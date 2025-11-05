@@ -1,0 +1,43 @@
+{
+  "name": "nfc-business-card-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxtjs/tailwindcss": "^6.8.4",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "nuxt": "^3.17.6",
+    "tailwindcss": "^3.3.0",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.16",
+    "@heroicons/vue": "^2.0.18",
+    "@iconify-json/heroicons": "^1.2.2",
+    "@iconify-json/lucide": "^1.2.60",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/ri": "^1.2.5",
+    "@nuxt/image": "^1.1.0",
+    "@nuxtjs/google-fonts": "^3.0.2",
+    "@pinia/nuxt": "^0.5.1",
+    "@vueuse/core": "^10.5.0",
+    "@vueuse/nuxt": "^10.5.0",
+    "axios": "^1.6.0",
+    "draggable": "^4.2.0",
+    "nuxt-icon": "^0.6.6",
+    "pinia": "^2.1.7",
+    "vue-draggable-next": "^2.2.1",
+    "vue3-otp-input": "^0.4.1",
+    "vuedraggable": "^4.1.0"
+  }
+}
