@@ -284,10 +284,14 @@ const cancel2FA = () => {
 const handleGoogleLogin = async () => {
     loading.value = true
     try {
-        $toast.info('Google login integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '') || 'http://localhost:8000'
+        const redirectTo = route.query.redirect || '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/google/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Google login failed')
-    } finally {
         loading.value = false
     }
 }
@@ -296,10 +300,14 @@ const handleGoogleLogin = async () => {
 const handleAppleLogin = async () => {
     loading.value = true
     try {
-        $toast.info('Apple login integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '') || 'http://localhost:8000'
+        const redirectTo = route.query.redirect || '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/apple/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Apple login failed')
-    } finally {
         loading.value = false
     }
 }
