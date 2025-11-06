@@ -110,11 +110,11 @@ export const useAuthStore = defineStore("auth", {
       try {
         const { $api } = useNuxtApp();
         console.log("Auth store: Requesting password reset for:", email);
-        
+
         const response = await $api.post("/password-reset-request", {
-          email
+          email,
         });
-        
+
         console.log("Auth store: Password reset request response:", response);
         return response;
       } catch (error) {
@@ -130,13 +130,13 @@ export const useAuthStore = defineStore("auth", {
       try {
         const { $api } = useNuxtApp();
         console.log("Auth store: Resetting password with token");
-        
+
         const response = await $api.post("/password-reset", {
           token: data.token,
           password: data.password,
-          password_confirmation: data.password_confirmation
+          password_confirmation: data.password_confirmation,
         });
-        
+
         console.log("Auth store: Password reset response:", response);
         return response;
       } catch (error) {
@@ -203,7 +203,7 @@ export const useAuthStore = defineStore("auth", {
       const tokenCookie = useCookie("auth-token");
       tokenCookie.value = null;
 
-      navigateTo("/login");
+      navigateTo("/UserAccount/login");
     },
 
     /**
@@ -232,9 +232,7 @@ export const useAuthStore = defineStore("auth", {
         const data = error.response._data || error.response.data;
 
         if (status === 422 && data?.errors) {
-          const formattedError = new Error(
-            data.message || "Validation failed"
-          );
+          const formattedError = new Error(data.message || "Validation failed");
           formattedError.response = error.response;
           formattedError.validationErrors = data.errors;
           return formattedError;

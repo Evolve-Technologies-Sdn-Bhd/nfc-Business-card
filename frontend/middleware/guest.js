@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   // Check if user is already authenticated
   if (authStore.isAuthenticated) {
     // Check if user has completed onboarding by looking for subscription plan
-    const user = authStore.user
+    const user = authStore.user;
     if (user && user.subscription_plan) {
       // User has completed onboarding, redirect to dashboard
       return navigateTo("/dashboard");
