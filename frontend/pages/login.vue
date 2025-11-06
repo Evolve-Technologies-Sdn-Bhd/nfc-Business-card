@@ -8,7 +8,13 @@
                     <Icon name="heroicons:identification" class="h-12 w-12 text-primary-600" />
                     <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
                 </NuxtLink>
-                <h2 class="mt-6 text-3xl font-bold text-secondary-900">Welcome back</h2>
+                <div class="mt-6 relative">
+                    <NuxtLink to="/" class="absolute left-0 top-1/2 -translate-y-1/2 inline-flex items-center px-3 py-2 text-sm border border-secondary-300 rounded-lg text-secondary-600 hover:text-primary-600 hover:border-primary-600 transition-colors bg-white">
+                        <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
+                        Back 
+                    </NuxtLink>
+                    <h2 class="text-3xl font-bold text-secondary-900">Welcome back</h2>
+                </div>
                 <p class="mt-2 text-sm text-secondary-600">
                     Don't have an account?
                     <NuxtLink to="/register" class="font-medium text-primary-600 hover:text-primary-500">

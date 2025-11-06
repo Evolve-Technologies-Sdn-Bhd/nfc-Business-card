@@ -10,8 +10,9 @@ use App\Http\Controllers\Api\NfcCardController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\PassResetController;
+use App\Http\Controllers\Api\PasswordResetController;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Auth\SocialAuthController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -28,6 +29,7 @@ Route::get('/test', function () {
             'analytics' => true,
             'file_uploads' => true,
             'onboarding' => true,
+            'oauth' => true,
         ]
     ]);
 });
@@ -40,6 +42,21 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/profiles/{slug}', [ProfileController::class, 'show']);
 Route::post('/analytics/track', [AnalyticsController::class, 'track']);
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
+
+// ✅ OAuth Routes (Public - No Auth Required)
+Route::prefix('auth')->group(function () {
+    // OAuth Social Login
+    Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect'])
+        ->where('provider', 'google|apple');
+    
+    Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
+        ->where('provider', 'google|apple');
+    
+    // Password Reset Routes
+    Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
+    Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
+    Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken']);
+});
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -116,14 +133,3 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::delete('/nfc-cards/{cardId}', [AdminController::class, 'deleteNfcCard']);
 });
 
-// Password Reset Routes (no authentication required)
-Route::prefix('auth')->group(function () {
-    // Request a password reset link
-    Route::post('/password-reset-request', [PasswordResetController::class, 'requestReset']);
-    
-    // Reset the password using token
-    Route::post('/password-reset', [PasswordResetController::class, 'resetPassword']);
-    
-    // Verify if a token is valid
-    Route::get('/verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken']);
-});

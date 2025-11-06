@@ -9,7 +9,13 @@
                     <Icon name="heroicons:identification" class="h-12 w-12 text-primary-600" />
                     <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
                 </NuxtLink>
-                <h2 class="mt-6 text-3xl font-bold text-secondary-900">Create your account</h2>
+                <div class="mt-6 relative">
+                    <NuxtLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 inline-flex items-center px-3 py-2 text-sm border border-secondary-300 rounded-lg text-secondary-600 hover:text-primary-600 hover:border-primary-600 transition-colors bg-white">
+                        <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
+                        Back 
+                    </NuxtLink>
+                    <h2 class="text-3xl font-bold text-secondary-900">Create your account</h2>
+                </div>
                 <p class="mt-2 text-sm text-secondary-600">
                     Already have an account?
                     <NuxtLink to="/login" class="font-medium text-primary-600 hover:text-primary-500">
@@ -156,16 +162,15 @@
                 </div>
 
                 <!-- Social Registration -->
-                <div class="mt-6">
+                <div class="mt-6 grid grid-cols-2 gap-3">
                     <button @click="handleGoogleSignup" :disabled="loading" class="btn btn-outline w-full">
                         <Icon name="logos:google-icon" class="h-5 w-5 mr-2" />
-                        Continue with Google
+                        Google
                     </button>
-                    <!-- Apple integration disabled for now -->
-                    <!-- <button @click="handleAppleSignup" :disabled="loading" class="btn btn-outline w-full">
+                    <button @click="handleAppleSignup" :disabled="loading" class="btn btn-outline w-full">
                         <Icon name="logos:apple" class="h-5 w-5 mr-2" />
                         Apple
-                    </button> -->
+                    </button>
                 </div>
 
                 <!-- Trust Indicators -->
@@ -457,6 +462,21 @@ const handleGoogleSignup = async () => {
         $toast.info('Google signup integration coming soon')
     } catch (error) {
         $toast.error('Google signup failed')
+    } finally {
+        loading.value = false
+    }
+}
+
+// Handle Apple signup
+const handleAppleSignup = async () => {
+    loading.value = true
+
+    try {
+        // Initialize Apple Sign-In
+        // This is a placeholder - you'll need to implement actual Apple OAuth
+        $toast.info('Apple signup integration coming soon')
+    } catch (error) {
+        $toast.error('Apple signup failed')
     } finally {
         loading.value = false
     }

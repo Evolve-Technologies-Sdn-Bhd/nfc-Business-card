@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('APP_URL') . '/api/auth/google/callback',
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_CLIENT_ID'), // Service ID
+        'team_id' => env('APPLE_TEAM_ID'),
+        'key_id' => env('APPLE_KEY_ID'),
+        'private_key' => env('APPLE_PRIVATE_KEY'), 
+        'redirect' => env('APP_URL') . '/api/auth/apple/callback',
+    ],
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
 ];
