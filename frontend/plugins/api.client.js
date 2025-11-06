@@ -69,7 +69,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         // Clear auth and redirect to login
         const authStore = useAuthStore();
         authStore.logout();
-        await navigateTo("/login");
+        await navigateTo("/UserAccount/login");
         return Promise.reject(error);
       }
 

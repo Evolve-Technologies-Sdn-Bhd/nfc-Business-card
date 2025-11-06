@@ -14,18 +14,21 @@
 
 <script setup>
 // Initialize auth store when app starts
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
-// Initialize authentication state from localStorage
-// onMounted(() => {
-//   authStore.initializeAuth()
-// })
-const tokenCookie = useCookie('auth-token')
-if (tokenCookie.value && !authStore.isAuthenticated) {
-  await authStore.fetchProfile().catch(() => {
-    // Handle error silently
-  })
-}
+// Initialize authentication state from cookie
+// Only fetch profile on client-side after plugins are ready
+onMounted(async () => {
+  const tokenCookie = useCookie("auth-token");
+  if (tokenCookie.value && !authStore.isAuthenticated) {
+    try {
+      await authStore.fetchProfile();
+    } catch (error) {
+      // Handle error silently - token might be expired
+      console.log("Failed to fetch profile, token might be expired");
+    }
+  }
+});
 </script>
 
 <style>
