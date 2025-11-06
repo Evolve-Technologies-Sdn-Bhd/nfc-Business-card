@@ -198,6 +198,35 @@ onMounted(() => {
         const redirect = route.query.redirect || '/dashboard'
         router.push(redirect)
     }
+    
+    // Check for OAuth error in query params
+    const oauthError = route.query.error
+    if (oauthError) {
+        let errorMessage = 'Authentication failed'
+        
+        switch (oauthError) {
+            case 'invalid_state':
+                errorMessage = 'Invalid authentication state. Please try again.'
+                break
+            case 'no_code':
+                errorMessage = 'No authorization code received. Please try again.'
+                break
+            case 'access_denied':
+                errorMessage = 'Access was denied. Please authorize the application to continue.'
+                break
+            case 'auth_failed':
+                errorMessage = route.query.message || 'Authentication failed. Please try again.'
+                break
+            case 'oauth_init_failed':
+                errorMessage = 'Failed to initialize OAuth. Please check your configuration.'
+                break
+        }
+        
+        $toast.error(errorMessage)
+        
+        // Clean up URL
+        router.replace({ query: {} })
+    }
 })
 
 // Handle login
@@ -284,10 +313,14 @@ const cancel2FA = () => {
 const handleGoogleLogin = async () => {
     loading.value = true
     try {
-        $toast.info('Google login integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '')
+        const redirectTo = route.query.redirect || '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/google/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Google login failed')
-    } finally {
         loading.value = false
     }
 }
@@ -296,10 +329,14 @@ const handleGoogleLogin = async () => {
 const handleAppleLogin = async () => {
     loading.value = true
     try {
-        $toast.info('Apple login integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '')
+        const redirectTo = route.query.redirect || '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/apple/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Apple login failed')
-    } finally {
         loading.value = false
     }
 }

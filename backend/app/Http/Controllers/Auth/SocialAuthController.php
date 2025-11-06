@@ -42,13 +42,11 @@ class SocialAuthController extends Controller
             $separator = str_contains($redirectUrl, '?') ? '&' : '?';
             $redirectUrl .= $separator . 'state=' . $state;
             
-            return response()->json([
-                'redirect_url' => $redirectUrl
-            ]);
+            // Directly redirect to OAuth provider
+            return redirect($redirectUrl);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to initialize authentication: ' . $e->getMessage()
-            ], 500);
+            \Log::error('OAuth redirect error: ' . $e->getMessage());
+            return redirect(config('services.frontend_url') . '/login?error=oauth_init_failed');
         }
     }
 
@@ -59,6 +57,12 @@ class SocialAuthController extends Controller
     {
         $state = $request->query('state');
         $code = $request->query('code');
+        $error = $request->query('error');
+
+        // Check if user denied authorization
+        if ($error) {
+            return redirect(config('services.frontend_url') . '/login?error=access_denied');
+        }
 
         // Verify state
         $stateData = Cache::pull("oauth_state_{$state}");
@@ -74,24 +78,21 @@ class SocialAuthController extends Controller
         try {
             $user = $this->socialAuthService->handleCallback($provider);
             
-            // Log the user in
-            Auth::login($user, true);
+            // Create Sanctum token for API authentication
+            $token = $user->createToken('oauth-token')->plainTextToken;
 
-            // Create session
-            $request->session()->regenerate();
-
-            // Redirect to frontend
+            // Redirect to frontend with token
             $redirectTo = $stateData['redirect_to'] ?? '/dashboard';
             $frontendUrl = config('services.frontend_url');
             
-            return redirect($frontendUrl . $redirectTo);
+            return redirect($frontendUrl . '/auth/callback?token=' . urlencode($token) . '&redirect=' . urlencode($redirectTo));
         } catch (\Exception $e) {
             \Log::error('Social auth error: ' . $e->getMessage(), [
                 'provider' => $provider,
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect(config('services.frontend_url') . '/login?error=auth_failed');
+            return redirect(config('services.frontend_url') . '/login?error=auth_failed&message=' . urlencode($e->getMessage()));
         }
     }
 }

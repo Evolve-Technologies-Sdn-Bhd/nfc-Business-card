@@ -457,12 +457,14 @@ const handleGoogleSignup = async () => {
     loading.value = true
 
     try {
-        // Initialize Google Sign-In
-        // This is a placeholder - you'll need to implement actual Google OAuth
-        $toast.info('Google signup integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '')
+        const redirectTo = '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/google/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Google signup failed')
-    } finally {
         loading.value = false
     }
 }
@@ -472,12 +474,14 @@ const handleAppleSignup = async () => {
     loading.value = true
 
     try {
-        // Initialize Apple Sign-In
-        // This is a placeholder - you'll need to implement actual Apple OAuth
-        $toast.info('Apple signup integration coming soon')
+        const config = useRuntimeConfig()
+        const backendUrl = config.public.apiBaseUrl.replace('/api', '')
+        const redirectTo = '/dashboard'
+        
+        // Redirect to backend OAuth endpoint
+        window.location.href = `${backendUrl}/api/auth/apple/redirect?redirect_to=${encodeURIComponent(redirectTo)}`
     } catch (error) {
         $toast.error('Apple signup failed')
-    } finally {
         loading.value = false
     }
 }

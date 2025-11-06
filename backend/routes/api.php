@@ -45,7 +45,6 @@ Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
 
 // ✅ OAuth Routes (Public - No Auth Required)
 Route::prefix('auth')->group(function () {
-    // OAuth Social Login
     Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect'])
         ->where('provider', 'google|apple');
     
