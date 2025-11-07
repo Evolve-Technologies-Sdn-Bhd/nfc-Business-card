@@ -621,7 +621,7 @@ const skip2FASetup = () => {
 const goToPlanSelection = async () => {
   showSuccessModal.value = false;
   $toast.success("Welcome to NFCGo! Let's choose your plan.");
-  await router.push("/onboarding/plan-selection");
+  await router.push("/UserDashboard/PlanSelection");
 };
 
 // Handle Google signup
