@@ -28,7 +28,7 @@
         <p class="mt-2 text-sm text-secondary-600">
           Already have an account?
           <NuxtLink
-            to="/login"
+            to="/UserAccount/login"
             class="font-medium text-primary-600 hover:text-primary-500"
           >
             Sign in here
@@ -556,8 +556,8 @@ onMounted(() => {
     // Check if user has completed onboarding by looking for subscription plan
     const user = authStore.user;
     if (user && user.subscription_plan) {
-      // User has completed onboarding, redirect to UserDashboard
-      router.push("/UserDashboard");
+      // User has completed onboarding, redirect to CardManagement
+      router.push("/UserDashboard/CardManagement");
     } else {
       // User hasn't completed onboarding, let them continue with onboarding flow
       // Don't redirect automatically
@@ -625,47 +625,48 @@ const goToPlanSelection = async () => {
 };
 
 // Handle Google signup
-const handleGoogleSignup = async () => {
-  loading.value = true;
-
+const handleGoogleSignup = () => {
   try {
-    // Initialize Google Sign-In
-    // This is a placeholder - you'll need to implement actual Google OAuth
-    $toast.info("Google signup integration coming soon");
+    const config = useRuntimeConfig();
+    const apiBaseUrl = config.public.apiBaseUrl;
+    const oauthUrl = `${apiBaseUrl}/auth/google/redirect`;
+    
+    console.log('🔵 Google Signup Clicked');
+    console.log('📍 API Base URL:', apiBaseUrl);
+    console.log('🔗 OAuth URL:', oauthUrl);
+    console.log('🚀 Navigating now...');
+    
+    // Immediate navigation to backend OAuth endpoint
+    // Backend will redirect to Google's sign-in page
+    window.location.href = oauthUrl;
   } catch (error) {
-    $toast.error("Google signup failed");
-  } finally {
-    loading.value = false;
+    console.error('❌ Error in handleGoogleSignup:', error);
+    alert('Error: ' + error.message);
   }
 };
 
 // Handle Apple signup
-const handleAppleSignup = async () => {
-  loading.value = true;
-
-  try {
-    // Initialize Apple Sign-In
-    // This is a placeholder - you'll need to implement actual Apple OAuth
-    $toast.info("Apple signup integration coming soon");
-  } catch (error) {
-    $toast.error("Apple signup failed");
-  } finally {
-    loading.value = false;
-  }
+const handleAppleSignup = () => {
+  const config = useRuntimeConfig();
+  const apiBaseUrl = config.public.apiBaseUrl;
+  
+  // Immediate navigation to backend OAuth endpoint
+  // Backend will redirect to Apple's sign-in page
+  window.location.href = `${apiBaseUrl}/auth/apple/redirect`;
 };
 
 // Redirect if already authenticated (but not after registration)
 watch(
   () => authStore.isAuthenticated,
   (isAuth) => {
-    // Only redirect to UserDashboard if user is authenticated but not in the middle of registration
+    // Only redirect to CardManagement if user is authenticated but not in the middle of registration
     // This prevents automatic redirection during the onboarding flow
     if (isAuth && !showSuccessModal.value && !show2FASetup.value) {
       // Check if user has completed onboarding by looking for subscription plan
       const user = authStore.user;
       if (user && user.subscription_plan) {
-        // User has completed onboarding, redirect to UserDashboard
-        router.push("/UserDashboard");
+        // User has completed onboarding, redirect to CardManagement
+        router.push("/UserDashboard/CardManagement");
       } else {
         // User hasn't completed onboarding, let them go through the flow
         // Don't redirect automatically

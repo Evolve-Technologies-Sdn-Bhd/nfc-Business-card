@@ -12,6 +12,8 @@ class SocialIdentity extends Model
         'provider',
         'provider_id',
         'email',
+        'name',
+        'avatar',
         'access_token',
         'refresh_token',
         'token_expires_at',

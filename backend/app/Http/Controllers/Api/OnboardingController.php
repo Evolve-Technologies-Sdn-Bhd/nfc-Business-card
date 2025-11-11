@@ -262,7 +262,7 @@ class OnboardingController extends Controller
                 'purchase_amount' => $total,
                 'payment_method' => $request->payment_method,
                 'shipping_address' => $request->card_info['address'],
-                'status' => 'pending',
+                'status' => 'inactive', // Will be activated when admin encodes the physical NFC card
                 'notes' => 'Order created during onboarding',
             ]);
 

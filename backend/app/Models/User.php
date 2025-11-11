@@ -17,6 +17,8 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'provider',     
+        'provider_id',
         'phone',
         'company',
         'job_title',
@@ -36,6 +38,7 @@ class User extends Authenticatable
         'admin_role',
         'admin_permissions',
         'last_admin_action_at',
+        'is_new_user',
     ];
 
     protected $hidden = [
@@ -56,6 +59,7 @@ class User extends Authenticatable
         'is_admin' => 'boolean',
         'admin_permissions' => 'array',
         'last_admin_action_at' => 'datetime',
+        'is_new_user' => 'boolean',
     ];
 
     protected $appends = ['full_name'];
@@ -222,4 +226,34 @@ class User extends Authenticatable
 
         return $this->getRelation('profile');
     }
+
+    /**
+     * Get the social identities for the user
+     */
+    public function socialIdentities(): HasMany
+    {
+        return $this->hasMany(SocialIdentity::class);
+    }
+
+    /**
+     * Check if user has a specific provider linked
+     */
+    public function hasProvider(string $provider): bool
+    {
+        return $this->socialIdentities()
+            ->where('provider', $provider)
+            ->exists();
+    }
+
+    /**
+     * Get social identity for a specific provider
+     */
+    public function getProviderIdentity(string $provider): ?SocialIdentity
+    {
+        return $this->socialIdentities()
+            ->where('provider', $provider)
+            ->first();
+    }
 }
+
+

@@ -504,6 +504,7 @@ definePageMeta({
 const { $toast } = useNuxtApp();
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig();
+const router = useRouter();
 
 // Reactive data
 const loading = ref(false);
@@ -853,6 +854,17 @@ const initializeSampleData = () => {
 
 // Lifecycle
 onMounted(() => {
+  // Check if user just completed payment and redirect to CardManagement
+  const justCompletedPayment = sessionStorage.getItem('just_completed_payment');
+  
+  if (justCompletedPayment === 'true') {
+    // Clear the flag
+    sessionStorage.removeItem('just_completed_payment');
+    // Redirect to CardManagement
+    router.push('/UserDashboard/CardManagement');
+    return;
+  }
+  
   checkMobile();
   window.addEventListener("resize", checkMobile);
   initializeSampleData();

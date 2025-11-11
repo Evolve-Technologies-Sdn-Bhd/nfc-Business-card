@@ -390,18 +390,24 @@ const selectPlan = async (plan) => {
     const { $api } = useNuxtApp();
     await $api.post("/onboarding/select-plan", { plan });
 
+    // Mark user as no longer new (onboarding completed)
+    await $api.post("/complete-onboarding");
+
+    // Update auth store to reflect user is no longer new
+    if (authStore.user) {
+      authStore.user.is_new_user = false;
+    }
+
     if (plan === "free") {
-      // For free plan, go directly to UserDashboard
+      // For free plan, go directly to CardManagement
       $toast.success(
-        "Welcome to NFCGo! Let's build your digital business card."
+        "Welcome to NFCGo! Let's get started with your free plan."
       );
-      await router.push("/UserDashboard");
+      await router.push("/UserDashboard/CardManagement");
     } else {
-      // For paid plans, go to NFC card customization
-      $toast.success(`Great choice! Let's customize your ${plan} NFC card.`);
-      await router.push(
-        "/UserDashboard/UserManagement/NFCCardDesignCustomization"
-      );
+      // For paid plans, proceed to Payment page
+      $toast.success(`Great choice! Let's complete your ${plan} plan payment.`);
+      await router.push("/UserDashboard/Payment");
     }
   } catch (error) {
     console.error("Plan selection error:", error);
