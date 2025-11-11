@@ -207,7 +207,7 @@
                   class="h-6 w-6 text-yellow-300 flex-shrink-0"
                 />
                 <div class="ml-3 flex-1">
-                  <p class="text-sm font-medium">Upgrade to Pro</p>
+                  <p class="text-sm font-medium">Upgrade to Premium</p>
                   <p class="text-xs text-primary-100">
                     Unlock premium features
                   </p>
@@ -346,7 +346,7 @@ const navigation = [
     name: "Card Management",
     href: "/UserDashboard/CardManagement",
     icon: "heroicons:credit-card",
-    badge: "Pro",
+    badge: "Premium",
   },
   {
     name: "Analytics",

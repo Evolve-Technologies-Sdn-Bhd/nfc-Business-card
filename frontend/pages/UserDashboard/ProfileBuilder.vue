@@ -427,8 +427,8 @@
                         name="heroicons:sparkles"
                         class="w-4 h-4 inline mr-1"
                       />
-                      Upgrade to Pro to remove the watermark and unlock premium
-                      features
+                      Upgrade to Premium to remove the watermark and unlock
+                      premium features
                     </p>
                   </div>
                 </div>

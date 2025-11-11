@@ -64,8 +64,8 @@
             >
               <option value="">All Plans</option>
               <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
+              <option value="premium">Premium</option>
+              <option value="business">Business</option>
             </select>
           </div>
           <div>
@@ -376,8 +376,8 @@
               >
               <select v-model="form.subscription_plan" required class="input">
                 <option value="basic">Basic ($9/month)</option>
-                <option value="pro">Pro ($19/month)</option>
-                <option value="enterprise">Enterprise ($49/month)</option>
+                <option value="premium">Premium ($19/month)</option>
+                <option value="business">Business ($49/month)</option>
               </select>
             </div>
           </div>

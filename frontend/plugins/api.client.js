@@ -66,9 +66,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        // Clear auth and redirect to login
         const authStore = useAuthStore();
-        authStore.logout();
+        authStore.clearAuth(); // Clear auth state
         await navigateTo("/UserAccount/login");
         return Promise.reject(error);
       }

@@ -46,8 +46,8 @@
               <option value="">All Plans</option>
               <option value="free">Free</option>
               <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
+              <option value="premium">Premium</option>
+              <option value="business">Business</option>
             </select>
           </div>
           <div>
@@ -385,8 +385,8 @@
               <select v-model="form.subscription_plan" class="input">
                 <option value="free">Free</option>
                 <option value="basic">Basic</option>
-                <option value="pro">Pro</option>
-                <option value="enterprise">Enterprise</option>
+                <option value="premium">Premium</option>
+                <option value="business">Business</option>
               </select>
             </div>
             <div>
@@ -768,8 +768,8 @@ const getSubscriptionBadgeClass = (plan) => {
   const classes = {
     free: "bg-secondary-100 text-secondary-800",
     basic: "bg-blue-100 text-blue-800",
-    pro: "bg-purple-100 text-purple-800",
-    enterprise: "bg-green-100 text-green-800",
+    premium: "bg-purple-100 text-purple-800",
+    business: "bg-green-100 text-green-800",
   };
   return classes[plan] || classes.free;
 };

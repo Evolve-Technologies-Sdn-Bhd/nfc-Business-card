@@ -17,12 +17,12 @@
           </div>
           <div class="flex items-center space-x-4">
             <button
-              v-if="!hasProSubscription"
-              @click="upgradeToPro"
+              v-if="!hasPremiumSubscription"
+              @click="upgradeToPremium"
               class="btn btn-primary"
             >
               <Icon name="heroicons:star" class="h-4 w-4 mr-2" />
-              Upgrade to Pro
+              Upgrade to Premium
             </button>
             <button v-else @click="orderNewCard" class="btn btn-primary">
               <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
@@ -81,22 +81,22 @@
       </div>
 
       <!-- Upgrade Required Message -->
-      <div v-if="!hasProSubscription" class="text-center py-12">
+      <div v-if="!hasPremiumSubscription" class="text-center py-12">
         <div class="max-w-md mx-auto">
           <Icon
             name="heroicons:lock-closed"
             class="h-16 w-16 text-secondary-400 mx-auto mb-4"
           />
           <h3 class="text-xl font-semibold text-secondary-900 mb-2">
-            Pro Feature
+            Premium Feature
           </h3>
           <p class="text-secondary-600 mb-6">
-            Physical NFC card management is available exclusively to Pro
+            Physical NFC card management is available exclusively to Premium
             subscribers. Upgrade your plan to access this feature.
           </p>
-          <button @click="upgradeToPro" class="btn btn-primary btn-lg">
+          <button @click="upgradeToPremium" class="btn btn-primary btn-lg">
             <Icon name="heroicons:star" class="h-5 w-5 mr-2" />
-            Upgrade to Pro
+            Upgrade to Premium
           </button>
         </div>
       </div>
@@ -220,7 +220,7 @@
       </div>
 
       <!-- No Cards Message -->
-      <div v-else-if="hasProSubscription" class="text-center py-12">
+      <div v-else-if="hasPremiumSubscription" class="text-center py-12">
         <div class="max-w-md mx-auto">
           <Icon
             name="heroicons:credit-card"
@@ -312,8 +312,8 @@
                   required
                 >
                   <option value="basic">Basic - $29/month</option>
-                  <option value="pro">Pro - $49/month</option>
-                  <option value="enterprise">Enterprise - $99/month</option>
+                  <option value="premium">Premium - $49/month</option>
+                  <option value="business">Business - $99/month</option>
                 </select>
               </div>
               <div>
@@ -383,14 +383,14 @@ const orderForm = ref({
   card_owner: "",
   billing_address: "",
   contact_number: "",
-  subscription_plan: "pro",
+  subscription_plan: "basic,premium,business",
   shipping_address: "",
   notes: "",
 });
 
 // Computed
-const hasProSubscription = computed(() => {
-  return subscriptionData.value?.has_pro_subscription || false;
+const hasPremiumSubscription = computed(() => {
+  return subscriptionData.value?.has_premium_subscription || false;
 });
 
 // Methods
@@ -406,7 +406,7 @@ const loadSubscriptionStatus = async () => {
 };
 
 const loadNfcCards = async () => {
-  if (!hasProSubscription.value) {
+  if (!hasPremiumSubscription.value) {
     loading.value = false;
     return;
   }
@@ -422,7 +422,7 @@ const loadNfcCards = async () => {
       error.response?.data?.upgrade_required
     ) {
       // User needs to upgrade
-      $toast.info("This feature requires a Pro subscription");
+      $toast.info("This feature requires a Premium subscription");
     } else {
       $toast.error("Failed to load NFC cards");
       console.error("Failed to load NFC cards:", error);
@@ -432,7 +432,7 @@ const loadNfcCards = async () => {
   }
 };
 
-const upgradeToPro = () => {
+const upgradeToPremium = () => {
   // Redirect to upgrade page or show upgrade modal
   $toast.info("Redirecting to upgrade page...");
   // navigateTo('/upgrade')
@@ -465,7 +465,7 @@ const submitOrder = async () => {
       error.response?.status === 403 &&
       error.response?.data?.upgrade_required
     ) {
-      $toast.error("This feature requires a Pro subscription");
+      $toast.error("This feature requires a Premium subscription");
     } else {
       $toast.error("Failed to place order");
       console.error("Order error:", error);
@@ -531,8 +531,8 @@ const getStatusBadgeClass = (status) => {
 const getPlanPrice = (plan) => {
   const prices = {
     basic: 29.0,
-    pro: 49.0,
-    enterprise: 99.0,
+    premium: 49.0,
+    business: 99.0,
   };
   return prices[plan] || 49.0;
 };

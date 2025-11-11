@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('purchase_date');
             $table->date('expiry_date')->nullable();
             $table->enum('status', ['active', 'inactive', 'expired', 'replacement'])->default('active');
-            $table->enum('subscription_plan', ['free', 'basic', 'pro', 'enterprise'])->default('free');
+            $table->enum('subscription_plan', ['free', 'basic', 'premium', 'business'])->default('free');
             $table->decimal('purchase_amount', 10, 2)->default(0);
             $table->string('payment_method')->nullable();
             $table->string('shipping_address')->nullable();
