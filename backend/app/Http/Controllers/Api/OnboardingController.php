@@ -73,7 +73,7 @@ class OnboardingController extends Controller
             'website' => 'nullable|url',
             'address' => 'required|string',
             'companyLogo' => 'nullable|string',
-            // Pro plan fields
+            // Premium plan fields
             'companyBackground' => 'nullable|string',
             'services' => 'nullable|string',
             'linkedin' => 'nullable|url',

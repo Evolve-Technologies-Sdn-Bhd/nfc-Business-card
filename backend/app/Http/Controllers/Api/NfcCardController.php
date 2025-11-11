@@ -15,11 +15,11 @@ class NfcCardController extends Controller
     {
         $user = $request->user();
 
-        // Check if user has pro subscription
-        if (!$user->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$user->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -39,11 +39,11 @@ class NfcCardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription
-        if (!$request->user()->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$request->user()->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -60,11 +60,11 @@ class NfcCardController extends Controller
     {
         $user = $request->user();
 
-        // Check if user has pro subscription
-        if (!$user->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$user->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -73,7 +73,7 @@ class NfcCardController extends Controller
             'card_owner' => 'required|string|max:255',
             'billing_address' => 'required|string',
             'contact_number' => 'required|string|max:20',
-            'subscription_plan' => 'required|in:basic,pro,enterprise',
+            'subscription_plan' => 'required|in:free,basic,premium,business',
             'purchase_amount' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string|max:100',
             'shipping_address' => 'nullable|string',
@@ -126,11 +126,11 @@ class NfcCardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription
-        if (!$request->user()->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$request->user()->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -172,11 +172,11 @@ class NfcCardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription
-        if (!$request->user()->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$request->user()->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -222,11 +222,11 @@ class NfcCardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription
-        if (!$request->user()->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$request->user()->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -251,11 +251,11 @@ class NfcCardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription
-        if (!$request->user()->hasProSubscription()) {
+        // Check if user has premium subscription
+        if (!$request->user()->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Pro subscription',
+                'message' => 'This feature requires a Premium subscription',
                 'upgrade_required' => true
             ], 403);
         }
@@ -290,7 +290,8 @@ class NfcCardController extends Controller
                 'subscription_active' => $user->subscription_active,
                 'subscription_start_date' => $user->subscription_start_date,
                 'subscription_end_date' => $user->subscription_end_date,
-                'has_pro_subscription' => $user->hasProSubscription(),
+                'has_basic_subscription' => $user->hasBasicSubscription(),
+                'has_premium_subscription' => $user->hasPremiumSubscription(),
                 'has_physical_card' => $user->hasPhysicalCard(),
                 'active_nfc_card' => $user->activeNfcCard
             ]

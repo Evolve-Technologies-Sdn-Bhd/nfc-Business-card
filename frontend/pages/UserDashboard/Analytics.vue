@@ -37,7 +37,7 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Subscription Notice for Free Users -->
-      <div v-if="!hasProSubscription" class="mb-6">
+      <div v-if="!hasPremiumSubscription" class="mb-6">
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex items-center">
             <Icon
@@ -49,13 +49,13 @@
                 Free Plan Analytics
               </h3>
               <p class="text-sm text-blue-700 mt-1">
-                You're viewing basic analytics. Upgrade to Pro for detailed
+                You're viewing basic analytics. Upgrade to Premium for detailed
                 insights, device breakdowns, geographic data, and more.
               </p>
             </div>
-            <button @click="upgradeToPro" class="btn btn-primary btn-sm">
+            <button @click="upgradeToPremium" class="btn btn-primary btn-sm">
               <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-              Upgrade to Pro
+              Upgrade to Premium
             </button>
           </div>
         </div>
@@ -146,7 +146,7 @@
           </div>
           <div class="card-body">
             <div
-              v-if="!hasProSubscription"
+              v-if="!hasPremiumSubscription"
               class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center"
             >
               <div class="text-center">
@@ -155,14 +155,14 @@
                   class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                 />
                 <p class="text-secondary-600">
-                  Detailed charts available with Pro subscription
+                  Detailed charts available with Premium subscription
                 </p>
                 <button
-                  @click="upgradeToPro"
+                  @click="upgradeToPremium"
                   class="btn btn-primary btn-sm mt-2"
                 >
                   <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Pro
+                  Upgrade to Premium
                 </button>
               </div>
             </div>
@@ -193,17 +193,20 @@
             <p class="text-sm text-secondary-600">Breakdown by device type</p>
           </div>
           <div class="card-body">
-            <div v-if="!hasProSubscription" class="text-center py-8">
+            <div v-if="!hasPremiumSubscription" class="text-center py-8">
               <Icon
                 name="heroicons:lock-closed"
                 class="h-12 w-12 text-secondary-400 mx-auto mb-2"
               />
               <p class="text-secondary-600">
-                Device breakdown available with Pro subscription
+                Device breakdown available with Premium subscription
               </p>
-              <button @click="upgradeToPro" class="btn btn-primary btn-sm mt-2">
+              <button
+                @click="upgradeToPremium"
+                class="btn btn-primary btn-sm mt-2"
+              >
                 <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                Upgrade to Pro
+                Upgrade to Premium
               </button>
             </div>
             <div
@@ -270,7 +273,7 @@
               </div>
 
               <div
-                v-else-if="!hasProSubscription"
+                v-else-if="!hasPremiumSubscription"
                 class="text-center py-8 text-secondary-500"
               >
                 <Icon
@@ -278,14 +281,14 @@
                   class="h-12 w-12 mx-auto mb-3"
                 />
                 <p class="font-medium">
-                  Recent taps available with Pro subscription
+                  Recent taps available with Premium subscription
                 </p>
                 <button
-                  @click="upgradeToPro"
+                  @click="upgradeToPremium"
                   class="btn btn-primary btn-sm mt-2"
                 >
                   <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Pro
+                  Upgrade to Premium
                 </button>
               </div>
               <div
@@ -360,20 +363,20 @@
               </h3>
             </div>
             <div class="card-body">
-              <div v-if="!hasProSubscription" class="text-center py-8">
+              <div v-if="!hasPremiumSubscription" class="text-center py-8">
                 <Icon
                   name="heroicons:lock-closed"
                   class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                 />
                 <p class="text-secondary-600">
-                  Geographic data available with Pro subscription
+                  Geographic data available with Premium subscription
                 </p>
                 <button
-                  @click="upgradeToPro"
+                  @click="upgradeToPremium"
                   class="btn btn-primary btn-sm mt-2"
                 >
                   <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Pro
+                  Upgrade to Premium
                 </button>
               </div>
               <div
@@ -412,20 +415,20 @@
               <h3 class="text-lg font-medium text-secondary-900">Peak Hours</h3>
             </div>
             <div class="card-body">
-              <div v-if="!hasProSubscription" class="text-center py-8">
+              <div v-if="!hasPremiumSubscription" class="text-center py-8">
                 <Icon
                   name="heroicons:lock-closed"
                   class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                 />
                 <p class="text-secondary-600">
-                  Time analytics available with Pro subscription
+                  Time analytics available with Premium subscription
                 </p>
                 <button
-                  @click="upgradeToPro"
+                  @click="upgradeToPremium"
                   class="btn btn-primary btn-sm mt-2"
                 >
                   <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Pro
+                  Upgrade to Premium
                 </button>
               </div>
               <div
@@ -534,12 +537,13 @@ const tagData = computed(() => {
   };
 });
 
-// Check if user has pro subscription for detailed analytics
-const hasProSubscription = computed(() => {
+// Check if user has Premium subscription for detailed analytics
+const hasPremiumSubscription = computed(() => {
   const user = authStore.user;
   return (
-    user?.subscription_plan === "pro" ||
-    user?.subscription_plan === "enterprise"
+    user?.subscription_plan === "basic" ||
+    user?.subscription_plan === "premium" ||
+    user?.subscription_plan === "business"
   );
 });
 
@@ -593,8 +597,8 @@ const loadAnalytics = async () => {
         peakHours: response.data.peak_hours || [],
       });
 
-      // Update recent taps if available (Pro users only)
-      if (hasProSubscription.value && response.data.recent_taps) {
+      // Update recent taps if available (Premium users only)
+      if (hasPremiumSubscription.value && response.data.recent_taps) {
         recentTaps.value = response.data.recent_taps.map((tap) => ({
           id: tap.id,
           location: tap.ip_address || "Unknown Location",
@@ -625,7 +629,7 @@ const loadMoreTaps = () => {
   $toast.info("Loading more taps...");
 };
 
-const upgradeToPro = () => {
+const upgradeToPremium = () => {
   // Redirect to upgrade page or show upgrade modal
   const { $toast } = useNuxtApp();
   $toast.info("Redirecting to upgrade page...");

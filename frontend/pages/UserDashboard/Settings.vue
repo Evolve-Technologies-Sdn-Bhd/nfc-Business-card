@@ -416,7 +416,7 @@
                       name="heroicons:arrow-trending-up"
                       class="h-4 w-4 mr-2"
                     />
-                    Upgrade to Pro
+                    Upgrade to Premium
                   </button>
                   <button v-else @click="manageBilling" class="btn btn-outline">
                     <Icon name="heroicons:credit-card" class="h-4 w-4 mr-2" />

@@ -13,10 +13,10 @@ return new class extends Migration
     public function up(): void
     {
         // Update users table subscription_plan enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business', 'pro', 'enterprise') DEFAULT 'free'");
+        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business') DEFAULT 'free'");
         
         // Update nfc_cards table subscription_plan enum
-        DB::statement("ALTER TABLE nfc_cards MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business', 'pro', 'enterprise') DEFAULT 'free'");
+        DB::statement("ALTER TABLE nfc_cards MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business') DEFAULT 'free'");
     }
 
     /**
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         // Revert to original enum values
-        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'pro', 'enterprise') DEFAULT 'free'");
-        DB::statement("ALTER TABLE nfc_cards MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'pro', 'enterprise') DEFAULT 'free'");
+        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business') DEFAULT 'free'");
+        DB::statement("ALTER TABLE nfc_cards MODIFY COLUMN subscription_plan ENUM('free', 'basic', 'premium', 'business') DEFAULT 'free'");
     }
 };

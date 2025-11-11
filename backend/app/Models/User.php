@@ -133,10 +133,14 @@ class User extends Authenticatable
         return $this->hasOne(NfcCard::class)->where('status', 'active');
     }
 
-    public function hasProSubscription()
+    public function hasPremiumSubscription()
     {
-        return in_array($this->subscription_plan, ['pro', 'enterprise']) && $this->subscription_active;
+        return in_array($this->subscription_plan, ['premium', 'basic','business']) && $this->subscription_active;
     }
+    public function hasBasicSubscription()
+{
+    return in_array($this->subscription_plan, ['basic', 'premium', 'business']) && $this->subscription_active;
+}
 
     public function hasPhysicalCard()
     {

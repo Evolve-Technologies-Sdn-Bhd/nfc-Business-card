@@ -20,7 +20,7 @@ class NfcCardSeeder extends Seeder
                 'first_name' => 'John',
                 'last_name' => 'Doe',
                 'password' => bcrypt('password'),
-                'subscription_plan' => 'pro',
+                'subscription_plan' => 'premium',
                 'subscription_active' => true,
                 'subscription_start_date' => Carbon::now()->subMonths(2),
                 'subscription_end_date' => Carbon::now()->addMonths(10),
@@ -34,7 +34,7 @@ class NfcCardSeeder extends Seeder
                 'billing_address' => '123 Main St, New York, NY 10001',
                 'contact_number' => '+1-555-0123',
                 'purchase_date' => Carbon::now()->subMonths(2),
-                'subscription_plan' => 'pro',
+                'subscription_plan' => 'premium',
                 'purchase_amount' => 49.00,
                 'payment_method' => 'Credit Card',
                 'shipping_address' => '123 Main St, New York, NY 10001',
@@ -49,7 +49,7 @@ class NfcCardSeeder extends Seeder
                 'billing_address' => '123 Main St, New York, NY 10001',
                 'contact_number' => '+1-555-0123',
                 'purchase_date' => Carbon::now()->subMonth(),
-                'subscription_plan' => 'enterprise',
+                'subscription_plan' => 'business',
                 'purchase_amount' => 99.00,
                 'payment_method' => 'Credit Card',
                 'shipping_address' => '456 Business Ave, New York, NY 10002',
@@ -57,7 +57,7 @@ class NfcCardSeeder extends Seeder
                 'shipped_date' => Carbon::now()->subMonth()->addDays(2),
                 'delivered_date' => Carbon::now()->subMonth()->addDays(5),
                 'status' => 'active',
-                'notes' => 'Enterprise card for business meetings'
+                'notes' => 'Business card for business meetings'
             ]
         ];
 
@@ -108,7 +108,7 @@ class NfcCardSeeder extends Seeder
         );
 
         $this->command->info('NFC Card sample data created successfully!');
-        $this->command->info('Pro user: test@example.com / password');
+        $this->command->info('Premium user: test@example.com / password');
         $this->command->info('Free user: free@example.com / password');
     }
 } 

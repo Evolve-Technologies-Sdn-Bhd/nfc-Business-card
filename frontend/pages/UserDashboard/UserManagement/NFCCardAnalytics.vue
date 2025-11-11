@@ -17,12 +17,12 @@
           </div>
           <div class="flex items-center space-x-4">
             <button
-              v-if="!hasProSubscription"
-              @click="upgradeToPro"
+              v-if="!hasPremiumSubscription"
+              @click="upgradeToPremium"
               class="btn btn-primary"
             >
               <Icon name="heroicons:star" class="h-4 w-4 mr-2" />
-              Upgrade to Pro
+              Upgrade to Premium
             </button>
             <button
               v-else
@@ -74,7 +74,7 @@
       <!-- Analytics Content -->
       <div v-else>
         <!-- Subscription Notice for Free Users -->
-        <div v-if="!hasProSubscription" class="mb-6">
+        <div v-if="!hasPremiumSubscription" class="mb-6">
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div class="flex items-center">
               <Icon
@@ -86,13 +86,14 @@
                   Free Plan Analytics
                 </h3>
                 <p class="text-sm text-blue-700 mt-1">
-                  You're viewing basic analytics. Upgrade to Pro for detailed
-                  insights, device breakdowns, geographic data, and more.
+                  You're viewing basic analytics. Upgrade to Premium for
+                  detailed insights, device breakdowns, geographic data, and
+                  more.
                 </p>
               </div>
-              <button @click="upgradeToPro" class="btn btn-primary btn-sm">
+              <button @click="upgradeToPremium" class="btn btn-primary btn-sm">
                 <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                Upgrade to Pro
+                Upgrade to Premium
               </button>
             </div>
           </div>
@@ -327,11 +328,12 @@ const userNfcTag = computed(() => {
   return user?.nfcTag || null;
 });
 
-const hasProSubscription = computed(() => {
+const hasPremiumSubscription = computed(() => {
   const user = authStore.user;
   return (
-    user?.subscription_plan === "pro" ||
-    user?.subscription_plan === "enterprise"
+    user?.subscription_plan === "basic" ||
+    user?.subscription_plan === "premium" ||
+    user?.subscription_plan === "business"
   );
 });
 
@@ -386,7 +388,7 @@ const navigateToProfile = () => {
   navigateTo("/UserDashboard/");
 };
 
-const upgradeToPro = () => {
+const upgradeToPremium = () => {
   $toast.info("Redirecting to upgrade page...");
   // navigateTo('/upgrade')
 };

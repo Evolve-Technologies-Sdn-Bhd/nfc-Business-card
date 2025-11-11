@@ -183,10 +183,10 @@
                 </div>
               </div>
 
-              <!-- Pro Plan Additional Information -->
-              <div v-if="isProPlan" class="space-y-4">
+              <!-- Premium Plan Additional Information -->
+              <div v-if="isPremiumPlan" class="space-y-4">
                 <h3 class="text-lg font-semibold text-secondary-800">
-                  Back Side Information (Pro)
+                  Back Side Information (Premium)
                 </h3>
 
                 <div>
@@ -484,9 +484,9 @@
                     </div>
                   </div>
 
-                  <!-- Back Side (Pro only) -->
+                  <!-- Back Side (Premium only) -->
                   <div
-                    v-if="isProPlan"
+                    v-if="isPremiumPlan"
                     class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-lg transform rotate-y-180 transition-transform duration-500"
                     :class="{ 'rotate-y-0': showBack }"
                   >
@@ -506,9 +506,9 @@
                   </div>
                 </div>
 
-                <!-- Flip Button (Pro only) -->
+                <!-- Flip Button (Premium only) -->
                 <button
-                  v-if="isProPlan"
+                  v-if="isPremiumPlan"
                   @click="showBack = !showBack"
                   class="mt-4 w-full py-2 px-4 bg-secondary-100 text-secondary-700 rounded-lg text-sm font-medium hover:bg-secondary-200 transition-colors"
                 >
@@ -583,7 +583,7 @@ const cardInfo = reactive({
   website: "",
   address: "",
   companyLogo: null,
-  // Pro plan fields
+  // Premium plan fields
   companyBackground: "",
   services: "",
   linkedin: "",
@@ -607,15 +607,16 @@ const availableTemplates = computed(() => {
     return [{ id: "basic", name: "Basic Template" }];
   } else {
     return [
+      { id: "free", name: "Free Template" },
       { id: "basic", name: "Basic Template" },
-      { id: "pro", name: "Pro Template" },
       { id: "premium", name: "Premium Template" },
+      { id: "business", name: "Business Template" },
     ];
   }
 });
 
-// Check if user has pro plan
-const isProPlan = computed(() => {
+// Check if user has premium plan
+const isPremiumPlan = computed(() => {
   const selectedPlan = sessionStorage.getItem("selectedPlan");
   return ["premium", "business"].includes(selectedPlan);
 });
@@ -802,7 +803,22 @@ const proceedToPayment = async () => {
   const uploadSuccess = await uploadCardDesigns();
 
   if (uploadSuccess) {
+    // Mark user as no longer new (onboarding completed)
+    try {
+      const { $api } = useNuxtApp();
+      await $api.post("/complete-onboarding");
+
+      // Update auth store to reflect user is no longer new
+      if (authStore.user) {
+        authStore.user.is_new_user = false;
+      }
+    } catch (error) {
+      console.error("Complete onboarding error:", error);
+      // Continue to payment even if this fails
+    }
+
     // Navigate to payment page
+    $toast.success("Card customization complete! Let's proceed to payment.");
     await router.push("/UserDashboard/Payment");
   }
 };

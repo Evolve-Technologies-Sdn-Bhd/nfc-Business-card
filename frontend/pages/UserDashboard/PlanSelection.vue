@@ -219,7 +219,7 @@
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
-                <span>Physical NFC card (Pro)</span>
+                <span>Physical NFC card (Premium)</span>
               </li>
               <li class="flex items-center text-sm">
                 <Icon

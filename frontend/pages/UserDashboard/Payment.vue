@@ -533,8 +533,8 @@ const orderSummary = computed(() => {
   };
   const cardTypes = {
     basic: "Basic NFC Card",
-    premium: "Pro NFC Card",
-    business: "Pro NFC Card",
+    premium: "Premium NFC Card",
+    business: "Business NFC Card",
   };
 
   const planPrice = planPrices[selectedPlan] || 0;
@@ -647,7 +647,8 @@ const processPayment = async () => {
             total: orderSummary.value.total,
             orderDate: new Date().toISOString(),
             orderId: response.data?.order_id || `ORD-${Date.now()}`,
-            estimatedDelivery: response.data?.estimated_delivery || "5-7 business days",
+            estimatedDelivery:
+              response.data?.estimated_delivery || "5-7 business days",
           })
         );
       } else {
@@ -656,7 +657,7 @@ const processPayment = async () => {
     } catch (apiError) {
       // If API fails (e.g., endpoint not ready), simulate success for demo purposes
       console.warn("Payment API not available, simulating success:", apiError);
-      
+
       // Mock payment success for demo/development
       showSuccessModal.value = true;
 
@@ -675,7 +676,7 @@ const processPayment = async () => {
           estimatedDelivery: "5-7 business days",
         })
       );
-      
+
       $toast.success("Payment simulated successfully (Demo mode)");
     }
   } catch (error) {
@@ -694,10 +695,10 @@ const goBack = () => {
 // Go to UserDashboard
 const goToUserDashboard = async () => {
   showSuccessModal.value = false;
-  
+
   // Set flag to indicate payment was just completed
-  sessionStorage.setItem('just_completed_payment', 'true');
-  
+  sessionStorage.setItem("just_completed_payment", "true");
+
   $toast.success("Payment successful! Welcome to NFCGo!");
   // Redirect to Dashboard first, then it will auto-redirect to CardManagement
   await router.push("/UserDashboard");

@@ -395,8 +395,8 @@ const getPlanColor = (plan) => {
   const colors = {
     free: "bg-secondary-400",
     basic: "bg-blue-400",
-    pro: "bg-purple-400",
-    enterprise: "bg-green-400",
+    premium: "bg-purple-400",
+    business: "bg-green-400",
   };
   return colors[plan] || "bg-secondary-400";
 };

@@ -211,8 +211,8 @@ class AnalyticsController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has pro subscription for detailed analytics
-        $hasProSubscription = $request->user()->hasProSubscription();
+        // Check if user has premium subscription for detailed analytics
+        $hasPremiumSubscription = $request->user()->hasPremiumSubscription();
 
         // Get date range from request or default to last 30 days
         $endDate = Carbon::now();
@@ -266,8 +266,8 @@ class AnalyticsController extends Controller
             ]
         ];
 
-        // Add detailed analytics only for pro users
-        if ($hasProSubscription) {
+        // Add detailed analytics only for premium users
+        if ($hasPremiumSubscription) {
             $responseData['device_breakdown'] = $deviceBreakdown;
             $responseData['platform_breakdown'] = $platformBreakdown;
             $responseData['recent_taps'] = $recentTaps;
