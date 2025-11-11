@@ -163,4 +163,20 @@ class AuthController extends Controller
             'user' => $user->load('profile', 'nfcTag')
         ]);
     }
+
+    /**
+     * Mark user as no longer new (after completing onboarding/plan selection)
+     */
+    public function completeOnboarding(Request $request)
+    {
+        $user = $request->user();
+        
+        $user->update(['is_new_user' => false]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Onboarding completed',
+            'user' => $user->load('profile', 'nfcTag')
+        ]);
+    }
 }

@@ -8,7 +8,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     const user = authStore.user;
     if (user && user.subscription_plan) {
       // User has completed onboarding, redirect to dashboard
-      return navigateTo("/dashboard");
+      return navigateTo("/UserDashboard");
     } else {
       // User hasn't completed onboarding, let them continue with onboarding flow
       // Don't redirect automatically

@@ -44,16 +44,35 @@ class SocialAuthService
     public function handleCallback(string $provider)
     {
         try {
+            // Configure Guzzle options for SSL (Windows development fix)
+            $guzzleOptions = [];
+            if (app()->environment('local') && env('CURL_VERIFY_SSL', true) === false) {
+                $guzzleOptions = ['verify' => false];
+            }
+
             if ($provider === 'apple') {
                 $clientSecret = $this->appleClientSecretService->generate();
-                $providerUser = Socialite::driver($provider)
+                $socialite = Socialite::driver($provider)
                     ->setClientSecret($clientSecret)
-                    ->stateless()
-                    ->user();
+                    ->stateless();
+                
+                if (!empty($guzzleOptions)) {
+                    $socialite->setHttpClient(
+                        new \GuzzleHttp\Client($guzzleOptions)
+                    );
+                }
+                
+                $providerUser = $socialite->user();
             } else {
-                $providerUser = Socialite::driver($provider)
-                    ->stateless()
-                    ->user();
+                $socialite = Socialite::driver($provider)->stateless();
+                
+                if (!empty($guzzleOptions)) {
+                    $socialite->setHttpClient(
+                        new \GuzzleHttp\Client($guzzleOptions)
+                    );
+                }
+                
+                $providerUser = $socialite->user();
             }
 
             return $this->findOrCreateUser($provider, $providerUser);
@@ -91,6 +110,7 @@ class SocialAuthService
             // Try to find user by email
             $email = $providerUser->getEmail();
             $user = null;
+            $isNewUser = false;
 
             if ($email) {
                 $user = User::where('email', $email)->first();
@@ -98,12 +118,14 @@ class SocialAuthService
 
             // Create new user if not found
             if (!$user) {
+                $isNewUser = true;
                 $user = User::create([
                     'first_name' => $this->extractFirstName($providerUser),
                     'last_name' => $this->extractLastName($providerUser),
                     'email' => $email,
                     'email_verified_at' => now(), // Provider verified
                     'password' => Hash::make(Str::random(32)), // Random password
+                    'is_new_user' => true, // Mark as new user
                 ]);
             }
 

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('card_id')->unique(); // Unique card identifier
-            $table->string('nfc_card_id')->unique(); // Physical NFC card ID (encoded by admin)
+            $table->string('nfc_card_id')->unique()->nullable(); // Physical NFC card ID (encoded by admin later)
             $table->string('card_owner');
             $table->text('billing_address');
             $table->string('contact_number');

@@ -45,12 +45,10 @@ Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
 
 // ✅ OAuth Routes (Public - No Auth Required)
 Route::prefix('auth')->group(function () {
-    Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect'])
-        ->where('provider', 'google|apple');
-    
-    Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
-        ->where('provider', 'google|apple');
-    
+    // Social OAuth routes (Google & Apple)
+    Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect']);
+    Route::get('{provider}/callback', [SocialAuthController::class, 'callback']);
+
     // Password Reset Routes
     Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
     Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
@@ -62,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/complete-onboarding', [AuthController::class, 'completeOnboarding']);
 
     // Profile
     Route::get('/user/profile', [ProfileController::class, 'getProfile']);

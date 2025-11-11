@@ -261,7 +261,7 @@ const form = reactive({
 // Check if user is already authenticated
 onMounted(() => {
   if (authStore.isAuthenticated) {
-    const redirect = route.query.redirect || "/UserDashboard";
+    const redirect = route.query.redirect || "/UserDashboard/CardManagement";
     router.push(redirect);
   }
 });
@@ -287,17 +287,18 @@ const handleLogin = async () => {
       let redirectPath = route.query.redirect;
 
       if (!redirectPath) {
-        if (authStore.isAdmin()) {
-          redirectPath = "/AdminManagement";
-        } else {
-          redirectPath = "/UserDashboard";
-        }
+        // Redirect all users (admin and regular) to CardManagement
+        redirectPath = "/UserDashboard/CardManagement";
       }
 
+      console.log("Redirecting to:", redirectPath);
       await router.push(redirectPath);
+      console.log("Redirect successful");
     }
   } catch (error) {
     console.error("Login error details:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
 
     if (error.response?.status === 422) {
       errors.value = error.validationErrors || {};
@@ -323,11 +324,8 @@ const handle2FA = async () => {
     let redirectPath = route.query.redirect;
 
     if (!redirectPath) {
-      if (authStore.isAdmin()) {
-        redirectPath = "/AdminManagement";
-      } else {
-        redirectPath = "/UserDashboard";
-      }
+      // Redirect all users (admin and regular) to CardManagement
+      redirectPath = "/UserDashboard/CardManagement";
     }
 
     await router.push(redirectPath);
@@ -350,27 +348,34 @@ const cancel2FA = () => {
 };
 
 // Handle Google login
-const handleGoogleLogin = async () => {
-  loading.value = true;
+const handleGoogleLogin = () => {
   try {
-    $toast.info("Google login integration coming soon");
+    const config = useRuntimeConfig();
+    const apiBaseUrl = config.public.apiBaseUrl;
+    const oauthUrl = `${apiBaseUrl}/auth/google/redirect`;
+    
+    console.log('🔵 Google Login Clicked');
+    console.log('📍 API Base URL:', apiBaseUrl);
+    console.log('🔗 OAuth URL:', oauthUrl);
+    console.log('🚀 Navigating now...');
+    
+    // Immediate navigation to backend OAuth endpoint
+    // Backend will redirect to Google's sign-in page
+    window.location.href = oauthUrl;
   } catch (error) {
-    $toast.error("Google login failed");
-  } finally {
-    loading.value = false;
+    console.error('❌ Error in handleGoogleLogin:', error);
+    alert('Error: ' + error.message);
   }
 };
 
 // Handle Apple login
-const handleAppleLogin = async () => {
-  loading.value = true;
-  try {
-    $toast.info("Apple login integration coming soon");
-  } catch (error) {
-    $toast.error("Apple login failed");
-  } finally {
-    loading.value = false;
-  }
+const handleAppleLogin = () => {
+  const config = useRuntimeConfig();
+  const apiBaseUrl = config.public.apiBaseUrl;
+  
+  // Immediate navigation to backend OAuth endpoint
+  // Backend will redirect to Apple's sign-in page
+  window.location.href = `${apiBaseUrl}/auth/apple/redirect`;
 };
 
 // Redirect if already authenticated
@@ -378,7 +383,7 @@ watch(
   () => authStore.isAuthenticated,
   (isAuth) => {
     if (isAuth) {
-      const redirect = route.query.redirect || "/dashboard";
+      const redirect = route.query.redirect || "/UserDashboard/CardManagement";
       router.push(redirect);
     }
   }

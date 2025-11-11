@@ -38,6 +38,7 @@ class User extends Authenticatable
         'admin_role',
         'admin_permissions',
         'last_admin_action_at',
+        'is_new_user',
     ];
 
     protected $hidden = [
@@ -58,6 +59,7 @@ class User extends Authenticatable
         'is_admin' => 'boolean',
         'admin_permissions' => 'array',
         'last_admin_action_at' => 'datetime',
+        'is_new_user' => 'boolean',
     ];
 
     protected $appends = ['full_name'];

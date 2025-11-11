@@ -203,23 +203,37 @@ export const useAuthStore = defineStore("auth", {
       const tokenCookie = useCookie("auth-token");
       tokenCookie.value = null;
 
-      navigateTo("/UserAccount/login");
+      // Only navigate if on client side
+      if (process.client) {
+        navigateTo("/UserAccount/login");
+      }
     },
 
     /**
      * Initialize auth state from cookie
      */
     async initAuth() {
+      // Only run on client side
+      if (process.server) return;
+      
       const tokenCookie = useCookie("auth-token");
+      console.log('🔵 initAuth called, token:', tokenCookie.value ? 'exists' : 'missing');
+      
       if (tokenCookie.value) {
         try {
+          console.log('🔄 Fetching user profile...');
           await this.fetchProfile();
           this.token = tokenCookie.value;
           this.isAuthenticated = true;
+          console.log('✅ Auth initialized successfully');
         } catch (error) {
-          console.error("Failed to restore auth state:", error);
+          console.error("❌ Failed to restore auth state:", error);
+          console.error("Error details:", error.response || error.message);
           this.clearAuth();
+          throw error; // Re-throw so callback page can catch it
         }
+      } else {
+        console.log('❌ No token cookie found');
       }
     },
 

@@ -67,6 +67,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend Application URL
+    |--------------------------------------------------------------------------
+    | 
+    | This is the URL of your Nuxt/Vue frontend application.
+    | Used for OAuth redirects and CORS configuration.
+    |
+    */
+    
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

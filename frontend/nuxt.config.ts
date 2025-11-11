@@ -39,13 +39,14 @@ export default defineNuxtConfig({
   // Runtime Config
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || "http://localhost:8000/api",
-      appUrl: process.env.APP_URL || "http://localhost:3000",
-      googleClientId: process.env.GOOGLE_CLIENT_ID || "",
-      appleClientId: process.env.APPLE_CLIENT_ID || "",
-      maxFileSize: process.env.MAX_FILE_SIZE || "5242880", // 5MB
+      // Updated to use NUXT_PUBLIC_ prefix
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api",
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3002",
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      appleClientId: process.env.NUXT_PUBLIC_APPLE_CLIENT_ID || "",
+      maxFileSize: process.env.NUXT_PUBLIC_MAX_FILE_SIZE || "5242880", // 5MB
       allowedFileTypes:
-        process.env.ALLOWED_FILE_TYPES ||
+        process.env.NUXT_PUBLIC_ALLOWED_FILE_TYPES ||
         "image/jpeg,image/png,image/gif,image/webp",
     },
   },
@@ -83,8 +84,8 @@ export default defineNuxtConfig({
     },
   },
 
-  // SSR Configuration
-  ssr: true,
+  // SSR Configuration - Disabled for authentication-heavy SPA
+  ssr: false,
 
   // Nitro configuration for better performance
   nitro: {
