@@ -88,6 +88,17 @@
               <!-- Admin Actions -->
               <div class="mt-3 space-y-1">
                 <NuxtLink
+                  to="/AdminManagement/legal-documents"
+                  class="flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                >
+                  <Icon
+                    name="heroicons:document-text"
+                    class="mr-3 h-5 w-5 text-secondary-400"
+                  />
+                  <span>Terms & Privacy</span>
+                </NuxtLink>
+                
+                <NuxtLink
                   to="/AdminManagement"
                   class="flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                 >

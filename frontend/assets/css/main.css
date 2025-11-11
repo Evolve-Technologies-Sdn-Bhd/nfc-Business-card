@@ -238,4 +238,62 @@
   .backdrop-blur-xs {
     backdrop-filter: blur(2px);
   }
+
+  /* Prose styles for markdown content */
+  .prose {
+    @apply text-secondary-700;
+  }
+
+  .prose h1 {
+    @apply text-2xl font-bold text-secondary-900 mt-6 mb-4;
+  }
+
+  .prose h2 {
+    @apply text-xl font-bold text-secondary-900 mt-5 mb-3;
+  }
+
+  .prose h3 {
+    @apply text-lg font-semibold text-secondary-900 mt-4 mb-2;
+  }
+
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside mb-4 space-y-2;
+  }
+
+  .prose ol {
+    @apply list-decimal list-inside mb-4 space-y-2;
+  }
+
+  .prose li {
+    @apply ml-4;
+  }
+
+  .prose strong {
+    @apply font-semibold text-secondary-900;
+  }
+
+  .prose em {
+    @apply italic;
+  }
+
+  .prose a {
+    @apply text-primary-600 hover:text-primary-500 underline;
+  }
+
+  .prose code {
+    @apply bg-secondary-100 text-secondary-800 px-1 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply bg-secondary-100 p-4 rounded-lg overflow-x-auto mb-4;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-primary-500 pl-4 italic text-secondary-600 my-4;
+  }
 }
+

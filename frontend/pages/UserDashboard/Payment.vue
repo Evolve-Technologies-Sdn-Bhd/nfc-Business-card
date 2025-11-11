@@ -352,19 +352,21 @@
                   class="ml-2 block text-sm text-secondary-700"
                 >
                   I agree to the
-                  <a
-                    href="/terms"
-                    target="_blank"
+                  <button
+                    type="button"
+                    @click="showTermsModal = true"
                     class="text-primary-600 hover:text-primary-500 underline"
-                    >Terms of Service</a
                   >
+                    Terms of Service
+                  </button>
                   and
-                  <a
-                    href="/privacy"
-                    target="_blank"
+                  <button
+                    type="button"
+                    @click="showPrivacyModal = true"
                     class="text-primary-600 hover:text-primary-500 underline"
-                    >Privacy Policy</a
                   >
+                    Privacy Policy
+                  </button>
                 </label>
               </div>
 
@@ -443,6 +445,110 @@
       </div>
     </div>
 
+    <!-- Terms of Service Modal -->
+    <div
+      v-if="showTermsModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      @click.self="showTermsModal = false"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+      >
+        <div class="p-6 border-b border-secondary-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-bold text-secondary-900">
+              Terms of Service
+            </h3>
+            <button
+              @click="showTermsModal = false"
+              class="text-secondary-400 hover:text-secondary-600"
+            >
+              <Icon name="heroicons:x-mark" class="h-6 w-6" />
+            </button>
+          </div>
+          <p v-if="termsDocument" class="text-sm text-secondary-500 mt-2">
+            Version {{ termsDocument.version }} • Effective
+            {{ formatDate(termsDocument.effective_date) }}
+          </p>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+          <div v-if="loadingTerms" class="text-center py-8">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-secondary-600">Loading Terms of Service...</p>
+          </div>
+          <div
+            v-else-if="termsDocument"
+            class="prose prose-sm max-w-none"
+            v-html="renderMarkdown(termsDocument.content)"
+          ></div>
+          <div v-else class="text-center py-8 text-secondary-600">
+            Terms of Service not available
+          </div>
+        </div>
+        <div class="p-6 border-t border-secondary-200">
+          <button
+            @click="showTermsModal = false"
+            class="btn btn-primary w-full flex items-center justify-center"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5 mr-2" />
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div
+      v-if="showPrivacyModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      @click.self="showPrivacyModal = false"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+      >
+        <div class="p-6 border-b border-secondary-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-bold text-secondary-900">
+              Privacy Policy
+            </h3>
+            <button
+              @click="showPrivacyModal = false"
+              class="text-secondary-400 hover:text-secondary-600"
+            >
+              <Icon name="heroicons:x-mark" class="h-6 w-6" />
+            </button>
+          </div>
+          <p v-if="privacyDocument" class="text-sm text-secondary-500 mt-2">
+            Version {{ privacyDocument.version }} • Effective
+            {{ formatDate(privacyDocument.effective_date) }}
+          </p>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+          <div v-if="loadingPrivacy" class="text-center py-8">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-secondary-600">Loading Privacy Policy...</p>
+          </div>
+          <div
+            v-else-if="privacyDocument"
+            class="prose prose-sm max-w-none"
+            v-html="renderMarkdown(privacyDocument.content)"
+          ></div>
+          <div v-else class="text-center py-8 text-secondary-600">
+            Privacy Policy not available
+          </div>
+        </div>
+        <div class="p-6 border-t border-secondary-200">
+          <button
+            @click="showPrivacyModal = false"
+            class="btn btn-primary w-full flex items-center justify-center"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5 mr-2" />
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Success Modal -->
     <div
       v-if="showSuccessModal"
@@ -492,6 +598,12 @@ const router = useRouter();
 // Reactive data
 const processing = ref(false);
 const showSuccessModal = ref(false);
+const showTermsModal = ref(false);
+const showPrivacyModal = ref(false);
+const loadingTerms = ref(false);
+const loadingPrivacy = ref(false);
+const termsDocument = ref(null);
+const privacyDocument = ref(null);
 const paymentMethod = ref("stripe");
 const termsAccepted = ref(false);
 const billingConsent = ref(false);
@@ -533,8 +645,8 @@ const orderSummary = computed(() => {
   };
   const cardTypes = {
     basic: "Basic NFC Card",
-    premium: "Pro NFC Card",
-    business: "Pro NFC Card",
+    premium: "Premium NFC Card",
+    business: "Business NFC Card",
   };
 
   const planPrice = planPrices[selectedPlan] || 0;
@@ -589,6 +701,88 @@ onMounted(() => {
   // Load user data for billing address
   if (authStore.user) {
     billingAddress.fullName = authStore.user.full_name || "";
+  }
+
+  // Load legal documents
+  loadLegalDocuments();
+});
+
+// Load legal documents
+const loadLegalDocuments = async () => {
+  try {
+    const { $api } = useNuxtApp();
+
+    // Load Terms of Service and Privacy Policy in parallel
+    const [termsResponse, privacyResponse] = await Promise.all([
+      $api.get("/legal/terms"),
+      $api.get("/legal/privacy"),
+    ]);
+
+    if (termsResponse.success && termsResponse.data) {
+      termsDocument.value = termsResponse.data;
+    }
+
+    if (privacyResponse.success && privacyResponse.data) {
+      privacyDocument.value = privacyResponse.data;
+    }
+  } catch (error) {
+    console.error("Error loading legal documents:", error);
+  }
+};
+
+// Render Markdown to HTML (lightweight parser)
+const renderMarkdown = (markdown) => {
+  if (!markdown) return "";
+
+  let html = markdown
+    // Headers
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    // Italic
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Links
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" class="text-primary-600 hover:text-primary-500 underline">$1</a>'
+    )
+    // Line breaks
+    .replace(/\n\n/g, "</p><p>")
+    // Lists
+    .replace(/^\- (.*$)/gim, "<li>$1</li>")
+    .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
+  return `<div>${html}</div>`;
+};
+
+// Format date
+const formatDate = (date) => {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+// Watch for modal open to load documents if not already loaded
+watch(showTermsModal, (isOpen) => {
+  if (isOpen && !termsDocument.value && !loadingTerms.value) {
+    loadingTerms.value = true;
+    loadLegalDocuments().finally(() => {
+      loadingTerms.value = false;
+    });
+  }
+});
+
+watch(showPrivacyModal, (isOpen) => {
+  if (isOpen && !privacyDocument.value && !loadingPrivacy.value) {
+    loadingPrivacy.value = true;
+    loadLegalDocuments().finally(() => {
+      loadingPrivacy.value = false;
+    });
   }
 });
 
@@ -647,7 +841,8 @@ const processPayment = async () => {
             total: orderSummary.value.total,
             orderDate: new Date().toISOString(),
             orderId: response.data?.order_id || `ORD-${Date.now()}`,
-            estimatedDelivery: response.data?.estimated_delivery || "5-7 business days",
+            estimatedDelivery:
+              response.data?.estimated_delivery || "5-7 business days",
           })
         );
       } else {
@@ -656,7 +851,7 @@ const processPayment = async () => {
     } catch (apiError) {
       // If API fails (e.g., endpoint not ready), simulate success for demo purposes
       console.warn("Payment API not available, simulating success:", apiError);
-      
+
       // Mock payment success for demo/development
       showSuccessModal.value = true;
 
@@ -675,7 +870,7 @@ const processPayment = async () => {
           estimatedDelivery: "5-7 business days",
         })
       );
-      
+
       $toast.success("Payment simulated successfully (Demo mode)");
     }
   } catch (error) {
@@ -691,13 +886,13 @@ const goBack = () => {
   router.push("/UserDashboard/UserManagement/NFCCardDesignCustomization");
 };
 
-// Go to UserDashboard
+// Go to UserDashboardS
 const goToUserDashboard = async () => {
   showSuccessModal.value = false;
-  
+
   // Set flag to indicate payment was just completed
-  sessionStorage.setItem('just_completed_payment', 'true');
-  
+  sessionStorage.setItem("just_completed_payment", "true");
+
   $toast.success("Payment successful! Welcome to NFCGo!");
   // Redirect to Dashboard first, then it will auto-redirect to CardManagement
   await router.push("/UserDashboard");

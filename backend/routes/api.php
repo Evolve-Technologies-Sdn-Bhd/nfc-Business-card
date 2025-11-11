@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\LegalDocumentController;
+use App\Http\Controllers\Api\ChatbotController;
+use App\Http\Controllers\Api\AdminChatbotController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -111,6 +114,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
 });
 
+// Public legal documents routes
+Route::get('/legal/terms', [LegalDocumentController::class, 'getTerms']);
+Route::get('/legal/privacy', [LegalDocumentController::class, 'getPrivacy']);
+Route::get('/legal/documents', [LegalDocumentController::class, 'index']);
+Route::get('/legal/documents/{type}', [LegalDocumentController::class, 'show']);
+
+// Public chatbot routes
+Route::post('/chatbot/ask', [ChatbotController::class, 'ask']);
+Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
+Route::get('/chatbot/questions', [ChatbotController::class, 'getQuestions']);
+
 // Admin routes (protected by admin middleware)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Dashboard
@@ -129,5 +143,18 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/nfc-cards', [AdminController::class, 'registerNfcCard']);
     Route::put('/nfc-cards/{cardId}', [AdminController::class, 'updateNfcCard']);
     Route::delete('/nfc-cards/{cardId}', [AdminController::class, 'deleteNfcCard']);
+
+    // Legal documents management
+    Route::put('/legal/documents/{type}', [LegalDocumentController::class, 'update']);
+    
+    // Chatbot management
+    Route::get('/chatbot/questions', [AdminChatbotController::class, 'index']);
+    Route::post('/chatbot/questions', [AdminChatbotController::class, 'store']);
+    Route::put('/chatbot/questions/{id}', [AdminChatbotController::class, 'update']);
+    Route::delete('/chatbot/questions/{id}', [AdminChatbotController::class, 'destroy']);
+    Route::get('/chatbot/feedback', [AdminChatbotController::class, 'getFeedback']);
+    Route::put('/chatbot/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
+    Route::delete('/chatbot/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
+    Route::get('/chatbot/analytics', [AdminChatbotController::class, 'getAnalytics']);
 });
 

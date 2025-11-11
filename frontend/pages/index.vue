@@ -367,7 +367,7 @@
             Who Uses NFC Business Cards?
           </h2>
           <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
-            From entrepreneurs to enterprise teams, discover how professionals
+            From entrepreneurs to business teams, discover how professionals
             across industries are revolutionizing their networking.
           </p>
         </div>
@@ -1121,7 +1121,7 @@
                   name="heroicons:check"
                   class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
                 />
-                <span class="text-secondary-600">Enterprise Features</span>
+                <span class="text-secondary-600">Business Features</span>
               </li>
               <li class="flex items-start">
                 <Icon
@@ -1401,6 +1401,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Chatbot Components -->
+    <ChatbotFloatingIcon
+      :is-open="isChatbotOpen"
+      :unread-count="0"
+      @open="isChatbotOpen = true"
+      @close="isChatbotOpen = false"
+    />
+    <ChatbotInterface
+      v-if="isChatbotOpen"
+      @close="isChatbotOpen = false"
+    />
   </div>
 </template>
 
@@ -1431,6 +1443,7 @@ useHead({
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
 const showDemo = ref(false);
+const isChatbotOpen = ref(false);
 
 const steps = [
   { title: "Ensure phone have NFC function" },
