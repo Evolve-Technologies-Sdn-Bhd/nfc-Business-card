@@ -88,6 +88,55 @@
                 </p>
               </div>
 
+              <!-- PDF Upload Section -->
+              <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
+                <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+                  PDF Document
+                </h3>
+                
+                <div v-if="termsPdfStatus.exists" class="mb-3 flex items-center justify-between">
+                  <div class="flex items-center space-x-2 text-sm text-secondary-600">
+                    <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
+                    <span>PDF uploaded ({{ formatFileSize(termsPdfStatus.fileInfo?.size) }})</span>
+                  </div>
+                  <button
+                    type="button"
+                    @click="downloadPdf('terms')"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
+                    Download PDF
+                  </button>
+                </div>
+                
+                <div v-else class="mb-3 text-sm text-secondary-500">
+                  <Icon name="heroicons:information-circle" class="h-5 w-5 inline mr-1" />
+                  No PDF uploaded yet
+                </div>
+
+                <div class="flex items-center space-x-3">
+                  <input
+                    type="file"
+                    ref="termsFileInput"
+                    accept="application/pdf"
+                    @change="handleTermsFileSelect"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.termsFileInput.click()"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
+                    {{ termsPdfStatus.exists ? 'Replace PDF' : 'Upload PDF' }}
+                  </button>
+                  <span v-if="uploadingTermsPdf" class="text-sm text-secondary-600">
+                    <div class="spinner spinner-sm mr-1"></div>
+                    Uploading...
+                  </span>
+                </div>
+              </div>
+
               <!-- Last Updated Info -->
               <div v-if="termsData.updated_at" class="text-sm text-secondary-600">
                 <p>
@@ -176,6 +225,55 @@
                 <p class="mt-1 text-xs text-secondary-500">
                   Supports Markdown formatting
                 </p>
+              </div>
+
+              <!-- PDF Upload Section -->
+              <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
+                <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+                  PDF Document
+                </h3>
+                
+                <div v-if="privacyPdfStatus.exists" class="mb-3 flex items-center justify-between">
+                  <div class="flex items-center space-x-2 text-sm text-secondary-600">
+                    <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
+                    <span>PDF uploaded ({{ formatFileSize(privacyPdfStatus.fileInfo?.size) }})</span>
+                  </div>
+                  <button
+                    type="button"
+                    @click="downloadPdf('privacy')"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
+                    Download PDF
+                  </button>
+                </div>
+                
+                <div v-else class="mb-3 text-sm text-secondary-500">
+                  <Icon name="heroicons:information-circle" class="h-5 w-5 inline mr-1" />
+                  No PDF uploaded yet
+                </div>
+
+                <div class="flex items-center space-x-3">
+                  <input
+                    type="file"
+                    ref="privacyFileInput"
+                    accept="application/pdf"
+                    @change="handlePrivacyFileSelect"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.privacyFileInput.click()"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
+                    {{ privacyPdfStatus.exists ? 'Replace PDF' : 'Upload PDF' }}
+                  </button>
+                  <span v-if="uploadingPrivacyPdf" class="text-sm text-secondary-600">
+                    <div class="spinner spinner-sm mr-1"></div>
+                    Uploading...
+                  </span>
+                </div>
               </div>
 
               <!-- Last Updated Info -->
@@ -302,6 +400,20 @@ const savingTerms = ref(false);
 const savingPrivacy = ref(false);
 const showPreview = ref(false);
 const previewType = ref('terms');
+const uploadingTermsPdf = ref(false);
+const uploadingPrivacyPdf = ref(false);
+const termsFileInput = ref(null);
+const privacyFileInput = ref(null);
+
+const termsPdfStatus = reactive({
+  exists: false,
+  fileInfo: null
+});
+
+const privacyPdfStatus = reactive({
+  exists: false,
+  fileInfo: null
+});
 
 const termsData = reactive({
   content: '',
@@ -328,7 +440,31 @@ const renderedPreview = computed(() => {
 // Load documents on mount
 onMounted(async () => {
   await loadDocuments();
+  await checkPdfStatus('terms');
+  await checkPdfStatus('privacy');
 });
+
+// Check PDF status
+const checkPdfStatus = async (type) => {
+  try {
+    const response = await $api.get(`/admin/legal/pdf/${type}/status`);
+    if (response.success) {
+      if (type === 'terms') {
+        Object.assign(termsPdfStatus, {
+          exists: response.exists,
+          fileInfo: response.file_info
+        });
+      } else {
+        Object.assign(privacyPdfStatus, {
+          exists: response.exists,
+          fileInfo: response.file_info
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error checking PDF status:', error);
+  }
+};
 
 // Load documents
 const loadDocuments = async () => {
@@ -405,6 +541,147 @@ const saveDocument = async (type) => {
 const previewDocument = (type) => {
   previewType.value = type;
   showPreview.value = true;
+};
+
+// Handle Terms file selection
+const handleTermsFileSelect = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== 'application/pdf') {
+    $toast.error('Please select a PDF file');
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    $toast.error('File size must be less than 10MB');
+    return;
+  }
+
+  uploadingTermsPdf.value = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    const response = await $api.post('/admin/legal/pdf/terms/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.success) {
+      $toast.success('Terms of Service PDF uploaded successfully');
+      await checkPdfStatus('terms');
+    }
+  } catch (error) {
+    console.error('Error uploading PDF:', error);
+    $toast.error('Failed to upload PDF. Please try again.');
+  } finally {
+    uploadingTermsPdf.value = false;
+    if (termsFileInput.value) {
+      termsFileInput.value.value = '';
+    }
+  }
+};
+
+// Handle Privacy file selection
+const handlePrivacyFileSelect = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== 'application/pdf') {
+    $toast.error('Please select a PDF file');
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    $toast.error('File size must be less than 10MB');
+    return;
+  }
+
+  uploadingPrivacyPdf.value = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    const response = await $api.post('/admin/legal/pdf/privacy/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.success) {
+      $toast.success('Privacy Policy PDF uploaded successfully');
+      await checkPdfStatus('privacy');
+    }
+  } catch (error) {
+    console.error('Error uploading PDF:', error);
+    $toast.error('Failed to upload PDF. Please try again.');
+  } finally {
+    uploadingPrivacyPdf.value = false;
+    if (privacyFileInput.value) {
+      privacyFileInput.value.value = '';
+    }
+  }
+};
+
+// Download PDF
+const downloadPdf = async (type) => {
+  try {
+    const config = useRuntimeConfig();
+    const apiBaseUrl = config.public.apiBaseUrl;
+    const token = localStorage.getItem('auth_token');
+    
+    const url = `${apiBaseUrl}/admin/legal/pdf/${type}/download`;
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    link.style.display = 'none';
+    
+    // Add authorization header by fetching as blob first
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/pdf'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Download failed');
+    }
+    
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    link.href = blobUrl;
+    link.download = type === 'terms' ? 'Terms-of-Service.pdf' : 'Privacy-Policy.pdf';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the blob URL
+    window.URL.revokeObjectURL(blobUrl);
+    
+    $toast.success('PDF downloaded successfully');
+  } catch (error) {
+    console.error('Error downloading PDF:', error);
+    $toast.error('Failed to download PDF. Please try again.');
+  }
+};
+
+// Format file size
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
 // Go back to admin dashboard

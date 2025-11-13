@@ -96,6 +96,6 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Sample data created successfully!');
         $this->command->info('Test user: john@example.com / password');
-        $this->command->info('Profile URL: /p/john-doe');
+        $this->command->info('Profile URL: /Homepage/john-doe');
     }
 }

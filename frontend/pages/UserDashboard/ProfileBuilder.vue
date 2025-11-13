@@ -10,13 +10,116 @@
               Profile Builder
             </h1>
           </div>
-          <button
-            @click="saveProfile"
-            :disabled="saving"
-            class="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {{ saving ? "Saving..." : "Save" }}
-          </button>
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- NFC Card Selector -->
+            <div class="relative">
+              <button
+                @click="toggleCardSelector"
+                :disabled="loadingCards || userNfcCards.length === 0"
+                class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
+                <Icon name="heroicons:credit-card" class="w-4 h-4" />
+                <span v-if="loadingCards">Loading...</span>
+                <span v-else-if="userNfcCards.length === 0">No Cards</span>
+                <span v-else-if="getSelectedCard()">
+                  {{
+                    getSelectedCard().nfc_card_id ||
+                    "Card #" + getSelectedCard().id
+                  }}
+                </span>
+                <span v-else>Select Card</span>
+                <Icon
+                  name="heroicons:chevron-down"
+                  class="w-4 h-4 text-gray-400"
+                />
+              </button>
+
+              <!-- Card Selector Dropdown -->
+              <div
+                v-if="showCardSelector"
+                class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
+              >
+                <div class="p-3 space-y-2">
+                  <div
+                    v-for="card in userNfcCards"
+                    :key="card.id"
+                    @click="selectNfcCard(card.id)"
+                    :class="[
+                      'relative cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
+                      selectedNfcCardId === card.id
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100'
+                        : 'border-gray-200 hover:border-gray-300 bg-white',
+                    ]"
+                  >
+                    <!-- Card Mini Design -->
+                    <div class="flex items-start justify-between gap-3">
+                      <!-- Left: Card Info -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <Icon
+                            name="heroicons:credit-card-solid"
+                            :class="[
+                              'w-5 h-5',
+                              selectedNfcCardId === card.id
+                                ? 'text-blue-600'
+                                : 'text-gray-400',
+                            ]"
+                          />
+                          <p class="text-sm font-bold text-gray-900 truncate">
+                            {{ card.nfc_card_id || "Card #" + card.id }}
+                          </p>
+                        </div>
+
+                        <p class="text-xs text-gray-600 mb-2 truncate">
+                          {{ card.card_owner || "No owner" }}
+                        </p>
+
+                        <!-- Status & Plan Badges -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span
+                            :class="[
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                              card.status === 'active'
+                                ? 'bg-green-100 text-green-800'
+                                : card.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800',
+                            ]"
+                          >
+                            {{ card.status || "pending" }}
+                          </span>
+                          <span
+                            :class="[
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase',
+                              getPlanBadgeClass(card.subscription_plan),
+                            ]"
+                          >
+                            {{ card.subscription_plan || "free" }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Right: Check Icon -->
+                      <Icon
+                        v-if="selectedNfcCardId === card.id"
+                        name="heroicons:check-circle-solid"
+                        class="w-6 h-6 text-blue-500 flex-shrink-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <button
+              @click="saveProfile"
+              :disabled="saving || !selectedNfcCardId"
+              class="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ saving ? "Saving..." : "Save" }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -66,6 +169,34 @@
           <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
             <!-- Profile Tab -->
             <div v-if="activeTab === 'profile'" class="space-y-4 sm:space-y-6">
+              <!-- No Cards Warning (only show if no cards and not loading) -->
+              <div
+                v-if="!loadingCards && userNfcCards.length === 0"
+                class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+              >
+                <div class="flex">
+                  <Icon
+                    name="heroicons:exclamation-triangle"
+                    class="h-5 w-5 text-yellow-400"
+                  />
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                      No NFC Cards Found
+                    </h3>
+                    <p class="text-sm text-yellow-700 mt-1">
+                      You need to order an NFC card before creating a profile.
+                      Go to Card Management to order your card.
+                    </p>
+                    <NuxtLink
+                      to="/UserDashboard/CardManagement"
+                      class="inline-flex items-center mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900"
+                    >
+                      Go to Card Management
+                      <Icon name="heroicons:arrow-right" class="ml-1 h-4 w-4" />
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
               <!-- Profile Picture & Layout -->
               <div>
                 <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
@@ -158,6 +289,31 @@
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Qualification
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.qualification"
+                    type="text"
+                    placeholder="e.g., Bachelor of Business Administration"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Bio</label
+                  >
+                  <textarea
+                    v-model="profileData.bio"
+                    rows="4"
+                    placeholder="Tell visitors about yourself..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
                     >Contact Number</label
                   >
                   <input
@@ -192,17 +348,354 @@
                     class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              <!-- Stats Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Profile Statistics
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 3 statistics to showcase your achievements
+                </p>
+                <div
+                  v-for="(stat, index) in profileData.stats"
+                  :key="index"
+                  class="grid grid-cols-2 gap-3"
+                >
+                  <input
+                    v-model="stat.num"
+                    type="text"
+                    :placeholder="'e.g., 10+'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="stat.label"
+                    type="text"
+                    :placeholder="'e.g., Years Experience'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Tab -->
+            <div v-if="activeTab === 'company'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Company Information
+                </h3>
+
+                <!-- Company Logo Upload -->
+                <ProfileImageUpload
+                  v-model="profileData.companyLogo"
+                  upload-endpoint="/upload/company-logo"
+                  delete-endpoint="/upload/company-logo"
+                  label="Company Logo"
+                  help-text="Will appear on your profile"
+                  alt-text="Company logo"
+                  @upload-success="handleCompanyLogoUpload"
+                />
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Address</label
+                    >Company Logo Text
+                    <span class="text-xs text-gray-500"
+                      >(Fallback if no logo)</span
+                    ></label
                   >
-                  <textarea
-                    v-model="profileData.address"
-                    rows="2"
-                    placeholder="Your business address"
+                  <input
+                    v-model="profileData.companyLogoText"
+                    type="text"
+                    placeholder="e.g., CLB"
+                    maxlength="5"
                     class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  ></textarea>
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Company Name</label
+                  >
+                  <input
+                    v-model="profileData.companyName"
+                    type="text"
+                    placeholder="Your company name"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Registration Number
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.companyRegistrationNo"
+                    type="text"
+                    placeholder="e.g., 123456789-X"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Department
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.companyDepartment"
+                    type="text"
+                    placeholder="e.g., Sales & Marketing Division"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Address Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Business Address
+                </h3>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Location Name</label
+                  >
+                  <input
+                    v-model="profileData.addressName"
+                    type="text"
+                    placeholder="e.g., CLB Group Headquarters"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Street Address</label
+                  >
+                  <input
+                    v-model="profileData.addressStreet"
+                    type="text"
+                    placeholder="e.g., 18, Jalan Mutiara Emas 5/5"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Area/District</label
+                  >
+                  <input
+                    v-model="profileData.addressArea"
+                    type="text"
+                    placeholder="e.g., Taman Mount Austin"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >City & State</label
+                  >
+                  <input
+                    v-model="profileData.addressCityState"
+                    type="text"
+                    placeholder="e.g., 81100 Johor Bahru, Johor"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Country</label
+                  >
+                  <input
+                    v-model="profileData.addressCountry"
+                    type="text"
+                    placeholder="e.g., Malaysia"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Google Maps URL
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.addressMapUrl"
+                    type="url"
+                    placeholder="https://maps.google.com/?q=..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Contact Methods Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Contact Methods
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Phone Number</label
+                    >
+                    <input
+                      v-model="profileData.phoneNumber"
+                      type="tel"
+                      placeholder="+60 16-778 7616"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Email Address</label
+                    >
+                    <input
+                      v-model="profileData.emailAddress"
+                      type="email"
+                      placeholder="contact@company.com"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >WhatsApp Number
+                      <span class="text-xs text-gray-500"
+                        >(Optional)</span
+                      ></label
+                    >
+                    <input
+                      v-model="profileData.whatsappNumber"
+                      type="tel"
+                      placeholder="+60167787616"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Website URL
+                      <span class="text-xs text-gray-500"
+                        >(Optional)</span
+                      ></label
+                    >
+                    <input
+                      v-model="profileData.websiteUrl"
+                      type="url"
+                      placeholder="https://www.yourcompany.com"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div v-if="activeTab === 'services'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Services & Expertise
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 6 services or areas of expertise
+                </p>
+
+                <div
+                  v-for="(service, index) in profileData.services"
+                  :key="index"
+                  class="grid grid-cols-4 gap-3"
+                >
+                  <input
+                    v-model="service.icon"
+                    type="text"
+                    placeholder="📱"
+                    maxlength="2"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                  />
+                  <input
+                    v-model="service.name"
+                    type="text"
+                    placeholder="Service name"
+                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Team Members Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">Team Members</h3>
+                <p class="text-xs text-gray-500">
+                  Showcase up to 3 team members (optional)
+                </p>
+
+                <div
+                  v-for="(member, index) in profileData.teamMembers"
+                  :key="index"
+                  class="grid grid-cols-6 gap-3"
+                >
+                  <input
+                    v-model="member.initials"
+                    type="text"
+                    placeholder="JD"
+                    maxlength="3"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
+                  />
+                  <input
+                    v-model="member.name"
+                    type="text"
+                    placeholder="Full Name"
+                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="member.role"
+                    type="text"
+                    placeholder="Role"
+                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Tab -->
+            <div v-if="activeTab === 'social'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Social Media Links
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add links to your social media profiles
+                </p>
+
+                <div
+                  v-for="(social, index) in profileData.socialLinks"
+                  :key="index"
+                  class="grid grid-cols-8 gap-3"
+                >
+                  <input
+                    v-model="social.emoji"
+                    type="text"
+                    placeholder="📱"
+                    maxlength="2"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                  />
+                  <input
+                    v-model="social.name"
+                    type="text"
+                    placeholder="Platform name"
+                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="social.url"
+                    type="url"
+                    placeholder="https://..."
+                    class="col-span-5 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
               </div>
             </div>
@@ -550,14 +1043,74 @@ const isMobile = ref(false);
 
 // Profile data
 const profileData = reactive({
+  // Basic Info
   name: "",
   position: "",
+  qualification: "",
+  bio: "",
   contactNumber: "",
   email: "",
   website: "",
-  address: "",
   image: null,
+
+  // Company Info
   companyLogo: null,
+  companyLogoText: "",
+  companyName: "",
+  companyRegistrationNo: "",
+  companyDepartment: "",
+
+  // Address Info
+  addressName: "",
+  addressStreet: "",
+  addressArea: "",
+  addressCityState: "",
+  addressCountry: "",
+  addressMapUrl: "",
+
+  // Stats (3 items)
+  stats: [
+    { num: "10+", label: "Years Experience" },
+    { num: "500+", label: "Projects Done" },
+    { num: "98%", label: "Client Satisfaction" },
+  ],
+
+  // Services (max 6)
+  services: [
+    { icon: "🏷️", name: "RFID Technology" },
+    { icon: "🖨️", name: "Label Printing" },
+    { icon: "💻", name: "Software Development" },
+    { icon: "🌐", name: "IoT Implementation" },
+    { icon: "🛒", name: "E-commerce Marketing" },
+    { icon: "📄", name: "Printing Solutions" },
+  ],
+
+  // Contact Methods (phone, email, whatsapp, website)
+  phoneNumber: "",
+  phoneLabel: "Phone",
+  emailAddress: "",
+  emailLabel: "Email",
+  whatsappNumber: "",
+  whatsappLabel: "WhatsApp",
+  websiteUrl: "",
+  websiteLabel: "Website",
+
+  // Social Links (max 4)
+  socialLinks: [
+    { emoji: "📘", name: "Facebook", url: "" },
+    { emoji: "💼", name: "LinkedIn", url: "" },
+    { emoji: "📸", name: "Instagram", url: "" },
+    { emoji: "🐦", name: "Twitter", url: "" },
+  ],
+
+  // Team Members (max 3)
+  teamMembers: [
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+  ],
+
+  // Design Settings
   profileStyle: "classic",
   theme: "minimal",
   backgroundColor: "#FFFFFF",
@@ -565,7 +1118,6 @@ const profileData = reactive({
   font: "inter",
   buttonStyle: "solid",
   showWatermark: true,
-  bio: "",
 });
 
 // Sample links for preview
@@ -582,6 +1134,24 @@ const tabs = [
     name: "Profile",
     shortName: "Profile",
     icon: "heroicons:user",
+  },
+  {
+    id: "company",
+    name: "Company",
+    shortName: "Company",
+    icon: "heroicons:building-office",
+  },
+  {
+    id: "services",
+    name: "Services",
+    shortName: "Services",
+    icon: "heroicons:rocket-launch",
+  },
+  {
+    id: "social",
+    name: "Social",
+    shortName: "Social",
+    icon: "heroicons:globe-alt",
   },
   {
     id: "design",
@@ -706,7 +1276,63 @@ const getButtonClass = () => {
 const saveProfile = async () => {
   saving.value = true;
   try {
-    const response = await $api.put("/user/profile", profileData);
+    const response = await $api.put("/user/profile", {
+      // Basic Info
+      name: profileData.name,
+      title: profileData.position,
+      qualification: profileData.qualification,
+      bio: profileData.bio,
+      phone: profileData.contactNumber,
+      email: profileData.email,
+      website: profileData.website,
+      profile_image: profileData.image,
+
+      // Company Info
+      company_logo: profileData.companyLogo,
+      company_logo_text: profileData.companyLogoText,
+      company_name: profileData.companyName,
+      company_registration_no: profileData.companyRegistrationNo,
+      company_department: profileData.companyDepartment,
+
+      // Address Info
+      address_name: profileData.addressName,
+      address_street: profileData.addressStreet,
+      address_area: profileData.addressArea,
+      address_city_state: profileData.addressCityState,
+      address_country: profileData.addressCountry,
+      address_map_url: profileData.addressMapUrl,
+
+      // Stats
+      stats: profileData.stats,
+
+      // Services
+      services: profileData.services,
+
+      // Contact Methods
+      phone_number: profileData.phoneNumber,
+      phone_label: profileData.phoneLabel,
+      email_address: profileData.emailAddress,
+      email_label: profileData.emailLabel,
+      whatsapp_number: profileData.whatsappNumber,
+      whatsapp_label: profileData.whatsappLabel,
+      website_url: profileData.websiteUrl,
+      website_label: profileData.websiteLabel,
+
+      // Social Links
+      social_links: profileData.socialLinks,
+
+      // Team Members
+      team_members: profileData.teamMembers,
+
+      // Design Settings
+      profile_style: profileData.profileStyle,
+      theme: profileData.theme,
+      background_color: profileData.backgroundColor,
+      text_color: profileData.textColor,
+      font: profileData.font,
+      button_style: profileData.buttonStyle,
+      show_watermark: profileData.showWatermark,
+    });
 
     if (response.success) {
       $toast.success("Profile saved successfully!");
@@ -732,15 +1358,62 @@ const loadProfile = async () => {
     if (response.success && response.profile) {
       const profile = response.profile;
 
-      // Map backend fields to frontend fields
+      // Basic Info
       profileData.name = profile.name || "";
-      profileData.position = profile.title || "";
-      profileData.contactNumber = profile.phone || "";
+      profileData.position = profile.title || profile.position || "";
+      profileData.qualification = profile.qualification || "";
+      profileData.bio = profile.bio || "";
+      profileData.contactNumber = profile.phone || profile.contactNumber || "";
       profileData.email = profile.email || "";
       profileData.website = profile.website || "";
-      profileData.address = profile.location || "";
       profileData.image = profile.profile_image || null;
+
+      // Company Info
       profileData.companyLogo = profile.company_logo || null;
+      profileData.companyLogoText = profile.company_logo_text || "";
+      profileData.companyName = profile.company_name || "";
+      profileData.companyRegistrationNo = profile.company_registration_no || "";
+      profileData.companyDepartment = profile.company_department || "";
+
+      // Address Info
+      profileData.addressName = profile.address_name || "";
+      profileData.addressStreet = profile.address_street || "";
+      profileData.addressArea = profile.address_area || "";
+      profileData.addressCityState = profile.address_city_state || "";
+      profileData.addressCountry = profile.address_country || "";
+      profileData.addressMapUrl = profile.address_map_url || "";
+
+      // Stats
+      if (profile.stats && Array.isArray(profile.stats)) {
+        profileData.stats = profile.stats;
+      }
+
+      // Services
+      if (profile.services && Array.isArray(profile.services)) {
+        profileData.services = profile.services;
+      }
+
+      // Contact Methods
+      profileData.phoneNumber = profile.phone_number || "";
+      profileData.phoneLabel = profile.phone_label || "Phone";
+      profileData.emailAddress = profile.email_address || profile.email || "";
+      profileData.emailLabel = profile.email_label || "Email";
+      profileData.whatsappNumber = profile.whatsapp_number || "";
+      profileData.whatsappLabel = profile.whatsapp_label || "WhatsApp";
+      profileData.websiteUrl = profile.website_url || profile.website || "";
+      profileData.websiteLabel = profile.website_label || "Website";
+
+      // Social Links
+      if (profile.social_links && Array.isArray(profile.social_links)) {
+        profileData.socialLinks = profile.social_links;
+      }
+
+      // Team Members
+      if (profile.team_members && Array.isArray(profile.team_members)) {
+        profileData.teamMembers = profile.team_members;
+      }
+
+      // Design Settings
       profileData.profileStyle = profile.profile_style || "classic";
       profileData.theme = profile.theme || "minimal";
       profileData.backgroundColor = profile.background_color || "#FFFFFF";
@@ -748,7 +1421,6 @@ const loadProfile = async () => {
       profileData.font = profile.font || "inter";
       profileData.buttonStyle = profile.button_style || "solid";
       profileData.showWatermark = profile.show_watermark !== false;
-      profileData.bio = profile.bio || "";
     }
   } catch (error) {
     console.error("Error loading profile:", error);

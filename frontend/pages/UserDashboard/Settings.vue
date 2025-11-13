@@ -251,7 +251,7 @@
               </div>
               <div class="p-6">
                 <div class="flex items-center space-x-2">
-                  <span class="text-secondary-500">nfccard.app/p/</span>
+                  <span class="text-secondary-500">nfccard.app/Homepage/</span>
                   <input
                     v-model="profileForm.slug"
                     type="text"

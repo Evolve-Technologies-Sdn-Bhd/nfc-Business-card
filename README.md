@@ -12,6 +12,7 @@ A modern, full-stack digital business card platform that allows users to create,
 - **Analytics Dashboard**: Track profile views, NFC taps, and link clicks
 - **Responsive Design**: Mobile-first approach for all devices
 - **Custom Themes**: Multiple design themes and customization options
+- **AI Chatbot Widget**: Instant FAQ answers with smart keyword matching and feedback system
 
 ### User Tiers
 
@@ -25,6 +26,7 @@ A modern, full-stack digital business card platform that allows users to create,
 - **NFC Card Management**: Register and track physical NFC cards
 - **System Analytics**: Comprehensive system statistics and monitoring
 - **Content Moderation**: Manage user content and profiles
+- **Chatbot Management**: Create FAQ questions, manage knowledge base, review user feedback
 
 ## 🛠 Tech Stack
 
