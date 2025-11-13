@@ -159,6 +159,76 @@ export const useNotifications = () => {
     return icons[type] || "🔔";
   };
 
+  // Get notification category
+  const getNotificationCategory = (type) => {
+    const categories = {
+      // System notifications
+      registration_success: "system",
+      email_verification: "system",
+      app_update: "system",
+      system_message: "system",
+      admin_announcement: "system",
+      // Security notifications
+      login_new_device: "security",
+      password_changed: "security",
+      account_warning: "security",
+      // Profile & Activity
+      profile_updated: "activity",
+      link_milestone: "activity",
+      landing_page_viewed: "activity",
+      contact_request: "activity",
+      // Payment & Subscription
+      subscription_upgrade: "payment",
+      payment_successful: "payment",
+      payment_failed: "payment",
+      // NFC Card
+      nfc_card_purchased: "nfc",
+      nfc_card_delivered: "nfc",
+      nfc_card_linked: "nfc",
+      nfc_card_activated: "nfc",
+      nfc_card_expired: "nfc",
+    };
+    return categories[type] || "other";
+  };
+
+  // Get category info
+  const getCategoryInfo = (category) => {
+    const info = {
+      all: { label: "All", icon: "heroicons:bell", color: "text-gray-600" },
+      system: {
+        label: "System",
+        icon: "heroicons:cog-6-tooth",
+        color: "text-blue-600",
+      },
+      security: {
+        label: "Security",
+        icon: "heroicons:shield-check",
+        color: "text-red-600",
+      },
+      activity: {
+        label: "Activity",
+        icon: "heroicons:chart-bar",
+        color: "text-green-600",
+      },
+      payment: {
+        label: "Payment",
+        icon: "heroicons:credit-card",
+        color: "text-purple-600",
+      },
+      nfc: {
+        label: "NFC Cards",
+        icon: "heroicons:qr-code",
+        color: "text-orange-600",
+      },
+      other: {
+        label: "Other",
+        icon: "heroicons:inbox",
+        color: "text-gray-600",
+      },
+    };
+    return info[category] || info.other;
+  };
+
   // Get priority color
   const getPriorityColor = (priority) => {
     const colors = {
@@ -168,6 +238,17 @@ export const useNotifications = () => {
       urgent: "text-red-600",
     };
     return colors[priority] || "text-gray-600";
+  };
+
+  // Get priority class (for background + text color)
+  const getPriorityClass = (priority) => {
+    const classes = {
+      low: "bg-gray-100 text-gray-700",
+      normal: "bg-blue-100 text-blue-700",
+      high: "bg-orange-100 text-orange-700",
+      urgent: "bg-red-100 text-red-700",
+    };
+    return classes[priority] || "bg-gray-100 text-gray-700";
   };
 
   return {
@@ -182,6 +263,9 @@ export const useNotifications = () => {
     deleteAllRead,
     getTimeAgo,
     getNotificationIcon,
+    getNotificationCategory,
+    getCategoryInfo,
     getPriorityColor,
+    getPriorityClass,
   };
 };

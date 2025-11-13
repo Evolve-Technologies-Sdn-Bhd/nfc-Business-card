@@ -65,6 +65,11 @@ class NfcCard extends Model
         return $this->hasOne(NfcTag::class, 'nfc_card_id', 'nfc_card_id');
     }
 
+    public function landingPage()
+    {
+        return $this->hasOne(LandingPage::class, 'nfc_card_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

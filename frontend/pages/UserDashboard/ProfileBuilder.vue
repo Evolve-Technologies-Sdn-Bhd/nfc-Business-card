@@ -1218,65 +1218,64 @@ const saveProfile = async () => {
     // Save the landing page design for the selected NFC card
     const response = await $api.put(
       `/nfc-cards/${selectedNfcCardId.value}/landing-page`,
-      profileData
+      {
+        // Basic Info
+        name: profileData.name,
+        title: profileData.position,
+        qualification: profileData.qualification,
+        bio: profileData.bio,
+        phone: profileData.contactNumber,
+        email: profileData.email,
+        website: profileData.website,
+        profile_image: profileData.image,
+
+        // Company Info
+        company_logo: profileData.companyLogo,
+        company_logo_text: profileData.companyLogoText,
+        company_name: profileData.companyName,
+        company_registration_no: profileData.companyRegistrationNo,
+        company_department: profileData.companyDepartment,
+
+        // Address Info
+        address_name: profileData.addressName,
+        address_street: profileData.addressStreet,
+        address_area: profileData.addressArea,
+        address_city_state: profileData.addressCityState,
+        address_country: profileData.addressCountry,
+        address_map_url: profileData.addressMapUrl,
+
+        // Stats
+        stats: profileData.stats,
+
+        // Services
+        services: profileData.services,
+
+        // Contact Methods
+        phone_number: profileData.phoneNumber,
+        phone_label: profileData.phoneLabel,
+        email_address: profileData.emailAddress,
+        email_label: profileData.emailLabel,
+        whatsapp_number: profileData.whatsappNumber,
+        whatsapp_label: profileData.whatsappLabel,
+        website_url: profileData.websiteUrl,
+        website_label: profileData.websiteLabel,
+
+        // Social Links
+        social_links: profileData.socialLinks,
+
+        // Team Members
+        team_members: profileData.teamMembers,
+
+        // Design Settings
+        profile_style: profileData.profileStyle,
+        theme: profileData.theme,
+        background_color: profileData.backgroundColor,
+        text_color: profileData.textColor,
+        font: profileData.font,
+        button_style: profileData.buttonStyle,
+        show_watermark: profileData.showWatermark,
+      }
     );
-    const response = await $api.put("/user/profile", {
-      // Basic Info
-      name: profileData.name,
-      title: profileData.position,
-      qualification: profileData.qualification,
-      bio: profileData.bio,
-      phone: profileData.contactNumber,
-      email: profileData.email,
-      website: profileData.website,
-      profile_image: profileData.image,
-
-      // Company Info
-      company_logo: profileData.companyLogo,
-      company_logo_text: profileData.companyLogoText,
-      company_name: profileData.companyName,
-      company_registration_no: profileData.companyRegistrationNo,
-      company_department: profileData.companyDepartment,
-
-      // Address Info
-      address_name: profileData.addressName,
-      address_street: profileData.addressStreet,
-      address_area: profileData.addressArea,
-      address_city_state: profileData.addressCityState,
-      address_country: profileData.addressCountry,
-      address_map_url: profileData.addressMapUrl,
-
-      // Stats
-      stats: profileData.stats,
-
-      // Services
-      services: profileData.services,
-
-      // Contact Methods
-      phone_number: profileData.phoneNumber,
-      phone_label: profileData.phoneLabel,
-      email_address: profileData.emailAddress,
-      email_label: profileData.emailLabel,
-      whatsapp_number: profileData.whatsappNumber,
-      whatsapp_label: profileData.whatsappLabel,
-      website_url: profileData.websiteUrl,
-      website_label: profileData.websiteLabel,
-
-      // Social Links
-      social_links: profileData.socialLinks,
-
-      // Team Members
-      team_members: profileData.teamMembers,
-
-      // Design Settings
-      profile_style: profileData.profileStyle,
-      theme: profileData.theme,
-      background_color: profileData.backgroundColor,
-      text_color: profileData.textColor,
-      font: profileData.font,
-      button_style: profileData.buttonStyle,
-      show_watermark: profileData.showWatermark,
-    });
 
     if (response.success) {
       $toast.success("Landing page saved successfully!");
@@ -1335,19 +1334,46 @@ const loadProfile = async () => {
       profileData.buttonStyle =
         landingPage.button_style || landingPage.buttonStyle || "solid";
       profileData.bio = landingPage.bio || "";
+      profileData.showWatermark = landingPage.show_watermark !== false;
 
       console.log("Loaded landing page for card:", selectedNfcCardId.value);
     } else {
-      // No landing page exists yet for this card, use defaults
+      // No landing page exists yet for this card, reset to defaults
+      resetProfileData();
       console.log("No landing page found for card, using defaults");
     }
   } catch (error) {
     console.error("Error loading landing page:", error);
-    // Don't show error toast for 404 (card has no landing page yet)
-    if (error.response?.status !== 404) {
+
+    // If 404, this card has no landing page yet - reset to defaults
+    if (error.response?.status === 404) {
+      resetProfileData();
+      console.log("Card has no landing page yet, reset to defaults");
+    } else {
+      // Other errors
       $toast.error("Failed to load landing page");
     }
   }
+};
+
+// Reset profile data to defaults
+const resetProfileData = () => {
+  profileData.name = "";
+  profileData.position = "";
+  profileData.contactNumber = "";
+  profileData.email = "";
+  profileData.website = "";
+  profileData.address = "";
+  profileData.image = null;
+  profileData.companyLogo = null;
+  profileData.profileStyle = "classic";
+  profileData.theme = "minimal";
+  profileData.backgroundColor = "#FFFFFF";
+  profileData.textColor = "#000000";
+  profileData.font = "inter";
+  profileData.buttonStyle = "solid";
+  profileData.bio = "";
+  profileData.showWatermark = true;
 };
 
 // NFC Card selection

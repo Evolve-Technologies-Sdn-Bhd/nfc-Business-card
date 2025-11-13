@@ -181,14 +181,30 @@
                               </span>
                             </div>
                           </div>
-                          <button
-                            @click.stop="
-                              handleDeleteNotification(notification.id)
-                            "
-                            class="ml-2 text-gray-400 hover:text-red-600 transition-colors"
-                          >
-                            <Icon name="heroicons:x-mark" class="h-4 w-4" />
-                          </button>
+                          <div class="ml-2 flex items-center space-x-1">
+                            <!-- Quick Mark as Read -->
+                            <button
+                              v-if="!notification.is_read"
+                              @click.stop="markAsRead(notification.id)"
+                              class="text-blue-500 hover:text-blue-700 transition-colors"
+                              title="Mark as read"
+                            >
+                              <Icon
+                                name="heroicons:check-circle"
+                                class="h-4 w-4"
+                              />
+                            </button>
+                            <!-- Delete -->
+                            <button
+                              @click.stop="
+                                handleDeleteNotification(notification.id)
+                              "
+                              class="text-gray-400 hover:text-red-600 transition-colors"
+                              title="Delete"
+                            >
+                              <Icon name="heroicons:x-mark" class="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -200,6 +216,13 @@
                         class="mx-auto h-12 w-12 text-gray-300"
                       />
                       <p class="text-sm text-gray-500 mt-2">No notifications</p>
+                      <NuxtLink
+                        to="/UserDashboard/Notifications"
+                        class="inline-block mt-3 text-sm text-primary-600 hover:text-primary-500 font-medium"
+                        @click="showNotifications = false"
+                      >
+                        View all notifications
+                      </NuxtLink>
                     </div>
 
                     <!-- Footer Actions -->

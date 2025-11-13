@@ -724,7 +724,7 @@
                   {{
                     selectedCard.nfcTag
                       ? "Edit Profile in Profile Builder"
-                      : "Create Profile in Profile Builder"
+                      : "Edit Landing Page"
                   }}
                 </button>
               </div>
