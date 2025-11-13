@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\Analytics;
 use App\Services\FileUploadService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,10 +17,12 @@ use Illuminate\Support\Str;
 class ProfileController extends Controller
 {
     protected $fileUploadService;
+    protected $notificationService;
 
-    public function __construct(FileUploadService $fileUploadService)
+    public function __construct(FileUploadService $fileUploadService, NotificationService $notificationService)
     {
         $this->fileUploadService = $fileUploadService;
+        $this->notificationService = $notificationService;
     }
 
     public function show($slug)
@@ -118,6 +121,13 @@ class ProfileController extends Controller
         ];
 
         $profile->update($mappedData);
+
+        // Send profile updated notification
+        $this->notificationService->create($request->user(), 'profile_updated', [
+            'fields' => implode(', ', array_keys(array_filter($mappedData, function($value, $key) use ($profile) {
+                return $profile->wasChanged($key);
+            }, ARRAY_FILTER_USE_BOTH))),
+        ]);
 
         return response()->json([
             'success' => true,

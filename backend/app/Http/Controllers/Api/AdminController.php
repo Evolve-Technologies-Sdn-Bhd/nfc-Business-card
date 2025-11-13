@@ -212,6 +212,8 @@ class AdminController extends Controller
                 'is_admin' => $request->boolean('is_admin'),
                 'admin_role' => $request->admin_role,
                 'admin_permissions' => $request->admin_permissions,
+                'total_account_slots' => $request->subscription_plan ?? 'business' ? 10 : 0,
+                'total_card_quota' => $request->subscription_plan ?? 'business' ? 10 : 0,
             ]);
 
             // Create profile

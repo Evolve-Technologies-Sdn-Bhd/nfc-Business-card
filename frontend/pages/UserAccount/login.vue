@@ -261,7 +261,7 @@ const form = reactive({
 // Check if user is already authenticated
 onMounted(() => {
   if (authStore.isAuthenticated) {
-    const redirect = route.query.redirect || "/UserDashboard/CardManagement";
+    const redirect = route.query.redirect || authStore.getRedirectPathByPlan();
     router.push(redirect);
   }
 });
@@ -287,8 +287,13 @@ const handleLogin = async () => {
       let redirectPath = route.query.redirect;
 
       if (!redirectPath) {
-        // Redirect all users (admin and regular) to CardManagement
-        redirectPath = "/UserDashboard/CardManagement";
+        // Get redirect path based on user's plan
+        redirectPath = authStore.getRedirectPathByPlan();
+        console.log(
+          "User plan:",
+          authStore.user?.subscription_plan || authStore.user?.plan
+        );
+        console.log("Redirecting to:", redirectPath);
       }
 
       console.log("Redirecting to:", redirectPath);
@@ -324,8 +329,13 @@ const handle2FA = async () => {
     let redirectPath = route.query.redirect;
 
     if (!redirectPath) {
-      // Redirect all users (admin and regular) to CardManagement
-      redirectPath = "/UserDashboard/CardManagement";
+      // Get redirect path based on user's plan
+      redirectPath = authStore.getRedirectPathByPlan();
+      console.log(
+        "User plan (2FA):",
+        authStore.user?.subscription_plan || authStore.user?.plan
+      );
+      console.log("Redirecting to:", redirectPath);
     }
 
     await router.push(redirectPath);
@@ -353,18 +363,18 @@ const handleGoogleLogin = () => {
     const config = useRuntimeConfig();
     const apiBaseUrl = config.public.apiBaseUrl;
     const oauthUrl = `${apiBaseUrl}/auth/google/redirect`;
-    
-    console.log('🔵 Google Login Clicked');
-    console.log('📍 API Base URL:', apiBaseUrl);
-    console.log('🔗 OAuth URL:', oauthUrl);
-    console.log('🚀 Navigating now...');
-    
+
+    console.log("🔵 Google Login Clicked");
+    console.log("📍 API Base URL:", apiBaseUrl);
+    console.log("🔗 OAuth URL:", oauthUrl);
+    console.log("🚀 Navigating now...");
+
     // Immediate navigation to backend OAuth endpoint
     // Backend will redirect to Google's sign-in page
     window.location.href = oauthUrl;
   } catch (error) {
-    console.error('❌ Error in handleGoogleLogin:', error);
-    alert('Error: ' + error.message);
+    console.error("❌ Error in handleGoogleLogin:", error);
+    alert("Error: " + error.message);
   }
 };
 
@@ -372,7 +382,7 @@ const handleGoogleLogin = () => {
 const handleAppleLogin = () => {
   const config = useRuntimeConfig();
   const apiBaseUrl = config.public.apiBaseUrl;
-  
+
   // Immediate navigation to backend OAuth endpoint
   // Backend will redirect to Apple's sign-in page
   window.location.href = `${apiBaseUrl}/auth/apple/redirect`;
@@ -383,7 +393,8 @@ watch(
   () => authStore.isAuthenticated,
   (isAuth) => {
     if (isAuth) {
-      const redirect = route.query.redirect || "/UserDashboard/CardManagement";
+      const redirect =
+        route.query.redirect || authStore.getRedirectPathByPlan();
       router.push(redirect);
     }
   }

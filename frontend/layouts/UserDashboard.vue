@@ -1,4 +1,4 @@
-<!-- layouts/user.vue -->
+<!-- layouts/UserDashboard.vue -->
 <template>
   <div class="min-h-screen bg-secondary-50">
     <!-- Desktop Layout Container -->
@@ -62,7 +62,7 @@
               <div class="flex items-center px-3 py-2">
                 <div class="flex-shrink-0">
                   <img
-                    :src="user?.profile_image || '/default-avatar.png'"
+                    :src="user?.account_image || '/default-avatar.png'"
                     :alt="user?.name"
                     class="h-10 w-10 rounded-full object-cover"
                   />
@@ -84,8 +84,8 @@
               <!-- Notifications -->
               <div class="mt-3 px-3 notifications-dropdown">
                 <button
-                  @click="showNotifications = !showNotifications"
-                  class="w-full flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                  @click="toggleNotifications"
+                  class="w-full flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors relative"
                 >
                   <Icon
                     name="heroicons:bell"
@@ -93,9 +93,10 @@
                   />
                   <span class="flex-1 text-left">Notifications</span>
                   <span
+                    v-if="unreadCount > 0"
                     class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
                   >
-                    3
+                    {{ unreadCount > 9 ? "9+" : unreadCount }}
                   </span>
                 </button>
 
@@ -110,47 +111,115 @@
                 >
                   <div
                     v-if="showNotifications"
-                    class="mt-2 bg-white rounded-lg shadow-lg border border-secondary-200 overflow-hidden"
+                    class="mt-2 bg-white rounded-lg shadow-lg border border-secondary-200 overflow-hidden max-w-sm"
                   >
-                    <div class="p-3 border-b border-secondary-200">
+                    <div
+                      class="p-3 border-b border-secondary-200 flex items-center justify-between"
+                    >
                       <h3 class="text-sm font-medium text-secondary-900">
                         Recent Notifications
                       </h3>
-                    </div>
-                    <div class="max-h-64 overflow-y-auto">
-                      <div
-                        class="p-3 border-b border-secondary-100 hover:bg-secondary-50 cursor-pointer"
-                      >
-                        <p class="text-sm text-secondary-900">
-                          Your profile was viewed 5 times today
-                        </p>
-                        <p class="text-xs text-secondary-500 mt-1">
-                          2 hours ago
-                        </p>
-                      </div>
-                      <div
-                        class="p-3 border-b border-secondary-100 hover:bg-secondary-50 cursor-pointer"
-                      >
-                        <p class="text-sm text-secondary-900">
-                          New NFC tag activated successfully
-                        </p>
-                        <p class="text-xs text-secondary-500 mt-1">1 day ago</p>
-                      </div>
-                      <div class="p-3 hover:bg-secondary-50 cursor-pointer">
-                        <p class="text-sm text-secondary-900">
-                          Welcome to NFCGo! Start building your profile
-                        </p>
-                        <p class="text-xs text-secondary-500 mt-1">
-                          3 days ago
-                        </p>
-                      </div>
-                    </div>
-                    <div class="p-3 border-t border-secondary-200">
                       <button
-                        class="text-sm text-primary-600 hover:text-primary-500 font-medium"
+                        v-if="notifications.length > 0 && unreadCount > 0"
+                        @click="handleMarkAllAsRead"
+                        class="text-xs text-blue-600 hover:text-blue-700 font-medium"
                       >
-                        View all notifications
+                        Mark all read
                       </button>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div v-if="notificationsLoading" class="p-6 text-center">
+                      <div
+                        class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+                      ></div>
+                    </div>
+
+                    <!-- Notifications List -->
+                    <div
+                      v-else-if="notifications.length > 0"
+                      class="max-h-96 overflow-y-auto"
+                    >
+                      <div
+                        v-for="notification in notifications"
+                        :key="notification.id"
+                        @click="handleNotificationClick(notification)"
+                        class="p-3 border-b border-secondary-100 hover:bg-secondary-50 cursor-pointer transition-colors"
+                        :class="{ 'bg-blue-50': !notification.is_read }"
+                      >
+                        <div class="flex items-start">
+                          <span class="text-xl mr-2 flex-shrink-0">
+                            {{ getNotificationIcon(notification.type) }}
+                          </span>
+                          <div class="flex-1 min-w-0">
+                            <p
+                              class="text-sm font-medium text-secondary-900"
+                              :class="{
+                                'font-semibold': !notification.is_read,
+                              }"
+                            >
+                              {{ notification.title }}
+                            </p>
+                            <p
+                              class="text-xs text-secondary-600 mt-1 line-clamp-2"
+                            >
+                              {{ notification.message }}
+                            </p>
+                            <div class="flex items-center justify-between mt-1">
+                              <p class="text-xs text-secondary-500">
+                                {{ getTimeAgo(notification.created_at) }}
+                              </p>
+                              <span
+                                v-if="
+                                  notification.priority === 'urgent' ||
+                                  notification.priority === 'high'
+                                "
+                                class="text-xs px-1.5 py-0.5 rounded"
+                                :class="getPriorityClass(notification.priority)"
+                              >
+                                {{ notification.priority }}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            @click.stop="
+                              handleDeleteNotification(notification.id)
+                            "
+                            class="ml-2 text-gray-400 hover:text-red-600 transition-colors"
+                          >
+                            <Icon name="heroicons:x-mark" class="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else class="p-6 text-center">
+                      <Icon
+                        name="heroicons:bell-slash"
+                        class="mx-auto h-12 w-12 text-gray-300"
+                      />
+                      <p class="text-sm text-gray-500 mt-2">No notifications</p>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div
+                      v-if="notifications.length > 0"
+                      class="p-3 border-t border-secondary-200 flex items-center justify-between"
+                    >
+                      <button
+                        @click="handleDeleteAllRead"
+                        class="text-xs text-red-600 hover:text-red-700 font-medium"
+                      >
+                        Clear read
+                      </button>
+                      <NuxtLink
+                        to="/UserDashboard/Notifications"
+                        class="text-xs text-primary-600 hover:text-primary-500 font-medium"
+                        @click="showNotifications = false"
+                      >
+                        View all
+                      </NuxtLink>
                     </div>
                   </div>
                 </Transition>
@@ -321,6 +390,22 @@
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
+// Notifications composable
+const {
+  notifications,
+  unreadCount,
+  loading: notificationsLoading,
+  loadNotifications,
+  loadUnreadCount,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+  deleteAllRead,
+  getTimeAgo,
+  getNotificationIcon,
+  getPriorityClass,
+} = useNotifications();
+
 // Reactive data
 const sidebarOpen = ref(false);
 const showProfilePreview = ref(false);
@@ -330,35 +415,64 @@ const logoutLoading = ref(false);
 // Computed
 const user = computed(() => authStore.user);
 
-// Navigation items
-const navigation = [
-  {
-    name: "Profile Builder",
-    href: "/UserDashboard/ProfileBuilder",
-    icon: "heroicons:user",
-  },
-  {
-    name: "Link Management",
-    href: "/UserDashboard/LinkManagement",
-    icon: "heroicons:wifi",
-  },
-  {
-    name: "Card Management",
-    href: "/UserDashboard/CardManagement",
-    icon: "heroicons:credit-card",
-    badge: "Premium",
-  },
-  {
-    name: "Analytics",
-    href: "/UserDashboard/Analytics",
-    icon: "heroicons:chart-bar",
-  },
-  {
+// Plan-aware navigation items
+const navigation = computed(() => {
+  const plan = authStore.user?.subscription_plan || "free";
+  const isBusinessPlan = plan === "business";
+  const isFreePlan = plan === "free";
+
+  const baseNavigation = [
+    {
+      name: "Profile Builder",
+      href: isBusinessPlan
+        ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder"
+        : isFreePlan
+        ? "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder"
+        : "/UserDashboard/ProfileBuilder",
+      icon: "heroicons:user",
+    },
+    {
+      name: "Link Management",
+      href: isBusinessPlan
+        ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessLinkManagement"
+        : "/UserDashboard/LinkManagement",
+      icon: "heroicons:wifi",
+    },
+    {
+      name: "Card Management",
+      href: isBusinessPlan
+        ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
+        : "/UserDashboard/CardManagement",
+      icon: "heroicons:credit-card",
+      badge: "Premium",
+    },
+    {
+      name: "Analytics",
+      href: isBusinessPlan
+        ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics"
+        : "/UserDashboard/Analytics",
+      icon: "heroicons:chart-bar",
+    },
+  ];
+
+  // Only add Employee Management for Business plan users
+  if (isBusinessPlan) {
+    baseNavigation.push({
+      name: "Employee Management",
+      href: "/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement",
+      icon: "heroicons:users",
+    });
+  }
+
+  // Add common navigation items for all users
+  baseNavigation.push({
     name: "Settings",
     href: "/UserDashboard/Settings",
     icon: "heroicons:cog-6-tooth",
-  },
-];
+  });
+
+  return baseNavigation;
+});
 
 // Check if route is active
 const isActiveRoute = (href) => {
@@ -402,8 +516,55 @@ const handleLogout = async () => {
   }
 };
 
+// Notification handlers
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value;
+  if (showNotifications.value && notifications.value.length === 0) {
+    loadNotifications(10); // Load first 10 notifications
+  }
+};
+
+const handleNotificationClick = async (notification) => {
+  // Mark as read if unread
+  if (!notification.is_read) {
+    await markAsRead(notification.id);
+  }
+
+  // Navigate to action URL if exists
+  if (notification.action_url) {
+    navigateTo(notification.action_url);
+    showNotifications.value = false;
+  }
+};
+
+const handleMarkAllAsRead = async () => {
+  await markAllAsRead();
+  $toast.success("All notifications marked as read");
+};
+
+const handleDeleteNotification = async (notificationId) => {
+  await deleteNotification(notificationId);
+  $toast.success("Notification deleted");
+};
+
+const handleDeleteAllRead = async () => {
+  if (!confirm("Delete all read notifications?")) {
+    return;
+  }
+  await deleteAllRead();
+  $toast.success("Read notifications cleared");
+};
+
 // Close dropdowns when clicking outside
 onMounted(() => {
+  // Load initial unread count
+  loadUnreadCount();
+
+  // Auto-refresh unread count every 30 seconds
+  const intervalId = setInterval(() => {
+    loadUnreadCount();
+  }, 30000);
+
   const handleClickOutside = (e) => {
     // Close notifications dropdown when clicking outside
     if (!e.target.closest(".notifications-dropdown")) {
@@ -414,6 +575,7 @@ onMounted(() => {
   document.addEventListener("click", handleClickOutside);
 
   onUnmounted(() => {
+    clearInterval(intervalId);
     document.removeEventListener("click", handleClickOutside);
   });
 });

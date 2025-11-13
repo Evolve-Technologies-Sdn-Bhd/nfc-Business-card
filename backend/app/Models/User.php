@@ -39,6 +39,7 @@ class User extends Authenticatable
         'admin_permissions',
         'last_admin_action_at',
         'is_new_user',
+        'account_image',
     ];
 
     protected $hidden = [
@@ -121,6 +122,11 @@ class User extends Authenticatable
     public function nfcCards()
     {
         return $this->hasMany(NfcCard::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
     public function analytics()

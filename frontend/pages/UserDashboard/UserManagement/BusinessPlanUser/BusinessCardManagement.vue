@@ -34,6 +34,54 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Business Plan Card Quota (for Business accounts only) -->
+      <div v-if="isBusinessAccount" class="mb-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-medium text-secondary-900">
+              Business Card Quota
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-primary-600">
+                  {{ cardQuotaInfo.available }} / {{ cardQuotaInfo.total }}
+                </div>
+                <p class="text-sm text-secondary-600">Available Cards</p>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-info-600">
+                  {{ cardQuotaInfo.used }}
+                </div>
+                <p class="text-sm text-secondary-600">Cards Used</p>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-success-600">
+                  {{ cardQuotaInfo.employees }}
+                </div>
+                <p class="text-sm text-secondary-600">Employee Accounts</p>
+              </div>
+            </div>
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div class="flex">
+                <Icon
+                  name="heroicons:information-circle"
+                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
+                />
+                <div class="ml-3">
+                  <p class="text-sm text-blue-700">
+                    <strong>Quota Breakdown:</strong> 1 admin card +
+                    {{ cardQuotaInfo.employees }} employee cards =
+                    {{ cardQuotaInfo.used }} used
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Subscription Status -->
       <div v-if="subscriptionData" class="mb-8">
         <div class="card">
@@ -707,6 +755,14 @@ const orderLoading = ref(false);
 const showCardDetailsModal = ref(false);
 const selectedCard = ref(null);
 
+// Business Card Quota (for Business accounts)
+const cardQuotaInfo = ref({
+  total: 0,
+  used: 0,
+  available: 0,
+  employees: 0,
+});
+
 const orderForm = ref({
   card_owner: "",
   billing_address: "",
@@ -719,6 +775,13 @@ const orderForm = ref({
 // Computed
 const hasPremiumSubscription = computed(() => {
   return subscriptionData.value?.has_premium_subscription || false;
+});
+
+const isBusinessAccount = computed(() => {
+  return (
+    authStore.user?.subscription_plan === "business" &&
+    authStore.user?.parent_business_id === null
+  );
 });
 
 // Methods
@@ -760,6 +823,27 @@ const loadNfcCards = async () => {
   }
 };
 
+// Load Business Card Quota (for Business accounts only)
+const loadCardQuota = async () => {
+  if (!isBusinessAccount.value) {
+    return;
+  }
+
+  try {
+    const response = await $api.get("/business/card-quota");
+    if (response.success) {
+      cardQuotaInfo.value = {
+        total: response.total_card_quota || 0,
+        used: response.used_card_quota || 0,
+        available: response.available_card_quota || 0,
+        employees: response.employee_count || 0,
+      };
+    }
+  } catch (error) {
+    console.error("Failed to load card quota:", error);
+  }
+};
+
 const upgradeToPremium = () => {
   // Redirect to upgrade page or show upgrade modal
   $toast.info("Redirecting to upgrade page...");
@@ -777,16 +861,77 @@ const orderNewCard = () => {
 const submitOrder = async () => {
   orderLoading.value = true;
   try {
-    const response = await $api.post("/nfc-cards", {
+    const selectedPlan = orderForm.value.subscription_plan;
+    const currentUser = authStore.user;
+
+    // Check if user is selecting Business Plan
+    if (selectedPlan === "business") {
+      // Check if user has permission to use Business Plan
+      const isBusinessAccount = currentUser?.subscription_plan === "business";
+      const isBusinessEmployee = currentUser?.parent_business_id !== null;
+
+      // If user is neither Business account nor employee under Business account
+      if (!isBusinessAccount && !isBusinessEmployee) {
+        $toast.warning(
+          "Business Plan is not available. Redirecting to purchase page..."
+        );
+        setTimeout(() => {
+          navigateTo("/UserDashboard/PlanSelection");
+        }, 1500);
+        return;
+      }
+
+      // If user is employee but trying to order Business Plan without parent permission
+      if (isBusinessEmployee && !isBusinessAccount) {
+        // Need to verify with backend that parent has quota
+        // Backend will check: parent_business_id has available quota
+      }
+    }
+
+    // Prepare order data
+    const orderData = {
       ...orderForm.value,
-      purchase_amount: getPlanPrice(orderForm.value.subscription_plan),
-    });
+      purchase_amount: getPlanPrice(selectedPlan),
+    };
+
+    // For Business Plan orders, always check card quota
+    // This applies to:
+    // 1. Business account (main) ordering Business Plan
+    // 2. Employee account ordering Business Plan (checks parent's quota)
+    if (selectedPlan === "business") {
+      orderData.check_card_quota = true; // Tell backend to validate card quota
+
+      // If current user is employee, include parent_business_id for quota tracking
+      if (currentUser?.parent_business_id) {
+        orderData.parent_business_id = currentUser.parent_business_id;
+      }
+    }
+
+    const response = await $api.post("/nfc-cards", orderData);
 
     if (response.success) {
       $toast.success("NFC card order placed successfully!");
       showOrderModal.value = false;
-      await loadNfcCards();
-      await loadSubscriptionStatus();
+
+      // Redirect to NFCCardDesign page based on selected plan
+      const planRoutes = {
+        basic: "/UserDashboard/NFCCardDesign/BasicPlanNFCCard",
+        premium: "/UserDashboard/NFCCardDesign/PremiumPlanNFCCard",
+        business: "/UserDashboard/NFCCardDesign/BusinessPlanNFCCard",
+      };
+
+      const redirectPath =
+        planRoutes[selectedPlan] || "/UserDashboard/NFCCardDesign";
+
+      // Reload card quota if Business account
+      if (isBusinessAccount.value) {
+        await loadCardQuota();
+      }
+
+      // Wait a moment for the toast to show, then redirect
+      setTimeout(() => {
+        navigateTo(redirectPath);
+      }, 1000);
     }
   } catch (error) {
     if (
@@ -794,6 +939,27 @@ const submitOrder = async () => {
       error.response?.data?.upgrade_required
     ) {
       $toast.error("This feature requires a Premium subscription");
+    } else if (
+      error.response?.status === 400 &&
+      error.response?.data?.quota_exceeded
+    ) {
+      // Card quota exceeded
+      $toast.error(
+        error.response.data.message ||
+          "Card quota limit reached. Please contact support to purchase additional quota."
+      );
+    } else if (
+      error.response?.status === 403 &&
+      error.response?.data?.business_plan_not_allowed
+    ) {
+      // User not authorized to use Business Plan
+      $toast.error(
+        error.response.data.message ||
+          "You are not authorized to use Business Plan. Redirecting to purchase page..."
+      );
+      setTimeout(() => {
+        navigateTo("/UserDashboard/PlanSelection");
+      }, 1500);
     } else {
       $toast.error("Failed to place order");
       console.error("Order error:", error);
@@ -893,6 +1059,7 @@ const formatDate = (date) => {
 onMounted(async () => {
   await loadSubscriptionStatus();
   await loadNfcCards();
+  await loadCardQuota(); // Load Business card quota if applicable
 });
 </script>
 

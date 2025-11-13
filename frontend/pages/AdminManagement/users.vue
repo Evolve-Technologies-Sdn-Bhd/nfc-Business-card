@@ -400,6 +400,70 @@
             </div>
           </div>
 
+          <!-- Business Plan Quota Settings -->
+          <div
+            v-if="form.subscription_plan === 'business'"
+            class="border-t border-secondary-200 pt-4 mt-4"
+          >
+            <h4 class="text-sm font-medium text-secondary-900 mb-4">
+              Business Plan Settings
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2"
+                  >Total Account Slots *</label
+                >
+                <input
+                  v-model.number="form.total_account_slots"
+                  type="number"
+                  min="1"
+                  required
+                  class="input"
+                  placeholder="e.g. 50"
+                />
+                <p class="text-xs text-secondary-500 mt-1">
+                  Number of employee accounts that can be created
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2"
+                  >Total Card Quota *</label
+                >
+                <input
+                  v-model.number="form.total_card_quota"
+                  type="number"
+                  min="1"
+                  required
+                  class="input"
+                  placeholder="e.g. 50"
+                />
+                <p class="text-xs text-secondary-500 mt-1">
+                  Total NFC cards (admin + employees) that can be ordered
+                </p>
+              </div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+              <div class="flex">
+                <Icon
+                  name="heroicons:information-circle"
+                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
+                />
+                <div class="ml-3">
+                  <p class="text-sm text-blue-700">
+                    <strong>Card Quota Breakdown:</strong>
+                  </p>
+                  <ul class="text-sm text-blue-600 mt-1 list-disc list-inside">
+                    <li>1 card for Business admin account</li>
+                    <li>
+                      Remaining cards ({{ form.total_card_quota - 1 || 0 }}) for
+                      employee accounts
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div
             v-if="form.is_admin"
             class="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -609,6 +673,8 @@ const form = ref({
   is_admin: false,
   admin_role: "admin",
   admin_permissions: [],
+  total_account_slots: 10, // Default for Business plan
+  total_card_quota: 10, // Default for Business plan
 });
 
 // Filters
@@ -681,6 +747,8 @@ const editUser = (user) => {
     is_admin: user.is_admin,
     admin_role: user.admin_role || "admin",
     admin_permissions: user.admin_permissions || [],
+    total_account_slots: user.total_account_slots || 10,
+    total_card_quota: user.total_card_quota || 10,
   };
   showEditModal.value = true;
 };
@@ -745,6 +813,8 @@ const closeModal = () => {
     is_admin: false,
     admin_role: "admin",
     admin_permissions: [],
+    total_account_slots: 10,
+    total_card_quota: 10,
   };
 };
 

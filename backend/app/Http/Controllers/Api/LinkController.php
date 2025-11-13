@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\SocialLink;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class LinkController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
     public function index(Request $request)
     {
         $links = $request->user()->profile->socialLinks;
@@ -146,6 +153,18 @@ class LinkController extends Controller
             'browser' => $this->getBrowser($request->userAgent()),
             'platform' => $this->getPlatform($request->userAgent()),
         ]);
+
+        // Check for milestones (every 100 clicks)
+        if ($link->click_count % 100 === 0 && $link->click_count > 0) {
+            // Get the profile owner
+            $user = $link->profile->user;
+            
+            // Send milestone notification
+            $this->notificationService->create($user, 'link_milestone', [
+                'link_title' => $link->title,
+                'click_count' => $link->click_count,
+            ]);
+        }
 
         return response()->json([
             'success' => true,

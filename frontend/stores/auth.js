@@ -193,6 +193,45 @@ export const useAuthStore = defineStore("auth", {
     },
 
     /**
+     * Get redirect path based on user's subscription plan
+     */
+    getRedirectPathByPlan() {
+      if (!this.user) {
+        return "/UserDashboard/CardManagement";
+      }
+
+      // Admin users go to admin panel
+      if (this.isAdmin()) {
+        return "/AdminManagement";
+      }
+
+      // Get user's plan (check subscription_plan first, then fall back to plan)
+      const userPlan = this.user.subscription_plan || this.user.plan || "free";
+
+      // Route based on plan
+      switch (userPlan.toLowerCase()) {
+        case "free":
+          // Free users - show basic dashboard
+          return "/UserDashboard/CardManagement";
+
+        case "basic":
+          // Basic users - card management
+          return "/UserDashboard/CardManagement";
+
+        case "premium":
+          // Premium users - advanced features
+          return "/UserDashboard/CardManagement";
+
+        case "business":
+          // Business users - business plan specific pages
+          return "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement";
+
+        default:
+          return "/UserDashboard/CardManagement";
+      }
+    },
+
+    /**
      * Clear authentication state
      */
     clearAuth() {
@@ -215,17 +254,20 @@ export const useAuthStore = defineStore("auth", {
     async initAuth() {
       // Only run on client side
       if (process.server) return;
-      
+
       const tokenCookie = useCookie("auth-token");
-      console.log('🔵 initAuth called, token:', tokenCookie.value ? 'exists' : 'missing');
-      
+      console.log(
+        "🔵 initAuth called, token:",
+        tokenCookie.value ? "exists" : "missing"
+      );
+
       if (tokenCookie.value) {
         try {
-          console.log('🔄 Fetching user profile...');
+          console.log("🔄 Fetching user profile...");
           await this.fetchProfile();
           this.token = tokenCookie.value;
           this.isAuthenticated = true;
-          console.log('✅ Auth initialized successfully');
+          console.log("✅ Auth initialized successfully");
         } catch (error) {
           console.error("❌ Failed to restore auth state:", error);
           console.error("Error details:", error.response || error.message);
@@ -233,7 +275,7 @@ export const useAuthStore = defineStore("auth", {
           throw error; // Re-throw so callback page can catch it
         }
       } else {
-        console.log('❌ No token cookie found');
+        console.log("❌ No token cookie found");
       }
     },
 

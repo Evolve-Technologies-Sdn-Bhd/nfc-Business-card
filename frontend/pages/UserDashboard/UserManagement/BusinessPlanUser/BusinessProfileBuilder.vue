@@ -45,65 +45,43 @@
                     :key="card.id"
                     @click="selectNfcCard(card.id)"
                     :class="[
-                      'relative cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
+                      'cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
                       selectedNfcCardId === card.id
-                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100'
-                        : 'border-gray-200 hover:border-gray-300 bg-white',
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300',
                     ]"
                   >
                     <!-- Card Mini Design -->
                     <div class="flex items-start justify-between gap-3">
-                      <!-- Left: Card Info -->
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                          <Icon
-                            name="heroicons:credit-card-solid"
-                            :class="[
-                              'w-5 h-5',
-                              selectedNfcCardId === card.id
-                                ? 'text-blue-600'
-                                : 'text-gray-400',
-                            ]"
-                          />
-                          <p class="text-sm font-bold text-gray-900 truncate">
-                            {{ card.nfc_card_id || "Card #" + card.id }}
-                          </p>
+                          <h4
+                            class="font-medium text-sm text-gray-900 truncate"
+                          >
+                            {{ card.card_owner || "Card Owner" }}
+                          </h4>
+                          <span
+                            :class="getPlanBadgeClass(card.subscription_plan)"
+                            class="px-2 py-0.5 text-xs font-semibold rounded-full"
+                          >
+                            {{
+                              (card.subscription_plan || "free").toUpperCase()
+                            }}
+                          </span>
                         </div>
-
-                        <p class="text-xs text-gray-600 mb-2 truncate">
-                          {{ card.card_owner || "No owner" }}
+                        <p class="text-xs text-gray-500 font-mono">
+                          {{ card.nfc_card_id || `Card #${card.id}` }}
                         </p>
-
-                        <!-- Status & Plan Badges -->
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span
-                            :class="[
-                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                              card.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : card.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800',
-                            ]"
-                          >
-                            {{ card.status || "pending" }}
-                          </span>
-                          <span
-                            :class="[
-                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase',
-                              getPlanBadgeClass(card.subscription_plan),
-                            ]"
-                          >
-                            {{ card.subscription_plan || "free" }}
-                          </span>
-                        </div>
+                        <p class="text-xs text-gray-400 mt-1">
+                          {{
+                            card.status === "active" ? "✓ Active" : "○ Inactive"
+                          }}
+                        </p>
                       </div>
-
-                      <!-- Right: Check Icon -->
                       <Icon
                         v-if="selectedNfcCardId === card.id"
-                        name="heroicons:check-circle-solid"
-                        class="w-6 h-6 text-blue-500 flex-shrink-0"
+                        name="heroicons:check-circle"
+                        class="w-5 h-5 text-blue-500 flex-shrink-0"
                       />
                     </div>
                   </div>
@@ -188,7 +166,7 @@
                       Go to Card Management to order your card.
                     </p>
                     <NuxtLink
-                      to="/UserDashboard/CardManagement"
+                      to="/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
                       class="inline-flex items-center mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900"
                     >
                       Go to Card Management
@@ -290,6 +268,31 @@
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Qualification
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.qualification"
+                    type="text"
+                    placeholder="e.g., Bachelor of Business Administration"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Bio</label
+                  >
+                  <textarea
+                    v-model="profileData.bio"
+                    rows="4"
+                    placeholder="Tell visitors about yourself..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
                     >Contact Number</label
                   >
                   <input
@@ -335,6 +338,430 @@
                     placeholder="Your business address"
                     class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   ></textarea>
+                </div>
+              </div>
+
+              <!-- Stats Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Profile Statistics
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 3 statistics to showcase your achievements
+                </p>
+                <div
+                  v-for="(stat, index) in profileData.stats"
+                  :key="index"
+                  class="grid grid-cols-2 gap-3"
+                >
+                  <input
+                    v-model="stat.num"
+                    type="text"
+                    :placeholder="'e.g., 10+'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="stat.label"
+                    type="text"
+                    :placeholder="'e.g., Years Experience'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Tab -->
+            <div v-if="activeTab === 'company'" class="space-y-4 sm:space-y-6">
+              <!-- Company Information -->
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Company Information
+                </h3>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Company Logo Text</label
+                  >
+                  <input
+                    v-model="profileData.companyLogoText"
+                    type="text"
+                    placeholder="e.g., COMPANY"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p class="text-xs text-gray-500 mt-1">
+                    Text overlay for company logo
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Company Name</label
+                  >
+                  <input
+                    v-model="profileData.companyName"
+                    type="text"
+                    placeholder="e.g., ABC Corporation Sdn. Bhd."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Company Registration No.</label
+                  >
+                  <input
+                    v-model="profileData.companyRegistrationNo"
+                    type="text"
+                    placeholder="e.g., 202201234567 (1234567-A)"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Department</label
+                  >
+                  <input
+                    v-model="profileData.companyDepartment"
+                    type="text"
+                    placeholder="e.g., Sales & Marketing"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Company Address -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Company Address
+                </h3>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Location Name</label
+                  >
+                  <input
+                    v-model="profileData.addressName"
+                    type="text"
+                    placeholder="e.g., Headquarters"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Street Address</label
+                  >
+                  <input
+                    v-model="profileData.addressStreet"
+                    type="text"
+                    placeholder="e.g., 123 Business Street"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Area</label
+                  >
+                  <input
+                    v-model="profileData.addressArea"
+                    type="text"
+                    placeholder="e.g., Taman ABC"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >City, State</label
+                  >
+                  <input
+                    v-model="profileData.addressCityState"
+                    type="text"
+                    placeholder="e.g., 50000 Kuala Lumpur"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Country</label
+                  >
+                  <input
+                    v-model="profileData.addressCountry"
+                    type="text"
+                    placeholder="e.g., Malaysia"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Map URL</label
+                  >
+                  <input
+                    v-model="profileData.addressMapUrl"
+                    type="url"
+                    placeholder="e.g., https://maps.google.com/..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p class="text-xs text-gray-500 mt-1">
+                    Google Maps or other map service link
+                  </p>
+                </div>
+              </div>
+
+              <!-- Contact Methods -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Contact Methods
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Customize labels and values for contact buttons
+                </p>
+
+                <!-- Phone -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Phone Label</label
+                    >
+                    <input
+                      v-model="profileData.phoneLabel"
+                      type="text"
+                      placeholder="e.g., Call Us"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Phone Number</label
+                    >
+                    <input
+                      v-model="profileData.phoneNumber"
+                      type="tel"
+                      placeholder="e.g., +60123456789"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Email Label</label
+                    >
+                    <input
+                      v-model="profileData.emailLabel"
+                      type="text"
+                      placeholder="e.g., Email Us"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Email Address</label
+                    >
+                    <input
+                      v-model="profileData.emailAddress"
+                      type="email"
+                      placeholder="e.g., info@company.com"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <!-- WhatsApp -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >WhatsApp Label</label
+                    >
+                    <input
+                      v-model="profileData.whatsappLabel"
+                      type="text"
+                      placeholder="e.g., WhatsApp"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >WhatsApp Number</label
+                    >
+                    <input
+                      v-model="profileData.whatsappNumber"
+                      type="tel"
+                      placeholder="e.g., +60123456789"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <!-- Website -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Website Label</label
+                    >
+                    <input
+                      v-model="profileData.websiteLabel"
+                      type="text"
+                      placeholder="e.g., Visit Website"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Website URL</label
+                    >
+                    <input
+                      v-model="profileData.websiteUrl"
+                      type="url"
+                      placeholder="e.g., https://company.com"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div v-if="activeTab === 'services'" class="space-y-4 sm:space-y-6">
+              <!-- Services Section -->
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">Our Services</h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 6 services your company offers
+                </p>
+
+                <div
+                  v-for="(service, index) in profileData.services"
+                  :key="index"
+                  class="grid grid-cols-3 gap-3 items-end"
+                >
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Icon {{ index + 1 }}</label
+                    >
+                    <input
+                      v-model="service.icon"
+                      type="text"
+                      placeholder="e.g., 🏢"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl"
+                    />
+                  </div>
+                  <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Service Name</label
+                    >
+                    <input
+                      v-model="service.name"
+                      type="text"
+                      :placeholder="'e.g., Consulting'"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Team Members Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">Team Members</h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 3 key team members to display
+                </p>
+
+                <div
+                  v-for="(member, index) in profileData.teamMembers"
+                  :key="index"
+                  class="grid grid-cols-3 gap-3"
+                >
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Initials {{ index + 1 }}</label
+                    >
+                    <input
+                      v-model="member.initials"
+                      type="text"
+                      placeholder="e.g., JD"
+                      maxlength="2"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
+                    />
+                  </div>
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Name</label
+                    >
+                    <input
+                      v-model="member.name"
+                      type="text"
+                      placeholder="e.g., John Doe"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Role</label
+                    >
+                    <input
+                      v-model="member.role"
+                      type="text"
+                      placeholder="e.g., CEO"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Tab -->
+            <div v-if="activeTab === 'social'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">Social Links</h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 4 social media or external links
+                </p>
+
+                <div
+                  v-for="(social, index) in profileData.socialLinks"
+                  :key="index"
+                  class="grid grid-cols-4 gap-3"
+                >
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Icon {{ index + 1 }}</label
+                    >
+                    <input
+                      v-model="social.emoji"
+                      type="text"
+                      placeholder="e.g., 🌐"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl"
+                    />
+                  </div>
+                  <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >Name</label
+                    >
+                    <input
+                      v-model="social.name"
+                      type="text"
+                      placeholder="e.g., Website"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-600 mb-1"
+                      >URL</label
+                    >
+                    <input
+                      v-model="social.url"
+                      type="url"
+                      placeholder="e.g., https://company.com"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -504,6 +931,68 @@
                 </div>
               </div>
             </div>
+
+            <!-- Watermarks Tab -->
+            <div
+              v-if="activeTab === 'watermarks'"
+              class="space-y-4 sm:space-y-6"
+            >
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                  Watermark Settings
+                </h3>
+
+                <!-- Watermark Toggle -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <h4 class="text-sm font-medium text-gray-900">
+                        Show "Powered by NFC GO" watermark
+                      </h4>
+                      <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                        Display the NFC GO branding at the bottom of your
+                        profile
+                      </p>
+                    </div>
+                    <button
+                      @click="
+                        profileData.showWatermark = !profileData.showWatermark
+                      "
+                      :class="[
+                        'relative inline-flex h-6 w-11 sm:h-7 sm:w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                        profileData.showWatermark
+                          ? 'bg-blue-600'
+                          : 'bg-gray-200',
+                      ]"
+                    >
+                      <span
+                        :class="[
+                          'pointer-events-none inline-block h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                          profileData.showWatermark
+                            ? 'translate-x-5 sm:translate-x-5'
+                            : 'translate-x-0',
+                        ]"
+                      />
+                    </button>
+                  </div>
+
+                  <!-- Premium Upsell -->
+                  <div
+                    v-if="profileData.showWatermark"
+                    class="mt-4 p-3 bg-blue-50 rounded-lg"
+                  >
+                    <p class="text-xs sm:text-sm text-blue-700">
+                      <Icon
+                        name="heroicons:sparkles"
+                        class="w-4 h-4 inline mr-1"
+                      />
+                      Upgrade to Premium to remove the watermark and unlock
+                      premium features
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -619,23 +1108,89 @@ const showMobilePreview = ref(false);
 const isMobile = ref(false);
 const showCardSelector = ref(false);
 
+// NFC Card selection
+const userNfcCards = ref([]);
+const selectedNfcCardId = ref(null);
+const loadingCards = ref(false);
+
 // Profile data
 const profileData = reactive({
+  // Basic Info
   name: "",
   position: "",
+  qualification: "",
+  bio: "",
   contactNumber: "",
   email: "",
   website: "",
   address: "",
   image: null,
+
+  // Company Info
   companyLogo: null,
+  companyLogoText: "",
+  companyName: "",
+  companyRegistrationNo: "",
+  companyDepartment: "",
+
+  // Address Info
+  addressName: "",
+  addressStreet: "",
+  addressArea: "",
+  addressCityState: "",
+  addressCountry: "",
+  addressMapUrl: "",
+
+  // Stats (3 items)
+  stats: [
+    { num: "10+", label: "Years Experience" },
+    { num: "500+", label: "Projects Done" },
+    { num: "98%", label: "Client Satisfaction" },
+  ],
+
+  // Services (max 6)
+  services: [
+    { icon: "🏷️", name: "RFID Technology" },
+    { icon: "🖨️", name: "Label Printing" },
+    { icon: "💻", name: "Software Development" },
+    { icon: "🌐", name: "IoT Implementation" },
+    { icon: "🛒", name: "E-commerce Marketing" },
+    { icon: "📄", name: "Printing Solutions" },
+  ],
+
+  // Contact Methods
+  phoneNumber: "",
+  phoneLabel: "Phone",
+  emailAddress: "",
+  emailLabel: "Email",
+  whatsappNumber: "",
+  whatsappLabel: "WhatsApp",
+  websiteUrl: "",
+  websiteLabel: "Website",
+
+  // Social Links (max 4)
+  socialLinks: [
+    { emoji: "📘", name: "Facebook", url: "" },
+    { emoji: "💼", name: "LinkedIn", url: "" },
+    { emoji: "📸", name: "Instagram", url: "" },
+    { emoji: "🐦", name: "Twitter", url: "" },
+  ],
+
+  // Team Members (max 3)
+  teamMembers: [
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+  ],
+
+  // Design Settings
   profileStyle: "classic",
   theme: "minimal",
   backgroundColor: "#FFFFFF",
   textColor: "#000000",
   font: "inter",
   buttonStyle: "solid",
-  bio: "",
+  showWatermark: true,
 });
 
 // Sample links for preview
@@ -654,6 +1209,24 @@ const tabs = [
     icon: "heroicons:user",
   },
   {
+    id: "company",
+    name: "Company",
+    shortName: "Company",
+    icon: "heroicons:building-office",
+  },
+  {
+    id: "services",
+    name: "Services",
+    shortName: "Services",
+    icon: "heroicons:rocket-launch",
+  },
+  {
+    id: "social",
+    name: "Social",
+    shortName: "Social",
+    icon: "heroicons:globe-alt",
+  },
+  {
     id: "design",
     name: "Design",
     shortName: "Design",
@@ -664,6 +1237,12 @@ const tabs = [
     name: "Style",
     shortName: "Style",
     icon: "heroicons:sparkles",
+  },
+  {
+    id: "watermarks",
+    name: "Watermarks",
+    shortName: "Brand",
+    icon: "heroicons:eye",
   },
 ];
 
@@ -775,10 +1354,64 @@ const saveProfile = async () => {
 
   saving.value = true;
   try {
+    // Map frontend camelCase to backend snake_case
+    const payload = {
+      // Basic Info
+      name: profileData.name,
+      title: profileData.position,
+      qualification: profileData.qualification,
+      bio: profileData.bio,
+      phone: profileData.contactNumber,
+      email: profileData.email,
+      website: profileData.website,
+      address: profileData.address,
+      profile_image: profileData.image,
+      company_logo: profileData.companyLogo,
+
+      // Company Info
+      company_logo_text: profileData.companyLogoText,
+      company_name: profileData.companyName,
+      company_registration_no: profileData.companyRegistrationNo,
+      company_department: profileData.companyDepartment,
+
+      // Address Details
+      address_name: profileData.addressName,
+      address_street: profileData.addressStreet,
+      address_area: profileData.addressArea,
+      address_city_state: profileData.addressCityState,
+      address_country: profileData.addressCountry,
+      address_map_url: profileData.addressMapUrl,
+
+      // Stats, Services, Social Links, Team Members
+      stats: profileData.stats,
+      services: profileData.services,
+      social_links: profileData.socialLinks,
+      team_members: profileData.teamMembers,
+
+      // Contact Methods
+      phone_number: profileData.phoneNumber,
+      phone_label: profileData.phoneLabel,
+      email_address: profileData.emailAddress,
+      email_label: profileData.emailLabel,
+      whatsapp_number: profileData.whatsappNumber,
+      whatsapp_label: profileData.whatsappLabel,
+      website_url: profileData.websiteUrl,
+      website_label: profileData.websiteLabel,
+
+      // Design Settings
+      profile_style: profileData.profileStyle,
+      theme: profileData.theme,
+      background_color: profileData.backgroundColor,
+      text_color: profileData.textColor,
+      font: profileData.font,
+      button_style: profileData.buttonStyle,
+      show_watermark: profileData.showWatermark,
+    };
+
     // Save the landing page design for the selected NFC card
     const response = await $api.put(
       `/nfc-cards/${selectedNfcCardId.value}/landing-page`,
-      profileData
+      payload
     );
 
     if (response.success) {
@@ -813,9 +1446,11 @@ const loadProfile = async () => {
     if (response.success && response.landing_page) {
       const landingPage = response.landing_page;
 
-      // Map backend fields to frontend fields
+      // Map backend fields to frontend fields - Basic Info
       profileData.name = landingPage.name || "";
       profileData.position = landingPage.title || landingPage.position || "";
+      profileData.qualification = landingPage.qualification || "";
+      profileData.bio = landingPage.bio || "";
       profileData.contactNumber =
         landingPage.phone || landingPage.contactNumber || "";
       profileData.email = landingPage.email || "";
@@ -825,6 +1460,72 @@ const loadProfile = async () => {
         landingPage.profile_image || landingPage.image || null;
       profileData.companyLogo =
         landingPage.company_logo || landingPage.companyLogo || null;
+
+      // Company Info
+      profileData.companyLogoText = landingPage.company_logo_text || "";
+      profileData.companyName = landingPage.company_name || "";
+      profileData.companyRegistrationNo =
+        landingPage.company_registration_no || "";
+      profileData.companyDepartment = landingPage.company_department || "";
+
+      // Address Details
+      profileData.addressName = landingPage.address_name || "";
+      profileData.addressStreet = landingPage.address_street || "";
+      profileData.addressArea = landingPage.address_area || "";
+      profileData.addressCityState = landingPage.address_city_state || "";
+      profileData.addressCountry = landingPage.address_country || "";
+      profileData.addressMapUrl = landingPage.address_map_url || "";
+
+      // Stats
+      if (landingPage.stats && Array.isArray(landingPage.stats)) {
+        profileData.stats = landingPage.stats.map((stat, index) => ({
+          num: stat.num || profileData.stats[index]?.num || "",
+          label: stat.label || profileData.stats[index]?.label || "",
+        }));
+      }
+
+      // Services
+      if (landingPage.services && Array.isArray(landingPage.services)) {
+        profileData.services = landingPage.services.map((service, index) => ({
+          icon: service.icon || profileData.services[index]?.icon || "",
+          name: service.name || profileData.services[index]?.name || "",
+        }));
+      }
+
+      // Contact Methods
+      profileData.phoneNumber = landingPage.phone_number || "";
+      profileData.phoneLabel = landingPage.phone_label || "Call Us";
+      profileData.emailAddress = landingPage.email_address || "";
+      profileData.emailLabel = landingPage.email_label || "Email Us";
+      profileData.whatsappNumber = landingPage.whatsapp_number || "";
+      profileData.whatsappLabel = landingPage.whatsapp_label || "WhatsApp";
+      profileData.websiteUrl = landingPage.website_url || "";
+      profileData.websiteLabel = landingPage.website_label || "Visit Website";
+
+      // Social Links
+      if (landingPage.social_links && Array.isArray(landingPage.social_links)) {
+        profileData.socialLinks = landingPage.social_links.map(
+          (social, index) => ({
+            emoji: social.emoji || profileData.socialLinks[index]?.emoji || "",
+            name: social.name || profileData.socialLinks[index]?.name || "",
+            url: social.url || profileData.socialLinks[index]?.url || "",
+          })
+        );
+      }
+
+      // Team Members
+      if (landingPage.team_members && Array.isArray(landingPage.team_members)) {
+        profileData.teamMembers = landingPage.team_members.map(
+          (member, index) => ({
+            initials:
+              member.initials || profileData.teamMembers[index]?.initials || "",
+            name: member.name || profileData.teamMembers[index]?.name || "",
+            role: member.role || profileData.teamMembers[index]?.role || "",
+          })
+        );
+      }
+
+      // Design Settings
       profileData.profileStyle =
         landingPage.profile_style || landingPage.profileStyle || "classic";
       profileData.theme = landingPage.theme || "minimal";
@@ -837,7 +1538,7 @@ const loadProfile = async () => {
       profileData.font = landingPage.font || "inter";
       profileData.buttonStyle =
         landingPage.button_style || landingPage.buttonStyle || "solid";
-      profileData.bio = landingPage.bio || "";
+      profileData.showWatermark = landingPage.show_watermark !== false;
 
       console.log("Loaded landing page for card:", selectedNfcCardId.value);
     } else {
@@ -852,11 +1553,6 @@ const loadProfile = async () => {
     }
   }
 };
-
-// NFC Card selection
-const userNfcCards = ref([]);
-const selectedNfcCardId = ref(null);
-const loadingCards = ref(false);
 
 const loadUserNfcCards = async () => {
   loadingCards.value = true;
@@ -955,6 +1651,14 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth < 1024;
 };
 
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  const cardSelector = event.target.closest(".relative");
+  if (!cardSelector && showCardSelector.value) {
+    showCardSelector.value = false;
+  }
+};
+
 // Initialize
 onMounted(() => {
   checkMobile();
@@ -970,14 +1674,6 @@ onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
   document.removeEventListener("click", handleClickOutside);
 });
-
-// Close dropdown when clicking outside
-const handleClickOutside = (event) => {
-  const cardSelector = event.target.closest(".relative");
-  if (!cardSelector && showCardSelector.value) {
-    showCardSelector.value = false;
-  }
-};
 </script>
 
 <style scoped>
