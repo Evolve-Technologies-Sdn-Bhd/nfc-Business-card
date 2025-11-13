@@ -57,7 +57,7 @@ export default defineNuxtConfig({
       title: "NFC Business Card - Digital Professional Networking",
       meta: [
         { charset: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" },
         {
           name: "description",
           content:
@@ -75,12 +75,20 @@ export default defineNuxtConfig({
   },
 
   // Development configuration
+  devServer: {
+    host: '0.0.0.0', // Bind to all network interfaces (accessible from localhost and LAN/mobile)
+    port: 3000,
+  },
+
   vite: {
     vue: {
       customElement: true,
     },
     optimizeDeps: {
       include: ["vue", "vue-router"],
+    },
+    server: {
+      host: '0.0.0.0', // Also bind Vite dev server to all interfaces
     },
   },
 

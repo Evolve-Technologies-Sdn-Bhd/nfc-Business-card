@@ -177,6 +177,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
         Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
     });
+    Route::get('/legal/pdf/{type}/status', [LegalDocumentController::class, 'checkPdfStatus']);
+    Route::get('/legal/pdf/terms/download', [LegalDocumentController::class, 'downloadTerms']);
+    Route::get('/legal/pdf/privacy/download', [LegalDocumentController::class, 'downloadPrivacy']);
+    Route::post('/legal/pdf/terms/upload', [LegalDocumentController::class, 'uploadTermsPdf']);
+    Route::post('/legal/pdf/privacy/upload', [LegalDocumentController::class, 'uploadPrivacyPdf']);
     
     // Chatbot management
     Route::get('/chatbot/questions', [AdminChatbotController::class, 'index']);

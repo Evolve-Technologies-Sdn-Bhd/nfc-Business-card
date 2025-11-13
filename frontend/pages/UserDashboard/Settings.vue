@@ -150,6 +150,79 @@
                 </form>
               </div>
             </div>
+
+            <!-- Profile URL Settings Card -->
+            <div
+              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+            >
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <h2 class="text-lg font-semibold text-secondary-900">
+                  Profile URL
+                </h2>
+                <p class="text-sm text-secondary-600">
+                  Customize your public profile URL
+                </p>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center space-x-2">
+                  <span class="text-secondary-500">nfccard.app/Homepage/</span>
+                  <input
+                    v-model="profileForm.slug"
+                    type="text"
+                    class="input input-bordered flex-1"
+                    placeholder="your-username"
+                    @input="checkSlugAvailability"
+                  />
+                  <button
+                    @click="updateSlug"
+                    :disabled="!isSlugValid || updatingSlug"
+                    class="btn btn-primary"
+                  >
+                    <span
+                      v-if="updatingSlug"
+                      class="loading loading-spinner loading-sm mr-2"
+                    ></span>
+                    Update
+                  </button>
+                </div>
+                <div class="mt-2">
+                  <p
+                    v-if="slugStatus === 'checking'"
+                    class="text-sm text-secondary-500"
+                  >
+                    <Icon
+                      name="heroicons:arrow-path"
+                      class="h-4 w-4 inline animate-spin mr-1"
+                    />
+                    Checking availability...
+                  </p>
+                  <p
+                    v-else-if="slugStatus === 'available'"
+                    class="text-sm text-green-600"
+                  >
+                    <Icon
+                      name="heroicons:check-circle"
+                      class="h-4 w-4 inline mr-1"
+                    />
+                    URL is available
+                  </p>
+                  <p
+                    v-else-if="slugStatus === 'taken'"
+                    class="text-sm text-red-600"
+                  >
+                    <Icon
+                      name="heroicons:x-circle"
+                      class="h-4 w-4 inline mr-1"
+                    />
+                    URL is already taken
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Settings Tab -->
+          <div v-if="activeTab === 'account'" class="space-y-6">
             <!-- Account Information Card -->
             <div
               class="bg-white rounded-lg shadow-sm border border-secondary-200"

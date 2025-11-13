@@ -290,6 +290,31 @@
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Qualification
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.qualification"
+                    type="text"
+                    placeholder="e.g., Bachelor of Business Administration"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Bio</label
+                  >
+                  <textarea
+                    v-model="profileData.bio"
+                    rows="4"
+                    placeholder="Tell visitors about yourself..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
                     >Contact Number</label
                   >
                   <input
@@ -324,17 +349,354 @@
                     class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              <!-- Stats Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Profile Statistics
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 3 statistics to showcase your achievements
+                </p>
+                <div
+                  v-for="(stat, index) in profileData.stats"
+                  :key="index"
+                  class="grid grid-cols-2 gap-3"
+                >
+                  <input
+                    v-model="stat.num"
+                    type="text"
+                    :placeholder="'e.g., 10+'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="stat.label"
+                    type="text"
+                    :placeholder="'e.g., Years Experience'"
+                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Tab -->
+            <div v-if="activeTab === 'company'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Company Information
+                </h3>
+
+                <!-- Company Logo Upload -->
+                <ProfileImageUpload
+                  v-model="profileData.companyLogo"
+                  upload-endpoint="/upload/company-logo"
+                  delete-endpoint="/upload/company-logo"
+                  label="Company Logo"
+                  help-text="Will appear on your profile"
+                  alt-text="Company logo"
+                  @upload-success="handleCompanyLogoUpload"
+                />
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Address</label
+                    >Company Logo Text
+                    <span class="text-xs text-gray-500"
+                      >(Fallback if no logo)</span
+                    ></label
                   >
-                  <textarea
-                    v-model="profileData.address"
-                    rows="2"
-                    placeholder="Your business address"
+                  <input
+                    v-model="profileData.companyLogoText"
+                    type="text"
+                    placeholder="e.g., CLB"
+                    maxlength="5"
                     class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  ></textarea>
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Company Name</label
+                  >
+                  <input
+                    v-model="profileData.companyName"
+                    type="text"
+                    placeholder="Your company name"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Registration Number
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.companyRegistrationNo"
+                    type="text"
+                    placeholder="e.g., 123456789-X"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Department
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.companyDepartment"
+                    type="text"
+                    placeholder="e.g., Sales & Marketing Division"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Address Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Business Address
+                </h3>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Location Name</label
+                  >
+                  <input
+                    v-model="profileData.addressName"
+                    type="text"
+                    placeholder="e.g., CLB Group Headquarters"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Street Address</label
+                  >
+                  <input
+                    v-model="profileData.addressStreet"
+                    type="text"
+                    placeholder="e.g., 18, Jalan Mutiara Emas 5/5"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Area/District</label
+                  >
+                  <input
+                    v-model="profileData.addressArea"
+                    type="text"
+                    placeholder="e.g., Taman Mount Austin"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >City & State</label
+                  >
+                  <input
+                    v-model="profileData.addressCityState"
+                    type="text"
+                    placeholder="e.g., 81100 Johor Bahru, Johor"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Country</label
+                  >
+                  <input
+                    v-model="profileData.addressCountry"
+                    type="text"
+                    placeholder="e.g., Malaysia"
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Google Maps URL
+                    <span class="text-xs text-gray-500">(Optional)</span></label
+                  >
+                  <input
+                    v-model="profileData.addressMapUrl"
+                    type="url"
+                    placeholder="https://maps.google.com/?q=..."
+                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Contact Methods Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Contact Methods
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Phone Number</label
+                    >
+                    <input
+                      v-model="profileData.phoneNumber"
+                      type="tel"
+                      placeholder="+60 16-778 7616"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Email Address</label
+                    >
+                    <input
+                      v-model="profileData.emailAddress"
+                      type="email"
+                      placeholder="contact@company.com"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >WhatsApp Number
+                      <span class="text-xs text-gray-500"
+                        >(Optional)</span
+                      ></label
+                    >
+                    <input
+                      v-model="profileData.whatsappNumber"
+                      type="tel"
+                      placeholder="+60167787616"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Website URL
+                      <span class="text-xs text-gray-500"
+                        >(Optional)</span
+                      ></label
+                    >
+                    <input
+                      v-model="profileData.websiteUrl"
+                      type="url"
+                      placeholder="https://www.yourcompany.com"
+                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div v-if="activeTab === 'services'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Services & Expertise
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add up to 6 services or areas of expertise
+                </p>
+
+                <div
+                  v-for="(service, index) in profileData.services"
+                  :key="index"
+                  class="grid grid-cols-4 gap-3"
+                >
+                  <input
+                    v-model="service.icon"
+                    type="text"
+                    placeholder="📱"
+                    maxlength="2"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                  />
+                  <input
+                    v-model="service.name"
+                    type="text"
+                    placeholder="Service name"
+                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Team Members Section -->
+              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
+                <h3 class="text-sm font-medium text-gray-700">Team Members</h3>
+                <p class="text-xs text-gray-500">
+                  Showcase up to 3 team members (optional)
+                </p>
+
+                <div
+                  v-for="(member, index) in profileData.teamMembers"
+                  :key="index"
+                  class="grid grid-cols-6 gap-3"
+                >
+                  <input
+                    v-model="member.initials"
+                    type="text"
+                    placeholder="JD"
+                    maxlength="3"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
+                  />
+                  <input
+                    v-model="member.name"
+                    type="text"
+                    placeholder="Full Name"
+                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="member.role"
+                    type="text"
+                    placeholder="Role"
+                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Tab -->
+            <div v-if="activeTab === 'social'" class="space-y-4 sm:space-y-6">
+              <div class="space-y-3 sm:space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">
+                  Social Media Links
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Add links to your social media profiles
+                </p>
+
+                <div
+                  v-for="(social, index) in profileData.socialLinks"
+                  :key="index"
+                  class="grid grid-cols-8 gap-3"
+                >
+                  <input
+                    v-model="social.emoji"
+                    type="text"
+                    placeholder="📱"
+                    maxlength="2"
+                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                  />
+                  <input
+                    v-model="social.name"
+                    type="text"
+                    placeholder="Platform name"
+                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    v-model="social.url"
+                    type="url"
+                    placeholder="https://..."
+                    class="col-span-5 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
               </div>
             </div>
@@ -621,14 +983,74 @@ const showCardSelector = ref(false);
 
 // Profile data
 const profileData = reactive({
+  // Basic Info
   name: "",
   position: "",
+  qualification: "",
+  bio: "",
   contactNumber: "",
   email: "",
   website: "",
-  address: "",
   image: null,
+
+  // Company Info
   companyLogo: null,
+  companyLogoText: "",
+  companyName: "",
+  companyRegistrationNo: "",
+  companyDepartment: "",
+
+  // Address Info
+  addressName: "",
+  addressStreet: "",
+  addressArea: "",
+  addressCityState: "",
+  addressCountry: "",
+  addressMapUrl: "",
+
+  // Stats (3 items)
+  stats: [
+    { num: "10+", label: "Years Experience" },
+    { num: "500+", label: "Projects Done" },
+    { num: "98%", label: "Client Satisfaction" },
+  ],
+
+  // Services (max 6)
+  services: [
+    { icon: "🏷️", name: "RFID Technology" },
+    { icon: "🖨️", name: "Label Printing" },
+    { icon: "💻", name: "Software Development" },
+    { icon: "🌐", name: "IoT Implementation" },
+    { icon: "🛒", name: "E-commerce Marketing" },
+    { icon: "📄", name: "Printing Solutions" },
+  ],
+
+  // Contact Methods (phone, email, whatsapp, website)
+  phoneNumber: "",
+  phoneLabel: "Phone",
+  emailAddress: "",
+  emailLabel: "Email",
+  whatsappNumber: "",
+  whatsappLabel: "WhatsApp",
+  websiteUrl: "",
+  websiteLabel: "Website",
+
+  // Social Links (max 4)
+  socialLinks: [
+    { emoji: "📘", name: "Facebook", url: "" },
+    { emoji: "💼", name: "LinkedIn", url: "" },
+    { emoji: "📸", name: "Instagram", url: "" },
+    { emoji: "🐦", name: "Twitter", url: "" },
+  ],
+
+  // Team Members (max 3)
+  teamMembers: [
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+  ],
+
+  // Design Settings
   profileStyle: "classic",
   theme: "minimal",
   backgroundColor: "#FFFFFF",
@@ -652,6 +1074,24 @@ const tabs = [
     name: "Profile",
     shortName: "Profile",
     icon: "heroicons:user",
+  },
+  {
+    id: "company",
+    name: "Company",
+    shortName: "Company",
+    icon: "heroicons:building-office",
+  },
+  {
+    id: "services",
+    name: "Services",
+    shortName: "Services",
+    icon: "heroicons:rocket-launch",
+  },
+  {
+    id: "social",
+    name: "Social",
+    shortName: "Social",
+    icon: "heroicons:globe-alt",
   },
   {
     id: "design",
@@ -780,6 +1220,63 @@ const saveProfile = async () => {
       `/nfc-cards/${selectedNfcCardId.value}/landing-page`,
       profileData
     );
+    const response = await $api.put("/user/profile", {
+      // Basic Info
+      name: profileData.name,
+      title: profileData.position,
+      qualification: profileData.qualification,
+      bio: profileData.bio,
+      phone: profileData.contactNumber,
+      email: profileData.email,
+      website: profileData.website,
+      profile_image: profileData.image,
+
+      // Company Info
+      company_logo: profileData.companyLogo,
+      company_logo_text: profileData.companyLogoText,
+      company_name: profileData.companyName,
+      company_registration_no: profileData.companyRegistrationNo,
+      company_department: profileData.companyDepartment,
+
+      // Address Info
+      address_name: profileData.addressName,
+      address_street: profileData.addressStreet,
+      address_area: profileData.addressArea,
+      address_city_state: profileData.addressCityState,
+      address_country: profileData.addressCountry,
+      address_map_url: profileData.addressMapUrl,
+
+      // Stats
+      stats: profileData.stats,
+
+      // Services
+      services: profileData.services,
+
+      // Contact Methods
+      phone_number: profileData.phoneNumber,
+      phone_label: profileData.phoneLabel,
+      email_address: profileData.emailAddress,
+      email_label: profileData.emailLabel,
+      whatsapp_number: profileData.whatsappNumber,
+      whatsapp_label: profileData.whatsappLabel,
+      website_url: profileData.websiteUrl,
+      website_label: profileData.websiteLabel,
+
+      // Social Links
+      social_links: profileData.socialLinks,
+
+      // Team Members
+      team_members: profileData.teamMembers,
+
+      // Design Settings
+      profile_style: profileData.profileStyle,
+      theme: profileData.theme,
+      background_color: profileData.backgroundColor,
+      text_color: profileData.textColor,
+      font: profileData.font,
+      button_style: profileData.buttonStyle,
+      show_watermark: profileData.showWatermark,
+    });
 
     if (response.success) {
       $toast.success("Landing page saved successfully!");

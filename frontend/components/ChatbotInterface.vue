@@ -1,244 +1,184 @@
+<!-- components/ChatbotInterface.vue -->
 <template>
   <Teleport to="body">
-    <Transition name="chat-modal">
-      <div v-if="isOpen" class="chat-modal-overlay" @click.self="closeChat">
-        <div class="chat-modal">
-          <!-- Header -->
-          <div class="chat-header">
-            <div class="header-content">
-              <div class="bot-avatar">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="bot-icon"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                  />
-                </svg>
-              </div>
-              <div class="header-text">
-                <h3 class="bot-name">NFCGo Assistant</h3>
-                <p class="bot-status">
-                  <span class="status-dot"></span>
-                  Online
-                </p>
-              </div>
-            </div>
-            <button @click="closeChat" class="minimize-btn" aria-label="Close chat">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="minimize-icon"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
+    <div 
+      v-if="isOpen"
+      class="chatbot-interface" 
+      role="dialog" 
+      aria-labelledby="chatbot-title" 
+      aria-modal="true"
+    >
+      <!-- Header -->
+      <div class="chatbot-header">
+        <div class="header-content">
+          <div class="bot-avatar">
+            <Icon name="heroicons:chat-bubble-left-ellipsis" class="h-6 w-6" />
+          </div>
+          <div>
+            <h3 id="chatbot-title" class="header-title">AI Assistant</h3>
+            <p class="header-subtitle">Always here to help</p>
+          </div>
+        </div>
+        <button 
+          class="close-button" 
+          @click="closeChat"
+          aria-label="Close chat"
+        >
+          <Icon name="heroicons:x-mark" class="h-6 w-6" />
+        </button>
+      </div>
+
+      <!-- Messages Container -->
+      <div ref="messagesContainer" class="messages-container">
+        <!-- Welcome Message -->
+        <div v-if="messages.length === 0" class="welcome-section">
+          <div class="welcome-icon">
+            <Icon name="heroicons:sparkles" class="h-12 w-12" />
+          </div>
+          <h4 class="welcome-title">Hi there! 👋</h4>
+          <p class="welcome-text">I'm your AI assistant. Ask me anything about our services!</p>
+          
+          <!-- Quick Questions -->
+          <div v-if="quickQuestions.length > 0" class="quick-questions">
+            <p class="quick-questions-title">Quick questions:</p>
+            <button
+              v-for="(question, index) in quickQuestions"
+              :key="index"
+              @click="askQuickQuestion(question)"
+              class="quick-question-btn"
+            >
+              {{ question }}
             </button>
           </div>
+        </div>
 
-          <!-- Messages Container -->
-          <div ref="messagesContainer" class="messages-container">
-            <!-- Welcome Message -->
-            <div v-if="messages.length === 0" class="welcome-message">
-              <div class="welcome-icon">👋</div>
-              <h4>Hi there! How can I help you today?</h4>
-              <p class="text-sm text-gray-500 mt-2">
-                Ask me anything about our NFC business cards, pricing, or services!
-              </p>
-              
-              <!-- Quick Questions -->
-              <div class="quick-questions">
-                <p class="quick-questions-title">Quick questions:</p>
-                <button
-                  v-for="question in quickQuestions"
-                  :key="question"
-                  @click="sendQuickQuestion(question)"
-                  class="quick-question-btn"
+        <!-- Messages -->
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
+          :class="['message', message.type]"
+        >
+          <div class="message-bubble">
+            <div class="message-content">{{ message.text }}</div>
+            <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+            
+            <!-- Feedback Buttons for AI responses -->
+            <div v-if="message.type === 'ai' && message.questionId && !message.feedbackGiven" class="feedback-buttons">
+              <p class="feedback-prompt">Was this helpful?</p>
+              <div class="feedback-actions">
+                <button 
+                  @click="giveFeedback(message, true)"
+                  class="feedback-btn helpful"
+                  title="Yes, helpful"
                 >
-                  {{ question }}
+                  <Icon name="heroicons:hand-thumb-up" class="h-4 w-4" />
+                  Yes
+                </button>
+                <button 
+                  @click="giveFeedback(message, false)"
+                  class="feedback-btn not-helpful"
+                  title="No, not helpful"
+                >
+                  <Icon name="heroicons:hand-thumb-down" class="h-4 w-4" />
+                  No
                 </button>
               </div>
             </div>
 
-            <!-- Messages -->
-            <div
-              v-for="(message, index) in messages"
-              :key="index"
-              class="message"
-              :class="message.type"
-            >
-              <div v-if="message.type === 'bot'" class="message-avatar">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="avatar-icon"
+            <!-- Feedback Form (shown after clicking "No") -->
+            <div v-if="message.showFeedbackForm" class="feedback-form">
+              <p class="feedback-form-title">Help us improve</p>
+              
+              <!-- Star Rating -->
+              <div class="star-rating">
+                <button
+                  v-for="star in 5"
+                  :key="star"
+                  @click="message.rating = star"
+                  class="star-btn"
+                  :class="{ active: star <= (message.rating || 0) }"
+                  :aria-label="`Rate ${star} stars`"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                  <Icon 
+                    :name="star <= (message.rating || 0) ? 'heroicons:star-solid' : 'heroicons:star'" 
+                    class="h-5 w-5" 
                   />
-                </svg>
+                </button>
               </div>
 
-              <div class="message-bubble" :class="message.type">
-                <div class="message-content" v-html="formatMessage(message.text)"></div>
-                <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+              <!-- Feedback Text -->
+              <textarea
+                v-model="message.feedbackText"
+                placeholder="Tell us what went wrong..."
+                class="feedback-textarea"
+                rows="3"
+              ></textarea>
 
-                <!-- Feedback Buttons (only for bot messages with answers) -->
-                <div
-                  v-if="message.type === 'bot' && message.showFeedback && !message.feedbackGiven"
-                  class="feedback-buttons"
-                >
-                  <p class="feedback-question">Was this helpful?</p>
-                  <div class="feedback-actions">
-                    <button
-                      @click="handleFeedback(index, 'helpful')"
-                      class="feedback-btn helpful"
-                    >
-                      👍 Yes
-                    </button>
-                    <button
-                      @click="handleFeedback(index, 'not-helpful')"
-                      class="feedback-btn not-helpful"
-                    >
-                      👎 No
-                    </button>
-                  </div>
-                </div>
+              <!-- Email (optional) -->
+              <input
+                v-model="message.feedbackEmail"
+                type="email"
+                placeholder="Your email (optional)"
+                class="feedback-input"
+              />
 
-                <!-- Feedback Form -->
-                <div v-if="message.showFeedbackForm" class="feedback-form">
-                  <p class="feedback-form-title">Help us improve:</p>
-                  
-                  <!-- Star Rating -->
-                  <div class="star-rating">
-                    <button
-                      v-for="star in 5"
-                      :key="star"
-                      @click="setRating(index, star)"
-                      class="star-btn"
-                      :class="{ active: star <= (message.rating || 0) }"
-                    >
-                      ★
-                    </button>
-                  </div>
-
-                  <!-- Feedback Text -->
-                  <textarea
-                    v-model="message.feedbackText"
-                    placeholder="What could we improve? (optional)"
-                    class="feedback-textarea"
-                    rows="3"
-                  ></textarea>
-
-                  <!-- Email (optional) -->
-                  <input
-                    v-model="message.feedbackEmail"
-                    type="email"
-                    placeholder="Your email (optional)"
-                    class="feedback-email"
-                  />
-
-                  <div class="feedback-form-actions">
-                    <button @click="submitFeedback(index)" class="submit-feedback-btn">
-                      Submit Feedback
-                    </button>
-                    <button @click="closeFeedbackForm(index)" class="cancel-feedback-btn">
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Thank You Message -->
-                <div v-if="message.feedbackGiven" class="feedback-thanks">
-                  ✓ Thank you for your feedback!
-                </div>
-              </div>
+              <!-- Submit Button -->
+              <button
+                @click="submitDetailedFeedback(message)"
+                class="feedback-submit-btn"
+                :disabled="!message.rating"
+              >
+                <Icon name="heroicons:paper-airplane" class="h-4 w-4 mr-2" />
+                Submit Feedback
+              </button>
             </div>
 
-            <!-- Typing Indicator -->
-            <div v-if="isTyping" class="message bot">
-              <div class="message-avatar">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="avatar-icon"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                  />
-                </svg>
-              </div>
-              <div class="message-bubble bot">
-                <div class="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+            <!-- Feedback Thank You -->
+            <div v-if="message.feedbackSubmitted" class="feedback-thanks">
+              <Icon name="heroicons:check-circle" class="h-5 w-5 text-green-600 mr-2" />
+              <span>Thank you for your feedback!</span>
             </div>
           </div>
+        </div>
 
-          <!-- Input Area -->
-          <div class="input-area">
-            <form @submit.prevent="sendMessage" class="input-form">
-              <input
-                v-model="userInput"
-                type="text"
-                placeholder="Type your question..."
-                class="message-input"
-                :disabled="isTyping"
-                @keyup.enter="sendMessage"
-              />
-              <button
-                type="submit"
-                class="send-btn"
-                :disabled="!userInput.trim() || isTyping"
-                aria-label="Send message"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="send-icon"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                  />
-                </svg>
-              </button>
-            </form>
-            <p class="input-footer">Powered by NFCGo AI</p>
+        <!-- Typing Indicator -->
+        <div v-if="isTyping" class="message ai">
+          <div class="message-bubble">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
-    </Transition>
+
+      <!-- Input Area -->
+      <div class="input-container">
+        <input
+          ref="messageInput"
+          v-model="currentMessage"
+          type="text"
+          placeholder="Type your question..."
+          class="message-input"
+          @keydown.enter="sendMessage"
+          :disabled="isTyping"
+        />
+        <button
+          @click="sendMessage"
+          class="send-button"
+          :disabled="!currentMessage.trim() || isTyping"
+          aria-label="Send message"
+        >
+          <Icon name="heroicons:paper-airplane" class="h-5 w-5" />
+        </button>
+      </div>
+    </div>
   </Teleport>
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -247,145 +187,56 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'ask', 'submitFeedback'])
+const emit = defineEmits(['close', 'ask', 'submit-feedback'])
 
-const messagesContainer = ref(null)
-const userInput = ref('')
+// State
 const messages = ref([])
+const currentMessage = ref('')
 const isTyping = ref(false)
+const messagesContainer = ref(null)
+const messageInput = ref(null)
 
+// Quick Questions
 const quickQuestions = ref([
-  'What services do you offer?',
-  'How much does it cost?',
-  'What is NFC technology?'
+  'What is an NFC business card?',
+  'How do I customize my profile?',
+  'What are your pricing plans?',
+  'How do I share my card?'
 ])
 
+// Keyboard accessibility - Close on Esc key
+const handleEscKey = (event) => {
+  if (event.key === 'Escape' && props.isOpen) {
+    closeChat()
+  }
+}
+
+// Add/remove event listener
+onMounted(() => {
+  document.addEventListener('keydown', handleEscKey)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscKey)
+})
+
+// Methods
 const closeChat = () => {
   emit('close')
 }
 
-const sendQuickQuestion = (question) => {
-  userInput.value = question
-  sendMessage()
-}
-
-const sendMessage = async () => {
-  if (!userInput.value.trim() || isTyping.value) return
-
-  const question = userInput.value.trim()
-  
-  // Add user message
-  messages.value.push({
-    type: 'user',
-    text: question,
-    timestamp: new Date()
-  })
-
-  userInput.value = ''
-  scrollToBottom()
-
-  // Show typing indicator
-  isTyping.value = true
-
-  // Emit to parent to get answer
-  emit('ask', question, (response) => {
-    isTyping.value = false
-
-    if (response.success && response.answer) {
-      // Found answer
-      messages.value.push({
-        type: 'bot',
-        text: response.answer,
-        timestamp: new Date(),
-        showFeedback: true,
-        feedbackGiven: false,
-        questionId: response.questionId
-      })
-    } else {
-      // No answer found
-      messages.value.push({
-        type: 'bot',
-        text: "I'm sorry, I don't have an answer to that specific question. Would you like to leave feedback so our team can help you?",
-        timestamp: new Date(),
-        showFeedback: true,
-        feedbackGiven: false,
-        noAnswer: true
-      })
-    }
-
-    scrollToBottom()
-  })
-}
-
-const handleFeedback = (messageIndex, type) => {
-  const message = messages.value[messageIndex]
-  
-  if (type === 'helpful') {
-    message.feedbackGiven = true
-    message.showFeedback = false
-    
-    // Emit helpful feedback
-    if (message.questionId) {
-      emit('submitFeedback', {
-        questionId: message.questionId,
-        feedbackType: 'helpful',
-        rating: 5
-      })
-    }
-  } else {
-    // Show feedback form
-    message.showFeedbackForm = true
-    message.showFeedback = false
-    message.rating = 0
-    message.feedbackText = ''
-    message.feedbackEmail = ''
-  }
-
-  scrollToBottom()
-}
-
-const setRating = (messageIndex, rating) => {
-  messages.value[messageIndex].rating = rating
-}
-
-const submitFeedback = (messageIndex) => {
-  const message = messages.value[messageIndex]
-  
-  const feedbackData = {
-    questionId: message.questionId || null,
-    userQuestion: messages.value[messageIndex - 1]?.text || '',
-    feedbackType: message.noAnswer ? 'no-answer' : 'not-helpful',
-    rating: message.rating || 1,
-    userMessage: message.feedbackText || '',
-    userEmail: message.feedbackEmail || ''
-  }
-
-  emit('submitFeedback', feedbackData, (success) => {
-    if (success) {
-      message.showFeedbackForm = false
-      message.feedbackGiven = true
-      scrollToBottom()
-    }
-  })
-}
-
-const closeFeedbackForm = (messageIndex) => {
-  messages.value[messageIndex].showFeedbackForm = false
-  messages.value[messageIndex].showFeedback = true
-}
-
-const formatMessage = (text) => {
-  // Convert newlines to <br>
-  return text.replace(/\n/g, '<br>')
-}
-
 const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit',
-    hour12: true 
-  })
+  if (!timestamp) return 'Just now'
+  const now = new Date()
+  const messageTime = new Date(timestamp)
+  const diffMs = now - messageTime
+  const diffMins = Math.floor(diffMs / 60000)
+  
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  return messageTime.toLocaleDateString()
 }
 
 const scrollToBottom = () => {
@@ -396,54 +247,168 @@ const scrollToBottom = () => {
   })
 }
 
-// Watch for chat opening
-watch(() => props.isOpen, (newVal) => {
-  if (newVal) {
+const askQuickQuestion = (question) => {
+  currentMessage.value = question
+  sendMessage()
+}
+
+const sendMessage = async () => {
+  const message = currentMessage.value.trim()
+  if (!message || isTyping.value) return
+
+  // Add user message
+  messages.value.push({
+    type: 'user',
+    text: message,
+    timestamp: new Date()
+  })
+
+  const userQuestion = message
+  currentMessage.value = ''
+  scrollToBottom()
+  isTyping.value = true
+
+  // Emit ask event to parent
+  emit('ask', userQuestion, (response) => {
+    isTyping.value = false
+    
+    if (response.success && response.answer) {
+      // Add AI response
+      messages.value.push({
+        type: 'ai',
+        text: response.answer,
+        timestamp: new Date(),
+        questionId: response.questionId,
+        userQuestion: userQuestion,
+        feedbackGiven: false,
+        showFeedbackForm: false,
+        feedbackSubmitted: false,
+        rating: 0,
+        feedbackText: '',
+        feedbackEmail: ''
+      })
+    } else {
+      // No answer found
+      messages.value.push({
+        type: 'ai',
+        text: "I'm sorry, I don't have an answer to that question yet. Our team will review your question and update the knowledge base soon!",
+        timestamp: new Date(),
+        userQuestion: userQuestion,
+        feedbackGiven: false
+      })
+    }
+    
+    scrollToBottom()
+  })
+}
+
+const giveFeedback = (message, isHelpful) => {
+  message.feedbackGiven = true
+  
+  if (isHelpful) {
+    // Submit helpful feedback immediately
+    emit('submit-feedback', {
+      questionId: message.questionId,
+      userQuestion: message.userQuestion,
+      rating: 5,
+      feedbackType: 'helpful'
+    }, () => {
+      message.feedbackSubmitted = true
+      scrollToBottom()
+    })
+  } else {
+    // Show detailed feedback form for not helpful
+    message.showFeedbackForm = true
+    message.rating = 1
+    scrollToBottom()
+  }
+}
+
+const submitDetailedFeedback = (message) => {
+  if (!message.rating) return
+
+  // Submit detailed feedback
+  emit('submit-feedback', {
+    questionId: message.questionId,
+    userQuestion: message.userQuestion,
+    rating: message.rating,
+    userMessage: message.feedbackText,
+    userEmail: message.feedbackEmail,
+    feedbackType: 'not-helpful'
+  }, () => {
+    message.showFeedbackForm = false
+    message.feedbackSubmitted = true
+    scrollToBottom()
+  })
+}
+
+// Watch for panel open/close
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
     nextTick(() => {
+      messageInput.value?.focus()
       scrollToBottom()
     })
   }
 })
+
+// Escape key listener
+if (typeof window !== 'undefined') {
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && props.isOpen) {
+      closeChat()
+    }
+  })
+}
 </script>
 
 <style scoped>
-.chat-modal-overlay {
+.chatbot-interface {
   position: fixed;
-  bottom: 6rem;
-  right: 2rem;
-  z-index: 9998;
-}
-
-.chat-modal {
-  width: 350px;
-  height: 500px;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  max-height: 480px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  z-index: 99998 !important;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Header */
-.chat-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.25rem 1.5rem;
+.chatbot-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0.75rem 0.75rem 0 0;
+  color: white;
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .bot-avatar {
-  width: 40px;
-  height: 40px;
+  width: 2rem;
+  height: 2rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
@@ -451,196 +416,178 @@ watch(() => props.isOpen, (newVal) => {
   justify-content: center;
 }
 
-.bot-icon {
-  width: 24px;
-  height: 24px;
+.bot-avatar .h-6 {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
-.header-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.bot-name {
-  font-size: 1rem;
+.header-title {
+  font-size: 0.875rem;
   font-weight: 600;
   margin: 0;
 }
 
-.bot-status {
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin: 0.25rem 0 0 0;
+.header-subtitle {
+  font-size: 0.625rem;
   opacity: 0.9;
+  margin: 0;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: #10b981;
-  border-radius: 50%;
-  animation: pulse-dot 2s infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.minimize-btn {
+.close-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: white;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.minimize-btn:hover {
+.close-button:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.minimize-icon {
-  width: 20px;
-  height: 20px;
-  color: white;
+.close-button:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
 }
 
 /* Messages Container */
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
-  background: #f9fafb;
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 350px;
 }
 
-/* Welcome Message */
-.welcome-message {
+/* Welcome Section */
+.welcome-section {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 0.5rem 0;
 }
 
 .welcome-icon {
-  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.75rem;
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667eea;
+}
+
+.welcome-icon .h-12 {
+  width: 2rem;
+  height: 2rem;
+}
+
+.welcome-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text {
+  color: #6b7280;
+  font-size: 0.8125rem;
   margin-bottom: 1rem;
 }
 
-.welcome-message h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
-}
-
 .quick-questions {
-  margin-top: 1.5rem;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  align-items: stretch;
 }
 
 .quick-questions-title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
+  color: #4b5563;
+  text-align: left;
+  margin-bottom: 0.375rem;
 }
 
 .quick-question-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: white;
+  background: #f3f4f6;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: #374151;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 0.875rem;
-  color: #4b5563;
+  text-align: left;
 }
 
 .quick-question-btn:hover {
-  background: #f3f4f6;
+  background: #e5e7eb;
   border-color: #667eea;
-  color: #667eea;
-  transform: translateX(4px);
 }
 
 /* Messages */
 .message {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .message.user {
-  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
-.message-avatar {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.avatar-icon {
-  width: 18px;
-  height: 18px;
-  color: white;
+.message.ai {
+  justify-content: flex-start;
 }
 
 .message-bubble {
   max-width: 75%;
-  border-radius: 12px;
   padding: 0.875rem 1rem;
-  word-wrap: break-word;
-}
-
-.message-bubble.bot {
-  background: white;
-  color: #1f2937;
-  border: 1px solid #e5e7eb;
-}
-
-.message-bubble.user {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.message-content {
-  font-size: 0.9375rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
+.message.user .message-bubble {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.message.ai .message-bubble {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.message-content {
+  margin-bottom: 0.25rem;
+}
+
 .message-time {
-  font-size: 0.6875rem;
-  opacity: 0.6;
-  margin-top: 0.5rem;
+  font-size: 0.625rem;
+  opacity: 0.7;
 }
 
 /* Feedback */
 .feedback-buttons {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.feedback-question {
-  font-size: 0.8125rem;
+.feedback-prompt {
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #6b7280;
   margin-bottom: 0.5rem;
 }
@@ -651,39 +598,49 @@ watch(() => props.isOpen, (newVal) => {
 }
 
 .feedback-btn {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: white;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 0.8125rem;
   transition: all 0.2s;
+  border: 1px solid;
 }
 
-.feedback-btn:hover {
-  background: #f3f4f6;
-}
-
-.feedback-btn.helpful:hover {
+.feedback-btn.helpful {
+  background: white;
   border-color: #10b981;
   color: #10b981;
 }
 
-.feedback-btn.not-helpful:hover {
+.feedback-btn.helpful:hover {
+  background: #10b981;
+  color: white;
+}
+
+.feedback-btn.not-helpful {
+  background: white;
   border-color: #ef4444;
   color: #ef4444;
 }
 
+.feedback-btn.not-helpful:hover {
+  background: #ef4444;
+  color: white;
+}
+
 /* Feedback Form */
 .feedback-form {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 1px solid #e5e7eb;
 }
 
 .feedback-form-title {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.75rem;
@@ -698,97 +655,97 @@ watch(() => props.isOpen, (newVal) => {
 .star-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
   color: #d1d5db;
   cursor: pointer;
-  transition: all 0.2s;
   padding: 0;
+  transition: color 0.2s;
 }
 
-.star-btn:hover,
 .star-btn.active {
   color: #fbbf24;
-  transform: scale(1.1);
+}
+
+.star-btn:hover {
+  color: #fbbf24;
 }
 
 .feedback-textarea {
   width: 100%;
-  padding: 0.625rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
-  font-family: inherit;
   resize: none;
+  font-family: inherit;
 }
 
-.feedback-email {
+.feedback-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.feedback-input {
   width: 100%;
-  padding: 0.625rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
-.feedback-form-actions {
+.feedback-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.feedback-submit-btn {
   display: flex;
-  gap: 0.5rem;
-}
-
-.submit-feedback-btn {
-  flex: 1;
-  padding: 0.625rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.submit-feedback-btn:hover {
-  opacity: 0.9;
+.feedback-submit-btn:hover:not(:disabled) {
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.cancel-feedback-btn {
-  padding: 0.625rem 1rem;
-  background: white;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cancel-feedback-btn:hover {
-  background: #f3f4f6;
+.feedback-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .feedback-thanks {
-  margin-top: 1rem;
-  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
   background: #d1fae5;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   color: #065f46;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  text-align: center;
 }
 
 /* Typing Indicator */
 .typing-indicator {
   display: flex;
   gap: 0.25rem;
-  padding: 0.25rem 0;
+  padding: 0.5rem 0;
 }
 
 .typing-indicator span {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   background: #9ca3af;
   border-radius: 50%;
   animation: typing 1.4s infinite;
@@ -804,143 +761,88 @@ watch(() => props.isOpen, (newVal) => {
 
 @keyframes typing {
   0%, 60%, 100% {
-    opacity: 0.3;
     transform: translateY(0);
+    opacity: 0.7;
   }
   30% {
+    transform: translateY(-10px);
     opacity: 1;
-    transform: translateY(-8px);
   }
 }
 
-/* Input Area */
-.input-area {
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  padding: 1rem 1.5rem;
-}
-
-.input-form {
+/* Input Container */
+.input-container {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .message-input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px;
-  font-size: 0.9375rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 1.25rem;
+  font-size: 0.8125rem;
   outline: none;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
 }
 
 .message-input:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.send-btn {
-  width: 42px;
-  height: 42px;
+.message-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.send-button {
+  width: 2.25rem;
+  height: 2.25rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   border-radius: 50%;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.send-btn:hover:not(:disabled) {
+.send-button:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.send-btn:disabled {
+.send-button:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.send-icon {
-  width: 20px;
-  height: 20px;
-  color: white;
-}
-
-.input-footer {
-  text-align: center;
-  font-size: 0.6875rem;
-  color: #9ca3af;
-  margin: 0;
-}
-
-/* Transitions */
-.chat-modal-enter-active {
-  animation: slide-up 0.3s ease-out;
-}
-
-.chat-modal-leave-active {
-  animation: slide-down 0.2s ease-in;
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-down {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-  .chat-modal-overlay {
-    bottom: 5rem;
+  .chatbot-interface {
+    width: calc(100vw - 2rem);
     right: 1rem;
-    left: 1rem;
+    bottom: 4.5rem;
+    max-height: 420px;
   }
-
-  .chat-modal {
-    width: 100%;
-    height: 450px;
+  
+  .messages-container {
+    max-height: 280px;
+    padding: 0.75rem;
   }
-
-  .message-bubble {
-    max-width: 85%;
+  
+  .input-container {
+    padding: 0.625rem 0.75rem;
   }
-}
-
-/* Scrollbar */
-.messages-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.messages-container::-webkit-scrollbar-track {
-  background: #f3f4f6;
-}
-
-.messages-container::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
 }
 </style>

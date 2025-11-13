@@ -57,6 +57,6 @@ class Profile extends Model
 
     public function getProfileUrlAttribute()
     {
-        return config('app.url') . '/p/' . $this->slug;
+        return config('app.url') . '/Homepage/' . $this->slug;
     }
 }

@@ -249,6 +249,11 @@ const navigation = [
     icon: "heroicons:credit-card",
   },
   {
+    name: "Chatbot & FAQ",
+    href: "/AdminManagement/chatbot",
+    icon: "heroicons:chat-bubble-left-right",
+  },
+  {
     name: "System Statistics",
     href: "/AdminManagement/stats",
     icon: "heroicons:chart-pie",

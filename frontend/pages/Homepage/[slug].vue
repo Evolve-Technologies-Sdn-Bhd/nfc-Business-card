@@ -1,4 +1,4 @@
-<!-- pages/p/[slug].vue -->
+<!-- pages/Homepage/[slug].vue -->
 <template>
   <div
     class="min-h-screen"
@@ -603,7 +603,7 @@ const profileUrl = computed(() => {
   if (process.client) {
     return window.location.href;
   }
-  return `https://nfccard.app/p/${slug.value}`;
+  return `https://nfccard.app/Homepage/${slug.value}`;
 });
 
 // Methods
@@ -611,7 +611,7 @@ const loadProfile = async () => {
   try {
     loading.value = true;
     const { $api } = useNuxtApp();
-    const response = await $api.get(`/profiles/${slug.value}`); // Added .get()
+    const response = await $api.get(`/profiles/${slug.value}`);
 
     if (response.success) {
       profile.value = response.data;
@@ -642,7 +642,6 @@ const trackAction = async (action, data = {}) => {
   try {
     const { $api } = useNuxtApp();
     await $api.post("/analytics/track", {
-      // Changed to .post()
       slug: slug.value,
       action,
       data,

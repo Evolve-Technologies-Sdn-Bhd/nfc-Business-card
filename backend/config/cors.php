@@ -27,9 +27,14 @@ return [
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
         'http://127.0.0.1:3002',
+        'http://172.19.1.57:3000',
+        'http://172.19.1.57:3001',
+        'http://172.19.1.57:3002',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^http:\/\/(localhost|127\.0\.0\.1|172\.19\.1\.\d{1,3}):\d{4}$/',
+    ],
 
     'allowed_headers' => ['*'],
 

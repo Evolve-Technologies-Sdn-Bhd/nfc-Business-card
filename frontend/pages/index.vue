@@ -1401,18 +1401,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Chatbot Components -->
-    <ChatbotFloatingIcon
-      :is-open="isChatbotOpen"
-      :unread-count="0"
-      @open="isChatbotOpen = true"
-      @close="isChatbotOpen = false"
-    />
-    <ChatbotInterface
-      v-if="isChatbotOpen"
-      @close="isChatbotOpen = false"
-    />
   </div>
 </template>
 
@@ -1443,7 +1431,6 @@ useHead({
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
 const showDemo = ref(false);
-const isChatbotOpen = ref(false);
 
 const steps = [
   { title: "Ensure phone have NFC function" },

@@ -526,11 +526,11 @@ const userProfile = reactive({
 
 const profileUrl = computed(() => {
   const baseUrl = config.public.appUrl || "https://nfcgo.app";
-  return `${baseUrl}/${userProfile.username}`;
+  return `${baseUrl}/Homepage/${userProfile.username}`;
 });
 
 const shortProfileUrl = computed(() => {
-  return `nfcgo.app/${userProfile.username}`;
+  return `nfcgo.app/Homepage/${userProfile.username}`;
 });
 
 // Stats
