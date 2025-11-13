@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
+use App\Models\LandingPage;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -315,6 +316,110 @@ class NfcCardController extends Controller
                 'has_physical_card' => $user->hasPhysicalCard(),
                 'active_nfc_card' => $user->activeNfcCard
             ]
+        ]);
+    }
+
+    /**
+     * Get landing page for an NFC card
+     */
+    public function getLandingPage(Request $request, NfcCard $nfcCard)
+    {
+        // Check ownership
+        if ($nfcCard->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $landingPage = $nfcCard->landingPage;
+
+        if (!$landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found for this card'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'landing_page' => $landingPage
+        ]);
+    }
+
+    /**
+     * Update or create landing page for an NFC card
+     */
+    public function updateLandingPage(Request $request, NfcCard $nfcCard)
+    {
+        // Check ownership
+        if ($nfcCard->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'website' => 'nullable|url|max:500',
+            'address' => 'nullable|string',
+            'profile_image' => 'nullable|string',
+            'company_logo' => 'nullable|string',
+            'company_logo_text' => 'nullable|string|max:50',
+            'company_name' => 'nullable|string|max:255',
+            'company_registration_no' => 'nullable|string|max:255',
+            'company_department' => 'nullable|string|max:255',
+            'address_name' => 'nullable|string|max:255',
+            'address_street' => 'nullable|string|max:255',
+            'address_area' => 'nullable|string|max:255',
+            'address_city_state' => 'nullable|string|max:255',
+            'address_country' => 'nullable|string|max:255',
+            'address_map_url' => 'nullable|url',
+            'stats' => 'nullable|array',
+            'services' => 'nullable|array',
+            'social_links' => 'nullable|array',
+            'team_members' => 'nullable|array',
+            'phone_number' => 'nullable|string|max:50',
+            'phone_label' => 'nullable|string|max:100',
+            'email_address' => 'nullable|email|max:255',
+            'email_label' => 'nullable|string|max:100',
+            'whatsapp_number' => 'nullable|string|max:50',
+            'whatsapp_label' => 'nullable|string|max:100',
+            'website_url' => 'nullable|url|max:500',
+            'website_label' => 'nullable|string|max:100',
+            'profile_style' => 'nullable|string|max:50',
+            'theme' => 'nullable|string|max:50',
+            'background_color' => 'nullable|string|max:50',
+            'text_color' => 'nullable|string|max:50',
+            'font' => 'nullable|string|max:50',
+            'button_style' => 'nullable|string|max:50',
+            'show_watermark' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Update or create landing page
+        $landingPage = LandingPage::updateOrCreate(
+            ['nfc_card_id' => $nfcCard->id],
+            $request->all()
+        );
+
+        return response()->json([
+            'success' => true,
+            'landing_page' => $landingPage,
+            'message' => 'Landing page saved successfully'
         ]);
     }
 } 

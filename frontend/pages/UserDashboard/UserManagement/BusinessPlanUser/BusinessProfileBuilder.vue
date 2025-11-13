@@ -1542,16 +1542,102 @@ const loadProfile = async () => {
 
       console.log("Loaded landing page for card:", selectedNfcCardId.value);
     } else {
-      // No landing page exists yet for this card, use defaults
+      // No landing page exists yet for this card, reset to defaults
+      resetProfileData();
       console.log("No landing page found for card, using defaults");
     }
   } catch (error) {
     console.error("Error loading landing page:", error);
-    // Don't show error toast for 404 (card has no landing page yet)
-    if (error.response?.status !== 404) {
+
+    // If 404, this card has no landing page yet - reset to defaults
+    if (error.response?.status === 404) {
+      resetProfileData();
+      console.log("Card has no landing page yet, reset to defaults");
+    } else {
+      // Other errors
       $toast.error("Failed to load landing page");
     }
   }
+};
+
+// Reset profile data to defaults
+const resetProfileData = () => {
+  // Basic Info
+  profileData.name = "";
+  profileData.position = "";
+  profileData.qualification = "";
+  profileData.bio = "";
+  profileData.contactNumber = "";
+  profileData.email = "";
+  profileData.website = "";
+  profileData.address = "";
+  profileData.image = null;
+
+  // Company Info
+  profileData.companyLogo = null;
+  profileData.companyLogoText = "";
+  profileData.companyName = "";
+  profileData.companyRegistrationNo = "";
+  profileData.companyDepartment = "";
+
+  // Address Info
+  profileData.addressName = "";
+  profileData.addressStreet = "";
+  profileData.addressArea = "";
+  profileData.addressCityState = "";
+  profileData.addressCountry = "";
+  profileData.addressMapUrl = "";
+
+  // Stats (reset to default examples)
+  profileData.stats = [
+    { num: "10+", label: "Years Experience" },
+    { num: "500+", label: "Projects Done" },
+    { num: "98%", label: "Client Satisfaction" },
+  ];
+
+  // Services (reset to default examples)
+  profileData.services = [
+    { icon: "🏷️", name: "RFID Technology" },
+    { icon: "🖨️", name: "Label Printing" },
+    { icon: "💻", name: "Software Development" },
+    { icon: "🌐", name: "IoT Implementation" },
+    { icon: "🛒", name: "E-commerce Marketing" },
+    { icon: "📄", name: "Printing Solutions" },
+  ];
+
+  // Contact Methods
+  profileData.phoneNumber = "";
+  profileData.phoneLabel = "Phone";
+  profileData.emailAddress = "";
+  profileData.emailLabel = "Email";
+  profileData.whatsappNumber = "";
+  profileData.whatsappLabel = "WhatsApp";
+  profileData.websiteUrl = "";
+  profileData.websiteLabel = "Website";
+
+  // Social Links (reset to default)
+  profileData.socialLinks = [
+    { emoji: "📘", name: "Facebook", url: "" },
+    { emoji: "💼", name: "LinkedIn", url: "" },
+    { emoji: "📸", name: "Instagram", url: "" },
+    { emoji: "🐦", name: "Twitter", url: "" },
+  ];
+
+  // Team Members (reset to empty)
+  profileData.teamMembers = [
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+    { initials: "", name: "", role: "" },
+  ];
+
+  // Design Settings
+  profileData.profileStyle = "classic";
+  profileData.theme = "minimal";
+  profileData.backgroundColor = "#FFFFFF";
+  profileData.textColor = "#000000";
+  profileData.font = "inter";
+  profileData.buttonStyle = "solid";
+  profileData.showWatermark = true;
 };
 
 const loadUserNfcCards = async () => {

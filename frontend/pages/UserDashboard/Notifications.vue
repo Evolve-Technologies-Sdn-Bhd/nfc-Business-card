@@ -7,12 +7,14 @@
         <div class="flex items-center justify-between h-16">
           <h1 class="text-2xl font-semibold text-gray-900">Notifications</h1>
           <div class="flex items-center space-x-3">
+            <!-- Mark All as Read Button (more prominent) -->
             <button
               v-if="unreadCount > 0"
               @click="handleMarkAllAsRead"
-              class="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center shadow-sm"
             >
-              Mark all as read
+              <Icon name="heroicons:check-circle" class="w-4 h-4 mr-2" />
+              Mark all as read ({{ unreadCount }})
             </button>
             <button
               @click="loadNotifications()"
@@ -75,9 +77,53 @@
         </div>
       </div>
 
+      <!-- Search and Filters -->
+      <div class="bg-white rounded-lg shadow mb-6 p-4">
+        <div class="flex flex-col md:flex-row gap-4">
+          <!-- Search Box -->
+          <div class="flex-1">
+            <div class="relative">
+              <Icon
+                name="heroicons:magnifying-glass"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search notifications..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="w-full md:w-48">
+            <select
+              v-model="categoryFilter"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All Categories</option>
+              <option value="system">System</option>
+              <option value="security">Security</option>
+              <option value="activity">Activity</option>
+              <option value="payment">Payment</option>
+              <option value="nfc">NFC Cards</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- Filter Tabs -->
       <div class="bg-white rounded-lg shadow mb-6">
-        <div class="border-b border-gray-200">
+        <div class="border-b border-gray-200 flex items-center justify-between">
           <nav class="flex space-x-8 px-6" aria-label="Tabs">
             <button
               @click="filterTab = 'all'"
@@ -119,6 +165,21 @@
               Read
             </button>
           </nav>
+
+          <!-- Quick Actions -->
+          <div class="flex items-center space-x-2 px-6">
+            <button
+              v-if="filteredNotifications.some((n) => !n.is_read)"
+              @click="handleMarkFilteredAsRead"
+              class="px-3 py-1.5 text-xs bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors font-medium flex items-center"
+              :title="`Mark ${
+                filteredNotifications.filter((n) => !n.is_read).length
+              } visible notification(s) as read`"
+            >
+              <Icon name="heroicons:check" class="w-3.5 h-3.5 mr-1" />
+              Mark visible as read
+            </button>
+          </div>
         </div>
       </div>
 
@@ -215,12 +276,25 @@
                   </div>
                 </div>
               </div>
-              <button
-                @click.stop="handleDeleteNotification(notification.id)"
-                class="ml-4 text-gray-400 hover:text-red-600 transition-colors"
-              >
-                <Icon name="heroicons:trash" class="h-5 w-5" />
-              </button>
+              <div class="ml-4 flex items-center space-x-2">
+                <!-- Mark as Read Button (only for unread) -->
+                <button
+                  v-if="!notification.is_read"
+                  @click.stop="markAsRead(notification.id)"
+                  class="text-blue-500 hover:text-blue-700 transition-colors"
+                  title="Mark as read"
+                >
+                  <Icon name="heroicons:check-circle" class="h-5 w-5" />
+                </button>
+                <!-- Delete Button -->
+                <button
+                  @click.stop="handleDeleteNotification(notification.id)"
+                  class="text-gray-400 hover:text-red-600 transition-colors"
+                  title="Delete notification"
+                >
+                  <Icon name="heroicons:trash" class="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -277,20 +351,46 @@ const {
   deleteAllRead,
   getTimeAgo,
   getNotificationIcon,
+  getNotificationCategory,
+  getCategoryInfo,
   getPriorityClass,
 } = useNotifications();
 
-// Filter tab
-const filterTab = ref("all");
+// Filter states
+const filterTab = ref("all"); // all, unread, read
+const categoryFilter = ref("all"); // all, system, security, activity, payment, nfc, other
+const searchQuery = ref("");
+const selectedNotifications = ref([]);
 
 // Computed filtered notifications
 const filteredNotifications = computed(() => {
+  let result = notifications.value;
+
+  // Filter by read/unread status
   if (filterTab.value === "unread") {
-    return notifications.value.filter((n) => !n.is_read);
+    result = result.filter((n) => !n.is_read);
   } else if (filterTab.value === "read") {
-    return notifications.value.filter((n) => n.is_read);
+    result = result.filter((n) => n.is_read);
   }
-  return notifications.value;
+
+  // Filter by category
+  if (categoryFilter.value !== "all") {
+    result = result.filter(
+      (n) => getNotificationCategory(n.type) === categoryFilter.value
+    );
+  }
+
+  // Filter by search query
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase();
+    result = result.filter(
+      (n) =>
+        n.title.toLowerCase().includes(query) ||
+        n.message.toLowerCase().includes(query)
+    );
+  }
+
+  return result;
 });
 
 // Handlers
@@ -311,6 +411,21 @@ const handleMarkAllAsRead = async () => {
   $toast.success("All notifications marked as read");
 };
 
+const handleMarkFilteredAsRead = async () => {
+  const unreadFiltered = filteredNotifications.value.filter((n) => !n.is_read);
+
+  if (unreadFiltered.length === 0) {
+    $toast.info("No unread notifications to mark");
+    return;
+  }
+
+  // Mark each filtered unread notification as read
+  const promises = unreadFiltered.map((n) => markAsRead(n.id));
+  await Promise.all(promises);
+
+  $toast.success(`Marked ${unreadFiltered.length} notification(s) as read`);
+};
+
 const handleDeleteNotification = async (notificationId) => {
   if (!confirm("Delete this notification?")) {
     return;
@@ -328,6 +443,13 @@ const handleDeleteAllRead = async () => {
 };
 
 const getEmptyStateMessage = () => {
+  if (searchQuery.value.trim()) {
+    return "No notifications match your search";
+  }
+  if (categoryFilter.value !== "all") {
+    const categoryInfo = getCategoryInfo(categoryFilter.value);
+    return `No ${categoryInfo.label.toLowerCase()} notifications`;
+  }
   if (filterTab.value === "unread") {
     return "You have no unread notifications";
   } else if (filterTab.value === "read") {

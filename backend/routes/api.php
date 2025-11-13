@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\LegalDocumentController;
 use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\AdminChatbotController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
@@ -97,6 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/nfc-cards/{nfcCard}/activate', [NfcCardController::class, 'activate']);
     Route::post('/nfc-cards/{nfcCard}/deactivate', [NfcCardController::class, 'deactivate']);
     Route::get('/nfc-cards/{nfcCard}/analytics', [NfcCardController::class, 'analytics']);
+    
+    // Landing Page for NFC Cards
+    Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
+    Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
+    
     Route::get('/subscription/status', [NfcCardController::class, 'subscriptionStatus']);
 
     // Analytics
@@ -116,7 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/settings/upload-account-image', [SettingsController::class, 'uploadUserAccountImage']);
     Route::delete('/settings/delete-account-image', [SettingsController::class, 'deleteUserAccountImage']);
 
-    // Notifications (User)
+   // Notifications (User)
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
@@ -166,6 +171,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Legal documents management
     Route::put('/legal/documents/{type}', [LegalDocumentController::class, 'update']);
+    Route::get('/legal/pdf/{type}/status', [LegalDocumentController::class, 'checkPdfStatus']);
+    Route::get('/legal/pdf/terms/download', [LegalDocumentController::class, 'downloadTerms']);
+    Route::get('/legal/pdf/privacy/download', [LegalDocumentController::class, 'downloadPrivacy']);
+    Route::post('/legal/pdf/terms/upload', [LegalDocumentController::class, 'uploadTermsPdf']);
+    Route::post('/legal/pdf/privacy/upload', [LegalDocumentController::class, 'uploadPrivacyPdf']);
 
     // Admin Notification Management
     Route::prefix('notifications')->group(function () {
@@ -177,12 +187,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
         Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
     });
-    Route::get('/legal/pdf/{type}/status', [LegalDocumentController::class, 'checkPdfStatus']);
-    Route::get('/legal/pdf/terms/download', [LegalDocumentController::class, 'downloadTerms']);
-    Route::get('/legal/pdf/privacy/download', [LegalDocumentController::class, 'downloadPrivacy']);
-    Route::post('/legal/pdf/terms/upload', [LegalDocumentController::class, 'uploadTermsPdf']);
-    Route::post('/legal/pdf/privacy/upload', [LegalDocumentController::class, 'uploadPrivacyPdf']);
-    
     // Chatbot management
     Route::get('/chatbot/questions', [AdminChatbotController::class, 'index']);
     Route::post('/chatbot/questions', [AdminChatbotController::class, 'store']);
