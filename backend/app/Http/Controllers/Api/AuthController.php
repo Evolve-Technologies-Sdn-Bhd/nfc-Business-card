@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Profile;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,6 +13,13 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -59,6 +67,12 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Send registration success notification
+        $this->notificationService->create($user, 'registration_success', [
+            'name' => $user->first_name,
+            'profile_url' => config('app.frontend_url') . '/UserDashboard/overview',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -116,6 +130,22 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Check if this is a new device/location (simplified check)
+        $lastLoginDevice = $user->last_login_device ?? '';
+        $currentDevice = $request->userAgent();
+        
+        if ($lastLoginDevice && $lastLoginDevice !== $currentDevice) {
+            // Send new device login notification
+            $this->notificationService->create($user, 'login_new_device', [
+                'device' => $this->getDeviceInfo($currentDevice),
+                'ip' => $request->ip(),
+                'time' => now()->format('Y-m-d H:i:s'),
+            ]);
+        }
+        
+        // Update last login device
+        $user->update(['last_login_device' => $currentDevice]);
+
         return response()->json([
             'success' => true,
             'user' => $user->load('profile', 'nfcTag'),
@@ -162,6 +192,26 @@ class AuthController extends Controller
             'success' => true,
             'user' => $user->load('profile', 'nfcTag')
         ]);
+    }
+
+    /**
+     * Get simplified device info from user agent
+     */
+    private function getDeviceInfo($userAgent)
+    {
+        if (preg_match('/Windows/', $userAgent)) {
+            return 'Windows PC';
+        } elseif (preg_match('/Macintosh/', $userAgent)) {
+            return 'Mac';
+        } elseif (preg_match('/iPhone/', $userAgent)) {
+            return 'iPhone';
+        } elseif (preg_match('/iPad/', $userAgent)) {
+            return 'iPad';
+        } elseif (preg_match('/Android/', $userAgent)) {
+            return 'Android Device';
+        } else {
+            return 'Unknown Device';
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PasswordReset;
 use App\Models\User;
 use App\Mail\PasswordResetMail;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -16,6 +17,13 @@ use Carbon\Carbon;
 
 class PasswordResetController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Request a password reset link.
      * 
@@ -177,6 +185,12 @@ class PasswordResetController extends Controller
             'user_id' => $user->id,
             'email' => $user->email,
             'ip' => $request->ip()
+        ]);
+
+        // Send password changed notification
+        $this->notificationService->create($user, 'password_changed', [
+            'ip' => $request->ip(),
+            'time' => now()->format('Y-m-d H:i:s'),
         ]);
 
         // Optional: Send confirmation email

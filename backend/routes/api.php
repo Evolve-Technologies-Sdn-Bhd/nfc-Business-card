@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\NfcController;
 use App\Http\Controllers\Api\NfcCardController;
@@ -14,6 +15,8 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\LegalDocumentController;
 use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\AdminChatbotController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\AdminNotificationController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -68,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile
     Route::get('/user/profile', [ProfileController::class, 'getProfile']);
     Route::put('/user/profile', [ProfileController::class, 'update']);
+    Route::put('/user/account', [ProfileController::class, 'updateUserInfo']); // Settings page account update
     Route::post('/user/check-slug', [ProfileController::class, 'checkSlug']);
     Route::put('/user/slug', [ProfileController::class, 'updateSlug']);
 
@@ -105,6 +109,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload/company-logo', [ProfileController::class, 'uploadCompanyLogo']);
     Route::delete('/upload/profile-image', [ProfileController::class, 'deleteProfileImage']);
     Route::delete('/upload/company-logo', [ProfileController::class, 'deleteCompanyLogo']);
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'getSettings']);
+    Route::put('/settings/personal-info', [SettingsController::class, 'updatePersonalInfo']);
+    Route::post('/settings/upload-account-image', [SettingsController::class, 'uploadUserAccountImage']);
+    Route::delete('/settings/delete-account-image', [SettingsController::class, 'deleteUserAccountImage']);
+
+    // Notifications (User)
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
+        Route::post('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        Route::delete('/read/all', [NotificationController::class, 'deleteAllRead']);
+    });
 
     // Onboarding flow
     Route::post('/onboarding/select-plan', [OnboardingController::class, 'selectPlan']);
@@ -146,6 +166,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Legal documents management
     Route::put('/legal/documents/{type}', [LegalDocumentController::class, 'update']);
+
+    // Admin Notification Management
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [AdminNotificationController::class, 'index']);
+        Route::get('/statistics', [AdminNotificationController::class, 'getStatistics']);
+        Route::post('/announcement', [AdminNotificationController::class, 'sendAnnouncement']);
+        Route::post('/send-to-users', [AdminNotificationController::class, 'sendToUsers']);
+        Route::post('/system-message', [AdminNotificationController::class, 'sendSystemMessage']);
+        Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
+        Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
+    });
     Route::get('/legal/pdf/{type}/status', [LegalDocumentController::class, 'checkPdfStatus']);
     Route::get('/legal/pdf/terms/download', [LegalDocumentController::class, 'downloadTerms']);
     Route::get('/legal/pdf/privacy/download', [LegalDocumentController::class, 'downloadPrivacy']);

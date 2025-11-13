@@ -40,8 +40,8 @@
 
         <!-- Main Content Area -->
         <div class="flex-1">
-          <!-- Profile Settings Tab -->
-          <div v-if="activeTab === 'profile'" class="space-y-6">
+          <!-- Account Settings Tab (Integrated Profile + Account) -->
+          <div v-if="activeTab === 'account'" class="space-y-6">
             <!-- Personal Information Card -->
             <div
               class="bg-white rounded-lg shadow-sm border border-secondary-200"
@@ -51,79 +51,62 @@
                   Personal Information
                 </h2>
                 <p class="text-sm text-secondary-600">
-                  Update your personal details and profile picture
+                  Update your personal details
                 </p>
               </div>
               <div class="p-6">
-                <form @submit.prevent="updateProfile">
+                <form @submit.prevent="updatePersonalInfo">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Profile Picture Section -->
+                    <!-- Account Picture -->
                     <div class="md:col-span-2">
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Profile Picture</label
-                      >
-                      <div class="flex items-center space-x-4">
-                        <img
-                          :src="
-                            profileForm.profile_image || '/default-avatar.png'
-                          "
-                          :alt="profileForm.name"
-                          class="w-20 h-20 rounded-full object-cover border-4 border-secondary-200"
-                        />
-                        <div>
-                          <input
-                            ref="profileImageInput"
-                            type="file"
-                            accept="image/*"
-                            @change="handleImageUpload"
-                            class="hidden"
-                          />
-                          <button
-                            type="button"
-                            @click="$refs.profileImageInput.click()"
-                            class="btn btn-outline btn-sm mr-2"
-                          >
-                            <Icon
-                              name="heroicons:camera"
-                              class="h-4 w-4 mr-2"
-                            />
-                            Change Photo
-                          </button>
-                          <button
-                            type="button"
-                            @click="removeProfileImage"
-                            class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Full Name Field -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Full Name *</label
-                      >
-                      <input
-                        v-model="profileForm.name"
-                        type="text"
-                        required
-                        class="input input-bordered w-full"
-                        placeholder="Enter your full name"
+                      <ProfileImageUpload
+                        v-model="personalInfoForm.account_image"
+                        upload-endpoint="/settings/upload-account-image"
+                        delete-endpoint="/settings/delete-account-image"
+                        label="Account Picture"
+                        help-text="JPG, PNG, GIF or WebP. Max 5MB"
+                        @upload-success="handleAccountImageUpload"
                       />
                     </div>
 
-                    <!-- Email Field -->
+                    <!-- First Name -->
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        >First Name *</label
+                      >
+                      <input
+                        v-model="personalInfoForm.first_name"
+                        type="text"
+                        required
+                        class="input input-bordered w-full"
+                        placeholder="Enter your first name"
+                      />
+                    </div>
+
+                    <!-- Last Name -->
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        >Last Name *</label
+                      >
+                      <input
+                        v-model="personalInfoForm.last_name"
+                        type="text"
+                        required
+                        class="input input-bordered w-full"
+                        placeholder="Enter your last name"
+                      />
+                    </div>
+
+                    <!-- Email -->
                     <div>
                       <label
                         class="block text-sm font-medium text-secondary-700 mb-2"
                         >Email Address *</label
                       >
                       <input
-                        v-model="profileForm.email"
+                        v-model="personalInfoForm.email"
                         type="email"
                         required
                         class="input input-bordered w-full"
@@ -131,91 +114,18 @@
                       />
                     </div>
 
-                    <!-- Phone Field -->
+                    <!-- Phone -->
                     <div>
                       <label
                         class="block text-sm font-medium text-secondary-700 mb-2"
                         >Phone Number</label
                       >
                       <input
-                        v-model="profileForm.phone"
+                        v-model="personalInfoForm.phone"
                         type="tel"
                         class="input input-bordered w-full"
                         placeholder="Enter your phone number"
                       />
-                    </div>
-
-                    <!-- Title Field -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Professional Title</label
-                      >
-                      <input
-                        v-model="profileForm.title"
-                        type="text"
-                        class="input input-bordered w-full"
-                        placeholder="e.g., Software Engineer"
-                      />
-                    </div>
-
-                    <!-- Company Field -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Company</label
-                      >
-                      <input
-                        v-model="profileForm.company"
-                        type="text"
-                        class="input input-bordered w-full"
-                        placeholder="Enter your company name"
-                      />
-                    </div>
-
-                    <!-- Website Field -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Website</label
-                      >
-                      <input
-                        v-model="profileForm.website"
-                        type="url"
-                        class="input input-bordered w-full"
-                        placeholder="https://yourwebsite.com"
-                      />
-                    </div>
-
-                    <!-- Location Field -->
-                    <div class="md:col-span-2">
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Location</label
-                      >
-                      <input
-                        v-model="profileForm.location"
-                        type="text"
-                        class="input input-bordered w-full"
-                        placeholder="City, Country"
-                      />
-                    </div>
-
-                    <!-- Bio Field -->
-                    <div class="md:col-span-2">
-                      <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
-                        >Bio</label
-                      >
-                      <textarea
-                        v-model="profileForm.bio"
-                        rows="4"
-                        class="textarea textarea-bordered w-full"
-                        placeholder="Tell people about yourself..."
-                      ></textarea>
-                      <p class="text-xs text-secondary-500 mt-1">
-                        {{ profileForm.bio?.length || 0 }}/500 characters
-                      </p>
                     </div>
                   </div>
 
@@ -223,14 +133,18 @@
                   <div class="flex justify-end mt-6">
                     <button
                       type="submit"
-                      :disabled="updatingProfile"
+                      :disabled="updatingPersonalInfo"
                       class="btn btn-primary"
                     >
                       <span
-                        v-if="updatingProfile"
+                        v-if="updatingPersonalInfo"
                         class="loading loading-spinner loading-sm mr-2"
                       ></span>
-                      {{ updatingProfile ? "Updating..." : "Update Profile" }}
+                      {{
+                        updatingPersonalInfo
+                          ? "Updating..."
+                          : "Update Personal Info"
+                      }}
                     </button>
                   </div>
                 </form>
@@ -341,12 +255,12 @@
                   <div>
                     <label
                       class="block text-sm font-medium text-secondary-700 mb-1"
-                      >Plan</label
+                      >Subscription Plan</label
                     >
                     <span
                       class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                     >
-                      {{ user.plan || "Free" }}
+                      {{ user?.subscription_plan || "Free" }}
                     </span>
                   </div>
                   <div>
@@ -355,7 +269,7 @@
                       >Member Since</label
                     >
                     <p class="text-sm text-secondary-900">
-                      {{ formatDate(user.created_at) }}
+                      {{ formatDate(user?.created_at) }}
                     </p>
                   </div>
                   <div>
@@ -364,7 +278,7 @@
                       >Last Login</label
                     >
                     <p class="text-sm text-secondary-900">
-                      {{ formatDate(user.last_login_at) }}
+                      {{ formatDate(user?.last_login_at) }}
                     </p>
                   </div>
                 </div>
@@ -387,19 +301,19 @@
                 <div class="flex items-center justify-between mb-4">
                   <div>
                     <h3 class="text-lg font-medium text-secondary-900">
-                      {{ user.plan || "Free Plan" }}
+                      {{ user?.subscription_plan || "Free Plan" }}
                     </h3>
                     <p class="text-sm text-secondary-600">
                       {{
-                        user.plan === "free"
+                        user?.subscription_plan === "free"
                           ? "Basic features included"
-                          : "All premium features included"
+                          : "Premium features included"
                       }}
                     </p>
                   </div>
                   <div class="text-right">
                     <p class="text-2xl font-bold text-secondary-900">
-                      {{ user.plan === "free" ? "$0" : "$9.99" }}
+                      {{ user?.subscription_plan === "free" ? "$0" : "$9.99" }}
                       <span class="text-sm font-normal text-secondary-500"
                         >/month</span
                       >
@@ -408,7 +322,7 @@
                 </div>
                 <div class="flex space-x-3">
                   <button
-                    v-if="user.plan === 'free'"
+                    v-if="user?.subscription_plan === 'free'"
                     @click="upgradePlan"
                     class="btn btn-primary"
                   >
@@ -423,7 +337,7 @@
                     Manage Billing
                   </button>
                   <button
-                    v-if="user.plan !== 'free'"
+                    v-if="user?.subscription_plan !== 'free'"
                     @click="cancelSubscription"
                     class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50"
                   >
@@ -1011,7 +925,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 
 // Meta
 definePageMeta({
@@ -1019,20 +933,21 @@ definePageMeta({
   middleware: "auth",
 });
 
+// Store
+const authStore = useAuthStore();
+
 // Reactive data
-const activeTab = ref("profile");
-const user = ref({});
-const profileForm = ref({
-  name: "",
+const activeTab = ref("account"); // Default to account tab
+const user = computed(() => authStore.user); // Use user from authStore
+const accountImageTimestamp = ref(Date.now()); // Add timestamp to force image refresh
+
+// Personal info form
+const personalInfoForm = ref({
+  first_name: "",
+  last_name: "",
   email: "",
   phone: "",
-  title: "",
-  company: "",
-  website: "",
-  location: "",
-  bio: "",
-  profile_image: "",
-  slug: "",
+  account_image: null,
 });
 
 const passwordForm = ref({
@@ -1065,8 +980,7 @@ const slugStatus = ref("");
 const isSlugValid = computed(() => slugStatus.value === "available");
 
 // Loading states
-const updatingProfile = ref(false);
-const updatingSlug = ref(false);
+const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
 const exportingData = ref(false);
 const deletingAccount = ref(false);
@@ -1081,10 +995,9 @@ const showErrorToast = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
 
-// Settings tabs
+// Settings tabs (removed separate profile tab, integrated with account)
 const settingsTabs = [
-  { id: "profile", label: "Profile", icon: "heroicons:user-circle" },
-  { id: "account", label: "Account", icon: "heroicons:cog-6-tooth" },
+  { id: "account", label: "Account", icon: "heroicons:user-circle" },
   { id: "security", label: "Security", icon: "heroicons:shield-check" },
   { id: "privacy", label: "Privacy", icon: "heroicons:eye-slash" },
   { id: "notifications", label: "Notifications", icon: "heroicons:bell" },
@@ -1097,19 +1010,99 @@ const settingsTabs = [
 
 // Methods
 const loadUserData = async () => {
+  // User data is loaded via authStore and watch
+  // This function is kept for loading additional settings if needed
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.get("/user/profile"); // Added .get()
+    const response = await $api.get("/user/settings");
 
-    user.value = response.user;
-    profileForm.value = { ...response.profile };
-    securitySettings.value = { ...response.security_settings };
-    privacySettings.value = { ...response.privacy_settings };
-    notificationSettings.value = { ...response.notification_settings };
+    // Load settings data if available
+    if (response?.security_settings) {
+      securitySettings.value = { ...response.security_settings };
+    }
+    if (response?.privacy_settings) {
+      privacySettings.value = { ...response.privacy_settings };
+    }
+    if (response?.notification_settings) {
+      notificationSettings.value = { ...response.notification_settings };
+    }
   } catch (error) {
-    console.error("Error loading user data:", error);
-    showError("Failed to load user data");
+    // Silently fail if settings endpoint doesn't exist yet
+    // User data is already loaded from authStore
+    console.warn("Settings endpoint not available:", error);
   }
+};
+
+// Helper function to get account image URL with cache-busting timestamp
+const getAccountImageUrl = (imageUrl) => {
+  if (!imageUrl) return "";
+  // Add timestamp to force browser to reload the image
+  const separator = imageUrl.includes("?") ? "&" : "?";
+  return `${imageUrl}${separator}t=${accountImageTimestamp.value}`;
+};
+
+const updatePersonalInfo = async () => {
+  updatingPersonalInfo.value = true;
+  try {
+    const { $api } = useNuxtApp();
+
+    // Update user personal information using Settings API
+    const response = await $api.put("/settings/personal-info", {
+      first_name: personalInfoForm.value.first_name,
+      last_name: personalInfoForm.value.last_name,
+      email: personalInfoForm.value.email,
+      phone: personalInfoForm.value.phone,
+    });
+
+    // Update authStore user with new data
+    if (response.success && response.user) {
+      authStore.user = response.user;
+    } else {
+      // Refresh user data from server
+      await authStore.fetchProfile();
+    }
+
+    showSuccess("Personal information updated successfully");
+  } catch (error) {
+    console.error("Error updating personal info:", error);
+
+    // Handle validation errors
+    if (error.response?.data?.errors) {
+      // Get first validation error message
+      const errors = error.response.data.errors;
+      const firstError = Object.values(errors)[0];
+      showError(Array.isArray(firstError) ? firstError[0] : firstError);
+
+      // Revert email back to original value if email validation failed
+      if (errors.email) {
+        personalInfoForm.value.email = user.value?.email || "";
+      }
+    } else {
+      showError(
+        error.response?.data?.message || "Failed to update personal information"
+      );
+    }
+  } finally {
+    updatingPersonalInfo.value = false;
+  }
+};
+
+// Handle account image upload success
+const handleAccountImageUpload = async (data) => {
+  console.log("Account image uploaded:", data);
+  // Update authStore and form with new image URL
+  if (data.url) {
+    personalInfoForm.value.account_image = data.url;
+    if (authStore.user) {
+      authStore.user = {
+        ...authStore.user,
+        account_image: data.url,
+      };
+    }
+    accountImageTimestamp.value = Date.now(); // Force image refresh
+  }
+  // Note: No need to fetchProfile() - the upload response already contains updated user data
+  // and we've already updated authStore.user above
 };
 
 const loadActiveSessions = async () => {
@@ -1118,94 +1111,6 @@ const loadActiveSessions = async () => {
     activeSessions.value = response.sessions;
   } catch (error) {
     console.error("Error loading sessions:", error);
-  }
-};
-
-const updateProfile = async () => {
-  updatingProfile.value = true;
-  try {
-    const { $api } = useNuxtApp();
-    await $api.put("/user/profile", profileForm.value); // Changed to .put()
-    showSuccess("Profile updated successfully");
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    showError("Failed to update profile");
-  } finally {
-    updatingProfile.value = false;
-  }
-};
-
-const handleImageUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    showError("Please select a valid image file");
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    showError("Image size must be less than 5MB");
-    return;
-  }
-
-  try {
-    const { $api } = useNuxtApp();
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const response = await $api.post("/upload/profile-image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    profileForm.value.profile_image = response.data.url;
-    showSuccess("Profile image updated successfully");
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    showError("Failed to upload image");
-  }
-};
-
-const removeProfileImage = () => {
-  profileForm.value.profile_image = "";
-};
-
-const checkSlugAvailability = async () => {
-  if (!profileForm.value.slug || profileForm.value.slug.length < 3) {
-    slugStatus.value = "";
-    return;
-  }
-
-  slugStatus.value = "checking";
-
-  try {
-    const { $api } = useNuxtApp();
-    const response = await $api.post("/user/check-slug", {
-      // Changed to .post()
-      slug: profileForm.value.slug,
-    });
-    slugStatus.value = response.available ? "available" : "taken";
-  } catch (error) {
-    console.error("Error checking slug:", error);
-    slugStatus.value = "";
-  }
-};
-
-const updateSlug = async () => {
-  updatingSlug.value = true;
-  try {
-    await $fetch("/api/user/slug", {
-      method: "PUT",
-      body: { slug: profileForm.value.slug },
-    });
-    showSuccess("Profile URL updated successfully");
-  } catch (error) {
-    console.error("Error updating slug:", error);
-    showError("Failed to update profile URL");
-  } finally {
-    updatingSlug.value = false;
   }
 };
 
@@ -1397,9 +1302,56 @@ const showError = (message) => {
 
 // Lifecycle
 onMounted(() => {
-  loadUserData();
+  // Initialize form with user data
+  if (user.value) {
+    personalInfoForm.value = {
+      first_name: user.value.first_name || "",
+      last_name: user.value.last_name || "",
+      email: user.value.email || "",
+      phone: user.value.phone || "",
+      account_image: user.value.account_image || null,
+    };
+  }
+
+  // loadUserData(); // Commented out - endpoint not implemented yet
   loadActiveSessions();
 });
+
+// Watch user changes to update form
+watch(
+  user,
+  (newUser) => {
+    if (newUser) {
+      // Only update if values have actually changed to avoid overwriting recent uploads
+      if (personalInfoForm.value.first_name !== newUser.first_name) {
+        personalInfoForm.value.first_name = newUser.first_name || "";
+      }
+      if (personalInfoForm.value.last_name !== newUser.last_name) {
+        personalInfoForm.value.last_name = newUser.last_name || "";
+      }
+      if (personalInfoForm.value.email !== newUser.email) {
+        personalInfoForm.value.email = newUser.email || "";
+      }
+      if (personalInfoForm.value.phone !== newUser.phone) {
+        personalInfoForm.value.phone = newUser.phone || "";
+      }
+      // Only update account_image if it's actually different and not null
+      // This prevents overwriting a just-uploaded image
+      if (
+        newUser.account_image &&
+        personalInfoForm.value.account_image !== newUser.account_image
+      ) {
+        personalInfoForm.value.account_image = newUser.account_image;
+      } else if (
+        !personalInfoForm.value.account_image &&
+        !newUser.account_image
+      ) {
+        personalInfoForm.value.account_image = null;
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

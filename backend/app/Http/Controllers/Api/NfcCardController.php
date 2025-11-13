@@ -5,12 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class NfcCardController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
     public function index(Request $request)
     {
         $user = $request->user();
@@ -112,6 +119,13 @@ class NfcCardController extends Controller
             'subscription_active' => true,
         ]);
 
+        // Send NFC card purchased notification
+        $this->notificationService->create($user, 'nfc_card_purchased', [
+            'card_id' => $nfcCardId,
+            'amount' => '$' . number_format($request->purchase_amount, 2),
+            'plan' => ucfirst($request->subscription_plan),
+        ]);
+
         return response()->json([
             'success' => true,
             'nfc_card' => $nfcCard,
@@ -206,6 +220,12 @@ class NfcCardController extends Controller
 
         // Update card status
         $nfcCard->update(['status' => 'active']);
+
+        // Send NFC card activated notification
+        $this->notificationService->create($request->user(), 'nfc_card_activated', [
+            'card_id' => $nfcCard->nfc_card_id,
+            'nfc_id' => $request->nfc_id,
+        ]);
 
         return response()->json([
             'success' => true,
