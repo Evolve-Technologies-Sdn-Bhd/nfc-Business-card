@@ -270,6 +270,7 @@
                   delete-endpoint="/upload/profile-image"
                   label="Profile Picture"
                   help-text="JPG, PNG, GIF or WebP. Max 5MB"
+                  :nfc-card-id="selectedNfcCardId"
                   @upload-success="handleProfileImageUpload"
                 />
 
@@ -281,6 +282,7 @@
                   label="Company Logo"
                   help-text="Will appear as background watermark"
                   alt-text="Company logo"
+                  :nfc-card-id="selectedNfcCardId"
                   @upload-success="handleCompanyLogoUpload"
                 />
 
@@ -415,6 +417,7 @@
                   label="Company Logo"
                   help-text="Will appear on your profile"
                   alt-text="Company logo"
+                  :nfc-card-id="selectedNfcCardId"
                   @upload-success="handleCompanyLogoUpload"
                 />
 

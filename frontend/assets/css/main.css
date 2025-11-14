@@ -5,15 +5,22 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   html {
     font-family: "Inter", sans-serif;
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-secondary-50 text-secondary-900;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100vh;
   }
 }
 
@@ -237,6 +244,27 @@
 
   .backdrop-blur-xs {
     backdrop-filter: blur(2px);
+  }
+
+  /* Prevent horizontal scroll and layout shift */
+  .overflow-x-hidden {
+    overflow-x: hidden !important;
+  }
+
+  .w-screen {
+    width: 100vw;
+    max-width: 100%;
+  }
+
+  /* Ensure containers don't overflow */
+  .container,
+  .max-w-7xl,
+  .max-w-6xl,
+  .max-w-5xl,
+  .max-w-4xl {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* Prose styles for markdown content */

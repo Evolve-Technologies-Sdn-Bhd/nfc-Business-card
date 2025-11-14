@@ -64,9 +64,10 @@ class SettingsController extends Controller
                 'phone' => $request->phone,
             ]);
 
-            // Also update profile table if profile exists
-            if ($user->profile) {
-                $user->profile->update([
+            // Also update landing page if exists
+            $nfcCard = $user->nfcCards()->first();
+            if ($nfcCard && $nfcCard->landingPage) {
+                $nfcCard->landingPage->update([
                     'name' => $request->first_name . ' ' . $request->last_name,
                     'email' => $request->email,
                     'phone' => $request->phone,

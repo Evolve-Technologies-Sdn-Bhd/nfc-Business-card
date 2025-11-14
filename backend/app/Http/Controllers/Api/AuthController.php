@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Profile;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -25,10 +24,12 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'company' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
+        ], [
+            'email.unique' => 'This email is already registered. Please login or use a different email.',
         ]);
 
         if ($validator->fails()) {
@@ -38,49 +39,46 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'company' => $request->company,
-            'job_title' => $request->job_title,
-        ]);
+        try {
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'company' => $request->company,
+                'job_title' => $request->job_title,
+                'is_new_user' => true, // Mark as new user for onboarding
+            ]);
 
-        // Create profile with unique slug
-        $slug = Str::slug($user->full_name);
-        $originalSlug = $slug;
-        $count = 1;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        while (Profile::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count;
-            $count++;
+            // Send registration success notification
+            try {
+                $this->notificationService->create($user, 'registration_success', [
+                    'name' => $user->first_name,
+                    'profile_url' => config('app.frontend_url') . '/UserDashboard/PlanSelection',
+                ]);
+            } catch (\Exception $e) {
+                // Log notification error but don't fail registration
+                \Log::error('Failed to send registration notification: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => $user->fresh(),
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Registration error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $profile = Profile::create([
-            'user_id' => $user->id,
-            'slug' => $slug,
-            'name' => $user->full_name,
-            'title' => $user->job_title,
-            'company' => $user->company,
-            'email' => $user->email,
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Send registration success notification
-        $this->notificationService->create($user, 'registration_success', [
-            'name' => $user->first_name,
-            'profile_url' => config('app.frontend_url') . '/UserDashboard/overview',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'user' => $user,
-            'profile' => $profile,
-            'token' => $token,
-            'token_type' => 'Bearer',
-        ], 201);
     }
 
     public function login(Request $request)
@@ -106,26 +104,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Ensure user has a profile (for users created before profile system)
-        if (!$user->profile) {
-            $slug = Str::slug($user->full_name ?? $user->email);
-            $originalSlug = $slug;
-            $count = 1;
-
-            while (Profile::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $count;
-                $count++;
-            }
-
-            $user->profile()->create([
-                'slug' => $slug,
-                'name' => $user->full_name ?? $user->email,
-                'title' => $user->job_title,
-                'company' => $user->company,
-                'email' => $user->email,
-            ]);
-        }
-
         $user->update(['last_login_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -148,7 +126,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'user' => $user->load('profile', 'nfcTag'),
+            'user' => $user->load('nfcCards'),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -168,29 +146,9 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        // Ensure user has a profile
-        if (!$user->profile) {
-            $slug = Str::slug($user->full_name ?? $user->email);
-            $originalSlug = $slug;
-            $count = 1;
-
-            while (Profile::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $count;
-                $count++;
-            }
-
-            $user->profile()->create([
-                'slug' => $slug,
-                'name' => $user->full_name ?? $user->email,
-                'title' => $user->job_title,
-                'company' => $user->company,
-                'email' => $user->email,
-            ]);
-        }
-
         return response()->json([
             'success' => true,
-            'user' => $user->load('profile', 'nfcTag')
+            'user' => $user->load('nfcCards')
         ]);
     }
 
@@ -226,7 +184,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Onboarding completed',
-            'user' => $user->load('profile', 'nfcTag')
+            'user' => $user->load('nfcCards')
         ]);
     }
 }

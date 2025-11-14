@@ -10,7 +10,7 @@ class SocialLink extends Model
     use HasFactory;
 
     protected $fillable = [
-        'profile_id',
+        'landing_page_id',
         'platform',
         'url',
         'title',
@@ -25,9 +25,9 @@ class SocialLink extends Model
         'order' => 'integer',
     ];
 
-    public function profile()
+    public function landingPage()
     {
-        return $this->belongsTo(Profile::class);
+        return $this->belongsTo(LandingPage::class);
     }
 
     public function analytics()

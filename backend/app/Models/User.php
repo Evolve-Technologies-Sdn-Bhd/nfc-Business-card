@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable
@@ -66,47 +67,11 @@ class User extends Authenticatable
     protected $appends = ['full_name'];
 
     /**
-     * Boot method to handle model events
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Create a profile when a user is created
-        static::created(function ($user) {
-            // Check if profile doesn't already exist (in case it was created in controller)
-            if (!$user->profile()->exists()) {
-                $slug = Str::slug($user->full_name ?? $user->email);
-                $originalSlug = $slug;
-                $count = 1;
-
-                while (Profile::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $count;
-                    $count++;
-                }
-
-                $user->profile()->create([
-                    'slug' => $slug,
-                    'name' => $user->full_name ?? $user->email,
-                    'title' => $user->job_title,
-                    'company' => $user->company,
-                    'email' => $user->email,
-                ]);
-            }
-        });
-    }
-
-    /**
      * Get the user's full name.
      */
     public function getFullNameAttribute()
     {
         return trim($this->first_name . ' ' . $this->last_name);
-    }
-
-    public function profile()
-    {
-        return $this->hasOne(Profile::class);
     }
 
     public function nfcTag()
@@ -201,40 +166,6 @@ class User extends Authenticatable
             'moderator' => 'Moderator',
             default => 'Admin'
         };
-    }
-
-    /**
-     * Get or create profile
-     */
-    public function getProfileAttribute()
-    {
-        if (!$this->relationLoaded('profile') || !$this->getRelation('profile')) {
-            $profile = $this->profile()->first();
-
-            if (!$profile) {
-                // Create profile with unique slug
-                $slug = Str::slug($this->full_name ?? $this->email);
-                $originalSlug = $slug;
-                $count = 1;
-
-                while (Profile::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $count;
-                    $count++;
-                }
-
-                $profile = $this->profile()->create([
-                    'slug' => $slug,
-                    'name' => $this->full_name ?? $this->email,
-                    'title' => $this->job_title,
-                    'company' => $this->company,
-                    'email' => $this->email,
-                ]);
-            }
-
-            $this->setRelation('profile', $profile);
-        }
-
-        return $this->getRelation('profile');
     }
 
     /**

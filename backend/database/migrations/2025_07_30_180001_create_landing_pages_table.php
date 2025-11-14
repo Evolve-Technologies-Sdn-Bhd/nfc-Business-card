@@ -26,7 +26,10 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->text('address')->nullable();
             $table->string('profile_image')->nullable();
+            $table->string('profile_image_path')->nullable();
             $table->string('company_logo')->nullable();
+            $table->string('company_logo_path')->nullable();
+            $table->string('location')->nullable();
             
             // Company Info
             $table->string('company_logo_text')->nullable();
@@ -66,6 +69,10 @@ return new class extends Migration
             $table->string('font')->default('inter');
             $table->string('button_style')->default('solid');
             $table->boolean('show_watermark')->default(true);
+            
+            // Status
+            $table->boolean('is_active')->default(true);
+            $table->json('settings')->nullable();
             
             $table->timestamps();
         });

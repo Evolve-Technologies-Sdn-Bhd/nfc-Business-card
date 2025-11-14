@@ -210,15 +210,17 @@
                 type="button"
                 @click="showTermsModal = true"
                 class="text-primary-600 hover:text-primary-500 underline"
-                >Terms of Service</button
               >
+                Terms of Service
+              </button>
               and
               <button
                 type="button"
                 @click="showPrivacyModal = true"
                 class="text-primary-600 hover:text-primary-500 underline"
-                >Privacy Policy</button
               >
+                Privacy Policy
+              </button>
             </label>
           </div>
           <p v-if="errors.terms" class="form-error">{{ errors.terms[0] }}</p>
@@ -317,10 +319,14 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
         @click.self="showTermsModal = false"
       >
-        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
+        <div
+          class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+        >
           <div class="p-6 border-b border-secondary-200">
             <div class="flex items-center justify-between">
-              <h3 class="text-2xl font-bold text-secondary-900">Terms of Service</h3>
+              <h3 class="text-2xl font-bold text-secondary-900">
+                Terms of Service
+              </h3>
               <button
                 @click="showTermsModal = false"
                 class="text-secondary-400 hover:text-secondary-600"
@@ -329,7 +335,8 @@
               </button>
             </div>
             <p v-if="termsDocument" class="text-sm text-secondary-500 mt-2">
-              Version {{ termsDocument.version }} • Effective {{ formatDate(termsDocument.effective_date) }}
+              Version {{ termsDocument.version }} • Effective
+              {{ formatDate(termsDocument.effective_date) }}
             </p>
           </div>
           <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
@@ -337,7 +344,11 @@
               <div class="spinner mx-auto mb-4"></div>
               <p class="text-secondary-600">Loading Terms of Service...</p>
             </div>
-            <div v-else-if="termsDocument" class="prose prose-sm max-w-none" v-html="renderMarkdown(termsDocument.content)"></div>
+            <div
+              v-else-if="termsDocument"
+              class="prose prose-sm max-w-none"
+              v-html="renderMarkdown(termsDocument.content)"
+            ></div>
             <div v-else class="text-center py-8 text-secondary-600">
               Terms of Service not available
             </div>
@@ -360,10 +371,14 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
         @click.self="showPrivacyModal = false"
       >
-        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
+        <div
+          class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+        >
           <div class="p-6 border-b border-secondary-200">
             <div class="flex items-center justify-between">
-              <h3 class="text-2xl font-bold text-secondary-900">Privacy Policy</h3>
+              <h3 class="text-2xl font-bold text-secondary-900">
+                Privacy Policy
+              </h3>
               <button
                 @click="showPrivacyModal = false"
                 class="text-secondary-400 hover:text-secondary-600"
@@ -372,7 +387,8 @@
               </button>
             </div>
             <p v-if="privacyDocument" class="text-sm text-secondary-500 mt-2">
-              Version {{ privacyDocument.version }} • Effective {{ formatDate(privacyDocument.effective_date) }}
+              Version {{ privacyDocument.version }} • Effective
+              {{ formatDate(privacyDocument.effective_date) }}
             </p>
           </div>
           <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
@@ -380,7 +396,11 @@
               <div class="spinner mx-auto mb-4"></div>
               <p class="text-secondary-600">Loading Privacy Policy...</p>
             </div>
-            <div v-else-if="privacyDocument" class="prose prose-sm max-w-none" v-html="renderMarkdown(privacyDocument.content)"></div>
+            <div
+              v-else-if="privacyDocument"
+              class="prose prose-sm max-w-none"
+              v-html="renderMarkdown(privacyDocument.content)"
+            ></div>
             <div v-else class="text-center py-8 text-secondary-600">
               Privacy Policy not available
             </div>
@@ -711,65 +731,76 @@ const skip2FASetup = () => {
 
 // Go to plan selection
 const goToPlanSelection = async () => {
-  showSuccessModal.value = false;
-  $toast.success("Welcome to NFCGo! Let's choose your plan.");
-  await router.push("/UserDashboard/PlanSelection");
+  try {
+    console.log("goToPlanSelection called");
+    showSuccessModal.value = false;
+    $toast.success("Welcome to NFCGo! Let's choose your plan.");
+    console.log("Navigating to plan selection...");
+    await router.push("/UserDashboard/PlanSelection");
+    console.log("Navigation complete");
+  } catch (error) {
+    console.error("Error in goToPlanSelection:", error);
+    $toast.error("Failed to navigate. Please try refreshing the page.");
+  }
 };
 
 // Load legal documents
 const loadLegalDocuments = async () => {
   try {
     const { $api } = useNuxtApp();
-    
+
     // Load Terms of Service and Privacy Policy in parallel
     const [termsResponse, privacyResponse] = await Promise.all([
-      $api.get('/legal/terms'),
-      $api.get('/legal/privacy')
+      $api.get("/legal/terms"),
+      $api.get("/legal/privacy"),
     ]);
-    
+
     if (termsResponse.success && termsResponse.data) {
       termsDocument.value = termsResponse.data;
     }
-    
+
     if (privacyResponse.success && privacyResponse.data) {
       privacyDocument.value = privacyResponse.data;
     }
   } catch (error) {
-    console.error('Error loading legal documents:', error);
+    console.error("Error loading legal documents:", error);
   }
 };
 
 // Render Markdown to HTML (lightweight parser)
 const renderMarkdown = (markdown) => {
-  if (!markdown) return '';
-  
+  if (!markdown) return "";
+
   let html = markdown
     // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
     // Bold
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     // Italic
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-primary-600 hover:text-primary-500 underline">$1</a>')
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" class="text-primary-600 hover:text-primary-500 underline">$1</a>'
+    )
     // Line breaks
-    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n\n/g, "</p><p>")
     // Lists
-    .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-  
+    .replace(/^\- (.*$)/gim, "<li>$1</li>")
+    .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
   return `<div>${html}</div>`;
 };
 
 // Format date
 const formatDate = (date) => {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
@@ -798,18 +829,18 @@ const handleGoogleSignup = () => {
     const config = useRuntimeConfig();
     const apiBaseUrl = config.public.apiBaseUrl;
     const oauthUrl = `${apiBaseUrl}/auth/google/redirect`;
-    
-    console.log('🔵 Google Signup Clicked');
-    console.log('📍 API Base URL:', apiBaseUrl);
-    console.log('🔗 OAuth URL:', oauthUrl);
-    console.log('🚀 Navigating now...');
-    
+
+    console.log("🔵 Google Signup Clicked");
+    console.log("📍 API Base URL:", apiBaseUrl);
+    console.log("🔗 OAuth URL:", oauthUrl);
+    console.log("🚀 Navigating now...");
+
     // Immediate navigation to backend OAuth endpoint
     // Backend will redirect to Google's sign-in page
     window.location.href = oauthUrl;
   } catch (error) {
-    console.error('❌ Error in handleGoogleSignup:', error);
-    alert('Error: ' + error.message);
+    console.error("❌ Error in handleGoogleSignup:", error);
+    alert("Error: " + error.message);
   }
 };
 
@@ -817,7 +848,7 @@ const handleGoogleSignup = () => {
 const handleAppleSignup = () => {
   const config = useRuntimeConfig();
   const apiBaseUrl = config.public.apiBaseUrl;
-  
+
   // Immediate navigation to backend OAuth endpoint
   // Backend will redirect to Apple's sign-in page
   window.location.href = `${apiBaseUrl}/auth/apple/redirect`;

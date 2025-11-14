@@ -18,7 +18,18 @@ class LinkController extends Controller
     }
     public function index(Request $request)
     {
-        $links = $request->user()->profile->socialLinks;
+        $user = $request->user();
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found',
+                'links' => []
+            ], 404);
+        }
+        
+        $links = $nfcCard->landingPage->socialLinks;
 
         return response()->json([
             'success' => true,
@@ -42,11 +53,21 @@ class LinkController extends Controller
             ], 422);
         }
 
-        $profile = $request->user()->profile;
-        $maxOrder = $profile->socialLinks()->max('order') ?? -1;
+        $user = $request->user();
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found'
+            ], 404);
+        }
+        
+        $landingPage = $nfcCard->landingPage;
+        $maxOrder = $landingPage->socialLinks()->max('order') ?? -1;
 
         $link = SocialLink::create([
-            'profile_id' => $profile->id,
+            'landing_page_id' => $landingPage->id,
             'platform' => $request->platform,
             'title' => $request->title,
             'url' => $request->url,
@@ -62,8 +83,15 @@ class LinkController extends Controller
 
     public function update(Request $request, SocialLink $link)
     {
+        $user = $request->user();
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json(['error' => 'No landing page found'], 404);
+        }
+        
         // Check ownership
-        if ($link->profile_id !== $request->user()->profile->id) {
+        if ($link->landing_page_id !== $nfcCard->landingPage->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -90,15 +118,22 @@ class LinkController extends Controller
 
     public function destroy(Request $request, SocialLink $link)
     {
+        $user = $request->user();
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json(['error' => 'No landing page found'], 404);
+        }
+        
         // Check ownership
-        if ($link->profile_id !== $request->user()->profile->id) {
+        if ($link->landing_page_id !== $nfcCard->landingPage->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $link->delete();
 
         // Reorder remaining links
-        $request->user()->profile->socialLinks()
+        $nfcCard->landingPage->socialLinks()
             ->where('order', '>', $link->order)
             ->decrement('order');
 
@@ -123,11 +158,21 @@ class LinkController extends Controller
             ], 422);
         }
 
-        $profile = $request->user()->profile;
+        $user = $request->user();
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found'
+            ], 404);
+        }
+        
+        $landingPage = $nfcCard->landingPage;
 
         foreach ($request->links as $linkData) {
             SocialLink::where('id', $linkData['id'])
-                ->where('profile_id', $profile->id)
+                ->where('landing_page_id', $landingPage->id)
                 ->update(['order' => $linkData['order']]);
         }
 
@@ -156,14 +201,17 @@ class LinkController extends Controller
 
         // Check for milestones (every 100 clicks)
         if ($link->click_count % 100 === 0 && $link->click_count > 0) {
-            // Get the profile owner
-            $user = $link->profile->user;
-            
-            // Send milestone notification
-            $this->notificationService->create($user, 'link_milestone', [
-                'link_title' => $link->title,
-                'click_count' => $link->click_count,
-            ]);
+            // Get the landing page owner through NFC card
+            $landingPage = $link->landingPage;
+            if ($landingPage && $landingPage->nfcCard) {
+                $user = $landingPage->nfcCard->user;
+                
+                // Send milestone notification
+                $this->notificationService->create($user, 'link_milestone', [
+                    'link_title' => $link->title,
+                    'click_count' => $link->click_count,
+                ]);
+            }
         }
 
         return response()->json([

@@ -4,9 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Profile;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AdminUserSeeder extends Seeder
 {
@@ -32,12 +30,23 @@ class AdminUserSeeder extends Seeder
             'admin_permissions' => ['user_management', 'nfc_management', 'analytics', 'system_admin'],
         ]);
 
-        // Update the auto-created profile for admin
-        $admin->profile->update([
-            'slug' => 'admin',
+        // Create NFC Card for admin
+        $adminCard = \App\Models\NfcCard::create([
+            'user_id' => $admin->id,
+            'card_owner' => $admin->full_name,
+            'billing_address' => 'NFCGo HQ, Business District',
+            'contact_number' => '+1234567890',
+            'purchase_date' => now(),
+            'subscription_plan' => 'business',
+            'status' => 'active',
+        ]);
+
+        // Create Landing Page for admin
+        \App\Models\LandingPage::create([
+            'nfc_card_id' => $adminCard->id,
             'name' => 'Admin User',
             'title' => 'System Administrator',
-            'company' => 'NFCGo',
+            'company_name' => 'NFCGo',
             'email' => 'admin@nfcgo.com',
             'is_active' => true,
         ]);
@@ -59,12 +68,23 @@ class AdminUserSeeder extends Seeder
             'admin_permissions' => ['user_management', 'nfc_management'],
         ]);
 
-        // Update the auto-created profile for regular admin
-        $regularAdmin->profile->update([
-            'slug' => 'regular-admin',
+        // Create NFC Card for regular admin
+        $regularAdminCard = \App\Models\NfcCard::create([
+            'user_id' => $regularAdmin->id,
+            'card_owner' => $regularAdmin->full_name,
+            'billing_address' => 'NFCGo HQ, Business District',
+            'contact_number' => '+1234567890',
+            'purchase_date' => now(),
+            'subscription_plan' => 'premium',
+            'status' => 'active',
+        ]);
+
+        // Create Landing Page for regular admin
+        \App\Models\LandingPage::create([
+            'nfc_card_id' => $regularAdminCard->id,
             'name' => 'Regular Admin',
             'title' => 'Administrator',
-            'company' => 'NFCGo',
+            'company_name' => 'NFCGo',
             'email' => 'admin2@nfcgo.com',
             'is_active' => true,
         ]);
