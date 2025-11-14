@@ -1,6 +1,20 @@
 <!-- layouts/UserDashboard.vue -->
 <template>
   <div class="min-h-screen bg-secondary-50">
+    <!-- Global Route Loading Indicator -->
+    <Transition
+      enter-active-class="transition-opacity duration-150"
+      leave-active-class="transition-opacity duration-150"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="isPageLoading"
+        class="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-[100] animate-pulse"
+        style="box-shadow: 0 0 10px rgba(37, 99, 235, 0.5)"
+      ></div>
+    </Transition>
+
     <!-- Desktop Layout Container -->
     <div class="flex h-screen overflow-hidden">
       <!-- Sidebar -->
@@ -412,6 +426,24 @@
 // Stores
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
+const route = useRoute();
+
+// Page loading state
+const isPageLoading = ref(false);
+
+// Watch for route changes using route watcher instead of router guards
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    if (newPath !== oldPath) {
+      isPageLoading.value = true;
+      // Reset loading state after a short delay
+      setTimeout(() => {
+        isPageLoading.value = false;
+      }, 300);
+    }
+  }
+);
 
 // Notifications composable
 const {

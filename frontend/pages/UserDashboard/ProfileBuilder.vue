@@ -1,6 +1,26 @@
 <!-- pages/UserDashboard/ProfileBuilder.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Global Loading Overlay -->
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="pageLoading"
+        class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div
+            class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"
+          ></div>
+          <p class="mt-4 text-sm text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Header -->
     <div class="bg-white shadow-sm border-b sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -892,13 +912,17 @@
                   <!-- Profile Section -->
                   <div class="text-center mb-4 sm:mb-6">
                     <img
-                      :src="profileData.image || '/default-avatar.png'"
+                      :src="
+                        getImageUrl(profileData.image) || '/default-avatar.png'
+                      "
+                      alt="Profile preview"
                       :class="[
                         'mx-auto object-cover mb-3 sm:mb-4',
                         profileData.profileStyle === 'classic'
                           ? 'w-20 h-20 sm:w-24 sm:h-24 rounded-full'
                           : 'w-full h-24 sm:h-32 rounded-xl',
                       ]"
+                      @error="(e) => (e.target.src = '/default-avatar.png')"
                     />
                     <h2
                       :style="{
@@ -980,6 +1004,8 @@ const saving = ref(false);
 const showMobilePreview = ref(false);
 const isMobile = ref(false);
 const showCardSelector = ref(false);
+const pageLoading = ref(true);
+const isInitialized = ref(false);
 
 // Profile data
 const profileData = reactive({
@@ -1107,10 +1133,7 @@ const tabs = [
   },
 ];
 
-const profileStyles = [
-  { id: "classic", name: "Classic" },
-  { id: "hero", name: "Hero" },
-];
+const profileStyles = [{ id: "classic", name: "Classic" }];
 
 const themes = [
   {
@@ -1166,6 +1189,28 @@ const buttonStyles = [
     class: "bg-white text-black rounded-xl shadow-lg",
   },
 ];
+
+// Helper function to get full image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+
+  // If already a full URL, return as is
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  // Get config
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
+
+  // Remove /api from the end to get base URL
+  const baseUrl = apiBase.replace("/api", "");
+
+  // Ensure the path starts with /
+  const path = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+
+  return `${baseUrl}${path}`;
+};
 
 // Methods - These are just event handlers for the ProfileImageUpload component
 const handleProfileImageUpload = (data) => {
@@ -1300,6 +1345,12 @@ const loadProfile = async () => {
     return;
   }
 
+  // Prevent multiple simultaneous loads
+  if (saving.value) {
+    console.log("Already loading, skipping");
+    return;
+  }
+
   try {
     // Load the landing page design for the selected NFC card
     const response = await $api.get(
@@ -1321,6 +1372,15 @@ const loadProfile = async () => {
         landingPage.profile_image || landingPage.image || null;
       profileData.companyLogo =
         landingPage.company_logo || landingPage.companyLogo || null;
+
+      // Debug image URLs
+      console.log("📸 Loaded images:", {
+        profile_image: profileData.image,
+        profile_image_full: getImageUrl(profileData.image),
+        company_logo: profileData.companyLogo,
+        company_logo_full: getImageUrl(profileData.companyLogo),
+      });
+
       profileData.profileStyle =
         landingPage.profile_style || landingPage.profileStyle || "classic";
       profileData.theme = landingPage.theme || "minimal";
@@ -1382,7 +1442,14 @@ const selectedNfcCardId = ref(null);
 const loadingCards = ref(false);
 
 const loadUserNfcCards = async () => {
+  // Prevent duplicate calls
+  if (isInitialized.value && !loadingCards.value) {
+    console.log("Already initialized, skipping reload");
+    return;
+  }
+
   loadingCards.value = true;
+  pageLoading.value = true;
   try {
     const response = await $api.get("/nfc-cards");
 
@@ -1431,10 +1498,18 @@ const loadUserNfcCards = async () => {
     $toast.error("Failed to load NFC cards");
   } finally {
     loadingCards.value = false;
+    pageLoading.value = false;
+    isInitialized.value = true;
   }
 };
 
-const selectNfcCard = (cardId) => {
+const selectNfcCard = async (cardId) => {
+  // Prevent selecting same card
+  if (selectedNfcCardId.value === cardId) {
+    showCardSelector.value = false;
+    return;
+  }
+
   selectedNfcCardId.value = cardId;
   showCardSelector.value = false;
 
@@ -1447,7 +1522,7 @@ const selectNfcCard = (cardId) => {
     );
 
     // Load the landing page for this card
-    loadProfile();
+    await loadProfile();
   }
 };
 
@@ -1479,11 +1554,14 @@ const checkMobile = () => {
 };
 
 // Initialize
-onMounted(() => {
+onMounted(async () => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+
   // Load user's NFC cards (which will auto-select a card and load its landing page)
-  loadUserNfcCards();
+  // Use nextTick to ensure DOM is ready
+  await nextTick();
+  await loadUserNfcCards();
 
   // Close card selector when clicking outside
   document.addEventListener("click", handleClickOutside);

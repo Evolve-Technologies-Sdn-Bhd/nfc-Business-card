@@ -2,6 +2,11 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const authStore = useAuthStore();
 
+  // Skip check if navigating from the same path (refresh)
+  if (to.path === from.path) {
+    return;
+  }
+
   // Check if user is authenticated
   if (!authStore.isAuthenticated) {
     console.log("User not authenticated, redirecting to login");
