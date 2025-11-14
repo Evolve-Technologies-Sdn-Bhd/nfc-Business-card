@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Analytics;
-use App\Models\Profile;
+use App\Models\LandingPage;
 use App\Models\NfcTag;
 use App\Models\SocialLink;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class AnalyticsController extends Controller
     public function track(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'trackable_type' => 'required|string|in:App\Models\Profile,App\Models\NfcTag,App\Models\SocialLink',
+            'trackable_type' => 'required|string|in:App\Models\LandingPage,App\Models\NfcTag,App\Models\SocialLink',
             'trackable_id' => 'required|integer',
             'action' => 'required|string',
             'data' => 'nullable|array',
@@ -58,17 +58,27 @@ class AnalyticsController extends Controller
     public function overview(Request $request)
     {
         $user = $request->user();
-        $profile = $user->profile;
+        
+        // Get user's first NFC card and landing page
+        $nfcCard = $user->nfcCards()->first();
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found'
+            ], 404);
+        }
+        
+        $landingPage = $nfcCard->landingPage;
         $nfcTag = $user->nfcTag;
 
         // Get date range (default to last 30 days)
         $endDate = Carbon::now();
         $startDate = $endDate->copy()->subDays(30);
 
-        // Profile views
-        $profileViews = Analytics::where('trackable_type', Profile::class)
-            ->where('trackable_id', $profile->id)
-            ->where('action', 'profile_view')
+        // Landing page views
+        $landingPageViews = Analytics::where('trackable_type', LandingPage::class)
+            ->where('trackable_id', $landingPage->id)
+            ->where('action', 'landing_page_view')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
@@ -84,17 +94,17 @@ class AnalyticsController extends Controller
 
         // Link clicks
         $linkClicks = Analytics::where('trackable_type', SocialLink::class)
-            ->whereIn('trackable_id', $profile->socialLinks->pluck('id'))
+            ->whereIn('trackable_id', $landingPage->socialLinks->pluck('id'))
             ->where('action', 'link_click')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         // Daily breakdown for the last 7 days
-        $dailyStats = Analytics::where(function ($query) use ($profile, $nfcTag) {
-            $query->where(function ($q) use ($profile) {
-                $q->where('trackable_type', Profile::class)
-                    ->where('trackable_id', $profile->id)
-                    ->where('action', 'profile_view');
+        $dailyStats = Analytics::where(function ($query) use ($landingPage, $nfcTag) {
+            $query->where(function ($q) use ($landingPage) {
+                $q->where('trackable_type', LandingPage::class)
+                    ->where('trackable_id', $landingPage->id)
+                    ->where('action', 'landing_page_view');
             });
 
             if ($nfcTag) {
@@ -112,7 +122,7 @@ class AnalyticsController extends Controller
             ->get();
 
         // Top performing links
-        $topLinks = $profile->socialLinks()
+        $topLinks = $landingPage->socialLinks()
             ->withCount(['analytics as click_count' => function ($query) use ($startDate, $endDate) {
                 $query->where('action', 'link_click')
                     ->whereBetween('created_at', [$startDate, $endDate]);
@@ -125,10 +135,10 @@ class AnalyticsController extends Controller
             'success' => true,
             'data' => [
                 'overview' => [
-                    'profile_views' => $profileViews,
+                    'landing_page_views' => $landingPageViews,
                     'nfc_taps' => $nfcTaps,
                     'link_clicks' => $linkClicks,
-                    'total_interactions' => $profileViews + $nfcTaps + $linkClicks,
+                    'total_interactions' => $landingPageViews + $nfcTaps + $linkClicks,
                 ],
                 'daily_stats' => $dailyStats,
                 'top_links' => $topLinks,
@@ -143,7 +153,17 @@ class AnalyticsController extends Controller
     public function profileAnalytics(Request $request)
     {
         $user = $request->user();
-        $profile = $user->profile;
+        
+        // Get user's first NFC card and landing page
+        $nfcCard = $user->nfcCards()->first();
+        if (!$nfcCard || !$nfcCard->landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found'
+            ], 404);
+        }
+        
+        $landingPage = $nfcCard->landingPage;
 
         // Get date range from request or default to last 30 days
         $endDate = Carbon::now();
@@ -151,10 +171,10 @@ class AnalyticsController extends Controller
             ? Carbon::parse($request->get('start_date'))
             : $endDate->copy()->subDays(30);
 
-        // Profile views over time
-        $profileViews = Analytics::where('trackable_type', Profile::class)
-            ->where('trackable_id', $profile->id)
-            ->where('action', 'profile_view')
+        // Landing page views over time
+        $landingPageViews = Analytics::where('trackable_type', LandingPage::class)
+            ->where('trackable_id', $landingPage->id)
+            ->where('action', 'landing_page_view')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
@@ -162,27 +182,27 @@ class AnalyticsController extends Controller
             ->get();
 
         // Device breakdown
-        $deviceBreakdown = Analytics::where('trackable_type', Profile::class)
-            ->where('trackable_id', $profile->id)
-            ->where('action', 'profile_view')
+        $deviceBreakdown = Analytics::where('trackable_type', LandingPage::class)
+            ->where('trackable_id', $landingPage->id)
+            ->where('action', 'landing_page_view')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('device_type, COUNT(*) as count')
             ->groupBy('device_type')
             ->get();
 
         // Browser breakdown
-        $browserBreakdown = Analytics::where('trackable_type', Profile::class)
-            ->where('trackable_id', $profile->id)
-            ->where('action', 'profile_view')
+        $browserBreakdown = Analytics::where('trackable_type', LandingPage::class)
+            ->where('trackable_id', $landingPage->id)
+            ->where('action', 'landing_page_view')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('browser, COUNT(*) as count')
             ->groupBy('browser')
             ->get();
 
         // Platform breakdown
-        $platformBreakdown = Analytics::where('trackable_type', Profile::class)
-            ->where('trackable_id', $profile->id)
-            ->where('action', 'profile_view')
+        $platformBreakdown = Analytics::where('trackable_type', LandingPage::class)
+            ->where('trackable_id', $landingPage->id)
+            ->where('action', 'landing_page_view')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('platform, COUNT(*) as count')
             ->groupBy('platform')
@@ -191,11 +211,11 @@ class AnalyticsController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'profile_views' => $profileViews,
+                'landing_page_views' => $landingPageViews,
                 'device_breakdown' => $deviceBreakdown,
                 'browser_breakdown' => $browserBreakdown,
                 'platform_breakdown' => $platformBreakdown,
-                'total_views' => $profileViews->sum('count'),
+                'total_views' => $landingPageViews->sum('count'),
                 'date_range' => [
                     'start' => $startDate->format('Y-m-d'),
                     'end' => $endDate->format('Y-m-d'),

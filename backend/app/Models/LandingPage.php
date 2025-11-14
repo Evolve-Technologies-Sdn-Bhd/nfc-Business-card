@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class LandingPage extends Model
 {
@@ -18,7 +19,10 @@ class LandingPage extends Model
         'website',
         'address',
         'profile_image',
+        'profile_image_path',
         'company_logo',
+        'company_logo_path',
+        'location',
         // Company Info
         'company_logo_text',
         'company_name',
@@ -53,6 +57,9 @@ class LandingPage extends Model
         'font',
         'button_style',
         'show_watermark',
+        // Status
+        'is_active',
+        'settings',
     ];
 
     protected $casts = [
@@ -60,7 +67,9 @@ class LandingPage extends Model
         'services' => 'array',
         'social_links' => 'array',
         'team_members' => 'array',
+        'settings' => 'array',
         'show_watermark' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -69,5 +78,29 @@ class LandingPage extends Model
     public function nfcCard()
     {
         return $this->belongsTo(NfcCard::class, 'nfc_card_id');
+    }
+
+    /**
+     * Get the social links for this landing page
+     */
+    public function socialLinks()
+    {
+        return $this->hasMany(SocialLink::class, 'landing_page_id');
+    }
+
+    /**
+     * Get analytics for this landing page
+     */
+    public function analytics()
+    {
+        return $this->morphMany(Analytics::class, 'trackable');
+    }
+
+    /**
+     * Get the user through the NFC card
+     */
+    public function user()
+    {
+        return $this->hasOneThrough(User::class, NfcCard::class, 'id', 'id', 'nfc_card_id', 'user_id');
     }
 }

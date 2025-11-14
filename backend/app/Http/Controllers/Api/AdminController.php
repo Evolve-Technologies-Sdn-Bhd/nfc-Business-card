@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Profile;
+use App\Models\LandingPage;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\Analytics;
@@ -27,13 +27,13 @@ class AdminController extends Controller
 
         // Get total counts
         $totalUsers = User::count();
-        $totalProfiles = Profile::count();
+        $totalLandingPages = LandingPage::count();
         $totalNfcCards = NfcCard::count();
         $totalNfcTags = NfcTag::count();
         $totalAnalytics = Analytics::count();
 
         // Get recent registrations
-        $recentUsers = User::with('profile')
+        $recentUsers = User::with('nfcCards.landingPage')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
@@ -61,7 +61,7 @@ class AdminController extends Controller
             'data' => [
                 'overview' => [
                     'total_users' => $totalUsers,
-                    'total_profiles' => $totalProfiles,
+                    'total_landing_pages' => $totalLandingPages,
                     'total_nfc_cards' => $totalNfcCards,
                     'total_nfc_tags' => $totalNfcTags,
                     'total_analytics' => $totalAnalytics,
@@ -79,7 +79,7 @@ class AdminController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $query = User::with(['profile', 'nfcTag', 'nfcCards'])
+        $query = User::with(['nfcCards.landingPage', 'nfcTag', 'nfcCards'])
             ->withCount(['analytics', 'nfcCards']);
 
         // Apply filters
@@ -136,7 +136,7 @@ class AdminController extends Controller
     public function getUser(Request $request, $userId)
     {
         $user = User::with([
-            'profile',
+            'nfcCards.landingPage',
             'nfcTag',
             'nfcCards',
             'analytics' => function ($query) {
@@ -216,23 +216,26 @@ class AdminController extends Controller
                 'total_card_quota' => $request->subscription_plan ?? 'business' ? 10 : 0,
             ]);
 
-            // Create profile
-            $slug = Str::slug($user->full_name);
-            $originalSlug = $slug;
-            $count = 1;
-
-            while (Profile::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $count;
-                $count++;
-            }
-
-            $profile = Profile::create([
+            // Create NFC card for the user
+            $nfcCard = NfcCard::create([
                 'user_id' => $user->id,
-                'slug' => $slug,
+                'card_owner' => $user->full_name,
+                'billing_address' => '',
+                'contact_number' => $user->phone ?? '',
+                'purchase_date' => now(),
+                'status' => 'active',
+                'subscription_plan' => $user->subscription_plan,
+                'purchase_amount' => 0,
+            ]);
+
+            // Create landing page for the NFC card
+            $landingPage = LandingPage::create([
+                'nfc_card_id' => $nfcCard->id,
                 'name' => $user->full_name,
                 'title' => $user->job_title,
-                'company' => $user->company,
+                'company_name' => $user->company,
                 'email' => $user->email,
+                'is_active' => true,
             ]);
 
             DB::commit();
@@ -241,8 +244,9 @@ class AdminController extends Controller
                 'success' => true,
                 'message' => 'User created successfully',
                 'data' => [
-                    'user' => $user->load('profile'),
-                    'profile' => $profile,
+                    'user' => $user->load('nfcCards.landingPage'),
+                    'nfc_card' => $nfcCard,
+                    'landing_page' => $landingPage,
                 ]
             ], 201);
         } catch (\Exception $e) {
@@ -296,7 +300,7 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User updated successfully',
-            'data' => $user->load('profile')
+            'data' => $user->load('nfcCards.landingPage')
         ]);
     }
 
@@ -327,7 +331,10 @@ class AdminController extends Controller
 
         try {
             // Delete related data
-            $user->profile()->delete();
+            // Delete landing pages through NFC cards
+            foreach ($user->nfcCards as $nfcCard) {
+                $nfcCard->landingPage()->delete();
+            }
             $user->nfcTag()->delete();
             $user->nfcCards()->delete();
             $user->analytics()->delete();
@@ -564,8 +571,8 @@ class AdminController extends Controller
             ],
             'storage' => [
                 'total_used' => $this->getStorageUsage(),
-                'profiles' => Profile::whereNotNull('profile_image_path')->count(),
-                'logos' => Profile::whereNotNull('company_logo_path')->count(),
+                'landing_pages' => LandingPage::whereNotNull('profile_image_path')->count(),
+                'logos' => LandingPage::whereNotNull('company_logo_path')->count(),
             ],
         ];
 

@@ -104,6 +104,10 @@ const props = defineProps({
     type: Number,
     default: 5 * 1024 * 1024, // 5MB
   },
+  nfcCardId: {
+    type: [Number, String],
+    default: null,
+  },
 });
 
 const emit = defineEmits([
@@ -184,6 +188,11 @@ const uploadFile = async (file) => {
       props.uploadEndpoint.includes("logo") ? "logo" : "image",
       file
     );
+
+    // Add nfc_card_id if provided
+    if (props.nfcCardId) {
+      formData.append("nfc_card_id", props.nfcCardId);
+    }
 
     // Create a custom fetch with progress tracking
     const xhr = new XMLHttpRequest();

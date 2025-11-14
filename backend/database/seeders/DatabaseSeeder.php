@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Profile;
-use App\Models\SocialLink;
 use App\Models\NfcTag;
+use App\Models\NfcCard;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -16,73 +15,53 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a test user (profile will be auto-created by User model)
-        $user = User::create([
-            'first_name' => 'John',
-            'last_name' => 'Doe',
-            'email' => 'john@example.com',
-            'password' => Hash::make('password'),
-            'company' => 'Tech Corp',
-            'job_title' => 'Software Engineer',
-            'plan' => 'premium',
-        ]);
-
-        // Update the auto-created profile with more details
-        $profile = $user->profile;
-        $profile->update([
-            'slug' => 'john-doe',
-            'bio' => 'Passionate software engineer with 5+ years of experience in web development.',
-            'phone' => '+1234567890',
-            'website' => 'https://johndoe.dev',
-            'location' => 'San Francisco, CA',
-            'theme' => 'modern',
-            'background_color' => '#1a1a1a',
-            'text_color' => '#ffffff',
-            'font' => 'inter',
-            'button_style' => 'solid',
-            'show_watermark' => true,
-        ]);
-
-        // Create social links
-        $socialLinks = [
+        // Create a test user (or find existing)
+        $user = User::firstOrCreate(
+            ['email' => 'john@example.com'],
             [
-                'platform' => 'linkedin',
-                'title' => 'LinkedIn',
-                'url' => 'https://linkedin.com/in/johndoe',
-                'order' => 1,
-            ],
-            [
-                'platform' => 'github',
-                'title' => 'GitHub',
-                'url' => 'https://github.com/johndoe',
-                'order' => 2,
-            ],
-            [
-                'platform' => 'twitter',
-                'title' => 'Twitter',
-                'url' => 'https://twitter.com/johndoe',
-                'order' => 3,
-            ],
-            [
-                'platform' => 'portfolio',
-                'title' => 'Portfolio',
-                'url' => 'https://johndoe.dev',
-                'order' => 4,
-            ],
-        ];
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'password' => Hash::make('password'),
+                'company' => 'Tech Corp',
+                'job_title' => 'Software Engineer',
+                'subscription_plan' => 'free',
+                'subscription_active' => true,
+            ]
+        );
 
-        foreach ($socialLinks as $linkData) {
-            SocialLink::create(array_merge($linkData, ['profile_id' => $profile->id]));
-        }
-
-        // Create NFC tag
-        NfcTag::create([
+        // Create NFC Card for test user
+        $nfcCard = NfcCard::create([
             'user_id' => $user->id,
-            'nfc_id' => 'test-nfc-123',
-            'name' => 'Business Card',
+            'card_owner' => $user->full_name,
+            'billing_address' => '123 Tech Street, San Francisco, CA 94105',
+            'contact_number' => '+1234567890',
+            'purchase_date' => now(),
+            'subscription_plan' => 'free',
             'status' => 'active',
-            'tap_count' => 0,
         ]);
+
+        // Create Landing Page for the NFC Card
+        \App\Models\LandingPage::create([
+            'nfc_card_id' => $nfcCard->id,
+            'name' => $user->full_name,
+            'title' => $user->job_title,
+            'company_name' => $user->company,
+            'email' => $user->email,
+            'phone' => '+1234567890',
+            'bio' => 'Passionate software engineer with 5+ years of experience.',
+            'is_active' => true,
+        ]);
+
+        // Create NFC tag (or find existing)
+        NfcTag::firstOrCreate(
+            ['nfc_id' => 'test-nfc-123'],
+            [
+                'user_id' => $user->id,
+                'name' => 'Business Card',
+                'status' => 'active',
+                'tap_count' => 0,
+            ]
+        );
 
         // Run NFC Card seeder for development
         $this->call([
@@ -96,6 +75,5 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Sample data created successfully!');
         $this->command->info('Test user: john@example.com / password');
-        $this->command->info('Profile URL: /Homepage/john-doe');
     }
 }

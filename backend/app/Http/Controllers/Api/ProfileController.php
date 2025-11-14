@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
+use App\Models\LandingPage;
+use App\Models\NfcCard;
 use App\Models\Analytics;
 use App\Services\FileUploadService;
 use App\Services\NotificationService;
@@ -25,27 +26,31 @@ class ProfileController extends Controller
         $this->notificationService = $notificationService;
     }
 
-    public function show($slug)
+    public function show($cardId)
     {
-        $profile = Profile::where('slug', $slug)
+        // Find NFC card by card_id
+        $nfcCard = NfcCard::where('card_id', $cardId)->firstOrFail();
+        
+        // Get the landing page for this card
+        $landingPage = LandingPage::where('nfc_card_id', $nfcCard->id)
             ->where('is_active', true)
             ->with(['socialLinks' => function ($query) {
                 $query->where('is_active', true);
             }])
             ->firstOrFail();
 
-        // Track profile view
+        // Track landing page view
         Analytics::create([
-            'trackable_type' => Profile::class,
-            'trackable_id' => $profile->id,
-            'action' => 'profile_view',
+            'trackable_type' => LandingPage::class,
+            'trackable_id' => $landingPage->id,
+            'action' => 'landing_page_view',
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
 
         return response()->json([
             'success' => true,
-            'data' => $profile
+            'data' => $landingPage
         ]);
     }
 
@@ -53,27 +58,55 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Ensure profile exists
-        if (!$user->profile) {
-            $user->profile()->create([
-                'name' => $user->name ?? $user->email,
-                'email' => $user->email,
-                'slug' => Str::slug(($user->name ?? $user->email) . '-' . $user->id),
-            ]);
+        // Get user's first NFC card
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No NFC card found. Please create one first.'
+            ], 404);
         }
 
-        $profile = $user->profile;
+        // Get or create landing page for this card
+        $landingPage = LandingPage::firstOrCreate(
+            ['nfc_card_id' => $nfcCard->id],
+            [
+                'name' => $user->full_name ?? $user->email,
+                'email' => $user->email,
+                'is_active' => true,
+            ]
+        );
 
         return response()->json([
             'success' => true,
-            'profile' => $profile
+            'landing_page' => $landingPage,
+            'nfc_card' => $nfcCard
         ]);
     }
 
     public function update(Request $request)
     {
         $user = $request->user();
-        $profile = $user->profile;
+        
+        // Get user's first NFC card
+        $nfcCard = $user->nfcCards()->first();
+        
+        if (!$nfcCard) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No NFC card found'
+            ], 404);
+        }
+        
+        $landingPage = $nfcCard->landingPage;
+        
+        if (!$landingPage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landing page found'
+            ], 404);
+        }
 
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:255',
@@ -103,86 +136,52 @@ class ProfileController extends Controller
         // Map frontend field names to database field names
         $data = $request->all();
         $mappedData = [
-            'name' => $data['name'] ?? $profile->name,
-            'title' => $data['position'] ?? $profile->title,
-            'company' => $data['company'] ?? $profile->company,
-            'bio' => $data['bio'] ?? $profile->bio,
-            'email' => $data['email'] ?? $profile->email,
-            'phone' => $data['contactNumber'] ?? $profile->phone,
-            'website' => $data['website'] ?? $profile->website,
-            'location' => $data['address'] ?? $profile->location,
-            'theme' => $data['theme'] ?? $profile->theme,
-            'background_color' => $data['backgroundColor'] ?? $profile->background_color,
-            'text_color' => $data['textColor'] ?? $profile->text_color,
-            'font' => $data['font'] ?? $profile->font,
-            'button_style' => $data['buttonStyle'] ?? $profile->button_style,
-            'show_watermark' => $data['showWatermark'] ?? $profile->show_watermark,
-            'profile_style' => $data['profileStyle'] ?? $profile->profile_style,
+            'name' => $data['name'] ?? $landingPage->name,
+            'title' => $data['position'] ?? $landingPage->title,
+            'company_name' => $data['company'] ?? $landingPage->company_name,
+            'bio' => $data['bio'] ?? $landingPage->bio,
+            'email' => $data['email'] ?? $landingPage->email,
+            'phone' => $data['contactNumber'] ?? $landingPage->phone,
+            'website' => $data['website'] ?? $landingPage->website,
+            'location' => $data['address'] ?? $landingPage->location,
+            'theme' => $data['theme'] ?? $landingPage->theme,
+            'background_color' => $data['backgroundColor'] ?? $landingPage->background_color,
+            'text_color' => $data['textColor'] ?? $landingPage->text_color,
+            'font' => $data['font'] ?? $landingPage->font,
+            'button_style' => $data['buttonStyle'] ?? $landingPage->button_style,
+            'show_watermark' => $data['showWatermark'] ?? $landingPage->show_watermark,
+            'profile_style' => $data['profileStyle'] ?? $landingPage->profile_style,
         ];
 
-        $profile->update($mappedData);
+        $landingPage->update($mappedData);
 
-        // Send profile updated notification
-        $this->notificationService->create($request->user(), 'profile_updated', [
-            'fields' => implode(', ', array_keys(array_filter($mappedData, function($value, $key) use ($profile) {
-                return $profile->wasChanged($key);
+        // Send landing page updated notification
+        $this->notificationService->create($request->user(), 'landing_page_updated', [
+            'fields' => implode(', ', array_keys(array_filter($mappedData, function($value, $key) use ($landingPage) {
+                return $landingPage->wasChanged($key);
             }, ARRAY_FILTER_USE_BOTH))),
         ]);
 
         return response()->json([
             'success' => true,
-            'profile' => $profile
+            'landing_page' => $landingPage
         ]);
     }
 
-    public function updateSlug(Request $request)
-    {
-        $user = $request->user();
-        $profile = $user->profile;
-
-        $validator = Validator::make($request->all(), [
-            'slug' => 'required|string|max:255|unique:profiles,slug,' . $profile->id,
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $profile->update(['slug' => Str::slug($request->slug)]);
-
-        return response()->json([
-            'success' => true,
-            'profile' => $profile
-        ]);
-    }
-
-    public function checkSlug(Request $request)
-    {
-        $slug = Str::slug($request->slug);
-        $exists = Profile::where('slug', $slug)
-            ->where('id', '!=', $request->user()->profile->id ?? 0)
-            ->exists();
-
-        return response()->json([
-            'success' => true,
-            'available' => !$exists,
-            'slug' => $slug
-        ]);
-    }
+    // Slug functions removed - landing pages use card_id instead
 
     public function uploadProfileImage(Request $request)
     {
-        Log::info('Profile image upload started', [
+        Log::info('Landing page image upload started', [
             'user_id' => $request->user()->id,
             'has_file' => $request->hasFile('image'),
-            'files' => $request->allFiles()
+            'files' => $request->allFiles(),
+            'nfc_card_id' => $request->input('nfc_card_id')
         ]);
 
         $validator = Validator::make($request->all(), [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
         ]);
 
         if ($validator->fails()) {
@@ -199,16 +198,28 @@ class ProfileController extends Controller
         try {
             $user = $request->user();
 
-            // Ensure profile exists
-            if (!$user->profile) {
-                $user->profile()->create([
-                    'name' => $user->name ?? $user->email,
-                    'email' => $user->email,
-                    'slug' => Str::slug(($user->name ?? $user->email) . '-' . $user->id),
-                ]);
+            // Get NFC card - either specified or user's first card
+            if ($request->has('nfc_card_id')) {
+                $nfcCard = $user->nfcCards()->find($request->input('nfc_card_id'));
+                if (!$nfcCard) {
+                    throw new \Exception('NFC card not found or does not belong to you');
+                }
+            } else {
+                $nfcCard = $user->nfcCards()->first();
+                if (!$nfcCard) {
+                    throw new \Exception('No NFC card found');
+                }
             }
 
-            $profile = $user->profile;
+            // Get or create landing page
+            $landingPage = LandingPage::firstOrCreate(
+                ['nfc_card_id' => $nfcCard->id],
+                [
+                    'name' => $user->full_name ?? $user->email,
+                    'email' => $user->email,
+                    'is_active' => true,
+                ]
+            );
 
             // Check if storage link exists
             if (!file_exists(public_path('storage'))) {
@@ -217,12 +228,12 @@ class ProfileController extends Controller
             }
 
             // Delete old image if exists
-            if ($profile->profile_image_path) {
+            if ($landingPage->profile_image_path) {
                 try {
-                    $this->fileUploadService->deleteFile($profile->profile_image_path);
+                    $this->fileUploadService->deleteFile($landingPage->profile_image_path);
 
                     // Delete thumbnail too
-                    $thumbnailPath = str_replace('profile-images/', 'profile-images/thumbnails/', $profile->profile_image_path);
+                    $thumbnailPath = str_replace('profile-images/', 'profile-images/thumbnails/', $landingPage->profile_image_path);
                     $this->fileUploadService->deleteFile($thumbnailPath);
                 } catch (\Exception $e) {
                     Log::warning('Failed to delete old image', ['error' => $e->getMessage()]);
@@ -237,8 +248,8 @@ class ProfileController extends Controller
 
             Log::info('Image uploaded successfully', ['result' => $uploadResult]);
 
-            // Update profile
-            $profile->update([
+            // Update landing page
+            $landingPage->update([
                 'profile_image' => $uploadResult['url'],
                 'profile_image_path' => $uploadResult['path'],
             ]);
@@ -273,11 +284,13 @@ class ProfileController extends Controller
         Log::info('Company logo upload started', [
             'user_id' => $request->user()->id,
             'has_file' => $request->hasFile('logo'),
-            'files' => $request->allFiles()
+            'files' => $request->allFiles(),
+            'nfc_card_id' => $request->input('nfc_card_id')
         ]);
 
         $validator = Validator::make($request->all(), [
             'logo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
         ]);
 
         if ($validator->fails()) {
@@ -294,16 +307,28 @@ class ProfileController extends Controller
         try {
             $user = $request->user();
 
-            // Ensure profile exists
-            if (!$user->profile) {
-                $user->profile()->create([
-                    'name' => $user->name ?? $user->email,
-                    'email' => $user->email,
-                    'slug' => Str::slug(($user->name ?? $user->email) . '-' . $user->id),
-                ]);
+            // Get NFC card - either specified or user's first card
+            if ($request->has('nfc_card_id')) {
+                $nfcCard = $user->nfcCards()->find($request->input('nfc_card_id'));
+                if (!$nfcCard) {
+                    throw new \Exception('NFC card not found or does not belong to you');
+                }
+            } else {
+                $nfcCard = $user->nfcCards()->first();
+                if (!$nfcCard) {
+                    throw new \Exception('No NFC card found');
+                }
             }
 
-            $profile = $user->profile;
+            // Get or create landing page
+            $landingPage = LandingPage::firstOrCreate(
+                ['nfc_card_id' => $nfcCard->id],
+                [
+                    'name' => $user->full_name ?? $user->email,
+                    'email' => $user->email,
+                    'is_active' => true,
+                ]
+            );
 
             // Check if storage link exists
             if (!file_exists(public_path('storage'))) {
@@ -312,9 +337,9 @@ class ProfileController extends Controller
             }
 
             // Delete old logo if exists
-            if ($profile->company_logo_path) {
+            if ($landingPage->company_logo_path) {
                 try {
-                    $this->fileUploadService->deleteFile($profile->company_logo_path);
+                    $this->fileUploadService->deleteFile($landingPage->company_logo_path);
                 } catch (\Exception $e) {
                     Log::warning('Failed to delete old logo', ['error' => $e->getMessage()]);
                 }
@@ -328,8 +353,8 @@ class ProfileController extends Controller
 
             Log::info('Logo uploaded successfully', ['result' => $uploadResult]);
 
-            // Update profile
-            $profile->update([
+            // Update landing page
+            $landingPage->update([
                 'company_logo' => $uploadResult['url'],
                 'company_logo_path' => $uploadResult['path'],
             ]);
@@ -363,18 +388,25 @@ class ProfileController extends Controller
         DB::beginTransaction();
 
         try {
-            $profile = $request->user()->profile;
+            $user = $request->user();
+            $nfcCard = $user->nfcCards()->first();
+            
+            if (!$nfcCard || !$nfcCard->landingPage) {
+                throw new \Exception('No landing page found');
+            }
+            
+            $landingPage = $nfcCard->landingPage;
 
-            if ($profile->profile_image_path) {
+            if ($landingPage->profile_image_path) {
                 // Delete main image
-                $this->fileUploadService->deleteFile($profile->profile_image_path);
+                $this->fileUploadService->deleteFile($landingPage->profile_image_path);
 
                 // Delete thumbnail
-                $thumbnailPath = str_replace('profile-images/', 'profile-images/thumbnails/', $profile->profile_image_path);
+                $thumbnailPath = str_replace('profile-images/', 'profile-images/thumbnails/', $landingPage->profile_image_path);
                 $this->fileUploadService->deleteFile($thumbnailPath);
 
-                // Update profile
-                $profile->update([
+                // Update landing page
+                $landingPage->update([
                     'profile_image' => null,
                     'profile_image_path' => null,
                 ]);
@@ -402,12 +434,19 @@ class ProfileController extends Controller
         DB::beginTransaction();
 
         try {
-            $profile = $request->user()->profile;
+            $user = $request->user();
+            $nfcCard = $user->nfcCards()->first();
+            
+            if (!$nfcCard || !$nfcCard->landingPage) {
+                throw new \Exception('No landing page found');
+            }
+            
+            $landingPage = $nfcCard->landingPage;
 
-            if ($profile->company_logo_path) {
-                $this->fileUploadService->deleteFile($profile->company_logo_path);
+            if ($landingPage->company_logo_path) {
+                $this->fileUploadService->deleteFile($landingPage->company_logo_path);
 
-                $profile->update([
+                $landingPage->update([
                     'company_logo' => null,
                     'company_logo_path' => null,
                 ]);

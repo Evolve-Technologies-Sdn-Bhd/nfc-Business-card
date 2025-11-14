@@ -7,117 +7,141 @@
 
 <!-- app.vue -->
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <div class="app-root">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
 
-  <!-- Chatbot - Only on Homepage -->
-  <ClientOnly>
-    <template v-if="isHomePage">
-      <ChatbotFloatingIcon
-        :is-open="isChatOpen"
-        :unread-count="unreadCount"
-        @open="openChat"
-        @close="closeChat"
-      />
-      <ChatbotInterface
-        :is-open="isChatOpen"
-        @close="closeChat"
-        @ask="handleAsk"
-        @submit-feedback="handleSubmitFeedback"
-      />
-    </template>
-  </ClientOnly>
+    <!-- Chatbot - Only on Homepage -->
+    <ClientOnly>
+      <template v-if="isHomePage">
+        <ChatbotFloatingIcon
+          :is-open="isChatOpen"
+          :unread-count="unreadCount"
+          @open="openChat"
+          @close="closeChat"
+        />
+        <ChatbotInterface
+          :is-open="isChatOpen"
+          @close="closeChat"
+          @ask="handleAsk"
+          @submit-feedback="handleSubmitFeedback"
+        />
+      </template>
+    </ClientOnly>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import ChatbotFloatingIcon from '~/components/ChatbotFloatingIcon.vue'
-import ChatbotInterface from '~/components/ChatbotInterface.vue'
+import { ref, computed } from "vue";
+import ChatbotFloatingIcon from "~/components/ChatbotFloatingIcon.vue";
+import ChatbotInterface from "~/components/ChatbotInterface.vue";
 
-const route = useRoute()
+const route = useRoute();
 
 // Chat state - STARTS CLOSED
-const isChatOpen = ref(false)
-const unreadCount = ref(0)
-const { $api } = useNuxtApp()
+const isChatOpen = ref(false);
+const unreadCount = ref(0);
+const { $api } = useNuxtApp();
 
 // Only show chatbot on homepage
-const isHomePage = computed(() => route.path === '/')
+const isHomePage = computed(() => route.path === "/");
 
 // Log initial state for debugging
-console.log('🤖 Chatbot initialized - isChatOpen:', isChatOpen.value)
+console.log("🤖 Chatbot initialized - isChatOpen:", isChatOpen.value);
 
 const openChat = () => {
-  console.log('🤖 Opening chat')
-  isChatOpen.value = true
-  unreadCount.value = 0
-}
+  console.log("🤖 Opening chat");
+  isChatOpen.value = true;
+  unreadCount.value = 0;
+};
 
 const closeChat = () => {
-  console.log('🤖 Closing chat')
-  isChatOpen.value = false
-}
+  console.log("🤖 Closing chat");
+  isChatOpen.value = false;
+};
 
 // Handle chatbot question
 const handleAsk = async (question, callback) => {
   try {
-    const response = await $api.post('/chatbot/ask', {
-      question: question
-    })
+    const response = await $api.post("/chatbot/ask", {
+      question: question,
+    });
 
     if (response.data.success && response.data.found) {
       // Found an answer
       callback({
         success: true,
         answer: response.data.data.answer,
-        questionId: response.data.data.id
-      })
+        questionId: response.data.data.id,
+      });
     } else {
       // No answer found
       callback({
         success: false,
-        answer: null
-      })
+        answer: null,
+      });
     }
   } catch (error) {
-    console.error('Error asking chatbot:', error)
+    console.error("Error asking chatbot:", error);
     callback({
       success: false,
       answer: null,
-      error: error.message
-    })
+      error: error.message,
+    });
   }
-}
+};
 
 // Handle feedback submission
 const handleSubmitFeedback = async (feedbackData, callback) => {
   try {
     const payload = {
       question_id: feedbackData.questionId || null,
-      user_question: feedbackData.userQuestion || '',
-      user_message: feedbackData.userMessage || '',
-      user_email: feedbackData.userEmail || '',
+      user_question: feedbackData.userQuestion || "",
+      user_message: feedbackData.userMessage || "",
+      user_email: feedbackData.userEmail || "",
       rating: feedbackData.rating || 1,
-      feedback_type: feedbackData.feedbackType === 'no-answer' ? 'not_found' : 
-                      feedbackData.feedbackType === 'not-helpful' ? 'rating' : 
-                      feedbackData.feedbackType === 'helpful' ? 'rating' : 'general'
-    }
+      feedback_type:
+        feedbackData.feedbackType === "no-answer"
+          ? "not_found"
+          : feedbackData.feedbackType === "not-helpful"
+          ? "rating"
+          : feedbackData.feedbackType === "helpful"
+          ? "rating"
+          : "general",
+    };
 
-    const response = await $api.post('/chatbot/feedback', payload)
+    const response = await $api.post("/chatbot/feedback", payload);
 
     if (response.data.success) {
-      callback(true)
+      callback(true);
     } else {
-      callback(false)
+      callback(false);
     }
   } catch (error) {
-    console.error('Error submitting feedback:', error)
-    callback(false)
+    console.error("Error submitting feedback:", error);
+    callback(false);
   }
-}
+};
 </script>
 
 <style>
 /* Global styles are handled in assets/css/main.css */
+
+.app-root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Prevent layout shift and horizontal scroll */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+  position: relative;
+}
 </style>
