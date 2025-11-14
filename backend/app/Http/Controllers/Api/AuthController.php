@@ -168,6 +168,13 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
         // Ensure user has a profile
         if (!$user->profile) {
             $slug = Str::slug($user->full_name ?? $user->email);

@@ -324,14 +324,9 @@ class NfcCardController extends Controller
      */
     public function getLandingPage(Request $request, NfcCard $nfcCard)
     {
-        // Check ownership
-        if ($nfcCard->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
-
+        // Public access - no authentication required
+        // Anyone with the NFC card ID can view the landing page
+        
         $landingPage = $nfcCard->landingPage;
 
         if (!$landingPage) {
