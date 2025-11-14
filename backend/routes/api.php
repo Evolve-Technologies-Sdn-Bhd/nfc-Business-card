@@ -46,6 +46,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Public profile viewing
 Route::get('/profiles/{slug}', [ProfileController::class, 'show']);
+Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
 Route::post('/analytics/track', [AnalyticsController::class, 'track']);
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
 
@@ -98,8 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/nfc-cards/{nfcCard}/deactivate', [NfcCardController::class, 'deactivate']);
     Route::get('/nfc-cards/{nfcCard}/analytics', [NfcCardController::class, 'analytics']);
     
-    // Landing Page for NFC Cards
-    Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
+    // Landing Page update (protected - only card owner can update)
     Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
     
     Route::get('/subscription/status', [NfcCardController::class, 'subscriptionStatus']);

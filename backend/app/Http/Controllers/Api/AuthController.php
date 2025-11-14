@@ -146,6 +146,33 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
+        // Ensure user has a profile
+        if (!$user->profile) {
+            $slug = Str::slug($user->full_name ?? $user->email);
+            $originalSlug = $slug;
+            $count = 1;
+
+            while (Profile::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $count;
+                $count++;
+            }
+
+            $user->profile()->create([
+                'slug' => $slug,
+                'name' => $user->full_name ?? $user->email,
+                'title' => $user->job_title,
+                'company' => $user->company,
+                'email' => $user->email,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'user' => $user->load('nfcCards')

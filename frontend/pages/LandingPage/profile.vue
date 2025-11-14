@@ -141,6 +141,43 @@
       </button>
     </Transition>
 
+    <!-- Edit Profile Button (for authenticated card owners) -->
+    <Transition name="fade-slide">
+      <button
+        v-if="showEditButton && !loading && !profileNotFound"
+        @click="goToEditProfile"
+        @mouseover="handleEditButtonHoverIn"
+        @mouseout="handleEditButtonHoverOut"
+        aria-label="Edit your profile in dashboard"
+        role="button"
+        tabindex="0"
+        :style="{
+          position: 'fixed',
+          top: isMobile ? '15px' : '20px',
+          right: isMobile ? '15px' : '20px',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '8px' : '10px',
+          padding: isMobile ? '10px 15px' : '12px 20px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          borderRadius: isMobile ? '12px' : '15px',
+          color: 'white',
+          fontSize: isMobile ? '14px' : '16px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          transition: 'all 0.3s',
+          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+          willChange: 'opacity, transform',
+        }"
+      >
+        <span :style="{ fontSize: isMobile ? '18px' : '20px' }" aria-hidden="true">✏️</span>
+        <span>Edit Profile</span>
+      </button>
+    </Transition>
+
     <div
       :style="{
         position: 'relative',
@@ -1167,6 +1204,9 @@ const activeService = ref(null);
 const activeTeam = ref(null);
 const showScrollTop = ref(false);
 const showHomeButton = ref(false);
+const showEditButton = ref(false);
+const currentNfcCardId = ref(null);
+const isCardOwner = ref(false);
 const companyCardRef = ref(null);
 const windowWidth = ref(
   typeof window !== "undefined" ? window.innerWidth : 1200
@@ -1335,7 +1375,7 @@ const loadProfileData = async () => {
   loading.value = true;
   try {
     // Get NFC card ID from route params or query
-    const nfcCardId = route.params.id || route.query.nfc_card_id;
+    const nfcCardId = route.params.id || route.query.nfc_card_id || route.query.id;
 
     if (!nfcCardId) {
       console.error("No NFC card ID provided");
@@ -1343,6 +1383,9 @@ const loadProfileData = async () => {
       loading.value = false;
       return;
     }
+
+    // Store the current NFC card ID
+    currentNfcCardId.value = nfcCardId;
 
     // Fetch landing page data for this NFC card
     const response = await $api.get(`/nfc-cards/${nfcCardId}/landing-page`);
@@ -1460,6 +1503,9 @@ const loadProfileData = async () => {
       }
 
       profileNotFound.value = false;
+      
+      // Check if current user owns this card (to show Edit button)
+      await checkCardOwnership();
     } else {
       profileNotFound.value = true;
     }
@@ -1661,8 +1707,55 @@ const handleBackButtonHoverOut = (e) => {
   }
 };
 
+const handleEditButtonHoverIn = (e) => {
+  if (!isMobile.value) {
+    e.currentTarget.style.transform = "translateY(-3px)";
+    e.currentTarget.style.boxShadow = "0 8px 25px rgba(102, 126, 234, 0.6)";
+  }
+};
+
+const handleEditButtonHoverOut = (e) => {
+  if (!isMobile.value) {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
+  }
+};
+
 const goToHome = () => {
   navigateTo("/");
+};
+
+const goToEditProfile = () => {
+  // Navigate to Business Profile Builder with the current NFC card ID
+  navigateTo(`/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?cardId=${currentNfcCardId.value}`);
+};
+
+// Check if current user owns this NFC card
+const checkCardOwnership = async () => {
+  try {
+    const token = localStorage.getItem('auth_token');
+    if (!token || !currentNfcCardId.value) {
+      showEditButton.value = false;
+      return;
+    }
+
+    // Get current user info
+    const userResponse = await $api.get('/me');
+    if (!userResponse.success) {
+      showEditButton.value = false;
+      return;
+    }
+
+    // Get NFC card details to check ownership
+    const cardResponse = await $api.get(`/nfc-cards/${currentNfcCardId.value}`);
+    if (cardResponse.success && cardResponse.nfc_card) {
+      isCardOwner.value = cardResponse.nfc_card.user_id === userResponse.user.id;
+      showEditButton.value = isCardOwner.value;
+    }
+  } catch (error) {
+    console.log('Not authenticated or error checking ownership:', error);
+    showEditButton.value = false;
+  }
 };
 
 // Lifecycle
