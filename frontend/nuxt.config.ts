@@ -24,8 +24,8 @@ export default defineNuxtConfig({
 
   // Icon configuration
   icon: {
-    size: '24px',
-    class: 'icon',
+    size: "24px",
+    class: "icon",
   },
 
   // Google Fonts
@@ -40,7 +40,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       // Updated to use NUXT_PUBLIC_ prefix
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api",
+      apiBaseUrl:
+        process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api",
       appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3002",
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
       appleClientId: process.env.NUXT_PUBLIC_APPLE_CLIENT_ID || "",
@@ -57,7 +58,11 @@ export default defineNuxtConfig({
       title: "NFC Business Card - Digital Professional Networking",
       meta: [
         { charset: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" },
+        {
+          name: "viewport",
+          content:
+            "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes",
+        },
         {
           name: "description",
           content:
@@ -66,6 +71,8 @@ export default defineNuxtConfig({
       ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     },
+    pageTransition: { name: "page", mode: "out-in" },
+    layoutTransition: { name: "layout", mode: "out-in" },
   },
 
   // Tailwind CSS
@@ -76,7 +83,7 @@ export default defineNuxtConfig({
 
   // Development configuration
   devServer: {
-    host: '0.0.0.0', // Bind to all network interfaces (accessible from localhost and LAN/mobile)
+    host: "0.0.0.0", // Bind to all network interfaces (accessible from localhost and LAN/mobile)
     port: 3000,
   },
 
@@ -86,9 +93,6 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["vue", "vue-router"],
-    },
-    server: {
-      host: '0.0.0.0', // Also bind Vite dev server to all interfaces
     },
   },
 

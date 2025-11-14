@@ -976,12 +976,19 @@ const notificationSettings = ref({
 });
 
 const activeSessions = ref([]);
+
+// Profile form for slug/URL management
+const profileForm = ref({
+  slug: "",
+});
+
 const slugStatus = ref("");
 const isSlugValid = computed(() => slugStatus.value === "available");
 
 // Loading states
 const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
+const updatingSlug = ref(false);
 const exportingData = ref(false);
 const deletingAccount = ref(false);
 
@@ -1139,6 +1146,73 @@ const changePassword = async () => {
     showError("Failed to change password");
   } finally {
     changingPassword.value = false;
+  }
+};
+
+// Slug/URL management functions
+let slugCheckTimeout = null;
+
+const checkSlugAvailability = async () => {
+  const slug = profileForm.value.slug?.trim();
+
+  if (!slug) {
+    slugStatus.value = "";
+    return;
+  }
+
+  // Debounce the check
+  if (slugCheckTimeout) {
+    clearTimeout(slugCheckTimeout);
+  }
+
+  slugStatus.value = "checking";
+
+  slugCheckTimeout = setTimeout(async () => {
+    try {
+      const { $api } = useNuxtApp();
+      const response = await $api.get(
+        `/user/check-slug?slug=${encodeURIComponent(slug)}`
+      );
+
+      if (response.success) {
+        slugStatus.value = response.available ? "available" : "taken";
+      } else {
+        slugStatus.value = "";
+      }
+    } catch (error) {
+      console.error("Error checking slug:", error);
+      slugStatus.value = "";
+    }
+  }, 500);
+};
+
+const updateSlug = async () => {
+  if (!isSlugValid.value) {
+    showError("Please enter a valid and available URL");
+    return;
+  }
+
+  updatingSlug.value = true;
+  try {
+    const { $api } = useNuxtApp();
+    const response = await $api.put("/user/slug", {
+      slug: profileForm.value.slug,
+    });
+
+    if (response.success) {
+      showSuccess("Profile URL updated successfully");
+      // Update user data if needed
+      if (response.user) {
+        authStore.user = { ...authStore.user, ...response.user };
+      }
+    } else {
+      showError(response.message || "Failed to update profile URL");
+    }
+  } catch (error) {
+    console.error("Error updating slug:", error);
+    showError(error.data?.message || "Failed to update profile URL");
+  } finally {
+    updatingSlug.value = false;
   }
 };
 
@@ -1347,6 +1421,11 @@ watch(
         !newUser.account_image
       ) {
         personalInfoForm.value.account_image = null;
+      }
+
+      // Update profile slug if available
+      if (newUser.slug && profileForm.value.slug !== newUser.slug) {
+        profileForm.value.slug = newUser.slug;
       }
     }
   },

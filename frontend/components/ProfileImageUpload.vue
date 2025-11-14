@@ -8,6 +8,7 @@
             :src="imageUrl"
             :alt="altText"
             class="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+            @error="handleImageError"
           />
           <button
             v-if="!uploading"
@@ -112,14 +113,41 @@ const emit = defineEmits([
 ]);
 
 const { $api, $toast } = useNuxtApp();
+const config = useRuntimeConfig();
 
 const fileInput = ref(null);
 const uploading = ref(false);
 const uploadProgress = ref(0);
 const error = ref(null);
 
+// Helper to get full image URL
+const getFullImageUrl = (path) => {
+  if (!path) return null;
+
+  // If already a full URL, return as is
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  // Get base URL from API config
+  const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
+  const baseUrl = apiBase.replace("/api", "");
+
+  // Ensure path starts with /
+  const imagePath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${baseUrl}${imagePath}`;
+};
+
 const imageUrl = computed({
-  get: () => props.modelValue,
+  get: () => {
+    const fullUrl = getFullImageUrl(props.modelValue);
+    console.log("🖼️ Image URL:", {
+      original: props.modelValue,
+      full: fullUrl,
+    });
+    return fullUrl;
+  },
   set: (value) => emit("update:modelValue", value),
 });
 
@@ -250,6 +278,12 @@ const uploadFile = async (file) => {
       fileInput.value.value = "";
     }
   }
+};
+
+const handleImageError = (event) => {
+  console.error("Image failed to load:", imageUrl.value);
+  event.target.src = "/default-avatar.png";
+  error.value = "Failed to load image";
 };
 
 const removeImage = async () => {

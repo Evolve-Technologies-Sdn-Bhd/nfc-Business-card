@@ -1246,10 +1246,7 @@ const tabs = [
   },
 ];
 
-const profileStyles = [
-  { id: "classic", name: "Classic" },
-  { id: "hero", name: "Hero" },
-];
+const profileStyles = [{ id: "classic", name: "Classic" }];
 
 const themes = [
   {
