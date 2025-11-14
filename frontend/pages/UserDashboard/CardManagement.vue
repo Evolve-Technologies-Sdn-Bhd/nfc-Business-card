@@ -777,16 +777,72 @@ const orderNewCard = () => {
 const submitOrder = async () => {
   orderLoading.value = true;
   try {
-    const response = await $api.post("/nfc-cards", {
+    const selectedPlan = orderForm.value.subscription_plan;
+    const currentUser = authStore.user;
+
+    // Check if user is selecting Business Plan
+    if (selectedPlan === "business") {
+      // Check if user has permission to use Business Plan
+      const isBusinessAccount = currentUser?.subscription_plan === "business";
+      const isBusinessEmployee = currentUser?.parent_business_id !== null;
+
+      // If user is neither Business account nor employee under Business account
+      if (!isBusinessAccount && !isBusinessEmployee) {
+        $toast.warning(
+          "Business Plan is not available. Redirecting to purchase page..."
+        );
+        setTimeout(() => {
+          navigateTo("/UserDashboard/PlanSelection");
+        }, 1500);
+        return;
+      }
+
+      // If user is employee but trying to order Business Plan without parent permission
+      if (isBusinessEmployee && !isBusinessAccount) {
+        // Need to verify with backend that parent has quota
+        // Backend will check: parent_business_id has available quota
+      }
+    }
+
+    // Prepare order data
+    const orderData = {
       ...orderForm.value,
-      purchase_amount: getPlanPrice(orderForm.value.subscription_plan),
-    });
+      purchase_amount: getPlanPrice(selectedPlan),
+    };
+
+    // For Business Plan orders, always check card quota
+    // This applies to:
+    // 1. Business account (main) ordering Business Plan
+    // 2. Employee account ordering Business Plan (checks parent's quota)
+    if (selectedPlan === "business") {
+      orderData.check_card_quota = true; // Tell backend to validate card quota
+
+      // If current user is employee, include parent_business_id for quota tracking
+      if (currentUser?.parent_business_id) {
+        orderData.parent_business_id = currentUser.parent_business_id;
+      }
+    }
+
+    const response = await $api.post("/nfc-cards", orderData);
 
     if (response.success) {
       $toast.success("NFC card order placed successfully!");
       showOrderModal.value = false;
-      await loadNfcCards();
-      await loadSubscriptionStatus();
+
+      // Redirect to NFCCardDesign page based on selected plan
+      const planRoutes = {
+        basic: "/UserDashboard/NFCCardDesign/BasicPlanNFCCard",
+        premium: "/UserDashboard/NFCCardDesign/PremiumPlanNFCCard",
+        business: "/UserDashboard/NFCCardDesign/BusinessPlanNFCCard",
+      };
+
+      const redirectPath =
+        planRoutes[selectedPlan] || "/UserDashboard/NFCCardDesign";
+
+      // Wait a moment for the toast to show, then redirect
+      setTimeout(() => {
+        navigateTo(redirectPath);
+      }, 1000);
     }
   } catch (error) {
     if (
@@ -794,6 +850,27 @@ const submitOrder = async () => {
       error.response?.data?.upgrade_required
     ) {
       $toast.error("This feature requires a Premium subscription");
+    } else if (
+      error.response?.status === 400 &&
+      error.response?.data?.quota_exceeded
+    ) {
+      // Card quota exceeded
+      $toast.error(
+        error.response.data.message ||
+          "Card quota limit reached. Please contact support to purchase additional quota."
+      );
+    } else if (
+      error.response?.status === 403 &&
+      error.response?.data?.business_plan_not_allowed
+    ) {
+      // User not authorized to use Business Plan
+      $toast.error(
+        error.response.data.message ||
+          "You are not authorized to use Business Plan. Redirecting to purchase page..."
+      );
+      setTimeout(() => {
+        navigateTo("/UserDashboard/PlanSelection");
+      }, 1500);
     } else {
       $toast.error("Failed to place order");
       console.error("Order error:", error);

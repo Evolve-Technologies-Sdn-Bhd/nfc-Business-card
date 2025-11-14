@@ -1,6 +1,26 @@
 <!-- pages/UserDashboard/ProfileBuilder.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Global Loading Overlay -->
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="pageLoading"
+        class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div
+            class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"
+          ></div>
+          <p class="mt-4 text-sm text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Header -->
     <div class="bg-white shadow-sm border-b sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,39 +65,61 @@
                     :key="card.id"
                     @click="selectNfcCard(card.id)"
                     :class="[
-                      'cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
+                      'relative cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
                       selectedNfcCardId === card.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300',
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100'
+                        : 'border-gray-200 hover:border-gray-300 bg-white',
                     ]"
                   >
                     <!-- Card Mini Design -->
                     <div class="flex items-start justify-between gap-3">
+                      <!-- Left: Card Info -->
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                          <h4
-                            class="font-medium text-sm text-gray-900 truncate"
-                          >
-                            {{ card.card_owner || "Card Owner" }}
-                          </h4>
+                          <Icon
+                            name="heroicons:credit-card-solid"
+                            :class="[
+                              'w-5 h-5',
+                              selectedNfcCardId === card.id
+                                ? 'text-blue-600'
+                                : 'text-gray-400',
+                            ]"
+                          />
+                          <p class="text-sm font-bold text-gray-900 truncate">
+                            {{ card.nfc_card_id || "Card #" + card.id }}
+                          </p>
+                        </div>
+
+                        <p class="text-xs text-gray-600 mb-2 truncate">
+                          {{ card.card_owner || "No owner" }}
+                        </p>
+
+                        <!-- Status & Plan Badges -->
+                        <div class="flex items-center gap-2 flex-wrap">
                           <span
-                            :class="getPlanBadgeClass(card.subscription_plan)"
-                            class="px-2 py-0.5 text-xs font-semibold rounded-full"
+                            :class="[
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                              card.status === 'active'
+                                ? 'bg-green-100 text-green-800'
+                                : card.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800',
+                            ]"
                           >
-                            {{
-                              (card.subscription_plan || "free").toUpperCase()
-                            }}
+                            {{ card.status || "pending" }}
+                          </span>
+                          <span
+                            :class="[
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase',
+                              getPlanBadgeClass(card.subscription_plan),
+                            ]"
+                          >
+                            {{ card.subscription_plan || "free" }}
                           </span>
                         </div>
-                        <p class="text-xs text-gray-500 font-mono">
-                          {{ card.nfc_card_id || `Card #${card.id}` }}
-                        </p>
-                        <p class="text-xs text-gray-400 mt-1">
-                          {{
-                            card.status === "active" ? "✓ Active" : "○ Inactive"
-                          }}
-                        </p>
                       </div>
+
+                      <!-- Right: Selected Indicator -->
                       <Icon
                         v-if="selectedNfcCardId === card.id"
                         name="heroicons:check-circle"
@@ -1019,7 +1061,9 @@
                   <!-- Profile Section -->
                   <div class="text-center mb-4 sm:mb-6">
                     <img
-                      :src="profileData.image || '/default-avatar.png'"
+                      :src="
+                        getImageUrl(profileData.image) || '/default-avatar.png'
+                      "
                       :class="[
                         'mx-auto object-cover mb-3 sm:mb-4',
                         profileData.profileStyle === 'classic'
@@ -1107,6 +1151,8 @@ const saving = ref(false);
 const showMobilePreview = ref(false);
 const isMobile = ref(false);
 const showCardSelector = ref(false);
+const pageLoading = ref(true);
+const isInitialized = ref(false);
 
 // NFC Card selection
 const userNfcCards = ref([]);
@@ -1303,6 +1349,28 @@ const buttonStyles = [
   },
 ];
 
+// Helper function to get full image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+
+  // If already a full URL, return as is
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  // Get config
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
+
+  // Remove /api from the end to get base URL
+  const baseUrl = apiBase.replace("/api", "");
+
+  // Ensure the path starts with /
+  const path = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+
+  return `${baseUrl}${path}`;
+};
+
 // Methods - These are just event handlers for the ProfileImageUpload component
 const handleProfileImageUpload = (data) => {
   // This is called when ProfileImageUpload component successfully uploads
@@ -1434,6 +1502,12 @@ const loadProfile = async () => {
     return;
   }
 
+  // Prevent multiple simultaneous loads
+  if (saving.value) {
+    console.log("Already loading, skipping");
+    return;
+  }
+
   try {
     // Load the landing page design for the selected NFC card
     const response = await $api.get(
@@ -1457,6 +1531,14 @@ const loadProfile = async () => {
         landingPage.profile_image || landingPage.image || null;
       profileData.companyLogo =
         landingPage.company_logo || landingPage.companyLogo || null;
+
+      // Debug image URLs
+      console.log("📸 Loaded images:", {
+        profile_image: profileData.image,
+        profile_image_full: getImageUrl(profileData.image),
+        company_logo: profileData.companyLogo,
+        company_logo_full: getImageUrl(profileData.companyLogo),
+      });
 
       // Company Info
       profileData.companyLogoText = landingPage.company_logo_text || "";
@@ -1638,7 +1720,14 @@ const resetProfileData = () => {
 };
 
 const loadUserNfcCards = async () => {
+  // Prevent duplicate calls
+  if (isInitialized.value && !loadingCards.value) {
+    console.log("Already initialized, skipping reload");
+    return;
+  }
+
   loadingCards.value = true;
+  pageLoading.value = true;
   try {
     const response = await $api.get("/nfc-cards");
 
@@ -1687,10 +1776,18 @@ const loadUserNfcCards = async () => {
     $toast.error("Failed to load NFC cards");
   } finally {
     loadingCards.value = false;
+    pageLoading.value = false;
+    isInitialized.value = true;
   }
 };
 
-const selectNfcCard = (cardId) => {
+const selectNfcCard = async (cardId) => {
+  // Prevent selecting same card
+  if (selectedNfcCardId.value === cardId) {
+    showCardSelector.value = false;
+    return;
+  }
+
   selectedNfcCardId.value = cardId;
   showCardSelector.value = false;
 
@@ -1703,7 +1800,7 @@ const selectNfcCard = (cardId) => {
     );
 
     // Load the landing page for this card
-    loadProfile();
+    await loadProfile();
   }
 };
 
@@ -1743,11 +1840,14 @@ const handleClickOutside = (event) => {
 };
 
 // Initialize
-onMounted(() => {
+onMounted(async () => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+
   // Load user's NFC cards (which will auto-select a card and load its landing page)
-  loadUserNfcCards();
+  // Use nextTick to ensure DOM is ready
+  await nextTick();
+  await loadUserNfcCards();
 
   // Close card selector when clicking outside
   document.addEventListener("click", handleClickOutside);
