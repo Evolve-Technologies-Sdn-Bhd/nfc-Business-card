@@ -101,22 +101,30 @@ export default defineNuxtPlugin((nuxtApp) => {
       // Handle 500 Server Error
       if (error.response?.status >= 500) {
         const { $toast } = nuxtApp;
-        $toast.error("Server error. Please try again later.");
+        if ($toast && typeof $toast.error === 'function') {
+          $toast.error("Server error. Please try again later.");
+        }
       }
 
       // Handle network errors
       if (!error.response) {
         console.error("Network Error - No response received");
         const { $toast } = nuxtApp;
-        $toast.error(
-          "Network error. Please check your connection and try again."
-        );
+        if ($toast && typeof $toast.error === 'function') {
+          $toast.error(
+            "Network error. Please check your connection and try again."
+          );
+        }
       }
 
       // Add response data to error for easier access
       if (error.response) {
         error.status = error.response.status;
         error.data = error.response.data;
+      } else {
+        // Handle cases where there's no response
+        error.status = null;
+        error.data = null;
       }
 
       return Promise.reject(error);

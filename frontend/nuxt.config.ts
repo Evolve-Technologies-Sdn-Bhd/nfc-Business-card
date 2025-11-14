@@ -45,6 +45,7 @@ export default defineNuxtConfig({
       appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3002",
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
       appleClientId: process.env.NUXT_PUBLIC_APPLE_CLIENT_ID || "",
+      stripePublishableKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
       maxFileSize: process.env.NUXT_PUBLIC_MAX_FILE_SIZE || "5242880", // 5MB
       allowedFileTypes:
         process.env.NUXT_PUBLIC_ALLOWED_FILE_TYPES ||

@@ -171,166 +171,126 @@
 
         <!-- Right Panel - Payment Form -->
         <div class="space-y-6">
-          <!-- Payment Method -->
-          <div class="bg-white rounded-2xl shadow-lg p-6">
+          <!-- Payment Method Selection -->
+          <div v-if="!selectedPaymentRail" class="bg-white rounded-2xl shadow-lg p-6">
             <h2 class="text-2xl font-bold text-secondary-900 mb-6">
-              Payment Method
+              Choose Payment Method
             </h2>
+            <PaymentMethodSelector
+              :amount="orderSummary.total"
+              currency="MYR"
+              @rail-selected="handleRailSelected"
+            />
+          </div>
 
-            <!-- Payment Options -->
-            <div class="space-y-4 mb-6">
-              <div class="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  id="stripe"
-                  v-model="paymentMethod"
-                  value="stripe"
-                  class="text-primary-600 focus:ring-primary-500"
-                />
-                <label
-                  for="stripe"
-                  class="flex items-center space-x-2 cursor-pointer"
-                >
-                  <Icon name="logos:stripe" class="h-6 w-6" />
-                  <span class="font-medium">Credit/Debit Card</span>
-                </label>
-              </div>
-              <div class="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  id="razorpay"
-                  v-model="paymentMethod"
-                  value="razorpay"
-                  class="text-primary-600 focus:ring-primary-500"
-                />
-                <label
-                  for="razorpay"
-                  class="flex items-center space-x-2 cursor-pointer"
-                >
-                  <Icon
-                    name="heroicons:credit-card"
-                    class="h-6 w-6 text-secondary-600"
-                  />
-                  <span class="font-medium">Razer Merchant Services</span>
-                </label>
-              </div>
-            </div>
+          <!-- Card Payment Form -->
+          <div v-else-if="selectedPaymentRail === 'card'" class="bg-white rounded-2xl shadow-lg p-6">
+            <CardPaymentForm
+              :amount="orderSummary.total"
+              :fee="paymentFee"
+              :description="`${orderSummary.planName} + NFC Card`"
+              :metadata="orderMetadata"
+              @payment-success="handlePaymentSuccess"
+              @payment-failed="handlePaymentFailed"
+              @back="selectedPaymentRail = null"
+            />
+          </div>
 
-            <!-- Credit Card Form -->
-            <div v-if="paymentMethod === 'stripe'" class="space-y-4">
+          <!-- FPX Bank Payment Form -->
+          <div v-else-if="selectedPaymentRail === 'fpx'" class="bg-white rounded-2xl shadow-lg p-6">
+            <BankPaymentForm
+              :amount="orderSummary.total"
+              :fee="paymentFee"
+              :description="`${orderSummary.planName} + NFC Card`"
+              :metadata="orderMetadata"
+              @payment-success="handlePaymentSuccess"
+              @payment-failed="handlePaymentFailed"
+              @back="selectedPaymentRail = null"
+            />
+          </div>
+
+          <!-- E-Wallet Payment Form -->
+          <div v-else-if="selectedPaymentRail === 'ewallet'" class="bg-white rounded-2xl shadow-lg p-6">
+            <EWalletSelector
+              :amount="orderSummary.total"
+              :fee="paymentFee"
+              :description="`${orderSummary.planName} + NFC Card`"
+              :metadata="orderMetadata"
+              @payment-success="handlePaymentSuccess"
+              @payment-failed="handlePaymentFailed"
+              @back="selectedPaymentRail = null"
+            />
+          </div>
+
+          <!-- Manual Bank Transfer Form -->
+          <div v-else-if="selectedPaymentRail === 'manual_bank_transfer'" class="bg-white rounded-2xl shadow-lg p-6">
+            <ManualBankTransfer
+              :amount="orderSummary.total"
+              :description="`${orderSummary.planName} + NFC Card`"
+              :metadata="orderMetadata"
+              @payment-initiated="handleManualTransferInitiated"
+              @proof-uploaded="handleProofUploaded"
+              @back="selectedPaymentRail = null"
+            />
+          </div>
+
+          <!-- Billing Address (shown for all payment methods) -->
+          <div v-if="selectedPaymentRail" class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-secondary-800 mb-4">
+              Billing Address
+            </h3>
+
+            <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Card Number</label
+                <label
+                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  >Full Name</label
                 >
                 <input
-                  v-model="paymentForm.cardNumber"
+                  v-model="billingAddress.fullName"
                   type="text"
                   class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
+                  placeholder="John Doe"
                 />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  >Address</label
+                >
+                <textarea
+                  v-model="billingAddress.address"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="123 Main Street, City, State, ZIP"
+                ></textarea>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label
                     class="block text-sm font-medium text-secondary-700 mb-1"
-                    >Expiry Date</label
+                    >City</label
                   >
                   <input
-                    v-model="paymentForm.expiryDate"
+                    v-model="billingAddress.city"
                     type="text"
                     class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="MM/YY"
-                    maxlength="5"
+                    placeholder="City"
                   />
                 </div>
                 <div>
                   <label
                     class="block text-sm font-medium text-secondary-700 mb-1"
-                    >CVV</label
+                    >ZIP Code</label
                   >
                   <input
-                    v-model="paymentForm.cvv"
+                    v-model="billingAddress.zipCode"
                     type="text"
                     class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="123"
-                    maxlength="4"
+                    placeholder="12345"
                   />
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Cardholder Name</label
-                >
-                <input
-                  v-model="paymentForm.cardholderName"
-                  type="text"
-                  class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
-
-            <!-- Billing Address -->
-            <div class="mt-6">
-              <h3 class="text-lg font-semibold text-secondary-800 mb-4">
-                Billing Address
-              </h3>
-
-              <div class="space-y-4">
-                <div>
-                  <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
-                    >Full Name</label
-                  >
-                  <input
-                    v-model="billingAddress.fullName"
-                    type="text"
-                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
-                    >Address</label
-                  >
-                  <textarea
-                    v-model="billingAddress.address"
-                    rows="3"
-                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="123 Main Street, City, State, ZIP"
-                  ></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
-                      >City</label
-                    >
-                    <input
-                      v-model="billingAddress.city"
-                      type="text"
-                      class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="City"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
-                      >ZIP Code</label
-                    >
-                    <input
-                      v-model="billingAddress.zipCode"
-                      type="text"
-                      class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="12345"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -427,20 +387,6 @@
         >
           <Icon name="heroicons:arrow-left" class="h-5 w-5 inline mr-2" />
           Back
-        </button>
-        <button
-          @click="processPayment"
-          :disabled="!isFormValid || processing"
-          class="px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <div v-if="processing" class="flex items-center">
-            <div class="spinner mr-2"></div>
-            Processing Payment...
-          </div>
-          <div v-else class="flex items-center">
-            Proceed to Payment
-            <Icon name="heroicons:arrow-right" class="h-5 w-5 inline ml-2" />
-          </div>
         </button>
       </div>
     </div>
@@ -577,6 +523,13 @@
 </template>
 
 <script setup>
+// Import payment components
+import PaymentMethodSelector from '~/components/PaymentMethodSelector.vue';
+import CardPaymentForm from '~/components/CardPaymentForm.vue';
+import BankPaymentForm from '~/components/BankPaymentForm.vue';
+import EWalletSelector from '~/components/EWalletSelector.vue';
+import ManualBankTransfer from '~/components/ManualBankTransfer.vue';
+
 // Meta tags
 useHead({
   title: "Payment - NFCGo",
@@ -604,12 +557,17 @@ const loadingTerms = ref(false);
 const loadingPrivacy = ref(false);
 const termsDocument = ref(null);
 const privacyDocument = ref(null);
-const paymentMethod = ref("stripe");
 const termsAccepted = ref(false);
 const billingConsent = ref(false);
 const marketingConsent = ref(false);
 
-// Payment form
+// Payment rail selection
+const selectedPaymentRail = ref(null);
+const paymentFee = ref(0);
+const feeCalculation = ref(null);
+
+// Payment form (legacy - kept for compatibility)
+const paymentMethod = ref("stripe");
 const paymentForm = reactive({
   cardNumber: "",
   expiryDate: "",
@@ -666,6 +624,14 @@ const orderSummary = computed(() => {
   };
 });
 
+// Order metadata for payment components
+const orderMetadata = computed(() => ({
+  plan: sessionStorage.getItem("selectedPlan"),
+  card_type: orderSummary.value.cardType,
+  shipping_cost: orderSummary.value.shippingCost,
+  card_info: cardInfo.value,
+}));
+
 // Card info from previous step
 const cardInfo = computed(() => {
   const stored = sessionStorage.getItem("cardInfo");
@@ -674,26 +640,113 @@ const cardInfo = computed(() => {
 
 // Form validation
 const isFormValid = computed(() => {
-  if (paymentMethod.value === "stripe") {
-    const cardValid =
-      paymentForm.cardNumber &&
-      paymentForm.expiryDate &&
-      paymentForm.cvv &&
-      paymentForm.cardholderName;
-    const billingValid =
-      billingAddress.fullName &&
-      billingAddress.address &&
-      billingAddress.city &&
-      billingAddress.zipCode;
-    return (
-      cardValid && billingValid && termsAccepted.value && billingConsent.value
-    );
+  if (!selectedPaymentRail.value) {
+    return false;
   }
-  return termsAccepted.value && billingConsent.value;
+  
+  const billingValid =
+    billingAddress.fullName &&
+    billingAddress.address &&
+    billingAddress.city &&
+    billingAddress.zipCode;
+    
+  return billingValid && termsAccepted.value && billingConsent.value;
 });
+
+// Handle payment rail selection
+const handleRailSelected = ({ rail, feeCalculation: fee }) => {
+  console.log('Rail selected:', rail, 'Fee calculation:', fee);
+  selectedPaymentRail.value = rail;
+  feeCalculation.value = fee;
+  
+  // Handle different fee calculation structures
+  if (fee?.fees?.total_fee !== undefined) {
+    paymentFee.value = fee.fees.total_fee;
+  } else if (fee?.fee !== undefined) {
+    paymentFee.value = fee.fee;
+  } else {
+    paymentFee.value = 0;
+    console.warn('Fee calculation missing total_fee:', fee);
+  }
+  
+  $toast.success(`Selected ${rail.toUpperCase()} payment method`);
+};
+
+// Handle payment success
+const handlePaymentSuccess = (data) => {
+  console.log('Payment successful:', data);
+  
+  // Store order details
+  sessionStorage.setItem("orderCompleted", "true");
+  sessionStorage.setItem("onboarding_completed", "true");
+  sessionStorage.setItem(
+    "orderDetails",
+    JSON.stringify({
+      plan: sessionStorage.getItem("selectedPlan"),
+      cardInfo: cardInfo.value,
+      paymentMethod: selectedPaymentRail.value,
+      total: orderSummary.value.total,
+      transactionId: data.transaction_id,
+      orderDate: new Date().toISOString(),
+      orderId: data.order_id || `ORD-${Date.now()}`,
+      estimatedDelivery: "5-7 business days",
+    })
+  );
+  
+  // Show success modal
+  showSuccessModal.value = true;
+  $toast.success("Payment successful!");
+};
+
+// Handle payment failure
+const handlePaymentFailed = (error) => {
+  console.error('Payment failed:', error);
+  $toast.error(error.message || "Payment failed. Please try again.");
+  
+  // Reset payment rail selection to allow user to try again
+  selectedPaymentRail.value = null;
+};
+
+// Handle manual transfer initiated
+const handleManualTransferInitiated = (data) => {
+  console.log('Manual transfer initiated:', data);
+  $toast.success("Transfer reference created. Please complete the bank transfer and upload proof.");
+};
+
+// Handle proof uploaded
+const handleProofUploaded = (data) => {
+  console.log('Payment proof uploaded:', data);
+  
+  // Store pending order details
+  sessionStorage.setItem("orderPending", "true");
+  sessionStorage.setItem(
+    "pendingOrderDetails",
+    JSON.stringify({
+      plan: sessionStorage.getItem("selectedPlan"),
+      cardInfo: cardInfo.value,
+      paymentMethod: 'manual_bank_transfer',
+      total: orderSummary.value.total,
+      transactionId: data.transaction_id,
+      orderDate: new Date().toISOString(),
+      orderId: `ORD-${Date.now()}`,
+      status: 'pending_verification',
+    })
+  );
+  
+  $toast.success("Payment proof uploaded. We'll verify it within 24 hours.");
+  
+  // Redirect to dashboard after short delay
+  setTimeout(() => {
+    router.push("/UserDashboard");
+  }, 2000);
+};
 
 // Check if user is authenticated
 onMounted(() => {
+  console.log('Payment page mounted - authStore:', authStore.isAuthenticated);
+  console.log('Selected payment rail:', selectedPaymentRail.value);
+  console.log('Order summary total:', orderSummary.value.total);
+  
   if (!authStore.isAuthenticated) {
     router.push("/UserAccount/login");
   }
@@ -703,8 +756,10 @@ onMounted(() => {
     billingAddress.fullName = authStore.user.full_name || "";
   }
 
-  // Load legal documents
-  loadLegalDocuments();
+  // Load legal documents (non-blocking)
+  loadLegalDocuments().catch(err => {
+    console.log('Legal documents failed to load (non-critical):', err.message);
+  });
 });
 
 // Load legal documents
@@ -786,107 +841,19 @@ watch(showPrivacyModal, (isOpen) => {
   }
 });
 
-// Process payment
-const processPayment = async () => {
-  if (!isFormValid.value) {
-    $toast.error("Please fill in all required fields and accept the terms.");
-    return;
-  }
-
-  processing.value = true;
-
-  try {
-    // Get card info from session storage
-    const cardInfo = JSON.parse(sessionStorage.getItem("cardInfo") || "{}");
-
-    // Prepare payment data
-    const paymentData = {
-      payment_method: paymentMethod.value,
-      billing_address: {
-        full_name: billingAddress.fullName,
-        address: billingAddress.address,
-        city: billingAddress.city,
-        zip_code: billingAddress.zipCode,
-      },
-      card_info: {
-        name: cardInfo.name,
-        position: cardInfo.position,
-        contact_number: cardInfo.contactNumber,
-        email: cardInfo.email,
-        address: cardInfo.address,
-      },
-    };
-
-    try {
-      // Call backend API to process payment
-      const { $api } = useNuxtApp();
-      const response = await $api.post(
-        "/onboarding/process-payment",
-        paymentData
-      );
-
-      if (response.success) {
-        // Payment success
-        showSuccessModal.value = true;
-
-        // Store order details in session storage
-        sessionStorage.setItem("orderCompleted", "true");
-        sessionStorage.setItem("onboarding_completed", "true"); // Mark onboarding as completed
-        sessionStorage.setItem(
-          "orderDetails",
-          JSON.stringify({
-            plan: sessionStorage.getItem("selectedPlan"),
-            cardInfo: cardInfo,
-            paymentMethod: paymentMethod.value,
-            total: orderSummary.value.total,
-            orderDate: new Date().toISOString(),
-            orderId: response.data?.order_id || `ORD-${Date.now()}`,
-            estimatedDelivery:
-              response.data?.estimated_delivery || "5-7 business days",
-          })
-        );
-      } else {
-        throw new Error("Payment processing failed");
-      }
-    } catch (apiError) {
-      // If API fails (e.g., endpoint not ready), simulate success for demo purposes
-      console.warn("Payment API not available, simulating success:", apiError);
-
-      // Mock payment success for demo/development
-      showSuccessModal.value = true;
-
-      // Store order details in session storage
-      sessionStorage.setItem("orderCompleted", "true");
-      sessionStorage.setItem("onboarding_completed", "true"); // Mark onboarding as completed
-      sessionStorage.setItem(
-        "orderDetails",
-        JSON.stringify({
-          plan: sessionStorage.getItem("selectedPlan"),
-          cardInfo: cardInfo,
-          paymentMethod: paymentMethod.value,
-          total: orderSummary.value.total,
-          orderDate: new Date().toISOString(),
-          orderId: `ORD-${Date.now()}`,
-          estimatedDelivery: "5-7 business days",
-        })
-      );
-
-      $toast.success("Payment simulated successfully (Demo mode)");
-    }
-  } catch (error) {
-    console.error("Payment processing error:", error);
-    $toast.error("Payment failed. Please try again.");
-  } finally {
-    processing.value = false;
-  }
-};
-
 // Go back to card customization
 const goBack = () => {
+  // If a payment rail is selected, go back to rail selection
+  if (selectedPaymentRail.value) {
+    selectedPaymentRail.value = null;
+    return;
+  }
+  
+  // Otherwise go back to previous page
   router.push("/UserDashboard/UserManagement/NFCCardDesignCustomization");
 };
 
-// Go to UserDashboardS
+// Go to UserDashboard
 const goToUserDashboard = async () => {
   showSuccessModal.value = false;
 
@@ -897,30 +864,4 @@ const goToUserDashboard = async () => {
   // Redirect to Dashboard first, then it will auto-redirect to CardManagement
   await router.push("/UserDashboard");
 };
-
-// Format card number
-watch(
-  () => paymentForm.cardNumber,
-  (newValue) => {
-    // Remove all non-digits
-    const digits = newValue.replace(/\D/g, "");
-    // Add spaces every 4 digits
-    paymentForm.cardNumber = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
-  }
-);
-
-// Format expiry date
-watch(
-  () => paymentForm.expiryDate,
-  (newValue) => {
-    // Remove all non-digits
-    const digits = newValue.replace(/\D/g, "");
-    // Add slash after 2 digits
-    if (digits.length >= 2) {
-      paymentForm.expiryDate = digits.slice(0, 2) + "/" + digits.slice(2, 4);
-    } else {
-      paymentForm.expiryDate = digits;
-    }
-  }
-);
 </script>
