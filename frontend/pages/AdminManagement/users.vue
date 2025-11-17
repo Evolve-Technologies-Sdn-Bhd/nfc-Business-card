@@ -36,6 +36,36 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary-700 mb-2"
+              >Business Plan User</label
+            >
+            <select
+              v-model="filters.businessUserId"
+              @change="handleFilterChange"
+              class="input"
+            >
+              <option value="">All Business Plan Users</option>
+              <option v-for="u in businessUserList" :key="u.id" :value="u.id">
+                {{ u.first_name }} {{ u.last_name }}
+              </option>
+            </select>
+          </div>
+          <div v-if="employeeList.length && filters.businessUserId">
+            <label class="block text-sm font-medium text-secondary-700 mb-2"
+              >Employee Account</label
+            >
+            <select
+              v-model="filters.employeeId"
+              @change="handleFilterChange"
+              class="input"
+            >
+              <option value="">All Employees</option>
+              <option v-for="e in employeeList" :key="e.id" :value="e.id">
+                {{ e.first_name }} {{ e.last_name }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2"
               >Subscription Plan</label
             >
             <select
@@ -208,20 +238,39 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center space-x-2">
                     <button
+                      @click="toggleUserStatus(user)"
+                      :class="[
+                        'px-2 py-1 rounded text-xs font-medium',
+                        user.subscription_active
+                          ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
+                          : 'bg-success-100 text-success-700 hover:bg-success-200',
+                      ]"
+                      :title="
+                        user.subscription_active
+                          ? 'Deactivate account'
+                          : 'Activate account'
+                      "
+                    >
+                      {{ user.subscription_active ? "Deactivate" : "Activate" }}
+                    </button>
+                    <button
                       @click="viewUser(user)"
                       class="text-primary-600 hover:text-primary-900"
+                      title="View details"
                     >
                       <Icon name="heroicons:eye" class="h-4 w-4" />
                     </button>
                     <button
                       @click="editUser(user)"
                       class="text-warning-600 hover:text-warning-900"
+                      title="Edit user"
                     >
                       <Icon name="heroicons:pencil" class="h-4 w-4" />
                     </button>
                     <button
                       @click="deleteUser(user)"
                       class="text-error-600 hover:text-error-900"
+                      title="Delete user"
                     >
                       <Icon name="heroicons:trash" class="h-4 w-4" />
                     </button>
@@ -391,6 +440,21 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
+                >Account Status</label
+              >
+              <select v-model="form.subscription_active" class="input">
+                <option :value="true">Active</option>
+                <option :value="false">Inactive</option>
+              </select>
+              <p class="text-xs text-secondary-500 mt-1">
+                Inactive accounts cannot log in or use the system
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Admin Status</label
               >
               <select v-model="form.is_admin" class="input">
@@ -438,9 +502,7 @@
                         }}
                         <span class="text-xs text-blue-500">
                           (1 owner +
-                          {{
-                            selectedUser.quota_info.employees_count
-                          }}
+                          {{ selectedUser.quota_info.employees_count }}
                           employees)
                         </span>
                       </p>
@@ -734,6 +796,8 @@ const form = ref({
   password: "",
   password_confirmation: "",
   subscription_plan: "free",
+  subscription_active: true,
+  subscription_end_date: "",
   is_admin: false,
   admin_role: "admin",
   admin_permissions: [],
@@ -747,13 +811,35 @@ const filters = ref({
   subscription_plan: "",
   status: "",
   is_admin: "",
+  businessUserId: "",
+  employeeId: "",
 });
 
-// Fetch users on mount
+const businessUserList = ref([]);
+const employeeList = ref([]);
 onMounted(async () => {
   await adminStore.fetchUsers();
+  const { $api } = useNuxtApp();
+  const res = await $api.get("/admin/business-users");
+  businessUserList.value = res.data;
 });
 
+const handleCompanyChange = async () => {
+  filters.value.employeeId = "";
+  if (!filters.value.businessUserId) {
+    employeeList.value = [];
+    handleFilterChange();
+    return;
+  }
+  const { $api } = useNuxtApp();
+  const res = await $api.get(
+    `/admin/business-users/${filters.value.businessUserId}`
+  );
+  employeeList.value = res.data.user.employees || [];
+  // Immediately trigger filter after company selection
+  adminStore.updateFilters(filters.value);
+  adminStore.fetchUsers();
+};
 // Handle search with debounce
 let searchTimeout;
 const handleSearch = () => {
@@ -778,7 +864,10 @@ const clearFilters = () => {
     subscription_plan: "",
     status: "",
     is_admin: "",
+    businessUserId: "",
+    employeeId: "",
   };
+  employeeList.value = [];
   adminStore.fetchUsers();
 };
 
@@ -808,6 +897,10 @@ const editUser = (user) => {
     password: "",
     password_confirmation: "",
     subscription_plan: user.subscription_plan,
+    subscription_active: user.subscription_active !== false, // Default to true if undefined
+    subscription_end_date: user.subscription_end_date
+      ? user.subscription_end_date.split("T")[0]
+      : "",
     is_admin: user.is_admin,
     admin_role: user.admin_role || "admin",
     admin_permissions: user.admin_permissions || [],
@@ -873,6 +966,8 @@ const closeModal = () => {
     password: "",
     password_confirmation: "",
     subscription_plan: "free",
+    subscription_active: true,
+    subscription_end_date: "",
     is_admin: false,
     admin_role: "admin",
     admin_permissions: [],
@@ -891,6 +986,38 @@ const deleteUser = async (user) => {
       await adminStore.deleteUser(user.id);
     } catch (error) {
       console.error("Failed to delete user:", error);
+    }
+  }
+};
+// Toggle user account status (activate/deactivate)
+const toggleUserStatus = async (user) => {
+  const newStatus = !user.subscription_active;
+  const action = newStatus ? "activate" : "deactivate";
+
+  if (
+    confirm(
+      `Are you sure you want to ${action} ${user.full_name}'s account?${
+        !newStatus
+          ? "\n\nDeactivated users cannot log in or use the system."
+          : ""
+      }`
+    )
+  ) {
+    try {
+      await adminStore.updateUser(user.id, {
+        subscription_active: newStatus,
+      });
+
+      const { $toast } = useNuxtApp();
+      $toast.success(
+        `${user.full_name}'s account has been ${
+          newStatus ? "activated" : "deactivated"
+        }.`
+      );
+    } catch (error) {
+      console.error("Failed to toggle user status:", error);
+      const { $toast } = useNuxtApp();
+      $toast.error("Failed to update user status. Please try again.");
     }
   }
 };
