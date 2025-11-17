@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\Admin\ManualBankTransferController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\BusinessPlanRequestController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -150,6 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
 
+<<<<<<< HEAD
     // Payment Routes
     Route::prefix('payment')->group(function () {
         // Get available payment methods
@@ -171,6 +173,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // Upload payment proof (for manual bank transfer)
         Route::post('/transactions/{transactionId}/upload-proof', [PaymentController::class, 'uploadPaymentProof']);
     });
+=======
+    // Business Plan Request
+    Route::post('/business-plan-request', [BusinessPlanRequestController::class, 'submit']);
+>>>>>>> b21d61f16bd751b980183d1c4035ffa7cab2bcbe
 
     // Business Plan Routes (for Business accounts and employees)
     Route::prefix('business')->group(function () {
