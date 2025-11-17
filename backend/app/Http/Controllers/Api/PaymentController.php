@@ -418,7 +418,7 @@ class PaymentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:1',
-            'payment_rail' => 'required|in:card,fpx,duitnow,ewallet,manual_bank',
+            'payment_rail' => 'required|in:card,fpx,duitnow,ewallet,manual_bank,manual_bank_transfer',
         ]);
 
         if ($validator->fails()) {
@@ -431,29 +431,56 @@ class PaymentController extends Controller
         try {
             $amount = $request->amount;
             $rail = $request->payment_rail;
+            
+            // Handle manual_bank_transfer alias
+            if ($rail === 'manual_bank_transfer') {
+                $rail = 'manual_bank';
+            }
+            
             $railConfig = config("payment.rails.{$rail}");
+
+            if (!$railConfig) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid payment rail',
+                ], 400);
+            }
 
             $feePercentage = $railConfig['fee_percentage'] ?? 0;
             $feeFixed = $railConfig['fee_fixed'] ?? 0;
 
-            $fee = ($amount * $feePercentage / 100) + $feeFixed;
+            $percentageFee = ($amount * $feePercentage / 100);
+            $fee = $percentageFee + $feeFixed;
             $totalAmount = $amount + $fee;
             $netAmount = $amount - $fee;
 
             return response()->json([
                 'success' => true,
                 'calculation' => [
-                    'amount' => $amount,
+                    'amount' => round($amount, 2),
+                    'subtotal' => round($amount, 2),
                     'fee' => round($fee, 2),
+                    'fees' => [
+                        'percentage_fee' => round($percentageFee, 2),
+                        'fixed_fee' => round($feeFixed, 2),
+                        'total_fee' => round($fee, 2),
+                    ],
                     'fee_percentage' => $feePercentage,
                     'fee_fixed' => $feeFixed,
+                    'total' => round($totalAmount, 2),
                     'total_amount' => round($totalAmount, 2),
                     'net_amount' => round($netAmount, 2),
-                    'currency' => config('payment.currency'),
+                    'currency' => config('payment.currency', 'MYR'),
                 ],
             ]);
 
         } catch (Exception $e) {
+            Log::error('Fee calculation error', [
+                'error' => $e->getMessage(),
+                'amount' => $request->amount ?? null,
+                'rail' => $request->payment_rail ?? null,
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to calculate fees',

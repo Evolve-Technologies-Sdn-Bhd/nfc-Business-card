@@ -217,13 +217,184 @@
 
       <!-- Profile Content -->
       <template v-else>
+        <!-- Hero Section -->
+        <div
+          :style="{
+            position: 'relative',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: responsive.borderRadius,
+            padding: isMobile ? '40px 20px' : isTablet ? '60px 30px' : '80px 40px',
+            marginBottom: responsive.cardMarginBottom,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          }"
+        >
+          <div :style="{ position: 'relative', zIndex: 2, textAlign: 'center' }">
+            <div
+              :style="{
+                position: 'relative',
+                width: responsive.profileSize,
+                height: responsive.profileSize,
+                margin: '0 auto 40px',
+                cursor: 'pointer',
+              }"
+              @mouseenter="imageHover = true"
+              @mouseleave="imageHover = false"
+            >
+              <div
+                :style="{
+                  position: 'absolute',
+                  inset: '-10px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+                  animation: 'rotate 3s linear infinite',
+                  opacity: imageHover ? 1 : 0,
+                  transition: 'opacity 0.3s',
+                }"
+              />
+              <img
+                :src="profileImage"
+                alt="Profile"
+                :style="{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  border: responsive.profileBorder,
+                  transition: 'transform 0.3s',
+                  zIndex: 1,
+                  transform: imageHover ? 'scale(1.05)' : 'scale(1)',
+                }"
+              />
+              <div
+                :style="{
+                  position: 'absolute',
+                  bottom: '15px',
+                  right: '15px',
+                  width: '20px',
+                  height: '20px',
+                  background: '#00ff88',
+                  border: '3px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '50%',
+                  zIndex: 2,
+                  animation: 'pulse-status 2s infinite',
+                }"
+              />
+            </div>
+
+            <h1
+              :style="{
+                fontSize: responsive.nameSize,
+                fontWeight: 800,
+                color: 'white',
+                marginBottom: '30px',
+                letterSpacing: '2px',
+              }"
+            >
+              <span
+                v-for="(char, i) in profile.name.split('')"
+                :key="i"
+                :style="{
+                  display: 'inline-block',
+                  animation: 'charBounce 0.5s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: `${i * 0.05}s`,
+                }"
+              >
+                {{ char === ' ' ? '\u00A0' : char }}
+              </span>
+            </h1>
+
+            <div
+              :style="{
+                display: 'flex',
+                gap: responsive.flexGap,
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+              }"
+            >
+              <div
+                v-if="profile.qualification"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.3s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">🎓</span>
+                {{ profile.qualification }}
+              </div>
+              <div
+                v-if="profile.position"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.4s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">💼</span>
+                {{ profile.position }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Particles -->
+          <div
+            :style="{
+              position: 'absolute',
+              inset: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }"
+          >
+            <div
+              v-for="n in 20"
+              :key="n"
+              :style="{
+                position: 'absolute',
+                width: '4px',
+                height: '4px',
+                background: 'white',
+                borderRadius: '50%',
+                animation: 'particleFloat 3s infinite ease-in-out',
+                opacity: 0.3,
+                ...getParticleStyle(n),
+              }"
+            />
+          </div>
+        </div>
+
         <!-- Quick Actions -->
         <div
           :style="{
             display: 'flex',
             justifyContent: 'center',
             gap: responsive.actionGap,
-            marginBottom: responsive.heroMarginBottom,
+            marginBottom: responsive.cardMarginBottom,
             flexWrap: 'wrap',
           }"
         >

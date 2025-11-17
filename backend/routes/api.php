@@ -150,6 +150,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
 
+    // Payment Routes
+    Route::prefix('payment')->group(function () {
+        // Get available payment methods
+        Route::get('/rails', [PaymentController::class, 'getPaymentRails']);
+        
+        // Calculate payment fees
+        Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
+        
+        // Initiate payment
+        Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
+        
+        // Confirm payment (after 3DS)
+        Route::post('/confirm/{transactionId}', [PaymentController::class, 'confirmPayment']);
+        
+        // Transaction management
+        Route::get('/transactions', [PaymentController::class, 'getTransactionHistory']);
+        Route::get('/transactions/{transactionId}', [PaymentController::class, 'getTransaction']);
+        
+        // Upload payment proof (for manual bank transfer)
+        Route::post('/transactions/{transactionId}/upload-proof', [PaymentController::class, 'uploadPaymentProof']);
+    });
+
     // Business Plan Routes (for Business accounts and employees)
     Route::prefix('business')->group(function () {
         // Quota Information
