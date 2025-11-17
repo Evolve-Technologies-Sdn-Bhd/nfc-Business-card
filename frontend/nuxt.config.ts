@@ -103,5 +103,43 @@ export default defineNuxtConfig({
   // Nitro configuration for better performance
   nitro: {
     compressPublicAssets: true,
+    prerender: {
+      routes: ['/'],
+      crawlLinks: true,
+    },
+  },
+
+  // Router configuration to handle trailing slashes
+  router: {
+    options: {
+      strict: false, // This makes /path and /path/ equivalent
+    },
+  },
+
+  // Hooks to add redirect rules for trailing slashes
+  hooks: {
+    'pages:extend'(pages) {
+      // For each index.vue page, ensure both /path and /path/ work
+      const indexPages = pages.filter(page => page.name?.endsWith('-index') || page.file?.endsWith('index.vue'));
+      
+      indexPages.forEach(page => {
+        if (page.path && page.path !== '/') {
+          // Remove trailing slash from the path for consistency
+          const pathWithoutSlash = page.path.replace(/\/$/, '');
+          const pathWithSlash = pathWithoutSlash + '/';
+          
+          // Update the page path to not have trailing slash
+          page.path = pathWithoutSlash;
+          
+          // Add an alias for the version with trailing slash
+          if (!page.alias) {
+            page.alias = [];
+          } else if (typeof page.alias === 'string') {
+            page.alias = [page.alias];
+          }
+          page.alias.push(pathWithSlash);
+        }
+      });
+    },
   },
 });

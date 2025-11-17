@@ -291,7 +291,13 @@ class PaymentService
             'status' => 'succeeded',
             'verified_by' => $admin->id,
             'verified_at' => now(),
+            'paid_at' => now(),
         ]);
+
+        // Generate invoice for verified payment
+        if (config('invoice.queue.enabled', true)) {
+            \App\Jobs\GenerateInvoiceJob::dispatch($transaction);
+        }
 
         // TODO: Send confirmation notification to user
 
@@ -538,7 +544,15 @@ class PaymentService
     {
         $transaction = Transaction::where('provider_transaction_id', $paymentIntent['id'])->first();
         if ($transaction) {
-            $transaction->update(['status' => 'succeeded']);
+            $transaction->update([
+                'status' => 'succeeded',
+                'paid_at' => now(),
+            ]);
+            
+            // Generate invoice for successful payment
+            if (config('invoice.queue.enabled', true)) {
+                GenerateInvoiceJob::dispatch($transaction);
+            }
         }
     }
 
@@ -698,6 +712,11 @@ class PaymentService
                 'bill_id' => $billId,
                 'wallet_type' => $transaction->ewallet_type,
             ]);
+            
+            // Generate invoice for successful payment
+            if (config('invoice.queue.enabled', true)) {
+                GenerateInvoiceJob::dispatch($transaction);
+            }
         } elseif ($payload['state'] === 'deleted' || $payload['paid'] === 'false') {
             $transaction->update([
                 'status' => 'failed',

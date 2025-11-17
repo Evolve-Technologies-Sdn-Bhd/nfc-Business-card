@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\RefundController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\Admin\ManualBankTransferController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -196,6 +198,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{subscription}/reactivate', [SubscriptionController::class, 'reactivate']);
         Route::put('/{subscription}/payment-method', [SubscriptionController::class, 'updatePaymentMethod']);
     });
+
+    // ✅ Invoice Routes (User)
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index']);
+        Route::get('/statistics', [InvoiceController::class, 'statistics']);
+        Route::get('/{invoice}', [InvoiceController::class, 'show']);
+        Route::get('/{invoice}/preview', [InvoiceController::class, 'preview']);
+    });
+
+    // Invoice download with signed URL
+    Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])
+        ->name('invoices.download')
+        ->middleware('signed');
 });
 
 // Public legal documents routes
@@ -274,6 +289,20 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/manual-transfers/pending', [ManualBankTransferController::class, 'getPendingTransfers']);
         Route::post('/manual-transfers/{transaction}/verify', [ManualBankTransferController::class, 'verifyTransfer']);
         Route::get('/manual-transfers', [ManualBankTransferController::class, 'getAllTransfers']);
+    });
+
+    // ✅ Admin Invoice Management
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [AdminInvoiceController::class, 'index']);
+        Route::get('/statistics', [AdminInvoiceController::class, 'statistics']);
+        Route::get('/{invoice}', [AdminInvoiceController::class, 'show']);
+        Route::post('/{invoice}/regenerate', [AdminInvoiceController::class, 'regenerate']);
+        Route::post('/{invoice}/mark-issued', [AdminInvoiceController::class, 'markAsIssued']);
+        Route::post('/{invoice}/mark-paid', [AdminInvoiceController::class, 'markAsPaid']);
+        Route::post('/{invoice}/cancel', [AdminInvoiceController::class, 'cancel']);
+        Route::post('/{invoice}/resend', [AdminInvoiceController::class, 'resend']);
+        Route::get('/{invoice}/download', [AdminInvoiceController::class, 'download']);
+        Route::get('/{invoice}/preview', [AdminInvoiceController::class, 'preview']);
     });
 });
 
