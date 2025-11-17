@@ -297,8 +297,8 @@ const handleLogin = async () => {
       }
 
       console.log("Redirecting to:", redirectPath);
-      await router.push(redirectPath);
-      console.log("Redirect successful");
+      // Use window.location for reliable navigation
+      window.location.href = redirectPath;
     }
   } catch (error) {
     console.error("Login error details:", error);
@@ -338,7 +338,8 @@ const handle2FA = async () => {
       console.log("Redirecting to:", redirectPath);
     }
 
-    await router.push(redirectPath);
+    // Use window.location for reliable navigation
+    window.location.href = redirectPath;
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.validationErrors || {};

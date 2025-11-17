@@ -351,6 +351,181 @@
         </p>
       </div>
     </div>
+
+    <!-- Business Plan Request Modal -->
+    <div
+      v-if="showBusinessModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      @click="closeBusinessModal"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        @click.stop
+      >
+        <!-- Modal Header -->
+        <div
+          class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="p-3 bg-white/20 rounded-xl mr-4">
+                <Icon
+                  name="heroicons:building-office"
+                  class="h-8 w-8 text-white"
+                />
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold text-white">
+                  Business Plan Request
+                </h3>
+                <p class="text-indigo-100 text-sm mt-1">
+                  Tell us about your organization
+                </p>
+              </div>
+            </div>
+            <button
+              @click="closeBusinessModal"
+              class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <Icon name="heroicons:x-mark" class="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <form @submit.prevent="submitBusinessRequest" class="p-6 space-y-6">
+          <!-- Company Name -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Company Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="businessForm.company_name"
+              type="text"
+              required
+              placeholder="Enter your company name"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <!-- Company Address -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Company Address <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              v-model="businessForm.company_address"
+              required
+              rows="3"
+              placeholder="Enter your company address"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            ></textarea>
+          </div>
+
+          <!-- Number of Cards (Quota) -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Number of NFC Cards Needed <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model.number="businessForm.quota"
+              type="number"
+              required
+              min="1"
+              placeholder="e.g., 50"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+            <p class="text-xs text-secondary-500 mt-2">
+              How many NFC cards do you need for your team?
+            </p>
+          </div>
+
+          <!-- Contact Person -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Contact Person <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="businessForm.contact_person"
+              type="text"
+              required
+              placeholder="Full name"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <!-- Phone Number -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Phone Number <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="businessForm.phone"
+              type="tel"
+              required
+              placeholder="+60 12-345 6789"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Email Address <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="businessForm.email"
+              type="email"
+              required
+              placeholder="your@company.com"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <!-- Additional Notes -->
+          <div>
+            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+              Additional Notes (Optional)
+            </label>
+            <textarea
+              v-model="businessForm.notes"
+              rows="3"
+              placeholder="Any special requirements or questions?"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            ></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-4 pt-4">
+            <button
+              type="button"
+              @click="closeBusinessModal"
+              class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl font-medium hover:bg-secondary-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="submittingBusinessRequest"
+              class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              <div v-if="submittingBusinessRequest" class="flex items-center">
+                <div
+                  class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"
+                ></div>
+                Submitting...
+              </div>
+              <span v-else>Submit Request</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-secondary-500 text-center">
+            Our team will contact you within 24 hours to discuss your Business
+            Plan setup.
+          </p>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -373,16 +548,156 @@ const { $toast } = useNuxtApp();
 // Route and router
 const router = useRouter();
 
-// Check if user is authenticated
-onMounted(() => {
-  if (!authStore.isAuthenticated) {
-    router.push("/UserAccount/login");
-  }
+// Business plan modal state
+const showBusinessModal = ref(false);
+const submittingBusinessRequest = ref(false);
+
+// Business form data
+const businessForm = reactive({
+  company_name: "",
+  company_address: "",
+  quota: null,
+  contact_person: "",
+  phone: "",
+  email: authStore.user?.email || "",
+  notes: "",
 });
+
+// Check if user is authenticated
+onMounted(async () => {
+  console.log("PlanSelection mounted, checking auth...");
+  console.log("Initial auth state:", {
+    isAuthenticated: authStore.isAuthenticated,
+    hasUser: !!authStore.user,
+    userEmail: authStore.user?.email,
+  });
+
+  // Wait for auth state to be ready (especially important after registration)
+  if (!authStore.isAuthenticated || !authStore.user) {
+    console.log("Waiting for auth state to initialize...");
+
+    // Wait up to 2 seconds for auth state to be ready
+    let attempts = 0;
+    while ((!authStore.isAuthenticated || !authStore.user) && attempts < 10) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      attempts++;
+      console.log(`Waiting for auth (attempt ${attempts})...`);
+    }
+
+    // If still not authenticated after waiting, redirect to login
+    if (!authStore.isAuthenticated || !authStore.user) {
+      console.log("Auth state not ready, redirecting to login");
+      router.push("/UserAccount/login");
+      return;
+    }
+  }
+
+  console.log("User authenticated:", authStore.user.email);
+
+  // Pre-fill user info
+  businessForm.email = authStore.user?.email || "";
+  businessForm.contact_person =
+    authStore.user?.first_name && authStore.user?.last_name
+      ? `${authStore.user.first_name} ${authStore.user.last_name}`
+      : authStore.user?.name || "";
+});
+
+// Close business modal
+const closeBusinessModal = () => {
+  showBusinessModal.value = false;
+  // Reset form
+  Object.assign(businessForm, {
+    company_name: "",
+    company_address: "",
+    quota: null,
+    contact_person:
+      authStore.user?.first_name && authStore.user?.last_name
+        ? `${authStore.user.first_name} ${authStore.user.last_name}`
+        : authStore.user?.name || "",
+    phone: "",
+    email: authStore.user?.email || "",
+    notes: "",
+  });
+};
+
+// Submit business plan request
+const submitBusinessRequest = async () => {
+  submittingBusinessRequest.value = true;
+
+  try {
+    // Prepare email content
+    const subject = `Business Plan Request - ${businessForm.company_name}`;
+    const body = `
+Business Plan Request Details:
+
+════════════════════════════════
+COMPANY INFORMATION
+════════════════════════════════
+Company Name: ${businessForm.company_name}
+Company Address: ${businessForm.company_address}
+Number of NFC Cards Needed: ${businessForm.quota} cards
+
+════════════════════════════════
+CONTACT INFORMATION
+════════════════════════════════
+Contact Person: ${businessForm.contact_person}
+Email: ${businessForm.email}
+Phone: ${businessForm.phone}
+
+════════════════════════════════
+USER ACCOUNT DETAILS
+════════════════════════════════
+User: ${authStore.user?.first_name || ""} ${authStore.user?.last_name || ""}
+User Email: ${authStore.user?.email || ""}
+Submitted: ${new Date().toLocaleString()}
+${
+  businessForm.notes
+    ? `\n════════════════════════════════\nADDITIONAL NOTES\n════════════════════════════════\n${businessForm.notes}`
+    : ""
+}
+
+════════════════════════════════
+Please contact this customer within 24 hours.
+This is an automated request from NFCGo platform.
+`;
+
+    // Create Gmail compose URL
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+      "genn.chong@clbgroups.com"
+    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open Gmail in new tab
+    window.open(gmailUrl, "_blank");
+
+    // Show success message
+    $toast.success(
+      "Opening Gmail... Please send the email, then you'll be redirected to your dashboard."
+    );
+
+    // Close modal and redirect to dashboard after a short delay
+    setTimeout(() => {
+      closeBusinessModal();
+      router.push("/UserDashboard");
+    }, 2000);
+  } catch (error) {
+    console.error("Business plan request error:", error);
+    $toast.error(
+      "Failed to open email client. Please contact genn.chong@clbgroups.com directly."
+    );
+  } finally {
+    submittingBusinessRequest.value = false;
+  }
+};
 
 // Select plan and proceed
 const selectPlan = async (plan) => {
   try {
+    // If business plan is selected, show the modal instead
+    if (plan === "business") {
+      showBusinessModal.value = true;
+      return;
+    }
+
     // Store selected plan in session storage for the onboarding flow
     sessionStorage.setItem("selectedPlan", plan);
 
@@ -393,7 +708,7 @@ const selectPlan = async (plan) => {
     if (plan === "free") {
       // For free plan, mark onboarding as complete and go directly to CardManagement
       await $api.post("/complete-onboarding");
-      
+
       // Update auth store to reflect user is no longer new
       if (authStore.user) {
         authStore.user.is_new_user = false;
@@ -405,8 +720,12 @@ const selectPlan = async (plan) => {
       await router.push("/UserDashboard/CardManagement");
     } else {
       // For paid plans, proceed to NFC Card Customization first
-      $toast.success(`Great choice! Let's customize your ${plan} plan NFC card.`);
-      await router.push("/UserDashboard/UserManagement/NFCCardDesignCustomization");
+      $toast.success(
+        `Great choice! Let's customize your ${plan} plan NFC card.`
+      );
+      await router.push(
+        "/UserDashboard/UserManagement/NFCCardDesignCustomization"
+      );
     }
   } catch (error) {
     console.error("Plan selection error:", error);

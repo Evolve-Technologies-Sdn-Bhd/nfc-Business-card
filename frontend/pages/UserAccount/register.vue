@@ -730,18 +730,31 @@ const skip2FASetup = () => {
 };
 
 // Go to plan selection
-const goToPlanSelection = async () => {
-  try {
-    console.log("goToPlanSelection called");
-    showSuccessModal.value = false;
-    $toast.success("Welcome to NFCGo! Let's choose your plan.");
-    console.log("Navigating to plan selection...");
-    await router.push("/UserDashboard/PlanSelection");
-    console.log("Navigation complete");
-  } catch (error) {
-    console.error("Error in goToPlanSelection:", error);
-    $toast.error("Failed to navigate. Please try refreshing the page.");
+const goToPlanSelection = () => {
+  console.log("=== goToPlanSelection Debug Start ===");
+  console.log("Auth store state:", {
+    isAuthenticated: authStore.isAuthenticated,
+    hasUser: !!authStore.user,
+    userEmail: authStore.user?.email,
+    token: !!authStore.token,
+  });
+
+  // Verify user is authenticated
+  if (!authStore.isAuthenticated || !authStore.user) {
+    console.error("User not authenticated");
+    $toast.error("Please log in to continue.");
+    window.location.href = "/UserAccount/login";
+    return;
   }
+
+  console.log("User authenticated successfully:", authStore.user.email);
+
+  // Close the modal immediately
+  showSuccessModal.value = false;
+
+  // Use window.location for hard navigation to ensure clean page transition
+  console.log("Navigating to /UserDashboard/PlanSelection...");
+  window.location.href = "/UserDashboard/PlanSelection";
 };
 
 // Load legal documents
