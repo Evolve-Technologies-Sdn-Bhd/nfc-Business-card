@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\Admin\ManualBankTransferController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\BusinessPlanRequestController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -149,6 +150,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding/upload-card-design', [OnboardingController::class, 'uploadCardDesign']);
     Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
+
+    // Business Plan Request
+    Route::post('/business-plan-request', [BusinessPlanRequestController::class, 'submit']);
 
     // Business Plan Routes (for Business accounts and employees)
     Route::prefix('business')->group(function () {
