@@ -251,9 +251,34 @@ class OnboardingController extends Controller
             $shippingCost = 5; // Fixed shipping cost
             $total = $planPrice + $cardPrice + $shippingCost;
 
+            // Determine business_account_id for Business plan orders
+            $businessAccountId = null;
+            if ($plan === 'business') {
+                if ($user->isBusinessAccount()) {
+                    $businessAccountId = $user->id;
+                } elseif ($user->isBusinessEmployee()) {
+                    $businessAccountId = $user->parent_business_id;
+                }
+                
+                // Check quota for Business plan
+                $businessAccount = $businessAccountId ? User::find($businessAccountId) : null;
+                if ($businessAccount) {
+                    $quotaInfo = $businessAccount->getQuotaInfo();
+                    if ($quotaInfo['available_card_quota'] <= 0) {
+                        DB::rollback();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Card quota exceeded. Please contact admin to increase quota.',
+                            'quota_info' => $quotaInfo
+                        ], 403);
+                    }
+                }
+            }
+
             // Create NFC card order
             $nfcCard = NfcCard::create([
                 'user_id' => $user->id,
+                'business_account_id' => $businessAccountId,
                 'card_owner' => $request->card_info['name'],
                 'billing_address' => json_encode($request->billing_address),
                 'contact_number' => $request->card_info['contact_number'],

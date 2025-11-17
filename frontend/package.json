@@ -34,12 +34,14 @@
     "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.5.0",
     "axios": "^1.6.0",
+    "csv": "^6.4.1",
     "draggable": "^4.2.0",
     "marked": "^17.0.0",
     "nuxt-icon": "^0.6.6",
     "pinia": "^2.1.7",
     "vue-draggable-next": "^2.2.1",
     "vue3-otp-input": "^0.4.1",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "xlsx": "^0.18.5"
   }
 }

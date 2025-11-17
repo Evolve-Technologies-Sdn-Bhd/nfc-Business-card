@@ -10,25 +10,22 @@
               Employee Management
             </h1>
             <p class="text-sm text-secondary-600">
-              Manage employee accounts and NFC cards
+              Manage employee details, cards and passwords
             </p>
           </div>
-          <button
-            @click="showAddEmployeeModal = true"
-            :disabled="!canAddMoreEmployees"
-            class="btn btn-primary"
-            :class="{ 'opacity-50 cursor-not-allowed': !canAddMoreEmployees }"
-          >
-            <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-            Add Employee
-          </button>
+          <div class="flex items-center space-x-3">
+            <button @click="showCardDesignModal = true" class="btn btn-primary">
+              <Icon name="heroicons:paint-brush" class="h-4 w-4 mr-2" />
+              Design Cards
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Account & Card Usage Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="card">
           <div class="card-body">
             <div class="flex items-center">
@@ -42,56 +39,13 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">
-                  Total Employees
+                  Total Accounts
                 </p>
                 <p class="text-2xl font-semibold text-secondary-900">
-                  {{ employees.length }}
+                  {{ totalAccounts }}
                 </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-12 w-12 rounded-lg bg-success-100 flex items-center justify-center"
-              >
-                <Icon
-                  name="heroicons:check-circle"
-                  class="h-6 w-6 text-success-600"
-                />
-              </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-secondary-600">
-                  Active Accounts
-                </p>
-                <p class="text-2xl font-semibold text-secondary-900">
-                  {{ activeEmployeesCount }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-12 w-12 rounded-lg bg-warning-100 flex items-center justify-center"
-              >
-                <Icon
-                  name="heroicons:square-3-stack-3d"
-                  class="h-6 w-6 text-warning-600"
-                />
-              </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-secondary-600">
-                  Account Slots
-                </p>
-                <p class="text-2xl font-semibold text-secondary-900">
-                  {{ availableSlots }} / {{ totalSlots }}
+                <p class="text-xs text-secondary-500">
+                  1 owner + {{ employees.length }} employees
                 </p>
               </div>
             </div>
@@ -111,11 +65,35 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">
-                  NFC Card Quota
+                  NFC Cards Ordered
                 </p>
                 <p class="text-2xl font-semibold text-secondary-900">
-                  {{ availableCardQuota }} / {{ totalCardQuota }}
+                  {{ orderedCardsCount }}
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="flex items-center">
+              <div
+                class="flex-shrink-0 h-12 w-12 rounded-lg bg-warning-100 flex items-center justify-center"
+              >
+                <Icon
+                  name="heroicons:square-3-stack-3d"
+                  class="h-6 w-6 text-warning-600"
+                />
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-secondary-600">
+                  Available Quota
+                </p>
+                <p class="text-2xl font-semibold text-secondary-900">
+                  {{ availableQuota }} / {{ totalQuota }}
+                </p>
+                <p class="text-xs text-secondary-500">For accounts & cards</p>
               </div>
             </div>
           </div>
@@ -124,9 +102,9 @@
 
       <!-- Warning Messages -->
       <div class="space-y-4 mb-6">
-        <!-- Account Limit Warning -->
+        <!-- Quota Limit Warning -->
         <div
-          v-if="availableSlots <= 0"
+          v-if="availableQuota <= 0"
           class="bg-warning-50 border border-warning-200 rounded-lg p-4"
         >
           <div class="flex">
@@ -136,42 +114,18 @@
             />
             <div class="ml-3">
               <h3 class="text-sm font-medium text-warning-800">
-                Account Limit Reached
+                Quota Limit Reached
               </h3>
               <p class="text-sm text-warning-700 mt-1">
-                You have reached the maximum number of employee accounts ({{
-                  totalSlots
-                }}). Please contact support to purchase additional slots.
+                You have reached the maximum quota ({{ totalQuota }}). Cannot
+                create more accounts or order more cards until quota is
+                increased. Please contact support to purchase additional quota.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Card Quota Warning -->
-        <div
-          v-if="availableCardQuota <= 0"
-          class="bg-warning-50 border border-warning-200 rounded-lg p-4"
-        >
-          <div class="flex">
-            <Icon
-              name="heroicons:exclamation-triangle"
-              class="h-5 w-5 text-warning-600 mt-0.5"
-            />
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-warning-800">
-                NFC Card Quota Reached
-              </h3>
-              <p class="text-sm text-warning-700 mt-1">
-                You have ordered the maximum number of Business Plan NFC cards
-                ({{ totalCardQuota }}). No more Business Plan cards can be
-                ordered until quota is increased. Please contact support to
-                purchase additional card quota.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Info: Card Quota Explanation -->
+        <!-- Info: Unified Quota Explanation -->
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex">
             <Icon
@@ -180,18 +134,27 @@
             />
             <div class="ml-3">
               <h3 class="text-sm font-medium text-blue-800">
-                NFC Card Quota Information
+                Business Quota Information
               </h3>
               <p class="text-sm text-blue-700 mt-1">
-                Card quota is deducted only when an account (admin or employee)
-                <strong>successfully orders a Business Plan NFC card</strong>.
+                Your business has a total quota of
+                <strong>{{ totalQuota }}</strong> for both accounts and NFC
+                cards.
               </p>
-              <p class="text-sm text-blue-700 mt-2">
-                <strong>Currently ordered:</strong> {{ usedCardQuota }} /
-                {{ totalCardQuota }} cards
-              </p>
-              <p class="text-sm text-blue-600 mt-1">
-                Creating employee accounts does NOT consume card quota.
+              <div class="text-sm text-blue-700 mt-2 space-y-1">
+                <p>📊 <strong>Current Usage:</strong></p>
+                <p class="ml-4">
+                  • Accounts: {{ totalAccounts }} / {{ totalQuota }} (1 owner +
+                  {{ employees.length }} employees)
+                </p>
+                <p class="ml-4">
+                  • Cards Ordered: {{ orderedCardsCount }} / {{ totalQuota }}
+                </p>
+                <p class="ml-4">• Available: {{ availableQuota }}</p>
+              </div>
+              <p class="text-sm text-blue-600 mt-2">
+                💡 Employee accounts are created by Super Admin. You can upload
+                employee details and design their cards.
               </p>
             </div>
           </div>
@@ -250,21 +213,13 @@
             <h3 class="text-lg font-semibold text-secondary-900 mb-2">
               No Employees Found
             </h3>
-            <p class="text-secondary-600 mb-6">
+            <p class="text-secondary-500">
               {{
                 searchQuery
-                  ? "No employees match your search."
-                  : "Get started by adding your first employee."
+                  ? "No employees match your search criteria."
+                  : "No employees found. Employee accounts are created by Super Admin."
               }}
             </p>
-            <button
-              v-if="!searchQuery"
-              @click="showAddEmployeeModal = true"
-              class="btn btn-primary"
-            >
-              <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-              Add First Employee
-            </button>
           </div>
 
           <!-- Employees Table -->
@@ -362,40 +317,29 @@
                     class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                   >
                     <div class="flex items-center justify-end space-x-2">
+                      <!-- View Details Button -->
+                      <button
+                        @click="viewEmployeeDetails(employee)"
+                        class="text-primary-600 hover:text-primary-900"
+                        title="View Details"
+                      >
+                        <Icon name="heroicons:eye" class="h-5 w-5" />
+                      </button>
+                      <!-- Reset Password Button -->
+                      <button
+                        @click="resetEmployeePassword(employee)"
+                        class="text-warning-600 hover:text-warning-900"
+                        title="Reset Password"
+                      >
+                        <Icon name="heroicons:key" class="h-5 w-5" />
+                      </button>
                       <!-- View NFC Card Button -->
                       <button
                         @click="viewEmployeeCard(employee)"
-                        class="text-primary-600 hover:text-primary-900"
+                        class="text-info-600 hover:text-info-900"
                         title="View NFC Card"
                       >
                         <Icon name="heroicons:credit-card" class="h-5 w-5" />
-                      </button>
-                      <!-- Edit Button -->
-                      <button
-                        @click="editEmployee(employee)"
-                        class="text-secondary-600 hover:text-secondary-900"
-                        title="Edit"
-                      >
-                        <Icon name="heroicons:pencil" class="h-5 w-5" />
-                      </button>
-                      <!-- Toggle Status Button -->
-                      <button
-                        @click="toggleEmployeeStatus(employee)"
-                        :class="[
-                          employee.is_active
-                            ? 'text-warning-600 hover:text-warning-900'
-                            : 'text-success-600 hover:text-success-900',
-                        ]"
-                        :title="employee.is_active ? 'Disable' : 'Enable'"
-                      >
-                        <Icon
-                          :name="
-                            employee.is_active
-                              ? 'heroicons:pause-circle'
-                              : 'heroicons:play-circle'
-                          "
-                          class="h-5 w-5"
-                        />
                       </button>
                     </div>
                   </td>
@@ -407,103 +351,144 @@
       </div>
     </div>
 
-    <!-- Add Employee Modal -->
+    <!-- View Employee Details Modal -->
     <Transition name="modal">
       <div
-        v-if="showAddEmployeeModal"
+        v-if="showViewDetailsModal"
         class="fixed inset-0 z-50 overflow-y-auto"
       >
         <div class="flex items-center justify-center min-h-screen px-4">
           <div
             class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            @click="closeAddEmployeeModal"
+            @click="closeViewDetailsModal"
           ></div>
           <div
             class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium text-secondary-900">
-                Add New Employee
+                Employee Details
               </h3>
               <button
-                @click="closeAddEmployeeModal"
+                @click="closeViewDetailsModal"
                 class="text-secondary-400 hover:text-secondary-600"
               >
                 <Icon name="heroicons:x-mark" class="h-6 w-6" />
               </button>
             </div>
 
-            <form @submit.prevent="submitAddEmployee" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Employee Name</label
+            <div v-if="selectedEmployee" class="space-y-4">
+              <div class="flex items-center space-x-4 mb-4">
+                <div
+                  class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold"
                 >
-                <input
-                  v-model="addForm.name"
-                  type="text"
-                  class="input w-full"
-                  placeholder="John Doe"
-                  required
-                />
+                  {{ getInitials(selectedEmployee.name) }}
+                </div>
+                <div>
+                  <h4 class="text-lg font-medium text-secondary-900">
+                    {{ selectedEmployee.name }}
+                  </h4>
+                  <span
+                    :class="[
+                      'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                      selectedEmployee.is_active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800',
+                    ]"
+                  >
+                    {{ selectedEmployee.is_active ? "Active" : "Inactive" }}
+                  </span>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Company Email</label
-                >
-                <input
-                  v-model="addForm.email"
-                  type="email"
-                  class="input w-full"
-                  placeholder="john.doe@company.com"
-                  required
-                />
-                <p class="text-xs text-secondary-500 mt-1">
-                  Employee will receive login credentials at this email
-                </p>
+              <div class="space-y-3">
+                <div>
+                  <label
+                    class="text-xs font-medium text-secondary-500 uppercase"
+                    >Email</label
+                  >
+                  <p class="text-sm text-secondary-900 mt-1">
+                    {{ selectedEmployee.email }}
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="text-xs font-medium text-secondary-500 uppercase"
+                    >Position</label
+                  >
+                  <p class="text-sm text-secondary-900 mt-1">
+                    {{ selectedEmployee.position || "N/A" }}
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="text-xs font-medium text-secondary-500 uppercase"
+                    >Phone</label
+                  >
+                  <p class="text-sm text-secondary-900 mt-1">
+                    {{ selectedEmployee.phone || "N/A" }}
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="text-xs font-medium text-secondary-500 uppercase"
+                    >Account Created</label
+                  >
+                  <p class="text-sm text-secondary-900 mt-1">
+                    {{ formatDate(selectedEmployee.created_at) }}
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Position (Optional)</label
-                >
-                <input
-                  v-model="addForm.position"
-                  type="text"
-                  class="input w-full"
-                  placeholder="Sales Manager"
-                />
+              <div class="flex items-center justify-end pt-4">
+                <button @click="closeViewDetailsModal" class="btn btn-primary">
+                  Close
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Phone Number (Optional)</label
-                >
-                <input
-                  v-model="addForm.phone"
-                  type="tel"
-                  class="input w-full"
-                  placeholder="+60 12-345 6789"
-                />
-              </div>
+    <!-- Reset Password Modal -->
+    <Transition name="modal">
+      <div
+        v-if="showResetPasswordModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex items-center justify-center min-h-screen px-4">
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            @click="closeResetPasswordModal"
+          ></div>
+          <div
+            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-secondary-900">
+                Reset Employee Password
+              </h3>
+              <button
+                @click="closeResetPasswordModal"
+                class="text-secondary-400 hover:text-secondary-600"
+              >
+                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              </button>
+            </div>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div v-if="selectedEmployee" class="space-y-4">
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div class="flex">
                   <Icon
-                    name="heroicons:information-circle"
-                    class="h-5 w-5 text-blue-600 flex-shrink-0"
+                    name="heroicons:exclamation-triangle"
+                    class="h-5 w-5 text-yellow-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-sm text-blue-700">
-                      <strong>Auto-Generated Credentials:</strong>
+                    <p class="text-sm text-yellow-700">
+                      A new password will be generated and sent to
+                      <strong>{{ selectedEmployee.email }}</strong>
                     </p>
-                    <ul
-                      class="text-sm text-blue-600 mt-1 list-disc list-inside"
-                    >
-                      <li>Secure password will be auto-generated</li>
-                      <li>Default plan: Premium</li>
-                      <li>Credentials sent via email</li>
-                    </ul>
                   </div>
                 </div>
               </div>
@@ -511,117 +496,77 @@
               <div class="flex items-center justify-end space-x-3 pt-4">
                 <button
                   type="button"
-                  @click="closeAddEmployeeModal"
+                  @click="closeResetPasswordModal"
                   class="btn btn-outline"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  class="btn btn-primary"
-                  :disabled="addLoading"
+                  @click="confirmResetPassword"
+                  class="btn btn-warning"
+                  :disabled="resetPasswordLoading"
                 >
-                  <div v-if="addLoading" class="spinner mr-2"></div>
-                  {{ addLoading ? "Creating..." : "Create Employee" }}
+                  <div v-if="resetPasswordLoading" class="spinner mr-2"></div>
+                  {{ resetPasswordLoading ? "Resetting..." : "Reset Password" }}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
     </Transition>
 
-    <!-- Edit Employee Modal -->
+    <!-- Card Design Modal -->
     <Transition name="modal">
       <div
-        v-if="showEditEmployeeModal"
+        v-if="showCardDesignModal"
         class="fixed inset-0 z-50 overflow-y-auto"
       >
         <div class="flex items-center justify-center min-h-screen px-4">
           <div
             class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            @click="closeEditEmployeeModal"
+            @click="closeCardDesignModal"
           ></div>
           <div
-            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
+            class="bg-white rounded-lg max-w-2xl w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium text-secondary-900">
-                Edit Employee
+                Design Employee NFC Cards
               </h3>
               <button
-                @click="closeEditEmployeeModal"
+                @click="closeCardDesignModal"
                 class="text-secondary-400 hover:text-secondary-600"
               >
                 <Icon name="heroicons:x-mark" class="h-6 w-6" />
               </button>
             </div>
 
-            <form @submit.prevent="submitEditEmployee" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Employee Name</label
-                >
-                <input
-                  v-model="editForm.name"
-                  type="text"
-                  class="input w-full"
-                  required
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Email</label
-                >
-                <input
-                  v-model="editForm.email"
-                  type="email"
-                  class="input w-full"
-                  required
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Position</label
-                >
-                <input
-                  v-model="editForm.position"
-                  type="text"
-                  class="input w-full"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Phone Number</label
-                >
-                <input
-                  v-model="editForm.phone"
-                  type="tel"
-                  class="input w-full"
-                />
+            <div class="space-y-4">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <Icon
+                    name="heroicons:information-circle"
+                    class="h-5 w-5 text-blue-600 flex-shrink-0"
+                  />
+                  <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                      Navigate to <strong>Card Design</strong> page to create
+                      and manage NFC card templates for your employees.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div class="flex items-center justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  @click="closeEditEmployeeModal"
-                  class="btn btn-outline"
-                >
+                <button @click="closeCardDesignModal" class="btn btn-outline">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  :disabled="editLoading"
-                >
-                  <div v-if="editLoading" class="spinner mr-2"></div>
-                  {{ editLoading ? "Saving..." : "Save Changes" }}
+                <button @click="navigateToCardDesign" class="btn btn-primary">
+                  Go to Card Design
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -647,48 +592,30 @@ const searchQuery = ref("");
 const filterStatus = ref("all");
 
 // Modals
-const showAddEmployeeModal = ref(false);
-const showEditEmployeeModal = ref(false);
-const addLoading = ref(false);
-const editLoading = ref(false);
+const showViewDetailsModal = ref(false);
+const showResetPasswordModal = ref(false);
+const showCardDesignModal = ref(false);
+const resetPasswordLoading = ref(false);
 
-// Forms
-const addForm = ref({
-  name: "",
-  email: "",
-  position: "",
-  phone: "",
-});
+// Selected Employee for view/reset actions
+const selectedEmployee = ref(null);
 
-const editForm = ref({
-  id: null,
-  name: "",
-  email: "",
-  position: "",
-  phone: "",
-});
-
-// Company account limits
-const totalSlots = ref(10); // Default: company purchased 10 account slots
-const usedSlots = computed(() => employees.value.length);
-const availableSlots = computed(() =>
-  Math.max(0, totalSlots.value - usedSlots.value)
-);
-const canAddMoreEmployees = computed(() => availableSlots.value > 0);
-
-// NFC Card Quota
-// Card quota is based on ACTUAL ORDERS, not account creation
-// Only when an account (admin or employee) orders a Business Plan card, quota is deducted
-const totalCardQuota = ref(10); // Default: admin assigns total cards this business can order
+// Company unified quota (for both accounts and cards)
+const totalQuota = ref(10); // Default: admin assigns 10 quota
+const totalAccounts = computed(() => 1 + employees.value.length); // 1 owner + employees
 const orderedCardsCount = ref(0); // Actual number of Business Plan cards ordered
-const usedCardQuota = computed(() => {
-  // Cards that have been ordered (not just account count)
-  return orderedCardsCount.value;
+
+// Available quota is the lesser of:
+// 1. Quota not used by accounts (total - total accounts)
+// 2. Quota not used by cards (total - ordered cards)
+const availableQuota = computed(() => {
+  const accountsRemaining = Math.max(0, totalQuota.value - totalAccounts.value);
+  const cardsRemaining = Math.max(
+    0,
+    totalQuota.value - orderedCardsCount.value
+  );
+  return Math.min(accountsRemaining, cardsRemaining);
 });
-const availableCardQuota = computed(() =>
-  Math.max(0, totalCardQuota.value - usedCardQuota.value)
-);
-const canOrderMoreCards = computed(() => availableCardQuota.value > 0);
 
 // Computed
 const activeEmployeesCount = computed(() => {
@@ -724,11 +651,14 @@ const loadEmployees = async () => {
   try {
     const response = await $api.get("/business/employees");
 
-    if (response.success) {
-      employees.value = response.employees || [];
-      totalSlots.value = response.total_slots || 10;
-      totalCardQuota.value = response.total_card_quota || 10; // Total card quota from backend
-      orderedCardsCount.value = response.ordered_cards_count || 0; // Actual ordered cards
+    if (response.success && response.data) {
+      employees.value = response.data.employees || [];
+
+      // Get quota info from nested data structure
+      const quotaInfo = response.data.quota_info || {};
+      totalQuota.value =
+        quotaInfo.total_quota || quotaInfo.total_account_slots || 10;
+      orderedCardsCount.value = quotaInfo.ordered_cards_count || 0;
     }
   } catch (error) {
     console.error("Failed to load employees:", error);
@@ -738,132 +668,67 @@ const loadEmployees = async () => {
   }
 };
 
-const submitAddEmployee = async () => {
-  if (!canAddMoreEmployees.value) {
-    $toast.error("You have reached the maximum number of employee accounts");
-    return;
-  }
+// View Employee Details
+const viewEmployeeDetails = (employee) => {
+  selectedEmployee.value = employee;
+  showViewDetailsModal.value = true;
+};
 
-  addLoading.value = true;
+const closeViewDetailsModal = () => {
+  showViewDetailsModal.value = false;
+  selectedEmployee.value = null;
+};
+
+// Reset Employee Password
+const resetEmployeePassword = (employee) => {
+  selectedEmployee.value = employee;
+  showResetPasswordModal.value = true;
+};
+
+const confirmResetPassword = async () => {
+  if (!selectedEmployee.value) return;
+
+  resetPasswordLoading.value = true;
   try {
-    const response = await $api.post("/business/employees", {
-      name: addForm.value.name,
-      email: addForm.value.email,
-      position: addForm.value.position,
-      phone: addForm.value.phone,
-      subscription_plan: "premium", // Auto-assign Premium plan
-    });
+    const response = await $api.post(
+      `/business/employees/${selectedEmployee.value.id}/reset-password`
+    );
 
     if (response.success) {
       $toast.success(
-        `Employee created successfully! Password sent to ${addForm.value.email}`
+        `Password reset email sent to ${selectedEmployee.value.email}`
       );
-      closeAddEmployeeModal();
-      await loadEmployees();
+      closeResetPasswordModal();
     }
   } catch (error) {
-    console.error("Failed to create employee:", error);
+    console.error("Failed to reset password:", error);
     if (error.data?.message) {
       $toast.error(error.data.message);
     } else {
-      $toast.error("Failed to create employee account");
+      $toast.error("Failed to reset password");
     }
   } finally {
-    addLoading.value = false;
+    resetPasswordLoading.value = false;
   }
 };
 
-const editEmployee = (employee) => {
-  editForm.value = {
-    id: employee.id,
-    name: employee.name,
-    email: employee.email,
-    position: employee.position || "",
-    phone: employee.phone || "",
-  };
-  showEditEmployeeModal.value = true;
+const closeResetPasswordModal = () => {
+  showResetPasswordModal.value = false;
+  selectedEmployee.value = null;
 };
 
-const submitEditEmployee = async () => {
-  editLoading.value = true;
-  try {
-    const response = await $api.put(
-      `/business/employees/${editForm.value.id}`,
-      {
-        name: editForm.value.name,
-        email: editForm.value.email,
-        position: editForm.value.position,
-        phone: editForm.value.phone,
-      }
-    );
-
-    if (response.success) {
-      $toast.success("Employee updated successfully!");
-      closeEditEmployeeModal();
-      await loadEmployees();
-    }
-  } catch (error) {
-    console.error("Failed to update employee:", error);
-    if (error.data?.message) {
-      $toast.error(error.data.message);
-    } else {
-      $toast.error("Failed to update employee");
-    }
-  } finally {
-    editLoading.value = false;
-  }
+// Card Design
+const closeCardDesignModal = () => {
+  showCardDesignModal.value = false;
 };
 
-const toggleEmployeeStatus = async (employee) => {
-  const action = employee.is_active ? "disable" : "enable";
-  const confirmMessage = `Are you sure you want to ${action} ${employee.name}'s account?`;
-
-  if (!confirm(confirmMessage)) {
-    return;
-  }
-
-  try {
-    const response = await $api.post(
-      `/business/employees/${employee.id}/toggle-status`,
-      {
-        is_active: !employee.is_active,
-      }
-    );
-
-    if (response.success) {
-      $toast.success(`Employee account ${action}d successfully!`);
-      await loadEmployees();
-    }
-  } catch (error) {
-    console.error("Failed to toggle employee status:", error);
-    $toast.error(`Failed to ${action} employee account`);
-  }
+const navigateToCardDesign = () => {
+  navigateTo("/UserDashboard/NFCCardDesign/BusinessPlanNFCCard");
 };
 
 const viewEmployeeCard = (employee) => {
   // Navigate to employee's NFC card management page
   navigateTo(`/UserDashboard/employees/${employee.id}/card`);
-};
-
-const closeAddEmployeeModal = () => {
-  showAddEmployeeModal.value = false;
-  addForm.value = {
-    name: "",
-    email: "",
-    position: "",
-    phone: "",
-  };
-};
-
-const closeEditEmployeeModal = () => {
-  showEditEmployeeModal.value = false;
-  editForm.value = {
-    id: null,
-    name: "",
-    email: "",
-    position: "",
-    phone: "",
-  };
 };
 
 const getInitials = (name) => {

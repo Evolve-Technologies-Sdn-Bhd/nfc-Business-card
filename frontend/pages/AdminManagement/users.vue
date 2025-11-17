@@ -408,40 +408,100 @@
             <h4 class="text-sm font-medium text-secondary-900 mb-4">
               Business Plan Settings
             </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2"
-                  >Total Account Slots *</label
-                >
-                <input
-                  v-model.number="form.total_account_slots"
-                  type="number"
-                  min="1"
-                  required
-                  class="input"
-                  placeholder="e.g. 50"
+
+            <!-- Current Quota Usage (Edit Mode Only) -->
+            <div
+              v-if="showEditModal && selectedUser?.quota_info"
+              class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4"
+            >
+              <div class="flex items-start">
+                <Icon
+                  name="heroicons:information-circle"
+                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
                 />
-                <p class="text-xs text-secondary-500 mt-1">
-                  Number of employee accounts that can be created
-                </p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2"
-                  >Total Card Quota *</label
-                >
-                <input
-                  v-model.number="form.total_card_quota"
-                  type="number"
-                  min="1"
-                  required
-                  class="input"
-                  placeholder="e.g. 50"
-                />
-                <p class="text-xs text-secondary-500 mt-1">
-                  Total NFC cards (admin + employees) that can be ordered
-                </p>
+                <div class="ml-3 flex-1">
+                  <h5 class="text-sm font-medium text-blue-900 mb-2">
+                    Current Quota Usage
+                  </h5>
+                  <div class="space-y-2 text-sm">
+                    <div>
+                      <p class="text-blue-700 font-medium">Total Accounts:</p>
+                      <p class="text-blue-600">
+                        {{
+                          selectedUser.quota_info.total_accounts ||
+                          1 + selectedUser.quota_info.employees_count
+                        }}
+                        /
+                        {{
+                          selectedUser.quota_info.total_quota ||
+                          selectedUser.quota_info.total_account_slots
+                        }}
+                        <span class="text-xs text-blue-500">
+                          (1 owner +
+                          {{
+                            selectedUser.quota_info.employees_count
+                          }}
+                          employees)
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-blue-700 font-medium">
+                        NFC Cards Ordered:
+                      </p>
+                      <p class="text-blue-600">
+                        {{ selectedUser.quota_info.ordered_cards_count }} /
+                        {{
+                          selectedUser.quota_info.total_quota ||
+                          selectedUser.quota_info.total_card_quota
+                        }}
+                      </p>
+                    </div>
+                    <div class="pt-2 border-t border-blue-200">
+                      <p class="text-blue-700 font-medium">Available Quota:</p>
+                      <p class="text-blue-600 text-lg font-semibold">
+                        {{
+                          selectedUser.quota_info.available_quota ||
+                          Math.min(
+                            selectedUser.quota_info.available_account_slots ||
+                              0,
+                            selectedUser.quota_info.available_card_quota || 0
+                          )
+                        }}
+                      </p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-blue-600 mt-3">
+                    ⚠️ Cannot set quota below max(total_accounts, ordered_cards)
+                  </p>
+                </div>
               </div>
             </div>
+
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 mb-2"
+                >Total Business Quota *</label
+              >
+              <input
+                v-model.number="form.total_account_slots"
+                type="number"
+                :min="getMinimumQuota()"
+                required
+                class="input"
+                placeholder="e.g. 50"
+              />
+              <p class="text-xs text-secondary-500 mt-1">
+                Maximum number of accounts (including owner) AND NFC cards this
+                business can have
+              </p>
+              <p
+                v-if="showEditModal && selectedUser?.quota_info"
+                class="text-xs text-warning-600 mt-1"
+              >
+                Minimum: {{ getMinimumQuota() }} (based on current usage)
+              </p>
+            </div>
+
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
               <div class="flex">
                 <Icon
@@ -450,13 +510,17 @@
                 />
                 <div class="ml-3">
                   <p class="text-sm text-blue-700">
-                    <strong>Card Quota Breakdown:</strong>
+                    <strong>Unified Quota System:</strong>
                   </p>
-                  <ul class="text-sm text-blue-600 mt-1 list-disc list-inside">
-                    <li>1 card for Business admin account</li>
+                  <ul class="text-sm text-blue-600 mt-1 space-y-1">
+                    <li>• Quota applies to both accounts AND cards</li>
                     <li>
-                      Remaining cards ({{ form.total_card_quota - 1 || 0 }}) for
-                      employee accounts
+                      • If quota = 10: max 10 accounts (1 owner + 9 employees)
+                      AND max 10 cards
+                    </li>
+                    <li>
+                      • Creating accounts doesn't consume quota until they order
+                      cards
                     </li>
                   </ul>
                 </div>
@@ -748,7 +812,6 @@ const editUser = (user) => {
     admin_role: user.admin_role || "admin",
     admin_permissions: user.admin_permissions || [],
     total_account_slots: user.total_account_slots || 10,
-    total_card_quota: user.total_card_quota || 10,
   };
   showEditModal.value = true;
 };
@@ -814,7 +877,6 @@ const closeModal = () => {
     admin_role: "admin",
     admin_permissions: [],
     total_account_slots: 10,
-    total_card_quota: 10,
   };
 };
 
@@ -834,6 +896,17 @@ const deleteUser = async (user) => {
 };
 
 // Helper functions
+const getMinimumQuota = () => {
+  if (!selectedUser.value?.quota_info) return 1;
+
+  const totalAccounts =
+    selectedUser.value.quota_info.total_accounts ||
+    1 + (selectedUser.value.quota_info.employees_count || 0);
+  const orderedCards = selectedUser.value.quota_info.ordered_cards_count || 0;
+
+  return Math.max(totalAccounts, orderedCards);
+};
+
 const getSubscriptionBadgeClass = (plan) => {
   const classes = {
     free: "bg-secondary-100 text-secondary-800",

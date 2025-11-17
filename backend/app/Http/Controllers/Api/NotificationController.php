@@ -25,6 +25,7 @@ class NotificationController extends Controller
         $unreadOnly = $request->boolean('unread_only', false);
 
         $query = $user->notifications()
+            ->orderBy('pinned', 'desc') // Pinned notifications first
             ->orderBy('created_at', 'desc')
             ->limit($limit);
 
