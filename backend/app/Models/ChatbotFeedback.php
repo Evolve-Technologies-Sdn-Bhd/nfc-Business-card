@@ -20,6 +20,11 @@ class ChatbotFeedback extends Model
         'user_email',
         'rating',
         'feedback_type',
+        'status',
+        'category',
+        'admin_notes',
+        'resolved_by',
+        'resolved_at',
         'is_read',
         'ip_address',
     ];
@@ -27,6 +32,7 @@ class ChatbotFeedback extends Model
     protected $casts = [
         'is_read' => 'boolean',
         'rating' => 'integer',
+        'resolved_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -40,11 +46,47 @@ class ChatbotFeedback extends Model
     }
 
     /**
+     * Get the admin who resolved this feedback
+     */
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    /**
      * Mark feedback as read
      */
     public function markAsRead(): void
     {
         $this->update(['is_read' => true]);
+    }
+
+    /**
+     * Mark feedback as resolved
+     */
+    public function markAsResolved(int $userId): void
+    {
+        $this->update([
+            'status' => 'resolved',
+            'resolved_by' => $userId,
+            'resolved_at' => now(),
+            'is_read' => true,
+        ]);
+    }
+
+    /**
+     * Update status
+     */
+    public function updateStatus(string $status, int $userId = null): void
+    {
+        $data = ['status' => $status];
+        
+        if ($status === 'resolved' && $userId) {
+            $data['resolved_by'] = $userId;
+            $data['resolved_at'] = now();
+        }
+        
+        $this->update($data);
     }
 
     /**
@@ -72,11 +114,43 @@ class ChatbotFeedback extends Model
     }
 
     /**
+     * Scope to filter by status
+     */
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to filter by category
+     */
+    public function scopeByCategory($query, string $category)
+    {
+        return $query->where('category', $category);
+    }
+
+    /**
+     * Scope to filter by date range
+     */
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    /**
      * Get count of unread feedback
      */
     public static function getUnreadCount(): int
     {
         return self::unread()->count();
+    }
+
+    /**
+     * Get count of pending feedback
+     */
+    public static function getPendingCount(): int
+    {
+        return self::where('status', 'pending')->count();
     }
 
     /**

@@ -666,6 +666,95 @@
             </div>
           </div>
 
+          <!-- Video Section -->
+          <div
+            v-if="videoData.url"
+            :style="{
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+            }"
+          >
+            <div
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
+              }"
+            >
+              <div
+                :style="{
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
+                }"
+              >
+                🎥
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
+                }"
+              >
+                {{ videoData.title || 'Company Introduction' }}
+              </h2>
+            </div>
+
+            <!-- Video Player -->
+            <div
+              :style="{
+                position: 'relative',
+                paddingBottom: '56.25%', /* 16:9 aspect ratio */
+                height: 0,
+                overflow: 'hidden',
+                borderRadius: '20px',
+                background: 'rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+                marginBottom: videoData.description ? (isMobile ? '15px' : '20px') : '0',
+              }"
+            >
+              <iframe
+                :src="getEmbedUrl(videoData.url)"
+                :style="{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '20px',
+                }"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              />
+            </div>
+
+            <!-- Video Description -->
+            <p
+              v-if="videoData.description"
+              :style="{
+                color: 'rgba(255, 255, 255, 0.7)',
+                lineHeight: '1.6',
+                fontSize: responsive.bodySize,
+                margin: 0,
+                textAlign: 'center',
+              }"
+            >
+              {{ videoData.description }}
+            </p>
+          </div>
+
           <!-- Services -->
           <div
             :style="{
@@ -1497,6 +1586,12 @@ const services = ref([
   { icon: "📄", name: "Printing Solutions" },
 ]);
 
+const videoData = ref({
+  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // YouTube, Vimeo, or direct embed URL
+  title: 'Company Introduction',
+  description: 'Watch our introduction video to learn more about what we do',
+});
+
 const contactMethods = ref([
   {
     icon: "M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z",
@@ -1540,6 +1635,28 @@ const teamMembers = ref([
   { initials: "JS", name: "Jane Smith", role: "Project Manager" },
   { initials: "ML", name: "Mike Lee", role: "Designer" },
 ]);
+
+// Helper function to convert video URLs to embed format
+const getEmbedUrl = (url) => {
+  if (!url) return '';
+  
+  // YouTube
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+  const youtubeMatch = url.match(youtubeRegex);
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0`;
+  }
+  
+  // Vimeo
+  const vimeoRegex = /(?:vimeo\.com\/)([0-9]+)/;
+  const vimeoMatch = url.match(vimeoRegex);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  
+  // If already an embed URL or direct link, return as is
+  return url;
+};
 
 // Load profile data from API
 const loadProfileData = async () => {

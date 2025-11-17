@@ -71,6 +71,7 @@ class ChatbotController extends Controller
             'user_email' => 'nullable|email|max:255',
             'rating' => 'nullable|integer|min:1|max:5',
             'feedback_type' => 'required|in:not_found,rating,general',
+            'category' => 'nullable|string|in:bug,feature,question,complaint,suggestion,other',
         ]);
 
         if ($validator->fails()) {
@@ -88,6 +89,8 @@ class ChatbotController extends Controller
             'user_email' => $request->user_email,
             'rating' => $request->rating,
             'feedback_type' => $request->feedback_type,
+            'category' => $request->category ?? 'other',
+            'status' => 'pending',
             'ip_address' => $request->ip(),
         ]);
 

@@ -152,23 +152,70 @@
 
     <!-- Feedback Tab -->
     <div v-show="activeTab === 'feedback'">
-      <div class="mb-6 flex items-center space-x-4">
+      <div class="mb-6 flex flex-wrap items-center gap-3">
+        <input
+          v-model="feedbackSearch"
+          type="text"
+          placeholder="Search feedback..."
+          class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+        
         <select
-          v-model="feedbackFilter"
+          v-model="feedbackFilters.status"
           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
-          <option value="all">All Feedback</option>
-          <option value="unread">Unread</option>
-          <option value="not_found">No Answer Found</option>
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
+
+        <select
+          v-model="feedbackFilters.category"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="all">All Categories</option>
+          <option value="bug">🐛 Bug</option>
+          <option value="feature">✨ Feature Request</option>
+          <option value="question">❓ Question</option>
+          <option value="complaint">😞 Complaint</option>
+          <option value="suggestion">💡 Suggestion</option>
+          <option value="other">📌 Other</option>
+        </select>
+
+        <select
+          v-model="feedbackFilters.type"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="all">All Types</option>
           <option value="rating">Ratings</option>
+          <option value="general">General</option>
+          <option value="not_found">No Answer Found</option>
         </select>
 
         <button
           v-if="feedbackList.filter(f => !f.is_read).length > 0"
           @click="markAllAsRead"
-          class="btn-secondary"
+          class="btn-secondary whitespace-nowrap"
         >
           Mark All as Read
+        </button>
+
+        <button
+          @click="refreshFeedback"
+          class="btn-secondary whitespace-nowrap"
+          title="Refresh feedback"
+        >
+          <Icon name="heroicons:arrow-path" class="h-5 w-5" />
+        </button>
+
+        <button
+          @click="exportFeedback"
+          :disabled="exportingFeedback"
+          class="btn-primary whitespace-nowrap"
+        >
+          <Icon name="heroicons:arrow-down-tray" class="h-5 w-5 mr-1" />
+          {{ exportingFeedback ? 'Exporting...' : 'Export CSV' }}
         </button>
       </div>
 
@@ -183,12 +230,13 @@
           :key="feedback.id"
           :class="[
             'card p-6',
-            !feedback.is_read ? 'border-l-4 border-primary-500' : ''
+            !feedback.is_read ? 'border-l-4 border-primary-500' : '',
+            feedback.status === 'resolved' ? 'bg-green-50' : ''
           ]"
         >
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
-              <div class="flex items-center space-x-2 mb-2">
+              <div class="flex items-center flex-wrap gap-2 mb-3">
                 <span
                   :class="[
                     'px-2 py-1 text-xs font-medium rounded-full',
@@ -197,14 +245,40 @@
                 >
                   {{ feedback.feedback_type.replace('_', ' ').toUpperCase() }}
                 </span>
+                
+                <span
+                  v-if="feedback.category"
+                  class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800"
+                >
+                  {{ getCategoryIcon(feedback.category) }} {{ feedback.category }}
+                </span>
+                
+                <span
+                  :class="[
+                    'px-2 py-1 text-xs font-medium rounded-full',
+                    getStatusBadge(feedback.status)
+                  ]"
+                >
+                  {{ feedback.status ? feedback.status.replace('_', ' ').toUpperCase() : 'PENDING' }}
+                </span>
+                
                 <span v-if="!feedback.is_read" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                   NEW
                 </span>
+                
                 <span v-if="feedback.rating" class="flex items-center space-x-1">
                   <Icon name="heroicons:star-solid" class="h-4 w-4 text-yellow-500" />
                   <span class="text-sm font-medium">{{ feedback.rating }}/5</span>
                 </span>
               </div>
+
+              <p v-if="feedback.user_name" class="text-sm font-medium text-gray-700 mb-1">
+                👤 {{ feedback.user_name }}
+              </p>
+
+              <p v-if="feedback.user_email" class="text-sm text-gray-500 mb-2">
+                ✉️ {{ feedback.user_email }}
+              </p>
 
               <p class="text-sm text-gray-500 mb-2">
                 <strong>User Question:</strong> {{ feedback.user_question }}
@@ -214,23 +288,51 @@
                 <strong>Matched Question:</strong> {{ feedback.question_text }}
               </p>
 
-              <p v-if="feedback.user_message" class="text-gray-900 mb-3">
+              <p v-if="feedback.user_message" class="text-gray-900 mb-3 p-3 bg-gray-50 rounded">
                 {{ feedback.user_message }}
               </p>
 
-              <div class="flex items-center space-x-4 text-xs text-gray-400">
-                <span v-if="feedback.user_email">{{ feedback.user_email }}</span>
+              <p v-if="feedback.admin_notes" class="text-sm text-blue-900 mb-2 p-2 bg-blue-50 border-l-2 border-blue-500 rounded">
+                <strong>📝 Admin Notes:</strong> {{ feedback.admin_notes }}
+              </p>
+
+              <p v-if="feedback.resolved_at" class="text-xs text-green-600 mb-2">
+                ✅ Resolved by {{ feedback.resolver_name || 'Admin' }} on {{ formatDate(feedback.resolved_at) }}
+              </p>
+
+              <div class="flex items-center space-x-4 text-xs text-gray-400 mt-3">
                 <span>{{ formatDate(feedback.created_at) }}</span>
               </div>
             </div>
 
-            <button
-              v-if="!feedback.is_read"
-              @click="markFeedbackAsRead(feedback.id)"
-              class="btn-secondary-sm"
-            >
-              Mark as Read
-            </button>
+            <div class="flex flex-col gap-2 ml-4">
+              <select
+                v-if="feedback.status !== 'resolved'"
+                :value="feedback.status || 'pending'"
+                @change="updateStatus(feedback.id, $event.target.value)"
+                class="px-3 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+              </select>
+              
+              <button
+                v-if="!feedback.is_read"
+                @click="markFeedbackAsRead(feedback.id)"
+                class="btn-secondary-sm whitespace-nowrap"
+              >
+                Mark Read
+              </button>
+              
+              <button
+                @click="deleteFeedback(feedback.id)"
+                class="btn-danger-sm whitespace-nowrap"
+                title="Delete feedback"
+              >
+                <Icon name="heroicons:trash" class="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -380,7 +482,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -396,6 +498,13 @@ const loadingFeedback = ref(false)
 const saving = ref(false)
 const searchQuery = ref('')
 const feedbackFilter = ref('all')
+const feedbackSearch = ref('')
+const feedbackFilters = reactive({
+  status: 'all',
+  category: 'all',
+  type: 'all'
+})
+const exportingFeedback = ref(false)
 
 const questions = ref([])
 const feedbackList = ref([])
@@ -440,10 +549,30 @@ const filteredQuestions = computed(() => {
 const filteredFeedback = computed(() => {
   let filtered = feedbackList.value
 
-  if (feedbackFilter.value === 'unread') {
-    filtered = filtered.filter(f => !f.is_read)
-  } else if (feedbackFilter.value !== 'all') {
-    filtered = filtered.filter(f => f.feedback_type === feedbackFilter.value)
+  // Search filter
+  if (feedbackSearch.value) {
+    const search = feedbackSearch.value.toLowerCase()
+    filtered = filtered.filter(f => 
+      f.user_question?.toLowerCase().includes(search) ||
+      f.user_message?.toLowerCase().includes(search) ||
+      f.user_name?.toLowerCase().includes(search) ||
+      f.user_email?.toLowerCase().includes(search)
+    )
+  }
+
+  // Status filter
+  if (feedbackFilters.status !== 'all') {
+    filtered = filtered.filter(f => (f.status || 'pending') === feedbackFilters.status)
+  }
+
+  // Category filter
+  if (feedbackFilters.category !== 'all') {
+    filtered = filtered.filter(f => f.category === feedbackFilters.category)
+  }
+
+  // Type filter
+  if (feedbackFilters.type !== 'all') {
+    filtered = filtered.filter(f => f.feedback_type === feedbackFilters.type)
   }
 
   return filtered
@@ -452,15 +581,34 @@ const filteredFeedback = computed(() => {
 // Methods
 const fetchQuestions = async () => {
   loading.value = true
+  console.log('📥 Fetching questions...')
   try {
     const response = await $api.get('/admin/chatbot/questions')
-    if (response.data.success) {
-      questions.value = response.data.data
+    console.log('📦 Fetch response:', response)
+    console.log('📦 Response data:', response.data)
+    console.log('📦 Response.data.success:', response.data?.success)
+    console.log('📦 Response.data.data:', response.data?.data)
+    
+    // The API returns { success: true, data: [...] } directly
+    if (response.data) {
+      if (response.data.success && response.data.data) {
+        questions.value = response.data.data
+        console.log('✅ Questions loaded from response.data.data:', questions.value.length, 'items')
+      } else if (Array.isArray(response.data)) {
+        // Fallback: if response.data is directly an array
+        questions.value = response.data
+        console.log('✅ Questions loaded from response.data:', questions.value.length, 'items')
+      } else {
+        console.error('❌ Unexpected response format:', response.data)
+      }
+      console.log('📋 Questions:', questions.value)
     }
   } catch (error) {
-    console.error('Error fetching questions:', error)
+    console.error('❌ Error fetching questions:', error)
+    console.error('Error response:', error.response)
   } finally {
     loading.value = false
+    console.log('✅ Fetch complete. Questions count:', questions.value.length)
   }
 }
 
@@ -535,17 +683,77 @@ const saveQuestion = async () => {
       is_active: questionForm.value.is_active
     }
 
+    console.log('=== CHATBOT QUESTION SUBMISSION ===')
+    console.log('Payload:', JSON.stringify(payload, null, 2))
+    console.log('Editing mode:', !!editingQuestion.value)
+    console.log('API endpoint:', editingQuestion.value 
+      ? `/admin/chatbot/questions/${editingQuestion.value.id}` 
+      : '/admin/chatbot/questions')
+
+    let response
     if (editingQuestion.value) {
-      await $api.put(`/admin/chatbot/questions/${editingQuestion.value.id}`, payload)
+      response = await $api.put(`/admin/chatbot/questions/${editingQuestion.value.id}`, payload)
     } else {
-      await $api.post('/admin/chatbot/questions', payload)
+      response = await $api.post('/admin/chatbot/questions', payload)
     }
 
-    closeQuestionModal()
-    await fetchQuestions()
+    console.log('✅ Server response:', response)
+    console.log('Response data:', response.data)
+
+    // Check if the response is successful
+    if (response.data && response.data.success) {
+      console.log('✅ Question saved successfully!')
+      
+      // Close modal first
+      closeQuestionModal()
+      
+      // Reload questions to show the new/updated item
+      console.log('🔄 Reloading questions...')
+      await fetchQuestions()
+      console.log('✅ Questions reloaded, count:', questions.value.length)
+      
+      // Show success message
+      alert(editingQuestion.value ? 'Question updated successfully!' : 'Question created successfully!')
+    } else {
+      console.error('❌ Unexpected response format:', response)
+      alert('Question may have been saved. Refreshing list...')
+      closeQuestionModal()
+      await fetchQuestions()
+    }
   } catch (error) {
-    console.error('Error saving question:', error)
-    alert('Failed to save question. Please try again.')
+    console.error('=== ERROR SAVING QUESTION ===')
+    console.error('Error object:', error)
+    console.error('Error response:', error.response)
+    console.error('Error status:', error.response?.status)
+    console.error('Error data:', error.response?.data)
+    console.error('Error headers:', error.response?.headers)
+    
+    let errorMessage = 'Failed to save question. '
+    
+    if (error.response) {
+      // Server responded with error
+      if (error.response.status === 401) {
+        errorMessage += 'You are not authenticated. Please log in again.'
+      } else if (error.response.status === 403) {
+        errorMessage += 'You do not have permission to perform this action.'
+      } else if (error.response.status === 422) {
+        errorMessage += 'Validation error: ' + JSON.stringify(error.response.data.errors || error.response.data.message)
+      } else if (error.response.data?.message) {
+        errorMessage += error.response.data.message
+      } else if (error.response.data?.errors) {
+        errorMessage += JSON.stringify(error.response.data.errors)
+      } else {
+        errorMessage += `Server error (${error.response.status})`
+      }
+    } else if (error.request) {
+      // Request made but no response
+      errorMessage += 'No response from server. Check your network connection.'
+    } else {
+      // Error setting up request
+      errorMessage += error.message
+    }
+    
+    alert(errorMessage)
   } finally {
     saving.value = false
   }
@@ -586,6 +794,84 @@ const getFeedbackTypeBadge = (type) => {
     general: 'bg-gray-100 text-gray-800'
   }
   return badges[type] || badges.general
+}
+
+const getStatusBadge = (status) => {
+  const badges = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    in_progress: 'bg-blue-100 text-blue-800',
+    resolved: 'bg-green-100 text-green-800'
+  }
+  return badges[status] || badges.pending
+}
+
+const getCategoryIcon = (category) => {
+  const icons = {
+    bug: '🐛',
+    feature: '✨',
+    question: '❓',
+    complaint: '😞',
+    suggestion: '💡',
+    other: '📌'
+  }
+  return icons[category] || '📌'
+}
+
+const updateStatus = async (id, status) => {
+  try {
+    await $api.put(`/admin/chatbot/feedback/${id}/status`, { status })
+    await fetchFeedback()
+  } catch (error) {
+    console.error('Error updating status:', error)
+    alert('Failed to update status. Please try again.')
+  }
+}
+
+const refreshFeedback = async () => {
+  await fetchFeedback()
+}
+
+const exportFeedback = async () => {
+  exportingFeedback.value = true
+  try {
+    const params = {}
+    if (feedbackFilters.status !== 'all') params.status = feedbackFilters.status
+    if (feedbackFilters.category !== 'all') params.category = feedbackFilters.category
+    if (feedbackFilters.type !== 'all') params.type = feedbackFilters.type
+    if (feedbackSearch.value) params.search = feedbackSearch.value
+    
+    const response = await $api.get('/admin/chatbot/feedback/export', { 
+      params,
+      responseType: 'blob' 
+    })
+    
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `feedback-export-${Date.now()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Error exporting feedback:', error)
+    alert('Failed to export feedback. Please try again.')
+  } finally {
+    exportingFeedback.value = false
+  }
+}
+
+const deleteFeedback = async (id) => {
+  if (!confirm('Are you sure you want to delete this feedback?')) return
+  
+  try {
+    await $api.delete(`/admin/chatbot/feedback/${id}`)
+    await fetchFeedback()
+  } catch (error) {
+    console.error('Error deleting feedback:', error)
+    alert('Failed to delete feedback. Please try again.')
+  }
 }
 
 const formatDate = (date) => {
