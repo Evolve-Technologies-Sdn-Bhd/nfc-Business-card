@@ -12,8 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Add CORS middleware
+        // Add Activity Logging middleware to API routes
         $middleware->api(append: [
+            \App\Http\Middleware\LogActivity::class,
             \App\Http\Middleware\HandleCors::class,
         ]);
 

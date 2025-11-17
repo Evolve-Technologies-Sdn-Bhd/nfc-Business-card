@@ -41,6 +41,9 @@ class User extends Authenticatable
         'last_admin_action_at',
         'is_new_user',
         'account_image',
+        'total_account_slots',
+        'total_card_quota',
+        'parent_business_id',
     ];
 
     protected $hidden = [
@@ -199,6 +202,98 @@ class User extends Authenticatable
         return $this->socialIdentities()
             ->where('provider', $provider)
             ->first();
+    }
+
+    /**
+     * Get employees under this Business account
+     */
+    public function employees(): HasMany
+    {
+        return $this->hasMany(User::class, 'parent_business_id');
+    }
+
+    /**
+     * Get parent Business account (if this user is an employee)
+     */
+    public function parentBusiness()
+    {
+        return $this->belongsTo(User::class, 'parent_business_id');
+    }
+
+    /**
+     * Get Business account ID (own ID if business account, or parent's ID if employee)
+     */
+    public function getBusinessAccountIdAttribute()
+    {
+        if ($this->subscription_plan === 'business' && !$this->parent_business_id) {
+            return $this->id;
+        }
+        return $this->parent_business_id;
+    }
+
+    /**
+     * Check if user is a Business account owner
+     */
+    public function isBusinessAccount(): bool
+    {
+        return $this->subscription_plan === 'business' && !$this->parent_business_id;
+    }
+
+    /**
+     * Check if user is an employee under a Business account
+     */
+    public function isBusinessEmployee(): bool
+    {
+        return $this->parent_business_id !== null;
+    }
+
+    /**
+     * Get quota information for Business account
+     * Note: total_account_slots serves as the unified quota for both accounts and cards
+     * If admin assigns 10 slots, business can have max 10 accounts (including employees) and 10 cards total
+     */
+    public function getQuotaInfo(): array
+    {
+        if (!$this->isBusinessAccount()) {
+            return [
+                'total_quota' => 0,
+                'employees_count' => 0,
+                'ordered_cards_count' => 0,
+                'available_quota' => 0,
+            ];
+        }
+
+        // Use total_account_slots as the unified quota
+        $totalQuota = $this->total_account_slots ?? 0;
+        
+        // Count employees (not including the business owner)
+        $employeesCount = $this->employees()->count();
+        
+        // Count ordered Business Plan cards (including business owner's card)
+        $orderedCardsCount = NfcCard::where('business_account_id', $this->id)
+            ->where('subscription_plan', 'business')
+            ->count();
+
+        // Total accounts = 1 (business owner) + employees
+        $totalAccounts = 1 + $employeesCount;
+        
+        // Available quota is the minimum of:
+        // 1. Remaining account slots (total - current accounts)
+        // 2. Remaining card quota (total - ordered cards)
+        $availableForAccounts = max(0, $totalQuota - $totalAccounts);
+        $availableForCards = max(0, $totalQuota - $orderedCardsCount);
+
+        return [
+            'total_quota' => $totalQuota,
+            'total_account_slots' => $totalQuota, // For backward compatibility
+            'total_card_quota' => $totalQuota, // For backward compatibility
+            'employees_count' => $employeesCount,
+            'total_accounts' => $totalAccounts,
+            'ordered_cards_count' => $orderedCardsCount,
+            'available_account_slots' => $availableForAccounts,
+            'available_card_quota' => $availableForCards,
+            'available_quota' => min($availableForAccounts, $availableForCards),
+        ];
     }
 }
 

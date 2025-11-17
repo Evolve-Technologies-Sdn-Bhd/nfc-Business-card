@@ -17,6 +17,10 @@ use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\AdminChatbotController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AdminNotificationController;
+use App\Http\Controllers\Api\Business\QuotaController;
+use App\Http\Controllers\Api\Business\EmployeeController;
+use App\Http\Controllers\Api\Business\ActivityLogController;
+use App\Http\Controllers\Api\Admin\BusinessUserController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\WebhookController;
@@ -68,19 +72,6 @@ Route::prefix('auth')->group(function () {
     Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
     Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
     Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken']);
-});
-
-// ✅ Public Payment Routes (No Auth Required)
-Route::prefix('payment')->group(function () {
-    // Payment rails & fee calculation - Public
-    Route::get('/rails', [PaymentController::class, 'getPaymentRails']);
-    Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
-});
-
-// ✅ Legal Documents (Public)
-Route::prefix('legal')->group(function () {
-    Route::get('/terms', [LegalDocumentController::class, 'getTerms']);
-    Route::get('/privacy', [LegalDocumentController::class, 'getPrivacy']);
 });
 
 // Protected routes
@@ -159,44 +150,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
 
-    // ✅ Payment Routes (Protected)
-    Route::prefix('payment')->group(function () {
-        // Transaction management (requires auth)
-        Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
-        Route::post('/transactions/{transaction}/confirm', [PaymentController::class, 'confirmPayment']);
-        Route::get('/transactions/{transaction}', [PaymentController::class, 'getTransaction']);
-        Route::get('/transactions', [PaymentController::class, 'getTransactionHistory']);
+    // Business Plan Routes (for Business accounts and employees)
+    Route::prefix('business')->group(function () {
+        // Quota Information
+        Route::get('/card-quota', [QuotaController::class, 'getCardQuota']);
+        Route::get('/can-order-card', [QuotaController::class, 'canOrderCard']);
 
-        // Manual bank transfer proof upload
-        Route::post('/transactions/{transaction}/proof', [PaymentController::class, 'uploadPaymentProof']);
-    });
-
-    // ✅ Payment Method Routes
-    Route::prefix('payment-methods')->group(function () {
-        Route::get('/', [PaymentMethodController::class, 'index']);
-        Route::post('/', [PaymentMethodController::class, 'store']);
-        Route::get('/default', [PaymentMethodController::class, 'getDefault']);
-        Route::get('/{paymentMethod}', [PaymentMethodController::class, 'show']);
-        Route::put('/{paymentMethod}', [PaymentMethodController::class, 'update']);
-        Route::delete('/{paymentMethod}', [PaymentMethodController::class, 'destroy']);
-    });
-
-    // ✅ Refund Routes
-    Route::prefix('refunds')->group(function () {
-        Route::get('/', [RefundController::class, 'index']);
-        Route::get('/{refund}', [RefundController::class, 'show']);
-        Route::post('/transactions/{transaction}/refund', [RefundController::class, 'requestRefund']);
-    });
-
-    // ✅ Subscription Routes
-    Route::prefix('subscriptions')->group(function () {
-        Route::get('/plans', [SubscriptionController::class, 'getPlans']);
-        Route::get('/active', [SubscriptionController::class, 'getActiveSubscription']);
-        Route::get('/history', [SubscriptionController::class, 'getSubscriptionHistory']);
-        Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
-        Route::post('/{subscription}/cancel', [SubscriptionController::class, 'cancel']);
-        Route::post('/{subscription}/reactivate', [SubscriptionController::class, 'reactivate']);
-        Route::put('/{subscription}/payment-method', [SubscriptionController::class, 'updatePaymentMethod']);
+        // Employee Management (Business account owners only)
+        Route::get('/employees', [QuotaController::class, 'getEmployees']);
+        // Note: Employee creation is now handled by Super Admin via /admin/business-employees
+        // Route::post('/employees', [QuotaController::class, 'createEmployee']); // DEPRECATED
+        Route::delete('/employees/{id}', [QuotaController::class, 'deleteEmployee']);
+        
+        // Bulk Employee Data Upload & Card Orders (does NOT create employee accounts)
+        Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);
+        Route::post('/employees/{id}/reset-password', [EmployeeController::class, 'resetPassword']);
+        Route::get('/employees/{id}/details', [EmployeeController::class, 'getEmployeeDetails']);
+        
+        // Activity Logs (Business Admin can view employee activities, read-only)
+        Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+        Route::get('/activity-logs/statistics', [ActivityLogController::class, 'statistics']);
+        Route::get('/activity-logs/action-types', [ActivityLogController::class, 'actionTypes']);
+        Route::get('/activity-logs/{id}', [ActivityLogController::class, 'show']);
+        Route::get('/activity-logs/export', [ActivityLogController::class, 'export']);
+        // Note: No DELETE endpoint - Business Admin can only view, not delete
     });
 
     // ✅ Invoice Routes (User)
@@ -224,14 +201,6 @@ Route::post('/chatbot/ask', [ChatbotController::class, 'ask']);
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
 Route::get('/chatbot/questions', [ChatbotController::class, 'getQuestions']);
 
-// ✅ Webhook routes (Public - No Auth, verified via signature)
-Route::prefix('webhooks')->group(function () {
-    Route::post('/stripe', [WebhookController::class, 'handleStripe']);
-    Route::post('/billplz', [WebhookController::class, 'handleBillplz']);
-    Route::post('/senangpay', [WebhookController::class, 'handleSenangpay']);
-    Route::post('/xendit', [WebhookController::class, 'handleXendit']);
-});
-
 // Admin routes (protected by admin middleware)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Dashboard
@@ -244,6 +213,20 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/users', [AdminController::class, 'createUser']);
     Route::put('/users/{userId}', [AdminController::class, 'updateUser']);
     Route::delete('/users/{userId}', [AdminController::class, 'deleteUser']);
+    
+    // Business Employee Management (Super Admin creates employees under Business accounts)
+    Route::post('/business-employees', [AdminController::class, 'createBusinessEmployee']);
+
+    // Business User Management
+    Route::prefix('business-users')->group(function () {
+        Route::get('/', [BusinessUserController::class, 'index']);
+        Route::get('/statistics', [BusinessUserController::class, 'statistics']);
+        Route::get('/{id}', [BusinessUserController::class, 'show']);
+        Route::post('/create-employee', [BusinessUserController::class, 'createEmployee']);
+        Route::post('/create-employees-bulk', [BusinessUserController::class, 'createEmployeesBulk']);
+        Route::post('/{id}/update-quota', [BusinessUserController::class, 'updateQuota']);
+        Route::delete('/employees/{id}', [BusinessUserController::class, 'deleteEmployee']);
+    });
 
     // NFC card management
     Route::get('/nfc-cards', [AdminController::class, 'getNfcCards']);

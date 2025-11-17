@@ -223,6 +223,11 @@ const navigation = [
     icon: "heroicons:users",
   },
   {
+    name: "Business Users",
+    href: "/AdminManagement/business-users",
+    icon: "heroicons:building-office-2",
+  },
+  {
     name: "NFC Card Management",
     href: "/AdminManagement/nfc-cards",
     icon: "heroicons:credit-card",

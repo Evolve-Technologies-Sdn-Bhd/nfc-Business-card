@@ -12,6 +12,7 @@ class NfcCard extends Model
 
     protected $fillable = [
         'user_id',
+        'business_account_id',
         'card_id',
         'nfc_card_id',
         'card_owner',
@@ -53,6 +54,11 @@ class NfcCard extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function businessAccount()
+    {
+        return $this->belongsTo(User::class, 'business_account_id');
     }
 
     public function analytics()

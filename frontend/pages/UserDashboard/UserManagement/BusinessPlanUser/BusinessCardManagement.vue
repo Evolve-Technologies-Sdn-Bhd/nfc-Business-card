@@ -8,23 +8,15 @@
           <div class="flex items-center space-x-4">
             <div>
               <h1 class="text-2xl font-semibold text-secondary-900">
-                Card Management
+                Business Plan - Card Management
               </h1>
               <p class="text-sm text-secondary-600">
-                Manage your physical NFC cards and subscriptions
+                Manage Business Plan NFC cards for employees
               </p>
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button
-              v-if="!hasPremiumSubscription"
-              @click="upgradeToPremium"
-              class="btn btn-primary"
-            >
-              <Icon name="heroicons:star" class="h-4 w-4 mr-2" />
-              Upgrade to Premium
-            </button>
-            <button v-else @click="orderNewCard" class="btn btn-primary">
+            <button @click="orderNewCard" class="btn btn-primary">
               <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
               Order New Card
             </button>
@@ -34,123 +26,366 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Business Plan Card Quota (for Business accounts only) -->
-      <div v-if="isBusinessAccount" class="mb-8">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="text-lg font-medium text-secondary-900">
-              Business Card Quota
-            </h3>
+      <!-- Filter and Search Section -->
+      <div
+        class="bg-white rounded-lg shadow-sm border border-secondary-200 p-4 mb-6"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Employee Filter -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">
+              Filter by Employee
+            </label>
+            <select
+              v-model="filters.employee_id"
+              @change="applyFilters"
+              class="input w-full"
+            >
+              <option value="">All Cards (My Cards + Employees)</option>
+              <option value="self">My Cards Only</option>
+              <option value="employees_only">Employee Cards Only</option>
+              <option disabled>──────────</option>
+              <option
+                v-for="employee in employees"
+                :key="employee.id"
+                :value="employee.id"
+              >
+                {{ employee.name }} ({{ employee.email }})
+              </option>
+            </select>
           </div>
-          <div class="card-body">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="text-center">
-                <div class="text-2xl font-bold text-primary-600">
-                  {{ cardQuotaInfo.available }} / {{ cardQuotaInfo.total }}
-                </div>
-                <p class="text-sm text-secondary-600">Available Cards</p>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-info-600">
-                  {{ cardQuotaInfo.used }}
-                </div>
-                <p class="text-sm text-secondary-600">Cards Used</p>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-success-600">
-                  {{ cardQuotaInfo.employees }}
-                </div>
-                <p class="text-sm text-secondary-600">Employee Accounts</p>
-              </div>
-            </div>
-            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div class="flex">
-                <Icon
-                  name="heroicons:information-circle"
-                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
-                />
-                <div class="ml-3">
-                  <p class="text-sm text-blue-700">
-                    <strong>Quota Breakdown:</strong> 1 admin card +
-                    {{ cardQuotaInfo.employees }} employee cards =
-                    {{ cardQuotaInfo.used }} used
-                  </p>
-                </div>
-              </div>
+
+          <!-- Status Filter -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">
+              Filter by Status
+            </label>
+            <select
+              v-model="filters.status"
+              @change="applyFilters"
+              class="input w-full"
+            >
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+
+          <!-- Search -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">
+              Search Cards
+            </label>
+            <div class="relative">
+              <input
+                v-model="filters.search"
+                @input="applyFilters"
+                type="text"
+                placeholder="Search by owner, card ID..."
+                class="input w-full pl-10"
+              />
+              <Icon
+                name="heroicons:magnifying-glass"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400"
+              />
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Subscription Status -->
-      <div v-if="subscriptionData" class="mb-8">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="text-lg font-medium text-secondary-900">
-              Subscription Status
-            </h3>
-          </div>
-          <div class="card-body">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="text-center">
-                <div class="text-2xl font-bold text-primary-600 capitalize">
-                  {{ subscriptionData.subscription_plan }}
-                </div>
-                <p class="text-sm text-secondary-600">Current Plan</p>
-              </div>
-              <div class="text-center">
-                <div
-                  class="text-2xl font-bold"
-                  :class="
-                    subscriptionData.subscription_active
-                      ? 'text-success-600'
-                      : 'text-warning-600'
-                  "
-                >
-                  {{
-                    subscriptionData.subscription_active ? "Active" : "Inactive"
-                  }}
-                </div>
-                <p class="text-sm text-secondary-600">Status</p>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-secondary-900">
-                  {{
-                    subscriptionData.subscription_end_date
-                      ? formatDate(subscriptionData.subscription_end_date)
-                      : "N/A"
-                  }}
-                </div>
-                <p class="text-sm text-secondary-600">Expires</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Upgrade Required Message -->
-      <div v-if="!hasPremiumSubscription" class="text-center py-12">
-        <div class="max-w-md mx-auto">
-          <Icon
-            name="heroicons:lock-closed"
-            class="h-16 w-16 text-secondary-400 mx-auto mb-4"
-          />
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
-            Premium Feature
-          </h3>
-          <p class="text-secondary-600 mb-6">
-            Physical NFC card management is available exclusively to Premium
-            subscribers. Upgrade your plan to access this feature.
+        <!-- Clear Filters -->
+        <div class="mt-4 flex items-center justify-between">
+          <p class="text-sm text-secondary-600">
+            Showing {{ filteredCards.length }} of {{ allCards.length }} cards
           </p>
-          <button @click="upgradeToPremium" class="btn btn-primary btn-lg">
-            <Icon name="heroicons:star" class="h-5 w-5 mr-2" />
-            Upgrade to Premium
+          <button
+            v-if="hasActiveFilters"
+            @click="clearFilters"
+            class="text-sm text-primary-600 hover:text-primary-700 font-medium"
+          >
+            Clear All Filters
           </button>
         </div>
       </div>
 
-      <!-- NFC Cards List -->
-      <div v-else-if="nfcCards.length > 0" class="space-y-6">
+      <!-- My Cards Section -->
+      <div v-if="myCards.length > 0" class="mb-8">
+        <h2
+          class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
+        >
+          <Icon name="heroicons:user" class="h-5 w-5 mr-2 text-primary-600" />
+          My Cards ({{ myCards.length }})
+        </h2>
+        <div class="space-y-4">
+          <div v-for="card in myCards" :key="card.id" class="card">
+            <div class="card-header">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-medium text-secondary-900">
+                    {{ card.card_owner }}
+                  </h3>
+                  <p class="text-sm text-secondary-600">
+                    Card ID: {{ card.card_id }}
+                  </p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span
+                    :class="getStatusBadgeClass(card.status_badge)"
+                    class="px-3 py-1 rounded-full text-xs font-medium"
+                  >
+                    {{ card.status_badge }}
+                  </span>
+                  <button
+                    @click="editCard(card)"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:pencil" class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Card Details
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      <strong>NFC ID:</strong> {{ card.nfc_card_id }}
+                    </p>
+                    <p class="text-sm text-secondary-900">
+                      <strong>Plan:</strong> {{ card.subscription_plan }}
+                    </p>
+                    <p class="text-sm text-secondary-900">
+                      <strong>Amount:</strong>
+                      {{ card.formatted_purchase_amount }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Contact
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      {{ card.contact_number }}
+                    </p>
+                    <p class="text-sm text-secondary-600">
+                      {{ card.billing_address }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Timeline
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      <strong>Purchased:</strong>
+                      {{ formatDate(card.purchase_date) }}
+                    </p>
+                    <p
+                      v-if="card.shipped_date"
+                      class="text-sm text-secondary-900"
+                    >
+                      <strong>Shipped:</strong>
+                      {{ formatDate(card.shipped_date) }}
+                    </p>
+                    <p
+                      v-if="card.delivered_date"
+                      class="text-sm text-secondary-900"
+                    >
+                      <strong>Delivered:</strong>
+                      {{ formatDate(card.delivered_date) }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Actions
+                  </h4>
+                  <div class="space-y-2">
+                    <button
+                      v-if="card.status === 'active'"
+                      @click="deactivateCard(card)"
+                      class="btn btn-sm btn-outline btn-warning w-full"
+                    >
+                      <Icon name="heroicons:pause" class="h-4 w-4 mr-1" />
+                      Deactivate
+                    </button>
+                    <button
+                      v-else
+                      @click="activateCard(card)"
+                      class="btn btn-sm btn-outline btn-success w-full"
+                    >
+                      <Icon name="heroicons:play" class="h-4 w-4 mr-1" />
+                      Activate
+                    </button>
+                    <button
+                      @click="viewAnalytics(card)"
+                      class="btn btn-sm btn-outline w-full"
+                    >
+                      <Icon name="heroicons:chart-bar" class="h-4 w-4 mr-1" />
+                      Analytics
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Cards Section -->
+      <div v-if="employeeCards.length > 0" class="mb-8">
+        <h2
+          class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
+        >
+          <Icon name="heroicons:users" class="h-5 w-5 mr-2 text-primary-600" />
+          Employee Cards ({{ employeeCards.length }})
+        </h2>
+        <div class="space-y-4">
+          <div
+            v-for="card in employeeCards"
+            :key="card.id"
+            class="card border-l-4 border-primary-500"
+          >
+            <div class="card-header">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h3 class="text-lg font-medium text-secondary-900">
+                      {{ card.card_owner }}
+                    </h3>
+                    <span
+                      class="px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-medium rounded"
+                    >
+                      Employee
+                    </span>
+                  </div>
+                  <p class="text-sm text-secondary-600">
+                    Card ID: {{ card.card_id }}
+                  </p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span
+                    :class="getStatusBadgeClass(card.status_badge)"
+                    class="px-3 py-1 rounded-full text-xs font-medium"
+                  >
+                    {{ card.status_badge }}
+                  </span>
+                  <button
+                    @click="editCard(card)"
+                    class="btn btn-sm btn-outline"
+                  >
+                    <Icon name="heroicons:pencil" class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Card Details
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      <strong>NFC ID:</strong> {{ card.nfc_card_id }}
+                    </p>
+                    <p class="text-sm text-secondary-900">
+                      <strong>Plan:</strong> {{ card.subscription_plan }}
+                    </p>
+                    <p class="text-sm text-secondary-900">
+                      <strong>Amount:</strong>
+                      {{ card.formatted_purchase_amount }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Contact
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      {{ card.contact_number }}
+                    </p>
+                    <p class="text-sm text-secondary-600">
+                      {{ card.billing_address }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Timeline
+                  </h4>
+                  <div class="space-y-1">
+                    <p class="text-sm text-secondary-900">
+                      <strong>Purchased:</strong>
+                      {{ formatDate(card.purchase_date) }}
+                    </p>
+                    <p
+                      v-if="card.shipped_date"
+                      class="text-sm text-secondary-900"
+                    >
+                      <strong>Shipped:</strong>
+                      {{ formatDate(card.shipped_date) }}
+                    </p>
+                    <p
+                      v-if="card.delivered_date"
+                      class="text-sm text-secondary-900"
+                    >
+                      <strong>Delivered:</strong>
+                      {{ formatDate(card.delivered_date) }}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                    Actions
+                  </h4>
+                  <div class="space-y-2">
+                    <button
+                      v-if="card.status === 'active'"
+                      @click="deactivateCard(card)"
+                      class="btn btn-sm btn-outline btn-warning w-full"
+                    >
+                      <Icon name="heroicons:pause" class="h-4 w-4 mr-1" />
+                      Deactivate
+                    </button>
+                    <button
+                      v-else
+                      @click="activateCard(card)"
+                      class="btn btn-sm btn-outline btn-success w-full"
+                    >
+                      <Icon name="heroicons:play" class="h-4 w-4 mr-1" />
+                      Activate
+                    </button>
+                    <button
+                      @click="viewAnalytics(card)"
+                      class="btn btn-sm btn-outline w-full"
+                    >
+                      <Icon name="heroicons:chart-bar" class="h-4 w-4 mr-1" />
+                      Analytics
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NFC Cards List (fallback for filtered view) -->
+      <div
+        v-if="
+          filteredCards.length > 0 &&
+          filters.employee_id &&
+          filters.employee_id !== 'self'
+        "
+        class="space-y-6"
+      >
         <div v-for="card in nfcCards" :key="card.id" class="card">
           <div class="card-header">
             <div class="flex items-center justify-between">
@@ -268,18 +503,18 @@
       </div>
 
       <!-- No Cards Message -->
-      <div v-else-if="hasPremiumSubscription" class="text-center py-12">
+      <div v-if="allCards.length === 0 && !loading" class="text-center py-12">
         <div class="max-w-md mx-auto">
           <Icon
             name="heroicons:credit-card"
             class="h-16 w-16 text-secondary-400 mx-auto mb-4"
           />
           <h3 class="text-xl font-semibold text-secondary-900 mb-2">
-            No Physical Cards
+            No Business Plan Cards
           </h3>
           <p class="text-secondary-600 mb-6">
-            You haven't ordered any physical NFC cards yet. Order your first
-            card to get started.
+            You haven't ordered any Business Plan NFC cards yet. Order cards for
+            your employees to get started.
           </p>
           <button @click="orderNewCard" class="btn btn-primary">
             <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
@@ -306,7 +541,7 @@
           <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium text-secondary-900">
-                Order New NFC Card
+                Order Business Plan NFC Card
               </h3>
               <button
                 @click="showOrderModal = false"
@@ -354,15 +589,16 @@
                 <label class="block text-sm font-medium text-secondary-700 mb-1"
                   >Subscription Plan</label
                 >
-                <select
-                  v-model="orderForm.subscription_plan"
-                  class="input w-full"
-                  required
-                >
-                  <option value="basic">Basic - $29/month</option>
-                  <option value="premium">Premium - $49/month</option>
-                  <option value="business">Business - $99/month</option>
-                </select>
+                <input
+                  type="text"
+                  value="Business - $99/month"
+                  class="input w-full bg-secondary-50"
+                  disabled
+                  readonly
+                />
+                <p class="text-xs text-secondary-500 mt-1">
+                  Business Plan is automatically applied for employee cards
+                </p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-secondary-700 mb-1"
@@ -749,105 +985,119 @@ const { $toast, $api } = useNuxtApp();
 // Reactive data
 const loading = ref(true);
 const nfcCards = ref([]);
+const allCards = ref([]);
+const employees = ref([]);
 const subscriptionData = ref(null);
 const showOrderModal = ref(false);
 const orderLoading = ref(false);
 const showCardDetailsModal = ref(false);
 const selectedCard = ref(null);
 
-// Business Card Quota (for Business accounts)
-const cardQuotaInfo = ref({
-  total: 0,
-  used: 0,
-  available: 0,
-  employees: 0,
+// Filters
+const filters = ref({
+  employee_id: "",
+  status: "",
+  search: "",
 });
 
 const orderForm = ref({
   card_owner: "",
   billing_address: "",
   contact_number: "",
-  subscription_plan: "basic,premium,business",
+  subscription_plan: "business",
   shipping_address: "",
   notes: "",
 });
 
-// Computed
-const hasPremiumSubscription = computed(() => {
-  return subscriptionData.value?.has_premium_subscription || false;
+// Computed properties
+const myCards = computed(() => {
+  const currentUserId = authStore.user?.id;
+  return filteredCards.value.filter((card) => card.user_id === currentUserId);
 });
 
-const isBusinessAccount = computed(() => {
+const employeeCards = computed(() => {
+  const currentUserId = authStore.user?.id;
+  return filteredCards.value.filter((card) => card.user_id !== currentUserId);
+});
+
+const filteredCards = computed(() => {
+  let cards = [...allCards.value];
+  const currentUserId = authStore.user?.id;
+
+  // Filter by employee
+  if (filters.value.employee_id === "self") {
+    cards = cards.filter((card) => card.user_id === currentUserId);
+  } else if (filters.value.employee_id === "employees_only") {
+    cards = cards.filter((card) => card.user_id !== currentUserId);
+  } else if (filters.value.employee_id) {
+    cards = cards.filter(
+      (card) => card.user_id === parseInt(filters.value.employee_id)
+    );
+  }
+
+  // Filter by status
+  if (filters.value.status) {
+    cards = cards.filter((card) => card.status === filters.value.status);
+  }
+
+  // Search
+  if (filters.value.search) {
+    const searchLower = filters.value.search.toLowerCase();
+    cards = cards.filter(
+      (card) =>
+        card.card_owner?.toLowerCase().includes(searchLower) ||
+        card.card_id?.toLowerCase().includes(searchLower) ||
+        card.nfc_card_id?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  return cards;
+});
+
+const hasActiveFilters = computed(() => {
   return (
-    authStore.user?.subscription_plan === "business" &&
-    authStore.user?.parent_business_id === null
+    filters.value.employee_id || filters.value.status || filters.value.search
   );
 });
 
 // Methods
-const loadSubscriptionStatus = async () => {
+const loadEmployees = async () => {
   try {
-    const response = await $api.get("/subscription/status");
+    const response = await $api.get("/business/employees");
     if (response.success) {
-      subscriptionData.value = response.data;
+      employees.value = response.employees || [];
     }
   } catch (error) {
-    console.error("Failed to load subscription status:", error);
+    console.error("Failed to load employees:", error);
   }
 };
 
 const loadNfcCards = async () => {
-  if (!hasPremiumSubscription.value) {
-    loading.value = false;
-    return;
-  }
-
   try {
     const response = await $api.get("/nfc-cards");
     if (response.success) {
+      allCards.value = response.nfc_cards;
       nfcCards.value = response.nfc_cards;
     }
   } catch (error) {
-    if (
-      error.response?.status === 403 &&
-      error.response?.data?.upgrade_required
-    ) {
-      // User needs to upgrade
-      $toast.info("This feature requires a Premium subscription");
-    } else {
-      $toast.error("Failed to load NFC cards");
-      console.error("Failed to load NFC cards:", error);
-    }
+    $toast.error("Failed to load NFC cards");
+    console.error("Failed to load NFC cards:", error);
   } finally {
     loading.value = false;
   }
 };
 
-// Load Business Card Quota (for Business accounts only)
-const loadCardQuota = async () => {
-  if (!isBusinessAccount.value) {
-    return;
-  }
-
-  try {
-    const response = await $api.get("/business/card-quota");
-    if (response.success) {
-      cardQuotaInfo.value = {
-        total: response.total_card_quota || 0,
-        used: response.used_card_quota || 0,
-        available: response.available_card_quota || 0,
-        employees: response.employee_count || 0,
-      };
-    }
-  } catch (error) {
-    console.error("Failed to load card quota:", error);
-  }
+const applyFilters = () => {
+  // Filters are applied via computed property
+  // This function is called to trigger reactivity
 };
 
-const upgradeToPremium = () => {
-  // Redirect to upgrade page or show upgrade modal
-  $toast.info("Redirecting to upgrade page...");
-  // navigateTo('/upgrade')
+const clearFilters = () => {
+  filters.value = {
+    employee_id: "",
+    status: "",
+    search: "",
+  };
 };
 
 const orderNewCard = () => {
@@ -923,11 +1173,6 @@ const submitOrder = async () => {
       const redirectPath =
         planRoutes[selectedPlan] || "/UserDashboard/NFCCardDesign";
 
-      // Reload card quota if Business account
-      if (isBusinessAccount.value) {
-        await loadCardQuota();
-      }
-
       // Wait a moment for the toast to show, then redirect
       setTimeout(() => {
         navigateTo(redirectPath);
@@ -939,15 +1184,6 @@ const submitOrder = async () => {
       error.response?.data?.upgrade_required
     ) {
       $toast.error("This feature requires a Premium subscription");
-    } else if (
-      error.response?.status === 400 &&
-      error.response?.data?.quota_exceeded
-    ) {
-      // Card quota exceeded
-      $toast.error(
-        error.response.data.message ||
-          "Card quota limit reached. Please contact support to purchase additional quota."
-      );
     } else if (
       error.response?.status === 403 &&
       error.response?.data?.business_plan_not_allowed
@@ -1057,9 +1293,7 @@ const formatDate = (date) => {
 
 // Lifecycle
 onMounted(async () => {
-  await loadSubscriptionStatus();
-  await loadNfcCards();
-  await loadCardQuota(); // Load Business card quota if applicable
+  await Promise.all([loadNfcCards(), loadEmployees()]);
 });
 </script>
 

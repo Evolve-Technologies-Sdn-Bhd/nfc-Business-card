@@ -77,6 +77,32 @@ class NfcCardController extends Controller
             ], 403);
         }
 
+        // For Business plan, check quota before allowing card order
+        if ($request->subscription_plan === 'business') {
+            $businessAccount = $user->isBusinessAccount() ? $user : $user->parentBusiness;
+            
+            if (!$businessAccount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Business account not found'
+                ], 404);
+            }
+
+            $quotaInfo = $businessAccount->getQuotaInfo();
+            
+            if ($quotaInfo['available_card_quota'] <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Card quota exceeded. Please contact admin to increase quota.',
+                    'quota_info' => [
+                        'total_card_quota' => $quotaInfo['total_card_quota'],
+                        'ordered_cards_count' => $quotaInfo['ordered_cards_count'],
+                        'available_card_quota' => 0
+                    ]
+                ], 403);
+            }
+        }
+
         $validator = Validator::make($request->all(), [
             'card_owner' => 'required|string|max:255',
             'billing_address' => 'required|string',
@@ -95,11 +121,22 @@ class NfcCardController extends Controller
             ], 422);
         }
 
+        // Determine business_account_id for Business plan orders
+        $businessAccountId = null;
+        if ($request->subscription_plan === 'business') {
+            if ($user->isBusinessAccount()) {
+                $businessAccountId = $user->id;
+            } elseif ($user->isBusinessEmployee()) {
+                $businessAccountId = $user->parent_business_id;
+            }
+        }
+
         // Generate unique NFC card ID (this would typically be done by admin)
         $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
 
         $nfcCard = NfcCard::create([
             'user_id' => $user->id,
+            'business_account_id' => $businessAccountId,
             'nfc_card_id' => $nfcCardId,
             'card_owner' => $request->card_owner,
             'billing_address' => $request->billing_address,

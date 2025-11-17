@@ -517,12 +517,17 @@ const navigation = computed(() => {
     },
   ];
 
-  // Only add Employee Management for Business plan users
+  // Only add Employee Management and Activity Log for Business plan users
   if (isBusinessPlan) {
     baseNavigation.push({
       name: "Employee Management",
       href: "/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement",
       icon: "heroicons:users",
+    });
+    baseNavigation.push({
+      name: "Activity Log",
+      href: "/UserDashboard/UserManagement/BusinessPlanUser/BusinessActivityLog",
+      icon: "heroicons:document-text",
     });
   }
 

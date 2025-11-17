@@ -124,6 +124,15 @@ class AdminController extends Controller
         $perPage = $request->get('per_page', 15);
         $users = $query->paginate($perPage);
 
+        // Add quota information for Business accounts
+        $users->getCollection()->transform(function ($user) {
+            if ($user->isBusinessAccount()) {
+                $quotaInfo = $user->getQuotaInfo();
+                $user->quota_info = $quotaInfo;
+            }
+            return $user;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $users
@@ -169,7 +178,87 @@ class AdminController extends Controller
     }
 
     /**
-     * Create new user
+     * Create a new employee under a Business account
+     * Only Super Admin can create employee accounts
+     */
+    public function createBusinessEmployee(Request $request)
+    {
+        $validated = $request->validate([
+            'business_account_id' => 'required|exists:users,id',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:50',
+            'job_title' => 'nullable|string|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+
+        // Verify business account exists and is a Business plan
+        $businessAccount = User::find($validated['business_account_id']);
+        
+        if (!$businessAccount || !$businessAccount->isBusinessAccount()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Business account ID'
+            ], 400);
+        }
+
+        // Check quota
+        $quotaInfo = $businessAccount->getQuotaInfo();
+        
+        if ($quotaInfo['available_account_slots'] <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot create employee. Business account has reached its account slots quota.',
+                'data' => [
+                    'business_account' => $businessAccount->full_name,
+                    'total_slots' => $quotaInfo['total_account_slots'],
+                    'used_slots' => $quotaInfo['employees_count'],
+                    'available_slots' => 0
+                ]
+            ], 403);
+        }
+
+        // Create employee
+        $employee = User::create([
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'job_title' => $validated['job_title'],
+            'password' => bcrypt($validated['password']),
+            'subscription_plan' => 'business',
+            'subscription_active' => true,
+            'parent_business_id' => $businessAccount->id,
+            'company' => $businessAccount->company,
+            'is_admin' => false,
+        ]);
+
+        // Get updated quota
+        $updatedQuotaInfo = $businessAccount->getQuotaInfo();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee account created successfully',
+            'data' => [
+                'employee' => [
+                    'id' => $employee->id,
+                    'full_name' => $employee->full_name,
+                    'email' => $employee->email,
+                    'job_title' => $employee->job_title,
+                    'parent_business_id' => $employee->parent_business_id,
+                ],
+                'business_account' => [
+                    'id' => $businessAccount->id,
+                    'name' => $businessAccount->full_name,
+                    'remaining_slots' => $updatedQuotaInfo['available_account_slots']
+                ]
+            ]
+        ], 201);
+    }
+
+    /**
+     * Create a new user
      */
     public function createUser(Request $request)
     {
@@ -185,6 +274,8 @@ class AdminController extends Controller
             'is_admin' => 'boolean',
             'admin_role' => 'nullable|in:admin,moderator',
             'admin_permissions' => 'nullable|array',
+            'total_account_slots' => 'nullable|integer|min:0',
+            'total_card_quota' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -197,6 +288,9 @@ class AdminController extends Controller
         DB::beginTransaction();
 
         try {
+            $subscriptionPlan = $request->subscription_plan ?? 'free';
+            $isBusinessPlan = $subscriptionPlan === 'business';
+
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -205,20 +299,21 @@ class AdminController extends Controller
                 'company' => $request->company,
                 'job_title' => $request->job_title,
                 'phone' => $request->phone,
-                'subscription_plan' => $request->subscription_plan ?? 'free',
-                'subscription_active' => $request->subscription_plan !== 'free',
-                'subscription_start_date' => $request->subscription_plan !== 'free' ? now() : null,
-                'subscription_end_date' => $request->subscription_plan !== 'free' ? now()->addYear() : null,
+                'subscription_plan' => $subscriptionPlan,
+                'subscription_active' => $subscriptionPlan !== 'free',
+                'subscription_start_date' => $subscriptionPlan !== 'free' ? now() : null,
+                'subscription_end_date' => $subscriptionPlan !== 'free' ? now()->addYear() : null,
                 'is_admin' => $request->boolean('is_admin'),
                 'admin_role' => $request->admin_role,
                 'admin_permissions' => $request->admin_permissions,
-                'total_account_slots' => $request->subscription_plan ?? 'business' ? 10 : 0,
-                'total_card_quota' => $request->subscription_plan ?? 'business' ? 10 : 0,
+                'total_account_slots' => $isBusinessPlan ? ($request->total_account_slots ?? 10) : 0,
+                'total_card_quota' => $isBusinessPlan ? ($request->total_card_quota ?? 10) : 0,
             ]);
 
             // Create NFC card for the user
             $nfcCard = NfcCard::create([
                 'user_id' => $user->id,
+                'business_account_id' => $isBusinessPlan ? $user->id : null,
                 'card_owner' => $user->full_name,
                 'billing_address' => '',
                 'contact_number' => $user->phone ?? '',
@@ -278,6 +373,8 @@ class AdminController extends Controller
             'is_admin' => 'boolean',
             'admin_role' => 'nullable|in:admin,moderator',
             'admin_permissions' => 'nullable|array',
+            'total_account_slots' => 'nullable|integer|min:0',
+            'total_card_quota' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -295,7 +392,73 @@ class AdminController extends Controller
             ], 403);
         }
 
-        $user->update($request->all());
+        // Handle Business Plan quota updates
+        if ($request->has('subscription_plan') && $request->subscription_plan === 'business') {
+            // If updating to Business Plan or already Business
+            if ($request->has('total_card_quota') || $request->has('total_account_slots')) {
+                $quotaInfo = $user->getQuotaInfo();
+
+                // Validate card quota
+                if ($request->has('total_card_quota')) {
+                    $newCardQuota = $request->total_card_quota;
+                    if ($newCardQuota < $quotaInfo['ordered_cards_count']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Cannot set card quota to {$newCardQuota}. Already ordered: {$quotaInfo['ordered_cards_count']} cards.",
+                            'errors' => [
+                                'total_card_quota' => ["Minimum value is {$quotaInfo['ordered_cards_count']} (already ordered cards)"]
+                            ]
+                        ], 422);
+                    }
+                }
+
+                // Validate account slots
+                if ($request->has('total_account_slots')) {
+                    $newAccountSlots = $request->total_account_slots;
+                    if ($newAccountSlots < $quotaInfo['employees_count']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Cannot set account slots to {$newAccountSlots}. Current employees: {$quotaInfo['employees_count']}.",
+                            'errors' => [
+                                'total_account_slots' => ["Minimum value is {$quotaInfo['employees_count']} (current employees)"]
+                            ]
+                        ], 422);
+                    }
+                }
+            }
+
+            // Update quota fields
+            if ($request->has('total_account_slots')) {
+                $user->total_account_slots = $request->total_account_slots;
+            }
+            if ($request->has('total_card_quota')) {
+                $user->total_card_quota = $request->total_card_quota;
+            }
+        } elseif ($request->has('subscription_plan') && $request->subscription_plan !== 'business') {
+            // Changing from Business to another plan
+            if ($user->subscription_plan === 'business') {
+                $quotaInfo = $user->getQuotaInfo();
+                
+                if ($quotaInfo['employees_count'] > 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot change plan. Please delete all employees first.',
+                        'errors' => [
+                            'subscription_plan' => ['Cannot change from Business plan while employees exist']
+                        ]
+                    ], 422);
+                }
+
+                // Clear quota
+                $user->total_account_slots = 0;
+                $user->total_card_quota = 0;
+            }
+        }
+
+        // Update other fields (exclude password and quota fields)
+        $fieldsToUpdate = $request->except(['password', 'password_confirmation', 'total_account_slots', 'total_card_quota']);
+        $user->fill($fieldsToUpdate);
+        $user->save();
 
         return response()->json([
             'success' => true,

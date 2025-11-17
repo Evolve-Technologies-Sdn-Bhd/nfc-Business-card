@@ -27,6 +27,7 @@ class AdminNotificationController extends Controller
         $userId = $request->input('user_id');
 
         $query = Notification::with('user')
+            ->orderBy('pinned', 'desc') // Pinned notifications first
             ->orderBy('created_at', 'desc');
 
         if ($type) {
