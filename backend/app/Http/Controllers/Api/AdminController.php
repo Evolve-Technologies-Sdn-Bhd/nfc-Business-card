@@ -82,7 +82,22 @@ class AdminController extends Controller
         $query = User::with(['nfcCards.landingPage', 'nfcTag', 'nfcCards'])
             ->withCount(['analytics', 'nfcCards']);
 
-        // Apply filters
+        // Filter by businessUserId: show the business user and all their employees
+        if ($request->filled('businessUserId')) {
+            $businessUserId = $request->businessUserId;
+            $query->where(function ($q) use ($businessUserId) {
+                $q->where('id', $businessUserId)
+                  ->orWhere('parent_business_id', $businessUserId);
+            });
+        }
+
+        // Filter by employeeId: show only the selected employee
+        if ($request->filled('employeeId')) {
+            $employeeId = $request->employeeId;
+            $query->where('id', $employeeId);
+        }
+
+        // Apply other filters
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {

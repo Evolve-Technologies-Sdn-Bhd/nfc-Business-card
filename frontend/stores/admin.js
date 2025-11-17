@@ -18,6 +18,8 @@ export const useAdminStore = defineStore("admin", {
       subscription_plan: "",
       status: "",
       is_admin: "",
+      businessUserId: "",
+      employeeId: "",
     },
   }),
 
@@ -252,6 +254,8 @@ export const useAdminStore = defineStore("admin", {
         subscription_plan: "",
         status: "",
         is_admin: "",
+        businessUserId: "",
+        employeeId: "",
       };
       this.pagination.current_page = 1;
     },

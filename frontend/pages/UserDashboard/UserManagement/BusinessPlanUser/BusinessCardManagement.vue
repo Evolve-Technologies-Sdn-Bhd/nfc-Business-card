@@ -16,7 +16,7 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button @click="orderNewCard" class="btn btn-primary">
+            <button @click="goToDesignPage" class="btn btn-primary">
               <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
               Order New Card
             </button>
@@ -1061,6 +1061,12 @@ const hasActiveFilters = computed(() => {
 });
 
 // Methods
+const router = useRouter();
+
+const goToDesignPage = () => {
+  router.push("/UserDashboard/NFCCardDesign/BusinessPlanNFCCard");
+};
+
 const loadEmployees = async () => {
   try {
     const response = await $api.get("/business/employees");

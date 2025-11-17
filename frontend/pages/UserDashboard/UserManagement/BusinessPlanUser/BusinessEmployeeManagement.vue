@@ -300,12 +300,12 @@
                     <span
                       :class="[
                         'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
-                        employee.is_active
+                        employee.subscription_active
                           ? 'bg-success-100 text-success-800'
                           : 'bg-secondary-100 text-secondary-800',
                       ]"
                     >
-                      {{ employee.is_active ? "Active" : "Inactive" }}
+                      {{ employee.subscription_active ? "Active" : "Inactive" }}
                     </span>
                   </td>
                   <td
@@ -391,12 +391,16 @@
                   <span
                     :class="[
                       'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                      selectedEmployee.is_active
+                      selectedEmployee.subscription_active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800',
                     ]"
                   >
-                    {{ selectedEmployee.is_active ? "Active" : "Inactive" }}
+                    {{
+                      selectedEmployee.subscription_active
+                        ? "Active"
+                        : "Inactive"
+                    }}
                   </span>
                 </div>
               </div>
@@ -619,7 +623,7 @@ const availableQuota = computed(() => {
 
 // Computed
 const activeEmployeesCount = computed(() => {
-  return employees.value.filter((emp) => emp.is_active).length;
+  return employees.value.filter((emp) => emp.subscription_active).length;
 });
 
 const filteredEmployees = computed(() => {
@@ -639,7 +643,7 @@ const filteredEmployees = computed(() => {
   // Filter by status
   if (filterStatus.value !== "all") {
     const isActive = filterStatus.value === "active";
-    filtered = filtered.filter((emp) => emp.is_active === isActive);
+    filtered = filtered.filter((emp) => emp.subscription_active === isActive);
   }
 
   return filtered;
@@ -652,9 +656,13 @@ const loadEmployees = async () => {
     const response = await $api.get("/business/employees");
 
     if (response.success && response.data) {
-      employees.value = response.data.employees || [];
+      employees.value = (response.data.employees || []).map((emp) => ({
+        ...emp,
+        subscription_active: emp.subscription_active,
+        name: emp.full_name || `${emp.first_name} ${emp.last_name}`,
+        position: emp.job_title,
+      }));
 
-      // Get quota info from nested data structure
       const quotaInfo = response.data.quota_info || {};
       totalQuota.value =
         quotaInfo.total_quota || quotaInfo.total_account_slots || 10;

@@ -728,7 +728,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div
                 v-if="bulkImport.errors.length"
                 class="bg-red-50 border border-red-200 rounded-lg p-4"
@@ -740,9 +739,7 @@
                   />
                   Validation Errors ({{ bulkImport.errors.length }})
                 </h4>
-                <ul
-                  class="text-sm text-red-700 space-y-1 ml-4 max-h-40 overflow-y-auto"
-                >
+                <ul class="text-sm text-red-800 font-medium space-y-1 ml-4">
                   <li v-for="(error, index) in bulkImport.errors" :key="index">
                     • {{ error }}
                   </li>
@@ -1231,9 +1228,38 @@ const submitBulkImport = async () => {
     }
   } catch (error) {
     console.error("Error creating employees:", error);
-    alert(
-      error.response?.data?.message || "Failed to create employee accounts."
-    );
+    if (error.response?.status === 422) {
+      const errorData = error.response.data;
+      console.log("422 Error Details:", errorData);
+
+      if (errorData.errors) {
+        const backendErrors = [];
+        Object.entries(errorData.errors).forEach(([field, messages]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((message) => {
+              backendErrors.push(`${field}: ${message}`);
+            });
+          } else {
+            backendErrors.push(`${field}: ${messages}`);
+          }
+        });
+
+        bulkImport.value.errors = [
+          ...bulkImport.value.errors,
+          ...backendErrors,
+        ];
+
+        alert(`Backend validation failed:\n${backendErrors.join("\n")}`);
+      } else if (errorData.message) {
+        alert(`Backend error: ${errorData.message}`);
+      } else {
+        alert("Validation failed. Please check the error details below.");
+      }
+    } else {
+      alert(
+        error.response?.data?.message || "Failed to create employee accounts."
+      );
+    }
   } finally {
     isSubmitting.value = false;
   }
