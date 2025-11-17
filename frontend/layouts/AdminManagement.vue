@@ -36,7 +36,7 @@
                 :key="item.name"
                 :to="item.href"
                 :class="[
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200',
+                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 w-full text-left',
                   isActiveRoute(item.href)
                     ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
@@ -87,28 +87,6 @@
 
               <!-- Admin Actions -->
               <div class="mt-3 space-y-1">
-                <NuxtLink
-                  to="/AdminManagement/legal-documents"
-                  class="flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
-                >
-                  <Icon
-                    name="heroicons:document-text"
-                    class="mr-3 h-5 w-5 text-secondary-400"
-                  />
-                  <span>Terms & Privacy</span>
-                </NuxtLink>
-
-                <NuxtLink
-                  to="/AdminManagement"
-                  class="flex items-center px-3 py-2 text-sm font-medium text-secondary-600 rounded-lg hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
-                >
-                  <Icon
-                    name="heroicons:arrow-left"
-                    class="mr-3 h-5 w-5 text-secondary-400"
-                  />
-                  <span>Back to Dashboard</span>
-                </NuxtLink>
-
                 <button
                   @click="handleLogout"
                   class="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors"
@@ -220,6 +198,7 @@
       @click="sidebarOpen = false"
       class="fixed inset-0 z-40 lg:hidden bg-black bg-opacity-50"
     ></div>
+
   </div>
 </template>
 
@@ -252,6 +231,16 @@ const navigation = [
     name: "NFC Card Management",
     href: "/AdminManagement/nfc-cards",
     icon: "heroicons:credit-card",
+  },
+  {
+    name: "Invoices",
+    href: "/AdminManagement/invoices",
+    icon: "heroicons:document-text",
+  },
+  {
+    name: "Terms & Privacy",
+    href: "/AdminManagement/legal-documents",
+    icon: "heroicons:shield-check",
   },
   {
     name: "Chatbot & FAQ",

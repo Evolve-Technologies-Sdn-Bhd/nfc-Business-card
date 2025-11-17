@@ -200,9 +200,9 @@ export const useAuthStore = defineStore("auth", {
         return "/UserDashboard/CardManagement";
       }
 
-      // Admin users go to admin panel
+      // Admin users go to admin panel - NFC Card Management
       if (this.isAdmin()) {
-        return "/AdminManagement";
+        return "/AdminManagement/nfc-cards";
       }
 
       // Get user's plan (check subscription_plan first, then fall back to plan)

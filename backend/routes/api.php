@@ -21,6 +21,14 @@ use App\Http\Controllers\Api\Business\QuotaController;
 use App\Http\Controllers\Api\Business\EmployeeController;
 use App\Http\Controllers\Api\Business\ActivityLogController;
 use App\Http\Controllers\Api\Admin\BusinessUserController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\RefundController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\Admin\ManualBankTransferController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 
@@ -167,6 +175,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/activity-logs/export', [ActivityLogController::class, 'export']);
         // Note: No DELETE endpoint - Business Admin can only view, not delete
     });
+
+    // ✅ Invoice Routes (User)
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index']);
+        Route::get('/statistics', [InvoiceController::class, 'statistics']);
+        Route::get('/{invoice}', [InvoiceController::class, 'show']);
+        Route::get('/{invoice}/preview', [InvoiceController::class, 'preview']);
+    });
+
+    // Invoice download with signed URL
+    Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])
+        ->name('invoices.download')
+        ->middleware('signed');
 });
 
 // Public legal documents routes
@@ -240,5 +261,31 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/chatbot/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
     Route::delete('/chatbot/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
     Route::get('/chatbot/analytics', [AdminChatbotController::class, 'getAnalytics']);
+
+    // ✅ Admin Payment Management
+    Route::prefix('payments')->group(function () {
+        // Refund management
+        Route::get('/refunds/pending', [RefundController::class, 'getPendingRefunds']);
+        Route::post('/refunds/{refund}/process', [RefundController::class, 'processRefund']);
+
+        // Manual bank transfer verification
+        Route::get('/manual-transfers/pending', [ManualBankTransferController::class, 'getPendingTransfers']);
+        Route::post('/manual-transfers/{transaction}/verify', [ManualBankTransferController::class, 'verifyTransfer']);
+        Route::get('/manual-transfers', [ManualBankTransferController::class, 'getAllTransfers']);
+    });
+
+    // ✅ Admin Invoice Management
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [AdminInvoiceController::class, 'index']);
+        Route::get('/statistics', [AdminInvoiceController::class, 'statistics']);
+        Route::get('/{invoice}', [AdminInvoiceController::class, 'show']);
+        Route::post('/{invoice}/regenerate', [AdminInvoiceController::class, 'regenerate']);
+        Route::post('/{invoice}/mark-issued', [AdminInvoiceController::class, 'markAsIssued']);
+        Route::post('/{invoice}/mark-paid', [AdminInvoiceController::class, 'markAsPaid']);
+        Route::post('/{invoice}/cancel', [AdminInvoiceController::class, 'cancel']);
+        Route::post('/{invoice}/resend', [AdminInvoiceController::class, 'resend']);
+        Route::get('/{invoice}/download', [AdminInvoiceController::class, 'download']);
+        Route::get('/{invoice}/preview', [AdminInvoiceController::class, 'preview']);
+    });
 });
 
