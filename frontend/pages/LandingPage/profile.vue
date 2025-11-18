@@ -217,13 +217,184 @@
 
       <!-- Profile Content -->
       <template v-else>
+        <!-- Hero Section -->
+        <div
+          :style="{
+            position: 'relative',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: responsive.borderRadius,
+            padding: isMobile ? '40px 20px' : isTablet ? '60px 30px' : '80px 40px',
+            marginBottom: responsive.cardMarginBottom,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          }"
+        >
+          <div :style="{ position: 'relative', zIndex: 2, textAlign: 'center' }">
+            <div
+              :style="{
+                position: 'relative',
+                width: responsive.profileSize,
+                height: responsive.profileSize,
+                margin: '0 auto 40px',
+                cursor: 'pointer',
+              }"
+              @mouseenter="imageHover = true"
+              @mouseleave="imageHover = false"
+            >
+              <div
+                :style="{
+                  position: 'absolute',
+                  inset: '-10px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+                  animation: 'rotate 3s linear infinite',
+                  opacity: imageHover ? 1 : 0,
+                  transition: 'opacity 0.3s',
+                }"
+              />
+              <img
+                :src="profileImage"
+                alt="Profile"
+                :style="{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  border: responsive.profileBorder,
+                  transition: 'transform 0.3s',
+                  zIndex: 1,
+                  transform: imageHover ? 'scale(1.05)' : 'scale(1)',
+                }"
+              />
+              <div
+                :style="{
+                  position: 'absolute',
+                  bottom: '15px',
+                  right: '15px',
+                  width: '20px',
+                  height: '20px',
+                  background: '#00ff88',
+                  border: '3px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '50%',
+                  zIndex: 2,
+                  animation: 'pulse-status 2s infinite',
+                }"
+              />
+            </div>
+
+            <h1
+              :style="{
+                fontSize: responsive.nameSize,
+                fontWeight: 800,
+                color: 'white',
+                marginBottom: '30px',
+                letterSpacing: '2px',
+              }"
+            >
+              <span
+                v-for="(char, i) in profile.name.split('')"
+                :key="i"
+                :style="{
+                  display: 'inline-block',
+                  animation: 'charBounce 0.5s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: `${i * 0.05}s`,
+                }"
+              >
+                {{ char === ' ' ? '\u00A0' : char }}
+              </span>
+            </h1>
+
+            <div
+              :style="{
+                display: 'flex',
+                gap: responsive.flexGap,
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+              }"
+            >
+              <div
+                v-if="profile.qualification"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.3s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">🎓</span>
+                {{ profile.qualification }}
+              </div>
+              <div
+                v-if="profile.position"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.4s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">💼</span>
+                {{ profile.position }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Particles -->
+          <div
+            :style="{
+              position: 'absolute',
+              inset: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }"
+          >
+            <div
+              v-for="n in 20"
+              :key="n"
+              :style="{
+                position: 'absolute',
+                width: '4px',
+                height: '4px',
+                background: 'white',
+                borderRadius: '50%',
+                animation: 'particleFloat 3s infinite ease-in-out',
+                opacity: 0.3,
+                ...getParticleStyle(n),
+              }"
+            />
+          </div>
+        </div>
+
         <!-- Quick Actions -->
         <div
           :style="{
             display: 'flex',
             justifyContent: 'center',
             gap: responsive.actionGap,
-            marginBottom: responsive.heroMarginBottom,
+            marginBottom: responsive.cardMarginBottom,
             flexWrap: 'wrap',
           }"
         >
@@ -493,6 +664,95 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Video Section -->
+          <div
+            v-if="videoData.url"
+            :style="{
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+            }"
+          >
+            <div
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
+              }"
+            >
+              <div
+                :style="{
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
+                }"
+              >
+                🎥
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
+                }"
+              >
+                {{ videoData.title || 'Company Introduction' }}
+              </h2>
+            </div>
+
+            <!-- Video Player -->
+            <div
+              :style="{
+                position: 'relative',
+                paddingBottom: '56.25%', /* 16:9 aspect ratio */
+                height: 0,
+                overflow: 'hidden',
+                borderRadius: '20px',
+                background: 'rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+                marginBottom: videoData.description ? (isMobile ? '15px' : '20px') : '0',
+              }"
+            >
+              <iframe
+                :src="getEmbedUrl(videoData.url)"
+                :style="{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '20px',
+                }"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              />
+            </div>
+
+            <!-- Video Description -->
+            <p
+              v-if="videoData.description"
+              :style="{
+                color: 'rgba(255, 255, 255, 0.7)',
+                lineHeight: '1.6',
+                fontSize: responsive.bodySize,
+                margin: 0,
+                textAlign: 'center',
+              }"
+            >
+              {{ videoData.description }}
+            </p>
           </div>
 
           <!-- Services -->
@@ -1326,6 +1586,12 @@ const services = ref([
   { icon: "📄", name: "Printing Solutions" },
 ]);
 
+const videoData = ref({
+  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // YouTube, Vimeo, or direct embed URL
+  title: 'Company Introduction',
+  description: 'Watch our introduction video to learn more about what we do',
+});
+
 const contactMethods = ref([
   {
     icon: "M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z",
@@ -1369,6 +1635,28 @@ const teamMembers = ref([
   { initials: "JS", name: "Jane Smith", role: "Project Manager" },
   { initials: "ML", name: "Mike Lee", role: "Designer" },
 ]);
+
+// Helper function to convert video URLs to embed format
+const getEmbedUrl = (url) => {
+  if (!url) return '';
+  
+  // YouTube
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+  const youtubeMatch = url.match(youtubeRegex);
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0`;
+  }
+  
+  // Vimeo
+  const vimeoRegex = /(?:vimeo\.com\/)([0-9]+)/;
+  const vimeoMatch = url.match(vimeoRegex);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  
+  // If already an embed URL or direct link, return as is
+  return url;
+};
 
 // Load profile data from API
 const loadProfileData = async () => {

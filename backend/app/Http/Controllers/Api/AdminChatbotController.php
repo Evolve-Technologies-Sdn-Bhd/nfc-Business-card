@@ -63,6 +63,11 @@ class AdminChatbotController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info('AdminChatbotController::store called', [
+            'request_data' => $request->all(),
+            'user_id' => auth()->id(),
+        ]);
+
         $validator = Validator::make($request->all(), [
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
@@ -73,25 +78,44 @@ class AdminChatbotController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Log::warning('AdminChatbotController::store validation failed', [
+                'errors' => $validator->errors()->toArray()
+            ]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $question = ChatbotQuestion::create([
-            'question' => $request->question,
-            'answer' => $request->answer,
-            'keywords' => $request->keywords,
-            'priority' => $request->priority ?? 0,
-            'is_active' => $request->is_active ?? true,
-        ]);
+        try {
+            $question = ChatbotQuestion::create([
+                'question' => $request->question,
+                'answer' => $request->answer,
+                'keywords' => $request->keywords,
+                'priority' => $request->priority ?? 0,
+                'is_active' => $request->is_active ?? true,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Q&A created successfully',
-            'data' => $question
-        ], 201);
+            \Log::info('AdminChatbotController::store question created', [
+                'question_id' => $question->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Q&A created successfully',
+                'data' => $question
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('AdminChatbotController::store error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create question: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -157,7 +181,7 @@ class AdminChatbotController extends Controller
      */
     public function getFeedback(Request $request)
     {
-        $query = ChatbotFeedback::with('question')->orderBy('created_at', 'desc');
+        $query = ChatbotFeedback::with(['question', 'resolver'])->orderBy('created_at', 'desc');
 
         // Filter by read status
         if ($request->has('is_read')) {
@@ -165,8 +189,34 @@ class AdminChatbotController extends Controller
         }
 
         // Filter by type
-        if ($request->has('type')) {
+        if ($request->has('type') && $request->type !== 'all') {
             $query->ofType($request->type);
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->byStatus($request->status);
+        }
+
+        // Filter by category
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->byCategory($request->category);
+        }
+
+        // Filter by date range
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->dateRange($request->start_date, $request->end_date);
+        }
+
+        // Search by user name or email or message
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('user_name', 'like', "%{$search}%")
+                  ->orWhere('user_email', 'like', "%{$search}%")
+                  ->orWhere('user_message', 'like', "%{$search}%")
+                  ->orWhere('user_question', 'like', "%{$search}%");
+            });
         }
 
         $feedback = $query->get()->map(function ($item) {
@@ -180,7 +230,14 @@ class AdminChatbotController extends Controller
                 'user_email' => $item->user_email,
                 'rating' => $item->rating,
                 'feedback_type' => $item->feedback_type,
+                'status' => $item->status ?? 'pending',
+                'category' => $item->category,
+                'admin_notes' => $item->admin_notes,
+                'resolved_by' => $item->resolved_by,
+                'resolver_name' => $item->resolver ? $item->resolver->name : null,
+                'resolved_at' => $item->resolved_at,
                 'is_read' => $item->is_read,
+                'ip_address' => $item->ip_address,
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
             ];
@@ -189,6 +246,126 @@ class AdminChatbotController extends Controller
         return response()->json([
             'success' => true,
             'data' => $feedback
+        ]);
+    }
+
+    /**
+     * Update feedback status
+     * 
+     * PUT /api/admin/chatbot/feedback/{id}/status
+     */
+    public function updateFeedbackStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:pending,in_progress,resolved',
+            'admin_notes' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $feedback = ChatbotFeedback::findOrFail($id);
+        
+        $data = ['status' => $request->status];
+        
+        if ($request->status === 'resolved') {
+            $data['resolved_by'] = auth()->id();
+            $data['resolved_at'] = now();
+            $data['is_read'] = true;
+        }
+        
+        if ($request->has('admin_notes')) {
+            $data['admin_notes'] = $request->admin_notes;
+        }
+        
+        $feedback->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback status updated successfully',
+            'data' => $feedback
+        ]);
+    }
+
+    /**
+     * Export feedback to CSV
+     * 
+     * GET /api/admin/chatbot/feedback/export
+     */
+    public function exportFeedback(Request $request)
+    {
+        $query = ChatbotFeedback::with(['question', 'resolver'])->orderBy('created_at', 'desc');
+
+        // Apply same filters as getFeedback
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->byStatus($request->status);
+        }
+
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->byCategory($request->category);
+        }
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->dateRange($request->start_date, $request->end_date);
+        }
+
+        $feedback = $query->get();
+
+        $csvData = [];
+        $csvData[] = [
+            'ID',
+            'Date',
+            'User Name',
+            'User Email',
+            'User Question',
+            'User Message',
+            'Category',
+            'Type',
+            'Rating',
+            'Status',
+            'Resolved By',
+            'Resolved At',
+            'Admin Notes',
+            'IP Address'
+        ];
+
+        foreach ($feedback as $item) {
+            $csvData[] = [
+                $item->id,
+                $item->created_at->format('Y-m-d H:i:s'),
+                $item->user_name ?? 'Anonymous',
+                $item->user_email ?? 'N/A',
+                $item->user_question,
+                $item->user_message ?? '',
+                $item->category ?? 'N/A',
+                $item->feedback_type,
+                $item->rating ?? 'N/A',
+                $item->status ?? 'pending',
+                $item->resolver ? $item->resolver->name : 'N/A',
+                $item->resolved_at ? $item->resolved_at->format('Y-m-d H:i:s') : 'N/A',
+                $item->admin_notes ?? '',
+                $item->ip_address ?? 'N/A'
+            ];
+        }
+
+        $filename = 'chatbot_feedback_' . now()->format('Y-m-d_His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
 

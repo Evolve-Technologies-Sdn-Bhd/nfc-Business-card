@@ -152,8 +152,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
 
-    // Business Plan Request
-    Route::post('/business-plan-request', [BusinessPlanRequestController::class, 'submit']);
+    // Payment Routes
+    Route::prefix('payment')->group(function () {
+        Route::get('/rails', [PaymentController::class, 'getAvailableRails']);
+        Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
+        Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
+        Route::post('/confirm/{transactionId}', [PaymentController::class, 'confirmPayment']);
+        Route::get('/transactions', [PaymentController::class, 'getTransactions']);
+        Route::get('/transactions/{transactionId}', [PaymentController::class, 'getTransactionDetails']);
+        Route::post('/transactions/{transactionId}/upload-proof', [PaymentController::class, 'uploadPaymentProof']);
+    });
 
     // Business Plan Routes (for Business accounts and employees)
     Route::prefix('business')->group(function () {
@@ -269,6 +277,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/chatbot/questions/{id}', [AdminChatbotController::class, 'update']);
     Route::delete('/chatbot/questions/{id}', [AdminChatbotController::class, 'destroy']);
     Route::get('/chatbot/feedback', [AdminChatbotController::class, 'getFeedback']);
+    Route::get('/chatbot/feedback/export', [AdminChatbotController::class, 'exportFeedback']);
+    Route::put('/chatbot/feedback/{id}/status', [AdminChatbotController::class, 'updateFeedbackStatus']);
     Route::put('/chatbot/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
     Route::delete('/chatbot/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
     Route::get('/chatbot/analytics', [AdminChatbotController::class, 'getAnalytics']);
