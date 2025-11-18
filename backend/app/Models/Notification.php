@@ -21,12 +21,25 @@ class Notification extends Model
         'action_url',
         'action_text',
         'icon',
+        'pinned',
+        'sticky',
+        'is_approved',
+        'is_rejected',
+        'rejection_reason',
+        'approved_at',
+        'rejected_at',
+        'approved_by',
+        'rejected_by',
     ];
 
     protected $casts = [
         'data' => 'array',
         'is_read' => 'boolean',
         'read_at' => 'datetime',
+        'is_approved' => 'boolean',
+        'is_rejected' => 'boolean',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -80,5 +93,46 @@ class Notification extends Model
     public function scopeWithPriority($query, $priority)
     {
         return $query->where('priority', $priority);
+    }
+
+    /**
+     * Get the user who approved this notification
+     */
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who rejected this notification
+     */
+    public function rejectedByUser()
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    /**
+     * Approve notification
+     */
+    public function approve($approvedBy)
+    {
+        $this->update([
+            'is_approved' => true,
+            'approved_at' => now(),
+            'approved_by' => $approvedBy,
+        ]);
+    }
+
+    /**
+     * Reject notification
+     */
+    public function reject($reason, $rejectedBy)
+    {
+        $this->update([
+            'is_rejected' => true,
+            'rejection_reason' => $reason,
+            'rejected_at' => now(),
+            'rejected_by' => $rejectedBy,
+        ]);
     }
 }

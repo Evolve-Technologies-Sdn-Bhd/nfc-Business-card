@@ -433,4 +433,54 @@ class EmployeeController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Toggle employee account status (activate/deactivate)
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleStatus(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        // Validate user is Business account
+        if (!$user->isBusinessAccount()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only Business account owners can toggle employee status'
+            ], 403);
+        }
+
+        // Find employee
+        $employee = User::where('id', $id)
+            ->where('parent_business_id', $user->id)
+            ->first();
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee not found or does not belong to your account'
+            ], 404);
+        }
+
+        // Validate request
+        $request->validate([
+            'subscription_active' => 'required|boolean'
+        ]);
+
+        // Update status
+        $employee->subscription_active = $request->subscription_active;
+        $employee->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee status updated successfully',
+            'data' => [
+                'id' => $employee->id,
+                'subscription_active' => $employee->subscription_active
+            ]
+        ]);
+    }
 }

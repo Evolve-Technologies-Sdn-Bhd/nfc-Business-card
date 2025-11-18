@@ -98,13 +98,22 @@
           <p class="text-sm text-secondary-600">
             Showing {{ filteredCards.length }} of {{ allCards.length }} cards
           </p>
-          <button
-            v-if="hasActiveFilters"
-            @click="clearFilters"
-            class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-          >
-            Clear All Filters
-          </button>
+          <div class="flex items-center space-x-3">
+            <button
+              @click="loadNfcCards"
+              class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+            >
+              <Icon name="heroicons:arrow-path" class="h-4 w-4 mr-1" />
+              Refresh
+            </button>
+            <button
+              v-if="hasActiveFilters"
+              @click="clearFilters"
+              class="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Clear All Filters
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1012,7 +1021,14 @@ const orderForm = ref({
 // Computed properties
 const myCards = computed(() => {
   const currentUserId = authStore.user?.id;
-  return filteredCards.value.filter((card) => card.user_id === currentUserId);
+  const filtered = filteredCards.value.filter((card) => card.user_id === currentUserId);
+  console.log("myCards computed:", {
+    currentUserId,
+    totalCards: filteredCards.value.length,
+    myCardsCount: filtered.length,
+    cards: filtered
+  });
+  return filtered;
 });
 
 const employeeCards = computed(() => {
@@ -1023,6 +1039,13 @@ const employeeCards = computed(() => {
 const filteredCards = computed(() => {
   let cards = [...allCards.value];
   const currentUserId = authStore.user?.id;
+  
+  console.log("filteredCards computed:", {
+    allCardsCount: allCards.value.length,
+    allCards: allCards.value,
+    currentUserId,
+    filters: filters.value
+  });
 
   // Filter by employee
   if (filters.value.employee_id === "self") {
@@ -1051,6 +1074,7 @@ const filteredCards = computed(() => {
     );
   }
 
+  console.log("filteredCards result:", cards);
   return cards;
 });
 
@@ -1080,10 +1104,15 @@ const loadEmployees = async () => {
 
 const loadNfcCards = async () => {
   try {
+    console.log("Loading NFC cards...");
     const response = await $api.get("/nfc-cards");
+    console.log("NFC cards response:", response);
     if (response.success) {
+      console.log("Cards loaded:", response.nfc_cards);
       allCards.value = response.nfc_cards;
       nfcCards.value = response.nfc_cards;
+    } else {
+      console.error("Response not successful:", response);
     }
   } catch (error) {
     $toast.error("Failed to load NFC cards");
@@ -1298,8 +1327,25 @@ const formatDate = (date) => {
 };
 
 // Lifecycle
+let refreshInterval = null;
+
 onMounted(async () => {
+  console.log("Current user:", authStore.user);
+  console.log("User ID:", authStore.user?.id);
+  console.log("Subscription plan:", authStore.user?.subscription_plan);
+  
   await Promise.all([loadNfcCards(), loadEmployees()]);
+  
+  // Auto-refresh cards every 10 seconds to show newly approved cards
+  refreshInterval = setInterval(() => {
+    loadNfcCards();
+  }, 10000);
+});
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
 });
 </script>
 

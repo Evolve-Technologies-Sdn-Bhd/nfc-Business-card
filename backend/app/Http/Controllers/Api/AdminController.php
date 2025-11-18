@@ -813,4 +813,31 @@ class AdminController extends Controller
 
         return round($bytes, $precision) . ' ' . $units[$i];
     }
+
+    /**
+     * Get super admin user
+     */
+    public function getSuperAdmin()
+    {
+        $superAdmin = User::where('admin_role', 'super_admin')
+            ->where('is_admin', true)
+            ->first();
+
+        if (!$superAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Super admin not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $superAdmin->id,
+                'email' => $superAdmin->email,
+                'full_name' => $superAdmin->full_name,
+                'admin_role' => $superAdmin->admin_role,
+            ],
+        ]);
+    }
 }

@@ -138,6 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
+        Route::post('/', [NotificationController::class, 'store']);
         Route::post('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
         Route::delete('/{id}', [NotificationController::class, 'destroy']);
@@ -177,6 +178,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Bulk Employee Data Upload & Card Orders (does NOT create employee accounts)
         Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);
         Route::post('/employees/{id}/reset-password', [EmployeeController::class, 'resetPassword']);
+        Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus']);
         Route::get('/employees/{id}/details', [EmployeeController::class, 'getEmployeeDetails']);
         
         // Activity Logs (Business Admin can view employee activities, read-only)
@@ -212,6 +214,9 @@ Route::get('/legal/documents/{type}', [LegalDocumentController::class, 'show']);
 Route::post('/chatbot/ask', [ChatbotController::class, 'ask']);
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
 Route::get('/chatbot/questions', [ChatbotController::class, 'getQuestions']);
+
+// Public admin info endpoint (for getting super admin to send notifications)
+Route::middleware('auth:sanctum')->get('/admin/super-admin', [AdminController::class, 'getSuperAdmin']);
 
 // Admin routes (protected by admin middleware)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
@@ -261,6 +266,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::post('/announcement', [AdminNotificationController::class, 'sendAnnouncement']);
         Route::post('/send-to-users', [AdminNotificationController::class, 'sendToUsers']);
         Route::post('/system-message', [AdminNotificationController::class, 'sendSystemMessage']);
+        Route::post('/{id}/approve', [AdminNotificationController::class, 'approveOrder']);
+        Route::post('/{id}/reject', [AdminNotificationController::class, 'rejectOrder']);
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
         Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
     });
