@@ -213,6 +213,22 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center space-x-2">
                     <button
+                      @click="toggleCardStatus(card)"
+                      :class="[
+                        'px-2 py-1 rounded text-xs font-medium',
+                        card.status === 'active'
+                          ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
+                          : 'bg-success-100 text-success-700 hover:bg-success-200',
+                      ]"
+                      :title="
+                        card.status === 'active'
+                          ? 'Deactivate card'
+                          : 'Activate card'
+                      "
+                    >
+                      {{ card.status === 'active' ? 'Deactivate' : 'Activate' }}
+                    </button>
+                    <button
                       @click="viewCard(card)"
                       class="text-primary-600 hover:text-primary-900"
                     >
@@ -892,6 +908,24 @@ const deleteCard = async (card) => {
       await adminStore.deleteNfcCard(card.id);
     } catch (error) {
       console.error("Failed to delete NFC card:", error);
+    }
+  }
+};
+
+// Toggle card status (active/inactive)
+const toggleCardStatus = async (card) => {
+  const newStatus = card.status === 'active' ? 'inactive' : 'active';
+  const action = newStatus === 'active' ? 'activate' : 'deactivate';
+
+  if (
+    confirm(
+      `Are you sure you want to ${action} the NFC card for ${card.card_owner}?`
+    )
+  ) {
+    try {
+      await adminStore.updateNfcCard(card.id, { status: newStatus });
+    } catch (error) {
+      console.error("Failed to toggle card status:", error);
     }
   }
 };

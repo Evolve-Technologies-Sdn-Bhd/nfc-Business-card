@@ -256,10 +256,18 @@
                   <div class="flex items-center">
                     <div>
                       <div class="text-sm font-medium text-gray-900">
-                        {{ notification.user?.full_name || "N/A" }}
+                        {{
+                          notification.type === "business_card_order_request"
+                            ? notification.data?.name || "N/A"
+                            : notification.user?.full_name || "N/A"
+                        }}
                       </div>
                       <div class="text-sm text-gray-500">
-                        {{ notification.user?.email || "N/A" }}
+                        {{
+                          notification.type === "business_card_order_request"
+                            ? notification.data?.email || "N/A"
+                            : notification.user?.email || "N/A"
+                        }}
                       </div>
                     </div>
                   </div>
@@ -333,6 +341,35 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center gap-2">
+                    <!-- Approve/Reject buttons for business card order requests -->
+                    <template v-if="notification.type === 'business_card_order_request' && !notification.is_approved && !notification.is_rejected">
+                      <button
+                        @click="approveOrder(notification)"
+                        :disabled="approvingId === notification.id"
+                        class="px-2 py-1 bg-success-100 text-success-700 hover:bg-success-200 rounded text-xs font-medium disabled:opacity-50"
+                        title="Approve order"
+                      >
+                        {{ approvingId === notification.id ? 'Approving...' : 'Approve' }}
+                      </button>
+                      <button
+                        @click="openRejectModal(notification)"
+                        class="px-2 py-1 bg-error-100 text-error-700 hover:bg-error-200 rounded text-xs font-medium"
+                        title="Reject order"
+                      >
+                        Reject
+                      </button>
+                    </template>
+                    <!-- Status badges for processed orders -->
+                    <template v-else-if="notification.type === 'business_card_order_request'">
+                      <span v-if="notification.is_approved" class="px-2 py-1 bg-success-100 text-success-800 rounded text-xs font-medium flex items-center">
+                        <Icon name="heroicons:check-circle" class="w-3 h-3 mr-1" />
+                        Approved
+                      </span>
+                      <span v-else-if="notification.is_rejected" class="px-2 py-1 bg-error-100 text-error-800 rounded text-xs font-medium flex items-center">
+                        <Icon name="heroicons:x-circle" class="w-3 h-3 mr-1" />
+                        Rejected
+                      </span>
+                    </template>
                     <button
                       @click="viewUserHistory(notification.user)"
                       class="text-blue-600 hover:text-blue-900"
@@ -621,6 +658,66 @@
       </div>
     </Teleport>
 
+    <!-- Reject Order Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showRejectModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="showRejectModal = false"
+      >
+        <div
+          class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
+        >
+          <div
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          ></div>
+
+          <div
+            class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+          >
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">
+                Reject Order
+              </h3>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Rejection Reason *
+                  </label>
+                  <textarea
+                    v-model="rejectForm.reason"
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Please provide a reason for rejecting this order..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+            >
+              <button
+                @click="submitRejectOrder"
+                :disabled="rejectingId || !rejectForm.reason.trim()"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+              >
+                {{ rejectingId ? 'Rejecting...' : 'Reject Order' }}
+              </button>
+              <button
+                @click="showRejectModal = false"
+                type="button"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Notification History Modal -->
     <Teleport to="body">
       <div
@@ -781,8 +878,12 @@ const customDateTo = ref("");
 const showSendModal = ref(false);
 const showCleanupModal = ref(false);
 const showHistoryModal = ref(false);
+const showRejectModal = ref(false);
 const selectedUser = ref(null);
 const cleanupDays = ref(30);
+const approvingId = ref(null);
+const rejectingId = ref(null);
+const selectedNotification = ref(null);
 
 const announcementForm = reactive({
   title: "",
@@ -793,6 +894,10 @@ const announcementForm = reactive({
   schedule: false,
   scheduled_at: "",
   timezone: "Asia/Kuala_Lumpur",
+});
+
+const rejectForm = reactive({
+  reason: "",
 });
 
 // Computed minimum datetime for scheduling (current time + 5 minutes)
@@ -1009,6 +1114,73 @@ const applyCustomDateRange = () => {
     return;
   }
   loadNotifications();
+};
+
+// Approve order
+const approveOrder = async (notification) => {
+  if (!confirm("Are you sure you want to approve this order?")) {
+    return;
+  }
+
+  approvingId.value = notification.id;
+  try {
+    const response = await $api.post(
+      `/admin/notifications/${notification.id}/approve`
+    );
+
+    if (response.success) {
+      $toast.success("Order approved successfully");
+      notification.is_approved = true;
+      notification.approved_at = new Date();
+      loadNotifications();
+      loadStatistics();
+    }
+  } catch (error) {
+    console.error("Error approving order:", error);
+    $toast.error(error.data?.message || "Failed to approve order");
+  } finally {
+    approvingId.value = null;
+  }
+};
+
+// Open reject modal
+const openRejectModal = (notification) => {
+  selectedNotification.value = notification;
+  rejectForm.reason = "";
+  showRejectModal.value = true;
+};
+
+// Submit reject order
+const submitRejectOrder = async () => {
+  if (!selectedNotification.value || !rejectForm.reason.trim()) {
+    $toast.error("Please provide a rejection reason");
+    return;
+  }
+
+  rejectingId.value = selectedNotification.value.id;
+  try {
+    const response = await $api.post(
+      `/admin/notifications/${selectedNotification.value.id}/reject`,
+      {
+        rejection_reason: rejectForm.reason,
+      }
+    );
+
+    if (response.success) {
+      $toast.success("Order rejected successfully");
+      selectedNotification.value.is_rejected = true;
+      selectedNotification.value.rejection_reason = rejectForm.reason;
+      selectedNotification.value.rejected_at = new Date();
+      showRejectModal.value = false;
+      loadNotifications();
+      loadStatistics();
+    }
+  } catch (error) {
+    console.error("Error rejecting order:", error);
+    $toast.error(error.data?.message || "Failed to reject order");
+  } finally {
+    rejectingId.value = null;
+  }
 };
 
 // Export notifications

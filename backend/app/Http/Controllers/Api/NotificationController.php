@@ -123,4 +123,64 @@ class NotificationController extends Controller
             'message' => 'All read notifications deleted',
         ]);
     }
+
+    /**
+     * Create notification (for order requests)
+     */
+    public function store(Request $request)
+    {
+        \Log::info('Notification store called', [
+            'user' => auth()->user()?->id,
+            'authenticated' => auth()->check(),
+        ]);
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'type' => 'required|string',
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'priority' => 'nullable|in:low,normal,high,urgent',
+            'sticky' => 'nullable|boolean',
+            'data' => 'nullable|array',
+        ]);
+
+        try {
+            \Log::info('Creating notification', ['validated' => $validated]);
+
+            // Create notification directly without service
+            $notification = \App\Models\Notification::create([
+                'user_id' => $validated['user_id'],
+                'type' => $validated['type'],
+                'title' => $validated['title'],
+                'message' => $validated['message'],
+                'data' => $validated['data'] ?? [],
+                'priority' => $validated['priority'] ?? 'normal',
+                'sticky' => $validated['sticky'] ?? false,
+                'pinned' => $validated['sticky'] ?? false,
+            ]);
+
+            \Log::info('Notification created successfully', ['notification_id' => $notification->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification created successfully',
+                'data' => $notification,
+            ], 201);
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Database error creating notification: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error: ' . $e->getMessage(),
+            ], 500);
+        } catch (\Exception $e) {
+            \Log::error('Notification creation error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create notification: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

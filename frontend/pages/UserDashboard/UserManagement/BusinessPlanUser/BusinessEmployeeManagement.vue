@@ -317,6 +317,23 @@
                     class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                   >
                     <div class="flex items-center justify-end space-x-2">
+                      <!-- Toggle Status Button -->
+                      <button
+                        @click="toggleEmployeeStatus(employee)"
+                        :class="[
+                          'px-2 py-1 rounded text-xs font-medium',
+                          employee.subscription_active
+                            ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
+                            : 'bg-success-100 text-success-700 hover:bg-success-200',
+                        ]"
+                        :title="
+                          employee.subscription_active
+                            ? 'Deactivate employee'
+                            : 'Activate employee'
+                        "
+                      >
+                        {{ employee.subscription_active ? 'Deactivate' : 'Activate' }}
+                      </button>
                       <!-- View Details Button -->
                       <button
                         @click="viewEmployeeDetails(employee)"
@@ -737,6 +754,45 @@ const navigateToCardDesign = () => {
 const viewEmployeeCard = (employee) => {
   // Navigate to employee's NFC card management page
   navigateTo(`/UserDashboard/employees/${employee.id}/card`);
+};
+
+// Toggle employee account status (activate/deactivate)
+const toggleEmployeeStatus = async (employee) => {
+  const newStatus = !employee.subscription_active;
+  const action = newStatus ? 'activate' : 'deactivate';
+
+  if (
+    confirm(
+      `Are you sure you want to ${action} ${employee.name}'s account?${
+        !newStatus
+          ? '\n\nDeactivated employees cannot log in or use the system.'
+          : ''
+      }`
+    )
+  ) {
+    try {
+      const response = await $api.post(
+        `/business/employees/${employee.id}/toggle-status`,
+        { subscription_active: newStatus }
+      );
+
+      if (response.success) {
+        employee.subscription_active = newStatus;
+        $toast.success(
+          `${employee.name}'s account has been ${
+            newStatus ? 'activated' : 'deactivated'
+          }.`
+        );
+      }
+    } catch (error) {
+      console.error('Failed to toggle employee status:', error);
+      if (error.data?.message) {
+        $toast.error(error.data.message);
+      } else {
+        $toast.error('Failed to update employee status');
+      }
+    }
+  }
 };
 
 const getInitials = (name) => {

@@ -1573,7 +1573,7 @@ const placeOrder = async () => {
   showConfirmModal.value = true;
 };
 
-// Confirm and submit order
+// Confirm and submit order - send notification to super admin instead of direct save
 const confirmOrder = async () => {
   isPlacingOrder.value = true;
 
@@ -1627,9 +1627,15 @@ const confirmOrder = async () => {
       return;
     }
 
-    // Place the order
+    // Get current user for tracking who placed the order
+    const authStore = useAuthStore();
+    const currentUserId = authStore.user?.id;
+
+    // Prepare order data
     const orderData = {
+      requesting_user_id: currentUserId, // Track who placed the order
       subscription_plan: "business",
+      purchase_amount: 99.99, // Business plan price
       name: cardInfo.name,
       position: cardInfo.position,
       contact_number: cardInfo.contactNumber,
@@ -1650,24 +1656,50 @@ const confirmOrder = async () => {
       back_design: cardDesign.back,
     };
 
-    const response = await $api.post("/nfc-cards", orderData);
+    // Get super admin user - query by admin_role = 'super_admin'
+    let superAdminId = 1; // Default fallback
+    try {
+      // Try to fetch super admin from backend
+      const adminResponse = await $api.get("/admin/super-admin");
+      if (adminResponse.success && adminResponse.data?.id) {
+        superAdminId = adminResponse.data.id;
+        console.log("Found super admin:", superAdminId);
+      }
+    } catch (error) {
+      console.warn("Could not fetch super admin, using default ID 1", error);
+      superAdminId = 1;
+    }
 
-    if (response.success) {
+    // Send notification to super admin instead of direct save
+    const notificationResponse = await $api.post("/notifications", {
+      user_id: superAdminId,
+      type: "business_card_order_request",
+      title: `New NFC Card Order from ${cardInfo.name}`,
+      message: `${cardInfo.name} has requested a new NFC card. Please review and approve or reject the order.`,
+      priority: "urgent",
+      sticky: true,
+      data: orderData
+    });
+
+    if (notificationResponse.success) {
       showConfirmModal.value = false;
       $toast.success(
-        "NFC Card order placed successfully! Super Admin has been notified and will process your order."
+        "✅ Order submitted successfully! Your request has been sent to the Super Admin for approval. You will receive a notification once they review your order."
       );
 
-      // Redirect to card management page
-      await router.push(
-        "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
-      );
+      // Redirect to card management page after a short delay
+      setTimeout(() => {
+        router.push(
+          "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
+        );
+      }, 2000);
     } else {
-      throw new Error(response.message || "Failed to place order");
+      throw new Error(notificationResponse.message || "Failed to send order request");
     }
   } catch (error) {
     console.error("Place order error:", error);
-    $toast.error(error.message || "Failed to place order. Please try again.");
+    const errorMessage = error.response?.data?.message || error.message || "Failed to place order. Please try again.";
+    $toast.error(errorMessage);
   } finally {
     isPlacingOrder.value = false;
   }

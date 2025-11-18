@@ -22,9 +22,11 @@ class NfcCardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        \Log::info('NFC Cards index called', ['user_id' => $user?->id, 'user_email' => $user?->email]);
 
         // Check if user has premium subscription
         if (!$user->hasPremiumSubscription()) {
+            \Log::warning('User does not have premium subscription', ['user_id' => $user?->id]);
             return response()->json([
                 'success' => false,
                 'message' => 'This feature requires a Premium subscription',
@@ -33,6 +35,7 @@ class NfcCardController extends Controller
         }
 
         $nfcCards = $user->nfcCards()->with('nfcTag')->orderBy('created_at', 'desc')->get();
+        \Log::info('NFC cards retrieved', ['user_id' => $user->id, 'count' => $nfcCards->count()]);
 
         return response()->json([
             'success' => true,
