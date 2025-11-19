@@ -131,6 +131,18 @@ class NotificationService
             'icon' => '📢',
             'priority' => 'normal',
         ],
+        'account_created' => [
+            'title' => 'Welcome to {company}!',
+            'message' => 'Your employee account has been created. Login email: {email}, Temporary password: {temporary_password}. Please change your password after first login.',
+            'icon' => '👤',
+            'priority' => 'high',
+        ],
+        'order_rejected' => [
+            'title' => 'Order Rejected',
+            'message' => 'Your order has been rejected. Reason: {rejection_reason}',
+            'icon' => '❌',
+            'priority' => 'urgent',
+        ],
     ];
 
     /**
@@ -197,6 +209,17 @@ class NotificationService
     private function replacePlaceholders(string $text, array $data)
     {
         foreach ($data as $key => $value) {
+            // Convert non-string values to string
+            if (is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            } elseif (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            } elseif (is_null($value)) {
+                $value = '';
+            } else {
+                $value = (string) $value;
+            }
+            
             $text = str_replace('{' . $key . '}', $value, $text);
         }
 

@@ -126,55 +126,21 @@
             </div>
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Basic</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">$9</span>
-              <span class="text-secondary-600">/month</span>
+              <span class="text-3xl font-bold text-secondary-900">
+                {{ loading ? '...' : getFormattedPrice('basic') }}
+              </span>
             </div>
             <p class="text-sm text-secondary-600 mb-6">
               Great for small businesses
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li class="flex items-center text-sm">
+              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-center text-sm">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
-                <span>Everything in Free</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Physical NFC card (Basic)</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Advanced analytics</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Unlimited social links</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Custom branding</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Priority support</span>
+                <span>{{ feature }}</span>
               </li>
             </ul>
 
@@ -199,55 +165,21 @@
             </div>
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Premium</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">$19</span>
-              <span class="text-secondary-600">/month</span>
+              <span class="text-3xl font-bold text-secondary-900">
+                {{ loading ? '...' : getFormattedPrice('premium') }}
+              </span>
             </div>
             <p class="text-sm text-secondary-600 mb-6">
               For growing businesses
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li class="flex items-center text-sm">
+              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-center text-sm">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
-                <span>Everything in Basic</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Physical NFC card (Premium)</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Advanced card customization</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Detailed analytics</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Team management</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>API access</span>
+                <span>{{ feature }}</span>
               </li>
             </ul>
 
@@ -275,55 +207,21 @@
             </div>
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Business</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">$49</span>
-              <span class="text-secondary-600">/month</span>
+              <span class="text-3xl font-bold text-secondary-900">
+                {{ loading ? '...' : getFormattedPrice('business') }}
+              </span>
             </div>
             <p class="text-sm text-secondary-600 mb-6">
               For large organizations
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li class="flex items-center text-sm">
+              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-center text-sm">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
-                <span>Everything in Premium</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Multiple NFC cards</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>White-label solution</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Advanced integrations</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Dedicated support</span>
-              </li>
-              <li class="flex items-center text-sm">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Custom development</span>
+                <span>{{ feature }}</span>
               </li>
             </ul>
 
@@ -545,6 +443,14 @@ useHead({
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
+// Plan prices from API
+const { loading, getFormattedPrice, getPlanDetails, loadPrices } = usePlanPrices();
+
+// Get plan details
+const basicPlan = computed(() => getPlanDetails('basic'));
+const premiumPlan = computed(() => getPlanDetails('premium'));
+const businessPlan = computed(() => getPlanDetails('business'));
+
 // Route and router
 const router = useRouter();
 
@@ -593,6 +499,9 @@ onMounted(async () => {
   }
 
   console.log("User authenticated:", authStore.user.email);
+
+  // Load plan prices from API
+  await loadPrices();
 
   // Pre-fill user info
   businessForm.email = authStore.user?.email || "";

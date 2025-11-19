@@ -34,8 +34,24 @@ class NfcCardController extends Controller
             ], 403);
         }
 
-        $nfcCards = $user->nfcCards()->with('nfcTag')->orderBy('created_at', 'desc')->get();
-        \Log::info('NFC cards retrieved', ['user_id' => $user->id, 'count' => $nfcCards->count()]);
+        // If user is Business Admin, get all cards under the business account
+        if ($user->isBusinessAccount()) {
+            // Get cards for business admin and all employees
+            $nfcCards = NfcCard::where('business_account_id', $user->id)
+                ->with(['nfcTag', 'user:id,first_name,last_name,email,job_title'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            \Log::info('Business Admin NFC cards retrieved', [
+                'user_id' => $user->id,
+                'count' => $nfcCards->count(),
+                'business_account_id' => $user->id
+            ]);
+        } else {
+            // Regular user or employee - only get their own cards
+            $nfcCards = $user->nfcCards()->with('nfcTag')->orderBy('created_at', 'desc')->get();
+            \Log::info('NFC cards retrieved', ['user_id' => $user->id, 'count' => $nfcCards->count()]);
+        }
 
         return response()->json([
             'success' => true,
@@ -45,13 +61,21 @@ class NfcCardController extends Controller
 
     public function show(Request $request, NfcCard $nfcCard)
     {
-        // Check ownership
-        if ($nfcCard->user_id !== $request->user()->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        $user = $request->user();
+        
+        // Check ownership: card owner OR Business Admin
+        $isOwner = $nfcCard->user_id === $user->id;
+        $isBusinessAdmin = $user->isBusinessAccount() && $nfcCard->business_account_id === $user->id;
+        
+        if (!$isOwner && !$isBusinessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to view this card'
+            ], 403);
         }
 
         // Check if user has premium subscription
-        if (!$request->user()->hasPremiumSubscription()) {
+        if (!$user->hasPremiumSubscription()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This feature requires a Premium subscription',
@@ -59,7 +83,7 @@ class NfcCardController extends Controller
             ], 403);
         }
 
-        $nfcCard->load('nfcTag', 'analytics');
+        $nfcCard->load('nfcTag', 'analytics', 'user:id,first_name,last_name,email,job_title');
 
         return response()->json([
             'success' => true,

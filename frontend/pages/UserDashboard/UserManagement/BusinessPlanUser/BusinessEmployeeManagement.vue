@@ -751,9 +751,15 @@ const navigateToCardDesign = () => {
   navigateTo("/UserDashboard/NFCCardDesign/BusinessPlanNFCCard");
 };
 
-const viewEmployeeCard = (employee) => {
-  // Navigate to employee's NFC card management page
-  navigateTo(`/UserDashboard/employees/${employee.id}/card`);
+const viewEmployeeCard = async (employee) => {
+  // Navigate to Business Card Management page with employee filter
+  await navigateTo({
+    path: '/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement',
+    query: {
+      employee_id: employee.id,
+      employee_name: employee.name
+    }
+  });
 };
 
 // Toggle employee account status (activate/deactivate)

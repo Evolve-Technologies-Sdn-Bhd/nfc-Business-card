@@ -583,14 +583,12 @@ const billingAddress = reactive({
   zipCode: "",
 });
 
+// Plan prices from API
+const { getPlanPrice, getPlanDetails, loadPrices } = usePlanPrices();
+
 // Order summary
 const orderSummary = computed(() => {
   const selectedPlan = sessionStorage.getItem("selectedPlan");
-  const planPrices = {
-    basic: 9,
-    premium: 19,
-    business: 49,
-  };
   const planNames = {
     basic: "Basic Plan",
     premium: "Premium Plan",
@@ -607,7 +605,7 @@ const orderSummary = computed(() => {
     business: "Business NFC Card",
   };
 
-  const planPrice = planPrices[selectedPlan] || 0;
+  const planPrice = getPlanPrice(selectedPlan) || 0;
   const cardPrice = 15; // Fixed card price
   const shippingCost = 5; // Fixed shipping cost
   const total = planPrice + cardPrice + shippingCost;
@@ -742,14 +740,18 @@ const handleProofUploaded = (data) => {
 };
 
 // Check if user is authenticated
-onMounted(() => {
+onMounted(async () => {
   console.log('Payment page mounted - authStore:', authStore.isAuthenticated);
   console.log('Selected payment rail:', selectedPaymentRail.value);
   console.log('Order summary total:', orderSummary.value.total);
   
   if (!authStore.isAuthenticated) {
     router.push("/UserAccount/login");
+    return;
   }
+
+  // Load plan prices from API
+  await loadPrices();
 
   // Load user data for billing address
   if (authStore.user) {

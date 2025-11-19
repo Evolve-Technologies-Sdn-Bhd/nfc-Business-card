@@ -42,13 +42,15 @@ class BusinessUserController extends Controller
         }
 
         $users = $query->with(['employees'])
-            ->withCount(['employees', 'nfcCards as cards_count'])
+            ->withCount(['employees'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        // Add quota info to each user
+        // Add quota info and cards count to each user
         $users->getCollection()->transform(function ($user) {
             $user->quota_info = $user->getQuotaInfo();
+            // Count all cards for this business (admin + employees)
+            $user->cards_count = NfcCard::where('business_account_id', $user->id)->count();
             return $user;
         });
 
@@ -97,11 +99,21 @@ class BusinessUserController extends Controller
     {
         $user = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
-            ->with(['employees', 'nfcCards'])
-            ->withCount(['employees', 'nfcCards as cards_count'])
+            ->with(['employees'])
+            ->withCount(['employees'])
             ->findOrFail($id);
 
+        // Get all NFC cards for this business (admin + employees)
+        $user->nfc_cards = NfcCard::where('business_account_id', $user->id)->get();
+        $user->cards_count = $user->nfc_cards->count();
         $user->quota_info = $user->getQuotaInfo();
+
+        // Add cards info to each employee
+        foreach ($user->employees as $employee) {
+            $employeeCards = NfcCard::where('user_id', $employee->id)->get();
+            $employee->nfc_cards = $employeeCards;
+            $employee->cards_count = $employeeCards->count();
+        }
 
         return response()->json([
             'success' => true,

@@ -877,24 +877,41 @@
               <div
                 v-for="employee in selectedUser.employees"
                 :key="employee.id"
-                class="bg-white rounded-lg p-3 flex items-center justify-between"
+                class="bg-white rounded-lg p-3"
               >
-                <div>
-                  <p class="text-sm font-medium text-secondary-900">
-                    {{ employee.first_name }} {{ employee.last_name }}
-                  </p>
-                  <p class="text-xs text-secondary-500">{{ employee.email }}</p>
+                <div class="flex items-center justify-between mb-2">
+                  <div>
+                    <p class="text-sm font-medium text-secondary-900">
+                      {{ employee.first_name }} {{ employee.last_name }}
+                    </p>
+                    <p class="text-xs text-secondary-500">{{ employee.email }}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                      {{ employee.cards_count || 0 }} card{{ (employee.cards_count || 0) !== 1 ? 's' : '' }}
+                    </span>
+                    <span
+                      :class="[
+                        'px-2 py-1 text-xs font-medium rounded-full',
+                        employee.subscription_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800',
+                      ]"
+                    >
+                      {{ employee.subscription_active ? "Active" : "Inactive" }}
+                    </span>
+                  </div>
                 </div>
-                <span
-                  :class="[
-                    'px-2 py-1 text-xs font-medium rounded-full',
-                    employee.subscription_active
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800',
-                  ]"
-                >
-                  {{ employee.subscription_active ? "Active" : "Inactive" }}
-                </span>
+                
+                <!-- Show NFC cards if any -->
+                <div v-if="employee.nfc_cards && employee.nfc_cards.length > 0" class="mt-2 pl-4 border-l-2 border-blue-200">
+                  <p class="text-xs text-secondary-600 font-medium mb-1">NFC Cards:</p>
+                  <div class="space-y-1">
+                    <div v-for="card in employee.nfc_cards" :key="card.id" class="text-xs text-secondary-500">
+                      • {{ card.nfc_card_id }} - {{ card.card_owner }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -898,54 +898,19 @@
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Basic</h3>
             <div class="mb-6">
               <div class="text-2xl font-bold text-secondary-900 mb-2">
-                Contact for Pricing
+                {{ loadingPrices ? 'Loading...' : (basicPlan?.currency + ' ' + basicPlan?.price) || 'Contact for Pricing' }}
               </div>
               <p class="text-sm text-secondary-500">
-                For individual professionals
+                {{ basicPlan?.description || 'For individual professionals' }}
               </p>
             </div>
             <ul class="space-y-2 mb-6 text-left text-sm">
-              <li class="flex items-start">
+              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-start">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
                 />
-                <span class="text-secondary-600">3 Digital Profiles</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Premium Templates</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Custom Branding</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Contact Forms</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Advanced Analytics</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Email Support</span>
+                <span class="text-secondary-600">{{ feature }}</span>
               </li>
             </ul>
             <div class="mt-auto">
@@ -964,52 +929,17 @@
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Premium</h3>
             <div class="mb-6">
               <div class="text-2xl font-bold text-secondary-900 mb-2">
-                Contact for Pricing
+                {{ loadingPrices ? 'Loading...' : (premiumPlan?.currency + ' ' + premiumPlan?.price) || 'Contact for Pricing' }}
               </div>
-              <p class="text-sm text-secondary-500">For growing businesses</p>
+              <p class="text-sm text-secondary-500">{{ premiumPlan?.description || 'For growing businesses' }}</p>
             </div>
             <ul class="space-y-2 mb-6 text-left text-sm">
-              <li class="flex items-start">
+              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-start">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
                 />
-                <span class="text-secondary-600">10 Digital Profiles</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">All Premium Features</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Team Management</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Lead Capture Forms</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">CRM Integration</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Priority Support</span>
+                <span class="text-secondary-600">{{ feature }}</span>
               </li>
             </ul>
             <div class="mt-auto">
@@ -1028,52 +958,17 @@
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Business</h3>
             <div class="mb-6">
               <div class="text-2xl font-bold text-secondary-900 mb-2">
-                Contact for Pricing
+                {{ loadingPrices ? 'Loading...' : (businessPlan?.currency + ' ' + businessPlan?.price) || 'Contact for Pricing' }}
               </div>
-              <p class="text-sm text-secondary-500">For large organizations</p>
+              <p class="text-sm text-secondary-500">{{ businessPlan?.description || 'For large organizations' }}</p>
             </div>
             <ul class="space-y-2 mb-6 text-left text-sm">
-              <li class="flex items-start">
+              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-start">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
                 />
-                <span class="text-secondary-600">Unlimited Profiles</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Business Features</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">White Label Solution</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">API Access</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Custom Integrations</span>
-              </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">24/7 Priority Support</span>
+                <span class="text-secondary-600">{{ feature }}</span>
               </li>
             </ul>
             <div class="mt-auto">
@@ -1816,6 +1711,14 @@ const { $api, $toast } = useNuxtApp();
 const mobileMenuOpen = ref(false);
 const showDemo = ref(false);
 
+// Plan prices from API
+const { planPrices, loading: loadingPrices, loadPrices } = usePlanPrices();
+
+// Get plan details
+const basicPlan = computed(() => planPrices.value.find(p => p.plan_type === 'basic'));
+const premiumPlan = computed(() => planPrices.value.find(p => p.plan_type === 'premium'));
+const businessPlan = computed(() => planPrices.value.find(p => p.plan_type === 'business'));
+
 // AI Chatbot
 const showChatbot = ref(false);
 const chatInput = ref('');
@@ -2127,7 +2030,7 @@ const sendQuickMessage = (message) => {
   sendMessage();
 };
 
-// Load popular questions for quick buttons
+// Load popular questions
 const loadPopularQuestions = async () => {
   loadingQuestions.value = true;
   try {
@@ -2244,6 +2147,10 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  
+  // Load prices and questions
+  loadPrices();
+  loadPopularQuestions();
 
   const authStore = useAuthStore();
   if (authStore.isAuthenticated) {
