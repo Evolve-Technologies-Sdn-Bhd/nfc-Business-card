@@ -258,16 +258,19 @@
                       <div class="text-sm font-medium text-gray-900">
                         {{
                           notification.type === "business_card_order_request"
-                            ? notification.data?.name || "N/A"
+                            ? notification.data?.requesting_user_name || notification.data?.name || "N/A"
                             : notification.user?.full_name || "N/A"
                         }}
                       </div>
                       <div class="text-sm text-gray-500">
                         {{
                           notification.type === "business_card_order_request"
-                            ? notification.data?.email || "N/A"
+                            ? notification.data?.requesting_user_email || notification.data?.email || "N/A"
                             : notification.user?.email || "N/A"
                         }}
+                      </div>
+                      <div v-if="notification.type === 'business_card_order_request' && notification.data?.total_cards" class="text-xs text-blue-600 mt-1">
+                        {{ notification.data.total_cards }} card{{ notification.data.total_cards > 1 ? 's' : '' }} in batch
                       </div>
                     </div>
                   </div>
@@ -370,6 +373,13 @@
                         Rejected
                       </span>
                     </template>
+                    <button
+                      @click="viewDetails(notification)"
+                      class="text-purple-600 hover:text-purple-900"
+                      title="View details"
+                    >
+                      <Icon name="heroicons:eye" class="w-5 h-5" />
+                    </button>
                     <button
                       @click="viewUserHistory(notification.user)"
                       class="text-blue-600 hover:text-blue-900"
@@ -718,6 +728,211 @@
       </div>
     </Teleport>
 
+    <!-- Notification Details Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDetailsModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="showDetailsModal = false"
+      >
+        <div
+          class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
+        >
+          <div
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          ></div>
+
+          <div
+            class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full"
+          >
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">
+                  Notification Details
+                </h3>
+                <button
+                  @click="showDetailsModal = false"
+                  class="text-gray-400 hover:text-gray-500"
+                >
+                  <Icon name="heroicons:x-mark" class="w-6 h-6" />
+                </button>
+              </div>
+
+              <div v-if="selectedNotificationDetail" class="space-y-4">
+                <!-- Basic Info -->
+                <div class="border-b pb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Basic Information</h4>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-xs text-gray-500">Type</label>
+                      <p class="text-sm font-medium">{{ formatType(selectedNotificationDetail.type) }}</p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Priority</label>
+                      <p class="text-sm">
+                        <span
+                          :class="['px-2 py-1 text-xs font-medium rounded-full', getPriorityClass(selectedNotificationDetail.priority)]"
+                        >
+                          {{ selectedNotificationDetail.priority }}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Status</label>
+                      <p class="text-sm">
+                        <span
+                          v-if="selectedNotificationDetail.is_read"
+                          class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800"
+                        >
+                          Read
+                        </span>
+                        <span
+                          v-else
+                          class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
+                        >
+                          Unread
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Date</label>
+                      <p class="text-sm">{{ formatDate(selectedNotificationDetail.created_at) }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Message -->
+                <div class="border-b pb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-2">Message</h4>
+                  <p class="text-lg font-medium text-gray-900 mb-2">{{ selectedNotificationDetail.title }}</p>
+                  <p class="text-sm text-gray-600">{{ selectedNotificationDetail.message }}</p>
+                </div>
+
+                <!-- Business Card Order Details -->
+                <div v-if="selectedNotificationDetail.type === 'business_card_order_request'" class="border-b pb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Order Details</h4>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-xs text-gray-500">Requesting User</label>
+                      <p class="text-sm font-medium">{{ selectedNotificationDetail.data?.requesting_user_name || 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Email</label>
+                      <p class="text-sm">{{ selectedNotificationDetail.data?.requesting_user_email || 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Total Cards</label>
+                      <p class="text-sm font-medium text-blue-600">{{ selectedNotificationDetail.data?.total_cards || 0 }}</p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Plan</label>
+                      <p class="text-sm">{{ selectedNotificationDetail.data?.subscription_plan || 'N/A' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cards List (Batch Order) -->
+                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && selectedNotificationDetail.data?.cards" class="border-b pb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Cards in this Order</h4>
+                  <div class="space-y-3 max-h-64 overflow-y-auto">
+                    <div
+                      v-for="(card, index) in selectedNotificationDetail.data.cards"
+                      :key="index"
+                      class="bg-gray-50 p-3 rounded-lg"
+                    >
+                      <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center">
+                          <span class="text-xs font-medium text-gray-500 mr-2">#{{ index + 1 }}</span>
+                          <h5 class="text-sm font-semibold text-gray-900">{{ card.name }}</h5>
+                        </div>
+                        <span
+                          v-if="card.is_admin_card"
+                          class="px-2 py-0.5 text-xs font-medium rounded bg-purple-100 text-purple-700"
+                        >
+                          Admin
+                        </span>
+                        <span
+                          v-else
+                          class="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-700"
+                        >
+                          Employee
+                        </span>
+                      </div>
+                      <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span class="text-gray-500">Email:</span>
+                          <span class="text-gray-700 ml-1">{{ card.email }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-500">Position:</span>
+                          <span class="text-gray-700 ml-1">{{ card.position }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-500">Contact:</span>
+                          <span class="text-gray-700 ml-1">{{ card.contact_number }}</span>
+                        </div>
+                        <div v-if="card.website">
+                          <span class="text-gray-500">Website:</span>
+                          <span class="text-gray-700 ml-1">{{ card.website }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Delivery Address (Only for business_card_order_request) -->
+                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && selectedNotificationDetail.data?.delivery_address" class="border-b pb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <Icon name="heroicons:map-pin" class="w-4 h-4 mr-2 text-blue-600" />
+                    Delivery Address
+                  </h4>
+                  <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-800">{{ selectedNotificationDetail.data.delivery_address }}</p>
+                  </div>
+                </div>
+
+                <!-- Approval Status -->
+                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && (selectedNotificationDetail.is_approved || selectedNotificationDetail.is_rejected)">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-2">Status</h4>
+                  <div v-if="selectedNotificationDetail.is_approved" class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex items-center">
+                      <Icon name="heroicons:check-circle" class="w-5 h-5 text-green-600 mr-2" />
+                      <div>
+                        <p class="text-sm font-medium text-green-800">Approved</p>
+                        <p class="text-xs text-green-600">{{ formatDate(selectedNotificationDetail.approved_at) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="selectedNotificationDetail.is_rejected" class="bg-red-50 p-4 rounded-lg">
+                    <div class="flex items-start">
+                      <Icon name="heroicons:x-circle" class="w-5 h-5 text-red-600 mr-2 mt-0.5" />
+                      <div class="flex-1">
+                        <p class="text-sm font-medium text-red-800 mb-1">Rejected</p>
+                        <p class="text-xs text-red-600 mb-2">{{ formatDate(selectedNotificationDetail.rejected_at) }}</p>
+                        <p class="text-sm text-gray-700"><strong>Reason:</strong> {{ selectedNotificationDetail.rejection_reason }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+            >
+              <button
+                @click="showDetailsModal = false"
+                type="button"
+                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:w-auto sm:text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Notification History Modal -->
     <Teleport to="body">
       <div
@@ -879,7 +1094,9 @@ const showSendModal = ref(false);
 const showCleanupModal = ref(false);
 const showHistoryModal = ref(false);
 const showRejectModal = ref(false);
+const showDetailsModal = ref(false);
 const selectedUser = ref(null);
+const selectedNotificationDetail = ref(null);
 const cleanupDays = ref(30);
 const approvingId = ref(null);
 const rejectingId = ref(null);
@@ -1078,6 +1295,12 @@ const formatDate = (date) => {
 const truncateText = (text, length) => {
   if (text.length <= length) return text;
   return text.substring(0, length) + "...";
+};
+
+// View notification details
+const viewDetails = (notification) => {
+  selectedNotificationDetail.value = notification;
+  showDetailsModal.value = true;
 };
 
 // View user notification history
