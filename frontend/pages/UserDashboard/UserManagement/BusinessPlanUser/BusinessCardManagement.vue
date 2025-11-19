@@ -1021,19 +1021,45 @@ const orderForm = ref({
 // Computed properties
 const myCards = computed(() => {
   const currentUserId = authStore.user?.id;
-  const filtered = filteredCards.value.filter((card) => card.user_id === currentUserId);
+
+  const filtered = filteredCards.value.filter((card) => {
+    // Prefer explicit business flags if present
+    if (
+      typeof card.is_admin_card !== "undefined" ||
+      typeof card.is_employee_card !== "undefined"
+    ) {
+      return !!card.is_admin_card;
+    }
+
+    // Fallback: use ownership by user_id
+    return card.user_id === currentUserId;
+  });
+
   console.log("myCards computed:", {
     currentUserId,
     totalCards: filteredCards.value.length,
     myCardsCount: filtered.length,
-    cards: filtered
+    cards: filtered,
   });
+
   return filtered;
 });
 
 const employeeCards = computed(() => {
   const currentUserId = authStore.user?.id;
-  return filteredCards.value.filter((card) => card.user_id !== currentUserId);
+
+  return filteredCards.value.filter((card) => {
+    // Prefer explicit business flags if present
+    if (
+      typeof card.is_admin_card !== "undefined" ||
+      typeof card.is_employee_card !== "undefined"
+    ) {
+      return !!card.is_employee_card && !card.is_admin_card;
+    }
+
+    // Fallback: any card not owned by current user is treated as employee card
+    return card.user_id !== currentUserId;
+  });
 });
 
 const filteredCards = computed(() => {

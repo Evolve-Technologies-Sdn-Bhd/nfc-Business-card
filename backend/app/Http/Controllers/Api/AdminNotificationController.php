@@ -268,7 +268,7 @@ class AdminNotificationController extends Controller
         }
         \Log::info('User found', ['user_id' => $user->id, 'name' => $user->full_name]);
 
-        // Create NFC card from order data
+        // Create NFC cards from batch order data
         \Log::info('Order data', ['order_data' => $orderData]);
         $businessAccountId = null;
         
@@ -293,42 +293,64 @@ class AdminNotificationController extends Controller
         }
 
         try {
-            // Generate unique NFC card ID
-            $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
-            \Log::info('NFC card ID generated', ['nfc_card_id' => $nfcCardId]);
+            // Get cards array (batch order) or create single card array (backward compatibility)
+            $cards = $orderData['cards'] ?? [
+                [
+                    'name' => $orderData['name'] ?? $user->full_name,
+                    'email' => $orderData['email'] ?? $user->email,
+                    'position' => $orderData['position'] ?? '',
+                    'contact_number' => $orderData['contact_number'] ?? '',
+                    'website' => $orderData['website'] ?? '',
+                    'business_address' => $orderData['business_address'] ?? '',
+                    'is_admin_card' => $orderData['is_admin_card'] ?? false,
+                    'is_employee_card' => $orderData['is_employee_card'] ?? false,
+                ]
+            ];
 
-            // Create the NFC card
-            \Log::info('Creating NFC card with data', [
-                'user_id' => $user->id,
-                'business_account_id' => $businessAccountId,
-                'nfc_card_id' => $nfcCardId,
-                'card_owner' => $orderData['name'] ?? $user->full_name,
-                'subscription_plan' => $subscriptionPlan,
-            ]);
-            
-            $nfcCard = NfcCard::create([
-                'user_id' => $user->id,
-                'business_account_id' => $businessAccountId,
-                'nfc_card_id' => $nfcCardId,
-                'card_owner' => $orderData['name'] ?? $user->full_name,
-                'billing_address' => $orderData['business_address'] ?? $orderData['email'] ?? '',
-                'contact_number' => $orderData['contact_number'] ?? '',
-                'purchase_date' => now(),
-                'subscription_plan' => $subscriptionPlan,
-                'purchase_amount' => $orderData['purchase_amount'] ?? 0,
-                'payment_method' => 'Admin Approved',
-                'shipping_address' => $orderData['delivery_address'] ?? '',
-                'notes' => 'Auto-created from order approval: ' . $notification->id,
-            ]);
-            
-            \Log::info('NFC card created successfully', ['nfc_card_id' => $nfcCard->id, 'nfc_card_number' => $nfcCardId]);
+            $createdCards = [];
+            $deliveryAddress = $orderData['delivery_address'] ?? '';
+
+            \Log::info('Creating batch order', ['total_cards' => count($cards), 'delivery_address' => $deliveryAddress]);
+
+            // Create each card in the batch
+            foreach ($cards as $index => $cardData) {
+                // Generate unique NFC card ID
+                $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
+                \Log::info("Creating card #{$index}", ['nfc_card_id' => $nfcCardId, 'card_owner' => $cardData['name']]);
+
+                $nfcCard = NfcCard::create([
+                    'user_id' => $user->id,
+                    'business_account_id' => $businessAccountId,
+                    'nfc_card_id' => $nfcCardId,
+                    'card_owner' => $cardData['name'],
+                    'billing_address' => $cardData['business_address'] ?? $cardData['email'] ?? '',
+                    'contact_number' => $cardData['contact_number'] ?? '',
+                    'purchase_date' => now(),
+                    'subscription_plan' => $subscriptionPlan,
+                    'purchase_amount' => $orderData['purchase_amount'] ?? 0,
+                    'payment_method' => 'Admin Approved',
+                    'shipping_address' => $deliveryAddress,
+                    'notes' => 'Batch order approval: ' . $notification->id . ' - Card ' . ($index + 1) . ' of ' . count($cards),
+                ]);
+
+                $createdCards[] = [
+                    'id' => $nfcCard->id,
+                    'nfc_card_id' => $nfcCardId,
+                    'card_owner' => $cardData['name'],
+                    'is_admin_card' => $cardData['is_admin_card'] ?? false,
+                ];
+
+                \Log::info("Card #{$index} created successfully", ['nfc_card_id' => $nfcCard->id]);
+            }
+
+            \Log::info('All cards created successfully', ['total_created' => count($createdCards)]);
 
             // Send confirmation notification to user
             $this->notificationService->create(
                 $user,
                 'nfc_card_purchased',
                 [
-                    'card_id' => $nfcCardId,
+                    'card_count' => count($createdCards),
                     'order_number' => $notification->id,
                     'amount' => '$' . number_format($orderData['purchase_amount'] ?? 0, 2),
                     'plan' => ucfirst($subscriptionPlan),
@@ -337,11 +359,11 @@ class AdminNotificationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order approved successfully and NFC card created',
+                'message' => 'Batch order approved successfully! ' . count($createdCards) . ' card(s) created.',
                 'data' => [
                     'notification_id' => $notification->id,
-                    'nfc_card_id' => $nfcCard->id,
-                    'nfc_card_number' => $nfcCardId,
+                    'total_cards_created' => count($createdCards),
+                    'cards' => $createdCards,
                     'is_approved' => $notification->is_approved,
                     'approved_at' => $notification->approved_at,
                 ],
