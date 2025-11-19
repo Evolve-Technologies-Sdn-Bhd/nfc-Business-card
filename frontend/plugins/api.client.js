@@ -7,7 +7,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   // Create axios instance
   const api = axios.create({
     baseURL: config.public.apiBaseUrl || "http://localhost:8000/api",
-    timeout: 15000, // Reduced from 30s to 15s for faster timeout detection
+    timeout: 60000, // Increased to 60s for large order submissions
     headers: {
       Accept: "application/json",
       "X-Requested-With": "XMLHttpRequest",

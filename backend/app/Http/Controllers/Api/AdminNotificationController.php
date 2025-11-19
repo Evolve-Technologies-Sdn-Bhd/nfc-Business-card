@@ -9,6 +9,8 @@ use App\Models\Notification;
 use App\Models\NfcCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AdminNotificationController extends Controller
 {
@@ -307,19 +309,157 @@ class AdminNotificationController extends Controller
                 ]
             ];
 
+            // Get business account for employee creation
+            $businessAccount = $businessAccountId ? User::find($businessAccountId) : $user;
+
+            // PRE-VALIDATION: Check if any employee emails already exist
+            $existingEmployees = [];
+            foreach ($cards as $cardData) {
+                if (($cardData['is_employee_card'] ?? false) && !empty($cardData['email'])) {
+                    $existingUser = User::where('email', $cardData['email'])->first();
+                    if ($existingUser) {
+                        $existingEmployees[] = [
+                            'name' => $cardData['name'],
+                            'email' => $cardData['email'],
+                            'existing_user_id' => $existingUser->id,
+                        ];
+                    }
+                }
+            }
+
+            // If any employee accounts already exist, auto-reject the order
+            if (count($existingEmployees) > 0) {
+                \Log::warning('Order contains existing employee emails - auto-rejecting', ['existing_employees' => $existingEmployees]);
+                
+                // Build detailed rejection reason
+                $rejectionReason = "Order automatically rejected: " . count($existingEmployees) . " employee email(s) already exist in the system.\n\n";
+                $rejectionReason .= "Existing employees:\n";
+                foreach ($existingEmployees as $emp) {
+                    $rejectionReason .= "• {$emp['name']} ({$emp['email']})\n";
+                }
+                $rejectionReason .= "\n⚠️ Solution: Please remove these employees from your order or use different email addresses.\n";
+                $rejectionReason .= "Note: Each employee can only have one account in the system.";
+                
+                // Auto-reject the notification
+                $notification->reject($rejectionReason, auth()->id());
+                
+                // Send rejection notification to the user
+                $this->notificationService->create(
+                    $user,
+                    'order_rejected',
+                    [
+                        'order_number' => $notification->id,
+                        'rejection_reason' => $rejectionReason,
+                        'existing_employees_count' => count($existingEmployees),
+                        'existing_employees' => $existingEmployees,
+                    ]
+                );
+                
+                \Log::info('Order auto-rejected and notification sent', [
+                    'notification_id' => $notification->id,
+                    'user_id' => $user->id,
+                    'existing_employees_count' => count($existingEmployees)
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order automatically rejected due to duplicate employee emails',
+                    'rejection_reason' => $rejectionReason,
+                    'existing_employees' => $existingEmployees,
+                    'notification_id' => $notification->id,
+                    'is_rejected' => true,
+                ], 400);
+            }
+
             $createdCards = [];
+            $createdEmployees = [];
             $deliveryAddress = $orderData['delivery_address'] ?? '';
 
             \Log::info('Creating batch order', ['total_cards' => count($cards), 'delivery_address' => $deliveryAddress]);
 
             // Create each card in the batch
             foreach ($cards as $index => $cardData) {
+                $cardOwnerId = $user->id; // Default to business admin
+                $isEmployeeCard = $cardData['is_employee_card'] ?? false;
+
+                // If this is an employee card, create the employee account
+                if ($isEmployeeCard && !empty($cardData['email'])) {
+                    DB::beginTransaction();
+                    
+                    try {
+                        // Use default password for new employee
+                        $defaultPassword = 'Welcome123@';
+                        
+                        // Parse name into first and last name
+                        $nameParts = explode(' ', $cardData['name'], 2);
+                        $firstName = $nameParts[0] ?? '';
+                        $lastName = $nameParts[1] ?? '';
+                        
+                        \Log::info("Creating employee account", [
+                            'email' => $cardData['email'],
+                            'name' => $cardData['name'],
+                            'business_account_id' => $businessAccountId
+                        ]);
+                        
+                        // Create employee user account (pre-validated, no duplicates)
+                        $employeeUser = User::create([
+                            'first_name' => $firstName,
+                            'last_name' => $lastName,
+                            'email' => $cardData['email'],
+                            'password' => Hash::make($defaultPassword),
+                            'phone' => $cardData['contact_number'] ?? null,
+                            'job_title' => $cardData['position'] ?? null,
+                            'company' => $businessAccount->company ?? '',
+                            'subscription_plan' => 'premium',
+                            'subscription_active' => true,
+                            'subscription_start_date' => $businessAccount->subscription_start_date ?? now(),
+                            'subscription_end_date' => $businessAccount->subscription_end_date ?? now()->addYear(),
+                            'parent_business_id' => $businessAccountId,
+                        ]);
+                        
+                        \Log::info("Employee account created", ['employee_id' => $employeeUser->id, 'email' => $employeeUser->email]);
+                        
+                        // Send welcome notification with login credentials to employee
+                        $this->notificationService->create(
+                            $employeeUser,
+                            'account_created',
+                            [
+                                'welcome_message' => 'Your employee account has been created by ' . $user->full_name,
+                                'email' => $cardData['email'],
+                                'temporary_password' => $defaultPassword,
+                                'company' => $businessAccount->company ?? '',
+                            ]
+                        );
+                        
+                        $createdEmployees[] = [
+                            'id' => $employeeUser->id,
+                            'name' => $cardData['name'],
+                            'email' => $cardData['email'],
+                            'temporary_password' => $defaultPassword,
+                        ];
+                        
+                        // Use employee's user ID for the card
+                        $cardOwnerId = $employeeUser->id;
+                        
+                        DB::commit();
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        \Log::error("Failed to create employee account", [
+                            'error' => $e->getMessage(),
+                            'email' => $cardData['email']
+                        ]);
+                        
+                        // Fail the entire order if employee creation fails
+                        throw new \Exception("Failed to create employee account for {$cardData['email']}: " . $e->getMessage());
+                    }
+                }
+
                 // Generate unique NFC card ID
                 $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
                 \Log::info("Creating card #{$index}", ['nfc_card_id' => $nfcCardId, 'card_owner' => $cardData['name']]);
 
                 $nfcCard = NfcCard::create([
-                    'user_id' => $user->id,
+                    'user_id' => $cardOwnerId,
                     'business_account_id' => $businessAccountId,
                     'nfc_card_id' => $nfcCardId,
                     'card_owner' => $cardData['name'],
@@ -338,32 +478,43 @@ class AdminNotificationController extends Controller
                     'nfc_card_id' => $nfcCardId,
                     'card_owner' => $cardData['name'],
                     'is_admin_card' => $cardData['is_admin_card'] ?? false,
+                    'is_employee_card' => $isEmployeeCard,
+                    'employee_account_created' => $isEmployeeCard && isset($employeeUser) ? true : false,
                 ];
 
                 \Log::info("Card #{$index} created successfully", ['nfc_card_id' => $nfcCard->id]);
             }
 
-            \Log::info('All cards created successfully', ['total_created' => count($createdCards)]);
+            \Log::info('All cards created successfully', ['total_created' => count($createdCards), 'total_employees_created' => count($createdEmployees)]);
 
-            // Send confirmation notification to user
+            // Send confirmation notification to business admin
+            $confirmMessage = count($createdCards) . ' card(s) created';
+            if (count($createdEmployees) > 0) {
+                $confirmMessage .= ' and ' . count($createdEmployees) . ' employee account(s) created';
+            }
+            
             $this->notificationService->create(
                 $user,
                 'nfc_card_purchased',
                 [
                     'card_count' => count($createdCards),
+                    'employee_count' => count($createdEmployees),
                     'order_number' => $notification->id,
                     'amount' => '$' . number_format($orderData['purchase_amount'] ?? 0, 2),
                     'plan' => ucfirst($subscriptionPlan),
+                    'message' => $confirmMessage,
                 ]
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Batch order approved successfully! ' . count($createdCards) . ' card(s) created.',
+                'message' => 'Batch order approved successfully! ' . $confirmMessage,
                 'data' => [
                     'notification_id' => $notification->id,
                     'total_cards_created' => count($createdCards),
+                    'total_employees_created' => count($createdEmployees),
                     'cards' => $createdCards,
+                    'employees' => $createdEmployees,
                     'is_approved' => $notification->is_approved,
                     'approved_at' => $notification->approved_at,
                 ],

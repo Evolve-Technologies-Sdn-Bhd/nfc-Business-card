@@ -238,6 +238,11 @@ const navigation = [
     icon: "heroicons:document-text",
   },
   {
+    name: "Price Management",
+    href: "/AdminManagement/price-management",
+    icon: "heroicons:currency-dollar",
+  },
+  {
     name: "Terms & Privacy",
     href: "/AdminManagement/legal-documents",
     icon: "heroicons:shield-check",

@@ -1341,7 +1341,28 @@ const applyCustomDateRange = () => {
 
 // Approve order
 const approveOrder = async (notification) => {
-  if (!confirm("Are you sure you want to approve this order?")) {
+  // Get order details for confirmation
+  const orderData = notification.data || {};
+  const totalCards = orderData.total_cards || orderData.cards?.length || 1;
+  const employeeCount = orderData.employee_count || 0;
+  
+  let confirmMessage = `Are you sure you want to approve this order?\n\n`;
+  confirmMessage += `📦 Total Cards: ${totalCards}\n`;
+  
+  if (orderData.include_admin) {
+    confirmMessage += `👤 Admin Card: 1\n`;
+  }
+  
+  if (employeeCount > 0) {
+    confirmMessage += `👥 Employee Cards: ${employeeCount}\n`;
+    confirmMessage += `\n⚠️ This will automatically:\n`;
+    confirmMessage += `✓ Create ${totalCards} NFC card(s)\n`;
+    confirmMessage += `✓ Create ${employeeCount} employee account(s)\n`;
+    confirmMessage += `✓ Set default password: Welcome123@\n`;
+    confirmMessage += `✓ Send login credentials to employees`;
+  }
+  
+  if (!confirm(confirmMessage)) {
     return;
   }
 
@@ -1352,7 +1373,33 @@ const approveOrder = async (notification) => {
     );
 
     if (response.success) {
-      $toast.success("Order approved successfully");
+      // Show detailed success message
+      const data = response.data || {};
+      const cardsCreated = data.total_cards_created || 0;
+      const employeesCreated = data.total_employees_created || 0;
+      
+      let successMessage = `✅ Order approved successfully!\n\n`;
+      successMessage += `📦 ${cardsCreated} NFC card(s) created`;
+      
+      if (employeesCreated > 0) {
+        successMessage += `\n👥 ${employeesCreated} employee account(s) created`;
+        successMessage += `\n📧 Login credentials sent to employees`;
+      }
+      
+      // Check if any accounts already existed
+      const cards = data.cards || [];
+      const existingAccounts = cards.filter(c => 
+        c.is_employee_card && !c.employee_account_created
+      ).length;
+      
+      if (existingAccounts > 0) {
+        successMessage += `\n\nℹ️ ${existingAccounts} employee(s) already had accounts`;
+      }
+      
+      $toast.success(successMessage, {
+        duration: 8000, // Show for 8 seconds
+      });
+      
       notification.is_approved = true;
       notification.approved_at = new Date();
       loadNotifications();
@@ -1360,7 +1407,51 @@ const approveOrder = async (notification) => {
     }
   } catch (error) {
     console.error("Error approving order:", error);
-    $toast.error(error.data?.message || "Failed to approve order");
+    
+    // Handle validation errors (existing employees - auto-rejected)
+    if (error.data?.existing_employees) {
+      const existingEmps = error.data.existing_employees;
+      const isRejected = error.data?.is_rejected;
+      
+      let errorMessage = isRejected 
+        ? `🔴 Order Automatically Rejected!\n\n`
+        : `❌ Cannot approve order!\n\n`;
+      
+      errorMessage += `${existingEmps.length} employee email(s) already exist:\n\n`;
+      
+      existingEmps.forEach(emp => {
+        errorMessage += `• ${emp.name} (${emp.email})\n`;
+      });
+      
+      if (isRejected) {
+        errorMessage += `\n✅ The user has been notified with the rejection reason.`;
+        errorMessage += `\n\n💡 Solution: User should remove duplicate employees or use different emails.`;
+        
+        // Immediately update the notification status in the UI
+        notification.is_rejected = true;
+        notification.is_approved = false;
+        notification.rejection_reason = error.data?.rejection_reason || 'Duplicate employee emails detected';
+        notification.rejected_at = new Date();
+      } else {
+        errorMessage += `\nThese employees already have accounts in the system.`;
+      }
+      
+      $toast.error(errorMessage, {
+        duration: 12000,
+      });
+      
+      // Reload notifications to show rejected status
+      if (isRejected) {
+        loadNotifications();
+        loadStatistics();
+      }
+    } else {
+      // Generic error
+      const errorMessage = error.data?.message || "Failed to approve order";
+      $toast.error(`❌ ${errorMessage}`, {
+        duration: 5000,
+      });
+    }
   } finally {
     approvingId.value = null;
   }

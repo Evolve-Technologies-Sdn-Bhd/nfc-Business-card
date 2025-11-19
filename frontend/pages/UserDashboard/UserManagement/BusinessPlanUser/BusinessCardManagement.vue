@@ -26,6 +26,31 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Employee Filter Notice -->
+      <div
+        v-if="route.query.employee_id"
+        class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between"
+      >
+        <div class="flex items-center">
+          <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-600 mr-2" />
+          <div>
+            <p class="text-sm font-medium text-blue-900">
+              Viewing cards for: {{ route.query.employee_name || 'Selected Employee' }}
+            </p>
+            <p class="text-xs text-blue-700 mt-1">
+              You're viewing NFC cards for a specific employee
+            </p>
+          </div>
+        </div>
+        <button
+          @click="clearEmployeeFilter"
+          class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4 mr-1" />
+          View All Cards
+        </button>
+      </div>
+
       <!-- Filter and Search Section -->
       <div
         class="bg-white rounded-lg shadow-sm border border-secondary-200 p-4 mb-6"
@@ -379,131 +404,6 @@
                       Analytics
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NFC Cards List (fallback for filtered view) -->
-      <div
-        v-if="
-          filteredCards.length > 0 &&
-          filters.employee_id &&
-          filters.employee_id !== 'self'
-        "
-        class="space-y-6"
-      >
-        <div v-for="card in nfcCards" :key="card.id" class="card">
-          <div class="card-header">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-medium text-secondary-900">
-                  {{ card.card_owner }}
-                </h3>
-                <p class="text-sm text-secondary-600">
-                  Card ID: {{ card.card_id }}
-                </p>
-              </div>
-              <div class="flex items-center space-x-2">
-                <span
-                  :class="getStatusBadgeClass(card.status_badge)"
-                  class="px-3 py-1 rounded-full text-xs font-medium"
-                >
-                  {{ card.status_badge }}
-                </span>
-                <button @click="editCard(card)" class="btn btn-sm btn-outline">
-                  <Icon name="heroicons:pencil" class="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div>
-                <h4 class="text-sm font-medium text-secondary-500 mb-2">
-                  Card Details
-                </h4>
-                <div class="space-y-1">
-                  <p class="text-sm text-secondary-900">
-                    <strong>NFC ID:</strong> {{ card.nfc_card_id }}
-                  </p>
-                  <p class="text-sm text-secondary-900">
-                    <strong>Plan:</strong> {{ card.subscription_plan }}
-                  </p>
-                  <p class="text-sm text-secondary-900">
-                    <strong>Amount:</strong>
-                    {{ card.formatted_purchase_amount }}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h4 class="text-sm font-medium text-secondary-500 mb-2">
-                  Contact
-                </h4>
-                <div class="space-y-1">
-                  <p class="text-sm text-secondary-900">
-                    {{ card.contact_number }}
-                  </p>
-                  <p class="text-sm text-secondary-600">
-                    {{ card.billing_address }}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h4 class="text-sm font-medium text-secondary-500 mb-2">
-                  Timeline
-                </h4>
-                <div class="space-y-1">
-                  <p class="text-sm text-secondary-900">
-                    <strong>Purchased:</strong>
-                    {{ formatDate(card.purchase_date) }}
-                  </p>
-                  <p
-                    v-if="card.shipped_date"
-                    class="text-sm text-secondary-900"
-                  >
-                    <strong>Shipped:</strong>
-                    {{ formatDate(card.shipped_date) }}
-                  </p>
-                  <p
-                    v-if="card.delivered_date"
-                    class="text-sm text-secondary-900"
-                  >
-                    <strong>Delivered:</strong>
-                    {{ formatDate(card.delivered_date) }}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h4 class="text-sm font-medium text-secondary-500 mb-2">
-                  Actions
-                </h4>
-                <div class="space-y-2">
-                  <button
-                    v-if="card.status === 'active'"
-                    @click="deactivateCard(card)"
-                    class="btn btn-sm btn-outline btn-warning w-full"
-                  >
-                    <Icon name="heroicons:pause" class="h-4 w-4 mr-1" />
-                    Deactivate
-                  </button>
-                  <button
-                    v-else
-                    @click="activateCard(card)"
-                    class="btn btn-sm btn-outline btn-success w-full"
-                  >
-                    <Icon name="heroicons:play" class="h-4 w-4 mr-1" />
-                    Activate
-                  </button>
-                  <button
-                    @click="viewAnalytics(card)"
-                    class="btn btn-sm btn-outline w-full"
-                  >
-                    <Icon name="heroicons:chart-bar" class="h-4 w-4 mr-1" />
-                    Analytics
-                  </button>
                 </div>
               </div>
             </div>
@@ -1112,6 +1012,7 @@ const hasActiveFilters = computed(() => {
 
 // Methods
 const router = useRouter();
+const route = useRoute();
 
 const goToDesignPage = () => {
   router.push("/UserDashboard/NFCCardDesign/BusinessPlanNFCCard");
@@ -1159,6 +1060,16 @@ const clearFilters = () => {
     status: "",
     search: "",
   };
+};
+
+const clearEmployeeFilter = () => {
+  // Clear filter
+  filters.value.employee_id = "";
+  // Remove query params from URL
+  router.push({ 
+    path: route.path,
+    query: {} 
+  });
 };
 
 const orderNewCard = () => {
@@ -1361,6 +1272,20 @@ onMounted(async () => {
   console.log("Subscription plan:", authStore.user?.subscription_plan);
   
   await Promise.all([loadNfcCards(), loadEmployees()]);
+  
+  // Check if we have employee_id in query params (coming from Employee Management page)
+  const employeeIdParam = route.query.employee_id;
+  const employeeNameParam = route.query.employee_name;
+  
+  if (employeeIdParam) {
+    // Set filter to show only this employee's cards
+    filters.value.employee_id = parseInt(employeeIdParam);
+    
+    // Show toast notification
+    if (employeeNameParam) {
+      $toast.info(`Showing NFC cards for ${employeeNameParam}`);
+    }
+  }
   
   // Auto-refresh cards every 10 seconds to show newly approved cards
   refreshInterval = setInterval(() => {

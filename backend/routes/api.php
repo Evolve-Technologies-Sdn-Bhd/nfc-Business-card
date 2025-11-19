@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\BusinessPlanRequestController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Api\Admin\PlanPriceController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -308,5 +309,16 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/{invoice}/download', [AdminInvoiceController::class, 'download']);
         Route::get('/{invoice}/preview', [AdminInvoiceController::class, 'preview']);
     });
+
+    // ✅ Plan Price Management
+    Route::prefix('plan-prices')->group(function () {
+        Route::get('/', [PlanPriceController::class, 'index']);
+        Route::get('/{id}', [PlanPriceController::class, 'show']);
+        Route::put('/{id}', [PlanPriceController::class, 'update']);
+        Route::post('/bulk-update', [PlanPriceController::class, 'bulkUpdate']);
+    });
 });
+
+// Public endpoint for viewing current plan prices
+Route::get('/plan-prices/public', [PlanPriceController::class, 'publicPrices']);
 
