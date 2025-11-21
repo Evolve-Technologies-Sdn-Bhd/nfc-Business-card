@@ -1276,6 +1276,29 @@
             Select cards to apply the current design settings. Only design and style will be copied—content remains unchanged.
           </p>
 
+          <!-- Search Filter -->
+          <div class="mb-4">
+            <div class="relative">
+              <input
+                v-model="cardSearchQuery"
+                type="text"
+                placeholder="Search by card owner or card ID..."
+                class="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <button
+                v-if="cardSearchQuery"
+                @click="cardSearchQuery = ''"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+            <p v-if="cardSearchQuery" class="text-xs text-gray-500 mt-2">
+              Showing {{ filteredAvailableCards.length }} of {{ allAvailableCards.length }} cards
+            </p>
+          </div>
+
           <!-- Select All Button -->
           <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
             <button
@@ -1289,20 +1312,20 @@
               <span class="whitespace-nowrap">{{ isAllCardsSelected ? 'Deselect All' : 'Select All Employee Cards' }}</span>
             </button>
             <span class="text-sm text-gray-500 flex-shrink-0">
-              {{ selectedCardsForDesign.length }} / {{ allAvailableCards.length }} selected
+              {{ selectedCardsForDesign.length }} / {{ filteredAvailableCards.length }} selected
             </span>
           </div>
 
           <!-- Card Selection List -->
           <div class="space-y-3 mb-6 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
-            <div v-if="allAvailableCards.length === 0" class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
+            <div v-if="filteredAvailableCards.length === 0" class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
               <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p class="text-sm font-medium">No other cards available</p>
-              <p class="text-xs text-gray-400 mt-1">All your cards are already selected or this is your only card</p>
+              <p class="text-sm font-medium">{{ cardSearchQuery ? 'No cards found' : 'No other cards available' }}</p>
+              <p class="text-xs text-gray-400 mt-1">{{ cardSearchQuery ? 'Try a different search term' : 'All your cards are already selected or this is your only card' }}</p>
             </div>
             
             <label
-              v-for="card in allAvailableCards"
+              v-for="card in filteredAvailableCards"
               :key="card.id"
               class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border-2 min-h-[70px]"
               :class="selectedCardsForDesign.includes(card.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'"
@@ -1399,6 +1422,7 @@ const selectedCardsForDesign = ref([]);
 const applyingDesign = ref(false);
 const showApplyDesignModal = ref(false);
 const allEmployeeCards = ref([]); // All employee cards for batch design
+const cardSearchQuery = ref(''); // Search query for filtering cards
 
 // Links Management
 const links = ref([]);
@@ -1540,14 +1564,33 @@ const allAvailableCards = computed(() => {
   return [...adminCards, ...employeeCards];
 });
 
-// Check if all cards are selected
-const isAllCardsSelected = computed(() => {
-  return allAvailableCards.value.length > 0 && 
-         selectedCardsForDesign.value.length === allAvailableCards.value.length;
+// Filtered available cards based on search query
+const filteredAvailableCards = computed(() => {
+  if (!cardSearchQuery.value.trim()) {
+    return allAvailableCards.value;
+  }
+  
+  const query = cardSearchQuery.value.toLowerCase().trim();
+  return allAvailableCards.value.filter(card => {
+    const cardOwner = (card.card_owner || '').toLowerCase();
+    const cardId = (card.nfc_card_id || '').toLowerCase();
+    const cardNumber = (card.id || '').toString();
+    
+    return cardOwner.includes(query) || 
+           cardId.includes(query) || 
+           cardNumber.includes(query);
+  });
 });
 
-// Configuration options
-const tabs = [
+// Check if all cards are selected
+const isAllCardsSelected = computed(() => {
+  return filteredAvailableCards.value.length > 0 && 
+         selectedCardsForDesign.value.length === filteredAvailableCards.value.length;
+});
+
+// Configuration options - will be loaded from API
+const tabs = ref([
+  // Default tabs as fallback
   {
     id: "profile",
     name: "Profile",
@@ -1590,64 +1633,181 @@ const tabs = [
     shortName: "Brand",
     icon: "heroicons:eye",
   },
-];
+]);
 
-const profileStyles = [{ id: "classic", name: "Classic" }];
+// Design options - will be loaded from API
+const profileStyles = ref([]);
+const themes = ref([]);
+const fonts = ref([]);
+const buttonStyles = ref([]);
+const colorSchemes = ref([]);
+const layouts = ref([]);
 
-const themes = [
-  {
-    id: "minimal",
-    name: "Minimal",
-    preview: "bg-white",
-    backgroundColor: "#FFFFFF",
-  },
-  {
-    id: "modern",
-    name: "Modern",
-    preview: "bg-gradient-to-br from-gray-50 to-gray-100",
-    backgroundColor: "#F9FAFB",
-  },
-  {
-    id: "creative",
-    name: "Creative",
-    preview: "bg-gradient-to-br from-purple-500 to-pink-500",
-    backgroundColor: "#A855F7",
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    preview: "bg-gradient-to-br from-blue-600 to-blue-700",
-    backgroundColor: "#2563EB",
-  },
-  {
-    id: "dark",
-    name: "Dark",
-    preview: "bg-gray-900",
-    backgroundColor: "#111827",
-  },
-];
+// Fields - will be loaded from API
+const profileFields = ref([]);
+const companyFields = ref([]);
+const servicesFields = ref([]);
+const linksFields = ref([]);
 
-const fonts = [
-  { id: "inter", name: "Inter", family: "Inter, sans-serif" },
-  { id: "poppins", name: "Poppins", family: "Poppins, sans-serif" },
-  { id: "roboto", name: "Roboto", family: "Roboto, sans-serif" },
-  { id: "playfair", name: "Playfair", family: "Playfair Display, serif" },
-];
+// Load tabs configuration from API
+const loadTabsConfig = async () => {
+  try {
+    const userPlan = authStore.user?.subscription_plan || 'business';
+    console.log('🔍 Loading tabs config for plan:', userPlan);
+    
+    const response = await fetch(`${config.public.apiBaseUrl}/profile-design-options?plan=${userPlan}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    });
 
-const buttonStyles = [
-  { id: "solid", name: "Solid", class: "bg-black text-white rounded-full" },
-  {
-    id: "outline",
-    name: "Outline",
-    class: "border-2 border-black text-black rounded-full",
-  },
-  { id: "soft", name: "Soft", class: "bg-gray-100 text-gray-900 rounded-xl" },
-  {
-    id: "shadow",
-    name: "Shadow",
-    class: "bg-white text-black rounded-xl shadow-lg",
-  },
-];
+    if (!response.ok) throw new Error('Failed to load tabs config');
+    const data = await response.json();
+    
+    console.log('📋 Tabs API Response:', data);
+    
+    // Load tab_control configuration
+    if (data.data.tab_control && data.data.tab_control.length > 0) {
+      const tabConfig = data.data.tab_control[0]; // Get the active config
+      console.log('✅ Tab Control Config found:', tabConfig);
+      
+      if (tabConfig.config?.tabs && Array.isArray(tabConfig.config.tabs)) {
+        // Map tab IDs to full tab objects with icons
+        const iconMap = {
+          profile: 'heroicons:user',
+          company: 'heroicons:building-office',
+          services: 'heroicons:rocket-launch',
+          links: 'heroicons:link',
+          design: 'heroicons:paint-brush',
+          style: 'heroicons:sparkles',
+          watermarks: 'heroicons:eye',
+        };
+        
+        tabs.value = tabConfig.config.tabs.map(tabId => ({
+          id: tabId,
+          name: tabId.charAt(0).toUpperCase() + tabId.slice(1),
+          shortName: tabId.charAt(0).toUpperCase() + tabId.slice(1),
+          icon: iconMap[tabId] || 'heroicons:document',
+        }));
+        
+        console.log('✅ Tabs loaded:', tabs.value.map(t => t.id).join(', '));
+      }
+    } else {
+      console.log('ℹ️ No tab control config found, using default tabs');
+    }
+  } catch (error) {
+    console.error('❌ Error loading tabs config:', error);
+    // Keep default tabs as fallback
+  }
+};
+
+// Load fields configuration from API
+const loadFieldsConfig = async () => {
+  try {
+    console.log('🔍 Loading fields config...');
+    const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder-fields`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.log('⚠️ Fields API not available (this is OK for now)');
+      return; // Silently fail if API not available
+    }
+    
+    const data = await response.json();
+    
+    if (data.success && data.data) {
+      // Store fields by tab
+      profileFields.value = data.data.profile || [];
+      companyFields.value = data.data.company || [];
+      servicesFields.value = data.data.services || [];
+      linksFields.value = data.data.links || [];
+      
+      console.log('✅ Fields loaded:', {
+        profile: profileFields.value.length,
+        company: companyFields.value.length,
+        services: servicesFields.value.length,
+        links: linksFields.value.length,
+      });
+    }
+  } catch (error) {
+    console.log('⚠️ Fields config not available:', error.message);
+    // Continue without custom fields - this is OK
+  }
+};
+
+// Load design options from API
+const loadDesignOptions = async () => {
+  try {
+    const userPlan = authStore.user?.subscription_plan || 'business';
+    const response = await fetch(`${config.public.apiBaseUrl}/profile-design-options?plan=${userPlan}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to load design options');
+    const data = await response.json();
+    
+    // Map API response to component format
+    if (data.data.profile_style) {
+      profileStyles.value = data.data.profile_style.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+      }));
+    }
+    
+    if (data.data.theme) {
+      themes.value = data.data.theme.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        preview: opt.config?.preview || 'bg-white',
+        backgroundColor: opt.config?.backgroundColor || '#FFFFFF',
+      }));
+    }
+    
+    if (data.data.font) {
+      fonts.value = data.data.font.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        family: opt.config?.family || 'Inter, sans-serif',
+      }));
+    }
+    
+    if (data.data.button_style) {
+      buttonStyles.value = data.data.button_style.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        class: opt.config?.class || 'bg-black text-white rounded-full',
+      }));
+    }
+    
+    if (data.data.color_scheme) {
+      colorSchemes.value = data.data.color_scheme.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        colors: opt.config || {},
+      }));
+    }
+    
+    if (data.data.layout) {
+      layouts.value = data.data.layout.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        config: opt.config || {},
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading design options:', error);
+    // Fallback to default options if API fails
+    profileStyles.value = [{ id: "classic", name: "Classic" }];
+    themes.value = [{ id: "minimal", name: "Minimal", preview: "bg-white", backgroundColor: "#FFFFFF" }];
+    fonts.value = [{ id: "inter", name: "Inter", family: "Inter, sans-serif" }];
+    buttonStyles.value = [{ id: "solid", name: "Solid", class: "bg-black text-white rounded-full" }];
+  }
+};
 
 // Helper function to get full image URL
 const getImageUrl = (imagePath) => {
@@ -1700,19 +1860,19 @@ const applyTheme = (theme) => {
 };
 
 const getCurrentFont = () => {
-  const font = fonts.find((f) => f.id === profileData.font);
+  const font = fonts.value.find((f) => f.id === profileData.font);
   return font ? font.family : "Inter, sans-serif";
 };
 
 const getFontName = (fontId) => {
-  const font = fonts.find((f) => f.id === fontId);
+  const font = fonts.value.find((f) => f.id === fontId);
   return font ? font.name : fontId;
 };
 
 const getButtonClass = () => {
-  const style = buttonStyles.find((s) => s.id === profileData.buttonStyle);
+  const style = buttonStyles.value.find((s) => s.id === profileData.buttonStyle);
   return `py-2.5 sm:py-3 px-5 sm:px-6 ${
-    style ? style.class : buttonStyles[0].class
+    style ? style.class : (buttonStyles.value[0]?.class || 'bg-black text-white rounded-full')
   }`;
 };
 
@@ -2061,11 +2221,14 @@ const applyDesignToCards = async () => {
 // Toggle select all cards
 const toggleSelectAllCards = () => {
   if (isAllCardsSelected.value) {
-    // Deselect all
-    selectedCardsForDesign.value = [];
+    // Deselect all filtered cards
+    const filteredIds = filteredAvailableCards.value.map(card => card.id);
+    selectedCardsForDesign.value = selectedCardsForDesign.value.filter(id => !filteredIds.includes(id));
   } else {
-    // Select all available cards
-    selectedCardsForDesign.value = allAvailableCards.value.map(card => card.id);
+    // Select all filtered cards (add to existing selection)
+    const filteredIds = filteredAvailableCards.value.map(card => card.id);
+    const uniqueIds = new Set([...selectedCardsForDesign.value, ...filteredIds]);
+    selectedCardsForDesign.value = Array.from(uniqueIds);
   }
 };
 
@@ -2535,6 +2698,18 @@ const openLandingPage = () => {
 onMounted(async () => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+
+  try {
+    // Load all configurations from Admin API (in parallel for faster loading)
+    await Promise.all([
+      loadTabsConfig().catch(err => console.log('Tabs config skipped:', err.message)),
+      loadFieldsConfig().catch(err => console.log('Fields config skipped:', err.message)),
+      loadDesignOptions().catch(err => console.log('Design options skipped:', err.message))
+    ]);
+  } catch (error) {
+    console.error('Error loading configurations:', error);
+    // Continue anyway with defaults
+  }
 
   // Load user's NFC cards (which will auto-select a card and load its landing page)
   // Use nextTick to ensure DOM is ready

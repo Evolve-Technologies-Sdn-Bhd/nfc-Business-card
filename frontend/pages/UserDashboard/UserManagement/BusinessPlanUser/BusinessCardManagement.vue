@@ -66,8 +66,8 @@
               @change="applyFilters"
               class="input w-full"
             >
-              <option value="">All Cards (My Cards + Employees)</option>
-              <option value="self">My Cards Only</option>
+              <option value="">All Cards (Admin Cards + Employees)</option>
+              <option value="self">Admin Cards Only</option>
               <option value="employees_only">Employee Cards Only</option>
               <option disabled>──────────</option>
               <option
@@ -148,7 +148,7 @@
           class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
         >
           <Icon name="heroicons:user" class="h-5 w-5 mr-2 text-primary-600" />
-          My Cards ({{ myCards.length }})
+          Admin Cards ({{ myCards.length }})
         </h2>
         <div class="space-y-4">
           <div v-for="card in myCards" :key="card.id" class="card">
