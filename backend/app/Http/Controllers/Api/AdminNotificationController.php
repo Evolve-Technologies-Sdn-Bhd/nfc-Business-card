@@ -371,6 +371,100 @@ class AdminNotificationController extends Controller
                 ], 400);
             }
 
+            // QUOTA CHECK: Verify if business account has enough quota
+            if ($subscriptionPlan === 'business' && $businessAccount) {
+                $totalCardsInOrder = count($cards);
+                $newEmployeesInOrder = 0;
+                
+                // Count how many new employee accounts will be created
+                foreach ($cards as $cardData) {
+                    if (($cardData['is_employee_card'] ?? false) && !empty($cardData['email'])) {
+                        $newEmployeesInOrder++;
+                    }
+                }
+                
+                // Get current quota information
+                $quotaInfo = $businessAccount->getQuotaInfo();
+                $availableQuota = $quotaInfo['available_quota'] ?? 0;
+                $totalQuota = $quotaInfo['total_quota'] ?? 0;
+                $currentlyUsed = $quotaInfo['ordered_cards_count'] ?? 0;
+                
+                \Log::info('Quota check', [
+                    'business_account_id' => $businessAccount->id,
+                    'total_quota' => $totalQuota,
+                    'currently_used' => $currentlyUsed,
+                    'available_quota' => $availableQuota,
+                    'cards_in_order' => $totalCardsInOrder,
+                    'new_employees_in_order' => $newEmployeesInOrder,
+                    'quota_needed' => $totalCardsInOrder,
+                ]);
+                
+                // Check if there's enough quota for all cards
+                if ($totalCardsInOrder > $availableQuota) {
+                    \Log::warning('Insufficient quota - auto-rejecting order', [
+                        'required' => $totalCardsInOrder,
+                        'available' => $availableQuota,
+                        'total_quota' => $totalQuota,
+                        'current_usage' => $currentlyUsed
+                    ]);
+                    
+                    // Build detailed rejection reason
+                    $rejectionReason = "Order automatically rejected: Insufficient quota.\n\n";
+                    $rejectionReason .= "📊 Quota Status:\n";
+                    $rejectionReason .= "• Total Quota: {$totalQuota}\n";
+                    $rejectionReason .= "• Currently Used: {$currentlyUsed} card(s)\n";
+                    $rejectionReason .= "• Available: {$availableQuota} card(s)\n";
+                    $rejectionReason .= "• Requested: {$totalCardsInOrder} card(s)\n\n";
+                    $rejectionReason .= "⚠️ You need {$totalCardsInOrder} cards but only have {$availableQuota} available.\n";
+                    $rejectionReason .= "Please contact Super Admin to increase your quota or reduce the number of cards in your order.";
+                    
+                    // Auto-reject the notification
+                    $notification->reject($rejectionReason, auth()->id());
+                    
+                    // Send rejection notification to the user
+                    $this->notificationService->create(
+                        $user,
+                        'order_rejected',
+                        [
+                            'order_number' => $notification->id,
+                            'rejection_reason' => $rejectionReason,
+                            'quota_info' => [
+                                'total_quota' => $totalQuota,
+                                'currently_used' => $currentlyUsed,
+                                'available' => $availableQuota,
+                                'requested' => $totalCardsInOrder,
+                            ],
+                        ]
+                    );
+                    
+                    \Log::info('Order auto-rejected due to insufficient quota', [
+                        'notification_id' => $notification->id,
+                        'user_id' => $user->id,
+                        'business_account_id' => $businessAccount->id
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Order automatically rejected due to insufficient quota',
+                        'rejection_reason' => $rejectionReason,
+                        'quota_info' => [
+                            'total_quota' => $totalQuota,
+                            'currently_used' => $currentlyUsed,
+                            'available' => $availableQuota,
+                            'requested' => $totalCardsInOrder,
+                            'shortage' => $totalCardsInOrder - $availableQuota,
+                        ],
+                        'notification_id' => $notification->id,
+                        'is_rejected' => true,
+                    ], 400);
+                }
+                
+                \Log::info('Quota check passed - sufficient quota available', [
+                    'available' => $availableQuota,
+                    'required' => $totalCardsInOrder
+                ]);
+            }
+
             $createdCards = [];
             $createdEmployees = [];
             $deliveryAddress = $orderData['delivery_address'] ?? '';

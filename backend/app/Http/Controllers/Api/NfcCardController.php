@@ -400,6 +400,9 @@ class NfcCardController extends Controller
             ], 404);
         }
 
+        // Load social links relationship
+        $landingPage->load('socialLinks');
+
         return response()->json([
             'success' => true,
             'landing_page' => $landingPage
@@ -443,7 +446,6 @@ class NfcCardController extends Controller
             'address_map_url' => 'nullable|url',
             'stats' => 'nullable|array',
             'services' => 'nullable|array',
-            'social_links' => 'nullable|array',
             'team_members' => 'nullable|array',
             'phone_number' => 'nullable|string|max:50',
             'phone_label' => 'nullable|string|max:100',
@@ -460,6 +462,15 @@ class NfcCardController extends Controller
             'font' => 'nullable|string|max:50',
             'button_style' => 'nullable|string|max:50',
             'show_watermark' => 'nullable|boolean',
+            
+            // Links validation
+            'links' => 'nullable|array',
+            'links.*.id' => 'nullable|exists:social_links,id',
+            'links.*.title' => 'required_with:links|string|max:255',
+            'links.*.url' => 'required_with:links|url',
+            'links.*.platform' => 'required_with:links|string|max:50',
+            'links.*.is_active' => 'nullable|boolean',
+            'links.*.order' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -470,10 +481,56 @@ class NfcCardController extends Controller
         }
 
         // Update or create landing page
+        $landingPageData = $request->except('links'); // Exclude links from direct save
         $landingPage = LandingPage::updateOrCreate(
             ['nfc_card_id' => $nfcCard->id],
-            $request->all()
+            $landingPageData
         );
+
+        // Handle links sync if provided
+        if ($request->has('links')) {
+            $links = $request->input('links', []);
+            $existingLinkIds = [];
+            
+            foreach ($links as $linkData) {
+                if (isset($linkData['id']) && $linkData['id']) {
+                    // Update existing link
+                    $link = \App\Models\SocialLink::where('id', $linkData['id'])
+                        ->where('landing_page_id', $landingPage->id)
+                        ->first();
+                    
+                    if ($link) {
+                        $link->update([
+                            'title' => $linkData['title'],
+                            'url' => $linkData['url'],
+                            'platform' => $linkData['platform'],
+                            'is_active' => $linkData['is_active'] ?? true,
+                            'order' => $linkData['order'] ?? 0,
+                        ]);
+                        $existingLinkIds[] = $link->id;
+                    }
+                } else {
+                    // Create new link
+                    $newLink = \App\Models\SocialLink::create([
+                        'landing_page_id' => $landingPage->id,
+                        'title' => $linkData['title'],
+                        'url' => $linkData['url'],
+                        'platform' => $linkData['platform'],
+                        'is_active' => $linkData['is_active'] ?? true,
+                        'order' => $linkData['order'] ?? 0,
+                    ]);
+                    $existingLinkIds[] = $newLink->id;
+                }
+            }
+            
+            // Delete links that are not in the request (were removed by user)
+            \App\Models\SocialLink::where('landing_page_id', $landingPage->id)
+                ->whereNotIn('id', $existingLinkIds)
+                ->delete();
+        }
+
+        // Reload landing page with relationships
+        $landingPage->load('socialLinks');
 
         return response()->json([
             'success' => true,

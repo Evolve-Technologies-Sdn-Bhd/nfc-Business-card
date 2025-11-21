@@ -92,7 +92,11 @@ class ActivityLogController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $logs,
+            'data' => $logs->items(),
+            'current_page' => $logs->currentPage(),
+            'last_page' => $logs->lastPage(),
+            'per_page' => $logs->perPage(),
+            'total' => $logs->total(),
         ]);
     }
 
@@ -115,12 +119,41 @@ class ActivityLogController extends Controller
 
         $days = $request->input('days', 30);
         $startDate = Carbon::now()->subDays($days);
+        $todayStart = Carbon::today();
+
+        // Get most common action type
+        $mostCommonAction = ActivityLog::forBusinessAccount($user->id)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('action_type, COUNT(*) as count')
+            ->groupBy('action_type')
+            ->orderBy('count', 'desc')
+            ->first();
+
+        // Get most active employee
+        $mostActiveEmployee = ActivityLog::forBusinessAccount($user->id)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('user_id, COUNT(*) as count')
+            ->groupBy('user_id')
+            ->orderBy('count', 'desc')
+            ->with('user:id,first_name,last_name')
+            ->first();
 
         $stats = [
-            'total_activities' => ActivityLog::forBusinessAccount($user->id)->count(),
+            'total_logs' => ActivityLog::forBusinessAccount($user->id)->count(),
+            'today_count' => ActivityLog::forBusinessAccount($user->id)
+                ->where('created_at', '>=', $todayStart)
+                ->count(),
             'recent_activities' => ActivityLog::forBusinessAccount($user->id)
                 ->where('created_at', '>=', $startDate)
                 ->count(),
+            'most_active_employee' => $mostActiveEmployee ? [
+                'name' => $mostActiveEmployee->user->full_name,
+                'count' => $mostActiveEmployee->count,
+            ] : null,
+            'most_common_action' => $mostCommonAction ? [
+                'type' => $mostCommonAction->action_type,
+                'count' => $mostCommonAction->count,
+            ] : null,
             'by_action_type' => ActivityLog::forBusinessAccount($user->id)
                 ->where('created_at', '>=', $startDate)
                 ->selectRaw('action_type, COUNT(*) as count')
@@ -140,23 +173,8 @@ class ActivityLogController extends Controller
                     ];
                 })
                 ->values(),
-            'most_active_employee' => ActivityLog::forBusinessAccount($user->id)
-                ->where('created_at', '>=', $startDate)
-                ->selectRaw('user_id, COUNT(*) as count')
-                ->groupBy('user_id')
-                ->orderBy('count', 'desc')
-                ->with('user:id,first_name,last_name')
-                ->first(),
             'recent_7_days' => $this->getActivityTrend($user->id, 7),
         ];
-
-        // Format most active employee
-        if ($stats['most_active_employee']) {
-            $stats['most_active_employee'] = [
-                'employee_name' => $stats['most_active_employee']->user->full_name,
-                'activity_count' => $stats['most_active_employee']->count,
-            ];
-        }
 
         return response()->json([
             'success' => true,

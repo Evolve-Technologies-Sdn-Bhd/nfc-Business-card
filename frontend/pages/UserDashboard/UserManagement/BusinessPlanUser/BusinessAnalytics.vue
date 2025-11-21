@@ -1,4 +1,4 @@
-<!-- pages/UserDashboard/Analytics.vue -->
+<!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics.vue -->
 <template>
   <div class="min-h-screen bg-secondary-50">
     <!-- Header -->
@@ -6,13 +6,39 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center space-x-4">
-            <div>
-              <h1 class="text-2xl font-semibold text-secondary-900">
-                {{ tagData?.name || "Link Analytics" }}
-              </h1>
-              <p class="text-sm text-secondary-600">
-                ID: {{ tagData?.nfc_id }}
-              </p>
+            <!-- NFC Card Selector -->
+            <div class="relative">
+              <select
+                v-model="selectedCardId"
+                @change="onCardChange"
+                class="input text-sm min-w-[200px]"
+              >
+                <option value="all">📊 All Cards (Total Overview)</option>
+                <option
+                  v-for="card in nfcCards"
+                  :key="card.id"
+                  :value="card.id"
+                >
+                  {{ card.nfc_card_id || `Card #${card.id}` }} - {{ card.card_owner }}
+                </option>
+              </select>
+            </div>
+            <!-- Employee Filter -->
+            <div class="relative" v-if="employees.length > 0">
+              <select
+                v-model="selectedEmployeeId"
+                @change="loadAnalytics"
+                class="input text-sm min-w-[180px]"
+              >
+                <option value="">All Employees</option>
+                <option
+                  v-for="employee in employees"
+                  :key="employee.id"
+                  :value="employee.id"
+                >
+                  {{ employee.name }}
+                </option>
+              </select>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -36,31 +62,6 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Subscription Notice for Free Users -->
-      <div v-if="!hasPremiumSubscription" class="mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex items-center">
-            <Icon
-              name="heroicons:information-circle"
-              class="h-5 w-5 text-blue-400 mr-2"
-            />
-            <div class="flex-1">
-              <h3 class="text-sm font-medium text-blue-800">
-                Free Plan Analytics
-              </h3>
-              <p class="text-sm text-blue-700 mt-1">
-                You're viewing basic analytics. Upgrade to Premium for detailed
-                insights, device breakdowns, geographic data, and more.
-              </p>
-            </div>
-            <button @click="upgradeToPremium" class="btn btn-primary btn-sm">
-              <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-              Upgrade to Premium
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Overview Stats -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-6">
@@ -146,28 +147,6 @@
           </div>
           <div class="card-body">
             <div
-              v-if="!hasPremiumSubscription"
-              class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center"
-            >
-              <div class="text-center">
-                <Icon
-                  name="heroicons:lock-closed"
-                  class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-                />
-                <p class="text-secondary-600">
-                  Detailed charts available with Premium subscription
-                </p>
-                <button
-                  @click="upgradeToPremium"
-                  class="btn btn-primary btn-sm mt-2"
-                >
-                  <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Premium
-                </button>
-              </div>
-            </div>
-            <div
-              v-else
               class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center"
             >
               <div class="text-center">
@@ -193,24 +172,8 @@
             <p class="text-sm text-secondary-600">Breakdown by device type</p>
           </div>
           <div class="card-body">
-            <div v-if="!hasPremiumSubscription" class="text-center py-8">
-              <Icon
-                name="heroicons:lock-closed"
-                class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-              />
-              <p class="text-secondary-600">
-                Device breakdown available with Premium subscription
-              </p>
-              <button
-                @click="upgradeToPremium"
-                class="btn btn-primary btn-sm mt-2"
-              >
-                <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                Upgrade to Premium
-              </button>
-            </div>
             <div
-              v-else-if="analytics.deviceTypes.length === 0"
+              v-if="analytics.deviceTypes.length === 0"
               class="text-center py-8 text-secondary-500"
             >
               <Icon
@@ -272,25 +235,6 @@
                 <span class="text-secondary-600">Loading recent taps...</span>
               </div>
 
-              <div
-                v-else-if="!hasPremiumSubscription"
-                class="text-center py-8 text-secondary-500"
-              >
-                <Icon
-                  name="heroicons:lock-closed"
-                  class="h-12 w-12 mx-auto mb-3"
-                />
-                <p class="font-medium">
-                  Recent taps available with Premium subscription
-                </p>
-                <button
-                  @click="upgradeToPremium"
-                  class="btn btn-primary btn-sm mt-2"
-                >
-                  <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Premium
-                </button>
-              </div>
               <div
                 v-else-if="recentTaps.length === 0"
                 class="text-center py-8 text-secondary-500"
@@ -363,24 +307,8 @@
               </h3>
             </div>
             <div class="card-body">
-              <div v-if="!hasPremiumSubscription" class="text-center py-8">
-                <Icon
-                  name="heroicons:lock-closed"
-                  class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-                />
-                <p class="text-secondary-600">
-                  Geographic data available with Premium subscription
-                </p>
-                <button
-                  @click="upgradeToPremium"
-                  class="btn btn-primary btn-sm mt-2"
-                >
-                  <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Premium
-                </button>
-              </div>
               <div
-                v-else-if="analytics.topLocations.length === 0"
+                v-if="analytics.topLocations.length === 0"
                 class="text-center py-8 text-secondary-500"
               >
                 <Icon name="heroicons:map-pin" class="h-12 w-12 mx-auto mb-2" />
@@ -415,24 +343,8 @@
               <h3 class="text-lg font-medium text-secondary-900">Peak Hours</h3>
             </div>
             <div class="card-body">
-              <div v-if="!hasPremiumSubscription" class="text-center py-8">
-                <Icon
-                  name="heroicons:lock-closed"
-                  class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-                />
-                <p class="text-secondary-600">
-                  Time analytics available with Premium subscription
-                </p>
-                <button
-                  @click="upgradeToPremium"
-                  class="btn btn-primary btn-sm mt-2"
-                >
-                  <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Premium
-                </button>
-              </div>
               <div
-                v-else-if="analytics.peakHours.length === 0"
+                v-if="analytics.peakHours.length === 0"
                 class="text-center py-8 text-secondary-500"
               >
                 <Icon name="heroicons:clock" class="h-12 w-12 mx-auto mb-2" />
@@ -511,41 +423,22 @@
 // Layout
 definePageMeta({
   layout: "user-dashboard",
+  middleware: ["auth"],
 });
 
-// Route params
+// Route, Stores, API
 const route = useRoute();
-const tagId = computed(() => route.params?.id);
-
-// Stores
+const router = useRouter();
 const authStore = useAuthStore();
+const { $api, $toast } = useNuxtApp();
 
 // Reactive data
 const loading = ref(true);
 const selectedPeriod = ref("30d");
-
-// Get user's NFC tag data
-const tagData = computed(() => {
-  const user = authStore.user;
-  if (!user || !user.nfcTag) return null;
-
-  return {
-    id: user.nfcTag.id,
-    name: user.nfcTag.name || "Business Card",
-    nfc_id: user.nfcTag.nfc_id,
-    status: user.nfcTag.status,
-  };
-});
-
-// Check if user has Premium subscription for detailed analytics
-const hasPremiumSubscription = computed(() => {
-  const user = authStore.user;
-  return (
-    user?.subscription_plan === "basic" ||
-    user?.subscription_plan === "premium" ||
-    user?.subscription_plan === "business"
-  );
-});
+const selectedCardId = ref("all"); // Default to "All Cards"
+const selectedEmployeeId = ref("");
+const nfcCards = ref([]);
+const employees = ref([]);
 
 // Analytics data
 const analytics = reactive({
@@ -566,29 +459,71 @@ const analytics = reactive({
 const recentTaps = ref([]);
 
 // Methods
+const loadNfcCards = async () => {
+  try {
+    const response = await $api.get("/nfc-cards");
+    if (response.success) {
+      nfcCards.value = response.nfc_cards || [];
+      // Load analytics for default "All Cards" selection
+      if (nfcCards.value.length > 0) {
+        await loadAnalytics();
+      }
+    }
+  } catch (error) {
+    console.error("Failed to load NFC cards:", error);
+    $toast.error("Failed to load cards");
+  }
+};
+
+const loadEmployees = async () => {
+  try {
+    const response = await $api.get("/business/employees");
+    if (response.success) {
+      employees.value = response.employees || [];
+    }
+  } catch (error) {
+    console.error("Failed to load employees:", error);
+  }
+};
+
+const onCardChange = async () => {
+  if (selectedCardId.value) {
+    await loadAnalytics();
+  }
+};
+
 const loadAnalytics = async () => {
-  if (!tagData.value) {
-    const { $toast } = useNuxtApp();
-    $toast.error("No NFC tag found for this user");
+  if (!selectedCardId.value) {
     return;
   }
 
   loading.value = true;
   try {
-    const { $api } = useNuxtApp();
-    const response = await $api.get(`/analytics/nfc/${tagData.value.id}`, {
-      params: { period: selectedPeriod.value },
-    });
+    const params = {
+      period: selectedPeriod.value,
+    };
+
+    // Add employee filter if selected
+    if (selectedEmployeeId.value) {
+      params.employee_id = selectedEmployeeId.value;
+    }
+
+    // Determine API endpoint based on card selection
+    const endpoint = selectedCardId.value === "all" 
+      ? `/analytics/business/overview`  // All cards overview
+      : `/analytics/nfc/${selectedCardId.value}`; // Single card
+
+    const response = await $api.get(endpoint, { params });
 
     if (response.success) {
       // Update analytics data with real data
       Object.assign(analytics, {
         totalTaps: response.data.total_taps || 0,
-        tapGrowth: 12, // Calculate from previous period
+        tapGrowth: response.data.tap_growth || 0,
         uniqueVisitors: response.data.unique_visitors || 0,
-        visitorGrowth: 8,
+        visitorGrowth: response.data.visitor_growth || 0,
         avgEngagement: response.data.avg_engagement || 0,
-        engagementGrowth: 15,
+        engagementGrowth: response.data.engagement_growth || 0,
         topLocation: response.data.top_location || "Unknown",
         topLocationTaps: response.data.top_location_taps || 0,
         performanceScore: response.data.performance_score || 0,
@@ -597,19 +532,18 @@ const loadAnalytics = async () => {
         peakHours: response.data.peak_hours || [],
       });
 
-      // Update recent taps if available (Premium users only)
-      if (hasPremiumSubscription.value && response.data.recent_taps) {
+      // Update recent taps
+      if (response.data.recent_taps) {
         recentTaps.value = response.data.recent_taps.map((tap) => ({
           id: tap.id,
           location: tap.ip_address || "Unknown Location",
           device: tap.device_type || "Unknown Device",
           timestamp: new Date(tap.created_at),
-          duration: 0, // Not tracked in current implementation
+          duration: tap.duration || 0,
         }));
       }
     }
   } catch (error) {
-    const { $toast } = useNuxtApp();
     $toast.error("Failed to load analytics data");
     console.error("Analytics error:", error);
   } finally {
@@ -618,28 +552,46 @@ const loadAnalytics = async () => {
 };
 
 const refreshTaps = async () => {
-  // Refresh recent taps data
-  const { $toast } = useNuxtApp();
-  $toast.success("Taps refreshed");
+  await loadAnalytics();
+  $toast.success("Analytics refreshed");
 };
 
-const loadMoreTaps = () => {
-  // Load more taps
-  const { $toast } = useNuxtApp();
+const loadMoreTaps = async () => {
   $toast.info("Loading more taps...");
+  // Implement pagination for recent taps
 };
 
-const upgradeToPremium = () => {
-  // Redirect to upgrade page or show upgrade modal
-  const { $toast } = useNuxtApp();
-  $toast.info("Redirecting to upgrade page...");
-  // navigateTo('/upgrade')
-};
+const exportAnalytics = async () => {
+  if (!selectedCardId.value) {
+    $toast.error("Please select a card first");
+    return;
+  }
 
-const exportAnalytics = () => {
-  // Export analytics data
-  const { $toast } = useNuxtApp();
-  $toast.success("Analytics exported successfully");
+  try {
+    const params = new URLSearchParams({
+      period: selectedPeriod.value,
+    });
+
+    if (selectedEmployeeId.value) {
+      params.append("employee_id", selectedEmployeeId.value);
+    }
+
+    const token = localStorage.getItem("token");
+    const config = useRuntimeConfig();
+    const apiBaseUrl = config.public.apiBaseUrl || "http://localhost:8000";
+
+    // Determine export endpoint based on card selection
+    const exportUrl = selectedCardId.value === "all"
+      ? `${apiBaseUrl}/analytics/business/overview/export?${params}&token=${token}`
+      : `${apiBaseUrl}/analytics/nfc/${selectedCardId.value}/export?${params}&token=${token}`;
+
+    window.open(exportUrl, "_blank");
+
+    $toast.success("Exporting analytics...");
+  } catch (error) {
+    $toast.error("Failed to export analytics");
+    console.error("Export error:", error);
+  }
 };
 
 const getDeviceIcon = (deviceType) => {
@@ -663,6 +615,15 @@ const formatDateTime = (date) => {
 
 // Lifecycle
 onMounted(async () => {
-  await loadAnalytics();
+  // Check if user is Business Plan
+  const user = authStore.user;
+  if (user?.subscription_plan !== "business") {
+    $toast.error("This page is only for Business Plan users");
+    router.push("/UserDashboard");
+    return;
+  }
+
+  // Load initial data
+  await Promise.all([loadNfcCards(), loadEmployees()]);
 });
 </script>
