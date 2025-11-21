@@ -113,10 +113,16 @@ class ActivityLog extends Model
 
     /**
      * Scope for business account activities
+     * Includes both:
+     * 1. Employee activities (business_account_id = admin ID)
+     * 2. Admin's own activities (user_id = admin ID)
      */
     public function scopeForBusinessAccount($query, $businessAccountId)
     {
-        return $query->where('business_account_id', $businessAccountId);
+        return $query->where(function($q) use ($businessAccountId) {
+            $q->where('business_account_id', $businessAccountId)
+              ->orWhere('user_id', $businessAccountId);
+        });
     }
 
     /**

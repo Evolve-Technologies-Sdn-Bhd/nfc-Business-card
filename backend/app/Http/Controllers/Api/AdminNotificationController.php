@@ -248,10 +248,6 @@ class AdminNotificationController extends Controller
             ], 400);
         }
 
-        // Approve the notification
-        $notification->approve(auth()->id());
-        \Log::info('Notification approved', ['notification_id' => $notification->id]);
-
         // Get order data
         $orderData = $notification->data ?? [];
         
@@ -312,7 +308,76 @@ class AdminNotificationController extends Controller
             // Get business account for employee creation
             $businessAccount = $businessAccountId ? User::find($businessAccountId) : $user;
 
-            // PRE-VALIDATION: Check if any employee emails already exist
+            // PRE-VALIDATION 1: Check if admin has card when ordering employee cards only
+            $hasAdminCard = false;
+            $hasEmployeeCard = false;
+            
+            foreach ($cards as $cardData) {
+                if ($cardData['is_admin_card'] ?? false) {
+                    $hasAdminCard = true;
+                }
+                if ($cardData['is_employee_card'] ?? false) {
+                    $hasEmployeeCard = true;
+                }
+            }
+            
+            // If ordering employee cards only (no admin card in this order)
+            if ($hasEmployeeCard && !$hasAdminCard) {
+                // Check if business admin already has at least one card
+                $adminCardCount = \DB::table('nfc_cards')
+                    ->where('user_id', $businessAccount->id)
+                    ->count();
+                
+                if ($adminCardCount === 0) {
+                    \Log::warning('Admin has no card but trying to order employee cards only - auto-rejecting', [
+                        'business_account_id' => $businessAccount->id,
+                        'admin_email' => $businessAccount->email
+                    ]);
+                    
+                    $rejectionReason = "Order automatically rejected: Business admin must have at least one card before ordering employee cards.\n\n";
+                    $rejectionReason .= "📋 Issue:\n";
+                    $rejectionReason .= "• You are trying to order employee cards only\n";
+                    $rejectionReason .= "• Your business admin account ({$businessAccount->email}) does not have any cards yet\n\n";
+                    $rejectionReason .= "⚠️ Solution:\n";
+                    $rejectionReason .= "• Option 1: Include your admin card in this order (check 'Include myself')\n";
+                    $rejectionReason .= "• Option 2: Order your admin card first, then order employee cards separately\n\n";
+                    $rejectionReason .= "Note: Business admin must have a card before employees can have cards.";
+                    
+                    // Auto-reject the notification
+                    $notification->reject($rejectionReason, auth()->id());
+                    
+                    // Send rejection notification to the user
+                    $this->notificationService->create(
+                        $user,
+                        'order_rejected',
+                        [
+                            'order_number' => $notification->id,
+                            'rejection_reason' => $rejectionReason,
+                            'reason_type' => 'admin_card_required',
+                        ]
+                    );
+                    
+                    \Log::info('Order auto-rejected - admin card required', [
+                        'notification_id' => $notification->id,
+                        'user_id' => $user->id,
+                        'business_account_id' => $businessAccount->id
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Order automatically rejected: Admin must have a card before ordering employee cards',
+                        'rejection_reason' => $rejectionReason,
+                        'notification_id' => $notification->id,
+                    ], 400);
+                }
+                
+                \Log::info('Admin card check passed - admin has existing cards', [
+                    'business_account_id' => $businessAccount->id,
+                    'admin_card_count' => $adminCardCount
+                ]);
+            }
+
+            // PRE-VALIDATION 2: Check if any employee emails already exist
             $existingEmployees = [];
             foreach ($cards as $cardData) {
                 if (($cardData['is_employee_card'] ?? false) && !empty($cardData['email'])) {
@@ -580,6 +645,10 @@ class AdminNotificationController extends Controller
             }
 
             \Log::info('All cards created successfully', ['total_created' => count($createdCards), 'total_employees_created' => count($createdEmployees)]);
+
+            // Now that all cards are created successfully, approve the notification
+            $notification->approve(auth()->id());
+            \Log::info('Notification approved after successful card creation', ['notification_id' => $notification->id]);
 
             // Send confirmation notification to business admin
             $confirmMessage = count($createdCards) . ' card(s) created';

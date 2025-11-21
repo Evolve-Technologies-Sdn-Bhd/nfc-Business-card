@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Profile;
+use App\Models\ActivityLog;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -109,6 +110,20 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Log login activity
+        ActivityLog::logActivity(
+            $user,
+            'login',
+            'User logged in successfully',
+            [
+                'metadata' => [
+                    'ip_address' => $request->ip(),
+                    'device' => $this->getDeviceInfo($request->userAgent()),
+                    'user_agent' => $request->userAgent(),
+                ]
+            ]
+        );
+
         // Check if this is a new device/location (simplified check)
         $lastLoginDevice = $user->last_login_device ?? '';
         $currentDevice = $request->userAgent();
@@ -135,7 +150,23 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        
+        // Log logout activity before deleting token
+        ActivityLog::logActivity(
+            $user,
+            'logout',
+            'User logged out',
+            [
+                'metadata' => [
+                    'ip_address' => $request->ip(),
+                    'device' => $this->getDeviceInfo($request->userAgent()),
+                    'user_agent' => $request->userAgent(),
+                ]
+            ]
+        );
+        
+        $user->currentAccessToken()->delete();
 
         return response()->json([
             'success' => true,

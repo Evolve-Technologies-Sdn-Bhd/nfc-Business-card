@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Services\SocialAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,6 +74,20 @@ class SocialAuthController extends Controller
 
         try {
             $user = $this->socialAuthService->handleCallback($provider);
+            
+            // Log login activity for OAuth login
+            ActivityLog::logActivity(
+                $user,
+                'login',
+                'User logged in via ' . ucfirst($provider) . ' OAuth',
+                [
+                    'metadata' => [
+                        'ip_address' => $request->ip(),
+                        'provider' => $provider,
+                        'user_agent' => $request->userAgent(),
+                    ]
+                ]
+            );
             
             // Create a Sanctum token for the user
             $token = $user->createToken('oauth-token')->plainTextToken;
