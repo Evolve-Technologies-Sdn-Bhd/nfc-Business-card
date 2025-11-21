@@ -1,90 +1,104 @@
 <!-- pages/AdminManagement/notifications.vue -->
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b sticky top-0 z-10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <h1 class="text-2xl font-semibold text-gray-900">
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-secondary-900">
             Notification Management
           </h1>
+          <p class="mt-2 text-secondary-600">
+            Manage system notifications and announcements
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0">
           <button
             @click="showSendModal = true"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            class="btn btn-primary"
           >
-            <Icon name="heroicons:megaphone" class="w-5 h-5 mr-2" />
+            <Icon name="heroicons:megaphone" class="h-5 w-5 mr-2" />
             Send Announcement
           </button>
         </div>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div>
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600">Total Notifications</p>
-              <p class="text-2xl font-bold text-gray-900">
-                {{ statistics.total_notifications || 0 }}
-              </p>
+        <div class="card">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-secondary-600">Total Notifications</p>
+                <p class="text-2xl font-bold text-secondary-900">
+                  {{ statistics.total_notifications || 0 }}
+                </p>
+              </div>
+              <Icon
+                name="heroicons:bell"
+                class="w-12 h-12 text-blue-500 opacity-50"
+              />
             </div>
-            <Icon
-              name="heroicons:bell"
-              class="w-12 h-12 text-blue-500 opacity-50"
-            />
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600">Unread</p>
-              <p class="text-2xl font-bold text-orange-600">
-                {{ statistics.total_unread || 0 }}
-              </p>
+        <div class="card">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-secondary-600">Unread</p>
+                <p class="text-2xl font-bold text-warning-600">
+                  {{ statistics.total_unread || 0 }}
+                </p>
+              </div>
+              <Icon
+                name="heroicons:envelope"
+                class="w-12 h-12 text-warning-500 opacity-50"
+              />
             </div>
-            <Icon
-              name="heroicons:envelope"
-              class="w-12 h-12 text-orange-500 opacity-50"
-            />
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600">Today</p>
-              <p class="text-2xl font-bold text-green-600">
-                {{ statistics.today || 0 }}
-              </p>
+        <div class="card">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-secondary-600">Today</p>
+                <p class="text-2xl font-bold text-success-600">
+                  {{ statistics.today || 0 }}
+                </p>
+              </div>
+              <Icon
+                name="heroicons:calendar"
+                class="w-12 h-12 text-success-500 opacity-50"
+              />
             </div>
-            <Icon
-              name="heroicons:calendar"
-              class="w-12 h-12 text-green-500 opacity-50"
-            />
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600">Last 7 Days</p>
-              <p class="text-2xl font-bold text-purple-600">
-                {{ statistics.recent_7_days || 0 }}
-              </p>
+        <div class="card">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-secondary-600">Last 7 Days</p>
+                <p class="text-2xl font-bold text-purple-600">
+                  {{ statistics.recent_7_days || 0 }}
+                </p>
+              </div>
+              <Icon
+                name="heroicons:chart-bar"
+                class="w-12 h-12 text-purple-500 opacity-50"
+              />
             </div>
-            <Icon
-              name="heroicons:chart-bar"
-              class="w-12 h-12 text-purple-500 opacity-50"
-            />
           </div>
         </div>
       </div>
 
       <!-- Actions Bar -->
-      <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="card mb-6">
+        <div class="card-body">
         <div class="flex flex-wrap items-center gap-4">
           <!-- Search Input -->
           <div class="flex-1 min-w-[200px]">
@@ -196,61 +210,62 @@
             Apply
           </button>
         </div>
+        </div>
       </div>
 
       <!-- Notifications List -->
-      <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="card">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-secondary-200">
+            <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   User
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Type
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Message
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Priority
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Delivery
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Date
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-secondary-200">
               <tr
                 v-for="notification in notifications"
                 :key="notification.id"
-                class="hover:bg-gray-50"
+                class="hover:bg-secondary-50"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">

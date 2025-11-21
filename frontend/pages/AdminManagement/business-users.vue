@@ -165,7 +165,12 @@
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
-                  Employees
+                  <div class="flex flex-col">
+                    <span>Employees</span>
+                    <span class="text-xs font-semibold text-secondary-500 normal-case mt-0.5">
+                      (excl. admin)
+                    </span>
+                  </div>
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"

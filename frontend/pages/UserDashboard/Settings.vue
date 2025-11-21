@@ -1496,9 +1496,18 @@ const loadUserNfcCards = async () => {
     if (response.success && response.nfc_cards) {
       // Filter to show only user's own cards (not employee cards)
       const currentUserId = authStore.user?.id;
+      console.log("🔍 Filtering cards for user ID:", currentUserId);
+      console.log("📦 Total cards from API:", response.nfc_cards.length);
+      
       const userCards = response.nfc_cards.filter(card => {
-        return card.user_id === currentUserId;
+        const isOwnCard = card.user_id === currentUserId;
+        if (!isOwnCard) {
+          console.log(`⏭️ Skipping card ${card.nfc_card_id} (belongs to user ${card.user_id})`);
+        }
+        return isOwnCard;
       });
+
+      console.log("✅ User's own cards:", userCards.length);
 
       // Add cards and assume they have landing pages (since user saved in ProfileBuilder)
       const cardsWithStatus = userCards.map(card => ({
@@ -1507,7 +1516,7 @@ const loadUserNfcCards = async () => {
       }));
 
       userNfcCards.value = cardsWithStatus;
-      console.log("✅ Loaded NFC cards:", userNfcCards.value.length);
+      console.log("✅ Loaded NFC cards for Settings:", userNfcCards.value.length);
     } else {
       console.log("ℹ️ No cards returned from API");
       userNfcCards.value = [];

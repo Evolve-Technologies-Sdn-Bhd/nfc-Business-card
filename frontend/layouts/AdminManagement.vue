@@ -253,6 +253,11 @@ const navigation = [
     icon: "heroicons:chat-bubble-left-right",
   },
   {
+    name: "Profile Builder Design",
+    href: "/AdminManagement/profile-builder-design",
+    icon: "heroicons:paint-brush",
+  },
+  {
     name: "System Statistics",
     href: "/AdminManagement/stats",
     icon: "heroicons:chart-pie",
