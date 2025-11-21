@@ -33,6 +33,8 @@ use App\Http\Controllers\BusinessPlanRequestController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Api\Admin\PlanPriceController;
+use App\Http\Controllers\Api\ProfileDesignController;
+use App\Http\Controllers\Api\Admin\ProfileBuilderFieldController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -203,6 +205,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])
         ->name('invoices.download')
         ->middleware('signed');
+    
+    // Profile Design Options (User - get available options)
+    Route::get('/profile-design-options', [ProfileDesignController::class, 'index']);
 });
 
 // Public legal documents routes
@@ -316,6 +321,26 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/{id}', [PlanPriceController::class, 'show']);
         Route::put('/{id}', [PlanPriceController::class, 'update']);
         Route::post('/bulk-update', [PlanPriceController::class, 'bulkUpdate']);
+    });
+
+    // ✅ Profile Design Options Management
+    Route::prefix('profile-design-options')->group(function () {
+        Route::get('/', [ProfileDesignController::class, 'adminIndex']);
+        Route::get('/types', [ProfileDesignController::class, 'getTypes']);
+        Route::post('/', [ProfileDesignController::class, 'store']);
+        Route::put('/{id}', [ProfileDesignController::class, 'update']);
+        Route::delete('/{id}', [ProfileDesignController::class, 'destroy']);
+        Route::post('/{id}/toggle-active', [ProfileDesignController::class, 'toggleActive']);
+        Route::post('/{id}/set-default', [ProfileDesignController::class, 'setDefault']);
+        Route::post('/reorder', [ProfileDesignController::class, 'reorder']);
+    });
+
+    // ✅ Profile Builder Fields Management
+    Route::prefix('profile-builder-fields')->group(function () {
+        Route::get('/', [ProfileBuilderFieldController::class, 'index']);
+        Route::post('/', [ProfileBuilderFieldController::class, 'store']);
+        Route::put('/{id}', [ProfileBuilderFieldController::class, 'update']);
+        Route::delete('/{id}', [ProfileBuilderFieldController::class, 'destroy']);
     });
 });
 
