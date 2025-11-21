@@ -1178,8 +1178,19 @@ const submitOrder = async () => {
 };
 
 const editCard = (card) => {
-  selectedCard.value = card;
-  showCardDetailsModal.value = true;
+  // Navigate to BusinessProfileBuilder with the selected card's NFC tag and open Apply Design modal
+  if (card.nfcTag?.id) {
+    router.push(
+      `/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?nfc_tag_id=${card.nfcTag.id}&openApplyDesign=true`
+    );
+  } else if (card.nfc_card_id) {
+    // If no profile yet, pass the card ID to create a new profile and open Apply Design modal
+    router.push(
+      `/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?nfc_card_id=${card.nfc_card_id}&openApplyDesign=true`
+    );
+  } else {
+    $toast.error("Cannot edit this card: No valid card ID found");
+  }
 };
 
 const goToProfileBuilder = () => {
@@ -1190,13 +1201,13 @@ const goToProfileBuilder = () => {
 
   // If card has a linked profile, edit it
   if (selectedCard.value.nfcTag?.id) {
-    navigateTo(
-      `/UserDashboard/ProfileBuilder?nfc_tag_id=${selectedCard.value.nfcTag.id}`
+    router.push(
+      `/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?nfc_tag_id=${selectedCard.value.nfcTag.id}`
     );
   } else {
     // If no profile, go to Profile Builder to create new one with this card pre-selected
-    navigateTo(
-      `/UserDashboard/ProfileBuilder?nfc_card_id=${selectedCard.value.nfc_card_id}`
+    router.push(
+      `/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?nfc_card_id=${selectedCard.value.nfc_card_id}`
     );
   }
 };

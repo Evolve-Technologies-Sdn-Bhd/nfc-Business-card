@@ -178,21 +178,30 @@
       </button>
     </Transition>
 
-    <!-- Preview Mode Banner - Minimal -->
+    <!-- Preview Mode Banner -->
     <Transition name="fade-slide">
       <div
         v-if="isPreviewMode"
-        :class="[
-          'fixed top-0 left-0 right-0 z-50 text-center',
-          'bg-blue-500 text-white font-medium'
-        ]"
         :style="{
-          fontSize: '10px',
-          padding: '3px 8px',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+          position: 'fixed',
+          top: isMobile ? '60px' : '70px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 999,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          padding: isMobile ? '10px 20px' : '12px 30px',
+          borderRadius: '50px',
+          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: isMobile ? '13px' : '14px',
+          fontWeight: 600,
         }"
       >
-        <span>👁️ Preview</span>
+        <span :style="{ fontSize: isMobile ? '16px' : '18px' }">👁️</span>
+        <span>Preview Mode - Changes not saved yet</span>
       </div>
     </Transition>
 

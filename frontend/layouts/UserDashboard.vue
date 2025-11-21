@@ -477,6 +477,17 @@ const logoutLoading = ref(false);
 // Computed
 const user = computed(() => authStore.user);
 
+// Development mode check
+const isDevelopment = computed(() => {
+  if (process.client) {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' || 
+           window.location.hostname.includes('192.168') || 
+           window.location.hostname.includes('172.19');
+  }
+  return false;
+});
+
 // Plan-aware navigation items
 const navigation = computed(() => {
   const plan = authStore.user?.subscription_plan || "free";
@@ -492,13 +503,6 @@ const navigation = computed(() => {
         ? "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder"
         : "/UserDashboard/ProfileBuilder",
       icon: "heroicons:user",
-    },
-    {
-      name: "Link Management",
-      href: isBusinessPlan
-        ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessLinkManagement"
-        : "/UserDashboard/LinkManagement",
-      icon: "heroicons:wifi",
     },
     {
       name: "Card Management",

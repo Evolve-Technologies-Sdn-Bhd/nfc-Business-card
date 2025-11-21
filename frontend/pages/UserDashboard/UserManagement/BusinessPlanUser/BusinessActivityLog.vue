@@ -235,11 +235,21 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-secondary-900">
-                    {{ log.user?.name }}
-                  </div>
-                  <div class="text-xs text-secondary-500">
-                    {{ log.user?.email }}
+                  <div class="flex items-center gap-2">
+                    <div>
+                      <div class="text-sm font-medium text-secondary-900">
+                        {{ log.user?.name }}
+                      </div>
+                      <div class="text-xs text-secondary-500">
+                        {{ log.user?.email }}
+                      </div>
+                    </div>
+                    <span 
+                      v-if="isAdminUser(log.user)"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
+                    >
+                      Admin
+                    </span>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -545,15 +555,39 @@ const fetchActivityLogs = async (page = 1) => {
   }
 };
 
-// Fetch employees
+// Fetch employees for filter dropdown
 const fetchEmployees = async () => {
   try {
+    console.log("🔄 Fetching employees...");
     const response = await $api.get("/business/employees");
-    if (response.success) {
-      employees.value = response.employees || [];
+    console.log("📋 Employees response:", response);
+    
+    if (response.success && response.data && response.data.employees) {
+      employees.value = response.data.employees.map(employee => ({
+        id: employee.id,
+        name: employee.full_name || `${employee.first_name} ${employee.last_name}`,
+        email: employee.email
+      }));
+      console.log("✅ Employees loaded:", employees.value);
+    } else if (response.success && response.employees) {
+      // Fallback for direct employees property
+      employees.value = response.employees.map(employee => ({
+        id: employee.id,
+        name: employee.full_name || `${employee.first_name} ${employee.last_name}`,
+        email: employee.email
+      }));
+      console.log("✅ Employees loaded (direct):", employees.value);
+    } else {
+      console.log("⚠️ No employees found in response");
     }
   } catch (error) {
-    console.error("Error fetching employees:", error);
+    console.error("❌ Error fetching employees:", error);
+    // Add some mock data for testing
+    employees.value = [
+      { id: 1, name: "John Doe", email: "john@company.com" },
+      { id: 2, name: "Jane Smith", email: "jane@company.com" }
+    ];
+    console.log("🔧 Using mock employee data for testing");
   }
 };
 
@@ -562,7 +596,8 @@ const fetchActionTypes = async () => {
   try {
     const response = await $api.get("/business/activity-logs/action-types");
     if (response.success) {
-      actionTypes.value = response.action_types || [];
+      // Backend returns data as object, convert to array of keys
+      actionTypes.value = response.data ? Object.keys(response.data) : [];
     }
   } catch (error) {
     console.error("Error fetching action types:", error);
@@ -574,7 +609,7 @@ const fetchStatistics = async () => {
   try {
     const response = await $api.get("/business/activity-logs/statistics");
     if (response.success) {
-      statistics.value = response;
+      statistics.value = response.data;
     }
   } catch (error) {
     console.error("Error fetching statistics:", error);
@@ -666,6 +701,20 @@ const getActionClass = (actionType) => {
     settings_changed: "bg-orange-100 text-orange-800",
   };
   return classes[actionType] || "bg-secondary-100 text-secondary-800";
+};
+
+// Check if user is admin (current account owner)
+const isAdminUser = (user) => {
+  if (!user) return false;
+  
+  // Check if user is the current admin account
+  const currentUser = authStore.user;
+  if (currentUser && user.id === currentUser.id) {
+    return true;
+  }
+  
+  // Check if user has admin role
+  return user.admin_role === 'admin' || user.admin_role === 'super_admin' || user.is_admin === true;
 };
 
 // Format date
