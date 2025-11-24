@@ -1,31 +1,28 @@
 <!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
+  <div>
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-secondary-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div>
-            <h1 class="text-2xl font-semibold text-secondary-900">
-              Employee Management
-            </h1>
-            <p class="text-sm text-secondary-600">
-              Manage employee details, cards and passwords
-            </p>
-          </div>
-          <div class="flex items-center space-x-3">
-            <button @click="showCardDesignModal = true" class="btn btn-primary">
-              <Icon name="heroicons:paint-brush" class="h-4 w-4 mr-2" />
-              Design Cards
-            </button>
-          </div>
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-secondary-900">
+            Employee Management
+          </h1>
+          <p class="mt-2 text-secondary-600">
+            Manage employee details, cards and passwords
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <button @click="showCardDesignModal = true" class="btn btn-primary">
+            <Icon name="heroicons:paint-brush" class="h-5 w-5 mr-2" />
+            Design Cards
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Account & Card Usage Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Account & Card Usage Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="card">
           <div class="card-body">
             <div class="flex items-center">
@@ -366,7 +363,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- View Employee Details Modal -->
     <Transition name="modal">
@@ -599,7 +595,7 @@
 // Layout
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 // Stores and Composables

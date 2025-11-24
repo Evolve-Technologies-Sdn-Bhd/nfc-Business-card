@@ -1,31 +1,23 @@
 <!-- pages/UserDashboard/CardManagement.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
+  <div>
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-secondary-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-4">
-            <div>
-              <h1 class="text-2xl font-semibold text-secondary-900">
-                Business Plan - Card Management
-              </h1>
-              <p class="text-sm text-secondary-600">
-                Manage Business Plan NFC cards for employees
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button @click="goToDesignPage" class="btn btn-primary">
-              <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-              Order New Card
-            </button>
-          </div>
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-secondary-900">Card Management</h1>
+          <p class="mt-2 text-secondary-600">
+            Manage Business Plan NFC cards for employees
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <button @click="goToDesignPage" class="btn btn-primary">
+            <Icon name="heroicons:plus" class="h-5 w-5 mr-2" />
+            Order New Card
+          </button>
         </div>
       </div>
     </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Employee Filter Notice -->
       <div
         v-if="route.query.employee_id"
@@ -51,10 +43,9 @@
         </button>
       </div>
 
-      <!-- Filter and Search Section -->
-      <div
-        class="bg-white rounded-lg shadow-sm border border-secondary-200 p-4 mb-6"
-      >
+    <!-- Filter and Search Section -->
+    <div class="card mb-6">
+      <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Employee Filter -->
           <div>
@@ -141,9 +132,10 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- My Cards Section -->
-      <div v-if="myCards.length > 0" class="mb-8">
+    <!-- My Cards Section -->
+    <div v-if="myCards.length > 0" class="mb-8">
         <h2
           class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
         >
@@ -269,10 +261,10 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
 
-      <!-- Employee Cards Section -->
-      <div v-if="employeeCards.length > 0" class="mb-8">
+    <!-- Employee Cards Section -->
+    <div v-if="employeeCards.length > 0" class="mb-8">
         <h2
           class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
         >
@@ -409,10 +401,10 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
 
-      <!-- No Cards Message -->
-      <div v-if="allCards.length === 0 && !loading" class="text-center py-12">
+    <!-- No Cards Message -->
+    <div v-if="allCards.length === 0 && !loading" class="text-center py-12">
         <div class="max-w-md mx-auto">
           <Icon
             name="heroicons:credit-card"
@@ -430,13 +422,12 @@
             Order Your First Card
           </button>
         </div>
-      </div>
+    </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="text-center py-12">
-        <div class="spinner mx-auto mb-4"></div>
-        <p class="text-secondary-600">Loading card information...</p>
-      </div>
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center py-12">
+      <div class="spinner mx-auto mb-4"></div>
+      <p class="text-secondary-600">Loading card information...</p>
     </div>
 
     <!-- Order New Card Modal -->
@@ -885,11 +876,20 @@
 // Layout
 definePageMeta({
   layout: "user-dashboard",
+  middleware: ["auth"],
 });
 
 // Stores
 const authStore = useAuthStore();
 const { $toast, $api } = useNuxtApp();
+
+// Safe toast helper
+const safeToast = {
+  success: (msg) => $toast && $toast.success && $toast.success(msg),
+  error: (msg) => $toast && $toast.error && $toast.error(msg),
+  info: (msg) => $toast && $toast.info && $toast.info(msg),
+  warning: (msg) => $toast && $toast.warning && $toast.warning(msg),
+};
 
 // Reactive data
 const loading = ref(true);
@@ -1021,11 +1021,14 @@ const goToDesignPage = () => {
 const loadEmployees = async () => {
   try {
     const response = await $api.get("/business/employees");
-    if (response.success) {
+    if (response && response.success) {
       employees.value = response.employees || [];
+    } else {
+      employees.value = [];
     }
   } catch (error) {
     console.error("Failed to load employees:", error);
+    employees.value = [];
   }
 };
 
@@ -1034,16 +1037,20 @@ const loadNfcCards = async () => {
     console.log("Loading NFC cards...");
     const response = await $api.get("/nfc-cards");
     console.log("NFC cards response:", response);
-    if (response.success) {
+    if (response && response.success) {
       console.log("Cards loaded:", response.nfc_cards);
-      allCards.value = response.nfc_cards;
-      nfcCards.value = response.nfc_cards;
+      allCards.value = response.nfc_cards || [];
+      nfcCards.value = response.nfc_cards || [];
     } else {
       console.error("Response not successful:", response);
+      allCards.value = [];
+      nfcCards.value = [];
     }
   } catch (error) {
-    $toast.error("Failed to load NFC cards");
     console.error("Failed to load NFC cards:", error);
+    allCards.value = [];
+    nfcCards.value = [];
+    safeToast.error("Failed to load NFC cards");
   } finally {
     loading.value = false;
   }
@@ -1294,7 +1301,7 @@ onMounted(async () => {
     
     // Show toast notification
     if (employeeNameParam) {
-      $toast.info(`Showing NFC cards for ${employeeNameParam}`);
+      safeToast.info(`Showing NFC cards for ${employeeNameParam}`);
     }
   }
   

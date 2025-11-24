@@ -73,6 +73,12 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
         ]);
 
+        // Seed profile builder fields
+        $this->call([
+            ProfileBuilderFieldsSeeder::class,
+            AddMissingProfileFieldsSeeder::class,
+        ]);
+
         $this->command->info('Sample data created successfully!');
         $this->command->info('Test user: john@example.com / password');
     }

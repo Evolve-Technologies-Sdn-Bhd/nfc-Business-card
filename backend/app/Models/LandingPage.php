@@ -57,6 +57,9 @@ class LandingPage extends Model
         'font',
         'button_style',
         'show_watermark',
+        // Design & Fields Configuration
+        'design_config',
+        'visible_fields',
         // Status
         'is_active',
         'settings',
@@ -68,6 +71,8 @@ class LandingPage extends Model
         'social_links' => 'array',
         'team_members' => 'array',
         'settings' => 'array',
+        'design_config' => 'array',
+        'visible_fields' => 'array',
         'show_watermark' => 'boolean',
         'is_active' => 'boolean',
     ];

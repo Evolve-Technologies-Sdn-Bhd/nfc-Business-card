@@ -46,81 +46,47 @@
         <!-- Expanded Content -->
         <div v-if="expandedPlans.includes(plan.id)" class="border-t border-secondary-200 bg-white">
           <div class="p-6 space-y-6">
-            <!-- Design Options -->
+            <!-- General Sections -->
             <div>
               <h3 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
-                <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2" />
-                Design Options
+                <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2" />
+                General Sections
               </h3>
               <div class="space-y-4">
-                <div v-for="tab in tabs" :key="tab.id">
+                <div v-for="tab in generalTabs" :key="tab.id">
                   <!-- Category Header -->
-                  <button
-                    @click="toggleCategory(plan.id, tab.id)"
-                    class="w-full flex items-center justify-between p-2 hover:bg-secondary-50 rounded-md transition-all"
-                  >
-                    <div class="flex items-center gap-2">
-                      <Icon :name="tab.icon" class="w-4 h-4 text-secondary-600" />
-                      <span class="text-sm font-medium text-secondary-900">{{ tab.name }}</span>
-                      <span class="text-xs text-secondary-500">({{ getTabItemCount(tab.id) }})</span>
+                  <div class="w-full flex items-center justify-between p-2 hover:bg-secondary-50 rounded-md transition-all">
+                    <div class="flex items-center gap-2 flex-1">
+                      <!-- Select All Checkbox -->
+                      <input
+                        type="checkbox"
+                        :checked="isSectionFullySelected(plan.id, tab.id)"
+                        @change="toggleSectionForPlan(plan.id, tab.id, $event.target.checked)"
+                        @click.stop
+                        class="w-4 h-4 rounded border-secondary-300 text-primary-600"
+                        :title="isSectionFullySelected(plan.id, tab.id) ? 'Unselect all' : 'Select all'"
+                      />
+                      <button
+                        @click="toggleCategory(plan.id, tab.id)"
+                        class="flex items-center gap-2 flex-1"
+                      >
+                        <Icon :name="tab.icon" class="w-4 h-4 text-secondary-600" />
+                        <span class="text-sm font-medium text-secondary-900">{{ tab.name }} Fields</span>
+                        <span class="text-xs text-secondary-500">({{ getFieldTabItemCount(tab.id) }})</span>
+                      </button>
                     </div>
-                    <Icon 
-                      :name="expandedCategories[plan.id]?.includes(tab.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
-                      class="w-4 h-4 text-secondary-500"
-                    />
-                  </button>
+                    <button @click="toggleCategory(plan.id, tab.id)">
+                      <Icon 
+                        :name="expandedCategories[plan.id]?.includes(tab.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
+                        class="w-4 h-4 text-secondary-500"
+                      />
+                    </button>
+                  </div>
                   
                   <!-- Items List -->
                   <div v-if="expandedCategories[plan.id]?.includes(tab.id)" class="grid grid-cols-2 gap-2 ml-6 mt-2">
                     <label
-                      v-for="option in (options[tab.id] || [])"
-                      :key="option.id"
-                      class="flex items-center p-2 border border-secondary-200 rounded-md hover:bg-secondary-50 cursor-pointer transition-all text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        :checked="isAvailableForPlan(option, plan.id)"
-                        @change="toggleOptionForPlan(option, plan.id, $event.target.checked)"
-                        class="w-3.5 h-3.5 rounded border-secondary-300 text-primary-600"
-                      />
-                      <span class="ml-2 text-secondary-900 truncate">{{ option.name }}</span>
-                    </label>
-                    <div v-if="(options[tab.id] || []).length === 0" class="col-span-2 text-xs text-secondary-400 italic p-2">
-                      No items yet
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Fields -->
-            <div>
-              <h3 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
-                <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2" />
-                Input Fields
-              </h3>
-              <div class="space-y-4">
-                <div v-for="fieldTab in fieldTabs" :key="fieldTab.id">
-                  <!-- Category Header -->
-                  <button
-                    @click="toggleCategory(plan.id, fieldTab.id)"
-                    class="w-full flex items-center justify-between p-2 hover:bg-secondary-50 rounded-md transition-all"
-                  >
-                    <div class="flex items-center gap-2">
-                      <Icon :name="fieldTab.icon" class="w-4 h-4 text-secondary-600" />
-                      <span class="text-sm font-medium text-secondary-900">{{ fieldTab.name }}</span>
-                      <span class="text-xs text-secondary-500">({{ getFieldTabItemCount(fieldTab.id) }})</span>
-                    </div>
-                    <Icon 
-                      :name="expandedCategories[plan.id]?.includes(fieldTab.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
-                      class="w-4 h-4 text-secondary-500"
-                    />
-                  </button>
-                  
-                  <!-- Items List -->
-                  <div v-if="expandedCategories[plan.id]?.includes(fieldTab.id)" class="grid grid-cols-2 gap-2 ml-6 mt-2">
-                    <label
-                      v-for="field in (fields[fieldTab.id.replace('field_', '')] || [])"
+                      v-for="field in (fields[tab.id.replace('field_', '')] || [])"
                       :key="field.id"
                       class="flex items-center p-2 border border-secondary-200 rounded-md hover:bg-secondary-50 cursor-pointer transition-all text-sm"
                     >
@@ -132,8 +98,73 @@
                       />
                       <span class="ml-2 text-secondary-900 truncate">{{ field.label }}</span>
                     </label>
-                    <div v-if="(fields[fieldTab.id.replace('field_', '')] || []).length === 0" class="col-span-2 text-xs text-secondary-400 italic p-2">
+                    <div v-if="(fields[tab.id.replace('field_', '')] || []).length === 0" class="col-span-2 text-xs text-secondary-400 italic p-2">
                       No items yet
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Design Sections -->
+            <div>
+              <h3 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
+                <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2" />
+                Design Sections
+              </h3>
+              <div class="space-y-4">
+                <div v-for="designTab in designTabs" :key="designTab.id">
+                  <!-- Category Header -->
+                  <div class="w-full flex items-center justify-between p-2 hover:bg-secondary-50 rounded-md transition-all">
+                    <div class="flex items-center gap-2 flex-1">
+                      <!-- Select All Checkbox -->
+                      <input
+                        type="checkbox"
+                        :checked="isDesignSectionFullySelected(plan.id, designTab.subItems)"
+                        @change="toggleDesignSectionForPlan(plan.id, designTab.subItems, $event.target.checked)"
+                        @click.stop
+                        class="w-4 h-4 rounded border-secondary-300 text-primary-600"
+                        :title="isDesignSectionFullySelected(plan.id, designTab.subItems) ? 'Unselect all' : 'Select all'"
+                      />
+                      <button
+                        @click="toggleCategory(plan.id, designTab.id)"
+                        class="flex items-center gap-2 flex-1"
+                      >
+                        <Icon :name="designTab.icon" class="w-4 h-4 text-secondary-600" />
+                        <span class="text-sm font-medium text-secondary-900">{{ designTab.name }}</span>
+                        <span class="text-xs text-secondary-500">({{ getDesignCategoryItemCount(designTab.subItems) }})</span>
+                      </button>
+                    </div>
+                    <button @click="toggleCategory(plan.id, designTab.id)">
+                      <Icon 
+                        :name="expandedCategories[plan.id]?.includes(designTab.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
+                        class="w-4 h-4 text-secondary-500"
+                      />
+                    </button>
+                  </div>
+                  
+                  <!-- Sub Items -->
+                  <div v-if="expandedCategories[plan.id]?.includes(designTab.id)" class="ml-6 mt-2 space-y-2">
+                    <div v-for="subItem in designTab.subItems" :key="subItem" class="space-y-2">
+                      <div class="text-xs font-medium text-secondary-700 px-2 py-1">{{ getTabName(subItem) }}</div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <label
+                          v-for="option in (options[subItem] || [])"
+                          :key="option.id"
+                          class="flex items-center p-2 border border-secondary-200 rounded-md hover:bg-secondary-50 cursor-pointer transition-all text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="isAvailableForPlan(option, plan.id)"
+                            @change="toggleOptionForPlan(option, plan.id, $event.target.checked)"
+                            class="w-3.5 h-3.5 rounded border-secondary-300 text-primary-600"
+                          />
+                          <span class="ml-2 text-secondary-900 truncate">{{ option.name }}</span>
+                        </label>
+                        <div v-if="(options[subItem] || []).length === 0" class="col-span-2 text-xs text-secondary-400 italic p-2">
+                          No items yet
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -650,6 +681,36 @@
                         </div>
                       </div>
 
+                      <!-- Repeater Configuration -->
+                      <div v-if="formData.field_type === 'repeater'" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <h4 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
+                          <Icon name="heroicons:queue-list" class="w-4 h-4 mr-2" />
+                          Repeater Configuration
+                        </h4>
+                        <div class="space-y-3">
+                          <div>
+                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Max Items</label>
+                            <input
+                              v-model.number="formData.config.max_items"
+                              type="number"
+                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              placeholder="e.g., 3 or 6"
+                              min="1"
+                            />
+                          </div>
+                          <div>
+                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Sub-fields (JSON array)</label>
+                            <textarea
+                              v-model="formData.config.sub_fields"
+                              rows="4"
+                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder='[{"key": "num", "label": "Number", "type": "text"}, {"key": "label", "label": "Label", "type": "text"}]'
+                            ></textarea>
+                            <p class="text-xs text-secondary-500 mt-1">Define sub-fields as JSON array</p>
+                          </div>
+                        </div>
+                      </div>
+
                       <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
                         <h4 class="text-sm font-semibold text-secondary-900 mb-3">Validation</h4>
                         <div class="grid grid-cols-2 gap-4">
@@ -960,12 +1021,13 @@ const currentTab = ref('theme');
 const selectedPlanFilter = ref(null);
 const loading = ref(false);
 const saving = ref(false);
+const isFetching = ref(false);
 const options = ref({});
 const fields = ref({});
 const showModal = ref(false);
 const modalMode = ref('add');
 const editingOption = ref(null);
-const expandedPlans = ref(['business']);
+const expandedPlans = ref([]);
 
 // Plans
 const plans = [
@@ -974,7 +1036,22 @@ const plans = [
   { id: 'basic', name: 'Basic', color: 'blue' },
 ];
 
-// Tabs (Design Options only - no fields)
+// General Sections tabs (aligned with user frontend)
+const generalTabs = [
+  { id: 'field_profile', name: 'Profile', icon: 'heroicons:user', category: 'general', requiredPermission: 'profile' },
+  { id: 'field_company', name: 'Company', icon: 'heroicons:building-office', category: 'general', requiredPermission: 'company' },
+  { id: 'field_services', name: 'Services', icon: 'heroicons:rocket-launch', category: 'general', requiredPermission: 'services' },
+  { id: 'field_links', name: 'Links', icon: 'heroicons:link', category: 'general', requiredPermission: 'links' },
+];
+
+// Design Sections tabs (aligned with user frontend)
+const designTabs = [
+  { id: 'design', name: 'Design', icon: 'heroicons:paint-brush', category: 'design', requiredPermission: 'design', subItems: ['profile_style'] },
+  { id: 'style', name: 'Style', icon: 'heroicons:sparkles', category: 'design', requiredPermission: 'style', subItems: ['theme', 'font', 'button_style', 'color_scheme', 'layout'] },
+  { id: 'watermarks', name: 'Watermarks', icon: 'heroicons:eye', category: 'design', requiredPermission: 'watermarks', subItems: ['feature_toggle'] },
+];
+
+// All tabs (for backward compatibility with legacy code)
 const tabs = [
   { id: 'theme', name: 'Themes', icon: 'heroicons:paint-brush' },
   { id: 'font', name: 'Fonts', icon: 'heroicons:language' },
@@ -985,7 +1062,7 @@ const tabs = [
   { id: 'feature_toggle', name: 'Features', icon: 'heroicons:sparkles' },
 ];
 
-// Field tabs
+// Field tabs (for backward compatibility with legacy code)
 const fieldTabs = [
   { id: 'field_profile', name: 'Profile Fields', icon: 'heroicons:identification' },
   { id: 'field_company', name: 'Company Fields', icon: 'heroicons:building-office-2' },
@@ -995,11 +1072,27 @@ const fieldTabs = [
 
 // Initialize expanded categories with all categories expanded by default
 const expandedCategories = ref({
-  business: [...tabs.map(t => t.id), ...fieldTabs.map(t => t.id)],
-  premium: [...tabs.map(t => t.id), ...fieldTabs.map(t => t.id)],
-  basic: [...tabs.map(t => t.id), ...fieldTabs.map(t => t.id)],
+  business: [
+    ...generalTabs.map(t => t.id), 
+    ...designTabs.map(t => t.id),
+    ...tabs.map(t => t.id), 
+    ...fieldTabs.map(t => t.id)
+  ],
+  premium: [
+    ...generalTabs.map(t => t.id), 
+    ...designTabs.map(t => t.id),
+    ...tabs.map(t => t.id), 
+    ...fieldTabs.map(t => t.id)
+  ],
+  basic: [
+    ...generalTabs.map(t => t.id), 
+    ...designTabs.map(t => t.id),
+    ...tabs.map(t => t.id), 
+    ...fieldTabs.map(t => t.id)
+  ],
 });
 
+// Default form data function
 const defaultFormData = () => {
   const isFieldTab = currentTab.value.startsWith('field_');
   
@@ -1066,10 +1159,14 @@ const getFilteredOptions = computed(() => {
 });
 
 const getFilteredOptionCount = (type) => {
-  const tempTab = currentTab.value;
-  currentTab.value = type;
-  const opts = currentOptions.value;
-  currentTab.value = tempTab;
+  let opts;
+  
+  if (type.startsWith('field_')) {
+    const fieldTab = type.replace('field_', '');
+    opts = (fields.value[fieldTab] || []).sort((a, b) => a.display_order - b.display_order);
+  } else {
+    opts = options.value[type] || [];
+  }
   
   if (!selectedPlanFilter.value) {
     return opts.length;
@@ -1100,7 +1197,11 @@ const getPlanNames = (option) => {
 
 // Methods
 const fetchOptions = async () => {
-  loading.value = true;
+  if (!authStore.token) {
+    console.log('⚠️ No auth token, skipping fetchOptions');
+    return;
+  }
+  
   try {
     const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-design-options`, {
       headers: {
@@ -1113,15 +1214,16 @@ const fetchOptions = async () => {
     const data = await response.json();
     options.value = data.data;
   } catch (error) {
-    console.error('Error fetching options:', error);
-    alert('Failed to load design options');
-  } finally {
-    loading.value = false;
+    console.error('❌ Error fetching options:', error);
   }
 };
 
 const fetchFields = async () => {
-  loading.value = true;
+  if (!authStore.token) {
+    console.log('⚠️ No auth token, skipping fetchFields');
+    return;
+  }
+  
   try {
     const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder-fields`, {
       headers: {
@@ -1134,15 +1236,27 @@ const fetchFields = async () => {
     const data = await response.json();
     fields.value = data.data;
   } catch (error) {
-    console.error('Error fetching fields:', error);
-    alert('Failed to load fields');
-  } finally {
-    loading.value = false;
+    console.error('❌ Error fetching fields:', error);
   }
 };
 
 const fetchData = async () => {
-  await Promise.all([fetchOptions(), fetchFields()]);
+  if (!authStore.token) {
+    console.log('⚠️ No auth token, skipping fetchData');
+    return;
+  }
+  
+  if (isFetching.value) {
+    console.log('⚠️ Already fetching data, skipping...');
+    return;
+  }
+  
+  isFetching.value = true;
+  try {
+    await Promise.all([fetchOptions(), fetchFields()]);
+  } finally {
+    isFetching.value = false;
+  }
 };
 
 const togglePlan = (planId) => {
@@ -1189,7 +1303,7 @@ const getPlanOptionCount = (planId) => {
 };
 
 // Toggle single option/field for a plan
-const toggleOptionForPlan = async (item, planId, checked) => {
+const toggleOptionForPlan = async (item, planId, checked, skipRefresh = false) => {
   try {
     const plans = item.available_plans || [];
     
@@ -1217,17 +1331,14 @@ const toggleOptionForPlan = async (item, planId, checked) => {
       });
     }
     
-    await fetchData();
+    // Only refresh if not skipping (for batch operations)
+    if (!skipRefresh) {
+      await fetchData();
+    }
   } catch (error) {
     console.error('Error toggling option for plan:', error);
     alert('Failed to update');
   }
-};
-
-// Get item count for a design tab
-const getTabItemCount = (tabId) => {
-  const tabOptions = options.value[tabId] || [];
-  return tabOptions.length;
 };
 
 // Get item count for a field tab
@@ -1235,6 +1346,174 @@ const getFieldTabItemCount = (tabId) => {
   const fieldTab = tabId.replace('field_', '');
   const tabFields = fields.value[fieldTab] || [];
   return tabFields.length;
+};
+
+// Get item count for a design category (Design, Style, Watermarks)
+const getDesignCategoryItemCount = (subItems) => {
+  if (!subItems || !Array.isArray(subItems)) return 0;
+  let count = 0;
+  subItems.forEach(subItem => {
+    const tabOptions = options.value[subItem] || [];
+    count += tabOptions.length;
+  });
+  return count;
+};
+
+// Get tab name from tab ID
+const getTabName = (tabId) => {
+  const tab = tabs.find(t => t.id === tabId);
+  return tab ? tab.name : tabId;
+};
+
+// Check if all items in a section are selected for a plan
+const isSectionFullySelected = (planId, tabId) => {
+  const fieldTab = tabId.replace('field_', '');
+  const tabFields = fields.value[fieldTab] || [];
+  
+  if (tabFields.length === 0) return false;
+  
+  // Check if ALL fields are available for this plan
+  const allAvailable = tabFields.every(field => isAvailableForPlan(field, planId));
+  
+  return allAvailable;
+};
+
+// Check if all items in a design section are selected for a plan
+const isDesignSectionFullySelected = (planId, subItems) => {
+  if (!subItems || subItems.length === 0) return false;
+  
+  let allSelected = true;
+  subItems.forEach(subItem => {
+    const itemOptions = options.value[subItem] || [];
+    if (itemOptions.length === 0) {
+      return;
+    }
+    if (!itemOptions.every(opt => isAvailableForPlan(opt, planId))) {
+      allSelected = false;
+    }
+  });
+  
+  return allSelected;
+};
+
+// Toggle all items in a section for a plan
+const toggleSectionForPlan = async (planId, tabId, checked) => {
+  const fieldTab = tabId.replace('field_', '');
+  const tabFields = fields.value[fieldTab] || [];
+  
+  if (tabFields.length === 0) return;
+  
+  try {
+    console.log(`🔄 Toggling ${tabFields.length} fields for ${planId}...`);
+    
+    // Update all fields in parallel (fast!)
+    const updatePromises = tabFields.map(async (field) => {
+      // Update local data
+      const plans = field.available_plans || [];
+      if (checked && !plans.includes(planId)) {
+        plans.push(planId);
+      } else if (!checked && plans.includes(planId)) {
+        plans.splice(plans.indexOf(planId), 1);
+      }
+      field.available_plans = plans;
+      
+      // Send API request
+      const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder-fields/${field.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.token}`,
+        },
+        body: JSON.stringify(field),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to update ${field.label}: ${errorData.message || response.statusText}`);
+      }
+      
+      return response;
+    });
+    
+    // Wait for all requests to complete in parallel
+    const results = await Promise.allSettled(updatePromises);
+    
+    // Check if any requests failed
+    const failures = results.filter(r => r.status === 'rejected');
+    if (failures.length > 0) {
+      console.error('❌ Some updates failed:', failures);
+      throw new Error(`${failures.length} out of ${tabFields.length} fields failed to update`);
+    }
+    
+    // Refresh data
+    await fetchData();
+    console.log(`✅ Successfully toggled all ${tabFields.length} fields`);
+  } catch (error) {
+    console.error('❌ Error in toggleSectionForPlan:', error);
+    alert(`Failed to update section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
+  }
+};
+
+// Toggle all items in a design section for a plan
+const toggleDesignSectionForPlan = async (planId, subItems, checked) => {
+  if (!subItems || subItems.length === 0) return;
+  
+  try {
+    // Collect all options that need to be updated
+    const allOptions = [];
+    subItems.forEach(subItem => {
+      const itemOptions = options.value[subItem] || [];
+      allOptions.push(...itemOptions);
+    });
+    
+    console.log(`🔄 Toggling ${allOptions.length} design options for ${planId}...`);
+    
+    // Update all options in parallel (fast!)
+    const updatePromises = allOptions.map(async (option) => {
+      // Update local data
+      const plans = option.available_plans || [];
+      if (checked && !plans.includes(planId)) {
+        plans.push(planId);
+      } else if (!checked && plans.includes(planId)) {
+        plans.splice(plans.indexOf(planId), 1);
+      }
+      option.available_plans = plans;
+      
+      // Send API request
+      const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-design-options/${option.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.token}`,
+        },
+        body: JSON.stringify(option),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to update ${option.name}: ${errorData.message || response.statusText}`);
+      }
+      
+      return response;
+    });
+    
+    // Wait for all requests to complete in parallel
+    const results = await Promise.allSettled(updatePromises);
+    
+    // Check for any failed requests
+    const failures = results.filter(r => r.status === 'rejected');
+    if (failures.length > 0) {
+      console.error('❌ Some updates failed:', failures);
+      throw new Error(`${failures.length} out of ${allOptions.length} options failed to update`);
+    }
+    
+    // Refresh data
+    await fetchData();
+    console.log(`✅ Successfully toggled all ${allOptions.length} design options`);
+  } catch (error) {
+    console.error('❌ Error in toggleDesignSectionForPlan:', error);
+    alert(`Failed to update design section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
+  }
 };
 
 const openAddModal = () => {
@@ -1424,6 +1703,15 @@ const confirmDelete = async (option) => {
 
 const updateField = async (field) => {
   try {
+    console.log(`🔄 Updating field: ${field.label}`, {
+      id: field.id,
+      field_key: field.field_key,
+      field_type: field.field_type,
+      available_plans: field.available_plans,
+      data: field
+    });
+    console.log(`📤 Request Body (JSON):`, JSON.stringify(field, null, 2));
+    
     const response = await fetch(
       `${config.public.apiBaseUrl}/admin/profile-builder-fields/${field.id}`,
       {
@@ -1437,18 +1725,39 @@ const updateField = async (field) => {
     );
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update field');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData: errorData,
+        errors: errorData.errors,
+        field: field.label
+      });
+      console.error('❌ Errors Detail (JSON):', JSON.stringify(errorData.errors, null, 2));
+      
+      // Build detailed error message
+      let errorMsg = errorData.message || 'Failed to update field';
+      if (errorData.errors) {
+        const errorDetails = Object.entries(errorData.errors)
+          .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+          .join('; ');
+        errorMsg += ` (${errorDetails})`;
+      }
+      
+      throw new Error(errorMsg);
     }
 
     await fetchFields();
+    console.log(`✅ Successfully updated field: ${field.label}`);
   } catch (error) {
-    console.error('Error updating field:', error);
-    alert(error.message);
+    console.error('❌ Error updating field:', field.label, error);
+    alert(`Failed to update ${field.label}: ${error.message}`);
+    throw error;
   }
 };
 
 onMounted(() => {
+  console.log('🚀 Component mounted, fetching data...');
   fetchData();
 });
 

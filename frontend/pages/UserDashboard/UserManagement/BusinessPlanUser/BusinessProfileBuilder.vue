@@ -1,6 +1,6 @@
 <!-- pages/UserDashboard/ProfileBuilder.vue -->
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Global Loading Overlay -->
     <Transition
       enter-active-class="transition-opacity duration-200"
@@ -16,21 +16,21 @@
           <div
             class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"
           ></div>
-          <p class="mt-4 text-sm text-gray-600">Loading your profile...</p>
+          <p class="mt-4 text-sm text-secondary-600">Loading your profile...</p>
         </div>
       </div>
     </Transition>
 
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-14 sm:h-16">
-          <div>
-            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">
-              Profile Builder
-            </h1>
-          </div>
-          <div class="flex items-center gap-2 sm:gap-3">
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-secondary-900">Profile Builder</h1>
+          <p class="mt-2 text-secondary-600">
+            Customize your digital business card profile
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex items-center gap-3">
             <!-- NFC Card Selector -->
             <div class="relative">
               <button
@@ -154,45 +154,83 @@
           </div>
         </div>
       </div>
+
+    <!-- Mobile Preview Toggle -->
+    <div class="lg:hidden mb-4">
+      <button
+        @click="showMobilePreview = !showMobilePreview"
+        class="w-full py-2 px-4 bg-white rounded-lg shadow-sm border border-secondary-200 text-sm font-medium text-secondary-700 hover:bg-secondary-50"
+      >
+        {{ showMobilePreview ? "Hide Preview" : "Show Preview" }}
+      </button>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-      <!-- Mobile Preview Toggle -->
-      <div class="lg:hidden mb-4">
-        <button
-          @click="showMobilePreview = !showMobilePreview"
-          class="w-full py-2 px-4 bg-white rounded-lg shadow-sm border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          {{ showMobilePreview ? "Hide Preview" : "Show Preview" }}
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Left Panel - Editor -->
         <div
           v-show="!showMobilePreview || !isMobile"
           class="space-y-4 sm:space-y-6"
         >
-          <!-- Tab Navigation -->
-          <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-1">
-            <div class="flex space-x-1">
+          <!-- Main Category Tabs -->
+          <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
+            <div class="flex border-b border-gray-200 mb-4">
               <button
-                v-for="tab in tabs"
+                @click="mainCategory = 'general'"
+                :class="[
+                  'px-4 py-2 font-medium text-sm transition-all border-b-2 -mb-px',
+                  mainCategory === 'general'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                ]"
+              >
+                General Sections
+              </button>
+              <button
+                @click="mainCategory = 'design'"
+                :class="[
+                  'px-4 py-2 font-medium text-sm transition-all border-b-2 -mb-px',
+                  mainCategory === 'design'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                ]"
+              >
+                Design Sections
+              </button>
+            </div>
+
+            <!-- Sub Tabs for General Sections -->
+            <div v-if="mainCategory === 'general'" class="flex flex-wrap gap-2">
+              <button
+                v-for="tab in availableGeneralTabs"
                 :key="tab.id"
                 @click="activeTab = tab.id"
                 :class="[
-                  'flex-1 py-1.5 sm:py-2 px-2 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all',
+                  'px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2',
                   activeTab === tab.id
                     ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900',
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900',
                 ]"
               >
-                <Icon
-                  :name="tab.icon"
-                  class="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2"
-                />
-                <span class="hidden sm:inline">{{ tab.name }}</span>
-                <span class="sm:hidden">{{ tab.shortName || tab.name }}</span>
+                <Icon :name="tab.icon" class="w-4 h-4" />
+                {{ tab.name }}
+              </button>
+            </div>
+
+            <!-- Sub Tabs for Design Sections -->
+            <div v-if="mainCategory === 'design'" class="flex flex-wrap gap-2">
+              <button
+                v-for="tab in availableDesignTabs"
+                :key="tab.id"
+                @click="activeTab = tab.id"
+                :class="[
+                  'px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2',
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900',
+                ]"
+              >
+                <Icon :name="tab.icon" class="w-4 h-4" />
+                {{ tab.name }}
               </button>
             </div>
           </div>
@@ -269,164 +307,36 @@
                 </div>
               </div>
 
-              <!-- Basic Info -->
+              <!-- Basic Info - Dynamic Rendering -->
               <div class="space-y-3 sm:space-y-4">
                 <h3 class="text-sm font-medium text-gray-700">
                   Basic Information
                 </h3>
 
-                <!-- Profile Image Upload -->
+                <!-- Profile Image - Special handling -->
                 <ProfileImageUpload
+                  v-if="shouldShowField('image')"
                   v-model="profileData.image"
                   upload-endpoint="/upload/profile-image"
                   delete-endpoint="/upload/profile-image"
-                  label="Profile Picture"
-                  help-text="JPG, PNG, GIF or WebP. Max 5MB"
+                  :label="getFieldConfig('image')?.label || 'Profile Picture'"
+                  :help-text="getFieldConfig('image')?.help_text || 'JPG, PNG, GIF or WebP. Max 5MB'"
                   :nfc-card-id="selectedNfcCardId"
                   @upload-success="handleProfileImageUpload"
                 />
 
-                <!-- Company Logo Upload -->
-                <ProfileImageUpload
-                  v-model="profileData.companyLogo"
-                  upload-endpoint="/upload/company-logo"
-                  delete-endpoint="/upload/company-logo"
-                  label="Company Logo"
-                  help-text="Will appear as background watermark"
-                  alt-text="Company logo"
-                  :nfc-card-id="selectedNfcCardId"
-                  @upload-success="handleCompanyLogoUpload"
+                <!-- Dynamic Fields -->
+                <DynamicFormField
+                  v-for="field in getVisibleProfileFields()"
+                  :key="field.field_key"
+                  :field="field"
+                  v-model="profileData"
+                  :user-plan="authStore.user?.subscription_plan || 'business'"
                 />
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Name</label
-                  >
-                  <input
-                    v-model="profileData.name"
-                    type="text"
-                    placeholder="Your name"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Position</label
-                  >
-                  <input
-                    v-model="profileData.position"
-                    type="text"
-                    placeholder="Your job title"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Qualification
-                    <span class="text-xs text-gray-500">(Optional)</span></label
-                  >
-                  <input
-                    v-model="profileData.qualification"
-                    type="text"
-                    placeholder="e.g., Bachelor of Business Administration"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Bio</label
-                  >
-                  <textarea
-                    v-model="profileData.bio"
-                    rows="4"
-                    placeholder="Tell visitors about yourself..."
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  ></textarea>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Contact Number</label
-                  >
-                  <input
-                    v-model="profileData.contactNumber"
-                    type="tel"
-                    placeholder="+60 12-345 6789"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Email Address</label
-                  >
-                  <input
-                    v-model="profileData.email"
-                    type="email"
-                    placeholder="your@email.com"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Website
-                    <span class="text-xs text-gray-500">(Optional)</span></label
-                  >
-                  <input
-                    v-model="profileData.website"
-                    type="url"
-                    placeholder="https://yourwebsite.com"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Address</label
-                  >
-                  <textarea
-                    v-model="profileData.address"
-                    rows="2"
-                    placeholder="Your business address"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  ></textarea>
-                </div>
-              </div>
-
-              <!-- Stats Section -->
-              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
-                  Profile Statistics
-                </h3>
-                <p class="text-xs text-gray-500">
-                  Add up to 3 statistics to showcase your achievements
-                </p>
-                <div
-                  v-for="(stat, index) in profileData.stats"
-                  :key="index"
-                  class="grid grid-cols-2 gap-3"
-                >
-                  <input
-                    v-model="stat.num"
-                    type="text"
-                    :placeholder="'e.g., 10+'"
-                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <input
-                    v-model="stat.label"
-                    type="text"
-                    :placeholder="'e.g., Years Experience'"
-                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
               </div>
             </div>
 
-            <!-- Company Tab -->
+            <!-- Company Tab - Dynamic Rendering -->
             <div v-if="activeTab === 'company'" class="space-y-4 sm:space-y-6">
               <!-- Company Information -->
               <div class="space-y-3 sm:space-y-4">
@@ -434,341 +344,43 @@
                   Company Information
                 </h3>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Company Logo Text</label
-                  >
-                  <input
-                    v-model="profileData.companyLogoText"
-                    type="text"
-                    placeholder="e.g., COMPANY"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <p class="text-xs text-gray-500 mt-1">
-                    Text overlay for company logo
-                  </p>
-                </div>
+                <!-- Company Logo - Special handling -->
+                <ProfileImageUpload
+                  v-if="shouldShowField('companyLogo')"
+                  v-model="profileData.companyLogo"
+                  upload-endpoint="/upload/company-logo"
+                  delete-endpoint="/upload/company-logo"
+                  :label="getFieldConfig('companyLogo')?.label || 'Company Logo'"
+                  :help-text="getFieldConfig('companyLogo')?.help_text || 'Will appear as background watermark'"
+                  alt-text="Company logo"
+                  :nfc-card-id="selectedNfcCardId"
+                  @upload-success="handleCompanyLogoUpload"
+                />
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Company Name</label
-                  >
-                  <input
-                    v-model="profileData.companyName"
-                    type="text"
-                    placeholder="e.g., ABC Corporation Sdn. Bhd."
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Company Registration No.</label
-                  >
-                  <input
-                    v-model="profileData.companyRegistrationNo"
-                    type="text"
-                    placeholder="e.g., 202201234567 (1234567-A)"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Department</label
-                  >
-                  <input
-                    v-model="profileData.companyDepartment"
-                    type="text"
-                    placeholder="e.g., Sales & Marketing"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <!-- Company Address -->
-              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
-                  Company Address
-                </h3>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Location Name</label
-                  >
-                  <input
-                    v-model="profileData.addressName"
-                    type="text"
-                    placeholder="e.g., Headquarters"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Street Address</label
-                  >
-                  <input
-                    v-model="profileData.addressStreet"
-                    type="text"
-                    placeholder="e.g., 123 Business Street"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Area</label
-                  >
-                  <input
-                    v-model="profileData.addressArea"
-                    type="text"
-                    placeholder="e.g., Taman ABC"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >City, State</label
-                  >
-                  <input
-                    v-model="profileData.addressCityState"
-                    type="text"
-                    placeholder="e.g., 50000 Kuala Lumpur"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Country</label
-                  >
-                  <input
-                    v-model="profileData.addressCountry"
-                    type="text"
-                    placeholder="e.g., Malaysia"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Map URL</label
-                  >
-                  <input
-                    v-model="profileData.addressMapUrl"
-                    type="url"
-                    placeholder="e.g., https://maps.google.com/..."
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <p class="text-xs text-gray-500 mt-1">
-                    Google Maps or other map service link
-                  </p>
-                </div>
-              </div>
-
-              <!-- Contact Methods -->
-              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
-                  Contact Methods
-                </h3>
-                <p class="text-xs text-gray-500">
-                  Customize labels and values for contact buttons
-                </p>
-
-                <!-- Phone -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Phone Label</label
-                    >
-                    <input
-                      v-model="profileData.phoneLabel"
-                      type="text"
-                      placeholder="e.g., Call Us"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Phone Number</label
-                    >
-                    <input
-                      v-model="profileData.phoneNumber"
-                      type="tel"
-                      placeholder="e.g., +60123456789"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <!-- Email -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Email Label</label
-                    >
-                    <input
-                      v-model="profileData.emailLabel"
-                      type="text"
-                      placeholder="e.g., Email Us"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Email Address</label
-                    >
-                    <input
-                      v-model="profileData.emailAddress"
-                      type="email"
-                      placeholder="e.g., info@company.com"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <!-- WhatsApp -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >WhatsApp Label</label
-                    >
-                    <input
-                      v-model="profileData.whatsappLabel"
-                      type="text"
-                      placeholder="e.g., WhatsApp"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >WhatsApp Number</label
-                    >
-                    <input
-                      v-model="profileData.whatsappNumber"
-                      type="tel"
-                      placeholder="e.g., +60123456789"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <!-- Website -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Website Label</label
-                    >
-                    <input
-                      v-model="profileData.websiteLabel"
-                      type="text"
-                      placeholder="e.g., Visit Website"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Website URL</label
-                    >
-                    <input
-                      v-model="profileData.websiteUrl"
-                      type="url"
-                      placeholder="e.g., https://company.com"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
+                <!-- Dynamic Company Fields -->
+                <DynamicFormField
+                  v-for="field in getVisibleCompanyFields()"
+                  :key="field.field_key"
+                  :field="field"
+                  v-model="profileData"
+                  :user-plan="authStore.user?.subscription_plan || 'business'"
+                />
               </div>
             </div>
 
-            <!-- Services Tab -->
+            <!-- Services Tab - Dynamic Rendering -->
             <div v-if="activeTab === 'services'" class="space-y-4 sm:space-y-6">
-              <!-- Services Section -->
               <div class="space-y-3 sm:space-y-4">
-                <h3 class="text-sm font-medium text-gray-700">Our Services</h3>
-                <p class="text-xs text-gray-500">
-                  Add up to 6 services your company offers
-                </p>
+                <h3 class="text-sm font-medium text-gray-700">Services & Team</h3>
 
-                <div
-                  v-for="(service, index) in profileData.services"
-                  :key="index"
-                  class="grid grid-cols-3 gap-3 items-end"
-                >
-                  <div class="col-span-1">
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Icon {{ index + 1 }}</label
-                    >
-                    <input
-                      v-model="service.icon"
-                      type="text"
-                      placeholder="e.g., 🏢"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl"
-                    />
-                  </div>
-                  <div class="col-span-2">
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Service Name</label
-                    >
-                    <input
-                      v-model="service.name"
-                      type="text"
-                      :placeholder="'e.g., Consulting'"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Team Members Section -->
-              <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">Team Members</h3>
-                <p class="text-xs text-gray-500">
-                  Add up to 3 key team members to display
-                </p>
-
-                <div
-                  v-for="(member, index) in profileData.teamMembers"
-                  :key="index"
-                  class="grid grid-cols-3 gap-3"
-                >
-                  <div class="col-span-1">
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Initials {{ index + 1 }}</label
-                    >
-                    <input
-                      v-model="member.initials"
-                      type="text"
-                      placeholder="e.g., JD"
-                      maxlength="2"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
-                    />
-                  </div>
-                  <div class="col-span-1">
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Name</label
-                    >
-                    <input
-                      v-model="member.name"
-                      type="text"
-                      placeholder="e.g., John Doe"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div class="col-span-1">
-                    <label class="block text-xs font-medium text-gray-600 mb-1"
-                      >Role</label
-                    >
-                    <input
-                      v-model="member.role"
-                      type="text"
-                      placeholder="e.g., CEO"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
+                <!-- Dynamic Services Fields -->
+                <DynamicFormField
+                  v-for="field in getVisibleServicesFields()"
+                  :key="field.field_key"
+                  :field="field"
+                  v-model="profileData"
+                  :user-plan="authStore.user?.subscription_plan || 'business'"
+                />
               </div>
             </div>
 
@@ -1020,64 +632,55 @@
               </div>
             </div>
 
-            <!-- Watermarks Tab -->
-            <div
-              v-if="activeTab === 'watermarks'"
-              class="space-y-4 sm:space-y-6"
-            >
+            <!-- Watermarks Tab - Dynamic Rendering -->
+            <div v-if="activeTab === 'watermarks'" class="space-y-4 sm:space-y-6">
               <div>
                 <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
-                  Watermark Settings
+                  Feature Settings
                 </h3>
 
-                <!-- Watermark Toggle -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                      <h4 class="text-sm font-medium text-gray-900">
-                        Show "Powered by NFC GO" watermark
-                      </h4>
-                      <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                        Display the NFC GO branding at the bottom of your
-                        profile
-                      </p>
-                    </div>
-                    <button
-                      @click="
-                        profileData.showWatermark = !profileData.showWatermark
-                      "
-                      :class="[
-                        'relative inline-flex h-6 w-11 sm:h-7 sm:w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                        profileData.showWatermark
-                          ? 'bg-blue-600'
-                          : 'bg-gray-200',
-                      ]"
-                    >
-                      <span
-                        :class="[
-                          'pointer-events-none inline-block h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                          profileData.showWatermark
-                            ? 'translate-x-5 sm:translate-x-5'
-                            : 'translate-x-0',
-                        ]"
-                      />
-                    </button>
-                  </div>
-
-                  <!-- Premium Upsell -->
+                <!-- Dynamic Feature Toggles -->
+                <div v-if="featureToggles.length > 0" class="space-y-3">
                   <div
-                    v-if="profileData.showWatermark"
-                    class="mt-4 p-3 bg-blue-50 rounded-lg"
+                    v-for="feature in featureToggles"
+                    :key="feature.id"
+                    class="bg-gray-50 rounded-lg p-4"
                   >
-                    <p class="text-xs sm:text-sm text-blue-700">
-                      <Icon
-                        name="heroicons:sparkles"
-                        class="w-4 h-4 inline mr-1"
-                      />
-                      Upgrade to Premium to remove the watermark and unlock
-                      premium features
-                    </p>
+                    <div class="flex items-center justify-between">
+                      <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">
+                          {{ feature.name }}
+                        </h4>
+                        <p v-if="feature.description" class="text-xs sm:text-sm text-gray-500 mt-1">
+                          {{ feature.description }}
+                        </p>
+                      </div>
+                      <button
+                        @click="toggleFeature(feature.feature_key)"
+                        :class="[
+                          'relative inline-flex h-6 w-11 sm:h-7 sm:w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                          getFeatureValue(feature.feature_key)
+                            ? 'bg-blue-600'
+                            : 'bg-gray-200',
+                        ]"
+                      >
+                        <span
+                          :class="[
+                            'pointer-events-none inline-block h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                            getFeatureValue(feature.feature_key)
+                              ? 'translate-x-5 sm:translate-x-5'
+                              : 'translate-x-0',
+                          ]"
+                        />
+                      </button>
+                    </div>
                   </div>
+                </div>
+
+                <!-- Fallback if no features configured -->
+                <div v-else class="text-center py-8 text-gray-500">
+                  <Icon name="heroicons:sparkles" class="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p class="text-sm">No features configured by admin</p>
                 </div>
               </div>
             </div>
@@ -1162,7 +765,6 @@
               </div>
             </div>
           </div>
-      </div>
     </div>
 
     <!-- Add Link Modal -->
@@ -1395,20 +997,23 @@
 
 <script setup>
 // import ProfileImageUpload from '~/components/ProfileImageUpload.vue'
+import DynamicFormField from '~/components/DynamicFormField.vue';
 import { useAuthStore } from "~/stores/auth";
 import draggable from "vuedraggable";
 
 // Layout
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 // Composables and stores
 const { $api, $toast } = useNuxtApp();
 const authStore = useAuthStore();
+const config = useRuntimeConfig();
 
 // Reactive data
+const mainCategory = ref("general"); // 'general' or 'design'
 const activeTab = ref("profile");
 const saving = ref(false);
 const showMobilePreview = ref(false);
@@ -1589,51 +1194,91 @@ const isAllCardsSelected = computed(() => {
 });
 
 // Configuration options - will be loaded from API
-const tabs = ref([
-  // Default tabs as fallback
+// All possible tabs
+const allTabs = ref([
   {
     id: "profile",
     name: "Profile",
-    shortName: "Profile",
+    category: "general",
     icon: "heroicons:user",
+    requiredPermission: "profile",
   },
   {
     id: "company",
     name: "Company",
-    shortName: "Company",
+    category: "general",
     icon: "heroicons:building-office",
+    requiredPermission: "company",
   },
   {
     id: "services",
     name: "Services",
-    shortName: "Services",
+    category: "general",
     icon: "heroicons:rocket-launch",
+    requiredPermission: "services",
   },
   {
     id: "links",
     name: "Links",
-    shortName: "Links",
+    category: "general",
     icon: "heroicons:link",
+    requiredPermission: "links",
   },
   {
     id: "design",
     name: "Design",
-    shortName: "Design",
+    category: "design",
     icon: "heroicons:paint-brush",
+    requiredPermission: "design",
   },
   {
     id: "style",
     name: "Style",
-    shortName: "Style",
+    category: "design",
     icon: "heroicons:sparkles",
+    requiredPermission: "style",
   },
   {
     id: "watermarks",
     name: "Watermarks",
-    shortName: "Brand",
+    category: "design",
     icon: "heroicons:eye",
+    requiredPermission: "watermarks",
   },
 ]);
+
+// User's plan permissions (loaded from API)
+const userPermissions = ref([
+  "profile",
+  "company",
+  "services",
+  "links",
+  "design",
+  "style",
+  "watermarks",
+]); // Default: all permissions
+
+// Computed: Available tabs based on user permissions
+const availableGeneralTabs = computed(() => {
+  return allTabs.value.filter(
+    (tab) =>
+      tab.category === "general" &&
+      userPermissions.value.includes(tab.requiredPermission)
+  );
+});
+
+const availableDesignTabs = computed(() => {
+  return allTabs.value.filter(
+    (tab) =>
+      tab.category === "design" &&
+      userPermissions.value.includes(tab.requiredPermission)
+  );
+});
+
+// Computed: All available tabs
+const tabs = computed(() => {
+  return [...availableGeneralTabs.value, ...availableDesignTabs.value];
+});
 
 // Design options - will be loaded from API
 const profileStyles = ref([]);
@@ -1642,12 +1287,57 @@ const fonts = ref([]);
 const buttonStyles = ref([]);
 const colorSchemes = ref([]);
 const layouts = ref([]);
+const featureToggles = ref([]);
 
 // Fields - will be loaded from API
 const profileFields = ref([]);
 const companyFields = ref([]);
 const servicesFields = ref([]);
 const linksFields = ref([]);
+
+// Watch activeTab and auto-switch mainCategory
+watch(activeTab, (newTab) => {
+  const tab = allTabs.value.find(t => t.id === newTab);
+  if (tab && tab.category !== mainCategory.value) {
+    mainCategory.value = tab.category;
+  }
+});
+
+// Load user permissions from API
+const loadUserPermissions = async () => {
+  try {
+    const userPlan = authStore.user?.subscription_plan || 'business';
+    console.log('🔍 Loading user permissions for plan:', userPlan);
+    
+    const response = await fetch(`${config.public.apiBaseUrl}/profile-design-options?plan=${userPlan}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to load user permissions');
+    const data = await response.json();
+    
+    console.log('📋 Permissions API Response:', data);
+    
+    // Load tab_control configuration to get available tabs/permissions
+    if (data.data.tab_control && data.data.tab_control.length > 0) {
+      const tabConfig = data.data.tab_control[0];
+      console.log('✅ Tab Control Config found:', tabConfig);
+      
+      if (tabConfig.config?.tabs && Array.isArray(tabConfig.config.tabs)) {
+        // Update user permissions based on available tabs
+        userPermissions.value = tabConfig.config.tabs;
+        console.log('✅ User permissions loaded:', userPermissions.value);
+      }
+    } else {
+      console.log('ℹ️ No tab control config found, using default permissions');
+    }
+  } catch (error) {
+    console.error('❌ Error loading user permissions:', error);
+    // Keep default permissions as fallback
+  }
+};
 
 // Load tabs configuration from API
 const loadTabsConfig = async () => {
@@ -1704,19 +1394,29 @@ const loadTabsConfig = async () => {
 // Load fields configuration from API
 const loadFieldsConfig = async () => {
   try {
-    console.log('🔍 Loading fields config...');
-    const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder-fields`, {
+    const userPlan = authStore.user?.subscription_plan || 'business';
+    console.log('🔍 Loading fields config for plan:', userPlan);
+    
+    const response = await fetch(`${config.public.apiBaseUrl}/profile-builder-fields?plan=${userPlan}`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`,
       },
     });
 
+    console.log('📡 Fields API Response Status:', response.status, response.statusText);
+
     if (!response.ok) {
-      console.log('⚠️ Fields API not available (this is OK for now)');
+      const errorText = await response.text();
+      console.error('❌ Fields API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
       return; // Silently fail if API not available
     }
     
     const data = await response.json();
+    console.log('📦 Fields API Response Data:', data);
     
     if (data.success && data.data) {
       // Store fields by tab
@@ -1725,7 +1425,7 @@ const loadFieldsConfig = async () => {
       servicesFields.value = data.data.services || [];
       linksFields.value = data.data.links || [];
       
-      console.log('✅ Fields loaded:', {
+      console.log('✅ Fields loaded for plan', userPlan, ':', {
         profile: profileFields.value.length,
         company: companyFields.value.length,
         services: servicesFields.value.length,
@@ -1799,6 +1499,16 @@ const loadDesignOptions = async () => {
         config: opt.config || {},
       }));
     }
+    
+    if (data.data.feature_toggle) {
+      featureToggles.value = data.data.feature_toggle.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        feature_key: opt.config?.feature_key || opt.option_id,
+        enabled: opt.config?.enabled !== false,
+        description: opt.description,
+      }));
+    }
   } catch (error) {
     console.error('Error loading design options:', error);
     // Fallback to default options if API fails
@@ -1818,8 +1528,7 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-  // Get config
-  const config = useRuntimeConfig();
+  // Use global config (defined at top of script setup)
   const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
 
   // Remove /api from the end to get base URL
@@ -1829,6 +1538,72 @@ const getImageUrl = (imagePath) => {
   const path = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
 
   return `${baseUrl}${path}`;
+};
+
+// Helper functions for dynamic field rendering
+const shouldShowField = (fieldKey) => {
+  const allFields = [...profileFields.value, ...companyFields.value, ...servicesFields.value, ...linksFields.value];
+  const field = allFields.find(f => f.field_key === fieldKey);
+  
+  console.log(`🔍 shouldShowField(${fieldKey}):`, { field, allFieldsCount: allFields.length });
+  
+  if (!field) {
+    console.log(`❌ Field ${fieldKey} not found in allFields`);
+    return false;
+  }
+  
+  if (!field.is_visible) {
+    console.log(`❌ Field ${fieldKey} is not visible (is_visible=false)`);
+    return false;
+  }
+  
+  const userPlan = authStore.user?.subscription_plan || 'business';
+  console.log(`👤 User plan: ${userPlan}`);
+  
+  // If no plan restrictions, show to all
+  if (!field.available_plans || field.available_plans.length === 0) {
+    console.log(`✅ Field ${fieldKey} has no plan restrictions, showing to all`);
+    return true;
+  }
+  
+  // Check if user's plan is in available plans
+  const hasAccess = field.available_plans.includes(userPlan);
+  console.log(`${hasAccess ? '✅' : '❌'} Field ${fieldKey} available_plans:`, field.available_plans, `User has access: ${hasAccess}`);
+  return hasAccess;
+};
+
+const getFieldConfig = (fieldKey) => {
+  const allFields = [...profileFields.value, ...companyFields.value, ...servicesFields.value, ...linksFields.value];
+  return allFields.find(f => f.field_key === fieldKey);
+};
+
+const getVisibleProfileFields = () => {
+  console.log('📋 getVisibleProfileFields called');
+  console.log('📋 profileFields.value:', profileFields.value);
+  console.log('📋 profileFields count:', profileFields.value.length);
+  
+  const visible = profileFields.value.filter(field => {
+    const isNotImage = field.field_type !== 'image';
+    const shouldShow = shouldShowField(field.field_key);
+    console.log(`📋 Field ${field.field_key}: type=${field.field_type}, isNotImage=${isNotImage}, shouldShow=${shouldShow}`);
+    return isNotImage && shouldShow;
+  });
+  
+  console.log('📋 Visible profile fields:', visible);
+  return visible;
+};
+
+const getVisibleCompanyFields = () => {
+  return companyFields.value.filter(field => 
+    field.field_type !== 'image' && 
+    shouldShowField(field.field_key)
+  );
+};
+
+const getVisibleServicesFields = () => {
+  return servicesFields.value.filter(field => 
+    shouldShowField(field.field_key)
+  );
 };
 
 // Methods - These are just event handlers for the ProfileImageUpload component
@@ -1862,6 +1637,29 @@ const applyTheme = (theme) => {
 const getCurrentFont = () => {
   const font = fonts.value.find((f) => f.id === profileData.font);
   return font ? font.family : "Inter, sans-serif";
+};
+
+// Feature toggle helpers
+const toggleFeature = (featureKey) => {
+  if (!profileData.features) {
+    profileData.features = {};
+  }
+  profileData.features[featureKey] = !profileData.features[featureKey];
+  
+  // For backward compatibility with showWatermark
+  if (featureKey === 'watermark' || featureKey === 'show_watermark') {
+    profileData.showWatermark = profileData.features[featureKey];
+  }
+};
+
+const getFeatureValue = (featureKey) => {
+  // For backward compatibility with showWatermark
+  if (featureKey === 'watermark' || featureKey === 'show_watermark') {
+    return profileData.showWatermark !== undefined 
+      ? profileData.showWatermark 
+      : (profileData.features?.[featureKey] ?? false);
+  }
+  return profileData.features?.[featureKey] ?? false;
 };
 
 const getFontName = (fontId) => {
@@ -2061,6 +1859,71 @@ const saveProfile = async () => {
 
   saving.value = true;
   try {
+    // 1. 收集完整的 design 配置
+    const designConfig = {
+      theme: themes.value.find(t => t.id === profileData.theme),
+      font: fonts.value.find(f => f.id === profileData.font),
+      buttonStyle: buttonStyles.value.find(b => b.id === profileData.buttonStyle),
+      profileStyle: profileStyles.value.find(p => p.id === profileData.profileStyle),
+      colorScheme: colorSchemes.value.find(c => c.id === profileData.colorScheme),
+      layout: layouts.value.find(l => l.id === profileData.layout),
+    };
+
+    // 2. 收集可见字段列表
+    const visibleFields = [];
+
+    // Profile fields
+    profileFields.value.forEach(field => {
+      if (shouldShowField(field.field_key)) {
+        visibleFields.push({
+          tab: 'profile',
+          field_key: field.field_key,
+          label: field.label,
+          field_type: field.field_type,
+          config: field.config
+        });
+      }
+    });
+
+    // Company fields
+    companyFields.value.forEach(field => {
+      if (shouldShowField(field.field_key)) {
+        visibleFields.push({
+          tab: 'company',
+          field_key: field.field_key,
+          label: field.label,
+          field_type: field.field_type,
+          config: field.config
+        });
+      }
+    });
+
+    // Services fields
+    servicesFields.value.forEach(field => {
+      if (shouldShowField(field.field_key)) {
+        visibleFields.push({
+          tab: 'services',
+          field_key: field.field_key,
+          label: field.label,
+          field_type: field.field_type,
+          config: field.config
+        });
+      }
+    });
+
+    // Links fields
+    linksFields.value.forEach(field => {
+      if (shouldShowField(field.field_key)) {
+        visibleFields.push({
+          tab: 'links',
+          field_key: field.field_key,
+          label: field.label,
+          field_type: field.field_type,
+          config: field.config
+        });
+      }
+    });
+
     // Map frontend camelCase to backend snake_case
     const payload = {
       // Basic Info
@@ -2112,6 +1975,10 @@ const saveProfile = async () => {
       font: profileData.font,
       button_style: profileData.buttonStyle,
       show_watermark: profileData.showWatermark,
+      
+      // Design & Fields Configuration
+      design_config: designConfig,
+      visible_fields: visibleFields,
       
       // Links - include all links (new and existing)
       links: links.value.map(link => ({
@@ -2702,6 +2569,7 @@ onMounted(async () => {
   try {
     // Load all configurations from Admin API (in parallel for faster loading)
     await Promise.all([
+      loadUserPermissions().catch(err => console.log('User permissions skipped:', err.message)),
       loadTabsConfig().catch(err => console.log('Tabs config skipped:', err.message)),
       loadFieldsConfig().catch(err => console.log('Fields config skipped:', err.message)),
       loadDesignOptions().catch(err => console.log('Design options skipped:', err.message))

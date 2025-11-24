@@ -1,24 +1,22 @@
 <!-- pages/UserDashboard/Settings.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
-    <div class="container mx-auto px-4 py-8">
-      <!-- Header Section -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-secondary-900 mb-2">
-          Account Settings
-        </h1>
-        <p class="text-secondary-600">
-          Manage your account, security, and preferences
-        </p>
-      </div>
+  <div>
+    <!-- Header Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-secondary-900">
+        Account Settings
+      </h1>
+      <p class="mt-2 text-secondary-600">
+        Manage your account, security, and preferences
+      </p>
+    </div>
 
-      <!-- Main Layout -->
-      <div class="flex flex-col lg:flex-row gap-8" style="min-height: 500px;">
-        <!-- Sidebar Navigation -->
-        <div class="w-full lg:w-64 flex-shrink-0">
-          <div
-            class="bg-white rounded-lg shadow-sm border border-secondary-200 p-4"
-          >
+    <!-- Main Layout -->
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Sidebar Navigation -->
+      <div class="w-full lg:w-64 flex-shrink-0">
+        <div class="card">
+          <div class="card-body">
             <nav class="space-y-2">
               <button
                 v-for="tab in settingsTabs"
@@ -35,17 +33,17 @@
                 {{ tab.label }}
               </button>
             </nav>
-            
           </div>
         </div>
+      </div>
 
-        <!-- Main Content Area -->
-        <div class="flex-1">
+      <!-- Main Content Area -->
+      <div class="flex-1">
           <!-- Account Settings Tab -->
           <div v-if="activeTab === 'account'" class="space-y-6">
             <!-- Personal Information Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -187,7 +185,7 @@
 
             <!-- Profile URLs Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -293,7 +291,7 @@
 
             <!-- Account Information Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -355,7 +353,7 @@
 
             <!-- Subscription Management Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -495,7 +493,7 @@
           <div v-if="activeTab === 'security'" class="space-y-6">
             <!-- Change Password Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -567,7 +565,7 @@
 
             <!-- Two-Factor Authentication Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -625,7 +623,7 @@
 
             <!-- Active Sessions Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -686,7 +684,7 @@
           <div v-if="activeTab === 'privacy'" class="space-y-6">
             <!-- Profile Visibility Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -744,7 +742,7 @@
 
             <!-- Analytics & Tracking Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -805,7 +803,7 @@
           <div v-if="activeTab === 'notifications'" class="space-y-6">
             <!-- Email Notifications Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -906,7 +904,7 @@
           <div v-if="activeTab === 'danger'" class="space-y-6">
             <!-- Export Data Card -->
             <div
-              class="bg-white rounded-lg shadow-sm border border-secondary-200"
+              class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
@@ -978,7 +976,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Delete Account Confirmation Modal -->
     <div
@@ -1040,7 +1037,6 @@
       </div>
     </div>
 
-
     <!-- Success Toast -->
     <div
       v-if="showSuccessToast"
@@ -1074,7 +1070,7 @@ import { ref, onMounted, computed, watch } from "vue";
 // Meta
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 // Store

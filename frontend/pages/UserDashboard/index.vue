@@ -15,7 +15,7 @@ import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 const router = useRouter();
