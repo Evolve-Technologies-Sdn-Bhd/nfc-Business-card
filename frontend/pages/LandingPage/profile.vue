@@ -1567,6 +1567,11 @@ const profileImage = ref(
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E?%3C/text%3E%3C/svg%3E"
 );
 
+// 新增：Design config 和 visible fields 控制
+const visibleFieldsConfig = ref([]);
+const buttonClasses = ref('');
+const currentThemeConfig = ref(null);
+
 const company = ref({
   logoText: "",
   name: "",
@@ -1944,6 +1949,18 @@ const loadProfileData = async () => {
         teamMembers.value = data.team_members.filter((member) => member.name);
       }
 
+      // === 新增：应用 design_config ===
+      if (data.design_config) {
+        console.log('🎨 Applying design config:', data.design_config);
+        applyDesignConfig(data.design_config);
+      }
+
+      // === 新增：使用 visible_fields 控制显示 ===
+      if (data.visible_fields) {
+        console.log('👁️ Visible fields config:', data.visible_fields);
+        visibleFieldsConfig.value = data.visible_fields;
+      }
+
       profileNotFound.value = false;
       
       // Check if current user owns this card (to show Edit button)
@@ -1958,6 +1975,64 @@ const loadProfileData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// 新增：应用设计配置的函数
+const applyDesignConfig = (designConfig) => {
+  try {
+    // 应用 Theme
+    if (designConfig.theme && typeof window !== 'undefined') {
+      const theme = designConfig.theme;
+      if (theme.backgroundColor) {
+        document.documentElement.style.setProperty('--theme-bg', theme.backgroundColor);
+      }
+    }
+
+    // 应用 Font
+    if (designConfig.font && typeof window !== 'undefined') {
+      const font = designConfig.font;
+      if (font.family) {
+        document.documentElement.style.setProperty('--font-family', font.family);
+        document.body.style.fontFamily = font.family;
+      }
+    }
+
+    // 应用 Button Style
+    if (designConfig.buttonStyle) {
+      const buttonStyle = designConfig.buttonStyle;
+      if (buttonStyle.class) {
+        buttonClasses.value = buttonStyle.class;
+      }
+    }
+
+    // 应用 Color Scheme
+    if (designConfig.colorScheme && designConfig.colorScheme.colors && typeof window !== 'undefined') {
+      const colors = designConfig.colorScheme.colors;
+      if (colors.primary) {
+        document.documentElement.style.setProperty('--color-primary', colors.primary);
+      }
+      if (colors.secondary) {
+        document.documentElement.style.setProperty('--color-secondary', colors.secondary);
+      }
+      if (colors.accent) {
+        document.documentElement.style.setProperty('--color-accent', colors.accent);
+      }
+    }
+
+    // 保存当前主题配置
+    currentThemeConfig.value = designConfig;
+  } catch (error) {
+    console.error('Error applying design config:', error);
+  }
+};
+
+// 新增：检查字段是否应该显示
+const shouldShowField = (fieldKey) => {
+  if (!visibleFieldsConfig.value || visibleFieldsConfig.value.length === 0) {
+    return true; // 如果没有配置，默认显示所有字段
+  }
+  
+  return visibleFieldsConfig.value.some(f => f.field_key === fieldKey);
 };
 
 // Functions

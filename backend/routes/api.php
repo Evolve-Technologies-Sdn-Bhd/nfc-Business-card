@@ -60,8 +60,7 @@ Route::get('/test', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public profile viewing
-Route::get('/profiles/{slug}', [ProfileController::class, 'show']);
+// Public profile viewing (using landing pages)
 Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
 Route::post('/analytics/track', [AnalyticsController::class, 'track']);
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
@@ -208,6 +207,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Profile Design Options (User - get available options)
     Route::get('/profile-design-options', [ProfileDesignController::class, 'index']);
+    
+    // Profile Builder (User - get sections and fields by plan)
+    Route::get('/profile-builder-sections', [ProfileBuilderFieldController::class, 'getSections']);
+    Route::get('/profile-builder-fields', [ProfileBuilderFieldController::class, 'index']);
 });
 
 // Public legal documents routes
@@ -335,12 +338,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::post('/reorder', [ProfileDesignController::class, 'reorder']);
     });
 
-    // ✅ Profile Builder Fields Management
-    Route::prefix('profile-builder-fields')->group(function () {
-        Route::get('/', [ProfileBuilderFieldController::class, 'index']);
-        Route::post('/', [ProfileBuilderFieldController::class, 'store']);
-        Route::put('/{id}', [ProfileBuilderFieldController::class, 'update']);
-        Route::delete('/{id}', [ProfileBuilderFieldController::class, 'destroy']);
+    // ✅ Profile Builder Management
+    Route::prefix('profile-builder')->group(function () {
+        // Sections
+        Route::get('/sections', [ProfileBuilderFieldController::class, 'getAvailableSections']);
+        Route::get('/sections-with-fields', [ProfileBuilderFieldController::class, 'getSections']);
+        
+        // Fields
+        Route::get('/fields', [ProfileBuilderFieldController::class, 'index']);
+        Route::post('/fields', [ProfileBuilderFieldController::class, 'store']);
+        Route::put('/fields/{id}', [ProfileBuilderFieldController::class, 'update']);
+        Route::delete('/fields/{id}', [ProfileBuilderFieldController::class, 'destroy']);
     });
 });
 

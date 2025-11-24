@@ -126,7 +126,7 @@ import { useAuthStore } from "~/stores/auth";
 // Layout
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 // Example profile data (static)

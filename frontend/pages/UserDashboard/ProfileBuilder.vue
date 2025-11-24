@@ -1313,7 +1313,7 @@ import draggable from "vuedraggable";
 // Layout
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 // Composables and stores

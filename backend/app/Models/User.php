@@ -92,10 +92,7 @@ class User extends Authenticatable
         return $this->hasMany(NfcCard::class);
     }
 
-    public function profile()
-    {
-        return $this->hasOne(Profile::class);
-    }
+    // Profile relationship removed - using landing_pages instead
 
     public function notifications()
     {

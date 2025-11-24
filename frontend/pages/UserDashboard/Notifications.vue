@@ -334,7 +334,7 @@
 <script setup>
 definePageMeta({
   layout: "user-dashboard",
-  middleware: "auth",
+  middleware: ["auth"],
 });
 
 const { $toast } = useNuxtApp();

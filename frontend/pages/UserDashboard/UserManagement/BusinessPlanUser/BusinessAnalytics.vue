@@ -1,67 +1,81 @@
 <!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
+  <div>
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-secondary-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-4">
-            <!-- NFC Card Selector -->
-            <div class="relative">
-              <select
-                v-model="selectedCardId"
-                @change="onCardChange"
-                class="input text-sm min-w-[200px]"
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-secondary-900">Analytics</h1>
+          <p class="mt-2 text-secondary-600">
+            Track engagement and performance metrics
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <button @click="exportAnalytics" class="btn btn-primary">
+            <Icon name="heroicons:arrow-down-tray" class="h-5 w-5 mr-2" />
+            Export Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-6">
+      <div class="card-body">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- NFC Card Selector -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">Select Card</label>
+            <select
+              v-model="selectedCardId"
+              @change="onCardChange"
+              class="input w-full"
+            >
+              <option value="all">📊 All Cards (Total Overview)</option>
+              <option
+                v-for="card in nfcCards"
+                :key="card.id"
+                :value="card.id"
               >
-                <option value="all">📊 All Cards (Total Overview)</option>
-                <option
-                  v-for="card in nfcCards"
-                  :key="card.id"
-                  :value="card.id"
-                >
-                  {{ card.nfc_card_id || `Card #${card.id}` }} - {{ card.card_owner }}
-                </option>
-              </select>
-            </div>
-            <!-- Employee Filter -->
-            <div class="relative" v-if="employees.length > 0">
-              <select
-                v-model="selectedEmployeeId"
-                @change="loadAnalytics"
-                class="input text-sm min-w-[180px]"
-              >
-                <option value="">All Employees</option>
-                <option
-                  v-for="employee in employees"
-                  :key="employee.id"
-                  :value="employee.id"
-                >
-                  {{ employee.name }}
-                </option>
-              </select>
-            </div>
+                {{ card.nfc_card_id || `Card #${card.id}` }} - {{ card.card_owner }}
+              </option>
+            </select>
           </div>
-          <div class="flex items-center space-x-4">
+          <!-- Employee Filter -->
+          <div v-if="employees.length > 0">
+            <label class="block text-sm font-medium text-secondary-700 mb-2">Employee</label>
+            <select
+              v-model="selectedEmployeeId"
+              @change="loadAnalytics"
+              class="input w-full"
+            >
+              <option value="">All Employees</option>
+              <option
+                v-for="employee in employees"
+                :key="employee.id"
+                :value="employee.id"
+              >
+                {{ employee.name }}
+              </option>
+            </select>
+          </div>
+          <!-- Period Selector -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">Time Period</label>
             <select
               v-model="selectedPeriod"
               @change="loadAnalytics"
-              class="input text-sm"
+              class="input w-full"
             >
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
               <option value="90d">Last 90 days</option>
               <option value="1y">Last year</option>
             </select>
-            <button @click="exportAnalytics" class="btn btn-outline btn-sm">
-              <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
-              Export
-            </button>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Overview Stats -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-6">
@@ -415,7 +429,6 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
