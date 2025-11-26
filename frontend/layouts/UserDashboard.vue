@@ -302,8 +302,8 @@
             </div>
           </nav>
 
-          <!-- Upgrade Banner - Fixed at bottom -->
-          <div class="p-4 border-t border-secondary-200">
+          <!-- Upgrade Banner - Fixed at bottom (hide for Business/Premium users) -->
+          <div v-if="!['business', 'premium'].includes(authStore.user?.subscription_plan)" class="p-4 border-t border-secondary-200">
             <div
               class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-4 text-white"
             >

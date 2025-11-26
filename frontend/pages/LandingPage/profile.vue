@@ -2,11 +2,11 @@
   <div
     :style="{
       minHeight: '100vh',
-      background: '#0a0e27',
+      background: designSettings.backgroundColor,
+      color: designSettings.textColor,
       position: 'relative',
       overflow: 'hidden',
-      fontFamily:
-        'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+      fontFamily: designSettings.fontFamily,
     }"
   >
     <!-- Animations -->
@@ -377,7 +377,47 @@
                 <span :style="{ fontSize: isMobile ? '16px' : '18px' }">💼</span>
                 {{ profile.position }}
               </div>
+              <!-- Pronouns Badge -->
+              <div
+                v-if="profile.pronouns"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.5s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">👤</span>
+                {{ profile.pronouns }}
+              </div>
             </div>
+            
+            <!-- Tagline -->
+            <p
+              v-if="profile.tagline"
+              :style="{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: responsive.bodySize,
+                fontStyle: 'italic',
+                marginTop: '20px',
+                textAlign: 'center',
+                animation: 'fadeInUp 0.6s ease-out forwards',
+                opacity: 0,
+                animationDelay: '0.6s',
+              }"
+            >
+              "{{ profile.tagline }}"
+            </p>
           </div>
 
           <!-- Particles -->
@@ -1281,9 +1321,12 @@
                 gap: responsive.gridGap,
               }"
             >
-              <div
+              <component
+                :is="member.landing_page_url ? 'a' : 'div'"
                 v-for="(member, idx) in teamMembers"
                 :key="idx"
+                :href="member.landing_page_url || undefined"
+                :target="member.landing_page_url ? '_blank' : undefined"
                 @mouseenter="!isMobile && (activeTeam = idx)"
                 @mouseleave="!isMobile && (activeTeam = null)"
                 @touchstart="activeTeam = idx"
@@ -1297,6 +1340,9 @@
                   transition: 'all 0.3s',
                   transform:
                     activeTeam === idx ? 'translateY(-10px)' : 'translateY(0)',
+                  textDecoration: 'none',
+                  display: 'block',
+                  cursor: member.landing_page_url ? 'pointer' : 'default',
                 }"
               >
                 <div
@@ -1322,7 +1368,23 @@
                           : 'none',
                     }"
                   />
+                  <!-- Profile Image or Initials -->
+                  <img
+                    v-if="member.profile_image"
+                    :src="member.profile_image"
+                    :alt="member.name"
+                    :style="{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '3px solid rgba(10, 14, 39, 0.5)',
+                    }"
+                  />
                   <div
+                    v-else
                     :style="{
                       position: 'absolute',
                       inset: 0,
@@ -1360,7 +1422,22 @@
                 >
                   {{ member.role }}
                 </p>
-              </div>
+                <!-- View Profile Link Indicator -->
+                <p
+                  v-if="member.landing_page_url"
+                  :style="{
+                    color: 'rgba(102, 126, 234, 0.8)',
+                    fontSize: responsive.smallSize,
+                    marginTop: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                  }"
+                >
+                  View Profile →
+                </p>
+              </component>
             </div>
           </div>
 
@@ -1470,7 +1547,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
 
 // Composables
 const { $api } = useNuxtApp();
@@ -1555,12 +1632,20 @@ const responsive = computed(() => ({
   gridGap: isMobile.value ? "15px" : "20px",
 }));
 
-// Profile Data - Will be loaded from API
+// Profile Data - Will be loaded from API (matches ProfileBuilder fields)
 const profile = ref({
   name: "",
   qualification: "",
   position: "",
+  pronouns: "",
+  tagline: "",
   bio: "",
+  phone: "",
+  email: "",
+  website: "",
+  address: "",
+  education: [],
+  certifications: [],
 });
 
 const profileImage = ref(
@@ -1571,6 +1656,18 @@ const profileImage = ref(
 const visibleFieldsConfig = ref([]);
 const buttonClasses = ref('');
 const currentThemeConfig = ref(null);
+
+// 设计变量 - 用于动态样式
+const designSettings = reactive({
+  backgroundColor: '#0a0e27',
+  textColor: '#ffffff',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+  theme: 'default',
+  buttonStyle: 'solid',
+});
+
+// Section 排序配置
+const sectionOrder = ref(['profile', 'company', 'stats', 'services', 'contact', 'links', 'team']);
 
 const company = ref({
   logoText: "",
@@ -1720,10 +1817,28 @@ const loadPreviewData = (data) => {
     teamMembers.value = data.teamMembers.filter(member => member.name);
   }
 
-  // Design Settings
+  // Design Settings (from preview data)
   if (data.backgroundColor) {
-    // Apply background color if provided
-    document.documentElement.style.setProperty('--preview-bg', data.backgroundColor);
+    designSettings.backgroundColor = data.backgroundColor;
+  }
+  if (data.textColor) {
+    designSettings.textColor = data.textColor;
+  }
+  if (data.font) {
+    const fontMap = {
+      'inter': 'Inter, sans-serif',
+      'roboto': 'Roboto, sans-serif',
+      'playfair': 'Playfair Display, serif',
+      'poppins': 'Poppins, sans-serif',
+      'montserrat': 'Montserrat, sans-serif',
+    };
+    designSettings.fontFamily = fontMap[data.font] || data.font;
+  }
+  if (data.buttonStyle) {
+    designSettings.buttonStyle = data.buttonStyle;
+  }
+  if (data.theme) {
+    designSettings.theme = data.theme;
   }
 
   profileNotFound.value = false;
@@ -1838,11 +1953,19 @@ const loadProfileData = async () => {
     if (response.success && response.landing_page) {
       const data = response.landing_page;
 
-      // Basic Info
+      // Basic Info (Profile Tab)
       profile.value.name = data.name || "Your Name";
       profile.value.qualification = data.qualification || "";
       profile.value.position = data.title || data.position || "Your Position";
-      profile.value.bio = data.bio || "Your bio goes here";
+      profile.value.pronouns = data.pronouns || "";
+      profile.value.tagline = data.tagline || "";
+      profile.value.bio = data.bio || "";
+      profile.value.phone = data.phone || data.phone_number || "";
+      profile.value.email = data.email || data.email_address || "";
+      profile.value.website = data.website || data.website_url || "";
+      profile.value.address = data.address || "";
+      profile.value.education = data.education || [];
+      profile.value.certifications = data.certifications || [];
 
       // Profile Image
       if (data.profile_image) {
@@ -1949,13 +2072,16 @@ const loadProfileData = async () => {
         teamMembers.value = data.team_members.filter((member) => member.name);
       }
 
-      // === 新增：应用 design_config ===
+      // === 应用 design_config（完整设计对象） ===
       if (data.design_config) {
         console.log('🎨 Applying design config:', data.design_config);
         applyDesignConfig(data.design_config);
       }
+      
+      // === 应用直接的设计字段（兼容旧数据） ===
+      applyDirectDesignFields(data);
 
-      // === 新增：使用 visible_fields 控制显示 ===
+      // === 使用 visible_fields 控制显示 ===
       if (data.visible_fields) {
         console.log('👁️ Visible fields config:', data.visible_fields);
         visibleFieldsConfig.value = data.visible_fields;
@@ -1980,49 +2106,79 @@ const loadProfileData = async () => {
 // 新增：应用设计配置的函数
 const applyDesignConfig = (designConfig) => {
   try {
+    console.log('🎨 Applying design config:', designConfig);
+    
     // 应用 Theme
-    if (designConfig.theme && typeof window !== 'undefined') {
+    if (designConfig.theme) {
       const theme = designConfig.theme;
+      designSettings.theme = theme.id || 'default';
       if (theme.backgroundColor) {
-        document.documentElement.style.setProperty('--theme-bg', theme.backgroundColor);
+        designSettings.backgroundColor = theme.backgroundColor;
       }
     }
 
     // 应用 Font
-    if (designConfig.font && typeof window !== 'undefined') {
+    if (designConfig.font) {
       const font = designConfig.font;
       if (font.family) {
-        document.documentElement.style.setProperty('--font-family', font.family);
-        document.body.style.fontFamily = font.family;
+        designSettings.fontFamily = font.family;
       }
     }
 
     // 应用 Button Style
     if (designConfig.buttonStyle) {
       const buttonStyle = designConfig.buttonStyle;
+      designSettings.buttonStyle = buttonStyle.id || 'solid';
       if (buttonStyle.class) {
         buttonClasses.value = buttonStyle.class;
       }
     }
 
     // 应用 Color Scheme
-    if (designConfig.colorScheme && designConfig.colorScheme.colors && typeof window !== 'undefined') {
+    if (designConfig.colorScheme && designConfig.colorScheme.colors) {
       const colors = designConfig.colorScheme.colors;
-      if (colors.primary) {
-        document.documentElement.style.setProperty('--color-primary', colors.primary);
-      }
-      if (colors.secondary) {
-        document.documentElement.style.setProperty('--color-secondary', colors.secondary);
-      }
-      if (colors.accent) {
-        document.documentElement.style.setProperty('--color-accent', colors.accent);
-      }
+      if (colors.background) designSettings.backgroundColor = colors.background;
+      if (colors.text) designSettings.textColor = colors.text;
     }
 
     // 保存当前主题配置
     currentThemeConfig.value = designConfig;
+    
+    console.log('✅ Design settings applied:', designSettings);
   } catch (error) {
     console.error('Error applying design config:', error);
+  }
+};
+
+// 应用直接的设计字段（从 landing_page 表）
+const applyDirectDesignFields = (data) => {
+  if (data.background_color) {
+    designSettings.backgroundColor = data.background_color;
+  }
+  if (data.text_color) {
+    designSettings.textColor = data.text_color;
+  }
+  if (data.font) {
+    // Map font ID to font family
+    const fontMap = {
+      'inter': 'Inter, sans-serif',
+      'roboto': 'Roboto, sans-serif',
+      'playfair': 'Playfair Display, serif',
+      'poppins': 'Poppins, sans-serif',
+      'montserrat': 'Montserrat, sans-serif',
+    };
+    designSettings.fontFamily = fontMap[data.font] || data.font;
+  }
+  if (data.button_style) {
+    designSettings.buttonStyle = data.button_style;
+    // Map button style to classes
+    const buttonStyleMap = {
+      'solid': 'bg-black text-white rounded-full',
+      'outline': 'border-2 border-black text-black rounded-full bg-transparent',
+      'soft': 'bg-gray-100 text-gray-900 rounded-xl',
+      'shadow': 'bg-white text-black rounded-xl shadow-lg',
+    };
+    buttonClasses.value = buttonStyleMap[data.button_style] || '';
   }
 };
 

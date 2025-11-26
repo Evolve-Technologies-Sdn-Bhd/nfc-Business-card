@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfileBuilderField;
+use App\Models\ProfileBuilderSection;
+use App\Models\BusinessUserAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,11 +14,13 @@ class ProfileBuilderFieldController extends Controller
     /**
      * Get all profile builder fields grouped by tab
      * Supports filtering by plan parameter
+     * For Business users, checks for custom assignments
      */
     public function index(Request $request)
     {
         $plan = $request->query('plan');
         $tab = $request->query('tab');
+        $user = auth()->user();
         
         $query = ProfileBuilderField::orderBy('display_order');
         
@@ -25,12 +29,22 @@ class ProfileBuilderFieldController extends Controller
             $query->where('tab', $tab);
         }
         
-        // If plan parameter is provided, filter fields by plan availability
-        if ($plan) {
+        // Check if Business user has custom assignments
+        $customFieldIds = null;
+        if ($plan === 'business' && $user) {
+            $assignment = BusinessUserAssignment::where('user_id', $user->id)->first();
+            if ($assignment && $assignment->use_custom) {
+                $customFieldIds = $assignment->enabled_fields ?? [];
+            }
+        }
+        
+        // If Business user has custom assignments, use those
+        if ($customFieldIds !== null) {
+            $query->whereIn('id', $customFieldIds);
+        } elseif ($plan) {
+            // Default plan filtering
             $query->where(function($q) use ($plan) {
-                // Include fields that have this plan in available_plans
                 $q->whereJsonContains('available_plans', $plan)
-                  // OR fields with empty/null available_plans (available for all)
                   ->orWhereNull('available_plans')
                   ->orWhereJsonLength('available_plans', 0);
             });
@@ -59,47 +73,67 @@ class ProfileBuilderFieldController extends Controller
 
     /**
      * Get all sections with their fields
-     * Groups fields by tab and includes section metadata from config
+     * Returns ALL active sections from database (even without fields)
+     * For Business users, checks for custom assignments
      */
     public function getSections(Request $request)
     {
         $plan = $request->query('plan');
+        $user = auth()->user();
         
-        $query = ProfileBuilderField::orderBy('tab')->orderBy('display_order');
+        // Get all active sections from database
+        $sectionsQuery = ProfileBuilderSection::active()->orderBy('display_order');
         
-        // If plan parameter is provided, filter fields by plan availability
+        // Filter by plan if specified
         if ($plan) {
-            $query->where(function($q) use ($plan) {
+            $sectionsQuery->where(function($q) use ($plan) {
                 $q->whereJsonContains('available_plans', $plan)
                   ->orWhereNull('available_plans')
                   ->orWhereJsonLength('available_plans', 0);
             });
         }
         
-        $fields = $query->get();
+        $dbSections = $sectionsQuery->get();
         
-        // Group by tab (section)
-        $sections = $fields->groupBy('tab')->map(function ($sectionFields, $tabKey) {
-            // Get section metadata from config file
-            $sectionConfig = config("profile_sections.sections.{$tabKey}", [
-                'name' => ucfirst($tabKey),
-                'icon' => 'heroicons:folder',
-                'category' => 'general',
-                'description' => '',
-                'display_order' => 999,
-            ]);
+        // Check if Business user has custom assignments
+        $customFieldIds = null;
+        if ($plan === 'business' && $user) {
+            $assignment = BusinessUserAssignment::where('user_id', $user->id)->first();
+            if ($assignment && $assignment->use_custom) {
+                $customFieldIds = $assignment->enabled_fields ?? [];
+            }
+        }
+        
+        // Build field query
+        $fieldsQuery = ProfileBuilderField::orderBy('tab')->orderBy('display_order');
+        
+        if ($customFieldIds !== null) {
+            $fieldsQuery->whereIn('id', $customFieldIds);
+        } elseif ($plan) {
+            $fieldsQuery->where(function($q) use ($plan) {
+                $q->whereJsonContains('available_plans', $plan)
+                  ->orWhereNull('available_plans')
+                  ->orWhereJsonLength('available_plans', 0);
+            });
+        }
+        
+        $fields = $fieldsQuery->get()->groupBy('tab');
+        
+        // Map sections with their fields
+        $sections = $dbSections->map(function ($section) use ($fields) {
+            $sectionFields = $fields->get($section->key, collect([]))->values();
             
             return [
-                'section_key' => $tabKey,
-                'section_name' => $sectionConfig['name'],
-                'icon' => $sectionConfig['icon'],
-                'category' => $sectionConfig['category'],
-                'description' => $sectionConfig['description'] ?? '',
-                'display_order' => $sectionConfig['display_order'] ?? 999,
-                'available_plans' => $sectionConfig['available_plans'] ?? [],
-                'fields' => $sectionFields->values(),
+                'section_key' => $section->key,
+                'section_name' => $section->name,
+                'icon' => $section->icon,
+                'category' => $section->category,
+                'description' => $section->description ?? '',
+                'display_order' => $section->display_order ?? 999,
+                'available_plans' => $section->available_plans ?? [],
+                'fields' => $sectionFields,
             ];
-        })->sortBy('display_order')->values();
+        })->values();
         
         return response()->json([
             'success' => true,
@@ -171,7 +205,13 @@ class ProfileBuilderFieldController extends Controller
             ], 422);
         }
 
-        $field = ProfileBuilderField::create($request->all());
+        $data = $request->all();
+        // Default to all plans if not specified or empty
+        if (empty($data['available_plans'])) {
+            $data['available_plans'] = ['basic', 'premium', 'business'];
+        }
+        
+        $field = ProfileBuilderField::create($data);
 
         return response()->json([
             'success' => true,

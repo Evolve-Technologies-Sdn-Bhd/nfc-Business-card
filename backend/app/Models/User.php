@@ -218,6 +218,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get custom field/feature assignment for Business user
+     */
+    public function businessUserAssignment()
+    {
+        return $this->hasOne(BusinessUserAssignment::class);
+    }
+
+    /**
      * Get Business account ID (own ID if business account, or parent's ID if employee)
      */
     public function getBusinessAccountIdAttribute()

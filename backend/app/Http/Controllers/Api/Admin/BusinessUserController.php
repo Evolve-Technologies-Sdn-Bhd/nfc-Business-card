@@ -22,7 +22,8 @@ class BusinessUserController extends Controller
         $status = $request->input('status');
 
         $query = User::where('subscription_plan', 'business')
-            ->whereNull('parent_business_id');
+            ->whereNull('parent_business_id')
+            ->whereNull('admin_role'); // Exclude admins (super_admin, admin)
 
         // Search
         if ($search) {
@@ -71,11 +72,14 @@ class BusinessUserController extends Controller
     {
         $totalBusinessUsers = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
+            ->whereNull('admin_role') // Exclude admins
             ->count();
 
         $totalEmployees = User::whereNotNull('parent_business_id')->count();
 
         $activeAccounts = User::where('subscription_plan', 'business')
+            ->whereNull('parent_business_id')
+            ->whereNull('admin_role') // Exclude admins
             ->where('subscription_active', true)
             ->count();
 
@@ -99,6 +103,7 @@ class BusinessUserController extends Controller
     {
         $user = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
+            ->whereNull('admin_role') // Exclude admins
             ->with(['employees'])
             ->withCount(['employees'])
             ->findOrFail($id);

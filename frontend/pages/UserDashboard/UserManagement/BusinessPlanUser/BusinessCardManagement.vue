@@ -417,7 +417,7 @@
             You haven't ordered any Business Plan NFC cards yet. Order cards for
             your employees to get started.
           </p>
-          <button @click="orderNewCard" class="btn btn-primary">
+          <button @click="goToDesignPage" class="btn btn-primary">
             <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
             Order Your First Card
           </button>
