@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfileDesignOption;
+use App\Models\BusinessUserAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,11 +13,13 @@ class ProfileDesignController extends Controller
     /**
      * Get all design options (for users)
      * Returns only active options filtered by user's plan
+     * For Business users, checks for custom assignments
      */
     public function index(Request $request)
     {
         $type = $request->query('type');
-        $plan = $request->query('plan'); // Get user's subscription plan
+        $plan = $request->query('plan');
+        $user = auth()->user();
         
         $query = ProfileDesignOption::active()->ordered();
         
@@ -24,16 +27,39 @@ class ProfileDesignController extends Controller
             $query->ofType($type);
         }
         
-        // Filter by plan if provided (only if available_plans column exists)
-        if ($plan && \Schema::hasColumn('profile_design_options', 'available_plans')) {
-            $query->forPlan($plan);
+        // Check if Business user has custom assignments
+        $customDesignOptionIds = null;
+        $customFeatureIds = null;
+        if ($plan === 'business' && $user) {
+            $assignment = BusinessUserAssignment::where('user_id', $user->id)->first();
+            if ($assignment && $assignment->use_custom) {
+                $customDesignOptionIds = $assignment->enabled_design_options ?? [];
+                $customFeatureIds = $assignment->enabled_features ?? [];
+            }
         }
         
-        $options = $query->get()->groupBy('type');
+        // Get options
+        $options = $query->get();
+        
+        // Filter based on custom assignments or plan
+        if ($customDesignOptionIds !== null) {
+            $options = $options->filter(function($option) use ($customDesignOptionIds, $customFeatureIds) {
+                if ($option->type === 'feature_toggle') {
+                    return in_array($option->option_id, $customFeatureIds);
+                }
+                return in_array($option->id, $customDesignOptionIds);
+            });
+        } elseif ($plan && \Schema::hasColumn('profile_design_options', 'available_plans')) {
+            $options = $options->filter(function($option) use ($plan) {
+                return $option->isAvailableForPlan($plan);
+            });
+        }
+        
+        $grouped = $options->groupBy('type');
         
         return response()->json([
             'success' => true,
-            'data' => $options,
+            'data' => $grouped,
         ]);
     }
 
@@ -149,6 +175,7 @@ class ProfileDesignController extends Controller
             'is_default' => 'sometimes|boolean',
             'display_order' => 'sometimes|integer',
             'description' => 'sometimes|nullable|string',
+            'available_plans' => 'sometimes|nullable|array',
         ]);
 
         if ($validator->fails()) {

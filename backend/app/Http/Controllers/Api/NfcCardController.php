@@ -384,6 +384,65 @@ class NfcCardController extends Controller
     }
 
     /**
+     * Track NFC card tap (public endpoint)
+     */
+    public function trackTap(Request $request, NfcCard $nfcCard)
+    {
+        // Create analytics record for this tap
+        \App\Models\Analytics::create([
+            'trackable_type' => NfcCard::class,
+            'trackable_id' => $nfcCard->id,
+            'action' => 'nfc_tap',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'device_type' => $this->getDeviceType($request->userAgent()),
+            'browser' => $this->getBrowser($request->userAgent()),
+            'platform' => $this->getPlatform($request->userAgent()),
+            'referrer' => $request->header('Referer'),
+            'data' => [
+                'duration' => $request->input('duration', 0),
+                'source' => $request->input('source', 'nfc_tap'),
+            ],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tap tracked successfully'
+        ]);
+    }
+
+    private function getDeviceType($userAgent)
+    {
+        if (preg_match('/Mobile|Android|iPhone|iPad/', $userAgent)) {
+            if (preg_match('/iPad|Tablet/', $userAgent)) {
+                return 'tablet';
+            }
+            return 'mobile';
+        }
+        return 'desktop';
+    }
+
+    private function getBrowser($userAgent)
+    {
+        if (preg_match('/Chrome/', $userAgent)) return 'Chrome';
+        if (preg_match('/Firefox/', $userAgent)) return 'Firefox';
+        if (preg_match('/Safari/', $userAgent)) return 'Safari';
+        if (preg_match('/Edge/', $userAgent)) return 'Edge';
+        if (preg_match('/Opera/', $userAgent)) return 'Opera';
+        return 'Other';
+    }
+
+    private function getPlatform($userAgent)
+    {
+        if (preg_match('/Windows/', $userAgent)) return 'Windows';
+        if (preg_match('/Mac/', $userAgent)) return 'macOS';
+        if (preg_match('/Linux/', $userAgent)) return 'Linux';
+        if (preg_match('/Android/', $userAgent)) return 'Android';
+        if (preg_match('/iPhone|iPad/', $userAgent)) return 'iOS';
+        return 'Other';
+    }
+
+    /**
      * Get landing page for an NFC card
      */
     public function getLandingPage(Request $request, NfcCard $nfcCard)
@@ -424,56 +483,153 @@ class NfcCardController extends Controller
 
         // Validate request
         $validator = Validator::make($request->all(), [
+            // Basic Info
             'name' => 'nullable|string|max:255',
             'title' => 'nullable|string|max:255',
+            'pronouns' => 'nullable|string|max:50',
             'qualification' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
+            'tagline' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'website' => 'nullable|url|max:500',
+            'email' => 'nullable|string|max:255', // Changed from email to string to allow empty
+            'website' => 'nullable|string|max:500', // Changed from url to string to allow empty
             'address' => 'nullable|string',
+            
+            // Images
             'profile_image' => 'nullable|string',
+            'cover_banner' => 'nullable|string',
             'company_logo' => 'nullable|string',
+            
+            // Company Info
             'company_logo_text' => 'nullable|string|max:50',
             'company_name' => 'nullable|string|max:255',
             'company_registration_no' => 'nullable|string|max:255',
             'company_department' => 'nullable|string|max:255',
+            
+            // Address Details
             'address_name' => 'nullable|string|max:255',
             'address_street' => 'nullable|string|max:255',
             'address_area' => 'nullable|string|max:255',
             'address_city_state' => 'nullable|string|max:255',
             'address_country' => 'nullable|string|max:255',
-            'address_map_url' => 'nullable|url',
+            'address_map_url' => 'nullable|string|max:500', // Changed from url to string to allow empty
+            
+            // JSON/Repeater fields
             'stats' => 'nullable|array',
             'services' => 'nullable|array',
             'team_members' => 'nullable|array',
+            'education' => 'nullable|array',
+            'certifications' => 'nullable|array',
+            'expertise' => 'nullable|array',
+            'awards' => 'nullable|array',
+            'working_hours' => 'nullable|array',
+            'service_features' => 'nullable|array',
+            'service_tags' => 'nullable|array',
+            
+            // Contact Methods
             'phone_number' => 'nullable|string|max:50',
             'phone_label' => 'nullable|string|max:100',
-            'email_address' => 'nullable|email|max:255',
+            'email_address' => 'nullable|string|max:255', // Changed from email to string to allow empty
             'email_label' => 'nullable|string|max:100',
             'whatsapp_number' => 'nullable|string|max:50',
             'whatsapp_label' => 'nullable|string|max:100',
-            'website_url' => 'nullable|url|max:500',
+            'website_url' => 'nullable|string|max:500', // Changed from url to string to allow empty
             'website_label' => 'nullable|string|max:100',
+            
+            // Design Settings
             'profile_style' => 'nullable|string|max:50',
             'theme' => 'nullable|string|max:50',
             'background_color' => 'nullable|string|max:50',
             'text_color' => 'nullable|string|max:50',
             'font' => 'nullable|string|max:50',
             'button_style' => 'nullable|string|max:50',
+            'color_scheme' => 'nullable|string|max:50',
+            'layout' => 'nullable|string|max:50',
             'show_watermark' => 'nullable|boolean',
+            
+            // Design & Fields Configuration
+            'design_config' => 'nullable|array',
+            'visible_fields' => 'nullable|array',
+            
+            // Features
+            'features' => 'nullable|array',
+            'feature_order' => 'nullable|array',
+            
+            // Company additional
+            'company_description' => 'nullable|string',
+            'company_video' => 'nullable|string|max:500',
+            'industry' => 'nullable|string|max:100',
+            'established_year' => 'nullable', // Allow string or number
+            'employee_count' => 'nullable', // Allow string or number
+            'postal_code' => 'nullable|string|max:20',
+            'coordinates' => 'nullable|string|max:100',
+            'company_whatsapp' => 'nullable|string|max:50',
+            
+            // Services additional
+            'service_name' => 'nullable|string|max:255',
+            'service_category' => 'nullable|string|max:100',
+            'service_image' => 'nullable|string|max:500',
+            'service_video' => 'nullable|string|max:500',
+            'service_description' => 'nullable|string',
+            'service_price' => 'nullable|string|max:50',
+            'service_old_price' => 'nullable|string|max:50',
+            'service_duration' => 'nullable|string|max:100',
+            'service_brochure' => 'nullable|string|max:500',
+            'booking_enabled' => 'nullable|boolean',
+            'booking_url' => 'nullable|string|max:500',
+            'gallery' => 'nullable|array',
+            
+            // Portfolio
+            'portfolio_title' => 'nullable|string|max:255',
+            'portfolio_description' => 'nullable|string',
+            'portfolio_category' => 'nullable|string|max:100',
+            'portfolio_tags' => 'nullable|array',
+            'portfolio_cover_image' => 'nullable|string|max:500',
+            'portfolio_gallery' => 'nullable|array',
+            'projects' => 'nullable|array',
+            'project_url' => 'nullable|string|max:500',
+            'date_completed' => 'nullable|string|max:50',
+            'client_name' => 'nullable|string|max:255',
+            'portfolio_location' => 'nullable|string|max:255',
+            'skills_used' => 'nullable|array',
+            'pdf_download' => 'nullable|string|max:500',
+            
+            // Blog
+            'blog_enabled' => 'nullable|boolean',
+            'blog_posts' => 'nullable|array',
+            'blog_gallery' => 'nullable|array',
+            'blog_title' => 'nullable|string|max:255',
+            'blog_slug' => 'nullable|string|max:255',
+            'blog_cover_image' => 'nullable|string|max:500',
+            'blog_category' => 'nullable|string|max:100',
+            'blog_tags' => 'nullable|array',
+            'author_name' => 'nullable|string|max:255',
+            'published_date' => 'nullable|string|max:50',
+            'reading_time' => 'nullable|string|max:50',
+            'blog_content' => 'nullable|string',
+            'external_link' => 'nullable|string|max:500',
+            'related_posts' => 'nullable|array',
+            
+            // Links additional
+            'appointment_link' => 'nullable|string|max:500',
+            'payment_button_text' => 'nullable|string|max:100',
+            'payment_button_url' => 'nullable|string|max:500',
             
             // Links validation
             'links' => 'nullable|array',
             'links.*.id' => 'nullable|exists:social_links,id',
             'links.*.title' => 'required_with:links|string|max:255',
-            'links.*.url' => 'required_with:links|url',
+            'links.*.url' => 'required_with:links|string|max:500', // Changed from url to string
             'links.*.platform' => 'required_with:links|string|max:50',
             'links.*.is_active' => 'nullable|boolean',
             'links.*.order' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Landing page validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'input_keys' => array_keys($request->all())
+            ]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()

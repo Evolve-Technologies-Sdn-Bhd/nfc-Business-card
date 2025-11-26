@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LandingPage;
 use App\Models\NfcCard;
 use App\Models\Analytics;
+use App\Models\User;
 use App\Services\FileUploadService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -465,6 +466,470 @@ class ProfileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete logo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function uploadCoverBanner(Request $request)
+    {
+        Log::info('Cover banner upload started', [
+            'user_id' => $request->user()->id,
+            'has_file' => $request->hasFile('image'),
+            'nfc_card_id' => $request->input('nfc_card_id')
+        ]);
+
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB max for banner
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $user = $request->user();
+
+            // Get NFC card
+            if ($request->has('nfc_card_id')) {
+                $nfcCard = $user->nfcCards()->find($request->input('nfc_card_id'));
+                if (!$nfcCard) {
+                    throw new \Exception('NFC card not found or does not belong to you');
+                }
+            } else {
+                $nfcCard = $user->nfcCards()->first();
+                if (!$nfcCard) {
+                    throw new \Exception('No NFC card found');
+                }
+            }
+
+            // Get or create landing page
+            $landingPage = LandingPage::firstOrCreate(
+                ['nfc_card_id' => $nfcCard->id],
+                [
+                    'name' => $user->full_name ?? $user->email,
+                    'email' => $user->email,
+                    'is_active' => true,
+                ]
+            );
+
+            // Delete old banner if exists
+            if ($landingPage->cover_banner_path) {
+                try {
+                    $this->fileUploadService->deleteFile($landingPage->cover_banner_path);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to delete old cover banner', ['error' => $e->getMessage()]);
+                }
+            }
+
+            // Upload new banner - use same method as profile image but to different folder
+            $file = $request->file('image');
+            $fileName = 'banner_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('cover-banners', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            Log::info('Cover banner uploaded successfully', ['path' => $path, 'url' => $url]);
+
+            // Update landing page
+            $landingPage->update([
+                'cover_banner' => $url,
+                'cover_banner_path' => $path,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover banner uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'size' => $file->getSize(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Cover banner upload failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload cover banner: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteCoverBanner(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $user = $request->user();
+            $nfcCard = $user->nfcCards()->first();
+            
+            if (!$nfcCard || !$nfcCard->landingPage) {
+                throw new \Exception('No landing page found');
+            }
+            
+            $landingPage = $nfcCard->landingPage;
+
+            if ($landingPage->cover_banner_path) {
+                $this->fileUploadService->deleteFile($landingPage->cover_banner_path);
+
+                $landingPage->update([
+                    'cover_banner' => null,
+                    'cover_banner_path' => null,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover banner deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Failed to delete cover banner', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete cover banner: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get business team members with their landing page URLs
+     * Returns employees under the current Business Account
+     */
+    public function getBusinessTeamMembers(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            Log::info('getBusinessTeamMembers called', [
+                'user_id' => $user->id,
+                'subscription_plan' => $user->subscription_plan,
+                'parent_business_id' => $user->parent_business_id,
+                'isBusinessAccount' => $user->isBusinessAccount(),
+            ]);
+            
+            // Only Business Account owners can see their employees
+            if (!$user->isBusinessAccount()) {
+                Log::info('User is not a Business Account owner');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Only Business Account owners can view employees',
+                    'data' => [],
+                    'total' => 0,
+                ]);
+            }
+            
+            // Get all employees under current user's business account
+            // Same as QuotaController::getEmployees
+            $employees = $user->employees()
+                ->with(['nfcCards.landingPage'])
+                ->get();
+            
+            Log::info('Employees found', [
+                'count' => $employees->count(),
+                'employee_ids' => $employees->pluck('id')->toArray(),
+            ]);
+            
+            $teamMembers = [];
+            
+            foreach ($employees as $employee) {
+                // If employee has NFC cards, show each card
+                if ($employee->nfcCards->count() > 0) {
+                    foreach ($employee->nfcCards as $card) {
+                        $landingPage = $card->landingPage;
+                        // Use landing page data if available, otherwise use employee data
+                        $name = ($landingPage && $landingPage->name) ? $landingPage->name : $employee->full_name;
+                        $role = ($landingPage && $landingPage->title) ? $landingPage->title : ($employee->job_title ?? 'Team Member');
+                        $profileImage = ($landingPage && $landingPage->profile_image) ? $landingPage->profile_image : null;
+                        
+                        $teamMembers[] = [
+                            'id' => $employee->id,
+                            'user_id' => $employee->id,
+                            'name' => $name,
+                            'role' => $role,
+                            'initials' => $this->getInitials($name),
+                            'email' => $employee->email,
+                            'profile_image' => $profileImage,
+                            'nfc_card_id' => $card->nfc_card_id,
+                            'landing_page_url' => url('/profile/' . $card->nfc_card_id),
+                            'is_admin' => $employee->isBusinessAccount(),
+                        ];
+                    }
+                } else {
+                    // Employee without NFC card - still show them
+                    $teamMembers[] = [
+                        'id' => $employee->id,
+                        'user_id' => $employee->id,
+                        'name' => $employee->full_name,
+                        'role' => $employee->job_title ?? 'Team Member',
+                        'initials' => $this->getInitials($employee->full_name),
+                        'email' => $employee->email,
+                        'profile_image' => null,
+                        'nfc_card_id' => null,
+                        'landing_page_url' => null,
+                        'is_admin' => $employee->isBusinessAccount(),
+                    ];
+                }
+            }
+            
+            Log::info('Team members result', [
+                'count' => count($teamMembers),
+                'names' => array_column($teamMembers, 'name'),
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $teamMembers,
+                'total' => count($teamMembers),
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to get business team members', ['error' => $e->getMessage()]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get team members: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Get initials from name
+     */
+    private function getInitials($name)
+    {
+        if (empty($name)) return '??';
+        
+        $words = explode(' ', trim($name));
+        $initials = '';
+        
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $initials .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        
+        return substr($initials, 0, 2) ?: '??';
+    }
+    
+    /**
+     * Upload portfolio image
+     */
+    public function uploadPortfolioImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = $request->user();
+            $file = $request->file('image');
+            $fileName = 'portfolio_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('portfolio-images', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Portfolio image uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'path' => $path,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Portfolio image upload failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Upload service image
+     */
+    public function uploadServiceImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = $request->user();
+            $file = $request->file('image');
+            $fileName = 'service_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('service-images', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Service image uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'path' => $path,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Service image upload failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Upload gallery image
+     */
+    public function uploadGalleryImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = $request->user();
+            $file = $request->file('image');
+            $fileName = 'gallery_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('gallery-images', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Gallery image uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'path' => $path,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gallery image upload failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Upload blog image
+     */
+    public function uploadBlogImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'nfc_card_id' => 'nullable|exists:nfc_cards,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = $request->user();
+            $file = $request->file('image');
+            $fileName = 'blog_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('blog-images', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Blog image uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'path' => $path,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Blog image upload failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Upload generic file (PDF, documents, etc.)
+     */
+    public function uploadFile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip|max:20480',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = $request->user();
+            $file = $request->file('file');
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $fileName = 'file_' . $user->id . '_' . time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $path = $file->storeAs('uploads', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File uploaded successfully',
+                'data' => [
+                    'url' => $url,
+                    'path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('File upload failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -80,13 +80,16 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-6">
           <div class="flex items-center">
+            <div class="flex-shrink-0 bg-purple-100 p-3 rounded-lg">
+              <Icon name="heroicons:cursor-arrow-ripple" class="h-6 w-6 text-purple-600" />
+            </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-secondary-500">Total Taps</p>
               <p class="text-2xl font-semibold text-secondary-900">
                 {{ analytics.totalTaps }}
               </p>
-              <p class="text-sm text-success-600">
-                +{{ analytics.tapGrowth }}% from last period
+              <p :class="analytics.tapGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+                {{ analytics.tapGrowth >= 0 ? '+' : '' }}{{ analytics.tapGrowth }}% from last period
               </p>
             </div>
           </div>
@@ -104,8 +107,8 @@
               <p class="text-2xl font-semibold text-secondary-900">
                 {{ analytics.uniqueVisitors }}
               </p>
-              <p class="text-sm text-success-600">
-                +{{ analytics.visitorGrowth }}% from last period
+              <p :class="analytics.visitorGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+                {{ analytics.visitorGrowth >= 0 ? '+' : '' }}{{ analytics.visitorGrowth }}% from last period
               </p>
             </div>
           </div>
@@ -123,8 +126,8 @@
               <p class="text-2xl font-semibold text-secondary-900">
                 {{ analytics.avgEngagement }}s
               </p>
-              <p class="text-sm text-success-600">
-                +{{ analytics.engagementGrowth }}% from last period
+              <p :class="analytics.engagementGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+                {{ analytics.engagementGrowth >= 0 ? '+' : '' }}{{ analytics.engagementGrowth }}% from last period
               </p>
             </div>
           </div>
@@ -160,20 +163,36 @@
             </p>
           </div>
           <div class="card-body">
-            <div
-              class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center"
-            >
+            <div v-if="dailyTaps.length === 0" class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center">
               <div class="text-center">
-                <Icon
-                  name="heroicons:chart-bar"
-                  class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-                />
-                <p class="text-secondary-600">
-                  Interactive chart will be displayed here
-                </p>
-                <p class="text-sm text-secondary-500">
-                  Integration with Chart.js or similar
-                </p>
+                <Icon name="heroicons:chart-bar" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
+                <p class="text-secondary-600">No tap data available yet</p>
+                <p class="text-sm text-secondary-500">Taps will appear here once recorded</p>
+              </div>
+            </div>
+            <div v-else class="h-64">
+              <!-- Simple Bar Chart -->
+              <div class="flex items-end justify-between h-48 gap-1">
+                <div
+                  v-for="(day, index) in dailyTaps"
+                  :key="index"
+                  class="flex-1 flex flex-col items-center group"
+                >
+                  <div
+                    class="w-full bg-primary-500 rounded-t transition-all hover:bg-primary-600 cursor-pointer relative"
+                    :style="{ height: `${getBarHeight(day.count)}%`, minHeight: day.count > 0 ? '4px' : '0' }"
+                  >
+                    <!-- Tooltip -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-secondary-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                      {{ day.count }} taps
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- X-axis labels -->
+              <div class="flex justify-between mt-2 text-xs text-secondary-500">
+                <span>{{ formatChartDate(dailyTaps[0]?.date) }}</span>
+                <span v-if="dailyTaps.length > 1">{{ formatChartDate(dailyTaps[dailyTaps.length - 1]?.date) }}</span>
               </div>
             </div>
           </div>
@@ -470,6 +489,7 @@ const analytics = reactive({
 });
 
 const recentTaps = ref([]);
+const dailyTaps = ref([]);
 
 // Methods
 const loadNfcCards = async () => {
@@ -524,7 +544,7 @@ const loadAnalytics = async () => {
     // Determine API endpoint based on card selection
     const endpoint = selectedCardId.value === "all" 
       ? `/analytics/business/overview`  // All cards overview
-      : `/analytics/nfc/${selectedCardId.value}`; // Single card
+      : `/analytics/nfc-card/${selectedCardId.value}`; // Single card
 
     const response = await $api.get(endpoint, { params });
 
@@ -549,11 +569,18 @@ const loadAnalytics = async () => {
       if (response.data.recent_taps) {
         recentTaps.value = response.data.recent_taps.map((tap) => ({
           id: tap.id,
-          location: tap.ip_address || "Unknown Location",
-          device: tap.device_type || "Unknown Device",
+          location: tap.city || tap.country || tap.ip_address || "Unknown Location",
+          device: tap.device_type ? tap.device_type.charAt(0).toUpperCase() + tap.device_type.slice(1) : "Unknown Device",
           timestamp: new Date(tap.created_at),
-          duration: tap.duration || 0,
+          duration: tap.data?.duration || 0,
+          browser: tap.browser || "Unknown",
+          platform: tap.platform || "Unknown",
         }));
+      }
+
+      // Update daily taps for chart
+      if (response.data.daily_taps) {
+        dailyTaps.value = response.data.daily_taps;
       }
     }
   } catch (error) {
@@ -595,8 +622,8 @@ const exportAnalytics = async () => {
 
     // Determine export endpoint based on card selection
     const exportUrl = selectedCardId.value === "all"
-      ? `${apiBaseUrl}/analytics/business/overview/export?${params}&token=${token}`
-      : `${apiBaseUrl}/analytics/nfc/${selectedCardId.value}/export?${params}&token=${token}`;
+      ? `${apiBaseUrl}/api/analytics/business/overview/export?${params}&token=${token}`
+      : `${apiBaseUrl}/api/analytics/nfc-card/${selectedCardId.value}/export?${params}&token=${token}`;
 
     window.open(exportUrl, "_blank");
 
@@ -624,6 +651,21 @@ const formatDateTime = (date) => {
     minute: "2-digit",
     hour12: true,
   }).format(new Date(date));
+};
+
+const getBarHeight = (count) => {
+  if (dailyTaps.value.length === 0) return 0;
+  const maxCount = Math.max(...dailyTaps.value.map((d) => d.count), 1);
+  return Math.round((count / maxCount) * 100);
+};
+
+const formatChartDate = (dateStr) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
 };
 
 // Lifecycle

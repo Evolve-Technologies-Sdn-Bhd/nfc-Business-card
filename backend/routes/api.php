@@ -35,6 +35,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Api\Admin\PlanPriceController;
 use App\Http\Controllers\Api\ProfileDesignController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderFieldController;
+use App\Http\Controllers\Api\Admin\ProfileBuilderSectionController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -62,6 +63,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Public profile viewing (using landing pages)
 Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
+Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackTap']);
 Route::post('/analytics/track', [AnalyticsController::class, 'track']);
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
 
@@ -118,17 +120,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
     
     Route::get('/subscription/status', [NfcCardController::class, 'subscriptionStatus']);
+    
+    // Business Team Members (for profile builder)
+    Route::get('/business/team-members', [ProfileController::class, 'getBusinessTeamMembers']);
 
     // Analytics
     Route::get('/analytics/overview', [AnalyticsController::class, 'overview']);
     Route::get('/analytics/profile', [AnalyticsController::class, 'profileAnalytics']);
     Route::get('/analytics/nfc/{tag}', [AnalyticsController::class, 'nfcAnalytics']);
+    
+    // Business Analytics (for Business Plan users)
+    Route::get('/analytics/business/overview', [AnalyticsController::class, 'businessOverview']);
+    Route::get('/analytics/business/overview/export', [AnalyticsController::class, 'businessOverviewExport']);
+    Route::get('/analytics/nfc-card/{cardId}', [AnalyticsController::class, 'nfcCardAnalytics']);
+    Route::get('/analytics/nfc-card/{cardId}/export', [AnalyticsController::class, 'nfcCardExport']);
 
     // File uploads
     Route::post('/upload/profile-image', [ProfileController::class, 'uploadProfileImage']);
     Route::post('/upload/company-logo', [ProfileController::class, 'uploadCompanyLogo']);
+    Route::post('/upload/cover-banner', [ProfileController::class, 'uploadCoverBanner']);
+    Route::post('/upload/portfolio-image', [ProfileController::class, 'uploadPortfolioImage']);
+    Route::post('/upload/service-image', [ProfileController::class, 'uploadServiceImage']);
+    Route::post('/upload/gallery-image', [ProfileController::class, 'uploadGalleryImage']);
+    Route::post('/upload/blog-image', [ProfileController::class, 'uploadBlogImage']);
+    Route::post('/upload/file', [ProfileController::class, 'uploadFile']);
     Route::delete('/upload/profile-image', [ProfileController::class, 'deleteProfileImage']);
     Route::delete('/upload/company-logo', [ProfileController::class, 'deleteCompanyLogo']);
+    Route::delete('/upload/cover-banner', [ProfileController::class, 'deleteCoverBanner']);
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'getSettings']);
@@ -340,15 +358,31 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // ✅ Profile Builder Management
     Route::prefix('profile-builder')->group(function () {
-        // Sections
-        Route::get('/sections', [ProfileBuilderFieldController::class, 'getAvailableSections']);
+        // Sections CRUD
+        Route::get('/sections', [ProfileBuilderSectionController::class, 'index']);
+        Route::get('/sections/{id}', [ProfileBuilderSectionController::class, 'show']);
+        Route::post('/sections', [ProfileBuilderSectionController::class, 'store']);
+        Route::put('/sections/{id}', [ProfileBuilderSectionController::class, 'update']);
+        Route::delete('/sections/{id}', [ProfileBuilderSectionController::class, 'destroy']);
+        Route::post('/sections/reorder', [ProfileBuilderSectionController::class, 'reorder']);
+        
+        // Sections with fields (legacy compatibility)
         Route::get('/sections-with-fields', [ProfileBuilderFieldController::class, 'getSections']);
         
-        // Fields
+        // Fields CRUD
         Route::get('/fields', [ProfileBuilderFieldController::class, 'index']);
         Route::post('/fields', [ProfileBuilderFieldController::class, 'store']);
         Route::put('/fields/{id}', [ProfileBuilderFieldController::class, 'update']);
         Route::delete('/fields/{id}', [ProfileBuilderFieldController::class, 'destroy']);
+    });
+
+    // ✅ Business User Custom Assignments (separate prefix to not conflict with BusinessUserController)
+    Route::prefix('business-user-assignments')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'index']);
+        Route::get('/{userId}', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'show']);
+        Route::put('/{userId}', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'update']);
+        Route::post('/{userId}/reset', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'resetToDefault']);
+        Route::post('/{userId}/copy-from', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'copyFrom']);
     });
 });
 
