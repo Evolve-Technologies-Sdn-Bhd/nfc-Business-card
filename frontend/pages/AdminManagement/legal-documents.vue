@@ -61,6 +61,7 @@
                   type="text"
                   class="input"
                   placeholder="1.0"
+                  disabled
                 />
               </div>
               <div>
@@ -73,24 +74,75 @@
                   v-model="termsData.effective_date"
                   type="date"
                   class="input"
+                  disabled
                 />
               </div>
             </div>
 
-            <!-- Content Editor -->
-            <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-1">
-                Content
-              </label>
-              <textarea
-                v-model="termsData.content"
-                rows="20"
-                class="input font-mono text-sm"
-                placeholder="Enter Terms of Service content here. You can use Markdown formatting."
-              ></textarea>
-              <p class="mt-1 text-xs text-secondary-500">
-                Supports Markdown formatting
+            <!-- PDF Upload Section -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+                PDF Document Upload
+              </h3>
+              <p class="text-sm text-secondary-600 mb-4">
+                Upload a PDF file containing the Terms of Service document. This PDF will be displayed to users who access the Terms of Service.
               </p>
+
+              <div
+                v-if="termsPdfStatus.exists"
+                class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
+              >
+                <div
+                  class="flex items-center space-x-2 text-sm text-green-700"
+                >
+                  <Icon
+                    name="heroicons:document-check"
+                    class="h-5 w-5 text-green-500"
+                  />
+                  <span
+                    >PDF uploaded ({{
+                      formatFileSize(termsPdfStatus.fileInfo?.size)
+                    }})</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  @click="downloadPdf('terms')"
+                  class="btn btn-sm btn-outline"
+                >
+                  <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
+                  Download
+                </button>
+              </div>
+
+              <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
+                <Icon
+                  name="heroicons:exclamation-triangle"
+                  class="h-5 w-5 inline mr-1 text-yellow-600"
+                />
+                No PDF uploaded yet. Please upload a PDF file below.
+              </div>
+
+              <div class="flex items-center space-x-3">
+                <input
+                  type="file"
+                  ref="termsFileInput"
+                  accept="application/pdf"
+                  @change="handleTermsFileSelect"
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  @click="$refs.termsFileInput.click()"
+                  :disabled="uploadingTermsPdf"
+                  class="btn btn-sm btn-primary"
+                >
+                  <Icon v-if="!uploadingTermsPdf" name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
+                  <span v-if="uploadingTermsPdf" class="animate-spin">⏳</span>
+                  {{ uploadingTermsPdf ? 'Uploading...' : 'Choose PDF File' }}
+                </button>
+                <span class="text-xs text-secondary-500">Max 10MB</span>
+              </div>
             </div>
 
             <!-- PDF Upload Section -->
@@ -221,6 +273,7 @@
                   type="text"
                   class="input"
                   placeholder="1.0"
+                  disabled
                 />
               </div>
               <div>
@@ -233,40 +286,26 @@
                   v-model="privacyData.effective_date"
                   type="date"
                   class="input"
+                  disabled
                 />
               </div>
             </div>
 
-            <!-- Content Editor -->
-            <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-1">
-                Content
-              </label>
-              <textarea
-                v-model="privacyData.content"
-                rows="20"
-                class="input font-mono text-sm"
-                placeholder="Enter Privacy Policy content here. You can use Markdown formatting."
-              ></textarea>
-              <p class="mt-1 text-xs text-secondary-500">
-                Supports Markdown formatting
-              </p>
-            </div>
-
             <!-- PDF Upload Section -->
-            <div
-              class="bg-secondary-50 rounded-lg p-4 border border-secondary-200"
-            >
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 class="text-sm font-semibold text-secondary-900 mb-3">
-                PDF Document
+                PDF Document Upload
               </h3>
+              <p class="text-sm text-secondary-600 mb-4">
+                Upload a PDF file containing the Privacy Policy document. This PDF will be displayed to users who access the Privacy Policy.
+              </p>
 
               <div
                 v-if="privacyPdfStatus.exists"
-                class="mb-3 flex items-center justify-between"
+                class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
               >
                 <div
-                  class="flex items-center space-x-2 text-sm text-secondary-600"
+                  class="flex items-center space-x-2 text-sm text-green-700"
                 >
                   <Icon
                     name="heroicons:document-check"
@@ -284,16 +323,16 @@
                   class="btn btn-sm btn-outline"
                 >
                   <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
-                  Download PDF
+                  Download
                 </button>
               </div>
 
-              <div v-else class="mb-3 text-sm text-secondary-500">
+              <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
                 <Icon
-                  name="heroicons:information-circle"
-                  class="h-5 w-5 inline mr-1"
+                  name="heroicons:exclamation-triangle"
+                  class="h-5 w-5 inline mr-1 text-yellow-600"
                 />
-                No PDF uploaded yet
+                No PDF uploaded yet. Please upload a PDF file below.
               </div>
 
               <div class="flex items-center space-x-3">
@@ -307,18 +346,14 @@
                 <button
                   type="button"
                   @click="$refs.privacyFileInput.click()"
-                  class="btn btn-sm btn-outline"
+                  :disabled="uploadingPrivacyPdf"
+                  class="btn btn-sm btn-primary"
                 >
-                  <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
-                  {{ privacyPdfStatus.exists ? "Replace PDF" : "Upload PDF" }}
+                  <Icon v-if="!uploadingPrivacyPdf" name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
+                  <span v-if="uploadingPrivacyPdf" class="animate-spin">⏳</span>
+                  {{ uploadingPrivacyPdf ? 'Uploading...' : 'Choose PDF File' }}
                 </button>
-                <span
-                  v-if="uploadingPrivacyPdf"
-                  class="text-sm text-secondary-600"
-                >
-                  <div class="spinner spinner-sm mr-1"></div>
-                  Uploading...
-                </span>
+                <span class="text-xs text-secondary-500">Max 10MB</span>
               </div>
             </div>
 
@@ -559,47 +594,17 @@ const loadDocuments = async () => {
   }
 };
 
-// Save document
+// Save document - PDF upload instead of text content
+// Note: This now focuses on PDF uploads via file input handlers
+// The actual save is triggered through handleTermsFileSelect and handlePrivacyFileSelect
 const saveDocument = async (type) => {
+  // This function is kept for compatibility but now redirects to PDF upload workflow
   const isTerms = type === "terms_of_service";
-  const data = isTerms ? termsData : privacyData;
-
-  if (isTerms) {
-    savingTerms.value = true;
-  } else {
-    savingPrivacy.value = true;
-  }
-
-  try {
-    const response = await $api.put(`/admin/legal/documents/${type}`, {
-      content: data.content,
-      version: data.version,
-      effective_date: data.effective_date,
-    });
-
-    if (response.success) {
-      $toast.success(
-        `${
-          isTerms ? "Terms of Service" : "Privacy Policy"
-        } updated successfully`
-      );
-
-      // Update local data with response
-      Object.assign(data, {
-        updated_at: response.data.updated_at,
-        updater: response.data.updater,
-      });
-    }
-  } catch (error) {
-    console.error("Error saving document:", error);
-    $toast.error("Failed to save document. Please try again.");
-  } finally {
-    if (isTerms) {
-      savingTerms.value = false;
-    } else {
-      savingPrivacy.value = false;
-    }
-  }
+  const docName = isTerms ? "Terms of Service" : "Privacy Policy";
+  
+  $toast.info(
+    `To save ${docName}, please upload a PDF file using the file upload button above.`
+  );
 };
 
 // Preview document
