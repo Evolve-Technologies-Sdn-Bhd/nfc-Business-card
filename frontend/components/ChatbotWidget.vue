@@ -239,21 +239,26 @@ const sendMessage = async () => {
   scrollToBottom();
 
   try {
-    // Call chatbot API
-    const response = await $fetch('/api/chatbot/ask', {
+    // Call n8n webhook directly
+    const response = await $fetch('https://n8n.jiosgroup.com/webhook/e529b3a4-d09d-45d6-8de5-01cc6885bcb7/chat', {
       method: 'POST',
-      body: { question }
+      body: { 
+        question,
+        chatId: Date.now() // Simple session identifier
+      }
     });
 
     // Simulate typing delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    if (response.success && response.found) {
+    // Handle n8n response
+    const answer = response.answer || response.message || response.data?.answer;
+    
+    if (answer) {
       // Add bot response
       messages.value.push({
         type: 'bot',
-        text: response.data.answer,
-        questionId: response.data.id,
+        text: answer,
         feedbackGiven: false,
         timestamp: new Date()
       });
@@ -285,51 +290,16 @@ const sendQuickQuestion = (question) => {
   sendMessage();
 };
 
-// Submit feedback (helpful/not helpful)
-const submitFeedback = async (message, rating, index) => {
-  try {
-    await $fetch('/api/chatbot/feedback', {
-      method: 'POST',
-      body: {
-        question_id: message.questionId,
-        user_question: lastUserQuestion.value,
-        rating: rating,
-        feedback_type: 'rating'
-      }
-    });
-
-    // Update message to show feedback given
-    messages.value[index].feedbackGiven = true;
-  } catch (error) {
-    console.error('Feedback submission error:', error);
-  }
-};
-
-// Submit detailed feedback
+// Submit detailed feedback - now just shows confirmation without backend call
 const submitDetailedFeedback = async () => {
-  try {
-    await $fetch('/api/chatbot/feedback', {
-      method: 'POST',
-      body: {
-        user_question: lastUserQuestion.value,
-        user_name: feedbackData.value.name || null,
-        user_email: feedbackData.value.email || null,
-        user_message: feedbackData.value.message || null,
-        feedback_type: 'not_found'
-      }
-    });
+  messages.value.push({
+    type: 'bot',
+    text: "Thank you! We've received your message. 🙏",
+    timestamp: new Date()
+  });
 
-    messages.value.push({
-      type: 'bot',
-      text: "Thank you! We've received your message and will get back to you soon. 🙏",
-      timestamp: new Date()
-    });
-
-    closeFeedbackForm();
-    scrollToBottom();
-  } catch (error) {
-    console.error('Feedback submission error:', error);
-  }
+  closeFeedbackForm();
+  scrollToBottom();
 };
 
 // Close feedback form

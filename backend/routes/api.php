@@ -238,9 +238,7 @@ Route::get('/legal/documents', [LegalDocumentController::class, 'index']);
 Route::get('/legal/documents/{type}', [LegalDocumentController::class, 'show']);
 
 // Public chatbot routes
-Route::post('/chatbot/ask', [ChatbotController::class, 'ask']);
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
-Route::get('/chatbot/questions', [ChatbotController::class, 'getQuestions']);
 
 // Public admin info endpoint (for getting super admin to send notifications)
 Route::middleware('auth:sanctum')->get('/admin/super-admin', [AdminController::class, 'getSuperAdmin']);
@@ -298,17 +296,16 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
         Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
     });
-    // Chatbot management
-    Route::get('/chatbot/questions', [AdminChatbotController::class, 'index']);
-    Route::post('/chatbot/questions', [AdminChatbotController::class, 'store']);
-    Route::put('/chatbot/questions/{id}', [AdminChatbotController::class, 'update']);
-    Route::delete('/chatbot/questions/{id}', [AdminChatbotController::class, 'destroy']);
-    Route::get('/chatbot/feedback', [AdminChatbotController::class, 'getFeedback']);
-    Route::get('/chatbot/feedback/export', [AdminChatbotController::class, 'exportFeedback']);
-    Route::put('/chatbot/feedback/{id}/status', [AdminChatbotController::class, 'updateFeedbackStatus']);
-    Route::put('/chatbot/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
-    Route::delete('/chatbot/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
-    Route::get('/chatbot/analytics', [AdminChatbotController::class, 'getAnalytics']);
+    
+    // ✅ Chatbot Feedback Management
+    Route::prefix('chatbot')->group(function () {
+        Route::get('/feedback', [AdminChatbotController::class, 'getFeedback']);
+        Route::get('/feedback/statistics', [AdminChatbotController::class, 'getStatistics']);
+        Route::get('/feedback/unread-count', [AdminChatbotController::class, 'getUnreadCount']);
+        Route::put('/feedback/{id}/status', [AdminChatbotController::class, 'updateFeedbackStatus']);
+        Route::put('/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
+        Route::delete('/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
+    });
 
     // ✅ Admin Payment Management
     Route::prefix('payments')->group(function () {
