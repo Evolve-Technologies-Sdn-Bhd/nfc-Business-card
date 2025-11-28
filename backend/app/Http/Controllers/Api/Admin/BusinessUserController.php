@@ -23,7 +23,10 @@ class BusinessUserController extends Controller
 
         $query = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
-            ->whereNull('admin_role'); // Exclude admins (super_admin, admin)
+            ->where(function($q) {
+                $q->whereNull('admin_role')
+                  ->orWhere('admin_role', '!=', 'super_admin');
+            }); // Exclude only super_admin, show regular admins with business plan
 
         // Search
         if ($search) {
@@ -72,14 +75,20 @@ class BusinessUserController extends Controller
     {
         $totalBusinessUsers = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
-            ->whereNull('admin_role') // Exclude admins
+            ->where(function($q) {
+                $q->whereNull('admin_role')
+                  ->orWhere('admin_role', '!=', 'super_admin');
+            }) // Exclude only super_admin
             ->count();
 
         $totalEmployees = User::whereNotNull('parent_business_id')->count();
 
         $activeAccounts = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
-            ->whereNull('admin_role') // Exclude admins
+            ->where(function($q) {
+                $q->whereNull('admin_role')
+                  ->orWhere('admin_role', '!=', 'super_admin');
+            }) // Exclude only super_admin
             ->where('subscription_active', true)
             ->count();
 
@@ -103,7 +112,10 @@ class BusinessUserController extends Controller
     {
         $user = User::where('subscription_plan', 'business')
             ->whereNull('parent_business_id')
-            ->whereNull('admin_role') // Exclude admins
+            ->where(function($q) {
+                $q->whereNull('admin_role')
+                  ->orWhere('admin_role', '!=', 'super_admin');
+            }) // Exclude only super_admin
             ->with(['employees'])
             ->withCount(['employees'])
             ->findOrFail($id);
