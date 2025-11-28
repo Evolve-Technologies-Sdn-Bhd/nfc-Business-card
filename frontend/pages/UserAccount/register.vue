@@ -320,7 +320,7 @@
         @click.self="showTermsModal = false"
       >
         <div
-          class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+          class="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
         >
           <div class="p-6 border-b border-secondary-200">
             <div class="flex items-center justify-between">
@@ -339,19 +339,13 @@
               {{ formatDate(termsDocument.effective_date) }}
             </p>
           </div>
-          <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
-            <div v-if="loadingTerms" class="text-center py-8">
-              <div class="spinner mx-auto mb-4"></div>
-              <p class="text-secondary-600">Loading Terms of Service...</p>
-            </div>
-            <div
-              v-else-if="termsDocument"
-              class="prose prose-sm max-w-none"
-              v-html="renderMarkdown(termsDocument.content)"
-            ></div>
-            <div v-else class="text-center py-8 text-secondary-600">
-              Terms of Service not available
-            </div>
+          <div class="flex-1 p-6 overflow-hidden">
+            <PdfViewer
+              url="http://localhost:8000/api/legal/pdf/terms/view"
+              :require-auth="false"
+              :disable-download="true"
+              min-height="calc(85vh - 200px)"
+            />
           </div>
           <div class="p-6 border-t border-secondary-200">
             <button
@@ -372,7 +366,7 @@
         @click.self="showPrivacyModal = false"
       >
         <div
-          class="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+          class="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
         >
           <div class="p-6 border-b border-secondary-200">
             <div class="flex items-center justify-between">
@@ -391,19 +385,13 @@
               {{ formatDate(privacyDocument.effective_date) }}
             </p>
           </div>
-          <div class="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
-            <div v-if="loadingPrivacy" class="text-center py-8">
-              <div class="spinner mx-auto mb-4"></div>
-              <p class="text-secondary-600">Loading Privacy Policy...</p>
-            </div>
-            <div
-              v-else-if="privacyDocument"
-              class="prose prose-sm max-w-none"
-              v-html="renderMarkdown(privacyDocument.content)"
-            ></div>
-            <div v-else class="text-center py-8 text-secondary-600">
-              Privacy Policy not available
-            </div>
+          <div class="flex-1 p-6 overflow-hidden">
+            <PdfViewer
+              url="http://localhost:8000/api/legal/pdf/privacy/view"
+              :require-auth="false"
+              :disable-download="true"
+              min-height="calc(85vh - 200px)"
+            />
           </div>
           <div class="p-6 border-t border-secondary-200">
             <button

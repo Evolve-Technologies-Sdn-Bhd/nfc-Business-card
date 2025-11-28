@@ -131,16 +131,16 @@ class LegalDocumentController extends Controller
      */
     public function downloadTerms()
     {
-        $pdfPath = 'public/legal-documents/terms-of-service.pdf';
+        $pdfPath = 'legal-documents/terms-of-service.pdf';
 
-        if (!Storage::exists($pdfPath)) {
+        if (!Storage::disk('public')->exists($pdfPath)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Terms of Service PDF not found. Please upload a PDF file first.'
             ], 404);
         }
 
-        return Storage::download($pdfPath, 'Terms-of-Service.pdf', [
+        return Storage::disk('public')->download($pdfPath, 'Terms-of-Service.pdf', [
             'Content-Type' => 'application/pdf',
         ]);
     }
@@ -150,16 +150,16 @@ class LegalDocumentController extends Controller
      */
     public function downloadPrivacy()
     {
-        $pdfPath = 'public/legal-documents/privacy-policy.pdf';
+        $pdfPath = 'legal-documents/privacy-policy.pdf';
 
-        if (!Storage::exists($pdfPath)) {
+        if (!Storage::disk('public')->exists($pdfPath)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Privacy Policy PDF not found. Please upload a PDF file first.'
             ], 404);
         }
 
-        return Storage::download($pdfPath, 'Privacy-Policy.pdf', [
+        return Storage::disk('public')->download($pdfPath, 'Privacy-Policy.pdf', [
             'Content-Type' => 'application/pdf',
         ]);
     }
@@ -169,11 +169,18 @@ class LegalDocumentController extends Controller
      */
     public function uploadTermsPdf(Request $request)
     {
+        \Log::info('Upload Terms PDF called', [
+            'has_file' => $request->hasFile('pdf'),
+            'all_files' => array_keys($request->allFiles()),
+            'all_data' => array_keys($request->all())
+        ]);
+
         $validator = Validator::make($request->all(), [
             'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Upload validation failed', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -182,14 +189,43 @@ class LegalDocumentController extends Controller
 
         try {
             $file = $request->file('pdf');
-            $path = $file->storeAs('public/legal-documents', 'terms-of-service.pdf');
+            \Log::info('File received', [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime' => $file->getMimeType()
+            ]);
+            
+            $originalName = $file->getClientOriginalName();
+            $path = $file->storeAs('legal-documents', 'terms-of-service.pdf', 'public');
+            
+            // Store original filename in metadata file
+            $metadataPath = 'legal-documents/terms-of-service-metadata.json';
+            $metadata = [
+                'original_filename' => $originalName,
+                'uploaded_at' => now()->toIso8601String(),
+                'size' => $file->getSize()
+            ];
+            Storage::disk('public')->put($metadataPath, json_encode($metadata));
+            
+            \Log::info('File stored', [
+                'path' => $path,
+                'original_name' => $originalName,
+                'full_path' => storage_path('app/public/' . $path),
+                'exists' => Storage::disk('public')->exists($path)
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Terms of Service PDF uploaded successfully',
-                'path' => Storage::url($path)
+                'path' => Storage::disk('public')->url($path),
+                'original_filename' => $originalName,
+                'size' => $file->getSize()
             ]);
         } catch (\Exception $e) {
+            \Log::error('Upload failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to upload PDF: ' . $e->getMessage()
@@ -215,12 +251,24 @@ class LegalDocumentController extends Controller
 
         try {
             $file = $request->file('pdf');
-            $path = $file->storeAs('public/legal-documents', 'privacy-policy.pdf');
+            $originalName = $file->getClientOriginalName();
+            $path = $file->storeAs('legal-documents', 'privacy-policy.pdf', 'public');
+            
+            // Store original filename in metadata file
+            $metadataPath = 'legal-documents/privacy-policy-metadata.json';
+            $metadata = [
+                'original_filename' => $originalName,
+                'uploaded_at' => now()->toIso8601String(),
+                'size' => $file->getSize()
+            ];
+            Storage::disk('public')->put($metadataPath, json_encode($metadata));
 
             return response()->json([
                 'success' => true,
                 'message' => 'Privacy Policy PDF uploaded successfully',
-                'path' => Storage::url($path)
+                'path' => Storage::disk('public')->url($path),
+                'original_filename' => $originalName,
+                'size' => $file->getSize()
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -236,17 +284,32 @@ class LegalDocumentController extends Controller
     public function checkPdfStatus($type)
     {
         $fileName = $type === 'terms' ? 'terms-of-service.pdf' : 'privacy-policy.pdf';
-        $pdfPath = 'public/legal-documents/' . $fileName;
+        $metadataFileName = $type === 'terms' ? 'terms-of-service-metadata.json' : 'privacy-policy-metadata.json';
+        $pdfPath = 'legal-documents/' . $fileName;
+        $metadataPath = 'legal-documents/' . $metadataFileName;
 
-        $exists = Storage::exists($pdfPath);
+        $exists = Storage::disk('public')->exists($pdfPath);
         
         $fileInfo = null;
         if ($exists) {
             $fileInfo = [
-                'size' => Storage::size($pdfPath),
-                'last_modified' => Storage::lastModified($pdfPath),
-                'url' => Storage::url($pdfPath)
+                'size' => Storage::disk('public')->size($pdfPath),
+                'last_modified' => Storage::disk('public')->lastModified($pdfPath),
+                'url' => Storage::disk('public')->url($pdfPath),
+                'original_filename' => $fileName // Default to stored filename
             ];
+            
+            // Try to load metadata if it exists
+            if (Storage::disk('public')->exists($metadataPath)) {
+                try {
+                    $metadata = json_decode(Storage::disk('public')->get($metadataPath), true);
+                    if (isset($metadata['original_filename'])) {
+                        $fileInfo['original_filename'] = $metadata['original_filename'];
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to read metadata file', ['error' => $e->getMessage()]);
+                }
+            }
         }
 
         return response()->json([
@@ -254,5 +317,51 @@ class LegalDocumentController extends Controller
             'exists' => $exists,
             'file_info' => $fileInfo
         ]);
+    }
+
+    /**
+     * View Terms of Service PDF (public - no auth required)
+     */
+    public function viewTermsPdf()
+    {
+        $pdfPath = 'legal-documents/terms-of-service.pdf';
+
+        if (!Storage::disk('public')->exists($pdfPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terms of Service PDF not found.'
+            ], 404);
+        }
+
+        return response()->file(
+            storage_path('app/public/' . $pdfPath),
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="Terms-of-Service.pdf"'
+            ]
+        );
+    }
+
+    /**
+     * View Privacy Policy PDF (public - no auth required)
+     */
+    public function viewPrivacyPdf()
+    {
+        $pdfPath = 'legal-documents/privacy-policy.pdf';
+
+        if (!Storage::disk('public')->exists($pdfPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Privacy Policy PDF not found.'
+            ], 404);
+        }
+
+        return response()->file(
+            storage_path('app/public/' . $pdfPath),
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="Privacy-Policy.pdf"'
+            ]
+        );
     }
 }

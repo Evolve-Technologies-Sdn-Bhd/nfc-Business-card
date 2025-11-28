@@ -638,9 +638,10 @@ const isFormValid = computed(() => {
 });
 
 // Check if user is authenticated
-onMounted(() => {
+onMounted(async () => {
   if (!authStore.isAuthenticated) {
     router.push("/UserAccount/login");
+    return;
   }
 
   // Load user data if available
@@ -648,6 +649,29 @@ onMounted(() => {
     cardInfo.name = authStore.user.full_name || "";
     cardInfo.email = authStore.user.email || "";
     cardInfo.position = authStore.user.job_title || "";
+  }
+
+  // Check if user has an active NFC card
+  try {
+    const { $api } = useNuxtApp();
+    const response = await $api.get("/nfc-cards");
+    
+    const activeCard = response?.data?.find((card) => card.status === "active");
+    
+    if (!activeCard) {
+      const { $toast } = useNuxtApp();
+      $toast.warning(
+        "You don't have an active NFC card yet. Please purchase a card to customize its design."
+      );
+      
+      // Redirect to card purchase after 2 seconds
+      setTimeout(() => {
+        router.push("/UserDashboard/CardManagement");
+      }, 2000);
+    }
+  } catch (error) {
+    console.warn("Could not verify NFC card status:", error);
+    // Allow user to proceed anyway - error will be caught when trying to save
   }
 });
 
@@ -661,7 +685,7 @@ const saveCardInfo = async () => {
     sessionStorage.setItem("designMethod", designMethod.value);
 
     // Call backend API to save card information
-    const { $api } = useNuxtApp();
+    const { $api, $toast } = useNuxtApp();
     await $api.post("/onboarding/save-card-info", {
       name: cardInfo.name,
       position: cardInfo.position,
@@ -681,7 +705,36 @@ const saveCardInfo = async () => {
     $toast.success("Card information saved successfully!");
   } catch (error) {
     console.error("Save card info error:", error);
-    $toast.error("Failed to save card information. Please try again.");
+    
+    // Handle specific error cases
+    const { $toast } = useNuxtApp();
+    
+    if (error.response?.status === 404) {
+      // No active NFC card found
+      $toast.error(
+        "You don't have an active NFC card yet. Please purchase or activate a card first."
+      );
+    } else if (error.response?.status === 422) {
+      // Validation error
+      const errors = error.response.data?.errors;
+      if (errors) {
+        const firstError = Object.values(errors)[0];
+        $toast.error(
+          Array.isArray(firstError) ? firstError[0] : firstError
+        );
+      } else {
+        $toast.error("Validation failed. Please check your input.");
+      }
+    } else if (error.response?.status === 401) {
+      // Not authenticated
+      $toast.error("Session expired. Please login again.");
+    } else {
+      // Generic error
+      const message =
+        error.response?.data?.message ||
+        "Failed to save card information. Please try again.";
+      $toast.error(message);
+    }
   }
 };
 

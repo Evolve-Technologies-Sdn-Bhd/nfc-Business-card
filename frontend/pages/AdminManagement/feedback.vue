@@ -545,6 +545,8 @@ const markAsRead = async () => {
       $toast.success('Marked as read');
       loadFeedback();
       loadStatistics();
+      // Notify layout to update unread badge immediately
+      window.dispatchEvent(new CustomEvent('admin-feedback-updated'));
     }
   } catch (error) {
     console.error('Failed to mark as read:', error);
@@ -568,6 +570,8 @@ const updateFeedbackStatus = async () => {
       selectedFeedback.value = null;
       loadFeedback();
       loadStatistics();
+      // Notify layout to update unread badge immediately
+      window.dispatchEvent(new CustomEvent('admin-feedback-updated'));
     }
   } catch (error) {
     console.error('Failed to update status:', error);
@@ -590,6 +594,8 @@ const deleteFeedback = async () => {
       selectedFeedback.value = null;
       loadFeedback();
       loadStatistics();
+      // Notify layout to update unread badge immediately
+      window.dispatchEvent(new CustomEvent('admin-feedback-updated'));
     }
   } catch (error) {
     console.error('Failed to delete feedback:', error);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
+use App\Models\LandingPage;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,43 +90,65 @@ class OnboardingController extends Controller
             ], 422);
         }
 
-        $user = $request->user();
+        try {
+            $user = $request->user();
 
-        // Update user profile with card information
-        $profile = $user->profile;
-        $profile->update([
-            'name' => $request->name,
-            'title' => $request->position,
-            'phone' => $request->contactNumber,
-            'email' => $request->email,
-            'website' => $request->website,
-            'location' => $request->address,
-            'bio' => $request->companyBackground,
-        ]);
+            // Get user's active NFC card
+            $nfcCard = $user->activeNfcCard;
+            
+            if (!$nfcCard) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No active NFC card found for this user'
+                ], 404);
+            }
 
-        // Store additional card info in user settings
-        $cardInfo = [
-            'services' => $request->services,
-            'social_links' => [
-                'linkedin' => $request->linkedin,
-                'twitter' => $request->twitter,
-                'facebook' => $request->facebook,
-                'instagram' => $request->instagram,
-            ]
-        ];
+            // Get or create landing page for this NFC card
+            $landingPage = $nfcCard->landingPage ?? LandingPage::create([
+                'nfc_card_id' => $nfcCard->id,
+            ]);
 
-        $user->update([
-            'settings' => array_merge($user->settings ?? [], ['card_info' => $cardInfo])
-        ]);
+            // Update landing page with card information
+            $landingPage->update([
+                'name' => $request->name,
+                'title' => $request->position,
+                'phone' => $request->contactNumber,
+                'email' => $request->email,
+                'website' => $request->website,
+                'address' => $request->address,
+                'bio' => $request->companyBackground,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Card information saved successfully',
-            'data' => [
-                'profile' => $profile,
-                'card_info' => $cardInfo
-            ]
-        ]);
+            // Store additional card info in user settings
+            $cardInfo = [
+                'services' => $request->services,
+                'social_links' => [
+                    'linkedin' => $request->linkedin,
+                    'twitter' => $request->twitter,
+                    'facebook' => $request->facebook,
+                    'instagram' => $request->instagram,
+                ]
+            ];
+
+            $user->update([
+                'settings' => array_merge($user->settings ?? [], ['card_info' => $cardInfo])
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Card information saved successfully',
+                'data' => [
+                    'landing_page' => $landingPage,
+                    'card_info' => $cardInfo
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error saving card info: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save card information: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

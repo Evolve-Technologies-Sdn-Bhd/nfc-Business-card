@@ -110,10 +110,13 @@ class AdminChatbotController extends Controller
      * Get unread feedback count
      * 
      * GET /api/admin/chatbot/feedback/unread-count
+     * Returns the count of unread feedback items (is_read = false)
+     * This matches the "Unread" statistic shown in Feedback Management
      */
     public function getUnreadCount()
     {
         try {
+            // Count feedback that is unread - matches the Feedback Management unread count
             $unreadCount = ChatbotFeedback::where('is_read', false)->count();
 
             return response()->json([

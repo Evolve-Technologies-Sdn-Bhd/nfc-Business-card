@@ -27,6 +27,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
+
+        // Handle unauthenticated API requests
+        $middleware->redirectGuestsTo(function () {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                abort(401, 'Unauthenticated');
+            }
+            return route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

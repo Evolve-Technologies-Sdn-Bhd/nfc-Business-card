@@ -61,7 +61,7 @@
                   type="text"
                   class="input"
                   placeholder="1.0"
-                  disabled
+                  required
                 />
               </div>
               <div>
@@ -74,9 +74,15 @@
                   v-model="termsData.effective_date"
                   type="date"
                   class="input"
-                  disabled
+                  required
                 />
               </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p class="text-sm text-amber-800">
+                <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
+              </p>
             </div>
 
             <!-- PDF Upload Section -->
@@ -100,7 +106,7 @@
                     class="h-5 w-5 text-green-500"
                   />
                   <span
-                    >PDF uploaded ({{
+                    >{{ getDisplayFileName(termsPdfStatus.fileInfo?.original_filename) }} ({{
                       formatFileSize(termsPdfStatus.fileInfo?.size)
                     }})</span
                   >
@@ -145,75 +151,6 @@
               </div>
             </div>
 
-            <!-- PDF Upload Section -->
-            <div
-              class="bg-secondary-50 rounded-lg p-4 border border-secondary-200"
-            >
-              <h3 class="text-sm font-semibold text-secondary-900 mb-3">
-                PDF Document
-              </h3>
-
-              <div
-                v-if="termsPdfStatus.exists"
-                class="mb-3 flex items-center justify-between"
-              >
-                <div
-                  class="flex items-center space-x-2 text-sm text-secondary-600"
-                >
-                  <Icon
-                    name="heroicons:document-check"
-                    class="h-5 w-5 text-green-500"
-                  />
-                  <span
-                    >PDF uploaded ({{
-                      formatFileSize(termsPdfStatus.fileInfo?.size)
-                    }})</span
-                  >
-                </div>
-                <button
-                  type="button"
-                  @click="downloadPdf('terms')"
-                  class="btn btn-sm btn-outline"
-                >
-                  <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
-                  Download PDF
-                </button>
-              </div>
-
-              <div v-else class="mb-3 text-sm text-secondary-500">
-                <Icon
-                  name="heroicons:information-circle"
-                  class="h-5 w-5 inline mr-1"
-                />
-                No PDF uploaded yet
-              </div>
-
-              <div class="flex items-center space-x-3">
-                <input
-                  type="file"
-                  ref="termsFileInput"
-                  accept="application/pdf"
-                  @change="handleTermsFileSelect"
-                  class="hidden"
-                />
-                <button
-                  type="button"
-                  @click="$refs.termsFileInput.click()"
-                  class="btn btn-sm btn-outline"
-                >
-                  <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
-                  {{ termsPdfStatus.exists ? "Replace PDF" : "Upload PDF" }}
-                </button>
-                <span
-                  v-if="uploadingTermsPdf"
-                  class="text-sm text-secondary-600"
-                >
-                  <div class="spinner spinner-sm mr-1"></div>
-                  Uploading...
-                </span>
-              </div>
-            </div>
-
             <!-- Last Updated Info -->
             <div v-if="termsData.updated_at" class="text-sm text-secondary-600">
               <p>
@@ -226,12 +163,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-between items-center">
-              <button type="button" @click="goBack" class="btn btn-outline">
-                <Icon name="heroicons:arrow-left" class="h-5 w-5 mr-2" />
-                Back to Dashboard
-              </button>
-
+            <div class="flex justify-end items-center">
               <div class="flex space-x-3">
                 <button
                   type="button"
@@ -273,7 +205,7 @@
                   type="text"
                   class="input"
                   placeholder="1.0"
-                  disabled
+                  required
                 />
               </div>
               <div>
@@ -286,9 +218,15 @@
                   v-model="privacyData.effective_date"
                   type="date"
                   class="input"
-                  disabled
+                  required
                 />
               </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p class="text-sm text-amber-800">
+                <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
+              </p>
             </div>
 
             <!-- PDF Upload Section -->
@@ -312,7 +250,7 @@
                     class="h-5 w-5 text-green-500"
                   />
                   <span
-                    >PDF uploaded ({{
+                    >{{ getDisplayFileName(privacyPdfStatus.fileInfo?.original_filename) }} ({{
                       formatFileSize(privacyPdfStatus.fileInfo?.size)
                     }})</span
                   >
@@ -372,12 +310,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-between items-center">
-              <button type="button" @click="goBack" class="btn btn-outline">
-                <Icon name="heroicons:arrow-left" class="h-5 w-5 mr-2" />
-                Back to Dashboard
-              </button>
-
+            <div class="flex justify-end items-center">
               <div class="flex space-x-3">
                 <button
                   type="button"
@@ -410,7 +343,7 @@
       @click="showPreview = false"
     >
       <div
-        class="card max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden"
+        class="card max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
         @click.stop
       >
         <div
@@ -429,8 +362,14 @@
             <Icon name="heroicons:x-mark" class="h-6 w-6" />
           </button>
         </div>
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          <div class="prose prose-sm max-w-none" v-html="renderedPreview"></div>
+        <div class="flex-1 p-6 overflow-hidden">
+          <PdfViewer
+            :url="previewPdfUrl"
+            :require-auth="true"
+            min-height="calc(90vh - 200px)"
+            @loaded="onPdfLoaded"
+            @error="onPdfError"
+          />
         </div>
         <div class="flex justify-end p-6 border-t border-secondary-200">
           <button @click="showPreview = false" class="btn btn-outline">
@@ -455,36 +394,6 @@ definePageMeta({
 
 const { $api, $toast } = useNuxtApp();
 
-// Simple markdown to HTML converter
-const parseMarkdown = (markdown) => {
-  if (!markdown) return "No content yet.";
-
-  let html = markdown
-    // Headers
-    .replace(
-      /^### (.*$)/gim,
-      '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>'
-    )
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
-    // Bold
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-    // Italic
-    .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
-    // Links
-    .replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-primary-600 hover:underline" target="_blank">$1</a>'
-    )
-    // Line breaks
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    // Lists
-    .replace(/^\* (.+)$/gim, '<li class="ml-4">• $1</li>')
-    .replace(/^- (.+)$/gim, '<li class="ml-4">• $1</li>');
-
-  return `<p class="mb-4">${html}</p>`;
-};
-
 // Reactive data
 const activeTab = ref("terms");
 const savingTerms = ref(false);
@@ -506,6 +415,22 @@ const privacyPdfStatus = reactive({
   fileInfo: null,
 });
 
+// Computed preview PDF URL
+const previewPdfUrl = computed(() => {
+  const type = previewType.value === "terms" ? "terms" : "privacy";
+  return `http://localhost:8000/api/admin/legal/pdf/${type}/download`;
+});
+
+// Preview handlers
+const onPdfLoaded = () => {
+  console.log("PDF loaded successfully in preview");
+};
+
+const onPdfError = (errorMessage) => {
+  console.error("PDF preview error:", errorMessage);
+  $toast.error("Failed to load PDF preview");
+};
+
 const termsData = reactive({
   content: "",
   version: "1.0",
@@ -520,13 +445,6 @@ const privacyData = reactive({
   effective_date: new Date().toISOString().split("T")[0],
   updated_at: null,
   updater: null,
-});
-
-// Computed
-const renderedPreview = computed(() => {
-  const content =
-    previewType.value === "terms" ? termsData.content : privacyData.content;
-  return parseMarkdown(content);
 });
 
 // Load documents on mount
@@ -594,17 +512,49 @@ const loadDocuments = async () => {
   }
 };
 
-// Save document - PDF upload instead of text content
-// Note: This now focuses on PDF uploads via file input handlers
-// The actual save is triggered through handleTermsFileSelect and handlePrivacyFileSelect
+// Save document - Updates metadata (version, effective_date) in database
+// PDF file itself is uploaded separately via file input handlers
 const saveDocument = async (type) => {
-  // This function is kept for compatibility but now redirects to PDF upload workflow
   const isTerms = type === "terms_of_service";
   const docName = isTerms ? "Terms of Service" : "Privacy Policy";
-  
-  $toast.info(
-    `To save ${docName}, please upload a PDF file using the file upload button above.`
-  );
+  const data = isTerms ? termsData : privacyData;
+
+  // Check if PDF has been uploaded first
+  const pdfStatus = isTerms ? termsPdfStatus : privacyPdfStatus;
+  if (!pdfStatus.exists) {
+    $toast.error(
+      `Please upload a PDF file first before saving ${docName} metadata.`
+    );
+    return;
+  }
+
+  if (isTerms) {
+    savingTerms.value = true;
+  } else {
+    savingPrivacy.value = true;
+  }
+
+  try {
+    const response = await $api.put(`/admin/legal/documents/${type}`, {
+      content: `PDF document uploaded. Version: ${data.version}`, // Placeholder content
+      version: data.version,
+      effective_date: data.effective_date,
+    });
+
+    if (response.success) {
+      $toast.success(`${docName} metadata updated successfully`);
+      await loadDocuments(); // Reload to get updated metadata
+    }
+  } catch (error) {
+    console.error("Error saving document:", error);
+    $toast.error(`Failed to save ${docName} metadata. Please try again.`);
+  } finally {
+    if (isTerms) {
+      savingTerms.value = false;
+    } else {
+      savingPrivacy.value = false;
+    }
+  }
 };
 
 // Preview document
@@ -647,7 +597,21 @@ const handleTermsFileSelect = async (event) => {
 
     if (response.success) {
       $toast.success("Terms of Service PDF uploaded successfully");
-      await checkPdfStatus("terms");
+      
+      // Update status with response data if available
+      if (response.original_filename && response.size) {
+        Object.assign(termsPdfStatus, {
+          exists: true,
+          fileInfo: {
+            original_filename: response.original_filename,
+            size: response.size,
+            url: response.path
+          }
+        });
+      } else {
+        // Fallback to checking status via API
+        await checkPdfStatus("terms");
+      }
     }
   } catch (error) {
     console.error("Error uploading PDF:", error);
@@ -694,7 +658,21 @@ const handlePrivacyFileSelect = async (event) => {
 
     if (response.success) {
       $toast.success("Privacy Policy PDF uploaded successfully");
-      await checkPdfStatus("privacy");
+      
+      // Update status with response data if available
+      if (response.original_filename && response.size) {
+        Object.assign(privacyPdfStatus, {
+          exists: true,
+          fileInfo: {
+            original_filename: response.original_filename,
+            size: response.size,
+            url: response.path
+          }
+        });
+      } else {
+        // Fallback to checking status via API
+        await checkPdfStatus("privacy");
+      }
     }
   } catch (error) {
     console.error("Error uploading PDF:", error);
@@ -712,15 +690,15 @@ const downloadPdf = async (type) => {
   try {
     const config = useRuntimeConfig();
     const apiBaseUrl = config.public.apiBaseUrl;
-    const token = localStorage.getItem("auth_token");
+    const tokenCookie = useCookie("auth-token");
+    const token = tokenCookie.value;
+
+    if (!token) {
+      $toast.error("Authentication required. Please log in again.");
+      return;
+    }
 
     const url = `${apiBaseUrl}/admin/legal/pdf/${type}/download`;
-
-    // Create a temporary link and trigger download
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "");
-    link.style.display = "none";
 
     // Add authorization header by fetching as blob first
     const response = await fetch(url, {
@@ -736,9 +714,13 @@ const downloadPdf = async (type) => {
 
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement("a");
     link.href = blobUrl;
     link.download =
       type === "terms" ? "Terms-of-Service.pdf" : "Privacy-Policy.pdf";
+    link.style.display = "none";
 
     document.body.appendChild(link);
     link.click();
@@ -754,20 +736,20 @@ const downloadPdf = async (type) => {
   }
 };
 
-// Format file size
+// Format file size - always show KB with 2 decimal places for consistency
 const formatFileSize = (bytes) => {
-  if (!bytes) return "0 Bytes";
-
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  if (!bytes) return "0.00 KB";
+  
+  const kb = bytes / 1024;
+  return kb.toFixed(2) + " KB";
 };
 
-// Go back to admin dashboard
-const goBack = () => {
-  navigateTo("/AdminManagement");
+// Get display filename without extension
+const getDisplayFileName = (filename) => {
+  if (!filename) return "PDF uploaded";
+  
+  // Remove .pdf extension if present
+  return filename.replace(/\.pdf$/i, '');
 };
 
 // Format date

@@ -52,9 +52,11 @@
                   ]"
                 />
                 {{ item.name }}
+                <!-- Notification Badge -->
                 <span
-                  v-if="item.badge"
-                  class="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                  v-if="item.badge && Number(item.badge) > 0"
+                  class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 min-w-[1.25rem] px-1"
+                  :title="`${item.badge} unread feedback`"
                 >
                   {{ item.badge }}
                 </span>
@@ -205,6 +207,7 @@
 <script setup>
 const route = useRoute();
 const authStore = useAuthStore();
+const { $api } = useNuxtApp();
 const user = computed(() => authStore.user);
 
 const sidebarOpen = ref(false);
@@ -267,7 +270,7 @@ const navigation = computed(() => [
     name: "User Feedback",
     href: "/AdminManagement/feedback",
     icon: "heroicons:chat-bubble-left-right",
-    badge: unreadFeedbackCount.value || null,
+    badge: unreadFeedbackCount.value,
   },
 ]);
 
@@ -285,7 +288,7 @@ const isActiveRoute = (href) => {
 // Fetch unread feedback count
 const loadUnreadFeedbackCount = async () => {
   try {
-    const response = await $fetch('/api/admin/chatbot/feedback/unread-count');
+    const response = await $api.get('/admin/chatbot/feedback/unread-count');
     if (response.success) {
       unreadFeedbackCount.value = response.unread_count;
     }
@@ -318,6 +321,11 @@ onMounted(() => {
   // Refresh unread count every 30 seconds
   const interval = setInterval(loadUnreadFeedbackCount, 30000);
   onBeforeUnmount(() => clearInterval(interval));
+
+  // Listen for immediate updates from feedback page actions
+  window.addEventListener('admin-feedback-updated', () => {
+    loadUnreadFeedbackCount();
+  });
 });
 
 // Watch for route changes to close mobile sidebar

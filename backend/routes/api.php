@@ -236,6 +236,9 @@ Route::get('/legal/terms', [LegalDocumentController::class, 'getTerms']);
 Route::get('/legal/privacy', [LegalDocumentController::class, 'getPrivacy']);
 Route::get('/legal/documents', [LegalDocumentController::class, 'index']);
 Route::get('/legal/documents/{type}', [LegalDocumentController::class, 'show']);
+// Public PDF viewing routes (no auth required)
+Route::get('/legal/pdf/terms/view', [LegalDocumentController::class, 'viewTermsPdf']);
+Route::get('/legal/pdf/privacy/view', [LegalDocumentController::class, 'viewPrivacyPdf']);
 
 // Public chatbot routes
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
