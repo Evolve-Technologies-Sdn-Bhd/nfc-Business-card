@@ -20,7 +20,7 @@
         </div>
         <div class="flex items-center gap-2">
           <span class="text-xs text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
-            {{ generalTabs.length }} sections • {{ Object.values(fields).flat().length }} fields • {{ (options.feature_toggle || []).length }} features
+            {{ generalTabs.length }} sections • {{ Object.values(fields).flat().length }} fields • {{ filteredOptionsFeatureToggles.length }} features
           </span>
         </div>
       </div>
@@ -286,7 +286,7 @@
                   <h3 class="text-sm font-bold text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
                     <Icon name="heroicons:sparkles" class="w-4 h-4 mr-2 text-amber-600" />
                     Features
-                    <span class="ml-auto text-xs font-normal text-secondary-500">{{ (options.feature_toggle || []).length }} toggles</span>
+                    <span class="ml-auto text-xs font-normal text-secondary-500">{{ filteredOptionsFeatureToggles.length }} toggles</span>
                   </h3>
                   <div class="space-y-2">
                     <div class="border border-secondary-200 rounded-lg p-3 bg-white">
@@ -301,7 +301,7 @@
                       </div>
                       <div class="space-y-2">
                         <label
-                          v-for="feature in (options.feature_toggle || [])"
+                          v-for="feature in filteredOptionsFeatureToggles"
                           :key="feature.id"
                           :class="[
                             'flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all',
@@ -327,7 +327,7 @@
                             class="w-4 h-4 rounded border-secondary-300 text-primary-600"
                           />
                         </label>
-                        <div v-if="(options.feature_toggle || []).length === 0" class="text-xs text-secondary-400 italic p-4 text-center">
+                        <div v-if="filteredOptionsFeatureToggles.length === 0" class="text-xs text-secondary-400 italic p-4 text-center">
                           No features configured yet
                         </div>
                       </div>
@@ -1637,7 +1637,8 @@
                       <input type="checkbox" v-model="businessUserFormData.use_custom" class="w-5 h-5 rounded border-secondary-300 text-amber-600" />
                     </label>
                   </div>
-                  <div v-if="businessUserFormData.use_custom" class="space-y-4">
+                  <!-- Custom Settings UI - Always rendered but conditionally visible -->
+                  <div :class="{'hidden': !businessUserFormData.use_custom}" class="space-y-4">
                     <!-- Data Fields - Grouped by Tab -->
                     <div>
                       <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:rectangle-stack" class="w-4 h-4 inline mr-1 text-blue-600" />Data Fields</h4>
@@ -1696,7 +1697,7 @@
                     <div>
                       <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:sparkles" class="w-4 h-4 inline mr-1 text-amber-600" />Features</h4>
                       <div class="grid grid-cols-2 gap-2">
-                        <label v-for="feature in (businessUserAvailableData.design_options?.feature_toggle || [])" :key="feature.option_id"
+                        <label v-for="feature in filteredBusinessUserFeatureToggles" :key="feature.option_id"
                           :class="['flex items-center p-2 rounded-lg border cursor-pointer', businessUserFormData.enabled_features.includes(feature.option_id) ? 'border-amber-300 bg-amber-50' : 'border-secondary-200']">
                           <input type="checkbox" :value="feature.option_id" v-model="businessUserFormData.enabled_features" class="w-4 h-4 rounded text-amber-600" />
                           <span class="ml-2 text-sm font-medium">{{ feature.name }}</span>
@@ -1708,7 +1709,8 @@
                       <textarea v-model="businessUserFormData.notes" rows="2" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm" placeholder="Optional notes..."></textarea>
                     </div>
                   </div>
-                  <div v-else class="text-center py-8 bg-secondary-50 rounded-lg">
+                  <!-- Default Settings UI -->
+                  <div :class="{'hidden': businessUserFormData.use_custom}" class="text-center py-8 bg-secondary-50 rounded-lg">
                     <Icon name="heroicons:check-circle" class="w-12 h-12 text-success-500 mx-auto mb-2" />
                     <p class="font-medium text-secondary-700">Using Default Business Plan Settings</p>
                   </div>
@@ -1782,6 +1784,27 @@ const filteredBusinessUsers = computed(() => {
     user.name?.toLowerCase().includes(search) || 
     user.email?.toLowerCase().includes(search)
   );
+});
+
+// Excluded features (deprecated, not shown in UI)
+const excludedFeatureIds = ['layout_designer', 'click_tracking', 'analytics'];
+
+// Filtered feature toggles (excludes deprecated features)
+const filteredFeatureToggles = computed(() => {
+  const features = businessUserAvailableData.value.design_options?.feature_toggle || [];
+  return features.filter(f => !excludedFeatureIds.includes(f.option_id));
+});
+
+// Filtered feature toggles for options (excludes deprecated features)
+const filteredOptionsFeatureToggles = computed(() => {
+  const features = options.value.feature_toggle || [];
+  return features.filter(f => !excludedFeatureIds.includes(f.option_id));
+});
+
+// Filtered feature toggles for business user modal (excludes deprecated features)
+const filteredBusinessUserFeatureToggles = computed(() => {
+  const features = businessUserAvailableData.value.design_options?.feature_toggle || [];
+  return features.filter(f => !excludedFeatureIds.includes(f.option_id));
 });
 
 // Section Management
@@ -2969,13 +2992,38 @@ const openBusinessUserModal = async (user) => {
     };
     
     const assignment = data.data.assignment || {};
+    console.log('📊 User assignment data:', assignment);
+    
+    // 判断是否是空的自定义设置（use_custom=true 但没有保存具体项）
+    const isEmptyCustom = assignment.use_custom && 
+      (!assignment.enabled_fields || assignment.enabled_fields.length === 0) &&
+      (!assignment.enabled_design_options || assignment.enabled_design_options.length === 0) &&
+      (!assignment.enabled_features || assignment.enabled_features.length === 0);
+    
+    if (isEmptyCustom) {
+      console.log('🔔 Detected empty custom settings, using defaults as starting point');
+    }
+    
+    // 修复自定义模式不显示已保存记录的问题
     businessUserFormData.value = {
       use_custom: assignment.use_custom || false,
-      enabled_fields: assignment.enabled_fields?.length ? assignment.enabled_fields : [...(data.data.defaults?.fields || [])],
-      enabled_design_options: assignment.enabled_design_options?.length ? assignment.enabled_design_options : [...(data.data.defaults?.design_options || [])],
-      enabled_features: assignment.enabled_features?.length ? assignment.enabled_features : [...(data.data.defaults?.features || [])],
+      // 当use_custom=true但是空记录时，使用默认值作为起点，否则使用用户的设置
+      enabled_fields: isEmptyCustom ? [...(data.data.defaults?.fields || [])] :
+        (assignment.use_custom ? (assignment.enabled_fields || []) : [...(data.data.defaults?.fields || [])]),
+      enabled_design_options: isEmptyCustom ? [...(data.data.defaults?.design_options || [])] :
+        (assignment.use_custom ? (assignment.enabled_design_options || []) : [...(data.data.defaults?.design_options || [])]),
+      enabled_features: isEmptyCustom ? [...(data.data.defaults?.features || [])] :
+        (assignment.use_custom ? (assignment.enabled_features || []) : [...(data.data.defaults?.features || [])]),
       notes: assignment.notes || '',
     };
+    
+    console.log('✅ User form initialized with:', {
+      use_custom: businessUserFormData.value.use_custom,
+      fields_count: businessUserFormData.value.enabled_fields.length,
+      design_options_count: businessUserFormData.value.enabled_design_options.length,
+      features_count: businessUserFormData.value.enabled_features.length,
+      is_empty_custom: isEmptyCustom
+    });
     
     showBusinessUserModal.value = true;
   } catch (error) {
@@ -2992,6 +3040,33 @@ const closeBusinessUserModal = () => {
 };
 
 // Section toggle helpers for User Customization
+// 监听自定义模式状态变化，当首次启用时提供适当的初始值
+watch(() => businessUserFormData.value.use_custom, (isCustom, wasCustom) => {
+  console.log(`🔄 Custom mode ${wasCustom} -> ${isCustom}`);
+  
+  // 只处理从非自定义到自定义的转换（首次启用自定义）
+  if (isCustom && !wasCustom) {
+    console.log('✨ First time enabling custom mode, initializing with defaults');
+    
+    // 判断当前是否是空白设置
+    const isEmpty = 
+      (!businessUserFormData.value.enabled_fields || businessUserFormData.value.enabled_fields.length === 0) &&
+      (!businessUserFormData.value.enabled_design_options || businessUserFormData.value.enabled_design_options.length === 0) &&
+      (!businessUserFormData.value.enabled_features || businessUserFormData.value.enabled_features.length === 0);
+    
+    // 只有在当前设置为空时，才使用默认值填充
+    if (isEmpty) {
+      console.log('✨ Using default values as starting point');
+      // 使用默认设置作为自定义模式的初始值
+      businessUserFormData.value.enabled_fields = [...(businessUserAvailableData.value.defaults?.fields || [])];
+      businessUserFormData.value.enabled_design_options = [...(businessUserAvailableData.value.defaults?.design_options || [])];
+      businessUserFormData.value.enabled_features = [...(businessUserAvailableData.value.defaults?.features || [])];
+    } else {
+      console.log('✅ Using existing custom settings');
+    }
+  }
+}, { immediate: true }); // 添加 immediate: true 确保初始化时就执行
+
 const isTabFullySelected = (tabFields) => {
   if (!tabFields || tabFields.length === 0) return false;
   return tabFields.every(f => businessUserFormData.value.enabled_fields.includes(f.id));

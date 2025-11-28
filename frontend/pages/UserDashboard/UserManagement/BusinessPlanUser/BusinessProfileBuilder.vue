@@ -150,47 +150,62 @@
               <Icon v-if="saving" name="heroicons:arrow-path" class="h-5 w-5 mr-2 animate-spin" />
               {{ saving ? "Saving..." : "Save Profile" }}
             </button>
+
+            <!-- View Saved Landing Page Button -->
+            <button
+              @click="openSavedLandingPage"
+              :disabled="!selectedNfcCardId"
+              class="btn btn-success flex items-center gap-2"
+              title="Open the saved landing page (without preview mode)"
+            >
+              <Icon name="heroicons:eye" class="h-5 w-5" />
+              <span class="hidden sm:inline">View Saved</span>
+            </button>
           </div>
         </div>
       </div>
 
-    <!-- Mobile Preview Toggle -->
-    <div class="lg:hidden mb-4">
-      <button
-        @click="showMobilePreview = !showMobilePreview"
-        class="w-full py-2 px-4 bg-white rounded-lg shadow-sm border border-secondary-200 text-sm font-medium text-secondary-700 hover:bg-secondary-50"
-      >
-        {{ showMobilePreview ? "Hide Preview" : "Show Preview" }}
-      </button>
-    </div>
+    <!-- Always display two-column layout -->
+    <div class="grid grid-cols-1 md:grid-cols-7 gap-4 sm:gap-6">
+      <!-- Left Panel - Editor (5/7 width) -->
+      <div class="space-y-4 sm:space-y-6 md:col-span-4">
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-      <!-- Left Panel - Editor -->
-      <div
-        v-show="!showMobilePreview || !isMobile"
-        class="space-y-4 sm:space-y-6"
-      >
         <!-- Main Category Tabs -->
         <div class="card">
           <div class="card-body">
-            <div class="flex border-b border-gray-200 mb-4">
+            <!-- Display message when no options are available -->
+            <div v-if="availableGeneralTabs.length === 0 && availableDesignTabs.length === 0" 
+                 class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+              <Icon name="heroicons:exclamation-triangle" class="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+              <h3 class="text-sm font-medium text-yellow-800 mb-1">No Options Available</h3>
+              <p class="text-xs text-yellow-700">
+                Your admin has not assigned any sections or features to your account yet.
+                Please contact your administrator for assistance.
+              </p>
+            </div>
+            
+            <div v-else class="border-b border-gray-200">
+              <!-- Only show General Sections button when general options are available -->
               <button
+                v-if="availableGeneralTabs.length > 0"
                 @click="switchToCategory('general')"
                 :class="[
-                  'px-4 py-2 font-medium text-sm transition-all border-b-2 -mb-px',
+                  'pb-2 px-1 font-medium text-sm border-b-2 mr-8',
                   mainCategory === 'general'
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                 ]"
               >
                 General Sections
               </button>
+              <!-- Only show Design Sections button when design options are available -->
               <button
+                v-if="availableDesignTabs.length > 0"
                 @click="switchToCategory('design')"
                 :class="[
-                  'px-4 py-2 font-medium text-sm transition-all border-b-2 -mb-px',
+                  'pb-2 px-1 font-medium text-sm border-b-2',
                   mainCategory === 'design'
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                 ]"
               >
@@ -233,12 +248,33 @@
                 {{ tab.name }}
               </button>
             </div>
-            </div>
           </div>
+        </div>
 
-          <!-- Tab Content -->
-          <div class="card">
-            <div class="card-body">
+        <!-- Tab Content -->
+        <div class="card">
+          <div class="card-body">
+            <!-- Content to display when no options are available -->
+            <div v-if="availableGeneralTabs.length === 0 && availableDesignTabs.length === 0" class="space-y-4 sm:space-y-6">
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 text-center shadow-sm">
+                <div class="w-32 h-32 mx-auto mb-6 relative">
+                  <div class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full opacity-10 animate-pulse"></div>
+                  <div class="absolute inset-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full opacity-20"></div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <Icon name="heroicons:document-text" class="w-16 h-16 text-indigo-500" />
+                  </div>
+                </div>
+                <h3 class="text-xl font-semibold text-indigo-900 mb-3">No Profile Options Available</h3>
+                <p class="text-sm text-indigo-700 mb-6 max-w-md mx-auto">
+                  Your administrator has not assigned any profile sections or design options to your account yet.
+                  Please contact your administrator for assistance.
+                </p>
+                <a href="/UserDashboard" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-all duration-200">
+                  <Icon name="heroicons:arrow-left" class="w-4 h-4 mr-2" />
+                  Return to Dashboard
+                </a>
+              </div>
+            </div>
             <!-- Profile Tab -->
             <div v-if="activeTab === 'profile'" class="space-y-4 sm:space-y-6">
               <!-- No Cards Warning (only show if no cards and not loading) -->
@@ -270,17 +306,7 @@
                 </div>
               </div>
 
-              <!-- Profile Style - Fixed to Classic (No Selection) -->
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0"></div>
-                  <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-gray-900">Profile Style: Classic</h3>
-                    <p class="text-xs text-gray-600 mt-0.5">All profiles use the classic circular avatar style</p>
-                  </div>
-                  <Icon name="heroicons:check-circle" class="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
+              <!-- Profile Style section removed -->
 
               <!-- Profile Images -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1228,6 +1254,18 @@
               </div>
             </div>
 
+            <!-- Layout Designer Tab -->
+            <div v-if="activeTab === 'layout'" class="space-y-6">
+              <LayoutDesigner
+                :sections="layoutDesignerSections"
+                :section-layout="profileData.sectionLayout"
+                :field-layout="profileData.fieldLayout"
+                :can-customize-layout="canCustomizeLayout"
+                @update:section-layout="updateSectionLayout"
+                @update:field-layout="updateFieldLayout"
+              />
+            </div>
+
             <!-- Watermarks/Features Tab -->
             <div v-if="activeTab === 'watermarks' || activeTab === 'features'" class="space-y-6">
               <div>
@@ -1318,6 +1356,10 @@
                   <Icon name="heroicons:sparkles" class="w-12 h-12 mx-auto mb-3 text-secondary-300" />
                   <h4 class="text-sm font-medium text-secondary-900 mb-1">No Features Available</h4>
                   <p class="text-xs text-secondary-500">Features will be configured by admin</p>
+                  <p class="text-xs text-blue-600 mt-3">
+                    <Icon name="heroicons:information-circle" class="inline w-4 h-4 mr-1" />
+                    Quick Actions section will be hidden on landing page until features are assigned
+                  </p>
                 </div>
                 
                 <!-- Order Info -->
@@ -1331,22 +1373,19 @@
                 </div>
               </div>
             </div>
-            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Right Panel - Embedded Landing Page Preview -->
-        <div
-          v-show="showMobilePreview || !isMobile"
-          class="lg:sticky lg:top-20 sm:lg:top-24 h-fit"
-        >
+      <!-- Right Panel - Embedded Landing Page Preview -->
+      <div class="md:col-span-3 md:sticky md:top-20 h-fit">
           <div class="card">
             <div class="card-body">
               <!-- Preview Header -->
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <h3 class="text-sm font-medium text-secondary-900">Live Preview</h3>
-                  <p class="text-xs text-secondary-500 mt-0.5">Real-time preview</p>
+                  <h3 class="text-base font-semibold text-blue-800">Live Preview</h3>
+                  <p class="text-xs text-blue-600 mt-0.5">Real-time preview</p>
                 </div>
                 <div class="flex gap-2">
                   <button
@@ -1366,52 +1405,67 @@
                   </button>
                 </div>
               </div>
-          
-          <!-- Mobile Phone Frame with Embedded Landing Page -->
-          <div class="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl border border-gray-200 shadow-md sm:shadow-lg overflow-hidden">
-            <div class="w-full">
-              <!-- Phone Screen with iframe -->
-              <div class="relative bg-white overflow-hidden">
-                <!-- Embedded Landing Page iframe -->
-                <template v-if="selectedNfcCardId && getSelectedCard()?.nfc_card_id">
-                  <iframe
-                    :key="previewKey"
-                    :src="`/profile/${getSelectedCard().nfc_card_id}?preview=true`"
-                    class="w-full border-0"
-                    :style="{
-                      height: isMobile ? '500px' : '800px',
-                      minHeight: isMobile ? '450px' : '700px'
-                    }"
-                    @load="onPreviewLoad"
-                    @error="onPreviewError"
-                  ></iframe>
-                    
-                    <!-- Debug info (temporary) -->
-                    <div class="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 bg-black/70 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                      <span class="hidden sm:inline">Loading: /profile/</span>{{ getSelectedCard()?.nfc_card_id }}
+              
+              <!-- Mobile Phone Frame with Embedded Landing Page -->
+              <div class="bg-gradient-to-b from-gray-800 to-gray-900 rounded-[2.5rem] sm:rounded-[3rem] p-3 sm:p-4 shadow-xl relative overflow-hidden border-8 border-gray-800">
+                <!-- Phone Frame Elements -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-xl z-10 flex items-center justify-center">
+                  <div class="w-16 h-2 bg-gray-800 rounded-full"></div>
+                </div>
+                <div class="absolute right-5 top-3 h-2 w-2 rounded-full bg-gray-600"></div>
+                <div class="absolute right-5 top-7 h-2 w-2 rounded-full bg-gray-600"></div>
+                
+                <!-- Phone Power Button -->
+                <div class="absolute right-[-8px] top-20 h-12 w-2 bg-gray-700 rounded-l-md"></div>
+                
+                <!-- Phone Screen with iframe -->
+                <div class="rounded-[2rem] bg-white overflow-hidden relative">
+                  <!-- Embedded Landing Page iframe -->
+                  <template v-if="selectedNfcCardId && getSelectedCard()?.nfc_card_id">
+                    <div class="w-full h-10 bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
+                      <Icon name="heroicons:signal" class="h-4 w-4 mr-1" />
+                      <span>Digital Business Card</span>
+                    </div>
+                    <iframe
+                      :key="previewKey"
+                      :src="`/profile/${getSelectedCard().nfc_card_id}?preview=true&t=${previewKey}`"
+                      class="w-full border-0"
+                      :style="{
+                        height: 'calc(100vh - 280px)',
+                        minHeight: '600px'
+                      }"
+                      @load="onPreviewLoad"
+                      @error="onPreviewError"
+                    ></iframe>
+                      
+                    <!-- NFC Card ID Badge -->
+                    <div class="absolute bottom-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-md flex items-center gap-1">
+                      <Icon name="heroicons:credit-card" class="h-3 w-3" />
+                      <span>{{ getSelectedCard()?.nfc_card_id }}</span>
                     </div>
                   </template>
                   
-                  <!-- Empty State -->
-                  <div 
-                    v-else 
-                    class="flex items-center justify-center bg-gray-50"
-                    :style="{
-                      height: isMobile ? '500px' : '800px',
-                      minHeight: isMobile ? '450px' : '700px'
-                    }"
-                  >
-                    <div class="text-center p-4 sm:p-6">
-                      <Icon name="heroicons:device-phone-mobile" class="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-3 text-gray-300" />
-                      <p class="text-sm text-gray-500">Select a card to preview</p>
-                      <p class="text-xs text-gray-400 mt-1 sm:mt-2">Card ID: {{ selectedNfcCardId || 'None' }}</p>
+                  <!-- Empty State - Beautiful empty state -->
+                  <div v-else class="bg-gradient-to-b from-blue-50 to-indigo-50 h-[700px] flex items-center justify-center">
+                    <div class="text-center px-6 py-12 max-w-xs mx-auto">
+                      <div class="relative w-24 h-24 mx-auto mb-6">
+                        <div class="absolute inset-0 bg-blue-100 rounded-full animate-pulse"></div>
+                        <Icon name="heroicons:device-phone-mobile" class="absolute inset-0 h-24 w-24 text-blue-500 p-5" />
+                      </div>
+                      <h3 class="text-lg font-semibold text-indigo-900 mb-2">Preview Area</h3>
+                      <p class="text-sm text-indigo-700 mb-6">
+                        Select a card from the left to view real-time preview
+                      </p>
+                      <div class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-100 text-blue-600 rounded-full text-sm">
+                        <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
+                        <span>Please select a card first</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
 
@@ -1647,6 +1701,7 @@
 <script setup>
 // import ProfileImageUpload from '~/components/ProfileImageUpload.vue'
 import DynamicFormField from '~/components/DynamicFormField.vue';
+import LayoutDesigner from '~/components/LayoutDesigner.vue';
 import { useAuthStore } from "~/stores/auth";
 import draggable from "vuedraggable";
 
@@ -1809,9 +1864,21 @@ const profileData = reactive({
   layout: "",
   showWatermark: true,
   
-  // Features - user toggle state and order
-  features: {},         // { feature_key: true/false }
+  // Features - user toggle state and order (all enabled by default except remove_branding)
+  features: {
+    contact_form: true,
+    vcard_download: true,
+    qr_code: true,
+    remove_branding: false,  // OFF by default = show watermark
+    booking_integration: true,
+    social_sharing: true,
+  },
   featureOrder: [],     // Array of feature IDs in custom order
+  
+  // Layout Configuration
+  sectionLayout: [],    // Section order and visibility [{ id, order, enabled }]
+  fieldLayout: {},      // Field order within sections { sectionId: [{ field_key, order, enabled }] }
+  sectionSettings: {},  // Additional section settings { sectionId: { ... } }
   
   // Legacy compatibility
   image: null,
@@ -2009,17 +2076,36 @@ const availableGeneralTabs = computed(() => {
 });
 
 const availableDesignTabs = computed(() => {
-  // Hardcoded design tabs for better UX
-  const designTabs = [
-    { id: 'design', name: 'Theme & Colors', category: 'design', icon: 'heroicons:paint-brush' },
-    { id: 'style', name: 'Typography', category: 'design', icon: 'heroicons:language' },
-    { id: 'watermarks', name: 'Features', category: 'design', icon: 'heroicons:sparkles' },
-  ];
+  // Design tabs
+  const designTabs = [];
+  
+  // Only show Theme & Colors tab when admin has assigned theme options
+  if (themes.value && themes.value.length > 0) {
+    designTabs.push({ id: 'design', name: 'Theme & Colors', category: 'design', icon: 'heroicons:paint-brush' });
+  }
+  
+  // Only show Typography tab when admin has assigned font options
+  if (fonts.value && fonts.value.length > 0) {
+    designTabs.push({ id: 'style', name: 'Typography', category: 'design', icon: 'heroicons:language' });
+  }
+  
+  // Layout Designer option based on two conditions:
+  // 1. User's subscription plan allows it
+  // 2. Admin has assigned layout options
+  if (canCustomizeLayout.value && layouts.value && layouts.value.length > 0) {
+    designTabs.push({ id: 'layout', name: 'Layout Designer', category: 'design', icon: 'heroicons:squares-2x2' });
+  }
+  
+  // Only show Features tab when admin has assigned features
+  if (featureToggles.value && featureToggles.value.length > 0) {
+    designTabs.push({ id: 'watermarks', name: 'Features', category: 'design', icon: 'heroicons:sparkles' });
+  }
+  
   return designTabs;
 });
 
 // Helper: Check if tab is a dynamic (admin-created) section
-const hardcodedSections = ['profile', 'company', 'services', 'links', 'portfolio', 'blog', 'design', 'style', 'watermarks', 'features'];
+const hardcodedSections = ['profile', 'company', 'services', 'links', 'portfolio', 'blog', 'design', 'style', 'layout', 'watermarks', 'features'];
 const isDynamicSection = (tabId) => {
   return !hardcodedSections.includes(tabId);
 };
@@ -2177,6 +2263,154 @@ const linksFields = ref([]);
 const portfolioFields = ref([]);
 const blogFields = ref([]);
 
+// ========================================
+// LAYOUT DESIGNER - Section & Field Layout
+// ========================================
+
+// Ref: Layout designer permission (loaded from API)
+const layoutDesignerEnabled = ref(true); // Default enabled, will be updated from API
+
+// Computed: Check if user's plan allows layout customization
+const canCustomizeLayout = computed(() => {
+  // Based on user's subscription plan allowing layout customization
+  const userPlan = authStore.user?.subscription_plan || 'free';
+  const allowedPlans = ['business', 'enterprise', 'premium'];
+  return allowedPlans.includes(userPlan.toLowerCase());
+});
+
+// Landing Page Sections - granular control for each section
+// These match exactly with the sections in profile/[id].vue
+// IMPORTANT: fieldKeys must match the actual field_key values from ProfileBuilderFieldsSeeder (camelCase)
+const landingPageSectionsConfig = [
+  { id: 'hero', name: 'Hero / Profile', icon: 'heroicons:user-circle', description: 'Profile picture, name, title, badges', apiSource: 'profile', fieldKeys: ['profilePicture', 'name', 'position', 'qualification', 'pronouns', 'tagline', 'coverBanner'] },
+  // Combined: Profile & Achievements (About + Education + Awards)
+  { 
+    id: 'profileAchievements', 
+    name: 'Profile & Achievements', 
+    icon: 'heroicons:sparkles', 
+    description: 'About me, education, and awards',
+    subSections: [
+      { id: 'about', name: 'About Me', icon: 'heroicons:document-text', apiSource: 'profile', fieldKeys: ['bio', 'profileStats'] },
+      { id: 'education', name: 'Education', icon: 'heroicons:academic-cap', apiSource: 'profile', fieldKeys: ['education', 'certifications'] },
+      { id: 'awards', name: 'Awards', icon: 'heroicons:trophy', apiSource: 'company', fieldKeys: ['awards'] },
+    ]
+  },
+  // Combined: Company & Team (Company Info + Video + Team)
+  { 
+    id: 'companyTeam', 
+    name: 'Company & Team', 
+    icon: 'heroicons:building-office-2', 
+    description: 'Company info, video, and team members',
+    subSections: [
+      { id: 'company', name: 'Company Info', icon: 'heroicons:building-office', apiSource: 'company', fieldKeys: ['companyLogo', 'companyLogoText', 'companyName', 'companyRegNo', 'companyDescription', 'industry', 'establishedYear', 'employeeCount'] },
+      { id: 'video', name: 'Video', icon: 'heroicons:video-camera', apiSource: 'company', fieldKeys: ['companyVideo'] },
+      { id: 'team', name: 'Team', icon: 'heroicons:user-group', apiSource: 'company', fieldKeys: ['teamMembers'] },
+    ]
+  },
+  { id: 'services', name: 'Services', icon: 'heroicons:rocket-launch', description: 'Services and expertise', apiSource: 'services', fieldKeys: ['serviceName', 'serviceDescription', 'serviceImage', 'serviceFeatures', 'servicePrice', 'serviceOldPrice', 'serviceDuration', 'serviceTags', 'serviceBrochure', 'bookingUrl'] },
+  { id: 'portfolio', name: 'Portfolio', icon: 'heroicons:folder', description: 'Projects and work samples', apiSource: 'portfolio', fieldKeys: ['portfolioTitle', 'portfolioDescription', 'portfolioCoverImage', 'portfolioGallery', 'projectUrl', 'dateCompleted', 'clientName', 'location', 'skillsUsed', 'pdfDownload'] },
+  { id: 'blog', name: 'Blog', icon: 'heroicons:newspaper', description: 'Blog posts and articles', apiSource: 'blog', fieldKeys: ['blogTitle', 'blogCoverImage', 'blogCategory', 'blogTags', 'authorName', 'readingTime', 'blogContent', 'externalLink'] },
+  { id: 'contact', name: 'Contact', icon: 'heroicons:phone', description: 'Phone, email, WhatsApp', apiSource: 'links', fieldKeys: ['phone', 'whatsapp'] },
+  { id: 'location', name: 'Location', icon: 'heroicons:map-pin', description: 'Address and map', apiSource: 'company', fieldKeys: ['addressName', 'addressStreet', 'addressArea', 'addressCityState', 'addressCountry', 'postalCode', 'mapUrl'] },
+  { id: 'social', name: 'Social Media', icon: 'heroicons:share', description: 'Social media links', apiSource: 'links', fieldKeys: ['socialLinks'] },
+  { id: 'gallery', name: 'Gallery', icon: 'heroicons:photo', description: 'Image gallery', apiSource: 'portfolio', fieldKeys: ['portfolioGallery'] },
+];
+
+// Map API source to fields ref
+const getFieldsForApiSource = (apiSource) => {
+  const sourceMap = {
+    'profile': profileFields.value,
+    'company': companyFields.value,
+    'services': servicesFields.value,
+    'links': linksFields.value,
+    'portfolio': portfolioFields.value,
+    'blog': blogFields.value,
+  };
+  return sourceMap[apiSource] || [];
+};
+
+// Computed: Sections for Layout Designer (granular landing page sections with fields)
+// Combined sections now pass actual data fields (bio, stats, etc.) not sub-section IDs
+const layoutDesignerSections = computed(() => {
+  return landingPageSectionsConfig.map(section => {
+    // Handle combined sections with subSections - collect all fieldKeys from sub-sections
+    if (section.subSections) {
+      // Collect all fields from all sub-sections
+      const allFields = [];
+      section.subSections.forEach(sub => {
+        (sub.fieldKeys || []).forEach(fieldKey => {
+          allFields.push({
+            field_key: fieldKey,
+            label: formatFieldLabel(fieldKey),
+            field_type: 'text',
+            enabled: true,
+            subSection: sub.id // Track which sub-section this field belongs to
+          });
+        });
+      });
+      
+      return {
+        id: section.id,
+        name: section.name,
+        icon: section.icon,
+        description: section.description,
+        fields: allFields,
+        subSections: section.subSections, // Keep sub-section info for grouping in UI
+        isComposite: true
+      };
+    }
+    
+    // Regular sections: Get fields from API source and filter by fieldKeys
+    const apiFields = getFieldsForApiSource(section.apiSource);
+    const sectionFields = apiFields.filter(f => 
+      section.fieldKeys?.includes(f.field_key)
+    );
+    
+    return {
+      id: section.id,
+      name: section.name,
+      icon: section.icon,
+      description: section.description,
+      fields: sectionFields.length > 0 ? sectionFields : (section.fieldKeys || []).map(fk => ({
+        field_key: fk,
+        label: formatFieldLabel(fk),
+        field_type: 'text',
+        enabled: true
+      }))
+    };
+  });
+});
+
+// Helper: Format field key to human-readable label
+const formatFieldLabel = (fieldKey) => {
+  if (!fieldKey) return '';
+  return fieldKey
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase())
+    .trim();
+};
+
+// Update section layout from LayoutDesigner
+const updateSectionLayout = (newLayout) => {
+  profileData.sectionLayout = newLayout;
+  console.log('📐 Section layout updated:', newLayout);
+  // Watch will auto-trigger updatePreviewData with debounce
+};
+
+// Update field layout from LayoutDesigner
+const updateFieldLayout = (newLayout) => {
+  profileData.fieldLayout = newLayout;
+  console.log('📝 Field layout updated:', newLayout);
+  // Watch will auto-trigger updatePreviewData with debounce
+};
+
+// Update section settings from LayoutDesigner
+const updateSectionSettings = (newSettings) => {
+  profileData.sectionSettings = newSettings;
+  console.log('⚙️ Section settings updated:', newSettings);
+  // Watch will auto-trigger updatePreviewData with debounce
+};
+
 // Business Team Members (for auto-loading employees)
 const businessEmployees = ref([]);
 const loadingTeamMembers = ref(false);
@@ -2268,6 +2502,17 @@ const validTeamMembers = computed(() => {
 
 // Switch category and auto-select first tab
 const switchToCategory = (category) => {
+  // Check if the category to switch to has available options
+  if (category === 'general' && availableGeneralTabs.value.length === 0) {
+    console.log('No available options for category:', category);
+    return; // Don't switch if there are no available options
+  }
+  
+  if (category === 'design' && availableDesignTabs.value.length === 0) {
+    console.log('No available options for category:', category);
+    return; // Don't switch if there are no available options
+  }
+  
   mainCategory.value = category;
   
   // Auto-select first tab in the category
@@ -2496,16 +2741,25 @@ const loadDesignOptions = async () => {
       console.log('✅ Layouts loaded:', layouts.value.length);
     }
     
-    // Load feature toggles
+    // Load feature toggles (filter out deprecated features)
+    // Completely remove these three features: layout_designer, click_tracking, analytics
+    const excludedFeatures = ['layout_designer', 'click_tracking', 'analytics'];
+    console.log('📋 Raw feature_toggle from API:', data.data.feature_toggle);
     if (data.data.feature_toggle && data.data.feature_toggle.length > 0) {
-      featureToggles.value = data.data.feature_toggle.map(opt => ({
-        id: opt.option_id,
-        name: opt.name,
-        feature_key: opt.option_id, // Use option_id as feature_key
-        enabled: true, // Default enabled
-        description: opt.description || '',
-      }));
+      featureToggles.value = data.data.feature_toggle
+        .filter(opt => !excludedFeatures.includes(opt.option_id))
+        .map(opt => ({
+          id: opt.option_id,
+          name: opt.name,
+          feature_key: opt.option_id, // Use option_id as feature_key
+          enabled: true, // Default enabled
+          description: opt.description || '',
+          available_plans: opt.available_plans || [], // Include for debugging
+        }));
       console.log('✅ Feature toggles loaded:', featureToggles.value.length);
+      console.log('📋 Features available for this user:', featureToggles.value.map(f => f.feature_key));
+    } else {
+      console.log('⚠️ No feature toggles received from API - Admin may not have assigned any features');
     }
     
     console.log('🎨 All design options loaded successfully');
@@ -2654,12 +2908,10 @@ const getFeatureIcon = (featureKey) => {
     contact_form: 'heroicons:envelope',
     vcard_download: 'heroicons:document-arrow-down',
     qr_code: 'heroicons:qr-code',
-    click_tracking: 'heroicons:chart-bar',
     remove_branding: 'heroicons:eye-slash',
     booking_integration: 'heroicons:calendar',
     show_watermark: 'heroicons:photo',
     social_sharing: 'heroicons:share',
-    analytics: 'heroicons:presentation-chart-line',
   };
   return iconMap[featureKey] || 'heroicons:cog-6-tooth';
 };
@@ -2670,26 +2922,49 @@ const getCurrentFont = () => {
 };
 
 // Feature toggle helpers
-const toggleFeature = (featureKey) => {
-  if (!profileData.features) {
-    profileData.features = {};
-  }
-  profileData.features[featureKey] = !profileData.features[featureKey];
-  
-  // For backward compatibility with showWatermark
-  if (featureKey === 'watermark' || featureKey === 'show_watermark') {
-    profileData.showWatermark = profileData.features[featureKey];
-  }
-};
-
+// getFeatureValue must be defined before toggleFeature uses it
 const getFeatureValue = (featureKey) => {
   // For backward compatibility with showWatermark
   if (featureKey === 'watermark' || featureKey === 'show_watermark') {
     return profileData.showWatermark !== undefined 
       ? profileData.showWatermark 
-      : (profileData.features?.[featureKey] ?? false);
+      : (profileData.features?.[featureKey] ?? true);
   }
-  return profileData.features?.[featureKey] ?? false;
+  
+  // Check if feature has explicit value
+  if (profileData.features?.hasOwnProperty(featureKey)) {
+    return profileData.features[featureKey];
+  }
+  
+  // Default values: all ON except remove_branding
+  const defaultValues = {
+    contact_form: true,
+    vcard_download: true,
+    qr_code: true,
+    remove_branding: false,
+    booking_integration: true,
+    social_sharing: true,
+  };
+  return defaultValues[featureKey] ?? true;
+};
+
+const toggleFeature = (featureKey) => {
+  if (!profileData.features) {
+    profileData.features = {};
+  }
+  
+  // Get current value (use default if not set)
+  const currentValue = getFeatureValue(featureKey);
+  profileData.features[featureKey] = !currentValue;
+  
+  // For backward compatibility with showWatermark
+  if (featureKey === 'watermark' || featureKey === 'show_watermark') {
+    profileData.showWatermark = profileData.features[featureKey];
+  }
+  
+  // Update preview to reflect feature change
+  updatePreviewData();
+  console.log(`🔄 Feature "${featureKey}" toggled to:`, profileData.features[featureKey]);
 };
 
 const getFontName = (fontId) => {
@@ -3223,7 +3498,7 @@ const saveProfile = async () => {
       clearBlogForm();
     }
 
-    // 1. 收集完整的 design 配置
+    // 1. Collect complete design configuration
     const designConfig = {
       theme: themes.value.find(t => t.id === profileData.theme),
       font: fonts.value.find(f => f.id === profileData.font),
@@ -3233,7 +3508,7 @@ const saveProfile = async () => {
       layout: layouts.value.find(l => l.id === profileData.layout),
     };
 
-    // 2. 收集可见字段列表
+    // 2. Collect list of visible fields
     const visibleFields = [];
 
     // Profile fields
@@ -3406,11 +3681,17 @@ const saveProfile = async () => {
       
       // Features state and order
       features: profileData.features || {},
+      available_features: featureToggles.value.map(f => f.feature_key), // Features assigned by admin
       feature_order: featureOrder.value.length > 0 ? featureOrder.value : sortedFeatureToggles.value.map(f => f.id),
       
       // Design & Fields Configuration
       design_config: designConfig,
       visible_fields: visibleFields,
+      
+      // Layout Configuration
+      section_layout: profileData.sectionLayout,
+      field_layout: profileData.fieldLayout,
+      section_settings: profileData.sectionSettings,
       
       // Portfolio
       portfolio_title: profileData.portfolioTitle,
@@ -3459,6 +3740,9 @@ const saveProfile = async () => {
       })),
     };
 
+    // Log payload for debugging
+    console.log("💾 Saving landing page with payload:", JSON.stringify(payload, null, 2));
+    
     // Save the landing page design for the selected NFC card
     const response = await $api.put(
       `/nfc-cards/${selectedNfcCardId.value}/landing-page`,
@@ -3466,6 +3750,11 @@ const saveProfile = async () => {
     );
 
     if (response.success) {
+      console.log("✅ Landing page saved successfully!");
+      console.log("📄 Saved landing page data:", response.landing_page);
+      console.log("🔑 Saved for NFC card ID:", selectedNfcCardId.value);
+      console.log("🔗 Saved card nfc_card_id:", getSelectedCard()?.nfc_card_id);
+      
       $toast.success("Landing page and links saved successfully!");
       
       // Update links with backend IDs (remove _isNew flag)
@@ -3480,16 +3769,27 @@ const saveProfile = async () => {
     }
   } catch (error) {
     console.error("Save landing page error:", error);
-    console.error("Error response data:", error.data);
-    console.error("Validation errors:", error.data?.errors);
-    if (error.data?.errors) {
+    console.error("Error message:", error.message);
+    console.error("Error response:", error.response);
+    console.error("Error response data:", error.response?.data);
+    console.error("Error status:", error.response?.status);
+    console.error("Validation errors:", error.response?.data?.errors);
+    
+    // More detailed error logging
+    if (error.response) {
+      console.error("Full error response:", JSON.stringify(error.response.data, null, 2));
+    }
+    
+    if (error.response?.data?.errors) {
       // Show first validation error
-      const firstError = Object.values(error.data.errors)[0];
+      const firstError = Object.values(error.response.data.errors)[0];
       $toast.error(Array.isArray(firstError) ? firstError[0] : firstError);
-    } else if (error.data?.message) {
-      $toast.error(error.data.message);
+    } else if (error.response?.data?.message) {
+      $toast.error(error.response.data.message);
+    } else if (error.message) {
+      $toast.error(error.message);
     } else {
-      $toast.error("Failed to save landing page");
+      $toast.error("Failed to save landing page. Check console for details.");
     }
   } finally {
     saving.value = false;
@@ -3803,6 +4103,17 @@ const loadProfile = async () => {
       if (landingPage.feature_order && Array.isArray(landingPage.feature_order)) {
         profileData.featureOrder = landingPage.feature_order;
         featureOrder.value = landingPage.feature_order;
+      }
+      
+      // Load layout configuration
+      if (landingPage.section_layout && Array.isArray(landingPage.section_layout)) {
+        profileData.sectionLayout = landingPage.section_layout;
+      }
+      if (landingPage.field_layout && typeof landingPage.field_layout === 'object') {
+        profileData.fieldLayout = landingPage.field_layout;
+      }
+      if (landingPage.section_settings && typeof landingPage.section_settings === 'object') {
+        profileData.sectionSettings = landingPage.section_settings;
       }
       
       // Portfolio
@@ -4170,9 +4481,12 @@ const getPlanBadgeClass = (plan) => {
   }
 };
 
-// Check if mobile
+// Check if mobile - Used for screen size detection to adjust UI
+// Does not affect layout switching
+// isMobile property only used to adjust specific component sizes
+// Currently set for devices smaller than 768px (md breakpoint)
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < 1024;
+  isMobile.value = window.innerWidth < 768;
 };
 
 // Close dropdown when clicking outside
@@ -4187,8 +4501,21 @@ const handleClickOutside = (event) => {
 const updatePreviewData = () => {
   if (!selectedNfcCardId.value) return;
 
+  // Get list of available feature keys (assigned by admin)
+  const availableFeatureKeys = featureToggles.value.map(f => f.feature_key);
+  
+  // Build features object - only include available features with their enabled state
+  const featuresData = {};
+  availableFeatureKeys.forEach(key => {
+    featuresData[key] = getFeatureValue(key);
+  });
+
   const previewData = {
     ...profileData,
+    // Include features with their enabled state
+    features: featuresData,
+    // Include list of available features (assigned by admin)
+    availableFeatures: availableFeatureKeys,
     links: links.value.filter(link => link.is_active).map(link => ({
       title: link.title,
       url: link.url,
@@ -4198,6 +4525,9 @@ const updatePreviewData = () => {
     })),
     timestamp: Date.now(),
   };
+  
+  console.log('📤 Preview data - availableFeatures:', availableFeatureKeys);
+  console.log('📤 Preview data - features:', featuresData);
   
   try {
     localStorage.setItem('nfc_preview_data', JSON.stringify(previewData));
@@ -4235,7 +4565,7 @@ const forceRefreshPreview = () => {
   $toast.success('Preview refreshed');
 };
 
-// Open Landing Page in new tab
+// Open Landing Page in new tab (Preview Mode - shows unsaved changes)
 const openLandingPage = () => {
   if (!selectedNfcCardId.value) {
     $toast.error("Please select an NFC card first");
@@ -4254,11 +4584,34 @@ const openLandingPage = () => {
   // Update preview data before opening
   updatePreviewData();
 
-  // Open landing page in new tab
+  // Open landing page in new tab with preview mode
   const landingPageUrl = `/profile/${selectedCard.nfc_card_id}?preview=true`;
   window.open(landingPageUrl, '_blank');
   
   $toast.success("Opening live preview in new tab");
+};
+
+// Open Saved Landing Page in new tab (No Preview Mode - shows saved data from backend)
+const openSavedLandingPage = () => {
+  if (!selectedNfcCardId.value) {
+    $toast.error("Please select an NFC card first");
+    return;
+  }
+
+  const selectedCard = userNfcCards.value.find(
+    (card) => card.id === selectedNfcCardId.value
+  );
+
+  if (!selectedCard || !selectedCard.nfc_card_id) {
+    $toast.error("Card information not found");
+    return;
+  }
+
+  // Open real landing page without preview mode (shows saved data from backend)
+  const landingPageUrl = `/profile/${selectedCard.nfc_card_id}`;
+  window.open(landingPageUrl, '_blank');
+  
+  $toast.success("Opening saved landing page");
 };
 
 // Initialize
@@ -4276,6 +4629,21 @@ onMounted(async () => {
       loadUserNfcCards().catch(err => console.log('NFC cards loading failed:', err.message)),
     ]);
     console.log('✅ Core configurations loaded');
+    
+    // Check category availability and set initial category
+    // First check if there are available categories
+    if (availableGeneralTabs.value.length > 0) {
+      // General options available, set to general category
+      mainCategory.value = 'general';
+      activeTab.value = availableGeneralTabs.value[0]?.id;
+    } else if (availableDesignTabs.value.length > 0) {
+      // No general options but design options available, set to design category
+      mainCategory.value = 'design';
+      activeTab.value = availableDesignTabs.value[0]?.id;
+    } else {
+      // No options available in either category
+      console.log('\u26a0\ufe0f No available options - Admin has not assigned any features');
+    }
   } catch (error) {
     console.error('Error loading configurations:', error);
   }
@@ -4312,15 +4680,15 @@ onUnmounted(() => {
 let updatePreviewTimeout = null;
 
 watch(
-  [() => profileData, () => links.value],
+  () => JSON.stringify({ ...profileData, links: links.value }),
   () => {
     // Debounce the update to avoid too many refreshes
     if (updatePreviewTimeout) clearTimeout(updatePreviewTimeout);
     updatePreviewTimeout = setTimeout(() => {
+      console.log('🔄 Auto-updating preview due to data change');
       updatePreviewData();
-    }, 1000); // 1 second debounce for iframe
-  },
-  { deep: true }
+    }, 500); // 500ms debounce for faster feedback
+  }
 );
 </script>
 
