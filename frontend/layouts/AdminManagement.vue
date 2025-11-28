@@ -209,9 +209,10 @@ const user = computed(() => authStore.user);
 
 const sidebarOpen = ref(false);
 const profileDropdownOpen = ref(false);
+const unreadFeedbackCount = ref(0);
 
-// Navigation items
-const navigation = [
+// Navigation items - using a computed property to dynamically update badge
+const navigation = computed(() => [
   {
     name: "Dashboard",
     href: "/AdminManagement",
@@ -248,11 +249,6 @@ const navigation = [
     icon: "heroicons:shield-check",
   },
   {
-    name: "Chatbot & FAQ",
-    href: "/AdminManagement/chatbot",
-    icon: "heroicons:chat-bubble-left-right",
-  },
-  {
     name: "Profile Builder Design",
     href: "/AdminManagement/profile-builder-design",
     icon: "heroicons:paint-brush",
@@ -267,17 +263,35 @@ const navigation = [
     href: "/AdminManagement/notifications",
     icon: "heroicons:bell",
   },
-];
+  {
+    name: "User Feedback",
+    href: "/AdminManagement/feedback",
+    icon: "heroicons:chat-bubble-left-right",
+    badge: unreadFeedbackCount.value || null,
+  },
+]);
 
 // Page title based on current route
 const pageTitle = computed(() => {
-  const currentNav = navigation.find((item) => item.href === route.path);
+  const currentNav = navigation.value.find((item) => item.href === route.path);
   return currentNav ? currentNav.name : "Admin Panel";
 });
 
 // Check if route is active
 const isActiveRoute = (href) => {
   return route.path === href;
+};
+
+// Fetch unread feedback count
+const loadUnreadFeedbackCount = async () => {
+  try {
+    const response = await $fetch('/api/admin/chatbot/feedback/unread-count');
+    if (response.success) {
+      unreadFeedbackCount.value = response.unread_count;
+    }
+  } catch (error) {
+    console.error('Failed to load unread feedback count:', error);
+  }
 };
 
 // Handle logout
@@ -297,6 +311,13 @@ onMounted(() => {
       profileDropdownOpen.value = false;
     }
   });
+
+  // Load unread feedback count
+  loadUnreadFeedbackCount();
+
+  // Refresh unread count every 30 seconds
+  const interval = setInterval(loadUnreadFeedbackCount, 30000);
+  onBeforeUnmount(() => clearInterval(interval));
 });
 
 // Watch for route changes to close mobile sidebar

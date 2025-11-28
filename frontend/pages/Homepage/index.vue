@@ -391,13 +391,20 @@
                 />
                 Brand compliance
               </li>
-              <li class="flex items-center text-secondary-600">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2"
-                />
-                Team analytics UserDashboard
-              </li>
+                <li class="flex items-center text-secondary-600">
+                  <Icon
+                    name="heroicons:check"
+                    class="h-4 w-4 text-success-600 mr-2"
+                  />
+                  Team analytics
+                </li>
+                <li class="flex items-center text-secondary-600">
+                  <Icon
+                    name="heroicons:check"
+                    class="h-4 w-4 text-success-600 mr-2"
+                  />
+                  Team User Dashboard
+                </li>
             </ul>
           </div>
 
@@ -1721,6 +1728,7 @@ const businessPlan = computed(() => planPrices.value.find(p => p.plan_type === '
 
 // AI Chatbot
 const showChatbot = ref(false);
+const chatId = ref(null); // Session identifier for n8n webhook
 const chatInput = ref('');
 const messages = ref([]);
 const isTyping = ref(false);
@@ -1972,21 +1980,27 @@ const sendMessage = async () => {
   isTyping.value = true;
 
   try {
-    // Call chatbot API
-    const response = await $api.post('/chatbot/ask', {
-      question: question
+    // Direct POST to n8n webhook
+    const response = await fetch('https://n8n.jiosgroup.com/webhook/e529b3a4-d09d-45d6-8de5-01cc6885bcb7/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: chatId.value,
+        chatInput: question
+      })
     });
 
-    let aiResponse = '';
-    let questionId = null;
+    if (!response.ok) {
+      throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
+    }
 
-    if (response.data.success && response.data.found) {
-      // Found matching answer from database
-      aiResponse = response.data.data.answer;
-      questionId = response.data.data.id;
-    } else {
-      // No match found - use fallback
-      aiResponse = "I couldn't find a specific answer to your question in our FAQ database. However, I'd be happy to help!\n\nFor immediate assistance:\n• Check our FAQ section\n• Contact support at support@nfcgo.com\n• Call us at +60 123-456-789\n\nWould you like me to connect you with a human agent?";
+    const data = await response.json();
+
+    let aiResponse = data?.output || data?.text || data?.message || (data?.data && data.data.output) || null;
+    let questionId = data?.id || null;
+
+    if (!aiResponse) {
+      aiResponse = "I couldn't find a specific answer to your question. Please contact support or try again later.";
     }
 
     messages.value.push({
@@ -2030,49 +2044,32 @@ const sendQuickMessage = (message) => {
   sendMessage();
 };
 
-// Load popular questions
+// Load popular questions - Deprecated: No longer loading from backend
 const loadPopularQuestions = async () => {
-  loadingQuestions.value = true;
-  try {
-    const response = await $api.get('/chatbot/questions');
-    if (response.data.success) {
-      popularQuestions.value = response.data.data.slice(0, 6); // Top 6 questions
-    }
-  } catch (error) {
-    console.error('Failed to load popular questions:', error);
-    // Fallback questions are already in the template
-  } finally {
-    loadingQuestions.value = false;
-  }
+  loadingQuestions.value = false;
+  // Use fallback questions from template
 };
 
-// Submit feedback (helpful/not helpful)
+// Submit feedback (helpful/not helpful) - Deprecated: No longer sending to backend
 const submitFeedback = async (message, isHelpful) => {
-  if (!message.questionId) return;
-  
-  try {
-    await $api.post('/chatbot/feedback', {
-      question_id: message.questionId,
-      user_question: messages.value.find(m => m.sender === 'user' && m.timestamp < message.timestamp)?.text || '',
-      rating: isHelpful ? 5 : 2,
-      feedback_type: 'rating'
-    });
-    
-    // Mark feedback as given
-    message.feedbackGiven = true;
-  } catch (error) {
-    console.error('Failed to submit feedback:', error);
-  }
+  // Just mark as given locally without backend call
+  message.feedbackGiven = true;
 };
 
 // Watch for chatbot modal opening to load questions
 watch(showChatbot, (newValue) => {
-  if (newValue && popularQuestions.value.length === 0) {
-    loadPopularQuestions();
+  if (newValue) {
+    // Initialize a new chat session ID
+    if (!chatId.value) {
+      chatId.value = Date.now();
+    }
+    if (popularQuestions.value.length === 0) {
+      loadPopularQuestions();
+    }
   }
 });
 
-// Submit user feedback
+// Submit user feedback - Deprecated: No longer sending to backend
 const submitUserFeedback = async () => {
   if (!feedbackForm.category || !feedbackForm.message) {
     alert('Please fill in all required fields');
@@ -2080,32 +2077,69 @@ const submitUserFeedback = async () => {
   }
 
   submittingFeedback.value = true;
-  try {
-    await $api.post('/chatbot/feedback', {
-      user_question: 'General Feedback from Homepage',
-      user_message: feedbackForm.message,
-      user_name: feedbackForm.user_name || null,
-      user_email: feedbackForm.user_email || null,
-      rating: feedbackForm.rating || null,
-      feedback_type: 'general',
-      category: feedbackForm.category
-    });
+  
+  const payload = {
+    category: feedbackForm.category,
+    message: feedbackForm.message,
+    user_name: feedbackForm.user_name,
+    user_email: feedbackForm.user_email,
+    rating: feedbackForm.rating,
+  };
 
-    $toast.success('Thank you for your feedback! We will review it shortly.');
-    
-    // Reset form
-    Object.assign(feedbackForm, {
-      category: '',
-      user_name: '',
-      user_email: '',
-      message: '',
-      rating: 0
+  console.log('=== FEEDBACK SUBMISSION START ===');
+  console.log('$api available:', !!$api);
+  console.log('$api type:', typeof $api);
+  console.log('Payload:', payload);
+  console.log('Payload JSON:', JSON.stringify(payload));
+  
+  try {
+    console.log('About to call $api.post(/chatbot/feedback)');
+    const response = await $api.post('/chatbot/feedback', payload);
+    console.log('Success response:', response);
+
+    if (response.success) {
+      $toast.success('Thank you for your feedback!');
+      
+      // Reset form
+      feedbackForm.category = '';
+      feedbackForm.message = '';
+      feedbackForm.user_name = '';
+      feedbackForm.user_email = '';
+      feedbackForm.rating = null;
+      
+      // Close modal
+      showFeedbackModal.value = false;
+    } else {
+      $toast.error(response.message || 'Failed to submit feedback');
+    }
+  } catch (error) {
+    console.error('Feedback submission error:', error);
+    console.error('Error response data:', error.response?.data);
+    console.error('Error status:', error.response?.status);
+    console.error('Error config:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      data: error.config?.data,
+      headers: error.config?.headers
+    });
+    console.log('Payload sent:', {
+      category: feedbackForm.category,
+      message: feedbackForm.message,
+      user_name: feedbackForm.user_name,
+      user_email: feedbackForm.user_email,
+      rating: feedbackForm.rating,
     });
     
-    showFeedbackModal.value = false;
-  } catch (error) {
-    console.error('Failed to submit feedback:', error);
-    $toast.error('Failed to submit feedback. Please try again.');
+    let errorMessage = 'Failed to submit feedback. Please try again later.';
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.response?.data?.errors) {
+      const errors = error.response.data.errors;
+      const firstErrorKey = Object.keys(errors)[0];
+      errorMessage = errors[firstErrorKey]?.[0] || JSON.stringify(errors);
+    }
+    
+    $toast.error(errorMessage);
   } finally {
     submittingFeedback.value = false;
   }

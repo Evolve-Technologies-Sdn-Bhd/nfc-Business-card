@@ -98,15 +98,7 @@ class ChatbotFeedback extends Model
     }
 
     /**
-     * Scope to only read feedback
-     */
-    public function scopeRead($query)
-    {
-        return $query->where('is_read', true);
-    }
-
-    /**
-     * Scope to filter by type
+     * Scope to filter by feedback type
      */
     public function scopeOfType($query, string $type)
     {
@@ -132,32 +124,11 @@ class ChatbotFeedback extends Model
     /**
      * Scope to filter by date range
      */
-    public function scopeDateRange($query, $startDate, $endDate)
+    public function scopeDateRange($query, string $startDate, string $endDate)
     {
-        return $query->whereBetween('created_at', [$startDate, $endDate]);
-    }
-
-    /**
-     * Get count of unread feedback
-     */
-    public static function getUnreadCount(): int
-    {
-        return self::unread()->count();
-    }
-
-    /**
-     * Get count of pending feedback
-     */
-    public static function getPendingCount(): int
-    {
-        return self::where('status', 'pending')->count();
-    }
-
-    /**
-     * Get average rating
-     */
-    public static function getAverageRating(): float
-    {
-        return round(self::whereNotNull('rating')->avg('rating') ?? 0, 2);
+        return $query->whereBetween('created_at', [
+            $startDate . ' 00:00:00',
+            $endDate . ' 23:59:59'
+        ]);
     }
 }
