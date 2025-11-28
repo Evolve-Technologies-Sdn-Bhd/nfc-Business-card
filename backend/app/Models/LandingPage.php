@@ -77,6 +77,10 @@ class LandingPage extends Model
         // Features
         'features',
         'feature_order',
+        // Layout Configuration
+        'section_layout',
+        'field_layout',
+        'section_settings',
         // Company additional
         'company_description',
         'company_video',
@@ -154,6 +158,9 @@ class LandingPage extends Model
         'visible_fields' => 'array',
         'features' => 'array',
         'feature_order' => 'array',
+        'section_layout' => 'array',
+        'field_layout' => 'array',
+        'section_settings' => 'array',
         'projects' => 'array',
         'portfolio_gallery' => 'array',
         'portfolio_tags' => 'array',

@@ -1,4 +1,29 @@
 // stores/auth.js
+
+const callApi = async (method, url, data = null) => {
+  const nuxtApp = useNuxtApp();
+  const config = useRuntimeConfig();
+
+  if (nuxtApp.$api) {
+    const { $api } = nuxtApp;
+    if (method === "get") {
+      return await $api.get(url, { params: data || undefined });
+    }
+    return await $api[method](url, data);
+  }
+
+  const baseURL = config.public.apiBaseUrl || "http://localhost:8000/api";
+  const options = {
+    baseURL,
+    method: method.toUpperCase(),
+  };
+  if (data) {
+    options.body = data;
+  }
+  console.warn("API plugin not available, falling back to $fetch for", url);
+  return await $fetch(url, options);
+};
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: null,
@@ -12,9 +37,8 @@ export const useAuthStore = defineStore("auth", {
      */
     async login(credentials) {
       try {
-        const { $api } = useNuxtApp();
         console.log("Auth store: Making login request");
-        const response = await $api.post("/login", credentials);
+        const response = await callApi("post", "/login", credentials);
         console.log("Auth store: Login response received:", response);
 
         if (response.success) {
@@ -49,8 +73,7 @@ export const useAuthStore = defineStore("auth", {
      */
     async register(data) {
       try {
-        const { $api } = useNuxtApp();
-        const response = await $api.post("/register", data);
+        const response = await callApi("post", "/register", data);
 
         if (response.success) {
           this.token = response.token;
@@ -75,8 +98,10 @@ export const useAuthStore = defineStore("auth", {
      */
     async logout() {
       try {
-        const { $api } = useNuxtApp();
-        await $api.post("/logout");
+        const nuxtApp = useNuxtApp();
+        if (nuxtApp.$api) {
+          await nuxtApp.$api.post("/logout");
+        }
         console.log("Auth store: Logout successful");
       } catch (error) {
         console.error("Auth store: Logout API error:", error);
@@ -90,8 +115,7 @@ export const useAuthStore = defineStore("auth", {
      */
     async fetchProfile() {
       try {
-        const { $api } = useNuxtApp();
-        const response = await $api.get("/me");
+        const response = await callApi("get", "/me");
 
         if (response.success) {
           this.user = response.user;
@@ -108,10 +132,9 @@ export const useAuthStore = defineStore("auth", {
      */
     async requestPasswordReset(email) {
       try {
-        const { $api } = useNuxtApp();
         console.log("Auth store: Requesting password reset for:", email);
 
-        const response = await $api.post("/password-reset-request", {
+        const response = await callApi("post", "/password-reset-request", {
           email,
         });
 
@@ -128,10 +151,9 @@ export const useAuthStore = defineStore("auth", {
      */
     async resetPassword(data) {
       try {
-        const { $api } = useNuxtApp();
         console.log("Auth store: Resetting password with token");
 
-        const response = await $api.post("/password-reset", {
+        const response = await callApi("post", "/password-reset", {
           token: data.token,
           password: data.password,
           password_confirmation: data.password_confirmation,
@@ -150,8 +172,7 @@ export const useAuthStore = defineStore("auth", {
      */
     async verify2FA(code) {
       try {
-        const { $api } = useNuxtApp();
-        const response = await $api.post("/verify-2fa", { code });
+        const response = await callApi("post", "/verify-2fa", { code });
 
         if (response.success) {
           this.token = response.token;

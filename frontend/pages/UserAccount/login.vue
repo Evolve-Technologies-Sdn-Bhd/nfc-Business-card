@@ -308,9 +308,17 @@ const handleLogin = async () => {
     if (error.response?.status === 422) {
       errors.value = error.validationErrors || {};
     } else if (error.response?.status === 401) {
-      $toast.error("Invalid email or password");
+      if ($toast && typeof $toast.error === "function") {
+        $toast.error("Invalid email or password");
+      } else {
+        console.error("Invalid email or password");
+      }
     } else {
-      $toast.error("An error occurred. Please try again.");
+      if ($toast && typeof $toast.error === "function") {
+        $toast.error("An error occurred. Please try again.");
+      } else {
+        console.error("An error occurred. Please try again.");
+      }
     }
   } finally {
     loading.value = false;

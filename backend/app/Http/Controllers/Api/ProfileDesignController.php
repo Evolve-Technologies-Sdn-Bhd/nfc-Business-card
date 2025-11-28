@@ -41,8 +41,12 @@ class ProfileDesignController extends Controller
         // Get options
         $options = $query->get();
         
+        \Log::info("ProfileDesign: Loading options for plan={$plan}, user=" . ($user ? $user->id : 'null'));
+        \Log::info("ProfileDesign: Total options before filter: " . $options->count());
+        
         // Filter based on custom assignments or plan
         if ($customDesignOptionIds !== null) {
+            \Log::info("ProfileDesign: Using custom assignments");
             $options = $options->filter(function($option) use ($customDesignOptionIds, $customFeatureIds) {
                 if ($option->type === 'feature_toggle') {
                     return in_array($option->option_id, $customFeatureIds);
@@ -50,10 +54,17 @@ class ProfileDesignController extends Controller
                 return in_array($option->id, $customDesignOptionIds);
             });
         } elseif ($plan && \Schema::hasColumn('profile_design_options', 'available_plans')) {
+            \Log::info("ProfileDesign: Using plan-based filtering for plan={$plan}");
             $options = $options->filter(function($option) use ($plan) {
-                return $option->isAvailableForPlan($plan);
+                $isAvailable = $option->isAvailableForPlan($plan);
+                if ($option->type === 'feature_toggle') {
+                    \Log::info("ProfileDesign: Feature '{$option->option_id}' available_plans=" . json_encode($option->available_plans) . ", isAvailable={$isAvailable}");
+                }
+                return $isAvailable;
             });
         }
+        
+        \Log::info("ProfileDesign: Total options after filter: " . $options->count());
         
         $grouped = $options->groupBy('type');
         

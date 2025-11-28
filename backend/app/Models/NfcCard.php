@@ -116,4 +116,21 @@ class NfcCard extends Model
     {
         return '$' . number_format($this->purchase_amount, 2);
     }
+
+    /**
+     * Resolve route binding - supports both 'id' and 'nfc_card_id' for lookups
+     * This allows URLs like /nfc-cards/NFC-BY1CINMFLU7X/... to work
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        // First try to find by nfc_card_id (e.g., NFC-BY1CINMFLU7X)
+        $card = $this->where('nfc_card_id', $value)->first();
+        
+        // If not found and value is numeric, try finding by id
+        if (!$card && is_numeric($value)) {
+            $card = $this->where('id', $value)->first();
+        }
+        
+        return $card;
+    }
 } 

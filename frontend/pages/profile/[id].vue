@@ -2,18 +2,19 @@
   <div
     :style="{
       minHeight: '100vh',
-      background: '#0a0e27',
+      background: designSettings.backgroundColor,
+      color: designSettings.textColor,
       position: 'relative',
       overflow: 'hidden',
-      fontFamily:
-        'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+      fontFamily: designSettings.fontFamily,
     }"
   >
     <!-- Animations -->
     <component :is="'style'">
       {{
         `
-        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(100px, -100px) scale(1.1); } 66% { transform: translate(-100px, 100px) scale(0.9); } }
+        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -30px) scale(1.05); } }
+        @keyframes floatSlow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse-status { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); } }
         @keyframes charBounce { 0% { opacity: 0; transform: translateY(20px); } 50% { transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -41,7 +42,7 @@
       }}
     </component>
 
-    <!-- Animated Background -->
+    <!-- Modern Gradient Background -->
     <div
       :style="{
         position: 'fixed',
@@ -50,52 +51,60 @@
         width: '100%',
         height: '100%',
         zIndex: 0,
+        background: `linear-gradient(135deg, ${designSettings.backgroundColor} 0%, #1a1f3a 50%, #0f1419 100%)`,
         overflow: 'hidden',
       }"
     >
+      <!-- Animated Gradient Orbs -->
+      <div
+        :style="{
+          position: 'absolute',
+          width: isMobile ? '400px' : '600px',
+          height: isMobile ? '400px' : '600px',
+          background: 'radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(40px)',
+          animation: 'float 25s infinite ease-in-out',
+          top: '-200px',
+          left: '-200px',
+        }"
+      />
+      <div
+        :style="{
+          position: 'absolute',
+          width: isMobile ? '350px' : '550px',
+          height: isMobile ? '350px' : '550px',
+          background: 'radial-gradient(circle, rgba(240, 147, 251, 0.12) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(40px)',
+          animation: 'float 30s infinite ease-in-out',
+          bottom: '-150px',
+          right: '-150px',
+          animationDelay: '10s',
+        }"
+      />
       <div
         :style="{
           position: 'absolute',
           width: isMobile ? '300px' : '500px',
           height: isMobile ? '300px' : '500px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, transparent 70%)',
           borderRadius: '50%',
-          filter: isMobile ? 'blur(60px)' : 'blur(80px)',
-          opacity: 0.6,
-          animation: 'float 20s infinite ease-in-out',
-          top: isMobile ? '-150px' : '-250px',
-          left: isMobile ? '-150px' : '-250px',
+          filter: 'blur(40px)',
+          animation: 'float 35s infinite ease-in-out',
+          top: '40%',
+          right: '10%',
+          animationDelay: '5s',
         }"
       />
+      <!-- Subtle grid overlay -->
       <div
         :style="{
           position: 'absolute',
-          width: isMobile ? '250px' : '400px',
-          height: isMobile ? '250px' : '400px',
-          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-          borderRadius: '50%',
-          filter: isMobile ? 'blur(60px)' : 'blur(80px)',
-          opacity: 0.6,
-          animation: 'float 20s infinite ease-in-out',
-          bottom: isMobile ? '-125px' : '-200px',
-          right: isMobile ? '-125px' : '-200px',
-          animationDelay: '7s',
-        }"
-      />
-      <div
-        :style="{
-          position: 'absolute',
-          width: isMobile ? '200px' : '350px',
-          height: isMobile ? '200px' : '350px',
-          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-          borderRadius: '50%',
-          filter: isMobile ? 'blur(60px)' : 'blur(80px)',
-          opacity: 0.6,
-          animation: 'float 20s infinite ease-in-out',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          animationDelay: '14s',
+          inset: 0,
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          opacity: 0.3,
         }"
       />
     </div>
@@ -178,30 +187,21 @@
       </button>
     </Transition>
 
-    <!-- Preview Mode Banner -->
+    <!-- Preview Mode Banner - Minimal -->
     <Transition name="fade-slide">
       <div
         v-if="isPreviewMode"
+        :class="[
+          'fixed top-0 left-0 right-0 z-50 text-center',
+          'bg-blue-500 text-white font-medium'
+        ]"
         :style="{
-          position: 'fixed',
-          top: isMobile ? '60px' : '70px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 999,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          padding: isMobile ? '10px 20px' : '12px 30px',
-          borderRadius: '50px',
-          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          fontSize: isMobile ? '13px' : '14px',
-          fontWeight: 600,
+          fontSize: '10px',
+          padding: '3px 8px',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         }"
       >
-        <span :style="{ fontSize: isMobile ? '16px' : '18px' }">👁️</span>
-        <span>Preview Mode - Changes not saved yet</span>
+        <span>👁️ Preview</span>
       </div>
     </Transition>
 
@@ -221,6 +221,54 @@
       >
         <div :style="{ fontSize: '48px', marginBottom: '20px' }">⏳</div>
         <p :style="{ fontSize: responsive.h2Size }">Loading profile...</p>
+      </div>
+
+      <!-- No Profile Data Yet -->
+      <div
+        v-else-if="noProfileData"
+        :style="{
+          textAlign: 'center',
+          padding: '80px 20px',
+          maxWidth: '600px',
+          margin: '0 auto',
+        }"
+      >
+        <div :style="{ fontSize: '80px', marginBottom: '20px' }">📝</div>
+        <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px', color: 'white' }">
+          No Profile Data Yet
+        </h2>
+        <p
+          :style="{
+            fontSize: responsive.bodySize,
+            color: 'rgba(255, 255, 255, 0.8)',
+            marginBottom: '30px',
+            lineHeight: '1.6',
+          }"
+        >
+          This NFC card hasn't been set up with profile information yet.
+          <br />
+          Please use the <strong>Profile Builder</strong> to create your landing page.
+        </p>
+        <button
+          v-if="isCardOwner"
+          @click="goToEditProfile"
+          :style="{
+            padding: '15px 30px',
+            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50px',
+            fontSize: responsive.bodySize,
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+            transition: 'all 0.3s',
+          }"
+          @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.4)'; }"
+          @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)'; }"
+        >
+          Set Up Profile Now →
+        </button>
       </div>
 
       <!-- Profile Not Found -->
@@ -244,20 +292,99 @@
 
       <!-- Profile Content -->
       <template v-else>
-        <!-- Hero Section -->
+        <!-- Hero Section - Enhanced -->
         <div
           :style="{
             position: 'relative',
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: responsive.cardBackground,
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: responsive.cardBorder,
             borderRadius: responsive.borderRadius,
-            padding: isMobile ? '40px 20px' : isTablet ? '60px 30px' : '80px 40px',
-            marginBottom: responsive.cardMarginBottom,
+            padding: '0',
+            marginBottom: responsive.sectionGap,
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            boxShadow: responsive.cardShadow,
           }"
         >
+          <!-- Cover Banner (if available) -->
+          <div
+            v-if="coverBanner"
+            :style="{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${coverBanner})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              transform: 'scale(1.02)',
+              filter: 'brightness(0.9)',
+            }"
+          >
+            <div
+              :style="{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(3,7,18,0.9) 100%)',
+              }"
+            />
+          </div>
+
+          <!-- NFCGo Watermark (shown when Remove Branding is disabled) -->
+          <div
+            v-if="!isFeatureEnabled('remove_branding')"
+            :style="{
+              position: 'absolute',
+              top: isMobile ? '12px' : '16px',
+              left: isMobile ? '12px' : '16px',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: isMobile ? '6px 12px' : '8px 14px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            }"
+          >
+            <div
+              :style="{
+                width: isMobile ? '20px' : '24px',
+                height: isMobile ? '20px' : '24px',
+                border: '2px solid #2563eb',
+                borderRadius: '5px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }"
+            >
+              <svg :width="isMobile ? '12' : '14'" :height="isMobile ? '12' : '14'" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                <circle cx="9" cy="10" r="2"/>
+                <path d="M15 8h2"/>
+                <path d="M15 12h2"/>
+                <path d="M7 16h10"/>
+              </svg>
+            </div>
+            <span
+              :style="{
+                color: '#2563eb',
+                fontSize: isMobile ? '13px' : '15px',
+                fontWeight: 700,
+                letterSpacing: '0.3px',
+              }"
+            >
+              NFCGo
+            </span>
+          </div>
+
+          <!-- Hero Content -->
+          <div
+            :style="{
+              padding: isMobile ? '48px 24px' : isTablet ? '64px 40px' : '80px 48px',
+              position: 'relative',
+              zIndex: 1,
+            }"
+          >
           <div :style="{ position: 'relative', zIndex: 2, textAlign: 'center' }">
             <div
               :style="{
@@ -386,7 +513,47 @@
                 <span :style="{ fontSize: isMobile ? '16px' : '18px' }">💼</span>
                 {{ profile.position }}
               </div>
+              <!-- Pronouns Badge -->
+              <div
+                v-if="profile.pronouns"
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: responsive.badgePadding,
+                  borderRadius: '50px',
+                  fontSize: responsive.smallSize,
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3))',
+                  color: '#fff',
+                  animation: 'fadeInUp 0.6s ease-out forwards',
+                  opacity: 0,
+                  animationDelay: '0.5s',
+                }"
+              >
+                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">👤</span>
+                {{ profile.pronouns }}
+              </div>
             </div>
+            
+            <!-- Tagline -->
+            <p
+              v-if="profile.tagline"
+              :style="{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: responsive.bodySize,
+                fontStyle: 'italic',
+                marginTop: '20px',
+                textAlign: 'center',
+                animation: 'fadeInUp 0.6s ease-out forwards',
+                opacity: 0,
+                animationDelay: '0.6s',
+              }"
+            >
+              "{{ profile.tagline }}"
+            </p>
           </div>
 
           <!-- Particles -->
@@ -413,15 +580,17 @@
               }"
             />
           </div>
+          </div>
         </div>
 
         <!-- Quick Actions -->
         <div
+          v-if="quickActions.length > 0"
           :style="{
             display: 'flex',
             justifyContent: 'center',
             gap: responsive.actionGap,
-            marginBottom: responsive.cardMarginBottom,
+            marginBottom: responsive.sectionGap,
             flexWrap: 'wrap',
           }"
         >
@@ -461,22 +630,25 @@
           </button>
         </div>
 
-        <!-- Main Content -->
-        <div :style="{ display: 'grid', gap: responsive.cardMarginBottom }">
-          <!-- Company Card -->
+        <!-- Main Content Grid -->
+        <div :style="{ display: 'grid', gap: responsive.sectionGap }">
+          <!-- Company Card (Combined: Company Info + Video + Team) -->
           <div
+            v-if="showCompanySection || showVideoSection || showTeamSection"
             ref="companyCardRef"
             @mousemove="!isMobile && handleCardTilt"
             @mouseleave="!isMobile && resetCardTilt"
             :style="{
               position: 'relative',
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
-              transition: 'all 0.3s',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               overflow: 'hidden',
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -512,95 +684,456 @@
                 Company
               </h2>
             </div>
+            
+            <!-- Company Info Sub-section -->
             <div
+              v-if="hasCompanyData"
               :style="{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isMobile ? '15px' : '30px',
-                flexWrap: 'wrap',
+                marginBottom: (showVideoSection || showTeamSection) ? '30px' : '0',
               }"
             >
               <div
                 :style="{
-                  position: 'relative',
-                  width: isMobile ? '80px' : '100px',
-                  height: isMobile ? '80px' : '100px',
-                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: isMobile ? '15px' : '30px',
+                  flexWrap: 'wrap',
+                }"
+              >
+                <!-- Company Logo -->
+                <div
+                  v-if="isFieldVisible('companyTeam', 'companyLogo')"
+                  :style="{
+                    position: 'relative',
+                    width: isMobile ? '80px' : '100px',
+                    height: isMobile ? '80px' : '100px',
+                    flexShrink: 0,
+                  }"
+                >
+                  <!-- If company has logo image -->
+                  <img
+                    v-if="company.logo"
+                    :src="company.logo"
+                    alt="Company Logo"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: isMobile ? '15px' : '20px',
+                      border: '2px solid rgba(255, 255, 255, 0.1)',
+                    }"
+                  />
+                  <!-- Fallback to logo text -->
+                  <template v-else>
+                    <div
+                      :style="{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                        borderRadius: isMobile ? '15px' : '20px',
+                        animation: 'logoRotate 10s linear infinite',
+                      }"
+                    />
+                    <div
+                      :style="{
+                        position: 'absolute',
+                        inset: '3px',
+                        background: 'rgba(10, 14, 39, 0.95)',
+                        borderRadius: isMobile ? '13px' : '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: isMobile ? '24px' : '32px',
+                        fontWeight: 800,
+                        color: 'white',
+                        zIndex: 1,
+                      }"
+                    >
+                      {{ company.logoText }}
+                    </div>
+                  </template>
+                </div>
+                
+                <!-- Company Info -->
+                <div :style="{ flex: 1, minWidth: isMobile ? '100%' : 'auto' }">
+                  <h3
+                    v-if="company.name && isFieldVisible('companyTeam', 'companyName')"
+                    :style="{
+                      fontSize: responsive.h3Size,
+                      fontWeight: 800,
+                      color: 'white',
+                      marginBottom: '10px',
+                    }"
+                  >
+                    {{ company.name }}
+                  </h3>
+                  
+                  <!-- Registration No -->
+                  <p
+                    v-if="company.registrationNo && isFieldVisible('companyTeam', 'companyRegNo')"
+                    :style="{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: responsive.smallSize,
+                      marginBottom: '8px',
+                    }"
+                  >
+                    📋 {{ company.registrationNo }}
+                  </p>
+                  
+                  <!-- Industry & Year & Employee Count -->
+                  <div
+                    :style="{
+                      display: 'flex',
+                      gap: '12px',
+                      flexWrap: 'wrap',
+                      marginBottom: '12px',
+                    }"
+                  >
+                    <span
+                      v-if="company.industry && isFieldVisible('companyTeam', 'industry')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 12px',
+                        background: 'rgba(102, 126, 234, 0.2)',
+                        borderRadius: '12px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      🏭 {{ company.industry }}
+                    </span>
+                    <span
+                      v-if="company.establishedYear && isFieldVisible('companyTeam', 'establishedYear')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 12px',
+                        background: 'rgba(240, 147, 251, 0.2)',
+                        borderRadius: '12px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      📅 Est. {{ company.establishedYear }}
+                    </span>
+                    <span
+                      v-if="company.employeeCount && isFieldVisible('companyTeam', 'employeeCount')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 12px',
+                        background: 'rgba(79, 172, 254, 0.2)',
+                        borderRadius: '12px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      👥 {{ company.employeeCount }} employees
+                    </span>
+                  </div>
+                  
+                  <!-- Company Description -->
+                  <p
+                    v-if="company.description && isFieldVisible('companyTeam', 'companyDescription')"
+                    :style="{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: responsive.bodySize,
+                      lineHeight: '1.6',
+                      marginBottom: '12px',
+                    }"
+                    v-html="company.description"
+                  />
+                  <div
+                    v-if="company.department"
+                    :style="{
+                      display: 'inline-block',
+                      padding: isMobile ? '8px 16px' : '10px 20px',
+                      background: 'rgba(102, 126, 234, 0.2)',
+                      border: '1px solid rgba(102, 126, 234, 0.4)',
+                      borderRadius: '50px',
+                      color: '#a8b3ff',
+                      fontSize: responsive.smallSize,
+                      fontWeight: 600,
+                    }"
+                  >
+                    {{ company.department }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Video Sub-section -->
+            <div
+              v-if="showVideoSection"
+              :style="{
+                marginBottom: showTeamSection ? '30px' : '0',
+                paddingTop: hasCompanyData ? '20px' : '0',
+                borderTop: hasCompanyData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+              }"
+            >
+              <div
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '20px',
                 }"
               >
                 <div
                   :style="{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                    borderRadius: isMobile ? '15px' : '20px',
-                    animation: 'logoRotate 10s linear infinite',
-                  }"
-                />
-                <div
-                  :style="{
-                    position: 'absolute',
-                    inset: '3px',
-                    background: 'rgba(10, 14, 39, 0.95)',
-                    borderRadius: isMobile ? '13px' : '18px',
+                    width: isMobile ? '32px' : '40px',
+                    height: isMobile ? '32px' : '40px',
+                    background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: isMobile ? '24px' : '32px',
-                    fontWeight: 800,
-                    color: 'white',
-                    zIndex: 1,
+                    fontSize: isMobile ? '16px' : '20px',
                   }"
                 >
-                  {{ company.logoText }}
+                  🎥
                 </div>
-              </div>
-              <div :style="{ flex: 1, minWidth: isMobile ? '100%' : 'auto' }">
                 <h3
                   :style="{
                     fontSize: responsive.h3Size,
-                    fontWeight: 800,
+                    fontWeight: 700,
                     color: 'white',
-                    marginBottom: '10px',
+                    margin: 0,
                   }"
                 >
-                  {{ company.name }}
+                  {{ videoData.title || 'Company Introduction' }}
                 </h3>
-                <p
+              </div>
+
+              <!-- Video Player -->
+              <div
+                :style="{
+                  position: 'relative',
+                  paddingBottom: '56.25%', /* 16:9 aspect ratio */
+                  height: 0,
+                  overflow: 'hidden',
+                  borderRadius: '15px',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+                  marginBottom: videoData.description ? (isMobile ? '12px' : '15px') : '0',
+                }"
+              >
+                <iframe
+                  :src="getEmbedUrl(videoData.url)"
                   :style="{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: responsive.smallSize,
-                    marginBottom: '15px',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '15px',
                   }"
-                >
-                  📋 {{ company.registrationNo }}
-                </p>
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                />
+              </div>
+
+              <!-- Video Description -->
+              <p
+                v-if="videoData.description"
+                :style="{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  lineHeight: '1.6',
+                  fontSize: responsive.bodySize,
+                  margin: 0,
+                  textAlign: 'center',
+                }"
+              >
+                {{ videoData.description }}
+              </p>
+            </div>
+            
+            <!-- Team Sub-section -->
+            <div
+              v-if="showTeamSection"
+              :style="{
+                paddingTop: (hasCompanyData || showVideoSection) ? '20px' : '0',
+                borderTop: (hasCompanyData || showVideoSection) ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+              }"
+            >
+              <div
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '20px',
+                }"
+              >
                 <div
                   :style="{
-                    display: 'inline-block',
-                    padding: isMobile ? '8px 16px' : '10px 20px',
-                    background: 'rgba(102, 126, 234, 0.2)',
-                    border: '1px solid rgba(102, 126, 234, 0.4)',
-                    borderRadius: '50px',
-                    color: '#a8b3ff',
-                    fontSize: responsive.smallSize,
-                    fontWeight: 600,
+                    width: isMobile ? '32px' : '40px',
+                    height: isMobile ? '32px' : '40px',
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: isMobile ? '16px' : '20px',
                   }"
                 >
-                  {{ company.department }}
+                  👥
                 </div>
+                <h3
+                  :style="{
+                    fontSize: responsive.h3Size,
+                    fontWeight: 700,
+                    color: 'white',
+                    margin: 0,
+                  }"
+                >
+                  Meet The Team
+                </h3>
+              </div>
+              <div
+                :style="{
+                  display: 'grid',
+                  gridTemplateColumns: responsive.servicesGrid,
+                  gap: responsive.gridGap,
+                }"
+              >
+                <component
+                  :is="member.landing_page_url ? 'a' : 'div'"
+                  v-for="(member, idx) in teamMembers"
+                  :key="idx"
+                  :href="member.landing_page_url || undefined"
+                  :target="member.landing_page_url ? '_blank' : undefined"
+                  @mouseenter="!isMobile && (activeTeam = idx)"
+                  @mouseleave="!isMobile && (activeTeam = null)"
+                  @touchstart="activeTeam = idx"
+                  @touchend="setTimeout(() => (activeTeam = null), 2000)"
+                  :style="{
+                    textAlign: 'center',
+                    padding: isMobile ? '20px 12px' : '25px 15px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: isMobile ? '12px' : '15px',
+                    transition: 'all 0.3s',
+                    transform:
+                      activeTeam === idx ? 'translateY(-10px)' : 'translateY(0)',
+                    textDecoration: 'none',
+                    display: 'block',
+                    cursor: member.landing_page_url ? 'pointer' : 'default',
+                  }"
+                >
+                  <div
+                    :style="{
+                      position: 'relative',
+                      width: isMobile ? '60px' : '80px',
+                      height: isMobile ? '60px' : '80px',
+                      margin: '0 auto 15px',
+                      transition: 'all 0.3s',
+                    }"
+                  >
+                    <div
+                      :style="{
+                        position: 'absolute',
+                        inset: '-4px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                        opacity: activeTeam === idx ? 1 : 0,
+                        transition: 'opacity 0.3s',
+                        animation:
+                          activeTeam === idx
+                            ? 'rotate 2s linear infinite'
+                            : 'none',
+                      }"
+                    />
+                    <!-- Profile Image or Initials -->
+                    <img
+                      v-if="member.profile_image"
+                      :src="member.profile_image"
+                      :alt="member.name"
+                      :style="{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(10, 14, 39, 0.5)',
+                      }"
+                    />
+                    <div
+                      v-else
+                      :style="{
+                        position: 'absolute',
+                        inset: 0,
+                        background:
+                          'linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8))',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: isMobile ? '20px' : '28px',
+                        fontWeight: 800,
+                        color: 'white',
+                        border: '2px solid rgba(10, 14, 39, 0.5)',
+                      }"
+                    >
+                      {{ member.initials }}
+                    </div>
+                  </div>
+                  <h4
+                    :style="{
+                      color: 'white',
+                      fontSize: responsive.h4Size,
+                      fontWeight: 700,
+                      margin: '0 0 6px 0',
+                    }"
+                  >
+                    {{ member.name }}
+                  </h4>
+                  <p
+                    :style="{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: responsive.smallSize,
+                      margin: 0,
+                    }"
+                  >
+                    {{ member.role }}
+                  </p>
+                  <!-- View Profile Link Indicator -->
+                  <p
+                    v-if="member.landing_page_url"
+                    :style="{
+                      color: 'rgba(102, 126, 234, 0.8)',
+                      fontSize: responsive.smallSize,
+                      marginTop: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                    }"
+                  >
+                    View Profile →
+                  </p>
+                </component>
               </div>
             </div>
           </div>
 
-          <!-- About Card -->
+          <!-- About Card (Combined: About Me + Education + Awards) -->
           <div
+            v-if="showAboutSection || showEducationSection || showAwardsSection"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
+              transition: 'box-shadow 0.3s ease',
             }"
           >
             <div
@@ -636,160 +1169,274 @@
                 About Me
               </h2>
             </div>
-            <p
-              :style="{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.8',
-                fontSize: responsive.bodySize,
-                marginBottom: isMobile ? '20px' : '30px',
-              }"
-            >
-              {{ profile.bio }}
-            </p>
-            <div
-              :style="{
-                display: 'grid',
-                gridTemplateColumns: responsive.statsGrid,
-                gap: responsive.gridGap,
-              }"
-            >
-              <div
-                v-for="(stat, idx) in stats"
-                :key="idx"
+            
+            <!-- About Me Sub-section -->
+            <div v-if="hasAboutData" :style="{ marginBottom: (showEducationSection || showAwardsSection) ? '30px' : '0' }">
+              <p
+                v-if="profile.bio && isFieldVisible('profileAchievements', 'bio')"
                 :style="{
-                  textAlign: 'center',
-                  padding: isMobile ? '15px' : '20px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '15px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  transition: 'all 0.3s',
-                  cursor: 'pointer',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  lineHeight: '1.8',
+                  fontSize: responsive.bodySize,
+                  marginBottom: stats.length > 0 ? (isMobile ? '20px' : '30px') : '0',
                 }"
-                @mouseover="(e) => handleHoverTransform(e, 'scale(1.05)')"
-                @mouseout="(e) => handleHoverTransform(e, 'scale(1)')"
+              >
+                {{ profile.bio }}
+              </p>
+              <div
+                v-if="stats.length > 0 && isFieldVisible('profileAchievements', 'profileStats')"
+                :style="{
+                  display: 'grid',
+                  gridTemplateColumns: responsive.statsGrid,
+                  gap: responsive.gridGap,
+                }"
               >
                 <div
+                  v-for="(stat, idx) in stats"
+                  :key="idx"
                   :style="{
-                    fontSize: isMobile ? '28px' : '36px',
-                    fontWeight: 800,
-                    background: 'linear-gradient(135deg, #667eea, #f093fb)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    marginBottom: '8px',
+                    textAlign: 'center',
+                    padding: isMobile ? '15px' : '20px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '15px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    transition: 'all 0.3s',
+                    cursor: 'pointer',
                   }"
+                  @mouseover="(e) => handleHoverTransform(e, 'scale(1.05)')"
+                  @mouseout="(e) => handleHoverTransform(e, 'scale(1)')"
                 >
-                  {{ stat.num }}
-                </div>
-                <div
-                  :style="{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: responsive.smallSize,
-                    fontWeight: 600,
-                  }"
-                >
-                  {{ stat.label }}
+                  <div
+                    :style="{
+                      fontSize: isMobile ? '28px' : '36px',
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #667eea, #f093fb)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      marginBottom: '8px',
+                    }"
+                  >
+                    {{ stat.num }}
+                  </div>
+                  <div
+                    :style="{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: responsive.smallSize,
+                      fontWeight: 600,
+                    }"
+                  >
+                    {{ stat.label }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Video Section -->
-          <div
-            v-if="videoData.url"
-            :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: responsive.cardRadius,
-              padding: responsive.cardPadding,
-            }"
-          >
+            
+            <!-- Education Sub-section -->
             <div
+              v-if="showEducationSection"
               :style="{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                marginBottom: showAwardsSection ? '30px' : '0',
+                paddingTop: hasAboutData ? '20px' : '0',
+                borderTop: hasAboutData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                  borderRadius: '15px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  gap: '12px',
+                  marginBottom: '20px',
                 }"
               >
-                🎥
+                <div
+                  :style="{
+                    width: isMobile ? '32px' : '40px',
+                    height: isMobile ? '32px' : '40px',
+                    background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: isMobile ? '16px' : '20px',
+                  }"
+                >
+                  🎓
+                </div>
+                <h3
+                  :style="{
+                    fontSize: responsive.h3Size,
+                    fontWeight: 700,
+                    color: 'white',
+                    margin: 0,
+                  }"
+                >
+                  Education & Certifications
+                </h3>
               </div>
-              <h2
+              
+              <!-- Education List -->
+              <div v-if="profile.education?.length > 0 && isFieldVisible('profileAchievements', 'education')" :style="{ marginBottom: profile.certifications?.length > 0 ? '24px' : '0' }">
+                <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
+                  <span :style="{ fontSize: '18px' }">📚</span>
+                  <h4 :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Education</h4>
+                </div>
+                <div :style="{ display: 'grid', gap: '16px', position: 'relative', paddingLeft: isMobile ? '0' : '20px' }">
+                  <!-- Timeline line -->
+                  <div v-if="!isMobile" :style="{ position: 'absolute', left: '6px', top: '8px', bottom: '8px', width: '2px', background: 'linear-gradient(180deg, #4facfe, #00f2fe)', borderRadius: '2px' }" />
+                  <div
+                    v-for="(edu, idx) in profile.education"
+                    :key="idx"
+                    :style="{
+                      position: 'relative',
+                      padding: isMobile ? '16px' : '20px',
+                      background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05))',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(79, 172, 254, 0.2)',
+                      transition: 'all 0.3s ease',
+                    }"
+                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateX(5px)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.4)'; }"
+                    @mouseout="(e) => { e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.2)'; }"
+                  >
+                    <!-- Timeline dot -->
+                    <div v-if="!isMobile" :style="{ position: 'absolute', left: '-26px', top: '24px', width: '12px', height: '12px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '50%', border: '2px solid rgba(10, 14, 39, 0.9)' }" />
+                    <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }">
+                      <div :style="{ flex: 1 }">
+                        <p :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px' }">{{ edu.degree || edu.name }}</p>
+                        <p v-if="edu.institution" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize, display: 'flex', alignItems: 'center', gap: '6px' }">
+                          <span>🏛️</span> {{ edu.institution }}
+                        </p>
+                      </div>
+                      <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(79, 172, 254, 0.2)', borderRadius: '20px', color: '#7dd3fc', fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Certifications List -->
+              <div v-if="profile.certifications?.length > 0 && isFieldVisible('profileAchievements', 'certifications')">
+                <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
+                  <span :style="{ fontSize: '18px' }">📜</span>
+                  <h4 :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Certifications</h4>
+                </div>
+                <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }">
+                  <div
+                    v-for="(cert, idx) in profile.certifications"
+                    :key="idx"
+                    :style="{
+                      padding: isMobile ? '16px' : '20px',
+                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05))',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(102, 126, 234, 0.2)',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'flex-start',
+                    }"
+                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.2)'; }"
+                    @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }"
+                  >
+                    <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
+                      <span :style="{ fontSize: '20px' }">✅</span>
+                    </div>
+                    <div :style="{ flex: 1 }">
+                      <p :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px' }">{{ cert.name }}</p>
+                      <p v-if="cert.issuer" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize, marginBottom: '4px' }">{{ cert.issuer }}</p>
+                      <span v-if="cert.year" :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: responsive.smallSize }">{{ cert.year }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Awards Sub-section -->
+            <div
+              v-if="showAwardsSection"
+              :style="{
+                paddingTop: (hasAboutData || showEducationSection) ? '20px' : '0',
+                borderTop: (hasAboutData || showEducationSection) ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+              }"
+            >
+              <div
                 :style="{
-                  fontSize: responsive.h2Size,
-                  fontWeight: 700,
-                  color: 'white',
-                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '20px',
                 }"
               >
-                {{ videoData.title || 'Company Introduction' }}
-              </h2>
+                <div
+                  :style="{
+                    width: isMobile ? '32px' : '40px',
+                    height: isMobile ? '32px' : '40px',
+                    background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: isMobile ? '16px' : '20px',
+                  }"
+                >
+                  🏆
+                </div>
+                <h3
+                  :style="{
+                    fontSize: responsive.h3Size,
+                    fontWeight: 700,
+                    color: 'white',
+                    margin: 0,
+                  }"
+                >
+                  Awards & Recognition
+                </h3>
+              </div>
+              <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }">
+                <div
+                  v-for="(award, idx) in awards"
+                  :key="idx"
+                  :style="{
+                    position: 'relative',
+                    padding: isMobile ? '20px' : '24px',
+                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 237, 78, 0.05))',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 215, 0, 0.2)',
+                    transition: 'all 0.3s ease',
+                    overflow: 'hidden',
+                  }"
+                  @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(255, 215, 0, 0.15)'; e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.4)'; }"
+                  @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.2)'; }"
+                >
+                  <!-- Trophy decoration -->
+                  <div :style="{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.1, transform: 'rotate(15deg)' }">🏆</div>
+                  <div :style="{ position: 'relative', zIndex: 1 }">
+                    <div :style="{ display: 'flex', alignItems: 'flex-start', gap: '14px' }">
+                      <div :style="{ width: '50px', height: '50px', background: 'linear-gradient(135deg, #ffd700, #ffed4e)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)' }">
+                        <span :style="{ fontSize: '24px' }">🏆</span>
+                      </div>
+                      <div :style="{ flex: 1 }">
+                        <p :style="{ color: '#ffd700', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)' }">{{ award.title || award.name }}</p>
+                        <p v-if="award.organization" :style="{ color: 'rgba(255, 255, 255, 0.8)', fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }">
+                          <span>🏛️</span> {{ award.organization }}
+                        </p>
+                        <span v-if="award.year" :style="{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(255, 215, 0, 0.2)', borderRadius: '20px', color: '#ffd700', fontSize: responsive.smallSize, fontWeight: 600 }">{{ award.year }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <!-- Video Player -->
-            <div
-              :style="{
-                position: 'relative',
-                paddingBottom: '56.25%', /* 16:9 aspect ratio */
-                height: 0,
-                overflow: 'hidden',
-                borderRadius: '20px',
-                background: 'rgba(0, 0, 0, 0.3)',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-                marginBottom: videoData.description ? (isMobile ? '15px' : '20px') : '0',
-              }"
-            >
-              <iframe
-                :src="getEmbedUrl(videoData.url)"
-                :style="{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  borderRadius: '20px',
-                }"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              />
-            </div>
-
-            <!-- Video Description -->
-            <p
-              v-if="videoData.description"
-              :style="{
-                color: 'rgba(255, 255, 255, 0.7)',
-                lineHeight: '1.6',
-                fontSize: responsive.bodySize,
-                margin: 0,
-                textAlign: 'center',
-              }"
-            >
-              {{ videoData.description }}
-            </p>
           </div>
 
           <!-- Services -->
           <div
+            v-if="showServicesSection"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -915,16 +1562,178 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Service Details (Features, Price, etc.) -->
+            <div
+              v-if="serviceDetails.features.length > 0 || serviceDetails.price || serviceDetails.tags.length > 0 || serviceDetails.bookingEnabled"
+              :style="{
+                marginTop: responsive.gridGap,
+                padding: responsive.cardPadding,
+                background: 'rgba(102, 126, 234, 0.1)',
+                borderRadius: responsive.cardRadius,
+                border: '1px solid rgba(102, 126, 234, 0.2)',
+              }"
+            >
+              <h3
+                :style="{
+                  fontSize: responsive.h3Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  marginBottom: '20px',
+                }"
+              >
+                Service Details
+              </h3>
+              
+              <!-- Price & Duration -->
+              <div
+                v-if="(serviceDetails.price && isFieldVisible('services', 'servicePrice')) || (serviceDetails.duration && isFieldVisible('services', 'serviceDuration'))"
+                :style="{
+                  display: 'flex',
+                  gap: '20px',
+                  marginBottom: '20px',
+                  flexWrap: 'wrap',
+                }"
+              >
+                <div v-if="serviceDetails.price && isFieldVisible('services', 'servicePrice')" :style="{ display: 'flex', alignItems: 'baseline', gap: '10px' }">
+                  <span :style="{ fontSize: responsive.h2Size, fontWeight: 800, color: '#00ff88' }">
+                    ${{ serviceDetails.price }}
+                  </span>
+                  <span
+                    v-if="serviceDetails.oldPrice"
+                    :style="{
+                      fontSize: responsive.bodySize,
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      textDecoration: 'line-through',
+                    }"
+                  >
+                    ${{ serviceDetails.oldPrice }}
+                  </span>
+                </div>
+                <div
+                  v-if="serviceDetails.duration && isFieldVisible('services', 'serviceDuration')"
+                  :style="{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '20px',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: responsive.bodySize,
+                  }"
+                >
+                  ⏱️ {{ serviceDetails.duration }}
+                </div>
+              </div>
+              
+              <!-- Features -->
+              <div v-if="serviceDetails.features.length > 0 && isFieldVisible('services', 'serviceFeatures')" :style="{ marginBottom: '20px' }">
+                <h4 :style="{ fontSize: responsive.h4Size, color: 'white', marginBottom: '12px' }">Features:</h4>
+                <ul :style="{ listStyle: 'none', padding: 0, margin: 0 }">
+                  <li
+                    v-for="(feature, idx) in serviceDetails.features"
+                    :key="idx"
+                    :style="{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '8px 0',
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: responsive.bodySize,
+                    }"
+                  >
+                    <span :style="{ color: '#00ff88' }">✓</span> {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
+                  </li>
+                </ul>
+              </div>
+              
+              <!-- Tags -->
+              <div v-if="serviceDetails.tags.length > 0 && isFieldVisible('services', 'serviceTags')" :style="{ marginBottom: '20px' }">
+                <div :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap' }">
+                  <span
+                    v-for="(tag, idx) in serviceDetails.tags"
+                    :key="idx"
+                    :style="{
+                      padding: '6px 14px',
+                      background: 'rgba(102, 126, 234, 0.3)',
+                      border: '1px solid rgba(102, 126, 234, 0.5)',
+                      borderRadius: '16px',
+                      fontSize: responsive.smallSize,
+                      color: '#a8b3ff',
+                    }"
+                  >
+                    #{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap' }">
+                <!-- Brochure Download -->
+                <a
+                  v-if="serviceDetails.brochure && isFieldVisible('services', 'serviceBrochure')"
+                  :href="serviceDetails.brochure"
+                  download
+                  :style="{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 24px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '25px',
+                    color: 'white',
+                    fontSize: responsive.bodySize,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    transition: 'all 0.3s',
+                  }"
+                  @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
+                  @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+                >
+                  📄 Download Brochure
+                </a>
+                
+                <!-- Booking Button -->
+                <a
+                  v-if="serviceDetails.bookingEnabled && serviceDetails.bookingUrl && isFieldVisible('services', 'bookingUrl')"
+                  :href="serviceDetails.bookingUrl"
+                  target="_blank"
+                  :style="{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 24px',
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    borderRadius: '25px',
+                    color: 'white',
+                    fontSize: responsive.bodySize,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    transition: 'all 0.3s',
+                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                  }"
+                  @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
+                  @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
+                >
+                  📅 Book Now
+                </a>
+              </div>
+            </div>
           </div>
 
           <!-- Contact -->
           <div
+            v-if="showContactSection"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -962,7 +1771,7 @@
             </div>
             <div :style="{ display: 'grid', gap: responsive.gridGap }">
               <a
-                v-for="(contact, idx) in contactMethods"
+                v-for="(contact, idx) in filteredContactMethods"
                 :key="idx"
                 :href="contact.href"
                 :target="contact.href.startsWith('http') ? '_blank' : undefined"
@@ -1053,12 +1862,15 @@
 
           <!-- Location -->
           <div
+            v-if="showLocationSection"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -1104,6 +1916,7 @@
               }"
             >
               <h4
+                v-if="address.name && isFieldVisible('location', 'addressName')"
                 :style="{
                   color: 'white',
                   fontSize: responsive.h4Size,
@@ -1122,11 +1935,12 @@
               >
                 {{ address.street }}<br />
                 {{ address.area }}<br />
-                {{ address.cityState }}<br />
+                {{ address.cityState }}<span v-if="address.postalCode"> {{ address.postalCode }}</span><br />
                 {{ address.country }}
               </p>
             </div>
             <a
+              v-if="address.mapUrl && isFieldVisible('location', 'mapUrl')"
               :href="address.mapUrl"
               target="_blank"
               rel="noopener noreferrer"
@@ -1156,12 +1970,15 @@
 
           <!-- Social Media -->
           <div
+            v-if="showSocialSection"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -1240,14 +2057,82 @@
             </div>
           </div>
 
-          <!-- Team -->
+          <!-- Working Hours -->
           <div
+            v-if="workingHours.length > 0"
             :style="{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
+            }"
+          >
+            <div
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
+              }"
+            >
+              <div
+                :style="{
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
+                }"
+              >
+                🕒
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
+                }"
+              >
+                Working Hours
+              </h2>
+            </div>
+            <div :style="{ display: 'grid', gap: '10px' }">
+              <div
+                v-for="(hour, idx) in workingHours"
+                :key="idx"
+                :style="{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '15px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                }"
+              >
+                <span :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 600 }">{{ hour.day }}</span>
+                <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize }">{{ hour.hours || 'Closed' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gallery -->
+          <div
+            v-if="showGallerySection"
+            :style="{
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
           >
             <div
@@ -1270,7 +2155,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                👥
+                🖼️
               </div>
               <h2
                 :style="{
@@ -1280,169 +2165,601 @@
                   margin: 0,
                 }"
               >
-                Meet The Team
+                Gallery
               </h2>
             </div>
             <div
               :style="{
                 display: 'grid',
-                gridTemplateColumns: responsive.servicesGrid,
+                gridTemplateColumns: responsive.galleryGrid,
                 gap: responsive.gridGap,
               }"
             >
               <div
-                v-for="(member, idx) in teamMembers"
+                v-for="(image, idx) in gallery"
                 :key="idx"
-                @mouseenter="!isMobile && (activeTeam = idx)"
-                @mouseleave="!isMobile && (activeTeam = null)"
-                @touchstart="activeTeam = idx"
-                @touchend="setTimeout(() => (activeTeam = null), 2000)"
                 :style="{
-                  textAlign: 'center',
-                  padding: isMobile ? '25px 15px' : '30px 20px',
+                  position: 'relative',
+                  paddingBottom: '100%',
+                  borderRadius: '15px',
+                  overflow: 'hidden',
                   background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: isMobile ? '15px' : '20px',
-                  transition: 'all 0.3s',
-                  transform:
-                    activeTeam === idx ? 'translateY(-10px)' : 'translateY(0)',
                 }"
               >
-                <div
+                <img
+                  :src="image.url || image"
+                  :alt="image.caption || `Gallery image ${idx + 1}`"
                   :style="{
-                    position: 'relative',
-                    width: isMobile ? '80px' : '100px',
-                    height: isMobile ? '80px' : '100px',
-                    margin: '0 auto 20px',
-                    transition: 'all 0.3s',
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
                   }"
-                >
-                  <div
-                    :style="{
-                      position: 'absolute',
-                      inset: '-5px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                      opacity: activeTeam === idx ? 1 : 0,
-                      transition: 'opacity 0.3s',
-                      animation:
-                        activeTeam === idx
-                          ? 'rotate 2s linear infinite'
-                          : 'none',
-                    }"
-                  />
-                  <div
-                    :style="{
-                      position: 'absolute',
-                      inset: 0,
-                      background:
-                        'linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8))',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: isMobile ? '28px' : '36px',
-                      fontWeight: 800,
-                      color: 'white',
-                      border: '3px solid rgba(10, 14, 39, 0.5)',
-                    }"
-                  >
-                    {{ member.initials }}
-                  </div>
-                </div>
-                <h4
-                  :style="{
-                    color: 'white',
-                    fontSize: responsive.h4Size,
-                    fontWeight: 700,
-                    margin: '0 0 8px 0',
-                  }"
-                >
-                  {{ member.name }}
-                </h4>
-                <p
-                  :style="{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: responsive.smallSize,
-                    margin: 0,
-                  }"
-                >
-                  {{ member.role }}
-                </p>
+                />
               </div>
             </div>
           </div>
 
-          <!-- vCard Button -->
-          <button
-            @click="saveContact"
+          <!-- Portfolio -->
+          <div
+            v-if="showPortfolioSection"
             :style="{
-              position: 'relative',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: isMobile ? '10px' : '15px',
-              padding: isMobile ? '20px' : '25px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              border: 'none',
-              borderRadius: isMobile ? '15px' : '20px',
-              cursor: 'pointer',
-              overflow: 'hidden',
-              transition: 'all 0.3s',
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
             }"
-            @mouseover="handleVCardHoverIn"
-            @mouseout="handleVCardHoverOut"
           >
             <div
               :style="{
-                width: isMobile ? '40px' : '50px',
-                height: isMobile ? '40px' : '50px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
               }"
             >
-              <svg
+              <div
                 :style="{
-                  width: isMobile ? '24px' : '28px',
-                  height: isMobile ? '24px' : '28px',
-                  fill: 'white',
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
                 }"
-                viewBox="0 0 24 24"
               >
-                <path
-                  d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
-                />
-              </svg>
+                💼
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
+                }"
+              >
+                Portfolio
+              </h2>
             </div>
+            <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '24px' }">
+              <div
+                v-for="(project, idx) in portfolio"
+                :key="idx"
+                :style="{
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.05))',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(102, 126, 234, 0.15)',
+                  overflow: 'hidden',
+                  transition: 'all 0.4s ease',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(102, 126, 234, 0.2)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
+                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.15)'; }"
+              >
+                <!-- Image with overlay -->
+                <div
+                  v-if="(project.cover_image || project.image) && isFieldVisible('portfolio', 'portfolioCoverImage')"
+                  :style="{
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '180px' : '220px',
+                    overflow: 'hidden',
+                  }"
+                >
+                  <img
+                    :src="project.cover_image || project.image"
+                    :alt="project.title"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.4s ease',
+                    }"
+                  />
+                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.9) 0%, transparent 60%)' }" />
+                  <!-- Project number badge -->
+                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '36px', height: '36px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '14px' }">
+                    {{ String(idx + 1).padStart(2, '0') }}
+                  </div>
+                </div>
+                
+                <!-- Content -->
+                <div :style="{ padding: isMobile ? '20px' : '24px' }">
+                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ project.title }}</h3>
+                  
+                  <!-- Project Meta Info -->
+                  <div
+                    v-if="project.client_name || project.date_completed || project.location"
+                    :style="{
+                      display: 'flex',
+                      gap: '16px',
+                      flexWrap: 'wrap',
+                      marginBottom: '14px',
+                    }"
+                  >
+                    <span
+                      v-if="project.client_name && isFieldVisible('portfolio', 'clientName')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        borderRadius: '20px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      👤 {{ project.client_name }}
+                    </span>
+                    <span
+                      v-if="project.date_completed && isFieldVisible('portfolio', 'dateCompleted')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        borderRadius: '20px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      📅 {{ project.date_completed }}
+                    </span>
+                    <span
+                      v-if="project.location && isFieldVisible('portfolio', 'location')"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        borderRadius: '20px',
+                        fontSize: responsive.smallSize,
+                        color: 'rgba(255, 255, 255, 0.8)',
+                      }"
+                    >
+                      📍 {{ project.location }}
+                    </span>
+                  </div>
+                  
+                  <p v-if="project.description" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="project.description" />
+                
+                <!-- Skills Used -->
+                <div
+                  v-if="project.skills_used && project.skills_used.length > 0 && isFieldVisible('portfolio', 'skillsUsed')"
+                  :style="{ marginBottom: '15px' }"
+>
+                  <p :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: responsive.smallSize, marginBottom: '8px' }">Skills:</p>
+                  <div :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap' }">
+                    <span
+                      v-for="(skill, skillIdx) in project.skills_used"
+                      :key="skillIdx"
+                      :style="{
+                        padding: '4px 10px',
+                        background: 'rgba(79, 172, 254, 0.2)',
+                        border: '1px solid rgba(79, 172, 254, 0.3)',
+                        borderRadius: '12px',
+                        color: '#7dd3fc',
+                        fontSize: responsive.smallSize,
+                      }"
+                    >{{ typeof skill === 'object' ? (skill.skill || skill.name || skill) : skill }}</span>
+                  </div>
+                </div>
+                
+                <!-- Tags -->
+                <div v-if="project.tags && project.tags.length > 0" :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '15px' }">
+                  <span
+                    v-for="(tag, tagIdx) in project.tags"
+                    :key="tagIdx"
+                    :style="{
+                      padding: '6px 12px',
+                      background: 'rgba(102, 126, 234, 0.2)',
+                      border: '1px solid rgba(102, 126, 234, 0.4)',
+                      borderRadius: '50px',
+                      color: '#a8b3ff',
+                      fontSize: responsive.smallSize,
+                      fontWeight: 600,
+                    }"
+                  >{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}</span>
+                </div>
+                
+                  <!-- Action Buttons -->
+                  <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }">
+                    <a
+                      v-if="(project.url || project.project_url) && isFieldVisible('portfolio', 'projectUrl')"
+                      :href="project.url || project.project_url"
+                      target="_blank"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '12px 20px',
+                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                        borderRadius: '25px',
+                        color: 'white',
+                        fontSize: responsive.smallSize,
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        transition: 'all 0.3s',
+                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                      }"
+                      @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)'; }"
+                      @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)'; }"
+                    >
+                      🔗 View Project
+                    </a>
+                    <a
+                      v-if="project.pdf_download && isFieldVisible('portfolio', 'pdfDownload')"
+                      :href="project.pdf_download"
+                      download
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '12px 20px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '25px',
+                        color: 'white',
+                        fontSize: responsive.smallSize,
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        transition: 'all 0.3s',
+                      }"
+                      @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)'; }"
+                      @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.08)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'; }"
+                    >
+                      📥 Download PDF
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Posts -->
+          <div
+            v-if="showBlogSection"
+            :style="{
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
+            }"
+          >
             <div
               :style="{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '3px',
+                alignItems: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
               }"
             >
-              <span
+              <div
                 :style="{
-                  color: 'white',
-                  fontSize: responsive.h4Size,
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
+                }"
+              >
+                📝
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
                   fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
                 }"
-                >Save to Contacts</span
               >
-              <span
-                :style="{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: responsive.smallSize,
-                }"
-                >Download vCard</span
-              >
+                Blog
+              </h2>
             </div>
-          </button>
+            <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '24px' }">
+              <article
+                v-for="(post, idx) in blogPosts"
+                :key="idx"
+                :style="{
+                  background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.08), rgba(245, 87, 108, 0.05))',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(240, 147, 251, 0.15)',
+                  overflow: 'hidden',
+                  transition: 'all 0.4s ease',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(240, 147, 251, 0.15)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.3)'; }"
+                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.15)'; }"
+              >
+                <!-- Cover Image with overlay -->
+                <div
+                  v-if="post.cover_image && isFieldVisible('blog', 'blogCoverImage')"
+                  :style="{
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '180px' : '200px',
+                    overflow: 'hidden',
+                  }"
+                >
+                  <img
+                    :src="post.cover_image"
+                    :alt="post.title"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.4s ease',
+                    }"
+                  />
+                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.95) 0%, transparent 70%)' }" />
+                  <!-- Category badge on image -->
+                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '20px', color: 'white', fontSize: responsive.smallSize, fontWeight: 600 }">{{ post.category }}</span>
+                </div>
+                
+                <!-- Content -->
+                <div :style="{ padding: isMobile ? '20px' : '24px' }">
+                  <!-- Blog Meta -->
+                  <div :style="{ display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }">
+                    <span v-if="post.published_date" :style="{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255, 255, 255, 0.6)', fontSize: responsive.smallSize }">📅 {{ post.published_date }}</span>
+                    <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize }">⏱️ {{ post.reading_time }}</span>
+                  </div>
+                  
+                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ post.title }}</h3>
+                  
+                  <!-- Author -->
+                  <div
+                    v-if="post.author_name && isFieldVisible('blog', 'authorName')"
+                    :style="{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      marginBottom: '14px',
+                    }"
+                  >
+                    <div :style="{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+                      <span :style="{ fontSize: '14px' }">✍️</span>
+                    </div>
+                    <span :style="{ color: 'rgba(255, 255, 255, 0.8)', fontSize: responsive.smallSize, fontWeight: 500 }">{{ post.author_name }}</span>
+                  </div>
+                  
+                  <p v-if="post.excerpt || post.description" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="post.excerpt || post.description" />
+                  
+                  <!-- Tags -->
+                  <div v-if="post.tags && post.tags.length > 0 && isFieldVisible('blog', 'blogTags')" :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }">
+                    <span
+                      v-for="(tag, tagIdx) in post.tags"
+                      :key="tagIdx"
+                      :style="{
+                        padding: '5px 12px',
+                        background: 'rgba(240, 147, 251, 0.15)',
+                        border: '1px solid rgba(240, 147, 251, 0.25)',
+                        borderRadius: '15px',
+                        color: '#f0a3fb',
+                        fontSize: responsive.smallSize,
+                        transition: 'all 0.2s',
+                      }"
+                    >#{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}</span>
+                  </div>
+                  
+                  <!-- External Link -->
+                  <a
+                    v-if="post.external_link && isFieldVisible('blog', 'externalLink')"
+                    :href="post.external_link"
+                    target="_blank"
+                    :style="{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px 24px',
+                      background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                      borderRadius: '25px',
+                      color: 'white',
+                      fontSize: responsive.smallSize,
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      transition: 'all 0.3s',
+                      boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)',
+                    }"
+                    @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)'; }"
+                    @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(240, 147, 251, 0.3)'; }"
+                  >
+                    📖 Read More
+                  </a>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- Action Buttons Section -->
+          <!-- Hide entire Quick Actions section when admin has not assigned any features -->
+          <div v-if="availableFeatures && availableFeatures.length > 0" :style="{ 
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: '20px',
+            padding: isMobile ? '16px' : '20px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+          }">
+            <!-- Section Title -->
+            <div :style="{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              marginBottom: '16px',
+              paddingBottom: '12px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            }">
+              <span :style="{ fontSize: '18px' }">⚡</span>
+              <span :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
+            </div>
+            
+            <!-- Buttons Grid -->
+            <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }">
+              
+              <!-- vCard Button -->
+              <button
+                v-if="isFeatureEnabled('vcard_download')"
+                @click="saveContact"
+                :style="{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '16px 12px',
+                  background: 'rgba(102, 126, 234, 0.15)',
+                  border: '1px solid rgba(102, 126, 234, 0.3)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(102, 126, 234, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.5)'; }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(102, 126, 234, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
+              >
+                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)' }">
+                  <span :style="{ fontSize: '20px' }">📥</span>
+                </div>
+                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Save Contact</span>
+              </button>
+
+              <!-- Contact Form Button -->
+              <button
+                v-if="isFeatureEnabled('contact_form')"
+                @click="showContactForm = true"
+                :style="{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '16px 12px',
+                  background: 'rgba(240, 147, 251, 0.15)',
+                  border: '1px solid rgba(240, 147, 251, 0.3)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(240, 147, 251, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.5)'; }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(240, 147, 251, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.3)'; }"
+              >
+                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(240, 147, 251, 0.4)' }">
+                  <span :style="{ fontSize: '20px' }">✉️</span>
+                </div>
+                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Message</span>
+              </button>
+
+              <!-- QR Code Button -->
+              <button
+                v-if="isFeatureEnabled('qr_code')"
+                @click="showQRCode = true"
+                :style="{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '16px 12px',
+                  background: 'rgba(79, 172, 254, 0.15)',
+                  border: '1px solid rgba(79, 172, 254, 0.3)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(79, 172, 254, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.5)'; }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(79, 172, 254, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.3)'; }"
+              >
+                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)' }">
+                  <span :style="{ fontSize: '20px' }">📱</span>
+                </div>
+                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">QR Code</span>
+              </button>
+
+              <!-- Social Sharing Button -->
+              <button
+                v-if="isFeatureEnabled('social_sharing')"
+                @click="showSocialShare = true"
+                :style="{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '16px 12px',
+                  background: 'rgba(56, 239, 125, 0.15)',
+                  border: '1px solid rgba(56, 239, 125, 0.3)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                }"
+                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(56, 239, 125, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(56, 239, 125, 0.5)'; }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(56, 239, 125, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(56, 239, 125, 0.3)'; }"
+              >
+                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #11998e, #38ef7d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(56, 239, 125, 0.4)' }">
+                  <span :style="{ fontSize: '20px' }">🔗</span>
+                </div>
+                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Share</span>
+              </button>
+            </div>
+
+            <!-- Booking Integration Button (Full Width) -->
+            <a
+              v-if="isFeatureEnabled('booking_integration') && appointmentLink"
+              :href="appointmentLink"
+              target="_blank"
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                marginTop: '12px',
+                padding: '14px 20px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                borderRadius: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textDecoration: 'none',
+                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
+              }"
+              @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.5)'; }"
+              @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.3)'; }"
+            >
+              <span :style="{ fontSize: '18px' }">📅</span>
+              <span :style="{ color: 'white', fontSize: '14px', fontWeight: 600 }">Book Appointment</span>
+            </a>
+
+          </div>
         </div>
       </template>
     </div>
@@ -1475,11 +2792,416 @@
         >↑</span
       >
     </button>
+
+    <!-- Contact Form Modal -->
+    <div
+      v-if="showContactForm"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="showContactForm = false"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '500px',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          borderRadius: '24px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: isMobile ? '24px' : '32px',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="showContactForm = false"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '36px',
+            height: '36px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '18px',
+          }"
+        >✕</button>
+
+        <!-- Header -->
+        <div :style="{ marginBottom: '24px', textAlign: 'center' }">
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }">✉️</div>
+          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
+          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">I'll get back to you as soon as possible</p>
+        </div>
+
+        <!-- Success Message -->
+        <div
+          v-if="contactFormSuccess"
+          :style="{
+            padding: '20px',
+            background: 'rgba(34, 197, 94, 0.2)',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            borderRadius: '16px',
+            textAlign: 'center',
+            marginBottom: '16px',
+          }"
+        >
+          <div :style="{ fontSize: '40px', marginBottom: '8px' }">✅</div>
+          <p :style="{ color: '#22c55e', fontWeight: 600 }">Message sent successfully!</p>
+        </div>
+
+        <!-- Form -->
+        <form v-else @submit.prevent="submitContactForm" :style="{ display: 'grid', gap: '16px' }">
+          <div>
+            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Your Name</label>
+            <input
+              v-model="contactForm.name"
+              type="text"
+              required
+              :style="{
+                width: '100%',
+                padding: '14px 16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '15px',
+                outline: 'none',
+              }"
+              placeholder="John Doe"
+            />
+          </div>
+          <div>
+            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Email Address</label>
+            <input
+              v-model="contactForm.email"
+              type="email"
+              required
+              :style="{
+                width: '100%',
+                padding: '14px 16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '15px',
+                outline: 'none',
+              }"
+              placeholder="john@example.com"
+            />
+          </div>
+          <div>
+            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Phone (Optional)</label>
+            <input
+              v-model="contactForm.phone"
+              type="tel"
+              :style="{
+                width: '100%',
+                padding: '14px 16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '15px',
+                outline: 'none',
+              }"
+              placeholder="+60 12 345 6789"
+            />
+          </div>
+          <div>
+            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Message</label>
+            <textarea
+              v-model="contactForm.message"
+              required
+              rows="4"
+              :style="{
+                width: '100%',
+                padding: '14px 16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '15px',
+                outline: 'none',
+                resize: 'vertical',
+              }"
+              placeholder="Your message..."
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            :disabled="contactFormSubmitting"
+            :style="{
+              width: '100%',
+              padding: '16px',
+              background: contactFormSubmitting ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #f093fb, #f5576c)',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: 600,
+              cursor: contactFormSubmitting ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s',
+            }"
+          >
+            {{ contactFormSubmitting ? 'Sending...' : 'Send Message' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div
+      v-if="showQRCode"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="showQRCode = false"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '400px',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          borderRadius: '24px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: isMobile ? '24px' : '32px',
+          textAlign: 'center',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="showQRCode = false"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '36px',
+            height: '36px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '18px',
+          }"
+        >✕</button>
+
+        <!-- Header -->
+        <div :style="{ marginBottom: '24px' }">
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }">📱</div>
+          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
+          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">Share this profile instantly</p>
+        </div>
+
+        <!-- QR Code -->
+        <div
+          :style="{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '24px',
+            display: 'inline-block',
+            marginBottom: '20px',
+          }"
+        >
+          <img
+            :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`"
+            alt="QR Code"
+            :style="{ width: '200px', height: '200px', display: 'block' }"
+          />
+        </div>
+
+        <!-- Profile Info -->
+        <div :style="{ marginBottom: '16px' }">
+          <p :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">{{ profile.name }}</p>
+          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">{{ profile.position }}</p>
+        </div>
+
+        <!-- Copy Link Button -->
+        <button
+          @click="copyProfileLink"
+          :style="{
+            width: '100%',
+            padding: '14px',
+            background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+            border: 'none',
+            borderRadius: '12px',
+            color: 'white',
+            fontSize: '15px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }"
+        >
+          <span>📋</span> Copy Profile Link
+        </button>
+      </div>
+    </div>
+
+    <!-- Social Share Modal -->
+    <div
+      v-if="showSocialShare"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="showSocialShare = false"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '400px',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          borderRadius: '24px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: isMobile ? '24px' : '32px',
+          textAlign: 'center',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="showSocialShare = false"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '36px',
+            height: '36px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '18px',
+          }"
+        >✕</button>
+
+        <!-- Header -->
+        <div :style="{ marginBottom: '24px' }">
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }">🔗</div>
+          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
+          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">Share on your favorite platform</p>
+        </div>
+
+        <!-- Social Buttons Grid -->
+        <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }">
+          <!-- Facebook -->
+          <a
+            :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`"
+            target="_blank"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#1877f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📘</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Facebook</span>
+          </a>
+          <!-- Twitter/X -->
+          <a
+            :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(profile.name + ' - ' + profile.position)}`"
+            target="_blank"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#000000', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">🐦</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">X</span>
+          </a>
+          <!-- LinkedIn -->
+          <a
+            :href="`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(profile.name)}`"
+            target="_blank"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#0a66c2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💼</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">LinkedIn</span>
+          </a>
+          <!-- WhatsApp -->
+          <a
+            :href="`https://wa.me/?text=${encodeURIComponent(profile.name + ' - ' + currentUrl)}`"
+            target="_blank"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#25d366', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">WhatsApp</span>
+          </a>
+          <!-- Telegram -->
+          <a
+            :href="`https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(profile.name)}`"
+            target="_blank"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#0088cc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">✈️</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Telegram</span>
+          </a>
+          <!-- Email -->
+          <a
+            :href="`mailto:?subject=${encodeURIComponent('Check out ' + profile.name)}&body=${encodeURIComponent('Here is ' + profile.name + '\'s profile: ' + currentUrl)}`"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#ea4335', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📧</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Email</span>
+          </a>
+          <!-- SMS -->
+          <a
+            :href="`sms:?body=${encodeURIComponent(profile.name + ' - ' + currentUrl)}`"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: '#34c759', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">SMS</span>
+          </a>
+          <!-- Copy Link -->
+          <button
+            @click="copyProfileLink"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📋</div>
+            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Copy</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
 
 // Composables
 const { $api } = useNuxtApp();
@@ -1500,6 +3222,7 @@ const windowWidth = ref(
 );
 const loading = ref(true);
 const profileNotFound = ref(false);
+const noProfileData = ref(false);  // New: when card exists but has no landing page data
 const isPreviewMode = ref(false);
 let scrollTimeout = null;
 
@@ -1510,77 +3233,265 @@ const isTablet = computed(
 );
 const isDesktop = computed(() => windowWidth.value >= 1024);
 
-// Responsive values
+// Responsive values - Modern design system
 const responsive = computed(() => ({
-  // Container padding
-  containerPadding: isMobile.value ? "15px" : isTablet.value ? "20px" : "20px",
+  // Container
+  containerPadding: isMobile.value ? "20px" : isTablet.value ? "30px" : "40px",
+  maxWidth: "1200px",
 
   // Profile image
-  profileSize: isMobile.value ? "120px" : isTablet.value ? "150px" : "180px",
-  profileBorder: isMobile.value
-    ? "3px solid rgba(255, 255, 255, 0.2)"
-    : "5px solid rgba(255, 255, 255, 0.2)",
+  profileSize: isMobile.value ? "140px" : isTablet.value ? "160px" : "200px",
+  profileBorder: "4px solid rgba(255, 255, 255, 0.15)",
 
-  // Typography
-  nameSize: isMobile.value ? "32px" : isTablet.value ? "40px" : "48px",
-  h2Size: isMobile.value ? "20px" : isTablet.value ? "24px" : "28px",
-  h3Size: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
-  h4Size: isMobile.value ? "14px" : isTablet.value ? "16px" : "18px",
-  bodySize: isMobile.value ? "14px" : "16px",
-  smallSize: isMobile.value ? "12px" : "14px",
+  // Typography - Modern scale
+  nameSize: isMobile.value ? "36px" : isTablet.value ? "48px" : "56px",
+  h2Size: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
+  h3Size: isMobile.value ? "20px" : isTablet.value ? "24px" : "28px",
+  h4Size: isMobile.value ? "16px" : isTablet.value ? "18px" : "20px",
+  bodySize: isMobile.value ? "15px" : "16px",
+  smallSize: isMobile.value ? "13px" : "14px",
 
-  // Card padding
-  cardPadding: isMobile.value ? "20px" : isTablet.value ? "30px" : "40px",
-  cardMarginBottom: isMobile.value ? "20px" : "30px",
+  // Card styling - Glassmorphism
+  cardPadding: isMobile.value ? "24px" : isTablet.value ? "32px" : "40px",
+  cardMarginBottom: isMobile.value ? "24px" : "32px",
+  cardBackground: "rgba(255, 255, 255, 0.03)",
+  cardBorder: "1px solid rgba(255, 255, 255, 0.08)",
+  cardShadow: "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+  cardHoverShadow: "0 12px 48px rgba(102, 126, 234, 0.15)",
 
   // Quick actions
-  actionPadding: isMobile.value ? "15px" : "20px",
-  actionIconSize: isMobile.value ? "24px" : "32px",
-  actionGap: isMobile.value ? "10px" : "20px",
+  actionPadding: isMobile.value ? "16px" : "20px",
+  actionIconSize: isMobile.value ? "28px" : "36px",
+  actionGap: isMobile.value ? "12px" : "16px",
 
   // Grid columns
   statsGrid: isMobile.value
-    ? "repeat(auto-fit, minmax(100px, 1fr))"
-    : "repeat(auto-fit, minmax(150px, 1fr))",
+    ? "repeat(auto-fit, minmax(110px, 1fr))"
+    : "repeat(auto-fit, minmax(160px, 1fr))",
   servicesGrid: isMobile.value
-    ? "repeat(auto-fit, minmax(150px, 1fr))"
-    : "repeat(auto-fit, minmax(200px, 1fr))",
+    ? "repeat(auto-fit, minmax(160px, 1fr))"
+    : "repeat(auto-fit, minmax(220px, 1fr))",
+  galleryGrid: isMobile.value ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
 
   // Icon sizes
-  serviceIconSize: isMobile.value ? "24px" : "36px",
-  serviceIconBox: isMobile.value ? "50px" : "70px",
-  contactIconBox: isMobile.value ? "50px" : "60px",
-  contactIconSize: isMobile.value ? "24px" : "30px",
+  serviceIconSize: isMobile.value ? "28px" : "40px",
+  serviceIconBox: isMobile.value ? "56px" : "72px",
+  contactIconBox: isMobile.value ? "56px" : "64px",
+  contactIconSize: isMobile.value ? "28px" : "32px",
 
-  // Borders and radius
-  borderRadius: isMobile.value ? "20px" : isTablet.value ? "25px" : "30px",
-  cardRadius: isMobile.value ? "15px" : isTablet.value ? "20px" : "25px",
+  // Borders and radius - Softer edges
+  borderRadius: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
+  cardRadius: isMobile.value ? "20px" : isTablet.value ? "24px" : "28px",
+  smallRadius: isMobile.value ? "12px" : "16px",
 
-  // Badge padding
-  badgePadding: isMobile.value ? "10px 20px" : "15px 30px",
+  // Badge styling
+  badgePadding: isMobile.value ? "10px 20px" : "12px 24px",
 
-  // Gaps
-  flexGap: isMobile.value ? "10px" : "20px",
-  gridGap: isMobile.value ? "15px" : "20px",
+  // Gaps - More breathing room
+  flexGap: isMobile.value ? "12px" : "20px",
+  gridGap: isMobile.value ? "16px" : "24px",
+  sectionGap: isMobile.value ? "24px" : "32px",
 }));
 
-// Profile Data - Will be loaded from API
+// Profile Data - Will be loaded from API (matches ProfileBuilder fields)
 const profile = ref({
   name: "",
   qualification: "",
   position: "",
+  pronouns: "",
+  tagline: "",
   bio: "",
+  phone: "",
+  email: "",
+  website: "",
+  address: "",
+  education: [],
+  certifications: [],
+  profileStats: [], // User-defined statistics
 });
+
+const coverBanner = ref(null); // Cover banner image
 
 const profileImage = ref(
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E?%3C/text%3E%3C/svg%3E"
 );
 
+// Added: Design config and visible fields control
+const visibleFieldsConfig = ref([]);
+const buttonClasses = ref('');
+const currentThemeConfig = ref(null);
+
+// Design variables - for dynamic styling
+const designSettings = reactive({
+  backgroundColor: '#0a0e27',
+  textColor: '#ffffff',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+  theme: 'default',
+  buttonStyle: 'solid',
+});
+
+// ==================== A. SECTION LAYOUT CONFIGURATION ====================
+// Section Layout from API - now uses granular section IDs matching Layout Designer
+const sectionLayout = ref([]);
+const fieldLayout = ref({}); // Field layout with sub-section enabled states
+
+// Default section order if no layout configured
+// Logical flow: Introduction → About → Company → Services → Work/Portfolio → Blog → Contact → Location → Social → Team → Gallery → Education → Awards → vCard
+const defaultSections = [
+  'hero',       // 1. Introduction - always first
+  'about',      // 2. About Me - personal introduction
+  'company',    // 3. Company - business context
+  'video',      // 4. Video - company/personal intro video
+  'services',   // 5. Services - what you offer
+  'portfolio',  // 6. Portfolio - work samples
+  'blog',       // 7. Blog - thought leadership
+  'contact',    // 8. Contact - how to reach
+  'location',   // 9. Location - where to find
+  'social',     // 10. Social - connect online
+  'team',       // 11. Team - who else is involved
+  'gallery',    // 12. Gallery - visual showcase
+  'education',  // 13. Education - credentials
+  'awards',     // 14. Awards - achievements
+  'vcard',      // 15. vCard - always last, save contact action
+];
+
+// Computed: Ordered sections based on Layout Designer
+const orderedSections = computed(() => {
+  if (sectionLayout.value?.length) {
+    // Direct mapping - section IDs now match between Layout Designer and Landing Page
+    const enabledSections = sectionLayout.value
+      .filter(s => s.id === 'hero' || s.enabled !== false)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map(s => s.id);
+
+    // Always include vCard at the end if not already present
+    if (!enabledSections.includes('vcard')) {
+      enabledSections.push('vcard');
+    }
+    
+    return enabledSections;
+  }
+  return defaultSections;
+});
+
+// Check if a section should be visible (based on Layout Designer config)
+// Now uses direct section ID matching (no more mapping needed)
+const isSectionVisible = (sectionId) => {
+  // Hero section always visible
+  if (sectionId === 'hero') return true;
+  
+  // Default: show all sections if no layout config
+  if (!sectionLayout.value?.length) return true;
+  
+  const section = sectionLayout.value.find(s => s.id === sectionId);
+  return section ? section.enabled !== false : true;
+};
+
+// Check if a sub-section is visible within a combined section
+// Uses fieldLayout._subSections to check if the sub-section is enabled
+const isSubSectionVisible = (parentSectionId, subSectionId) => {
+  // First check if parent section is visible
+  if (!isSectionVisible(parentSectionId)) return false;
+  
+  // Check fieldLayout._subSections for sub-section enabled state
+  const subSections = fieldLayout.value?._subSections;
+  if (!subSections) return true; // Default: show if no config
+  
+  const key = `${parentSectionId}-${subSectionId}`;
+  return subSections[key] !== false;
+};
+
+// Check if a specific field is visible
+// Uses fieldLayout[sectionId] to check if the field is enabled
+const isFieldVisible = (sectionId, fieldKey) => {
+  const fields = fieldLayout.value?.[sectionId];
+  if (!fields || !Array.isArray(fields)) return true; // Default: show if no config
+  
+  const field = fields.find(f => f.field_key === fieldKey);
+  return field ? field.enabled !== false : true; // Default to visible if not found
+};
+
+// ==================== SECTION DATA AVAILABILITY ====================
+// These computed properties check if a section has data to display
+// Sections only show if: 1) they have data AND 2) they're enabled in layout
+
+const hasCompanyData = computed(() => {
+  return !!(company.value.name || company.value.department || company.value.logo || company.value.logoText);
+});
+
+const hasAboutData = computed(() => {
+  return !!(profile.value.bio || stats.value.length > 0);
+});
+
+const hasVideoData = computed(() => {
+  return !!videoData.value.url;
+});
+
+const hasServicesData = computed(() => {
+  return services.value.length > 0;
+});
+
+const hasContactData = computed(() => {
+  return contactMethods.value.some(c => c.subtitle);
+});
+
+const hasLocationData = computed(() => {
+  return !!(address.value.name || address.value.street || address.value.cityState);
+});
+
+const hasSocialData = computed(() => {
+  return socialLinks.value.length > 0;
+});
+
+const hasTeamData = computed(() => {
+  return teamMembers.value.length > 0;
+});
+
+const hasGalleryData = computed(() => {
+  return gallery.value.length > 0;
+});
+
+const hasPortfolioData = computed(() => {
+  return portfolio.value.length > 0;
+});
+
+const hasBlogData = computed(() => {
+  return blogPosts.value.length > 0;
+});
+
+// ==================== SECTION SHOW LOGIC ====================
+// Combine data availability with layout visibility
+// Default: show section if it has data (unless explicitly disabled in layout)
+// Section IDs now match directly between Layout Designer and Landing Page
+
+// Main section visibility
+// Note: companyTeam and profileAchievements are the combined section IDs from Layout Designer
+const showCompanySection = computed(() => hasCompanyData.value && isSubSectionVisible('companyTeam', 'company'));
+const showAboutSection = computed(() => hasAboutData.value && isSubSectionVisible('profileAchievements', 'about'));
+const showServicesSection = computed(() => hasServicesData.value && isSectionVisible('services'));
+const showContactSection = computed(() => hasContactData.value && isSectionVisible('contact'));
+const showLocationSection = computed(() => hasLocationData.value && isSectionVisible('location'));
+const showSocialSection = computed(() => hasSocialData.value && isSectionVisible('social'));
+const showGallerySection = computed(() => hasGalleryData.value && isSectionVisible('gallery'));
+const showPortfolioSection = computed(() => hasPortfolioData.value && isSectionVisible('portfolio'));
+const showBlogSection = computed(() => hasBlogData.value && isSectionVisible('blog'));
+
+// Sub-section visibility (within combined cards)
+const showVideoSection = computed(() => hasVideoData.value && isSubSectionVisible('companyTeam', 'video'));
+const showTeamSection = computed(() => hasTeamData.value && isSubSectionVisible('companyTeam', 'team'));
+const showEducationSection = computed(() => (profile.value.education?.length > 0 || profile.value.certifications?.length > 0) && isSubSectionVisible('profileAchievements', 'education'));
+const showAwardsSection = computed(() => awards.value.length > 0 && isSubSectionVisible('profileAchievements', 'awards'));
+
 const company = ref({
+  logo: null,          // Company logo image
   logoText: "",
   name: "",
   registrationNo: "",
   department: "",
+  description: "",     // Company description
+  industry: "",        // Industry type
+  establishedYear: "", // Year founded
+  employeeCount: "",   // Number of employees
 });
 
 const address = ref({
@@ -1589,30 +3500,64 @@ const address = ref({
   area: "",
   cityState: "",
   country: "",
+  postalCode: "",  // Postal code
   mapUrl: "",
 });
 
-const quickActions = ref([
-  { icon: "📞", label: "Call", action: "call" },
-  { icon: "✉️", label: "Email", action: "email" },
-  { icon: "💬", label: "Chat", action: "whatsapp" },
-  { icon: "📅", label: "Book", action: "book" },
-]);
+// ==================== C. QUICK ACTIONS (dynamically generated) ====================
+// Quick Actions - dynamically generated from contactMethods (respects field visibility)
+const quickActions = computed(() => {
+  const actions = [];
+  
+  // Phone (check field visibility)
+  if (contactMethods.value[0]?.subtitle && isFieldVisible('contact', 'phone')) {
+    actions.push({ icon: "📞", label: "Call", action: "call" });
+  }
+  
+  // Email
+  if (contactMethods.value[1]?.subtitle) {
+    actions.push({ icon: "✉️", label: "Email", action: "email" });
+  }
+  
+  // WhatsApp (check field visibility)
+  if (contactMethods.value[2]?.subtitle && contactMethods.value[2]?.href && isFieldVisible('contact', 'whatsapp')) {
+    actions.push({ icon: "💬", label: "Chat", action: "whatsapp" });
+  }
+  
+  // Appointment (check booking_integration feature)
+  if (appointmentLink.value && isFeatureEnabled('booking_integration')) {
+    actions.push({ icon: "📅", label: "Book", action: "appointment" });
+  }
+  
+  // Payment
+  if (paymentButton.value.url) {
+    actions.push({ icon: "💳", label: paymentButton.value.text || "Pay", action: "payment" });
+  }
+  
+  // Website
+  if (contactMethods.value[3]?.subtitle) {
+    actions.push({ icon: "🌐", label: "Website", action: "website" });
+  }
+  
+  return actions;
+});
 
-const stats = ref([
-  { num: "10+", label: "Years Experience" },
-  { num: "500+", label: "Projects Done" },
-  { num: "98%", label: "Client Satisfaction" },
-]);
+// Default stats (fallback)
+const stats = ref([]);
 
-const services = ref([
-  { icon: "🏷️", name: "RFID Technology" },
-  { icon: "🖨️", name: "Label Printing" },
-  { icon: "💻", name: "Software Development" },
-  { icon: "🌐", name: "IoT Implementation" },
-  { icon: "🛒", name: "E-commerce Marketing" },
-  { icon: "📄", name: "Printing Solutions" },
-]);
+const services = ref([]);
+
+// Service details
+const serviceDetails = ref({
+  features: [],      // Service features
+  price: "",         // Current price
+  oldPrice: "",      // Previous price
+  duration: "",      // Service duration
+  tags: [],          // Service tags
+  brochure: null,    // PDF brochure
+  bookingEnabled: false,
+  bookingUrl: "",
+});
 
 const videoData = ref({
   url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // YouTube, Vimeo, or direct embed URL
@@ -1651,6 +3596,20 @@ const contactMethods = ref([
   },
 ]);
 
+// Filtered contact methods based on field visibility
+const filteredContactMethods = computed(() => {
+  return contactMethods.value.filter((method, idx) => {
+    // Map index to field key: 0=phone, 1=email, 2=whatsapp, 3=website
+    const fieldKeyMap = { 0: 'phone', 1: 'email', 2: 'whatsapp', 3: 'website' };
+    const fieldKey = fieldKeyMap[idx];
+    // Only check visibility for phone and whatsapp (as defined in fieldKeys)
+    if (fieldKey === 'phone' || fieldKey === 'whatsapp') {
+      return isFieldVisible('contact', fieldKey);
+    }
+    return true; // email and website are always visible if they have data
+  });
+});
+
 const socialLinks = ref([
   { emoji: "📘", name: "Facebook", href: "#", color: "#1877f2" },
   { emoji: "💼", name: "LinkedIn", href: "#", color: "#0a66c2" },
@@ -1658,55 +3617,215 @@ const socialLinks = ref([
   { emoji: "🐦", name: "Twitter", href: "#", color: "#1da1f2" },
 ]);
 
-const teamMembers = ref([
-  { initials: "JD", name: "John Doe", role: "Technical Lead" },
-  { initials: "JS", name: "Jane Smith", role: "Project Manager" },
-  { initials: "ML", name: "Mike Lee", role: "Designer" },
-]);
+const teamMembers = ref([]);
 
-// Load preview data from localStorage
+// ==================== B. SUPPLEMENTARY FIELDS ====================
+// Working Hours
+const workingHours = ref([]);
+
+// Awards
+const awards = ref([]);
+
+// Gallery
+const gallery = ref([]);
+
+// Portfolio / Projects
+const portfolio = ref([]);
+
+// Blog Posts
+const blogPosts = ref([]);
+
+// Payment & Appointment
+const paymentButton = ref({
+  text: "",
+  url: "",
+});
+
+const appointmentLink = ref("");
+
+// Feature Settings (controlled by user in BusinessProfileBuilder)
+// Feature keys match those in getFeatureIcon() in BusinessProfileBuilder.vue
+const features = ref({
+  contact_form: true,         // Contact Form - send messages
+  vcard_download: true,       // Downloadable vCard
+  qr_code: true,              // QR Code Sharing
+  remove_branding: false,     // Remove Branding/Watermark (default: show watermark)
+  booking_integration: true,  // Booking Integration
+  social_sharing: true,       // Social Sharing buttons
+});
+
+// Available features (assigned by admin) - if empty, all features are available
+const availableFeatures = ref([]);
+
+// Feature order (from BusinessProfileBuilder)
+const featureOrder = ref([]);
+
+// Contact Form state
+const showContactForm = ref(false);
+const contactForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+  message: '',
+});
+const contactFormSubmitting = ref(false);
+const contactFormSuccess = ref(false);
+
+// QR Code state
+const showQRCode = ref(false);
+
+// Social Share state
+const showSocialShare = ref(false);
+
+// Check if a feature is enabled
+// A feature is enabled only if:
+// 1. Admin has assigned it (in availableFeatures)
+// 2. User has enabled it (not explicitly set to false)
+const isFeatureEnabled = (featureKey) => {
+  // If availableFeatures array exists but is empty, it means admin didn't assign any features
+  // In this case, nothing should be enabled
+  if (availableFeatures.value.length === 0) {
+    console.log(`🚫 Feature "${featureKey}" disabled: No features assigned by admin`);
+    return false;
+  }
+  
+  // Check if admin has assigned this feature
+  const isAssigned = availableFeatures.value.includes(featureKey);
+  
+  // Check if user has enabled it
+  const isEnabled = features.value[featureKey] !== false;
+  
+  // Both conditions must be met
+  const result = isAssigned && isEnabled;
+  
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log(`🔍 isFeatureEnabled("${featureKey}"): assigned=${isAssigned}, enabled=${isEnabled}, result=${result}`);
+  }
+  return result;
+};
+
+// Load preview data from localStorage (matches BusinessProfileBuilder.vue profileData structure)
 const loadPreviewData = (data) => {
-  // Basic Info
+  console.log('📋 Loading preview data:', data);
+  
+  // ============ PROFILE SECTION ============
   profile.value.name = data.name || "Your Name";
   profile.value.qualification = data.qualification || "";
-  profile.value.position = data.position || "Your Position";
-  profile.value.bio = data.bio || "Your bio goes here";
+  profile.value.position = data.position || data.title || "Your Position";
+  profile.value.pronouns = data.pronouns || "";
+  profile.value.tagline = data.tagline || "";
+  profile.value.bio = data.bio || "";
+  profile.value.email = data.email || "";
+  profile.value.phone = data.contactNumber || data.phone || "";
+  profile.value.website = data.website || "";
+  profile.value.address = data.address || "";
+  profile.value.education = data.education || [];
+  profile.value.certifications = data.certifications || [];
+  profile.value.profileStats = data.profileStats || [];
 
   // Profile Image
   if (data.image) {
     profileImage.value = data.image;
   } else if (data.name) {
-    const initials = data.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+    const initials = data.name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
     profileImage.value = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
   }
 
-  // Company Info
+  // Cover Banner
+  if (data.coverBanner) {
+    coverBanner.value = data.coverBanner;
+  }
+
+  // ============ COMPANY SECTION ============
+  if (data.companyLogo) {
+    company.value.logo = data.companyLogo;
+  }
   company.value.logoText = data.companyLogoText || "CO";
-  company.value.name = data.companyName || "Company Name";
+  company.value.name = data.companyName || "";
   company.value.registrationNo = data.companyRegistrationNo || "";
   company.value.department = data.companyDepartment || "";
+  company.value.description = data.companyDescription || "";
+  company.value.industry = data.industry || "";
+  company.value.establishedYear = data.establishedYear || "";
+  company.value.employeeCount = data.employeeCount || "";
 
-  // Contact Info
-  profile.value.email = data.email || "";
-  profile.value.phone = data.contactNumber || "";
-  profile.value.website = data.website || "";
+  // ============ ADDRESS SECTION ============
+  address.value.name = data.addressName || "";
+  address.value.street = data.addressStreet || "";
+  address.value.area = data.addressArea || "";
+  address.value.cityState = data.addressCityState || "";
+  address.value.country = data.addressCountry || "";
+  address.value.postalCode = data.postalCode || "";
+  address.value.mapUrl = data.addressMapUrl || "";
 
-  // Stats (preview data structure)
+  // ============ VIDEO SECTION ============
+  if (data.companyVideo) {
+    videoData.value.url = data.companyVideo;
+    videoData.value.title = data.companyVideoTitle || "Company Video";
+    videoData.value.description = data.companyVideoDescription || "";
+  }
+
+  // ============ CONTACT METHODS ============
+  contactMethods.value[0].subtitle = data.contactNumber || data.phone || "";
+  contactMethods.value[0].href = data.contactNumber ? `tel:${data.contactNumber}` : "";
+  contactMethods.value[1].subtitle = data.email || "";
+  contactMethods.value[1].href = data.email ? `mailto:${data.email}` : "";
+  contactMethods.value[2].subtitle = data.whatsapp || "";
+  contactMethods.value[2].href = data.whatsapp ? `https://wa.me/${data.whatsapp.replace(/[^0-9]/g, '')}` : "";
+
+  // ============ STATS ============
   if (data.stats && Array.isArray(data.stats)) {
     stats.value = data.stats.filter(stat => stat.num && stat.label);
   }
 
-  // Services (preview data structure)
+  // ============ SERVICES ============
   if (data.services && Array.isArray(data.services)) {
     services.value = data.services.filter(service => service.name);
+    // Load service details for first service
+    if (services.value.length > 0) {
+      serviceDetails.value = {
+        features: data.services[0]?.features || [],
+        price: data.services[0]?.price || "",
+        oldPrice: data.services[0]?.oldPrice || "",
+        duration: data.services[0]?.duration || "",
+        tags: data.services[0]?.tags || [],
+        brochure: data.brochure || data.services[0]?.brochure || "",
+        bookingUrl: data.bookingUrl || data.services[0]?.bookingUrl || "",
+      };
+    }
   }
 
-  // Links (from preview data)
+  // ============ GALLERY ============
+  if (data.gallery && Array.isArray(data.gallery)) {
+    gallery.value = data.gallery.filter(img => img.url || img.image);
+  }
+
+  // ============ TEAM MEMBERS ============
+  if (data.teamMembers && Array.isArray(data.teamMembers)) {
+    teamMembers.value = data.teamMembers.filter(member => member.name);
+  }
+
+  // ============ PORTFOLIO ============
+  if (data.portfolio && Array.isArray(data.portfolio)) {
+    // New preview structure using `portfolio`
+    portfolio.value = data.portfolio.filter(p => p.title || p.name);
+  } else if (data.projects && Array.isArray(data.projects)) {
+    // Fallback to legacy `projects` array (same as API load logic)
+    portfolio.value = data.projects.filter(p => p.title || p.name);
+  }
+
+  // ============ BLOG ============
+  if (data.blogPosts && Array.isArray(data.blogPosts)) {
+    blogPosts.value = data.blogPosts.filter(p => p.title);
+  }
+
+  // ============ AWARDS ============
+  if (data.awards && Array.isArray(data.awards)) {
+    awards.value = data.awards.filter(a => a.title || a.name);
+  }
+
+  // ============ SOCIAL LINKS ============
   if (data.links && Array.isArray(data.links) && data.links.length > 0) {
     socialLinks.value = data.links
       .filter((link) => link.is_active && link.url)
@@ -1719,15 +3838,80 @@ const loadPreviewData = (data) => {
       }));
   }
 
-  // Team Members (preview data structure)
-  if (data.teamMembers && Array.isArray(data.teamMembers)) {
-    teamMembers.value = data.teamMembers.filter(member => member.name);
+  // ============ QUICK ACTIONS ============
+  if (data.appointmentUrl) {
+    appointmentLink.value = data.appointmentUrl;
+  }
+  if (data.paymentUrl || data.paymentButtonText) {
+    paymentButton.value = {
+      url: data.paymentUrl || "",
+      text: data.paymentButtonText || "Pay Now",
+    };
   }
 
-  // Design Settings
+  // ============ DESIGN SETTINGS ============
   if (data.backgroundColor) {
-    // Apply background color if provided
-    document.documentElement.style.setProperty('--preview-bg', data.backgroundColor);
+    designSettings.backgroundColor = data.backgroundColor;
+  }
+  if (data.textColor) {
+    designSettings.textColor = data.textColor;
+  }
+  if (data.font) {
+    const fontMap = {
+      'inter': 'Inter, sans-serif',
+      'roboto': 'Roboto, sans-serif',
+      'playfair': 'Playfair Display, serif',
+      'poppins': 'Poppins, sans-serif',
+      'montserrat': 'Montserrat, sans-serif',
+    };
+    designSettings.fontFamily = fontMap[data.font] || data.font;
+  }
+  if (data.buttonStyle) {
+    designSettings.buttonStyle = data.buttonStyle;
+  }
+  if (data.theme) {
+    designSettings.theme = data.theme;
+  }
+
+  // ============ SECTION LAYOUT ============
+  if (data.sectionLayout && Array.isArray(data.sectionLayout)) {
+    sectionLayout.value = data.sectionLayout;
+    console.log('📐 Section layout loaded from preview:', sectionLayout.value);
+  } else {
+    console.log('⚠️ No sectionLayout in preview data, using defaults');
+  }
+  
+  // ============ FIELD LAYOUT (with sub-section states) ============
+  if (data.fieldLayout && typeof data.fieldLayout === 'object') {
+    fieldLayout.value = data.fieldLayout;
+    console.log('📐 Field layout loaded from preview:', fieldLayout.value);
+  }
+
+  // ============ FEATURE SETTINGS ============
+  // Load available features (assigned by admin)
+  if (data.availableFeatures && Array.isArray(data.availableFeatures)) {
+    availableFeatures.value = data.availableFeatures;
+    console.log('🔐 Available features (assigned by admin):', availableFeatures.value);
+  } else {
+    // If no availableFeatures provided, set to empty array (meaning admin didn't assign any features)
+    availableFeatures.value = [];
+    console.log('🚫 No features assigned by admin');
+  }
+  
+  console.log('📥 Raw features from preview data:', data.features);
+  if (data.features && typeof data.features === 'object' && Object.keys(data.features).length > 0) {
+    // Merge features - preview data overrides defaults
+    Object.keys(data.features).forEach(key => {
+      features.value[key] = data.features[key];
+      console.log(`  → Setting feature "${key}" to:`, data.features[key]);
+    });
+    console.log('✨ Features after merge:', JSON.stringify(features.value));
+  } else {
+    console.log('⚠️ No features in preview data, using defaults:', features.value);
+  }
+  if (data.featureOrder && Array.isArray(data.featureOrder)) {
+    featureOrder.value = data.featureOrder;
+    console.log('✨ Feature order loaded from preview:', featureOrder.value);
   }
 
   profileNotFound.value = false;
@@ -1837,16 +4021,36 @@ const loadProfileData = async () => {
     }
 
     // Fetch landing page data for this NFC card
+    console.log(`🔍 Fetching landing page for NFC card: ${nfcCardId}`);
+    console.log(`🌐 Request URL: /nfc-cards/${nfcCardId}/landing-page`);
     const response = await $api.get(`/nfc-cards/${nfcCardId}/landing-page`);
+    console.log('📡 API Response:', response);
+    console.log('📄 Landing Page Data:', response.landing_page);
+    console.log('✅ Has data?', !!response.landing_page);
 
     if (response.success && response.landing_page) {
       const data = response.landing_page;
+      console.log('✅ Loading landing page data...');
 
-      // Basic Info
+      // Basic Info (Profile Tab)
       profile.value.name = data.name || "Your Name";
       profile.value.qualification = data.qualification || "";
       profile.value.position = data.title || data.position || "Your Position";
-      profile.value.bio = data.bio || "Your bio goes here";
+      profile.value.pronouns = data.pronouns || "";
+      profile.value.tagline = data.tagline || "";
+      profile.value.bio = data.bio || "";
+      profile.value.phone = data.phone || data.phone_number || "";
+      profile.value.email = data.email || data.email_address || "";
+      profile.value.website = data.website || data.website_url || "";
+      profile.value.address = data.address || "";
+      profile.value.education = data.education || [];
+      profile.value.certifications = data.certifications || [];
+      profile.value.profileStats = data.profile_stats || data.profileStats || [];
+
+      // Cover Banner
+      if (data.cover_banner || data.coverBanner) {
+        coverBanner.value = data.cover_banner || data.coverBanner;
+      }
 
       // Profile Image
       if (data.profile_image) {
@@ -1863,10 +4067,17 @@ const loadProfileData = async () => {
       }
 
       // Company Info
+      if (data.company_logo) {
+        company.value.logo = data.company_logo;
+      }
       company.value.logoText = data.company_logo_text || "CO";
       company.value.name = data.company_name || "Company Name";
       company.value.registrationNo = data.company_registration_no || "";
       company.value.department = data.company_department || "";
+      company.value.description = data.company_description || "";
+      company.value.industry = data.industry || "";
+      company.value.establishedYear = data.established_year || "";
+      company.value.employeeCount = data.employee_count || "";
 
       // Address Info
       address.value.name = data.address_name || "";
@@ -1874,7 +4085,8 @@ const loadProfileData = async () => {
       address.value.area = data.address_area || "";
       address.value.cityState = data.address_city_state || "";
       address.value.country = data.address_country || "";
-      address.value.mapUrl = data.address_map_url || "";
+      address.value.postalCode = data.postal_code || "";
+      address.value.mapUrl = data.address_map_url || data.map_url || "";
 
       // Stats
       if (data.stats && Array.isArray(data.stats) && data.stats.length > 0) {
@@ -1953,20 +4165,234 @@ const loadProfileData = async () => {
         teamMembers.value = data.team_members.filter((member) => member.name);
       }
 
+      // ==================== B. LOAD SUPPLEMENTARY FIELDS ====================
+      // Working Hours
+      if (data.working_hours && Array.isArray(data.working_hours)) {
+        workingHours.value = data.working_hours;
+      }
+
+      // Awards
+      if (data.awards && Array.isArray(data.awards)) {
+        awards.value = data.awards;
+      }
+
+      // Gallery
+      if (data.gallery && Array.isArray(data.gallery)) {
+        gallery.value = data.gallery;
+      }
+
+      // Portfolio / Projects
+      if (data.projects && Array.isArray(data.projects)) {
+        portfolio.value = data.projects;
+      } else if (data.portfolio && Array.isArray(data.portfolio)) {
+        portfolio.value = data.portfolio;
+      }
+
+      // Blog Posts
+      if (data.blog_posts && Array.isArray(data.blog_posts)) {
+        blogPosts.value = data.blog_posts;
+      }
+
+      // Video Data
+      if (data.company_video) {
+        videoData.value.url = data.company_video;
+        videoData.value.title = data.video_title || 'Company Introduction';
+        videoData.value.description = data.video_description || '';
+      }
+
+      // Service Details
+      if (data.service_features && Array.isArray(data.service_features)) {
+        serviceDetails.value.features = data.service_features;
+      }
+      serviceDetails.value.price = data.service_price || "";
+      serviceDetails.value.oldPrice = data.service_old_price || "";
+      serviceDetails.value.duration = data.service_duration || "";
+      if (data.service_tags && Array.isArray(data.service_tags)) {
+        serviceDetails.value.tags = data.service_tags;
+      }
+      if (data.service_brochure) {
+        serviceDetails.value.brochure = data.service_brochure;
+      }
+      serviceDetails.value.bookingEnabled = data.booking_enabled || false;
+      serviceDetails.value.bookingUrl = data.booking_url || "";
+
+      // Payment Button
+      if (data.payment_button_text && data.payment_button_url) {
+        paymentButton.value.text = data.payment_button_text;
+        paymentButton.value.url = data.payment_button_url;
+      }
+
+      // Appointment Link
+      if (data.appointment_link) {
+        appointmentLink.value = data.appointment_link;
+      }
+
+      // Use profileStats if available, otherwise fall back to stats
+      if (profile.value.profileStats && profile.value.profileStats.length > 0) {
+        stats.value = profile.value.profileStats;
+      } else if (data.stats && Array.isArray(data.stats) && data.stats.length > 0) {
+        stats.value = data.stats;
+      }
+
+      // ==================== A. LOAD SECTION LAYOUT ====================
+      if (data.section_layout && Array.isArray(data.section_layout)) {
+        sectionLayout.value = data.section_layout;
+        console.log('📐 Section layout loaded:', sectionLayout.value);
+      }
+      
+      // ==================== B. LOAD FIELD LAYOUT (with sub-section states) ====================
+      if (data.field_layout && typeof data.field_layout === 'object') {
+        fieldLayout.value = data.field_layout;
+        console.log('📐 Field layout loaded:', fieldLayout.value);
+      }
+
+      // ==================== C. LOAD FEATURE SETTINGS ====================
+      // Load available features (assigned by admin)
+      if (data.available_features && Array.isArray(data.available_features)) {
+        availableFeatures.value = data.available_features;
+        console.log('🔐 Available features (from API):', availableFeatures.value);
+      } else {
+        // If no available_features from API, set to empty array (meaning admin didn't assign any features)
+        availableFeatures.value = [];
+        console.log('🚫 No features assigned by admin (API)');
+      }
+      
+      if (data.features && typeof data.features === 'object') {
+        features.value = { ...features.value, ...data.features };
+        console.log('✨ Features loaded:', features.value);
+      }
+      if (data.feature_order && Array.isArray(data.feature_order)) {
+        featureOrder.value = data.feature_order;
+        console.log('✨ Feature order loaded:', featureOrder.value);
+      }
+
+      // === Apply design_config (complete design object) ===
+      if (data.design_config) {
+        console.log('🎨 Applying design config:', data.design_config);
+        applyDesignConfig(data.design_config);
+      }
+      
+      // === Apply direct design fields (backward compatibility) ===
+      applyDirectDesignFields(data);
+
+      // === Use visible_fields to control display ===
+      if (data.visible_fields) {
+        console.log('👁️ Visible fields config:', data.visible_fields);
+        visibleFieldsConfig.value = data.visible_fields;
+      }
+
       profileNotFound.value = false;
+      noProfileData.value = false;
       
       // Check if current user owns this card (to show Edit button)
       await checkCardOwnership();
     } else {
-      profileNotFound.value = true;
+      console.warn('⚠️ No landing page data returned');
+      noProfileData.value = true;
     }
   } catch (error) {
-    console.error("Error loading landing page:", error);
-    // Don't show as not found if it's a 404 (card has no landing page yet)
-    profileNotFound.value = error.response?.status !== 404;
+    // 404 = Card exists but has no landing page data yet
+    if (error.response?.status === 404) {
+      console.log('ℹ️ No landing page data found for this card (expected for new cards)');
+      noProfileData.value = true;
+      // Check if user owns this card to show setup button
+      await checkCardOwnership();
+    } else {
+      // Other errors = Card doesn't exist or server error
+      console.error("Error loading landing page:", error);
+      profileNotFound.value = true;
+    }
   } finally {
     loading.value = false;
   }
+};
+
+// Added: Function to apply design configuration
+const applyDesignConfig = (designConfig) => {
+  try {
+    console.log('🎨 Applying design config:', designConfig);
+    
+    // Apply Theme
+    if (designConfig.theme) {
+      const theme = designConfig.theme;
+      designSettings.theme = theme.id || 'default';
+      if (theme.backgroundColor) {
+        designSettings.backgroundColor = theme.backgroundColor;
+      }
+    }
+
+    // Apply Font
+    if (designConfig.font) {
+      const font = designConfig.font;
+      if (font.family) {
+        designSettings.fontFamily = font.family;
+      }
+    }
+
+    // Apply Button Style
+    if (designConfig.buttonStyle) {
+      const buttonStyle = designConfig.buttonStyle;
+      designSettings.buttonStyle = buttonStyle.id || 'solid';
+      if (buttonStyle.class) {
+        buttonClasses.value = buttonStyle.class;
+      }
+    }
+
+    // Apply Color Scheme
+    if (designConfig.colorScheme && designConfig.colorScheme.colors) {
+      const colors = designConfig.colorScheme.colors;
+      if (colors.background) designSettings.backgroundColor = colors.background;
+      if (colors.text) designSettings.textColor = colors.text;
+    }
+
+    // Save current theme configuration
+    currentThemeConfig.value = designConfig;
+    
+    console.log('✅ Design settings applied:', designSettings);
+  } catch (error) {
+    console.error('Error applying design config:', error);
+  }
+};
+
+// Apply direct design fields (from landing_page table)
+const applyDirectDesignFields = (data) => {
+  if (data.background_color) {
+    designSettings.backgroundColor = data.background_color;
+  }
+  if (data.text_color) {
+    designSettings.textColor = data.text_color;
+  }
+  if (data.font) {
+    // Map font ID to font family
+    const fontMap = {
+      'inter': 'Inter, sans-serif',
+      'roboto': 'Roboto, sans-serif',
+      'playfair': 'Playfair Display, serif',
+      'poppins': 'Poppins, sans-serif',
+      'montserrat': 'Montserrat, sans-serif',
+    };
+    designSettings.fontFamily = fontMap[data.font] || data.font;
+  }
+  if (data.button_style) {
+    designSettings.buttonStyle = data.button_style;
+    // Map button style to classes
+    const buttonStyleMap = {
+      'solid': 'bg-black text-white rounded-full',
+      'outline': 'border-2 border-black text-black rounded-full bg-transparent',
+      'soft': 'bg-gray-100 text-gray-900 rounded-xl',
+      'shadow': 'bg-white text-black rounded-xl shadow-lg',
+    };
+    buttonClasses.value = buttonStyleMap[data.button_style] || '';
+  }
+};
+
+// Added: Check if field should be displayed
+const shouldShowField = (fieldKey) => {
+  if (!visibleFieldsConfig.value || visibleFieldsConfig.value.length === 0) {
+    return true; // If no configuration, show all fields by default
+  }
+  
+  return visibleFieldsConfig.value.some(f => f.field_key === fieldKey);
 };
 
 // Functions
@@ -1977,12 +4403,39 @@ const getParticleStyle = (n) => ({
   animationDuration: `${Math.random() * 3 + 2}s`,
 });
 
+// ==================== C. Handle Actions (using real data) ====================
 const handleAction = (action) => {
   const actions = {
-    call: () => (window.location.href = "tel:+60167787616"),
-    email: () => (window.location.href = "mailto:chuan.aw@clbgroups.com"),
-    whatsapp: () => window.open("https://wa.me/60167787616", "_blank"),
-    book: () => alert("Booking feature coming soon!"),
+    call: () => {
+      if (contactMethods.value[0]?.href) {
+        window.location.href = contactMethods.value[0].href;
+      }
+    },
+    email: () => {
+      if (contactMethods.value[1]?.href) {
+        window.location.href = contactMethods.value[1].href;
+      }
+    },
+    whatsapp: () => {
+      if (contactMethods.value[2]?.href) {
+        window.open(contactMethods.value[2].href, "_blank");
+      }
+    },
+    appointment: () => {
+      if (appointmentLink.value) {
+        window.open(appointmentLink.value, "_blank");
+      }
+    },
+    payment: () => {
+      if (paymentButton.value.url) {
+        window.open(paymentButton.value.url, "_blank");
+      }
+    },
+    website: () => {
+      if (contactMethods.value[3]?.href) {
+        window.open(contactMethods.value[3].href, "_blank");
+      }
+    },
   };
   actions[action]?.();
 };
@@ -2034,6 +4487,73 @@ END:VCARD`;
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+// Current page URL for QR Code
+const currentUrl = computed(() => {
+  if (typeof window !== 'undefined') {
+    return window.location.href;
+  }
+  return '';
+});
+
+// Copy profile link to clipboard
+const copyProfileLink = async () => {
+  try {
+    await navigator.clipboard.writeText(currentUrl.value);
+    // Show success feedback (could use a toast here)
+    alert('Profile link copied to clipboard!');
+  } catch (err) {
+    console.error('Failed to copy:', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = currentUrl.value;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('Profile link copied to clipboard!');
+  }
+};
+
+// Submit contact form
+const submitContactForm = async () => {
+  try {
+    contactFormSubmitting.value = true;
+    
+    // Get the NFC card ID from route
+    const cardId = route.params.id;
+    
+    // Send the contact form data to backend
+    const response = await $api(`/contact-form`, {
+      method: 'POST',
+      body: {
+        nfc_card_id: cardId,
+        name: contactForm.value.name,
+        email: contactForm.value.email,
+        phone: contactForm.value.phone,
+        message: contactForm.value.message,
+        profile_name: profile.value.name,
+        profile_email: profile.value.email,
+      },
+    });
+    
+    // Show success state
+    contactFormSuccess.value = true;
+    
+    // Reset form after 3 seconds and close modal
+    setTimeout(() => {
+      contactForm.value = { name: '', email: '', phone: '', message: '' };
+      contactFormSuccess.value = false;
+      showContactForm.value = false;
+    }, 3000);
+    
+  } catch (error) {
+    console.error('Error submitting contact form:', error);
+    alert('Failed to send message. Please try again.');
+  } finally {
+    contactFormSubmitting.value = false;
+  }
 };
 
 const scrollToTop = () => {

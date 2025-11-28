@@ -52,15 +52,21 @@ export default defineNuxtPlugin((nuxtApp) => {
       return response.data;
     },
     async (error) => {
-      console.error("API Response Error:", error);
-      console.error("Error Details:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        config: error.config,
-      });
-
       const originalRequest = error.config;
+      const isLandingPage404 = error.response?.status === 404 && originalRequest.url?.includes('/landing-page');
+      
+      // Reduce console noise for expected 404s on landing-page endpoints
+      if (isLandingPage404) {
+        console.log("ℹ️ Landing page not found (this is normal for new cards):", originalRequest.url);
+      } else {
+        console.error("API Response Error:", error);
+        console.error("Error Details:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          config: error.config,
+        });
+      }
 
       // Handle 401 Unauthorized
       if (error.response?.status === 401 && !originalRequest._retry) {
@@ -80,8 +86,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         );
       }
 
-      // Handle 404 Not Found
-      if (error.response?.status === 404) {
+      // Handle 404 Not Found (skip landing-page 404s as they're handled above)
+      if (error.response?.status === 404 && !isLandingPage404) {
         console.error("Resource not found:", error.response.config.url);
       }
 
