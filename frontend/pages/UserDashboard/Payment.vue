@@ -656,7 +656,7 @@ const handleRailSelected = ({ rail, feeCalculation: fee }) => {
 };
 
 // Handle payment success
-const handlePaymentSuccess = (data) => {
+const handlePaymentSuccess = async (data) => {
   console.log('Payment successful:', data);
   
   // Store order details
@@ -675,6 +675,21 @@ const handlePaymentSuccess = (data) => {
       estimatedDelivery: "5-7 business days",
     })
   );
+  
+  // BUGFIX: Auto-complete onboarding immediately after payment success
+  // This ensures is_new_user is set to false in the auth store and user can access dashboard
+  // even if they close the browser before clicking "Go to Dashboard"
+  try {
+    const { $api } = useNuxtApp();
+    await $api.post("/complete-onboarding");
+    console.log("✅ Onboarding auto-completed after payment");
+    if (authStore.user) {
+      authStore.user.is_new_user = false;
+    }
+  } catch (error) {
+    console.warn("Failed to auto-complete onboarding (will complete via webhook):", error);
+    // Continue anyway - the webhook will mark user as not new
+  }
   
   // Show success modal
   showSuccessModal.value = true;

@@ -120,7 +120,21 @@ class SocialAuthService
                         : null,
                 ]);
 
-                return $socialIdentity->user;
+                $user = $socialIdentity->user;
+                
+                // BUGFIX: Mark existing user as NOT new
+                // This ensures returning users are redirected to Dashboard, not Plan Selection
+                if ($user->is_new_user === true) {
+                    $user->update(['is_new_user' => false]);
+                    
+                    \Log::info('Existing OAuth user marked as not new', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'provider' => $provider,
+                    ]);
+                }
+
+                return $user;
             }
 
             // Try to find user by email

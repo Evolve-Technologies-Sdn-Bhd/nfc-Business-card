@@ -220,6 +220,26 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // BUGFIX: Auto-complete onboarding for users who have paid but haven't clicked "Go to Dashboard"
+        // This is a fallback in case the frontend auto-complete or webhook update didn't happen
+        if ($user->is_new_user === true && $user->subscription_active === true) {
+            try {
+                $user->update(['is_new_user' => false]);
+                
+                \Log::info('Auto-completed onboarding for paid user (profile fetch fallback)', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'subscription_plan' => $user->subscription_plan,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to auto-complete onboarding in profile endpoint', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // Continue anyway - don't fail the request
+            }
+        }
+
         return response()->json([
             'success' => true,
             'user' => $user->load('nfcCards')

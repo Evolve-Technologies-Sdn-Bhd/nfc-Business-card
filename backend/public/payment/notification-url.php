@@ -185,6 +185,32 @@ try {
     // Commit all changes
     $db->commit();
     
+    // BUGFIX: Mark user as not new (completed onboarding) when payment is successful
+    // This ensures users who complete payment can access their dashboard immediately
+    // even if they close the browser before clicking "Go to Dashboard"
+    if ($systemStatus === 'completed' && !empty($order['user_id'])) {
+        try {
+            $userUpdateQuery = $db->prepare("
+                UPDATE users 
+                SET is_new_user = false 
+                WHERE id = :user_id
+            ");
+            $userUpdateQuery->execute([':user_id' => $order['user_id']]);
+            
+            logInfo('Notification URL - User marked as not new (payment completed)', [
+                'user_id' => $order['user_id'],
+                'order_id' => $orderId,
+                'system_status' => $systemStatus,
+            ]);
+        } catch (Exception $e) {
+            logError('Notification URL - Failed to mark user as not new', [
+                'user_id' => $order['user_id'],
+                'error' => $e->getMessage(),
+            ]);
+            // Continue - don't fail the webhook even if user update fails
+        }
+    }
+    
     // IMPORTANT: Send success acknowledgment to Fiuu
     echo "CBTOKEN:MPSTATOK";
     
