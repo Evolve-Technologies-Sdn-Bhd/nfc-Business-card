@@ -182,6 +182,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the remember tokens for the user
+     */
+    public function rememberTokens(): HasMany
+    {
+        return $this->hasMany(RememberToken::class);
+    }
+
+    /**
      * Check if user has a specific provider linked
      */
     public function hasProvider(string $provider): bool
@@ -250,6 +258,41 @@ class User extends Authenticatable
     public function isBusinessEmployee(): bool
     {
         return $this->parent_business_id !== null;
+    }
+
+    /**
+     * Check if user signed up via OAuth only (Google/Apple) and has no local password.
+     * These users cannot reset password - they must continue using OAuth login.
+     */
+    public function isOAuthOnly(): bool
+    {
+        // User has OAuth provider set and password is null or empty
+        return !empty($this->provider) && (is_null($this->password) || $this->password === '');
+    }
+
+    /**
+     * Check if user has a local password (can use password reset).
+     * This includes users who registered with email+password, even if they later linked OAuth.
+     */
+    public function hasLocalPassword(): bool
+    {
+        return !is_null($this->password) && $this->password !== '';
+    }
+
+    /**
+     * Get the OAuth provider name for display purposes.
+     */
+    public function getOAuthProviderDisplayName(): ?string
+    {
+        if (empty($this->provider)) {
+            return null;
+        }
+
+        return match (strtolower($this->provider)) {
+            'google' => 'Google',
+            'apple' => 'Apple',
+            default => ucfirst($this->provider),
+        };
     }
 
     /**

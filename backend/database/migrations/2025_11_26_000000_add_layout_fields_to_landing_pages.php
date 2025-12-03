@@ -17,15 +17,15 @@ return new class extends Migration
         Schema::table('landing_pages', function (Blueprint $table) {
             // Section layout - stores order and visibility of sections
             // Format: [{ id: 'hero', order: 0, enabled: true }, { id: 'about', order: 1, enabled: true }, ...]
-            $table->json('section_layout')->nullable()->after('feature_order');
+            $table->json('section_layout')->nullable();
             
             // Field layout - stores order of fields within each section
             // Format: { hero: ['name', 'position', 'tagline'], about: ['bio', 'stats'], ... }
-            $table->json('field_layout')->nullable()->after('section_layout');
+            $table->json('field_layout')->nullable();
             
             // Section settings - additional settings per section
             // Format: { hero: { showParticles: true, animation: 'fade' }, ... }
-            $table->json('section_settings')->nullable()->after('field_layout');
+            $table->json('section_settings')->nullable();
         });
     }
 

@@ -51,6 +51,36 @@
         </div>
       </div>
 
+      <!-- OAuth User Message -->
+      <div v-else-if="oauthUser" class="card p-8">
+        <div class="text-center">
+          <div
+            class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <Icon
+              :name="oauthProvider === 'google' ? 'logos:google-icon' : 'logos:apple'"
+              class="h-8 w-8"
+            />
+          </div>
+          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+            Social Login Account
+          </h3>
+          <p class="text-secondary-600 mb-6">
+            This account was created using <strong>{{ oauthProviderDisplay }}</strong> Sign-In 
+            and does not use a password. Please continue logging in with {{ oauthProviderDisplay }}.
+          </p>
+          <div class="space-y-3">
+            <NuxtLink to="/UserAccount/login" class="btn btn-primary w-full">
+              <Icon :name="oauthProvider === 'google' ? 'logos:google-icon' : 'logos:apple'" class="h-5 w-5 mr-2" />
+              Sign in with {{ oauthProviderDisplay }}
+            </NuxtLink>
+            <button @click="resetForm" class="btn btn-outline w-full">
+              Try a different email
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Reset Form -->
       <div v-else class="card p-8">
         <form @submit.prevent="handleSubmit" class="space-y-6">
@@ -120,6 +150,9 @@ const router = useRouter();
 
 const loading = ref(false);
 const emailSent = ref(false);
+const oauthUser = ref(false);
+const oauthProvider = ref("");
+const oauthProviderDisplay = ref("");
 const errors = ref({});
 
 const form = reactive({
@@ -136,11 +169,20 @@ onMounted(() => {
 const handleSubmit = async () => {
   loading.value = true;
   errors.value = {};
+  oauthUser.value = false;
 
   try {
-    await authStore.requestPasswordReset(form.email);
-    emailSent.value = true;
-    // Don't show different messages for existing/non-existing emails (security)
+    const response = await authStore.requestPasswordReset(form.email);
+    
+    // Check if this is an OAuth-only user
+    if (response.oauth_user) {
+      oauthUser.value = true;
+      oauthProvider.value = response.provider || "";
+      oauthProviderDisplay.value = response.provider_display || "Social Login";
+      $toast.info(`This account uses ${oauthProviderDisplay.value} Sign-In`);
+    } else {
+      emailSent.value = true;
+    }
   } catch (error) {
     if (error.response?.status === 429) {
       $toast.error("Too many requests. Please wait before trying again.");
@@ -159,6 +201,9 @@ const handleSubmit = async () => {
 
 const resetForm = () => {
   emailSent.value = false;
+  oauthUser.value = false;
+  oauthProvider.value = "";
+  oauthProviderDisplay.value = "";
   form.email = "";
   errors.value = {};
 };

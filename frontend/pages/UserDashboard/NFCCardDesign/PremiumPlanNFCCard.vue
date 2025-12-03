@@ -803,22 +803,8 @@ const proceedToPayment = async () => {
   const uploadSuccess = await uploadCardDesigns();
 
   if (uploadSuccess) {
-    // Mark user as no longer new (onboarding completed)
-    try {
-      const { $api } = useNuxtApp();
-      await $api.post("/complete-onboarding");
-
-      // Update auth store to reflect user is no longer new
-      if (authStore.user) {
-        authStore.user.is_new_user = false;
-      }
-    } catch (error) {
-      console.error("Complete onboarding error:", error);
-      // Continue to payment even if this fails
-    }
-
-    // Navigate to payment page
-    $toast.success("Card customization complete! Let's proceed to payment.");
+    // Defer onboarding completion until payment success.
+    $toast.success("Card customization saved! Continue to payment.");
     await router.push("/UserDashboard/Payment");
   }
 };

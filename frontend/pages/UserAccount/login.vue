@@ -135,24 +135,54 @@
           </div>
         </div>
 
+        <!-- OAuth Blocked Warning -->
+        <div v-if="oauthBlocked && form.email" class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div class="flex items-start">
+            <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
+            <p class="text-sm text-amber-700">
+              This email uses password login. Sign in with your password, or link Google from Account Settings after logging in.
+            </p>
+          </div>
+        </div>
+
         <!-- Social Login -->
         <div class="mt-6 grid grid-cols-2 gap-3">
-          <button
-            @click="handleGoogleLogin"
-            :disabled="loading"
-            class="btn btn-outline w-full"
-          >
-            <Icon name="logos:google-icon" class="h-5 w-5 mr-2" />
-            Google
-          </button>
-          <button
-            @click="handleAppleLogin"
-            :disabled="loading"
-            class="btn btn-outline w-full"
-          >
-            <Icon name="logos:apple" class="h-5 w-5 mr-2" />
-            Apple
-          </button>
+          <div class="relative group">
+            <button
+              @click="handleGoogleLogin"
+              :disabled="loading || oauthBlocked"
+              :class="[
+                'btn btn-outline w-full',
+                oauthBlocked ? 'opacity-50 cursor-not-allowed' : ''
+              ]"
+            >
+              <Icon name="logos:google-icon" class="h-5 w-5 mr-2" />
+              Google
+            </button>
+            <!-- Tooltip for blocked OAuth -->
+            <div v-if="oauthBlocked" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+              Use password login for this account
+              <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-900"></div>
+            </div>
+          </div>
+          <div class="relative group">
+            <button
+              @click="handleAppleLogin"
+              :disabled="loading || oauthBlocked"
+              :class="[
+                'btn btn-outline w-full',
+                oauthBlocked ? 'opacity-50 cursor-not-allowed' : ''
+              ]"
+            >
+              <Icon name="logos:apple" class="h-5 w-5 mr-2" />
+              Apple
+            </button>
+            <!-- Tooltip for blocked OAuth -->
+            <div v-if="oauthBlocked" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-secondary-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+              Use password login for this account
+              <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-secondary-900"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -239,7 +269,7 @@ useHead({
 
 // Stores
 const authStore = useAuthStore();
-const { $toast } = useNuxtApp();
+const { $toast, $api } = useNuxtApp();
 
 // Route and router
 const route = useRoute();
@@ -251,6 +281,10 @@ const showPassword = ref(false);
 const show2FA = ref(false);
 const twoFactorCode = ref("");
 const errors = ref({});
+const emailCheckLoading = ref(false);
+const emailHasPassword = ref(false);
+const oauthBlocked = ref(false);
+const oauthBlockedMessage = ref("");
 
 const form = reactive({
   email: "",
@@ -258,8 +292,56 @@ const form = reactive({
   remember: false,
 });
 
-// Check if user is already authenticated
+// Debounce timer for email check
+let emailCheckTimer = null;
+
+// Check email authentication method when user types
+const checkEmailAuthMethod = async (email) => {
+  if (!email || !email.includes('@')) {
+    emailHasPassword.value = false;
+    oauthBlocked.value = false;
+    return;
+  }
+
+  emailCheckLoading.value = true;
+  try {
+    const response = await $api.get('/auth/check-email', { params: { email } });
+    if (response.success && response.exists) {
+      emailHasPassword.value = response.has_password;
+      oauthBlocked.value = response.oauth_blocked || false;
+    } else {
+      emailHasPassword.value = false;
+      oauthBlocked.value = false;
+    }
+  } catch (error) {
+    console.error('Email check error:', error);
+    // On error, don't block OAuth (fail open for UX)
+    emailHasPassword.value = false;
+    oauthBlocked.value = false;
+  } finally {
+    emailCheckLoading.value = false;
+  }
+};
+
+// Watch email input with debounce
+watch(() => form.email, (newEmail) => {
+  if (emailCheckTimer) clearTimeout(emailCheckTimer);
+  emailCheckTimer = setTimeout(() => {
+    checkEmailAuthMethod(newEmail);
+  }, 500);
+});
+
+// Check for OAuth blocked redirect on mount
 onMounted(() => {
+  // Check for OAuth blocked error from redirect
+  if (route.query.error === 'oauth_blocked' && route.query.message) {
+    oauthBlockedMessage.value = decodeURIComponent(route.query.message);
+    $toast.warning(oauthBlockedMessage.value, { duration: 8000 });
+    
+    // Clean up URL
+    router.replace({ query: {} });
+  }
+
   if (authStore.isAuthenticated) {
     const redirect = route.query.redirect || authStore.getRedirectPathByPlan();
     router.push(redirect);

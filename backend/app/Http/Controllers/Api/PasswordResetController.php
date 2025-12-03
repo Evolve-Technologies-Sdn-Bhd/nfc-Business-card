@@ -74,6 +74,29 @@ class PasswordResetController extends Controller
         $user = User::where('email', $email)->first();
 
         if ($user) {
+            // Check if user is OAuth-only (signed up with Google/Apple, no local password)
+            if ($user->isOAuthOnly()) {
+                $providerName = $user->getOAuthProviderDisplayName() ?? 'a social login provider';
+                
+                \Log::info('Password reset requested for OAuth-only user', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'provider' => $user->provider,
+                ]);
+
+                // Return a specific response for OAuth users
+                // Note: This does reveal that the email exists, but it's necessary UX
+                // to prevent user confusion. The trade-off is acceptable here.
+                return response()->json([
+                    'success' => false,
+                    'oauth_user' => true,
+                    'provider' => $user->provider,
+                    'provider_display' => $providerName,
+                    'message' => "This account was created using {$providerName} Sign-In and does not use a password. Please continue logging in with {$providerName}.",
+                ], 200); // 200 status to handle gracefully on frontend
+            }
+
+            // User has a local password - proceed with normal reset flow
             // Generate secure random token
             $rawToken = bin2hex(random_bytes(48)); // 96 characters
             
@@ -95,9 +118,79 @@ class PasswordResetController extends Controller
 
             // Send email
             try {
+                $mailDriver = config('mail.default');
+                
+                \Log::info('=== PASSWORD RESET EMAIL ATTEMPT ===', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'request_ip' => $ip,
+                    'mail_driver' => $mailDriver,
+                    'mail_config' => [
+                        'driver' => $mailDriver,
+                        'host' => config('mail.mailers.smtp.host'),
+                        'port' => config('mail.mailers.smtp.port'),
+                        'username' => config('mail.mailers.smtp.username'),
+                        'username_is_placeholder' => str_contains(config('mail.mailers.smtp.username') ?? '', 'your_mailtrap'),
+                        'password_set' => !empty(config('mail.mailers.smtp.password')),
+                        'encryption' => config('mail.mailers.smtp.encryption'),
+                        'from_address' => config('mail.from.address'),
+                        'from_name' => config('mail.from.name'),
+                    ],
+                ]);
+
+                // CRITICAL CHECK: Detect if using placeholder credentials
+                $smtpUsername = config('mail.mailers.smtp.username');
+                if ($mailDriver === 'smtp' && str_contains($smtpUsername ?? '', 'your_mailtrap')) {
+                    \Log::error('❌ PASSWORD RESET EMAIL BLOCKED - PLACEHOLDER CREDENTIALS DETECTED', [
+                        'issue' => 'MAIL_USERNAME contains placeholder text',
+                        'current_value' => $smtpUsername,
+                        'action_required' => 'Update MAIL_USERNAME and MAIL_PASSWORD in .env with real credentials',
+                    ]);
+                    // Don't throw exception - fail silently for security
+                    // But the email won't actually be sent
+                }
+
+                // CRITICAL CHECK: Warn if using 'log' driver
+                if ($mailDriver === 'log') {
+                    \Log::warning('⚠️  PASSWORD RESET EMAIL SENT TO LOG FILE (NOT REAL EMAIL)', [
+                        'issue' => 'Using log mail driver - emails are written to laravel.log, not sent to inbox',
+                        'user_email' => $user->email,
+                        'action_required' => 'Update .env: MAIL_MAILER=smtp',
+                        'log_location' => storage_path('logs/laravel.log'),
+                    ]);
+                }
+
+                // Send the email
                 Mail::to($user->email)->send(new PasswordResetMail($user, $rawToken, $ip));
+                
+                \Log::info('✅ Password reset email SENT (claimed success)', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mail_driver' => $mailDriver,
+                    'note' => $mailDriver === 'log' 
+                        ? 'Email written to log file, NOT sent to inbox' 
+                        : 'Email queued for delivery - check provider logs if not received',
+                ]);
             } catch (\Exception $e) {
-                \Log::error('Password reset email failed: ' . $e->getMessage());
+                \Log::error('❌ PASSWORD RESET EMAIL EXCEPTION THROWN', [
+                    'error' => $e->getMessage(),
+                    'error_class' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'user_id' => $user->id ?? null,
+                    'email' => $user->email ?? null,
+                    'mail_config' => [
+                        'driver' => config('mail.default'),
+                        'host' => config('mail.mailers.smtp.host'),
+                        'port' => config('mail.mailers.smtp.port'),
+                        'username_set' => !empty(config('mail.mailers.smtp.username')),
+                        'password_set' => !empty(config('mail.mailers.smtp.password')),
+                    ],
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                
+                // Don't reveal error to user for security
+                // But log it thoroughly for debugging
             }
         }
 

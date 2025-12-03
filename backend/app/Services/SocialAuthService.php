@@ -32,7 +32,13 @@ class SocialAuthService
                 ->getTargetUrl();
         }
 
+        // For Google OAuth:
+        // - 'select_account': Always show account picker
+        // - This allows users to choose which Google account to use
+        // - Google handles 2FA based on device trust and account settings
+        // - Even on trusted devices, 2FA was verified during initial device authorization
         return Socialite::driver($provider)
+            ->with(['prompt' => 'select_account'])
             ->stateless()
             ->redirect()
             ->getTargetUrl();
@@ -42,6 +48,16 @@ class SocialAuthService
      * Handle the callback from the provider
      */
     public function handleCallback(string $provider)
+    {
+        $providerUser = $this->getOAuthUser($provider);
+        return $this->findOrCreateUser($provider, $providerUser);
+    }
+
+    /**
+     * Get the OAuth user from the provider without creating/finding a user
+     * Used for account linking where we just need the OAuth info
+     */
+    public function getOAuthUser(string $provider)
     {
         try {
             // Configure Guzzle options for SSL (Windows development fix)
@@ -62,7 +78,7 @@ class SocialAuthService
                     );
                 }
                 
-                $providerUser = $socialite->user();
+                return $socialite->user();
             } else {
                 $socialite = Socialite::driver($provider)->stateless();
                 
@@ -72,10 +88,8 @@ class SocialAuthService
                     );
                 }
                 
-                $providerUser = $socialite->user();
+                return $socialite->user();
             }
-
-            return $this->findOrCreateUser($provider, $providerUser);
         } catch (InvalidStateException $e) {
             throw new \Exception('Invalid state. Please try again.');
         } catch (\Exception $e) {
@@ -85,6 +99,8 @@ class SocialAuthService
 
     /**
      * Find or create user from provider data
+     * 
+     * @throws \Exception if email exists with local password but no OAuth link
      */
     private function findOrCreateUser(string $provider, $providerUser): User
     {
@@ -95,7 +111,7 @@ class SocialAuthService
                 ->first();
 
             if ($socialIdentity) {
-                // Update tokens
+                // User has already linked this OAuth provider - allow login
                 $socialIdentity->update([
                     'access_token' => $providerUser->token,
                     'refresh_token' => $providerUser->refreshToken,
@@ -110,31 +126,70 @@ class SocialAuthService
             // Try to find user by email
             $email = $providerUser->getEmail();
             $user = null;
-            $isNewUser = false;
 
             if ($email) {
-                $user = User::where('email', $email)->first();
+                $user = User::where('email', strtolower($email))->first();
+            }
+
+            // SECURITY CHECK: If user exists with local password but hasn't linked this OAuth provider,
+            // block the OAuth login to prevent unauthorized access
+            if ($user) {
+                // Check if user has a local password (not OAuth-only)
+                $hasLocalPassword = $user->hasLocalPassword();
+                
+                // Check if user has already linked ANY OAuth provider
+                $hasAnyOAuth = $user->socialIdentities()->exists();
+                
+                // Check if this specific provider is already linked
+                $hasThisProvider = $user->socialIdentities()
+                    ->where('provider', $provider)
+                    ->exists();
+
+                // Block OAuth if: user has local password AND has NOT linked this OAuth provider
+                // Users who signed up with password must explicitly link OAuth from settings
+                if ($hasLocalPassword && !$hasThisProvider) {
+                    $providerDisplay = ucfirst($provider);
+                    
+                    \Log::warning('OAuth login blocked for password-backed account', [
+                        'user_id' => $user->id,
+                        'email' => $email,
+                        'provider' => $provider,
+                        'has_local_password' => true,
+                        'has_any_oauth' => $hasAnyOAuth,
+                    ]);
+
+                    throw new \Exception(
+                        "OAUTH_BLOCKED:An account with this email already exists and uses a password. " .
+                        "Please sign in with your email and password, or link {$providerDisplay} from your Account Settings after logging in."
+                    );
+                }
             }
 
             // Create new user if not found
             if (!$user) {
-                $isNewUser = true;
                 $user = User::create([
                     'first_name' => $this->extractFirstName($providerUser),
                     'last_name' => $this->extractLastName($providerUser),
-                    'email' => $email,
+                    'email' => strtolower($email),
                     'email_verified_at' => now(), // Provider verified
-                    'password' => Hash::make(Str::random(32)), // Random password
-                    'is_new_user' => true, // Mark as new user
+                    'password' => null, // OAuth-only users have no local password
+                    'provider' => $provider, // Mark primary OAuth provider
+                    'is_new_user' => true,
+                ]);
+                
+                \Log::info('New user created via OAuth', [
+                    'user_id' => $user->id,
+                    'email' => $email,
+                    'provider' => $provider,
                 ]);
             }
 
-            // Create social identity
+            // Create social identity link
             SocialIdentity::create([
                 'user_id' => $user->id,
                 'provider' => $provider,
                 'provider_id' => $providerUser->getId(),
-                'email' => $email,
+                'email' => strtolower($email),
                 'access_token' => $providerUser->token,
                 'refresh_token' => $providerUser->refreshToken,
                 'token_expires_at' => $providerUser->expiresIn 

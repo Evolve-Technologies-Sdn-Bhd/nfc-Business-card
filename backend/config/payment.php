@@ -104,6 +104,47 @@ return [
 
             'ewallets' => ['grabpay', 'shopeepay'],
         ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fiuu (MOLPay) Configuration (Malaysian Payment Gateway)
+        |--------------------------------------------------------------------------
+        | Supports: FPX, Cards, E-wallets, DuitNow
+        | Webhook URLs: return-url, notification-url, callback-url
+        */
+        'fiuu' => [
+            'enabled' => env('FIUU_ENABLED', false),
+            'merchant_id' => env('FIUU_MERCHANT_ID'),
+            'verify_key' => env('FIUU_VERIFY_KEY'),
+            'secret_key' => env('FIUU_SECRET_KEY'),
+            'sandbox' => env('FIUU_SANDBOX', true),
+            'api_url' => env('FIUU_SANDBOX', true) 
+                ? 'https://sandbox.merchant.razer.com/RMS/API/Direct/1.0.0/'
+                : 'https://payment.ipay88.com.my/epayment/entry.asp',
+            
+            'supports' => [
+                'cards' => true,
+                'fpx' => true,
+                'duitnow' => true,
+                'ewallet' => true,
+            ],
+
+            'payment_channels' => [
+                'credit' => 'Credit Card (MasterCard/Visa)',
+                'fpx' => 'FPX Online Banking',
+                'fpx_b2b' => 'FPX B2B',
+                'tng' => 'Touch n Go eWallet',
+                'grabpay' => 'GrabPay',
+                'boost' => 'Boost',
+                'shopeepay' => 'ShopeePay',
+                'maybank_qr' => 'Maybank QRPay',
+            ],
+            
+            // Webhook URLs (configured for your environment)
+            'return_url' => env('FIUU_RETURN_URL', 'http://localhost:8000/payment/return-url.php'),
+            'notification_url' => env('FIUU_NOTIFICATION_URL', 'http://localhost:8000/payment/notification-url.php'),
+            'callback_url' => env('FIUU_CALLBACK_URL', 'http://localhost:8000/payment/callback-url.php'),
+        ],
     ],
 
     /*

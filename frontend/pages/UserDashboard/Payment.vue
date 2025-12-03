@@ -533,9 +533,6 @@ useHead({
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
-// Route and router
-const router = useRouter();
-
 // Reactive data
 const processing = ref(false);
 const showSuccessModal = ref(false);
@@ -723,7 +720,7 @@ const handleProofUploaded = (data) => {
   
   // Redirect to dashboard after short delay
   setTimeout(() => {
-    router.push("/UserDashboard");
+    navigateTo("/UserDashboard");
   }, 2000);
 };
 
@@ -734,7 +731,7 @@ onMounted(async () => {
   console.log('Order summary total:', orderSummary.value.total);
   
   if (!authStore.isAuthenticated) {
-    router.push("/UserAccount/login");
+    await navigateTo("/UserAccount/login");
     return;
   }
 
@@ -840,7 +837,7 @@ const goBack = () => {
   }
   
   // Otherwise go back to previous page
-  router.push("/UserDashboard/UserManagement/NFCCardDesignCustomization");
+  navigateTo("/UserDashboard/UserManagement/NFCCardDesignCustomization");
 };
 
 // Go to UserDashboard
@@ -850,8 +847,18 @@ const goToUserDashboard = async () => {
   // Set flag to indicate payment was just completed
   sessionStorage.setItem("just_completed_payment", "true");
 
-  $toast.success("Payment successful! Welcome to NFCGo!");
-  // Redirect to Dashboard first, then it will auto-redirect to CardManagement
-  await router.push("/UserDashboard");
+  // Complete onboarding on backend and update auth store gating flag
+  try {
+    const { $api } = useNuxtApp();
+    await $api.post("/complete-onboarding");
+    if (authStore.user) {
+      authStore.user.is_new_user = false;
+    }
+  } catch (error) {
+    console.error("Failed to complete onboarding after payment:", error);
+  }
+
+  $toast.success("Onboarding complete! Redirecting to your dashboard.");
+  await navigateTo("/UserDashboard");
 };
 </script>

@@ -566,9 +566,6 @@ useHead({
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
-// Route and router
-const router = useRouter();
-
 // Reactive data
 const designMethod = ref("template");
 const selectedTemplate = ref("basic");
@@ -640,7 +637,7 @@ const isFormValid = computed(() => {
 // Check if user is authenticated
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
-    router.push("/UserAccount/login");
+    await navigateTo("/UserAccount/login");
     return;
   }
 
@@ -651,28 +648,9 @@ onMounted(async () => {
     cardInfo.position = authStore.user.job_title || "";
   }
 
-  // Check if user has an active NFC card
-  try {
-    const { $api } = useNuxtApp();
-    const response = await $api.get("/nfc-cards");
-    
-    const activeCard = response?.data?.find((card) => card.status === "active");
-    
-    if (!activeCard) {
-      const { $toast } = useNuxtApp();
-      $toast.warning(
-        "You don't have an active NFC card yet. Please purchase a card to customize its design."
-      );
-      
-      // Redirect to card purchase after 2 seconds
-      setTimeout(() => {
-        router.push("/UserDashboard/CardManagement");
-      }, 2000);
-    }
-  } catch (error) {
-    console.warn("Could not verify NFC card status:", error);
-    // Allow user to proceed anyway - error will be caught when trying to save
-  }
+  // Note: Removed active NFC card check during onboarding
+  // Users customize their card design BEFORE payment and card activation
+  // The card will be activated after successful payment
 });
 
 // Save card information
@@ -844,7 +822,7 @@ const uploadCardDesigns = async () => {
 
 // Go back to plan selection
 const goBack = () => {
-  router.push("/UserDashboard/PlanSelection");
+  navigateTo("/UserDashboard/PlanSelection");
 };
 
 // Proceed to payment
@@ -856,23 +834,9 @@ const proceedToPayment = async () => {
   const uploadSuccess = await uploadCardDesigns();
 
   if (uploadSuccess) {
-    // Mark user as no longer new (onboarding completed)
-    try {
-      const { $api } = useNuxtApp();
-      await $api.post("/complete-onboarding");
-
-      // Update auth store to reflect user is no longer new
-      if (authStore.user) {
-        authStore.user.is_new_user = false;
-      }
-    } catch (error) {
-      console.error("Complete onboarding error:", error);
-      // Continue to payment even if this fails
-    }
-
-    // Navigate to payment page
-    $toast.success("Card customization complete! Let's proceed to payment.");
-    await router.push("/UserDashboard/Payment");
+    // Do NOT complete onboarding here; defer until payment success.
+    $toast.success("Card customization saved! Continue to payment.");
+    await navigateTo("/UserDashboard/Payment");
   }
 };
 </script>

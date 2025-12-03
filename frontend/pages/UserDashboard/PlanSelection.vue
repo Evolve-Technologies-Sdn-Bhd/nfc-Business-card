@@ -251,47 +251,47 @@
     </div>
 
     <!-- Business Plan Request Modal -->
+  <div
+    v-if="showBusinessModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    @click="closeBusinessModal"
+  >
     <div
-      v-if="showBusinessModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      @click="closeBusinessModal"
+      class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+      @click.stop
     >
+      <!-- Modal Header -->
       <div
-        class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-        @click.stop
+        class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl"
       >
-        <!-- Modal Header -->
-        <div
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <div class="p-3 bg-white/20 rounded-xl mr-4">
-                <Icon
-                  name="heroicons:building-office"
-                  class="h-8 w-8 text-white"
-                />
-              </div>
-              <div>
-                <h3 class="text-2xl font-bold text-white">
-                  Business Plan Request
-                </h3>
-                <p class="text-indigo-100 text-sm mt-1">
-                  Tell us about your organization
-                </p>
-              </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="p-3 bg-white/20 rounded-xl mr-4">
+              <Icon
+                name="heroicons:building-office"
+                class="h-8 w-8 text-white"
+              />
             </div>
-            <button
-              @click="closeBusinessModal"
-              class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <Icon name="heroicons:x-mark" class="h-6 w-6" />
-            </button>
+            <div>
+              <h3 class="text-2xl font-bold text-white">
+                Business Plan Request
+              </h3>
+              <p class="text-indigo-100 text-sm mt-1">
+                Tell us about your organization
+              </p>
+            </div>
           </div>
+          <button
+            @click="closeBusinessModal"
+            class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <Icon name="heroicons:x-mark" class="h-6 w-6" />
+          </button>
         </div>
+      </div>
 
-        <!-- Modal Body -->
-        <form @submit.prevent="submitBusinessRequest" class="p-6 space-y-6">
+      <!-- Modal Body -->
+      <form @submit.prevent="submitBusinessRequest" class="p-6 space-y-6">
           <!-- Company Name -->
           <div>
             <label class="block text-sm font-semibold text-secondary-900 mb-2">
@@ -451,9 +451,6 @@ const basicPlan = computed(() => getPlanDetails('basic'));
 const premiumPlan = computed(() => getPlanDetails('premium'));
 const businessPlan = computed(() => getPlanDetails('business'));
 
-// Route and router
-const router = useRouter();
-
 // Business plan modal state
 const showBusinessModal = ref(false);
 const submittingBusinessRequest = ref(false);
@@ -493,7 +490,7 @@ onMounted(async () => {
     // If still not authenticated after waiting, redirect to login
     if (!authStore.isAuthenticated || !authStore.user) {
       console.log("Auth state not ready, redirecting to login");
-      router.push("/UserAccount/login");
+      await navigateTo("/UserAccount/login");
       return;
     }
   }
@@ -586,7 +583,7 @@ This is an automated request from NFCGo platform.
     // Close modal and redirect to dashboard after a short delay
     setTimeout(() => {
       closeBusinessModal();
-      router.push("/UserDashboard");
+      navigateTo("/UserDashboard");
     }, 2000);
   } catch (error) {
     console.error("Business plan request error:", error);
@@ -614,28 +611,18 @@ const selectPlan = async (plan) => {
     const { $api } = useNuxtApp();
     await $api.post("/onboarding/select-plan", { plan });
 
-    if (plan === "free") {
-      // For free plan, mark onboarding as complete and go directly to CardManagement
-      await $api.post("/complete-onboarding");
-
-      // Update auth store to reflect user is no longer new
-      if (authStore.user) {
-        authStore.user.is_new_user = false;
-      }
-
-      $toast.success(
-        "Welcome to NFCGo! Let's get started with your free plan."
-      );
-      await router.push("/UserDashboard/CardManagement");
-    } else {
-      // For paid plans, proceed to NFC Card Customization first
-      $toast.success(
-        `Great choice! Let's customize your ${plan} plan NFC card.`
-      );
-      await router.push(
-        "/UserDashboard/UserManagement/NFCCardDesignCustomization"
-      );
-    }
+    // Redirect all non-business plans to NFC card customization first.
+    // Onboarding completion now happens only AFTER successful payment.
+    $toast.success(
+      plan === "free"
+        ? "Free plan selected! Let's customize your NFC card."
+        : `Great choice! Let's customize your ${plan} plan NFC card.`
+    );
+    
+    // Use navigateTo for proper Nuxt 3 navigation instead of router.push
+    await navigateTo(
+      "/UserDashboard/UserManagement/NFCCardDesignCustomization"
+    );
   } catch (error) {
     console.error("Plan selection error:", error);
     $toast.error("Failed to select plan. Please try again.");

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Add Activity Logging middleware to API routes
         $middleware->api(append: [
+            \App\Http\Middleware\RememberMe::class, // Check for remember me token
             \App\Http\Middleware\LogActivity::class,
             \App\Http\Middleware\HandleCors::class,
         ]);

@@ -891,6 +891,27 @@ const formatDate = (date) => {
 
 // Lifecycle
 onMounted(async () => {
+  // GUARD: Redirect users still in onboarding process back to plan selection
+  // This ensures CardManagement is only accessible after payment completion
+  if (!authStore.isAuthenticated || !authStore.user) {
+    navigateTo("/UserAccount/login");
+    return;
+  }
+
+  // If user is marked as new (hasn't completed onboarding), redirect to plan selection
+  if (authStore.user.is_new_user === true) {
+    console.log(
+      "🚫 Access denied: User is still in onboarding process (is_new_user=true)"
+    );
+    $toast.warning("Please complete plan selection and payment first.");
+    navigateTo("/UserDashboard/PlanSelection");
+    return;
+  }
+
+  console.log(
+    "✅ CardManagement guard passed: User has completed onboarding (is_new_user=false)"
+  );
+
   await loadSubscriptionStatus();
   await loadNfcCards();
 });

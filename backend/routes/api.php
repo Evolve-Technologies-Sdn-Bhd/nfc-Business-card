@@ -67,8 +67,16 @@ Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackT
 Route::post('/analytics/track', [AnalyticsController::class, 'track']);
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
 
+// Legacy password reset routes (no prefix) for backward compatibility with older clients
+Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
+Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
+Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken']);
+
 // ✅ OAuth Routes (Public - No Auth Required)
 Route::prefix('auth')->group(function () {
+    // Email check for OAuth conflict detection (public, rate-limited)
+    Route::get('check-email', [AuthController::class, 'checkEmail'])->middleware('throttle:30,1');
+    
     // Social OAuth routes (Google & Apple)
     Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect']);
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback']);
@@ -153,6 +161,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/settings/personal-info', [SettingsController::class, 'updatePersonalInfo']);
     Route::post('/settings/upload-account-image', [SettingsController::class, 'uploadUserAccountImage']);
     Route::delete('/settings/delete-account-image', [SettingsController::class, 'deleteUserAccountImage']);
+
+    // Linked OAuth Accounts
+    Route::get('/user/linked-accounts', [AuthController::class, 'getLinkedAccounts']);
+    Route::post('/user/verify-password', [AuthController::class, 'verifyPassword']);
+    Route::post('/user/initiate-link-account', [AuthController::class, 'initiateLinkAccount']);
+    Route::delete('/user/linked-accounts/{provider}', [AuthController::class, 'unlinkAccount']);
+
+    // Logout from all devices (revoke all tokens)
+    Route::post('/user/logout-everywhere', [AuthController::class, 'logoutEverywhere']);
 
    // Notifications (User)
     Route::prefix('notifications')->group(function () {

@@ -621,6 +621,159 @@
               </div>
             </div>
 
+            <!-- Linked Accounts Card -->
+            <div class="card">
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <h2 class="text-lg font-semibold text-secondary-900">
+                  Linked Accounts
+                </h2>
+                <p class="text-sm text-secondary-600">
+                  Connect third-party accounts for easier sign-in
+                </p>
+              </div>
+              <div class="p-6">
+                <div class="space-y-4">
+                  <!-- Google Account -->
+                  <div class="flex items-center justify-between p-4 border border-secondary-200 rounded-lg">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-white border border-secondary-200 rounded-lg flex items-center justify-center mr-4">
+                        <Icon name="logos:google-icon" class="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-secondary-900">Google</h3>
+                        <p v-if="linkedAccounts.google" class="text-sm text-green-600">
+                          Connected as {{ linkedAccounts.google.email }}
+                        </p>
+                        <p v-else class="text-sm text-secondary-500">
+                          Not connected
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      v-if="linkedAccounts.google"
+                      @click="confirmUnlinkAccount('google')"
+                      :disabled="unlinkingAccount"
+                      class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      <Icon name="heroicons:link-slash" class="h-4 w-4 mr-1" />
+                      Unlink
+                    </button>
+                    <button
+                      v-else
+                      @click="openLinkAccountModal('google')"
+                      :disabled="linkingAccount"
+                      class="btn btn-outline btn-sm"
+                    >
+                      <Icon name="heroicons:link" class="h-4 w-4 mr-1" />
+                      Link Account
+                    </button>
+                  </div>
+
+                  <!-- Apple Account -->
+                  <div class="flex items-center justify-between p-4 border border-secondary-200 rounded-lg">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center mr-4">
+                        <Icon name="logos:apple" class="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-secondary-900">Apple</h3>
+                        <p v-if="linkedAccounts.apple" class="text-sm text-green-600">
+                          Connected as {{ linkedAccounts.apple.email || 'Private Email' }}
+                        </p>
+                        <p v-else class="text-sm text-secondary-500">
+                          Not connected
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      v-if="linkedAccounts.apple"
+                      @click="confirmUnlinkAccount('apple')"
+                      :disabled="unlinkingAccount"
+                      class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      <Icon name="heroicons:link-slash" class="h-4 w-4 mr-1" />
+                      Unlink
+                    </button>
+                    <button
+                      v-else
+                      @click="openLinkAccountModal('apple')"
+                      :disabled="linkingAccount"
+                      class="btn btn-outline btn-sm"
+                    >
+                      <Icon name="heroicons:link" class="h-4 w-4 mr-1" />
+                      Link Account
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Info notice -->
+                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex items-start">
+                    <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+                    <p class="text-sm text-blue-700">
+                      Linking accounts allows you to sign in with either your password or the linked provider. 
+                      You must verify your password before linking a new account.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Link Account Modal -->
+            <div v-if="showLinkAccountModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                <div class="text-center mb-6">
+                  <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Icon :name="linkAccountProvider === 'google' ? 'logos:google-icon' : 'logos:apple'" class="h-8 w-8" />
+                  </div>
+                  <h3 class="text-xl font-bold text-secondary-900 mb-2">
+                    Link {{ linkAccountProvider === 'google' ? 'Google' : 'Apple' }} Account
+                  </h3>
+                  <p class="text-secondary-600">
+                    Enter your current password to verify account ownership before linking.
+                  </p>
+                </div>
+
+                <form @submit.prevent="linkAccount">
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                      Current Password
+                    </label>
+                    <input
+                      v-model="linkAccountPassword"
+                      type="password"
+                      required
+                      class="input input-bordered w-full"
+                      placeholder="Enter your password"
+                      :disabled="linkingAccount"
+                    />
+                    <p v-if="linkAccountError" class="text-sm text-red-600 mt-1">
+                      {{ linkAccountError }}
+                    </p>
+                  </div>
+
+                  <div class="flex gap-3">
+                    <button
+                      type="button"
+                      @click="closeLinkAccountModal"
+                      class="btn btn-outline flex-1"
+                      :disabled="linkingAccount"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary flex-1"
+                      :disabled="linkingAccount || !linkAccountPassword"
+                    >
+                      <span v-if="linkingAccount" class="loading loading-spinner loading-sm mr-2"></span>
+                      {{ linkingAccount ? 'Verifying...' : 'Continue to Link' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
             <!-- Active Sessions Card -->
             <div
               class="card"
@@ -1075,6 +1228,8 @@ definePageMeta({
 
 // Store
 const authStore = useAuthStore();
+const route = useRoute();
+const router = useRouter();
 
 // Reactive data
 const activeTab = ref("account"); // Default to account tab
@@ -1166,6 +1321,18 @@ const notificationSettings = ref({
 });
 
 const activeSessions = ref([]);
+
+// Linked accounts state
+const linkedAccounts = ref({
+  google: null,
+  apple: null,
+});
+const showLinkAccountModal = ref(false);
+const linkAccountProvider = ref('');
+const linkAccountPassword = ref('');
+const linkAccountError = ref('');
+const linkingAccount = ref(false);
+const unlinkingAccount = ref(false);
 
 // Profile URLs management - no longer needed since URLs are based on NFC card IDs
 
@@ -1911,6 +2078,103 @@ const showError = (message) => {
   }, 3000);
 };
 
+// Linked accounts functions
+const loadLinkedAccounts = async () => {
+  try {
+    const response = await $api.get('/user/linked-accounts');
+    if (response.success) {
+      linkedAccounts.value = {
+        google: response.accounts?.find(a => a.provider === 'google') || null,
+        apple: response.accounts?.find(a => a.provider === 'apple') || null,
+      };
+    }
+  } catch (error) {
+    console.error('Failed to load linked accounts:', error);
+  }
+};
+
+const openLinkAccountModal = (provider) => {
+  linkAccountProvider.value = provider;
+  linkAccountPassword.value = '';
+  linkAccountError.value = '';
+  showLinkAccountModal.value = true;
+};
+
+const closeLinkAccountModal = () => {
+  showLinkAccountModal.value = false;
+  linkAccountProvider.value = '';
+  linkAccountPassword.value = '';
+  linkAccountError.value = '';
+};
+
+const linkAccount = async () => {
+  if (!linkAccountPassword.value) {
+    linkAccountError.value = 'Please enter your password';
+    return;
+  }
+
+  linkingAccount.value = true;
+  linkAccountError.value = '';
+
+  try {
+    // First verify the password
+    const verifyResponse = await $api.post('/user/verify-password', {
+      password: linkAccountPassword.value,
+    });
+
+    if (!verifyResponse.success) {
+      linkAccountError.value = 'Incorrect password. Please try again.';
+      return;
+    }
+
+    // Password verified - initiate OAuth linking flow
+    // Store a linking token in session to indicate this is a link operation
+    const linkResponse = await $api.post('/user/initiate-link-account', {
+      provider: linkAccountProvider.value,
+      password: linkAccountPassword.value,
+    });
+
+    if (linkResponse.success && linkResponse.redirect_url) {
+      // Close modal and redirect to OAuth
+      closeLinkAccountModal();
+      window.location.href = linkResponse.redirect_url;
+    } else {
+      linkAccountError.value = linkResponse.message || 'Failed to initiate account linking';
+    }
+  } catch (error) {
+    console.error('Link account error:', error);
+    linkAccountError.value = error.response?.data?.message || 'Failed to verify password';
+  } finally {
+    linkingAccount.value = false;
+  }
+};
+
+const confirmUnlinkAccount = async (provider) => {
+  const providerName = provider === 'google' ? 'Google' : 'Apple';
+  
+  if (!confirm(`Are you sure you want to unlink your ${providerName} account? You will no longer be able to sign in with ${providerName}.`)) {
+    return;
+  }
+
+  unlinkingAccount.value = true;
+
+  try {
+    const response = await $api.delete(`/user/linked-accounts/${provider}`);
+    
+    if (response.success) {
+      linkedAccounts.value[provider] = null;
+      showSuccess(`${providerName} account unlinked successfully`);
+    } else {
+      showError(response.message || `Failed to unlink ${providerName} account`);
+    }
+  } catch (error) {
+    console.error('Unlink account error:', error);
+    showError(error.response?.data?.message || `Failed to unlink ${providerName} account`);
+  } finally {
+    unlinkingAccount.value = false;
+  }
+};
+
 // Lifecycle
 onMounted(async () => {
   // Initialize form with user data
@@ -1929,6 +2193,18 @@ onMounted(async () => {
   await loadActiveSessions();
   await loadUserNfcCards();
   await loadPlanPrices();
+  await loadLinkedAccounts();
+
+  // Check for OAuth linking result from redirect
+  if (route.query.link_success) {
+    showSuccess(decodeURIComponent(String(route.query.link_success)));
+    // Clean up URL
+    router.replace({ query: {} });
+  } else if (route.query.link_error) {
+    showError(decodeURIComponent(String(route.query.link_error)));
+    // Clean up URL
+    router.replace({ query: {} });
+  }
 });
 
 // Watch user changes to update form

@@ -134,7 +134,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         console.log("Auth store: Requesting password reset for:", email);
 
-        const response = await callApi("post", "/password-reset-request", {
+        const response = await callApi("post", "/auth/password-reset-request", {
           email,
         });
 
@@ -153,7 +153,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         console.log("Auth store: Resetting password with token");
 
-        const response = await callApi("post", "/password-reset", {
+        const response = await callApi("post", "/auth/password-reset", {
           token: data.token,
           password: data.password,
           password_confirmation: data.password_confirmation,
