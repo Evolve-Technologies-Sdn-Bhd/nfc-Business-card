@@ -814,15 +814,32 @@ const goToProfileBuilder = () => {
     return;
   }
 
+  // Get user's subscription plan
+  const userPlan = authStore.user?.subscription_plan?.toLowerCase() || 'free';
+  
+  // Determine the correct ProfileBuilder path based on plan
+  let profileBuilderPath = '';
+  
+  if (userPlan === 'premium') {
+    // Premium users go to dedicated Premium ProfileBuilder
+    profileBuilderPath = '/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder';
+  } else if (userPlan === 'basic') {
+    // Basic users go to dedicated Basic ProfileBuilder
+    profileBuilderPath = '/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder';
+  } else {
+    // Free users go to shared ProfileBuilder
+    profileBuilderPath = '/UserDashboard/ProfileBuilder';
+  }
+
   // If card has a linked profile, edit it
   if (selectedCard.value.nfcTag?.id) {
     navigateTo(
-      `/UserDashboard/ProfileBuilder?nfc_tag_id=${selectedCard.value.nfcTag.id}`
+      `${profileBuilderPath}?nfc_tag_id=${selectedCard.value.nfcTag.id}`
     );
   } else {
     // If no profile, go to Profile Builder to create new one with this card pre-selected
     navigateTo(
-      `/UserDashboard/ProfileBuilder?nfc_card_id=${selectedCard.value.nfc_card_id}`
+      `${profileBuilderPath}?nfc_card_id=${selectedCard.value.nfc_card_id}`
     );
   }
 };

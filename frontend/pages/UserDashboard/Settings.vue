@@ -2081,6 +2081,7 @@ const showError = (message) => {
 // Linked accounts functions
 const loadLinkedAccounts = async () => {
   try {
+    const { $api } = useNuxtApp();
     const response = await $api.get('/user/linked-accounts');
     if (response.success) {
       linkedAccounts.value = {
@@ -2117,6 +2118,7 @@ const linkAccount = async () => {
   linkAccountError.value = '';
 
   try {
+    const { $api } = useNuxtApp();
     // First verify the password
     const verifyResponse = await $api.post('/user/verify-password', {
       password: linkAccountPassword.value,
@@ -2159,6 +2161,7 @@ const confirmUnlinkAccount = async (provider) => {
   unlinkingAccount.value = true;
 
   try {
+    const { $api } = useNuxtApp();
     const response = await $api.delete(`/user/linked-accounts/${provider}`);
     
     if (response.success) {

@@ -136,7 +136,7 @@ class NotificationController extends Controller
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'type' => 'required|string',
+            'type' => 'required|in:registration_success,email_verification,login_new_device,profile_updated,link_milestone,landing_page_viewed,contact_request,subscription_upgrade,payment_successful,payment_failed,account_warning,password_changed,nfc_card_purchased,nfc_card_delivered,nfc_card_linked,nfc_card_activated,nfc_card_expired,app_update,system_message,admin_announcement,business_card_order_request,account_created,order_rejected',
             'title' => 'required|string|max:255',
             'message' => 'required|string',
             'priority' => 'nullable|in:low,normal,high,urgent',

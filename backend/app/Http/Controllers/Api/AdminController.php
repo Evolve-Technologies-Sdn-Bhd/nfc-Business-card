@@ -749,8 +749,8 @@ class AdminController extends Controller
             ],
             'storage' => [
                 'total_used' => $this->getStorageUsage(),
-                'landing_pages' => LandingPage::whereNotNull('profile_image_path')->count(),
-                'logos' => LandingPage::whereNotNull('company_logo_path')->count(),
+                'landing_pages' => LandingPage::whereNotNull('profile_image')->count(),
+                'logos' => LandingPage::whereNotNull('company_logo')->count(),
             ],
         ];
 

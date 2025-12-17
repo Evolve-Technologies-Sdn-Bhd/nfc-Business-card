@@ -256,6 +256,8 @@ Route::get('/legal/documents/{type}', [LegalDocumentController::class, 'show']);
 // Public PDF viewing routes (no auth required)
 Route::get('/legal/pdf/terms/view', [LegalDocumentController::class, 'viewTermsPdf']);
 Route::get('/legal/pdf/privacy/view', [LegalDocumentController::class, 'viewPrivacyPdf']);
+// Public PDF metadata routes (no auth required - for footer modals)
+Route::get('/legal/pdf/{type}/info', [LegalDocumentController::class, 'getPdfInfo']);
 
 // Public chatbot routes
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);

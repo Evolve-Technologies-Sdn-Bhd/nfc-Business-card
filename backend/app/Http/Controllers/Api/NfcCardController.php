@@ -452,11 +452,13 @@ class NfcCardController extends Controller
         
         $landingPage = $nfcCard->landingPage;
 
+        // Auto-create landing page if it doesn't exist (for all plan types)
         if (!$landingPage) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No landing page found for this card'
-            ], 404);
+            $landingPage = LandingPage::create([
+                'nfc_card_id' => $nfcCard->id,
+                'name' => $nfcCard->user->name ?? '',
+                'email' => $nfcCard->user->email ?? '',
+            ]);
         }
 
         // Load social links relationship

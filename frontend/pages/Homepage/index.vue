@@ -1228,7 +1228,9 @@
             <ul class="space-y-2">
               <li>
                 <a
-                  href="#"
+                  href="https://clbgroups.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   class="text-secondary-400 hover:text-white transition-colors"
                   >About</a
                 >
@@ -1241,17 +1243,17 @@
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <button
+                  @click="openLegalModal('privacy')"
                   class="text-secondary-400 hover:text-white transition-colors"
-                  >Privacy</a
+                  >Privacy</button
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <button
+                  @click="openLegalModal('terms')"
                   class="text-secondary-400 hover:text-white transition-colors"
-                  >Terms</a
+                  >Terms</button
                 >
               </li>
             </ul>
@@ -1793,6 +1795,76 @@
         </form>
       </div>
     </div>
+
+    <!-- Legal Document Modal (Privacy Policy / Terms of Service) -->
+    <div
+      v-if="showLegalModal"
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      @click.self="closeLegalModal"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-modal-appear">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
+          <div class="flex-1 min-w-0">
+            <h2 class="text-xl font-bold text-gray-900 truncate">
+              {{ legalModalType === 'privacy' ? 'Privacy Policy' : 'Terms of Service' }}
+            </h2>
+            <div v-if="legalDocInfo && !loadingLegalDoc" class="flex items-center gap-3 mt-1 text-sm text-gray-600">
+              <span class="truncate max-w-[200px]" :title="legalDocInfo.filename">
+                <Icon name="heroicons:document" class="h-4 w-4 inline mr-1" />
+                {{ legalDocInfo.filename }}
+              </span>
+              <span class="text-gray-400">•</span>
+              <span>{{ formatFileSize(legalDocInfo.size) }}</span>
+            </div>
+          </div>
+          <button
+            @click="closeLegalModal"
+            class="p-2 rounded-full hover:bg-white/80 transition-colors ml-4"
+            aria-label="Close modal"
+          >
+            <Icon name="heroicons:x-mark" class="h-6 w-6 text-gray-600" />
+          </button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="flex-1 overflow-hidden relative">
+          <!-- Loading State -->
+          <div v-if="loadingLegalDoc" class="absolute inset-0 flex items-center justify-center bg-gray-50">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Loading document...</p>
+            </div>
+          </div>
+          
+          <!-- Error State -->
+          <div v-else-if="legalDocError" class="absolute inset-0 flex items-center justify-center bg-gray-50 p-8">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="heroicons:exclamation-triangle" class="h-8 w-8 text-red-600" />
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Not Available</h3>
+              <p class="text-gray-600 mb-4">{{ legalDocError }}</p>
+              <button
+                @click="closeLegalModal"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+          
+          <!-- PDF Viewer -->
+          <iframe
+            v-else-if="legalDocInfo"
+            :src="legalPdfUrl"
+            class="w-full h-full border-0"
+            style="min-height: 70vh;"
+            title="Legal Document"
+          ></iframe>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1862,6 +1934,21 @@ const feedbackForm = reactive({
 // Business Plan Modal
 const showBusinessModal = ref(false);
 const submittingBusinessRequest = ref(false);
+
+// Legal Document Modal (Privacy Policy / Terms of Service)
+const showLegalModal = ref(false);
+const legalModalType = ref(''); // 'privacy' or 'terms'
+const loadingLegalDoc = ref(false);
+const legalDocInfo = ref(null);
+const legalDocError = ref('');
+
+// Computed URL for PDF viewer
+const legalPdfUrl = computed(() => {
+  if (!legalModalType.value) return '';
+  const config = useRuntimeConfig();
+  const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8000/api';
+  return `${apiBaseUrl}/legal/pdf/${legalModalType.value}/view`;
+});
 
 // Business form data
 const businessForm = reactive({
@@ -1967,10 +2054,15 @@ const closeContactModal = () => {
   showContactModal.value = false;
 };
 
-// Handle ESC key to close Contact modal
+// Handle ESC key to close modals
 const handleEscKey = (event) => {
-  if (event.key === 'Escape' && showContactModal.value) {
-    closeContactModal();
+  if (event.key === 'Escape') {
+    if (showContactModal.value) {
+      closeContactModal();
+    }
+    if (showLegalModal.value) {
+      closeLegalModal();
+    }
   }
 };
 
@@ -2008,6 +2100,45 @@ const closeBusinessModal = () => {
     email: authStore.user?.email || "",
     notes: "",
   });
+};
+
+// Open legal document modal (Privacy Policy or Terms of Service)
+const openLegalModal = async (type) => {
+  legalModalType.value = type;
+  showLegalModal.value = true;
+  loadingLegalDoc.value = true;
+  legalDocError.value = '';
+  legalDocInfo.value = null;
+
+  try {
+    const response = await $api.get(`/legal/pdf/${type}/info`);
+    if (response.success && response.data) {
+      legalDocInfo.value = response.data;
+    } else {
+      legalDocError.value = response.message || 'Document not available.';
+    }
+  } catch (error) {
+    console.error('Error loading legal document info:', error);
+    legalDocError.value = error.data?.message || 'Failed to load document. Please try again later.';
+  } finally {
+    loadingLegalDoc.value = false;
+  }
+};
+
+// Close legal document modal
+const closeLegalModal = () => {
+  showLegalModal.value = false;
+  legalModalType.value = '';
+  legalDocInfo.value = null;
+  legalDocError.value = '';
+};
+
+// Format file size for display
+const formatFileSize = (bytes) => {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
 // Submit business plan request

@@ -430,6 +430,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: "admin-management",
+});
+
 const route = useRoute();
 const { $api, $toast } = useNuxtApp();
 

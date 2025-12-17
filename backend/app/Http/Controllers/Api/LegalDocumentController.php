@@ -364,4 +364,46 @@ class LegalDocumentController extends Controller
             ]
         );
     }
+
+    /**
+     * Get PDF info (public - no auth required, for footer modals)
+     */
+    public function getPdfInfo($type)
+    {
+        $fileName = $type === 'terms' ? 'terms-of-service.pdf' : 'privacy-policy.pdf';
+        $metadataFileName = $type === 'terms' ? 'terms-of-service-metadata.json' : 'privacy-policy-metadata.json';
+        $pdfPath = 'legal-documents/' . $fileName;
+        $metadataPath = 'legal-documents/' . $metadataFileName;
+
+        if (!Storage::disk('public')->exists($pdfPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => ucfirst($type) . ' document not found.'
+            ], 404);
+        }
+
+        $fileInfo = [
+            'filename' => $type === 'terms' ? 'Terms of Service.pdf' : 'Privacy Policy.pdf',
+            'size' => Storage::disk('public')->size($pdfPath),
+            'last_modified' => date('Y-m-d H:i:s', Storage::disk('public')->lastModified($pdfPath)),
+            'view_url' => '/api/legal/pdf/' . $type . '/view'
+        ];
+        
+        // Try to load metadata if it exists for original filename
+        if (Storage::disk('public')->exists($metadataPath)) {
+            try {
+                $metadata = json_decode(Storage::disk('public')->get($metadataPath), true);
+                if (isset($metadata['original_filename'])) {
+                    $fileInfo['filename'] = $metadata['original_filename'];
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to read metadata file', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $fileInfo
+        ]);
+    }
 }

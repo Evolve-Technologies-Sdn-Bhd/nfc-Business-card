@@ -1,4 +1,14 @@
 // stores/admin.js
+
+// Helper function to safely get API instance
+const getApi = () => {
+  const nuxtApp = useNuxtApp();
+  if (!nuxtApp.$api) {
+    throw new Error('API plugin not initialized');
+  }
+  return nuxtApp.$api;
+};
+
 export const useAdminStore = defineStore("admin", {
   state: () => ({
     dashboard: null,
@@ -27,7 +37,7 @@ export const useAdminStore = defineStore("admin", {
     async fetchDashboard() {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.get("/admin/dashboard");
 
         if (response.success) {
@@ -44,7 +54,7 @@ export const useAdminStore = defineStore("admin", {
     async fetchUsers(params = {}) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
 
         const queryParams = {
           ...this.filters,
@@ -77,7 +87,7 @@ export const useAdminStore = defineStore("admin", {
     async fetchNfcCards(params = {}) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
 
         const queryParams = {
           ...params,
@@ -109,7 +119,7 @@ export const useAdminStore = defineStore("admin", {
     async fetchStats() {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.get("/admin/stats");
 
         if (response.success) {
@@ -126,7 +136,7 @@ export const useAdminStore = defineStore("admin", {
     async createUser(userData) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.post("/admin/users", userData);
 
         if (response.success) {
@@ -146,7 +156,7 @@ export const useAdminStore = defineStore("admin", {
     async updateUser(userId, userData) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.put(`/admin/users/${userId}`, userData);
 
         if (response.success) {
@@ -166,7 +176,7 @@ export const useAdminStore = defineStore("admin", {
     async deleteUser(userId) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.delete(`/admin/users/${userId}`);
 
         if (response.success) {
@@ -186,7 +196,7 @@ export const useAdminStore = defineStore("admin", {
     async registerNfcCard(cardData) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.post("/admin/nfc-cards", cardData);
 
         if (response.success) {
@@ -206,7 +216,7 @@ export const useAdminStore = defineStore("admin", {
     async updateNfcCard(cardId, cardData) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.put(`/admin/nfc-cards/${cardId}`, cardData);
 
         if (response.success) {
@@ -226,7 +236,7 @@ export const useAdminStore = defineStore("admin", {
     async deleteNfcCard(cardId) {
       try {
         this.loading = true;
-        const { $api } = useNuxtApp();
+        const $api = getApi();
         const response = await $api.delete(`/admin/nfc-cards/${cardId}`);
 
         if (response.success) {
@@ -278,3 +288,4 @@ export const useAdminStore = defineStore("admin", {
     hasError: (state) => !!state.error,
   },
 });
+
