@@ -510,7 +510,7 @@ const navigation = computed(() => {
         ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
         : "/UserDashboard/CardManagement",
       icon: "heroicons:credit-card",
-      badge: "Premium",
+      badge: plan.charAt(0).toUpperCase() + plan.slice(1),
     },
     {
       name: "Analytics",
