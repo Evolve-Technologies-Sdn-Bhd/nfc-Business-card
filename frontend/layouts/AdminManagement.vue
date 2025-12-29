@@ -200,7 +200,6 @@
       @click="sidebarOpen = false"
       class="fixed inset-0 z-40 lg:hidden bg-black bg-opacity-50"
     ></div>
-
   </div>
 </template>
 
@@ -213,6 +212,7 @@ const user = computed(() => authStore.user);
 const sidebarOpen = ref(false);
 const profileDropdownOpen = ref(false);
 const unreadFeedbackCount = ref(0);
+const pendingNotificationCount = ref(0);
 
 // Navigation items - using a computed property to dynamically update badge
 const navigation = computed(() => [
@@ -265,6 +265,7 @@ const navigation = computed(() => [
     name: "Notifications",
     href: "/AdminManagement/notifications",
     icon: "heroicons:bell",
+    badge: pendingNotificationCount.value,
   },
   {
     name: "User Feedback",
@@ -288,12 +289,24 @@ const isActiveRoute = (href) => {
 // Fetch unread feedback count
 const loadUnreadFeedbackCount = async () => {
   try {
-    const response = await $api.get('/admin/chatbot/feedback/unread-count');
+    const response = await $api.get("/admin/chatbot/feedback/unread-count");
     if (response.success) {
       unreadFeedbackCount.value = response.unread_count;
     }
   } catch (error) {
-    console.error('Failed to load unread feedback count:', error);
+    console.error("Failed to load unread feedback count:", error);
+  }
+};
+
+// Fetch unread notification count (for sidebar badge)
+const loadPendingNotificationCount = async () => {
+  try {
+    const response = await $api.get("/admin/notifications/unread-count");
+    if (response.success) {
+      pendingNotificationCount.value = response.unread_count;
+    }
+  } catch (error) {
+    console.error("Failed to load unread notification count:", error);
   }
 };
 
@@ -318,13 +331,25 @@ onMounted(() => {
   // Load unread feedback count
   loadUnreadFeedbackCount();
 
-  // Refresh unread count every 30 seconds
-  const interval = setInterval(loadUnreadFeedbackCount, 30000);
-  onBeforeUnmount(() => clearInterval(interval));
+  // Load pending notification count
+  loadPendingNotificationCount();
+
+  // Refresh counts every 30 seconds
+  const feedbackInterval = setInterval(loadUnreadFeedbackCount, 30000);
+  const notificationInterval = setInterval(loadPendingNotificationCount, 30000);
+  onBeforeUnmount(() => {
+    clearInterval(feedbackInterval);
+    clearInterval(notificationInterval);
+  });
 
   // Listen for immediate updates from feedback page actions
-  window.addEventListener('admin-feedback-updated', () => {
+  window.addEventListener("admin-feedback-updated", () => {
     loadUnreadFeedbackCount();
+  });
+
+  // Listen for immediate updates from notifications page actions
+  window.addEventListener("admin-notifications-updated", () => {
+    loadPendingNotificationCount();
   });
 });
 

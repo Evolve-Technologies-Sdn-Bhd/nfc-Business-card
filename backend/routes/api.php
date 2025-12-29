@@ -76,7 +76,7 @@ Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verif
 Route::prefix('auth')->group(function () {
     // Email check for OAuth conflict detection (public, rate-limited)
     Route::get('check-email', [AuthController::class, 'checkEmail'])->middleware('throttle:30,1');
-    
+
     // Social OAuth routes (Google & Apple)
     Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect']);
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback']);
@@ -123,12 +123,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/nfc-cards/{nfcCard}/activate', [NfcCardController::class, 'activate']);
     Route::post('/nfc-cards/{nfcCard}/deactivate', [NfcCardController::class, 'deactivate']);
     Route::get('/nfc-cards/{nfcCard}/analytics', [NfcCardController::class, 'analytics']);
-    
+
     // Landing Page update (protected - only card owner can update)
     Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
-    
+
     Route::get('/subscription/status', [NfcCardController::class, 'subscriptionStatus']);
-    
+
     // Business Team Members (for profile builder)
     Route::get('/business/team-members', [ProfileController::class, 'getBusinessTeamMembers']);
 
@@ -136,7 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analytics/overview', [AnalyticsController::class, 'overview']);
     Route::get('/analytics/profile', [AnalyticsController::class, 'profileAnalytics']);
     Route::get('/analytics/nfc/{tag}', [AnalyticsController::class, 'nfcAnalytics']);
-    
+
     // Business Analytics (for Business Plan users)
     Route::get('/analytics/business/overview', [AnalyticsController::class, 'businessOverview']);
     Route::get('/analytics/business/overview/export', [AnalyticsController::class, 'businessOverviewExport']);
@@ -171,7 +171,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Logout from all devices (revoke all tokens)
     Route::post('/user/logout-everywhere', [AuthController::class, 'logoutEverywhere']);
 
-   // Notifications (User)
+    // Notifications (User)
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
@@ -211,13 +211,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // Note: Employee creation is now handled by Super Admin via /admin/business-employees
         // Route::post('/employees', [QuotaController::class, 'createEmployee']); // DEPRECATED
         Route::delete('/employees/{id}', [QuotaController::class, 'deleteEmployee']);
-        
+
         // Bulk Employee Data Upload & Card Orders (does NOT create employee accounts)
         Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);
         Route::post('/employees/{id}/reset-password', [EmployeeController::class, 'resetPassword']);
         Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus']);
         Route::get('/employees/{id}/details', [EmployeeController::class, 'getEmployeeDetails']);
-        
+
         // Activity Logs (Business Admin can view employee activities, read-only)
         Route::get('/activity-logs', [ActivityLogController::class, 'index']);
         Route::get('/activity-logs/statistics', [ActivityLogController::class, 'statistics']);
@@ -239,10 +239,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])
         ->name('invoices.download')
         ->middleware('signed');
-    
+
     // Profile Design Options (User - get available options)
     Route::get('/profile-design-options', [ProfileDesignController::class, 'index']);
-    
+
     // Profile Builder (User - get sections and fields by plan)
     Route::get('/profile-builder-sections', [ProfileBuilderFieldController::class, 'getSections']);
     Route::get('/profile-builder-fields', [ProfileBuilderFieldController::class, 'index']);
@@ -277,7 +277,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/users', [AdminController::class, 'createUser']);
     Route::put('/users/{userId}', [AdminController::class, 'updateUser']);
     Route::delete('/users/{userId}', [AdminController::class, 'deleteUser']);
-    
+
     // Business Employee Management (Super Admin creates employees under Business accounts)
     Route::post('/business-employees', [AdminController::class, 'createBusinessEmployee']);
 
@@ -310,15 +310,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::prefix('notifications')->group(function () {
         Route::get('/', [AdminNotificationController::class, 'index']);
         Route::get('/statistics', [AdminNotificationController::class, 'getStatistics']);
+        Route::get('/unread-count', [AdminNotificationController::class, 'getUnreadCount']);
         Route::post('/announcement', [AdminNotificationController::class, 'sendAnnouncement']);
         Route::post('/send-to-users', [AdminNotificationController::class, 'sendToUsers']);
         Route::post('/system-message', [AdminNotificationController::class, 'sendSystemMessage']);
         Route::post('/{id}/approve', [AdminNotificationController::class, 'approveOrder']);
         Route::post('/{id}/reject', [AdminNotificationController::class, 'rejectOrder']);
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
+        Route::post('/{id}/mark-read', [AdminNotificationController::class, 'markAsRead']);
         Route::post('/cleanup', [AdminNotificationController::class, 'cleanupOldNotifications']);
     });
-    
+
     // ✅ Chatbot Feedback Management
     Route::prefix('chatbot')->group(function () {
         Route::get('/feedback', [AdminChatbotController::class, 'getFeedback']);
@@ -384,10 +386,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::put('/sections/{id}', [ProfileBuilderSectionController::class, 'update']);
         Route::delete('/sections/{id}', [ProfileBuilderSectionController::class, 'destroy']);
         Route::post('/sections/reorder', [ProfileBuilderSectionController::class, 'reorder']);
-        
+
         // Sections with fields (legacy compatibility)
         Route::get('/sections-with-fields', [ProfileBuilderFieldController::class, 'getSections']);
-        
+
         // Fields CRUD
         Route::get('/fields', [ProfileBuilderFieldController::class, 'index']);
         Route::post('/fields', [ProfileBuilderFieldController::class, 'store']);

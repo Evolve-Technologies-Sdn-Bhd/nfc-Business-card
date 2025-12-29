@@ -13,10 +13,7 @@
           </p>
         </div>
         <div class="mt-4 sm:mt-0">
-          <button
-            @click="showSendModal = true"
-            class="btn btn-primary"
-          >
+          <button @click="showSendModal = true" class="btn btn-primary">
             <Icon name="heroicons:megaphone" class="h-5 w-5 mr-2" />
             Send Announcement
           </button>
@@ -99,117 +96,117 @@
       <!-- Actions Bar -->
       <div class="card mb-6">
         <div class="card-body">
-        <div class="flex flex-wrap items-center gap-4">
-          <!-- Search Input -->
-          <div class="flex-1 min-w-[200px]">
-            <div class="relative">
-              <Icon
-                name="heroicons:magnifying-glass"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-              />
+          <div class="flex flex-wrap items-center gap-4">
+            <!-- Search Input -->
+            <div class="flex-1 min-w-[200px]">
+              <div class="relative">
+                <Icon
+                  name="heroicons:magnifying-glass"
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search users, messages..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <!-- Type Filter -->
+            <select
+              v-model="filterType"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Types</option>
+              <option value="admin_announcement">Announcements</option>
+              <option value="system_message">System Messages</option>
+              <option value="registration_success">Registration</option>
+              <option value="login_new_device">Login Alerts</option>
+              <option value="profile_updated">Profile Updates</option>
+              <option value="password_changed">Password Changes</option>
+              <option value="payment_successful">Successful Payments</option>
+              <option value="payment_failed">Failed Payments</option>
+              <option value="nfc_card_purchased">NFC Purchases</option>
+              <option value="nfc_card_activated">NFC Activations</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select
+              v-model="filterStatus"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Status</option>
+              <option value="read">Read</option>
+              <option value="unread">Unread</option>
+              <option value="failed">Failed/Non-delivery</option>
+            </select>
+
+            <!-- Date Range Filter -->
+            <select
+              v-model="filterDateRange"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
+            </select>
+
+            <button
+              @click="loadNotifications"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
+            >
+              <Icon name="heroicons:arrow-path" class="w-5 h-5 mr-2" />
+              Refresh
+            </button>
+
+            <button
+              @click="showCleanupModal = true"
+              class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors flex items-center"
+            >
+              <Icon name="heroicons:trash" class="w-5 h-5 mr-2" />
+              Cleanup
+            </button>
+
+            <button
+              @click="exportNotifications"
+              class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center"
+            >
+              <Icon name="heroicons:arrow-down-tray" class="w-5 h-5 mr-2" />
+              Export
+            </button>
+          </div>
+
+          <!-- Custom Date Range Picker -->
+          <div
+            v-if="filterDateRange === 'custom'"
+            class="mt-4 flex items-center gap-4"
+          >
+            <div>
+              <label class="block text-xs text-gray-600 mb-1">From</label>
               <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search users, messages..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                v-model="customDateFrom"
+                type="date"
+                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            <div>
+              <label class="block text-xs text-gray-600 mb-1">To</label>
+              <input
+                v-model="customDateTo"
+                type="date"
+                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              @click="applyCustomDateRange"
+              class="mt-5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Apply
+            </button>
           </div>
-
-          <!-- Type Filter -->
-          <select
-            v-model="filterType"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Types</option>
-            <option value="admin_announcement">Announcements</option>
-            <option value="system_message">System Messages</option>
-            <option value="registration_success">Registration</option>
-            <option value="login_new_device">Login Alerts</option>
-            <option value="profile_updated">Profile Updates</option>
-            <option value="password_changed">Password Changes</option>
-            <option value="payment_successful">Successful Payments</option>
-            <option value="payment_failed">Failed Payments</option>
-            <option value="nfc_card_purchased">NFC Purchases</option>
-            <option value="nfc_card_activated">NFC Activations</option>
-          </select>
-
-          <!-- Status Filter -->
-          <select
-            v-model="filterStatus"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Status</option>
-            <option value="read">Read</option>
-            <option value="unread">Unread</option>
-            <option value="failed">Failed/Non-delivery</option>
-          </select>
-
-          <!-- Date Range Filter -->
-          <select
-            v-model="filterDateRange"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="custom">Custom Range</option>
-          </select>
-
-          <button
-            @click="loadNotifications"
-            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
-          >
-            <Icon name="heroicons:arrow-path" class="w-5 h-5 mr-2" />
-            Refresh
-          </button>
-
-          <button
-            @click="showCleanupModal = true"
-            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors flex items-center"
-          >
-            <Icon name="heroicons:trash" class="w-5 h-5 mr-2" />
-            Cleanup
-          </button>
-
-          <button
-            @click="exportNotifications"
-            class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center"
-          >
-            <Icon name="heroicons:arrow-down-tray" class="w-5 h-5 mr-2" />
-            Export
-          </button>
-        </div>
-
-        <!-- Custom Date Range Picker -->
-        <div
-          v-if="filterDateRange === 'custom'"
-          class="mt-4 flex items-center gap-4"
-        >
-          <div>
-            <label class="block text-xs text-gray-600 mb-1">From</label>
-            <input
-              v-model="customDateFrom"
-              type="date"
-              class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label class="block text-xs text-gray-600 mb-1">To</label>
-            <input
-              v-model="customDateTo"
-              type="date"
-              class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            @click="applyCustomDateRange"
-            class="mt-5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Apply
-          </button>
-        </div>
         </div>
       </div>
 
@@ -273,19 +270,32 @@
                       <div class="text-sm font-medium text-gray-900">
                         {{
                           notification.type === "business_card_order_request"
-                            ? notification.data?.requesting_user_name || notification.data?.name || "N/A"
+                            ? notification.data?.requesting_user_name ||
+                              notification.data?.name ||
+                              "N/A"
                             : notification.user?.full_name || "N/A"
                         }}
                       </div>
                       <div class="text-sm text-gray-500">
                         {{
                           notification.type === "business_card_order_request"
-                            ? notification.data?.requesting_user_email || notification.data?.email || "N/A"
+                            ? notification.data?.requesting_user_email ||
+                              notification.data?.email ||
+                              "N/A"
                             : notification.user?.email || "N/A"
                         }}
                       </div>
-                      <div v-if="notification.type === 'business_card_order_request' && notification.data?.total_cards" class="text-xs text-blue-600 mt-1">
-                        {{ notification.data.total_cards }} card{{ notification.data.total_cards > 1 ? 's' : '' }} in batch
+                      <div
+                        v-if="
+                          notification.type === 'business_card_order_request' &&
+                          notification.data?.total_cards
+                        "
+                        class="text-xs text-blue-600 mt-1"
+                      >
+                        {{ notification.data.total_cards }} card{{
+                          notification.data.total_cards > 1 ? "s" : ""
+                        }}
+                        in batch
                       </div>
                     </div>
                   </div>
@@ -360,14 +370,24 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center gap-2">
                     <!-- Approve/Reject buttons for business card order requests -->
-                    <template v-if="notification.type === 'business_card_order_request' && !notification.is_approved && !notification.is_rejected">
+                    <template
+                      v-if="
+                        notification.type === 'business_card_order_request' &&
+                        !notification.is_approved &&
+                        !notification.is_rejected
+                      "
+                    >
                       <button
                         @click="approveOrder(notification)"
                         :disabled="approvingId === notification.id"
                         class="px-2 py-1 bg-success-100 text-success-700 hover:bg-success-200 rounded text-xs font-medium disabled:opacity-50"
                         title="Approve order"
                       >
-                        {{ approvingId === notification.id ? 'Approving...' : 'Approve' }}
+                        {{
+                          approvingId === notification.id
+                            ? "Approving..."
+                            : "Approve"
+                        }}
                       </button>
                       <button
                         @click="openRejectModal(notification)"
@@ -378,12 +398,25 @@
                       </button>
                     </template>
                     <!-- Status badges for processed orders -->
-                    <template v-else-if="notification.type === 'business_card_order_request'">
-                      <span v-if="notification.is_approved" class="px-2 py-1 bg-success-100 text-success-800 rounded text-xs font-medium flex items-center">
-                        <Icon name="heroicons:check-circle" class="w-3 h-3 mr-1" />
+                    <template
+                      v-else-if="
+                        notification.type === 'business_card_order_request'
+                      "
+                    >
+                      <span
+                        v-if="notification.is_approved"
+                        class="px-2 py-1 bg-success-100 text-success-800 rounded text-xs font-medium flex items-center"
+                      >
+                        <Icon
+                          name="heroicons:check-circle"
+                          class="w-3 h-3 mr-1"
+                        />
                         Approved
                       </span>
-                      <span v-else-if="notification.is_rejected" class="px-2 py-1 bg-error-100 text-error-800 rounded text-xs font-medium flex items-center">
+                      <span
+                        v-else-if="notification.is_rejected"
+                        class="px-2 py-1 bg-error-100 text-error-800 rounded text-xs font-medium flex items-center"
+                      >
                         <Icon name="heroicons:x-circle" class="w-3 h-3 mr-1" />
                         Rejected
                       </span>
@@ -728,7 +761,7 @@
                 :disabled="rejectingId || !rejectForm.reason.trim()"
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
               >
-                {{ rejectingId ? 'Rejecting...' : 'Reject Order' }}
+                {{ rejectingId ? "Rejecting..." : "Reject Order" }}
               </button>
               <button
                 @click="showRejectModal = false"
@@ -776,17 +809,26 @@
               <div v-if="selectedNotificationDetail" class="space-y-4">
                 <!-- Basic Info -->
                 <div class="border-b pb-4">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Basic Information</h4>
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                    Basic Information
+                  </h4>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label class="text-xs text-gray-500">Type</label>
-                      <p class="text-sm font-medium">{{ formatType(selectedNotificationDetail.type) }}</p>
+                      <p class="text-sm font-medium">
+                        {{ formatType(selectedNotificationDetail.type) }}
+                      </p>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500">Priority</label>
                       <p class="text-sm">
                         <span
-                          :class="['px-2 py-1 text-xs font-medium rounded-full', getPriorityClass(selectedNotificationDetail.priority)]"
+                          :class="[
+                            'px-2 py-1 text-xs font-medium rounded-full',
+                            getPriorityClass(
+                              selectedNotificationDetail.priority
+                            ),
+                          ]"
                         >
                           {{ selectedNotificationDetail.priority }}
                         </span>
@@ -811,54 +853,103 @@
                     </div>
                     <div>
                       <label class="text-xs text-gray-500">Date</label>
-                      <p class="text-sm">{{ formatDate(selectedNotificationDetail.created_at) }}</p>
+                      <p class="text-sm">
+                        {{ formatDate(selectedNotificationDetail.created_at) }}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Message -->
                 <div class="border-b pb-4">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-2">Message</h4>
-                  <p class="text-lg font-medium text-gray-900 mb-2">{{ selectedNotificationDetail.title }}</p>
-                  <p class="text-sm text-gray-600">{{ selectedNotificationDetail.message }}</p>
+                  <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                    Message
+                  </h4>
+                  <p class="text-lg font-medium text-gray-900 mb-2">
+                    {{ selectedNotificationDetail.title }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    {{ selectedNotificationDetail.message }}
+                  </p>
                 </div>
 
                 <!-- Business Card Order Details -->
-                <div v-if="selectedNotificationDetail.type === 'business_card_order_request'" class="border-b pb-4">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Order Details</h4>
+                <div
+                  v-if="
+                    selectedNotificationDetail.type ===
+                    'business_card_order_request'
+                  "
+                  class="border-b pb-4"
+                >
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                    Order Details
+                  </h4>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-xs text-gray-500">Requesting User</label>
-                      <p class="text-sm font-medium">{{ selectedNotificationDetail.data?.requesting_user_name || 'N/A' }}</p>
+                      <label class="text-xs text-gray-500"
+                        >Requesting User</label
+                      >
+                      <p class="text-sm font-medium">
+                        {{
+                          selectedNotificationDetail.data
+                            ?.requesting_user_name || "N/A"
+                        }}
+                      </p>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500">Email</label>
-                      <p class="text-sm">{{ selectedNotificationDetail.data?.requesting_user_email || 'N/A' }}</p>
+                      <p class="text-sm">
+                        {{
+                          selectedNotificationDetail.data
+                            ?.requesting_user_email || "N/A"
+                        }}
+                      </p>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500">Total Cards</label>
-                      <p class="text-sm font-medium text-blue-600">{{ selectedNotificationDetail.data?.total_cards || 0 }}</p>
+                      <p class="text-sm font-medium text-blue-600">
+                        {{ selectedNotificationDetail.data?.total_cards || 0 }}
+                      </p>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500">Plan</label>
-                      <p class="text-sm">{{ selectedNotificationDetail.data?.subscription_plan || 'N/A' }}</p>
+                      <p class="text-sm">
+                        {{
+                          selectedNotificationDetail.data?.subscription_plan ||
+                          "N/A"
+                        }}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Cards List (Batch Order) -->
-                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && selectedNotificationDetail.data?.cards" class="border-b pb-4">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Cards in this Order</h4>
+                <div
+                  v-if="
+                    selectedNotificationDetail.type ===
+                      'business_card_order_request' &&
+                    selectedNotificationDetail.data?.cards
+                  "
+                  class="border-b pb-4"
+                >
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                    Cards in this Order
+                  </h4>
                   <div class="space-y-3 max-h-64 overflow-y-auto">
                     <div
-                      v-for="(card, index) in selectedNotificationDetail.data.cards"
+                      v-for="(card, index) in selectedNotificationDetail.data
+                        .cards"
                       :key="index"
                       class="bg-gray-50 p-3 rounded-lg"
                     >
                       <div class="flex items-start justify-between mb-2">
                         <div class="flex items-center">
-                          <span class="text-xs font-medium text-gray-500 mr-2">#{{ index + 1 }}</span>
-                          <h5 class="text-sm font-semibold text-gray-900">{{ card.name }}</h5>
+                          <span class="text-xs font-medium text-gray-500 mr-2"
+                            >#{{ index + 1 }}</span
+                          >
+                          <h5 class="text-sm font-semibold text-gray-900">
+                            {{ card.name }}
+                          </h5>
                         </div>
                         <span
                           v-if="card.is_admin_card"
@@ -876,19 +967,27 @@
                       <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span class="text-gray-500">Email:</span>
-                          <span class="text-gray-700 ml-1">{{ card.email }}</span>
+                          <span class="text-gray-700 ml-1">{{
+                            card.email
+                          }}</span>
                         </div>
                         <div>
                           <span class="text-gray-500">Position:</span>
-                          <span class="text-gray-700 ml-1">{{ card.position }}</span>
+                          <span class="text-gray-700 ml-1">{{
+                            card.position
+                          }}</span>
                         </div>
                         <div>
                           <span class="text-gray-500">Contact:</span>
-                          <span class="text-gray-700 ml-1">{{ card.contact_number }}</span>
+                          <span class="text-gray-700 ml-1">{{
+                            card.contact_number
+                          }}</span>
                         </div>
                         <div v-if="card.website">
                           <span class="text-gray-500">Website:</span>
-                          <span class="text-gray-700 ml-1">{{ card.website }}</span>
+                          <span class="text-gray-700 ml-1">{{
+                            card.website
+                          }}</span>
                         </div>
                       </div>
                     </div>
@@ -896,35 +995,85 @@
                 </div>
 
                 <!-- Delivery Address (Only for business_card_order_request) -->
-                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && selectedNotificationDetail.data?.delivery_address" class="border-b pb-4">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                    <Icon name="heroicons:map-pin" class="w-4 h-4 mr-2 text-blue-600" />
+                <div
+                  v-if="
+                    selectedNotificationDetail.type ===
+                      'business_card_order_request' &&
+                    selectedNotificationDetail.data?.delivery_address
+                  "
+                  class="border-b pb-4"
+                >
+                  <h4
+                    class="text-sm font-semibold text-gray-700 mb-3 flex items-center"
+                  >
+                    <Icon
+                      name="heroicons:map-pin"
+                      class="w-4 h-4 mr-2 text-blue-600"
+                    />
                     Delivery Address
                   </h4>
                   <div class="bg-blue-50 p-4 rounded-lg">
-                    <p class="text-sm text-gray-800">{{ selectedNotificationDetail.data.delivery_address }}</p>
+                    <p class="text-sm text-gray-800">
+                      {{ selectedNotificationDetail.data.delivery_address }}
+                    </p>
                   </div>
                 </div>
 
                 <!-- Approval Status -->
-                <div v-if="selectedNotificationDetail.type === 'business_card_order_request' && (selectedNotificationDetail.is_approved || selectedNotificationDetail.is_rejected)">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-2">Status</h4>
-                  <div v-if="selectedNotificationDetail.is_approved" class="bg-green-50 p-4 rounded-lg">
+                <div
+                  v-if="
+                    selectedNotificationDetail.type ===
+                      'business_card_order_request' &&
+                    (selectedNotificationDetail.is_approved ||
+                      selectedNotificationDetail.is_rejected)
+                  "
+                >
+                  <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                    Status
+                  </h4>
+                  <div
+                    v-if="selectedNotificationDetail.is_approved"
+                    class="bg-green-50 p-4 rounded-lg"
+                  >
                     <div class="flex items-center">
-                      <Icon name="heroicons:check-circle" class="w-5 h-5 text-green-600 mr-2" />
+                      <Icon
+                        name="heroicons:check-circle"
+                        class="w-5 h-5 text-green-600 mr-2"
+                      />
                       <div>
-                        <p class="text-sm font-medium text-green-800">Approved</p>
-                        <p class="text-xs text-green-600">{{ formatDate(selectedNotificationDetail.approved_at) }}</p>
+                        <p class="text-sm font-medium text-green-800">
+                          Approved
+                        </p>
+                        <p class="text-xs text-green-600">
+                          {{
+                            formatDate(selectedNotificationDetail.approved_at)
+                          }}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div v-if="selectedNotificationDetail.is_rejected" class="bg-red-50 p-4 rounded-lg">
+                  <div
+                    v-if="selectedNotificationDetail.is_rejected"
+                    class="bg-red-50 p-4 rounded-lg"
+                  >
                     <div class="flex items-start">
-                      <Icon name="heroicons:x-circle" class="w-5 h-5 text-red-600 mr-2 mt-0.5" />
+                      <Icon
+                        name="heroicons:x-circle"
+                        class="w-5 h-5 text-red-600 mr-2 mt-0.5"
+                      />
                       <div class="flex-1">
-                        <p class="text-sm font-medium text-red-800 mb-1">Rejected</p>
-                        <p class="text-xs text-red-600 mb-2">{{ formatDate(selectedNotificationDetail.rejected_at) }}</p>
-                        <p class="text-sm text-gray-700"><strong>Reason:</strong> {{ selectedNotificationDetail.rejection_reason }}</p>
+                        <p class="text-sm font-medium text-red-800 mb-1">
+                          Rejected
+                        </p>
+                        <p class="text-xs text-red-600 mb-2">
+                          {{
+                            formatDate(selectedNotificationDetail.rejected_at)
+                          }}
+                        </p>
+                        <p class="text-sm text-gray-700">
+                          <strong>Reason:</strong>
+                          {{ selectedNotificationDetail.rejection_reason }}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1313,9 +1462,26 @@ const truncateText = (text, length) => {
 };
 
 // View notification details
-const viewDetails = (notification) => {
+const viewDetails = async (notification) => {
   selectedNotificationDetail.value = notification;
   showDetailsModal.value = true;
+  
+  // Mark notification as read if unread
+  if (!notification.is_read) {
+    try {
+      const response = await $api.post(`/admin/notifications/${notification.id}/mark-read`);
+      if (response.success) {
+        notification.is_read = true;
+        notification.read_at = new Date();
+        // Trigger sidebar badge update
+        window.dispatchEvent(new CustomEvent('admin-notifications-updated'));
+        // Refresh statistics
+        loadStatistics();
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  }
 };
 
 // View user notification history
@@ -1360,14 +1526,14 @@ const approveOrder = async (notification) => {
   const orderData = notification.data || {};
   const totalCards = orderData.total_cards || orderData.cards?.length || 1;
   const employeeCount = orderData.employee_count || 0;
-  
+
   let confirmMessage = `Are you sure you want to approve this order?\n\n`;
   confirmMessage += `📦 Total Cards: ${totalCards}\n`;
-  
+
   if (orderData.include_admin) {
     confirmMessage += `👤 Admin Card: 1\n`;
   }
-  
+
   if (employeeCount > 0) {
     confirmMessage += `👥 Employee Cards: ${employeeCount}\n`;
     confirmMessage += `\n⚠️ This will automatically:\n`;
@@ -1376,7 +1542,7 @@ const approveOrder = async (notification) => {
     confirmMessage += `✓ Set default password: Welcome123@\n`;
     confirmMessage += `✓ Send login credentials to employees`;
   }
-  
+
   if (!confirm(confirmMessage)) {
     return;
   }
@@ -1392,69 +1558,73 @@ const approveOrder = async (notification) => {
       const data = response.data || {};
       const cardsCreated = data.total_cards_created || 0;
       const employeesCreated = data.total_employees_created || 0;
-      
+
       let successMessage = `✅ Order approved successfully!\n\n`;
       successMessage += `📦 ${cardsCreated} NFC card(s) created`;
-      
+
       if (employeesCreated > 0) {
         successMessage += `\n👥 ${employeesCreated} employee account(s) created`;
         successMessage += `\n📧 Login credentials sent to employees`;
       }
-      
+
       // Check if any accounts already existed
       const cards = data.cards || [];
-      const existingAccounts = cards.filter(c => 
-        c.is_employee_card && !c.employee_account_created
+      const existingAccounts = cards.filter(
+        (c) => c.is_employee_card && !c.employee_account_created
       ).length;
-      
+
       if (existingAccounts > 0) {
         successMessage += `\n\nℹ️ ${existingAccounts} employee(s) already had accounts`;
       }
-      
+
       $toast.success(successMessage, {
         duration: 8000, // Show for 8 seconds
       });
-      
+
       notification.is_approved = true;
       notification.approved_at = new Date();
       loadNotifications();
       loadStatistics();
+
+      // Trigger sidebar badge update
+      window.dispatchEvent(new CustomEvent("admin-notifications-updated"));
     }
   } catch (error) {
     console.error("Error approving order:", error);
-    
+
     // Handle validation errors (existing employees - auto-rejected)
     if (error.data?.existing_employees) {
       const existingEmps = error.data.existing_employees;
       const isRejected = error.data?.is_rejected;
-      
-      let errorMessage = isRejected 
+
+      let errorMessage = isRejected
         ? `🔴 Order Automatically Rejected!\n\n`
         : `❌ Cannot approve order!\n\n`;
-      
+
       errorMessage += `${existingEmps.length} employee email(s) already exist:\n\n`;
-      
-      existingEmps.forEach(emp => {
+
+      existingEmps.forEach((emp) => {
         errorMessage += `• ${emp.name} (${emp.email})\n`;
       });
-      
+
       if (isRejected) {
         errorMessage += `\n✅ The user has been notified with the rejection reason.`;
         errorMessage += `\n\n💡 Solution: User should remove duplicate employees or use different emails.`;
-        
+
         // Immediately update the notification status in the UI
         notification.is_rejected = true;
         notification.is_approved = false;
-        notification.rejection_reason = error.data?.rejection_reason || 'Duplicate employee emails detected';
+        notification.rejection_reason =
+          error.data?.rejection_reason || "Duplicate employee emails detected";
         notification.rejected_at = new Date();
       } else {
         errorMessage += `\nThese employees already have accounts in the system.`;
       }
-      
+
       $toast.error(errorMessage, {
         duration: 12000,
       });
-      
+
       // Reload notifications to show rejected status
       if (isRejected) {
         loadNotifications();
@@ -1503,6 +1673,9 @@ const submitRejectOrder = async () => {
       showRejectModal.value = false;
       loadNotifications();
       loadStatistics();
+
+      // Trigger sidebar badge update
+      window.dispatchEvent(new CustomEvent("admin-notifications-updated"));
     }
   } catch (error) {
     console.error("Error rejecting order:", error);

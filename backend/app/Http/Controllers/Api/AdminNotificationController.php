@@ -190,6 +190,39 @@ class AdminNotificationController extends Controller
             'data' => $stats,
         ]);
     }
+    /**
+     * Get count of unread notifications for admin
+     * Used for sidebar badge display
+     */
+    public function getUnreadCount()
+    {
+        // Count all unread notifications in the system
+        $unreadCount = Notification::where('is_read', false)->count();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+        ]);
+    }
+
+    /**
+     * Mark notification as read (Admin)
+     */
+    public function markAsRead($id)
+    {
+        $notification = Notification::findOrFail($id);
+
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->read_at = now();
+            $notification->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read',
+        ]);
+    }
 
     /**
      * Delete notification (Admin)
@@ -211,7 +244,7 @@ class AdminNotificationController extends Controller
     public function cleanupOldNotifications(Request $request)
     {
         $days = $request->input('days', 30);
-        
+
         $deleted = Notification::where('created_at', '<', now()->subDays($days))
             ->where('is_read', true)
             ->delete();
@@ -250,11 +283,11 @@ class AdminNotificationController extends Controller
 
         // Get order data
         $orderData = $notification->data ?? [];
-        
+
         // Get the user who placed the order (from notification data)
         $requestingUserId = $orderData['requesting_user_id'] ?? $notification->user_id;
         \Log::info('Requesting user ID', ['requesting_user_id' => $requestingUserId, 'notification_user_id' => $notification->user_id]);
-        
+
         // Get user and order data
         $user = User::find($requestingUserId);
         if (!$user) {
@@ -269,11 +302,11 @@ class AdminNotificationController extends Controller
         // Create NFC cards from batch order data
         \Log::info('Order data', ['order_data' => $orderData]);
         $businessAccountId = null;
-        
+
         // Determine subscription plan
         $subscriptionPlan = $orderData['subscription_plan'] ?? 'premium';
         \Log::info('Subscription plan determined', ['plan' => $subscriptionPlan]);
-        
+
         // Determine business account ID if it's a business plan
         if ($subscriptionPlan === 'business') {
             // Check if user is a business account or employee
@@ -311,7 +344,7 @@ class AdminNotificationController extends Controller
             // PRE-VALIDATION 1: Check if admin has card when ordering employee cards only
             $hasAdminCard = false;
             $hasEmployeeCard = false;
-            
+
             foreach ($cards as $cardData) {
                 if ($cardData['is_admin_card'] ?? false) {
                     $hasAdminCard = true;
@@ -320,20 +353,20 @@ class AdminNotificationController extends Controller
                     $hasEmployeeCard = true;
                 }
             }
-            
+
             // If ordering employee cards only (no admin card in this order)
             if ($hasEmployeeCard && !$hasAdminCard) {
                 // Check if business admin already has at least one card
                 $adminCardCount = \DB::table('nfc_cards')
                     ->where('user_id', $businessAccount->id)
                     ->count();
-                
+
                 if ($adminCardCount === 0) {
                     \Log::warning('Admin has no card but trying to order employee cards only - auto-rejecting', [
                         'business_account_id' => $businessAccount->id,
                         'admin_email' => $businessAccount->email
                     ]);
-                    
+
                     $rejectionReason = "Order automatically rejected: Business admin must have at least one card before ordering employee cards.\n\n";
                     $rejectionReason .= "📋 Issue:\n";
                     $rejectionReason .= "• You are trying to order employee cards only\n";
@@ -342,10 +375,10 @@ class AdminNotificationController extends Controller
                     $rejectionReason .= "• Option 1: Include your admin card in this order (check 'Include myself')\n";
                     $rejectionReason .= "• Option 2: Order your admin card first, then order employee cards separately\n\n";
                     $rejectionReason .= "Note: Business admin must have a card before employees can have cards.";
-                    
+
                     // Auto-reject the notification
                     $notification->reject($rejectionReason, auth()->id());
-                    
+
                     // Send rejection notification to the user
                     $this->notificationService->create(
                         $user,
@@ -356,13 +389,13 @@ class AdminNotificationController extends Controller
                             'reason_type' => 'admin_card_required',
                         ]
                     );
-                    
+
                     \Log::info('Order auto-rejected - admin card required', [
                         'notification_id' => $notification->id,
                         'user_id' => $user->id,
                         'business_account_id' => $businessAccount->id
                     ]);
-                    
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Order automatically rejected: Admin must have a card before ordering employee cards',
@@ -370,7 +403,7 @@ class AdminNotificationController extends Controller
                         'notification_id' => $notification->id,
                     ], 400);
                 }
-                
+
                 \Log::info('Admin card check passed - admin has existing cards', [
                     'business_account_id' => $businessAccount->id,
                     'admin_card_count' => $adminCardCount
@@ -395,7 +428,7 @@ class AdminNotificationController extends Controller
             // If any employee accounts already exist, auto-reject the order
             if (count($existingEmployees) > 0) {
                 \Log::warning('Order contains existing employee emails - auto-rejecting', ['existing_employees' => $existingEmployees]);
-                
+
                 // Build detailed rejection reason
                 $rejectionReason = "Order automatically rejected: " . count($existingEmployees) . " employee email(s) already exist in the system.\n\n";
                 $rejectionReason .= "Existing employees:\n";
@@ -404,10 +437,10 @@ class AdminNotificationController extends Controller
                 }
                 $rejectionReason .= "\n⚠️ Solution: Please remove these employees from your order or use different email addresses.\n";
                 $rejectionReason .= "Note: Each employee can only have one account in the system.";
-                
+
                 // Auto-reject the notification
                 $notification->reject($rejectionReason, auth()->id());
-                
+
                 // Send rejection notification to the user
                 $this->notificationService->create(
                     $user,
@@ -419,13 +452,13 @@ class AdminNotificationController extends Controller
                         'existing_employees' => $existingEmployees,
                     ]
                 );
-                
+
                 \Log::info('Order auto-rejected and notification sent', [
                     'notification_id' => $notification->id,
                     'user_id' => $user->id,
                     'existing_employees_count' => count($existingEmployees)
                 ]);
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Order automatically rejected due to duplicate employee emails',
@@ -440,20 +473,20 @@ class AdminNotificationController extends Controller
             if ($subscriptionPlan === 'business' && $businessAccount) {
                 $totalCardsInOrder = count($cards);
                 $newEmployeesInOrder = 0;
-                
+
                 // Count how many new employee accounts will be created
                 foreach ($cards as $cardData) {
                     if (($cardData['is_employee_card'] ?? false) && !empty($cardData['email'])) {
                         $newEmployeesInOrder++;
                     }
                 }
-                
+
                 // Get current quota information
                 $quotaInfo = $businessAccount->getQuotaInfo();
                 $availableQuota = $quotaInfo['available_quota'] ?? 0;
                 $totalQuota = $quotaInfo['total_quota'] ?? 0;
                 $currentlyUsed = $quotaInfo['ordered_cards_count'] ?? 0;
-                
+
                 \Log::info('Quota check', [
                     'business_account_id' => $businessAccount->id,
                     'total_quota' => $totalQuota,
@@ -463,7 +496,7 @@ class AdminNotificationController extends Controller
                     'new_employees_in_order' => $newEmployeesInOrder,
                     'quota_needed' => $totalCardsInOrder,
                 ]);
-                
+
                 // Check if there's enough quota for all cards
                 if ($totalCardsInOrder > $availableQuota) {
                     \Log::warning('Insufficient quota - auto-rejecting order', [
@@ -472,7 +505,7 @@ class AdminNotificationController extends Controller
                         'total_quota' => $totalQuota,
                         'current_usage' => $currentlyUsed
                     ]);
-                    
+
                     // Build detailed rejection reason
                     $rejectionReason = "Order automatically rejected: Insufficient quota.\n\n";
                     $rejectionReason .= "📊 Quota Status:\n";
@@ -482,10 +515,10 @@ class AdminNotificationController extends Controller
                     $rejectionReason .= "• Requested: {$totalCardsInOrder} card(s)\n\n";
                     $rejectionReason .= "⚠️ You need {$totalCardsInOrder} cards but only have {$availableQuota} available.\n";
                     $rejectionReason .= "Please contact Super Admin to increase your quota or reduce the number of cards in your order.";
-                    
+
                     // Auto-reject the notification
                     $notification->reject($rejectionReason, auth()->id());
-                    
+
                     // Send rejection notification to the user
                     $this->notificationService->create(
                         $user,
@@ -501,13 +534,13 @@ class AdminNotificationController extends Controller
                             ],
                         ]
                     );
-                    
+
                     \Log::info('Order auto-rejected due to insufficient quota', [
                         'notification_id' => $notification->id,
                         'user_id' => $user->id,
                         'business_account_id' => $businessAccount->id
                     ]);
-                    
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Order automatically rejected due to insufficient quota',
@@ -523,7 +556,7 @@ class AdminNotificationController extends Controller
                         'is_rejected' => true,
                     ], 400);
                 }
-                
+
                 \Log::info('Quota check passed - sufficient quota available', [
                     'available' => $availableQuota,
                     'required' => $totalCardsInOrder
@@ -544,22 +577,22 @@ class AdminNotificationController extends Controller
                 // If this is an employee card, create the employee account
                 if ($isEmployeeCard && !empty($cardData['email'])) {
                     DB::beginTransaction();
-                    
+
                     try {
                         // Use default password for new employee
                         $defaultPassword = 'Welcome123@';
-                        
+
                         // Parse name into first and last name
                         $nameParts = explode(' ', $cardData['name'], 2);
                         $firstName = $nameParts[0] ?? '';
                         $lastName = $nameParts[1] ?? '';
-                        
+
                         \Log::info("Creating employee account", [
                             'email' => $cardData['email'],
                             'name' => $cardData['name'],
                             'business_account_id' => $businessAccountId
                         ]);
-                        
+
                         // Create employee user account (pre-validated, no duplicates)
                         $employeeUser = User::create([
                             'first_name' => $firstName,
@@ -575,9 +608,9 @@ class AdminNotificationController extends Controller
                             'subscription_end_date' => $businessAccount->subscription_end_date ?? now()->addYear(),
                             'parent_business_id' => $businessAccountId,
                         ]);
-                        
+
                         \Log::info("Employee account created", ['employee_id' => $employeeUser->id, 'email' => $employeeUser->email]);
-                        
+
                         // Send welcome notification with login credentials to employee
                         $this->notificationService->create(
                             $employeeUser,
@@ -589,17 +622,17 @@ class AdminNotificationController extends Controller
                                 'company' => $businessAccount->company ?? '',
                             ]
                         );
-                        
+
                         $createdEmployees[] = [
                             'id' => $employeeUser->id,
                             'name' => $cardData['name'],
                             'email' => $cardData['email'],
                             'temporary_password' => $defaultPassword,
                         ];
-                        
+
                         // Use employee's user ID for the card
                         $cardOwnerId = $employeeUser->id;
-                        
+
                         DB::commit();
                     } catch (\Exception $e) {
                         DB::rollBack();
@@ -607,7 +640,7 @@ class AdminNotificationController extends Controller
                             'error' => $e->getMessage(),
                             'email' => $cardData['email']
                         ]);
-                        
+
                         // Fail the entire order if employee creation fails
                         throw new \Exception("Failed to create employee account for {$cardData['email']}: " . $e->getMessage());
                     }
@@ -655,7 +688,7 @@ class AdminNotificationController extends Controller
             if (count($createdEmployees) > 0) {
                 $confirmMessage .= ' and ' . count($createdEmployees) . ' employee account(s) created';
             }
-            
+
             $this->notificationService->create(
                 $user,
                 'nfc_card_purchased',
