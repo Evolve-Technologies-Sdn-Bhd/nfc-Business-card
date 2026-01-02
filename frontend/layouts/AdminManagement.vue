@@ -237,6 +237,11 @@ const navigation = computed(() => [
     icon: "heroicons:credit-card",
   },
   {
+    name: "Card Templates",
+    href: "/AdminManagement/card-templates",
+    icon: "heroicons:squares-2x2",
+  },
+  {
     name: "Invoices",
     href: "/AdminManagement/invoices",
     icon: "heroicons:document-text",

@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\Admin\PlanPriceController;
 use App\Http\Controllers\Api\ProfileDesignController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderFieldController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderSectionController;
+use App\Http\Controllers\Api\CardTemplateController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -56,6 +57,7 @@ Route::get('/test', function () {
         ]
     ]);
 });
+Route::post('/magick/replace-text', [\App\Http\Controllers\MagickController::class, 'replace']);
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -397,6 +399,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::delete('/fields/{id}', [ProfileBuilderFieldController::class, 'destroy']);
     });
 
+    // ✅ Card Template Management
+    Route::prefix('card-templates')->group(function () {
+        Route::get('/', [CardTemplateController::class, 'adminIndex']);
+        Route::post('/', [CardTemplateController::class, 'store']);
+        Route::put('/{id}', [CardTemplateController::class, 'update']);
+        Route::delete('/{id}', [CardTemplateController::class, 'destroy']);
+        Route::post('/{id}/retry', [CardTemplateController::class, 'retryProcessing']);
+        Route::post('/{id}/toggle-visibility', [CardTemplateController::class, 'toggleVisibility']);
+        Route::post('/{id}/mark-completed', [CardTemplateController::class, 'markCompleted']);
+    });
+
     // ✅ Business User Custom Assignments (separate prefix to not conflict with BusinessUserController)
     Route::prefix('business-user-assignments')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'index']);
@@ -409,4 +422,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
 // Public endpoint for viewing current plan prices
 Route::get('/plan-prices/public', [PlanPriceController::class, 'publicPrices']);
+
+// ✅ n8n Webhook (Public - receives processed images)
+Route::post('/webhooks/n8n/template-processed', [CardTemplateController::class, 'n8nWebhook']);
+
+// ✅ Public Card Templates (for users)
+Route::get('/card-templates', [CardTemplateController::class, 'index']);
+Route::get('/card-templates/{id}', [CardTemplateController::class, 'show']);
 
