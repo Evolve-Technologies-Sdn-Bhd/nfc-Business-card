@@ -38,6 +38,77 @@
         </p>
       </div>
 
+      <!-- Company Information Section -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+          <Icon name="heroicons:building-office-2" class="h-7 w-7 inline-block mr-2 text-primary-600" />
+          Company Information
+        </h2>
+        <p class="text-sm text-secondary-600 mb-6">This information will appear on all cards ordered.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Company Logo Upload -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">Company Logo</label>
+            <div class="flex items-start gap-4">
+              <!-- Logo Preview -->
+              <div 
+                class="w-24 h-24 border-2 border-dashed border-secondary-300 rounded-lg flex items-center justify-center bg-secondary-50 overflow-hidden"
+                :class="{ 'border-primary-500': companyInfo.logo }"
+              >
+                <img 
+                  v-if="companyInfo.logo" 
+                  :src="companyInfo.logo" 
+                  alt="Company Logo" 
+                  class="w-full h-full object-contain"
+                />
+                <Icon v-else name="heroicons:photo" class="h-8 w-8 text-secondary-400" />
+              </div>
+              
+              <!-- Upload Button -->
+              <div class="flex-1">
+                <input
+                  type="file"
+                  ref="logoInput"
+                  @change="handleLogoUpload"
+                  accept="image/*"
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  @click="$refs.logoInput.click()"
+                  class="w-full px-4 py-2 border border-secondary-300 rounded-lg text-sm font-medium text-secondary-700 hover:bg-secondary-50 transition-colors"
+                >
+                  <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 inline-block mr-1" />
+                  Upload Logo
+                </button>
+                <p class="text-xs text-secondary-500 mt-2">PNG, JPG up to 2MB. Recommended: 200x200px</p>
+                <button
+                  v-if="companyInfo.logo"
+                  @click="removeLogo"
+                  class="text-xs text-red-600 hover:text-red-800 mt-1"
+                >
+                  Remove logo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Name -->
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2">Company Name *</label>
+            <input
+              v-model="companyInfo.name"
+              type="text"
+              required
+              class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Enter your company name"
+            />
+            <p class="text-xs text-secondary-500 mt-2">This will be displayed on your NFC cards</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Card Recipients Section -->
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <h2 class="text-2xl font-bold text-secondary-900 mb-6">Card Recipients</h2>
@@ -562,8 +633,19 @@
                 Choose Template
               </h3>
 
+              <!-- Loading State -->
+              <div v-if="templatesLoading" class="flex justify-center py-8">
+                <div class="spinner"></div>
+              </div>
+
+              <!-- No Templates -->
+              <div v-else-if="availableTemplates.length === 0" class="text-center py-8">
+                <Icon name="heroicons:photo" class="h-12 w-12 text-secondary-300 mx-auto mb-2" />
+                <p class="text-secondary-500">No templates available for your plan</p>
+              </div>
+
               <!-- Template Options - Compact Cards (90mm x 54mm ratio) -->
-              <div class="grid grid-cols-3 gap-2">
+              <div v-else class="grid grid-cols-3 gap-2">
                 <div
                   v-for="template in availableTemplates"
                   :key="template.id"
@@ -577,17 +659,24 @@
                 >
                   <!-- Correct aspect ratio: 90mm width x 54mm height = 5:3 -->
                   <div
-                    class="w-full bg-gradient-to-br from-blue-500 to-blue-700 rounded mb-1 relative overflow-hidden"
+                    class="w-full rounded mb-1 relative overflow-hidden bg-secondary-100"
                     style="aspect-ratio: 5/3"
                   >
-                    <!-- Template Preview - Readable Size -->
-                    <div class="absolute inset-0 p-1.5 text-white flex flex-col justify-between text-xs">
+                    <!-- Template Image from API -->
+                    <img
+                      v-if="template.front_image_url"
+                      :src="getTemplateImageUrl(template.front_image_url)"
+                      :alt="template.name"
+                      class="w-full h-full object-cover"
+                    />
+                    <!-- Fallback Preview if no image -->
+                    <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 text-white flex flex-col justify-between text-xs">
                       <div>
-                        <div class="font-bold">JOHN DOE</div>
-                        <div class="opacity-80 text-xs">Engineer</div>
+                        <div class="font-bold">{{ template.name }}</div>
+                        <div class="opacity-80 text-xs">Template</div>
                       </div>
                       <div class="text-right text-xs">
-                        <div>+60 12-xxx</div>
+                        <div>NFC Card</div>
                       </div>
                     </div>
                   </div>
@@ -723,15 +812,31 @@
                     </div>
 
                     <!-- Template Preview -->
-                    <div v-else-if="designMethod === 'template' && selectedTemplate" class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 p-1.5">
-                      <div class="text-white h-full flex flex-col justify-between text-xs">
-                        <div>
-                          <div class="font-bold">{{ adminInfo.name || 'Your Name' }}</div>
-                          <div class="opacity-90 text-xs">{{ adminInfo.position || 'Position' }}</div>
-                        </div>
-                        <div class="text-xs space-y-0.5">
-                          <div>{{ adminInfo.contactNumber || '+60 12-345 6789' }}</div>
-                          <div>{{ adminInfo.email || 'email@company.com' }}</div>
+                    <div v-else-if="designMethod === 'template' && selectedTemplate" class="w-full h-full">
+                      <!-- Show template image from API -->
+                      <img
+                        v-if="selectedTemplateData?.front_image_url"
+                        :src="getTemplateImageUrl(selectedTemplateData.front_image_url)"
+                        :alt="selectedTemplateData?.name || 'Template'"
+                        class="w-full h-full object-cover"
+                      />
+                      <!-- Fallback gradient if no image -->
+                      <div v-else class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 p-1.5">
+                        <div class="text-white h-full flex flex-col justify-between text-xs">
+                          <div class="flex items-start gap-1.5">
+                            <div v-if="companyInfo.logo" class="w-6 h-6 rounded bg-white/20 flex-shrink-0 overflow-hidden">
+                              <img :src="companyInfo.logo" alt="Logo" class="w-full h-full object-contain" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="font-bold text-[10px] truncate">{{ companyInfo.name || 'Company Name' }}</div>
+                              <div class="font-semibold truncate">{{ adminInfo.name || 'Your Name' }}</div>
+                              <div class="opacity-90 text-[9px]">{{ adminInfo.position || 'Position' }}</div>
+                            </div>
+                          </div>
+                          <div class="text-[9px] space-y-0.5">
+                            <div>{{ adminInfo.contactNumber || '+60 12-345 6789' }}</div>
+                            <div class="truncate">{{ adminInfo.email || 'email@company.com' }}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -760,7 +865,7 @@
                       <Icon name="heroicons:sparkles" class="h-3 w-3 mr-1" />
                       {{ 
                         designMethod === 'previous' ? 'Previous' : 
-                        designMethod === 'template' ? selectedTemplate : 
+                        designMethod === 'template' ? (selectedTemplateData?.name || 'Template') : 
                         'Custom'
                       }}
                     </span>
@@ -780,6 +885,22 @@
             </h2>
 
             <div class="space-y-4">
+              <!-- Company Info Summary -->
+              <div class="p-3 bg-primary-50 border border-primary-200 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div v-if="companyInfo.logo" class="w-10 h-10 rounded-lg bg-white border border-primary-200 overflow-hidden flex-shrink-0">
+                    <img :src="companyInfo.logo" alt="Company Logo" class="w-full h-full object-contain" />
+                  </div>
+                  <div v-else class="w-10 h-10 rounded-lg bg-primary-100 border border-primary-200 flex items-center justify-center flex-shrink-0">
+                    <Icon name="heroicons:building-office-2" class="h-5 w-5 text-primary-600" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-primary-600 font-medium">Company</p>
+                    <p class="text-sm font-semibold text-primary-900 truncate">{{ companyInfo.name || 'Not set' }}</p>
+                  </div>
+                </div>
+              </div>
+
               <div class="flex justify-between items-center p-3 bg-secondary-50 rounded-lg">
                 <span class="text-sm font-medium text-secondary-700">Admin Card:</span>
                 <span class="text-sm font-semibold text-secondary-900">
@@ -1095,6 +1216,13 @@ const selectedPreviousDesign = ref(null);
 const previousDesigns = ref([]);
 const isPlacingOrder = ref(false);
 
+// Company info (shared across all cards)
+const companyInfo = reactive({
+  name: "",
+  logo: null,
+  logoFile: null,
+});
+
 // Admin info (populated from authStore, fully editable)
 const adminInfo = reactive({
   name: "",
@@ -1123,20 +1251,35 @@ const cardDesign = reactive({
   backFile: null,
 });
 
-// Available templates based on plan
-const availableTemplates = computed(() => {
-  const selectedPlan = sessionStorage.getItem("selectedPlan");
-  if (selectedPlan === "basic") {
-    return [{ id: "basic", name: "Basic Template" }];
-  } else {
-    return [
-      { id: "free", name: "Free Template" },
-      { id: "basic", name: "Basic Template" },
-      { id: "premium", name: "Premium Template" },
-      { id: "business", name: "Business Template" },
+// Available templates from API
+const availableTemplates = ref([]);
+const templatesLoading = ref(false);
+
+// Load templates based on user's plan
+const loadTemplates = async () => {
+  templatesLoading.value = true;
+  try {
+    const { $api } = useNuxtApp();
+    const userPlan = authStore.user?.subscription_plan || sessionStorage.getItem("selectedPlan") || 'free';
+    const response = await $api.get(`/card-templates?plan=${userPlan}`);
+    
+    if (response.success && response.data) {
+      availableTemplates.value = response.data;
+      // Auto-select first template if none selected
+      if (availableTemplates.value.length > 0 && !selectedTemplate.value) {
+        selectedTemplate.value = availableTemplates.value[0].id;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to load templates:", error);
+    // Fallback to default templates if API fails
+    availableTemplates.value = [
+      { id: "default", name: "Default Template", front_image_url: null }
     ];
+  } finally {
+    templatesLoading.value = false;
   }
-});
+};
 
 // Check if user has premium plan
 const isPremiumPlan = computed(() => {
@@ -1171,6 +1314,11 @@ const hasSelectedDesign = computed(() => {
 
 // Form validation
 const isFormValid = computed(() => {
+  // Company name is always required
+  if (!companyInfo.name) {
+    return false;
+  }
+
   // Must have at least one card (admin or employees)
   if (totalCardsCount.value === 0) {
     return false;
@@ -1227,8 +1375,11 @@ onMounted(async () => {
     adminInfo.deliveryAddress = authStore.user.delivery_address || authStore.user.address || "";
   }
 
-  // Load previous designs
-  await loadPreviousDesigns();
+  // Load previous designs and templates
+  await Promise.all([
+    loadPreviousDesigns(),
+    loadTemplates(),
+  ]);
 });
 
 // Load previous card designs from user's existing cards
@@ -1258,6 +1409,57 @@ const formatDate = (dateString) => {
     month: "short", 
     day: "numeric" 
   });
+};
+
+// Get template image URL (handle relative and absolute URLs)
+const config = useRuntimeConfig();
+const getTemplateImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  // Handle relative URLs - prepend API base URL
+  const apiBase = config.public?.apiBase || '';
+  return `${apiBase.replace('/api', '')}${url}`;
+};
+
+// Get selected template object
+const selectedTemplateData = computed(() => {
+  if (!selectedTemplate.value) return null;
+  return availableTemplates.value.find(t => t.id === selectedTemplate.value);
+});
+
+// Handle company logo upload
+const handleLogoUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validate file type
+  if (!file.type.startsWith("image/")) {
+    $toast.error("Please upload an image file");
+    return;
+  }
+
+  // Validate file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    $toast.error("Logo file must be less than 2MB");
+    return;
+  }
+
+  companyInfo.logoFile = file;
+
+  // Create preview URL
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    companyInfo.logo = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  $toast.success("Logo uploaded successfully");
+};
+
+// Remove company logo
+const removeLogo = () => {
+  companyInfo.logo = null;
+  companyInfo.logoFile = null;
 };
 
 // Handle employee file upload
@@ -1624,6 +1826,9 @@ const confirmOrder = async () => {
       requesting_user_email: adminInfo.email,
       subscription_plan: "business",
       delivery_address: adminInfo.deliveryAddress, // Master delivery address for all cards
+      // Company information (shared across all cards)
+      company_name: companyInfo.name,
+      company_logo: companyInfo.logo, // Base64 encoded image
       total_cards: cards.length,
       include_admin: includeAdminCard.value,
       employee_count: uploadedEmployees.value.length,

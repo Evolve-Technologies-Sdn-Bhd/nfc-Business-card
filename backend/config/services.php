@@ -37,4 +37,10 @@ return [
         'private_key' => env('APPLE_PRIVATE_KEY'), 
         'redirect' => env('APP_URL') . '/api/auth/apple/callback',
     ],
+
+    // n8n Integration for image processing
+    'n8n' => [
+        'webhook_url' => env('N8N_WEBHOOK_URL'), // Your n8n webhook URL
+        'webhook_secret' => env('N8N_WEBHOOK_SECRET'), // Optional secret for verification
+    ],
 ];
