@@ -108,9 +108,12 @@
                   v-model="searchQuery"
                   type="text"
                   placeholder="Search users, messages..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  maxlength="150"
+                  class="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  @input="handleSearch"
                 />
               </div>
+              <p class="text-xs text-secondary-500 mt-1">{{ searchQuery.length }}/150</p>
             </div>
 
             <!-- Type Filter -->
@@ -139,7 +142,6 @@
               <option value="">All Status</option>
               <option value="read">Read</option>
               <option value="unread">Unread</option>
-              <option value="failed">Failed/Non-delivery</option>
             </select>
 
             <!-- Date Range Filter -->
@@ -155,11 +157,15 @@
             </select>
 
             <button
-              @click="loadNotifications"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
+              @click="handleRefresh"
+              :disabled="refreshing"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center disabled:opacity-50"
             >
-              <Icon name="heroicons:arrow-path" class="w-5 h-5 mr-2" />
-              Refresh
+              <Icon 
+                name="heroicons:arrow-path" 
+                :class="['w-5 h-5 mr-2', { 'animate-spin': refreshing }]" 
+              />
+              {{ refreshing ? 'Refreshing...' : 'Refresh' }}
             </button>
 
             <button
@@ -472,6 +478,18 @@
             No notifications found matching your criteria.
           </p>
         </div>
+
+        <!-- Pagination -->
+        <AdminPagination
+          v-if="!loading && paginationData.total > 0"
+          :current-page="currentPage"
+          :last-page="paginationData.lastPage"
+          :per-page="10"
+          :total="paginationData.total"
+          item-label="notifications"
+          @page-change="goToPage"
+          @per-page-change="(val) => { /* per-page handled in loadNotifications */ }"
+        />
       </div>
     </div>
 
@@ -1265,6 +1283,14 @@ const cleanupDays = ref(30);
 const approvingId = ref(null);
 const rejectingId = ref(null);
 const selectedNotification = ref(null);
+const refreshing = ref(false);
+const currentPage = ref(1);
+const paginationData = ref({
+  total: 0,
+  from: 0,
+  to: 0,
+  lastPage: 1,
+});
 
 const announcementForm = reactive({
   title: "",
@@ -1309,11 +1335,22 @@ const loadNotifications = async () => {
       params.date_from = customDateFrom.value;
       params.date_to = customDateTo.value;
     }
+    
+    // Pagination
+    params.page = currentPage.value;
+    params.per_page = 10;
 
     const response = await $api.get("/admin/notifications", { params });
 
     if (response.success) {
       notifications.value = response.data.data || [];
+      // Extract pagination data
+      paginationData.value = {
+        total: response.data.total || 0,
+        from: response.data.from || 0,
+        to: response.data.to || 0,
+        lastPage: response.data.last_page || 1,
+      };
     }
   } catch (error) {
     console.error("Error loading notifications:", error);
@@ -1334,6 +1371,53 @@ const loadStatistics = async () => {
   } catch (error) {
     console.error("Error loading statistics:", error);
   }
+};
+
+// Computed: visible page numbers for pagination
+const visiblePages = computed(() => {
+  const total = paginationData.value.lastPage;
+  const current = currentPage.value;
+  const pages = [];
+  
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push('...');
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+      pages.push(i);
+    }
+    if (current < total - 2) pages.push('...');
+    pages.push(total);
+  }
+  return pages;
+});
+
+// Handle refresh button click
+const handleRefresh = async () => {
+  // Reset filters to default
+  searchQuery.value = "";
+  filterType.value = "";
+  filterStatus.value = "";
+  filterDateRange.value = "";
+  customDateFrom.value = "";
+  customDateTo.value = "";
+  currentPage.value = 1;
+
+  refreshing.value = true;
+  try {
+    await Promise.all([loadNotifications(), loadStatistics()]);
+    $toast.success("Notifications refreshed");
+  } finally {
+    refreshing.value = false;
+  }
+};
+
+// Go to specific page
+const goToPage = (page) => {
+  if (page < 1 || page > paginationData.value.lastPage) return;
+  currentPage.value = page;
+  loadNotifications();
 };
 
 // Send announcement
@@ -1733,8 +1817,9 @@ const exportNotifications = async () => {
   }
 };
 
-// Watch filters
+// Watch filters - reset to page 1 when filters change
 watch([searchQuery, filterType, filterStatus, filterDateRange], () => {
+  currentPage.value = 1;
   loadNotifications();
 });
 

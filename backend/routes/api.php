@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\ProfileDesignController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderFieldController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderSectionController;
 use App\Http\Controllers\Api\CardTemplateController;
+use App\Http\Controllers\Api\AdminExportController;
 
 // Test endpoint
 Route::get('/test', function () {
@@ -417,6 +418,13 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::put('/{userId}', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'update']);
         Route::post('/{userId}/reset', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'resetToDefault']);
         Route::post('/{userId}/copy-from', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'copyFrom']);
+    });
+
+    // ✅ Data Export (CSV)
+    Route::prefix('export')->group(function () {
+        Route::get('/nfc-cards', [AdminExportController::class, 'exportNfcCards']);
+        Route::get('/users', [AdminExportController::class, 'exportUsers']);
+        Route::get('/analytics', [AdminExportController::class, 'exportAnalytics']);
     });
 });
 

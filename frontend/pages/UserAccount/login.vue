@@ -303,9 +303,17 @@ const checkEmailAuthMethod = async (email) => {
     return;
   }
 
+  // Safety check for $api
+  const nuxtApp = useNuxtApp();
+  const api = nuxtApp.$api;
+  if (!api) {
+    console.warn('API plugin not available for email check');
+    return;
+  }
+
   emailCheckLoading.value = true;
   try {
-    const response = await $api.get('/auth/check-email', { params: { email } });
+    const response = await api.get('/auth/check-email', { params: { email } });
     if (response.success && response.exists) {
       emailHasPassword.value = response.has_password;
       oauthBlocked.value = response.oauth_blocked || false;
@@ -360,6 +368,15 @@ const handleLogin = async () => {
     });
     const response = await authStore.login(form);
     console.log("Login response:", response);
+
+    // Safety check for undefined response
+    if (!response) {
+      console.error("Login returned undefined response");
+      if ($toast && typeof $toast.error === "function") {
+        $toast.error("Login failed. Please try again.");
+      }
+      return;
+    }
 
     if (response.requires_2fa) {
       show2FA.value = true;

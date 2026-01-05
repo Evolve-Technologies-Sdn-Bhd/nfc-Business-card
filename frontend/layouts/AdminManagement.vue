@@ -134,55 +134,7 @@
 
             <!-- Right side actions -->
             <div class="flex items-center space-x-4">
-              <!-- Notifications -->
-              <button
-                class="p-2 text-secondary-400 hover:text-secondary-500 hover:bg-secondary-100 rounded-md"
-              >
-                <Icon name="heroicons:bell" class="h-6 w-6" />
-                <span class="sr-only">View notifications</span>
-              </button>
-
-              <!-- Profile dropdown -->
-              <div class="relative">
-                <button
-                  @click="profileDropdownOpen = !profileDropdownOpen"
-                  class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  <img
-                    :src="user?.profile_image || '/default-avatar.png'"
-                    :alt="user?.name"
-                    class="h-8 w-8 rounded-full"
-                  />
-                </button>
-
-                <!-- Profile dropdown menu -->
-                <Transition
-                  enter-active-class="transition ease-out duration-100"
-                  enter-from-class="transform opacity-0 scale-95"
-                  enter-to-class="transform opacity-100 scale-100"
-                  leave-active-class="transition ease-in duration-75"
-                  leave-from-class="transform opacity-100 scale-100"
-                  leave-to-class="transform opacity-0 scale-95"
-                >
-                  <div
-                    v-if="profileDropdownOpen"
-                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
-                  >
-                    <NuxtLink
-                      to="/admin"
-                      class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100"
-                    >
-                      Back to Dashboard
-                    </NuxtLink>
-                    <button
-                      @click="handleLogout"
-                      class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-100"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                </Transition>
-              </div>
+              <!-- Icons removed as requested -->
             </div>
           </div>
         </header>
@@ -210,7 +162,6 @@ const { $api } = useNuxtApp();
 const user = computed(() => authStore.user);
 
 const sidebarOpen = ref(false);
-const profileDropdownOpen = ref(false);
 const unreadFeedbackCount = ref(0);
 const pendingNotificationCount = ref(0);
 
@@ -294,6 +245,13 @@ const isActiveRoute = (href) => {
 // Fetch unread feedback count
 const loadUnreadFeedbackCount = async () => {
   try {
+    const nuxtApp = useNuxtApp();
+    const $api = nuxtApp.$api;
+    if (!$api) {
+      // Retry after a short delay if API not ready
+      setTimeout(() => loadUnreadFeedbackCount(), 500);
+      return;
+    }
     const response = await $api.get("/admin/chatbot/feedback/unread-count");
     if (response.success) {
       unreadFeedbackCount.value = response.unread_count;
@@ -306,6 +264,13 @@ const loadUnreadFeedbackCount = async () => {
 // Fetch unread notification count (for sidebar badge)
 const loadPendingNotificationCount = async () => {
   try {
+    const nuxtApp = useNuxtApp();
+    const $api = nuxtApp.$api;
+    if (!$api) {
+      // Retry after a short delay if API not ready
+      setTimeout(() => loadPendingNotificationCount(), 500);
+      return;
+    }
     const response = await $api.get("/admin/notifications/unread-count");
     if (response.success) {
       pendingNotificationCount.value = response.unread_count;
@@ -327,11 +292,6 @@ const handleLogout = async () => {
 
 // Close dropdowns when clicking outside
 onMounted(() => {
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".relative")) {
-      profileDropdownOpen.value = false;
-    }
-  });
 
   // Load unread feedback count
   loadUnreadFeedbackCount();

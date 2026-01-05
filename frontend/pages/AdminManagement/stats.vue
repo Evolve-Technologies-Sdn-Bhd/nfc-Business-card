@@ -329,17 +329,32 @@
         </div>
         <div class="card-body">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button @click="exportUsers" class="btn btn-outline w-full">
-              <Icon name="heroicons:users" class="h-5 w-5 mr-2" />
-              Export Users
+            <button 
+              @click="exportUsers" 
+              :disabled="exportingUsers"
+              class="btn btn-outline w-full"
+            >
+              <div v-if="exportingUsers" class="spinner mr-2"></div>
+              <Icon v-else name="heroicons:users" class="h-5 w-5 mr-2" />
+              {{ exportingUsers ? 'Exporting...' : 'Export Users' }}
             </button>
-            <button @click="exportNfcCards" class="btn btn-outline w-full">
-              <Icon name="heroicons:credit-card" class="h-5 w-5 mr-2" />
-              Export NFC Cards
+            <button 
+              @click="exportNfcCards" 
+              :disabled="exportingCards"
+              class="btn btn-outline w-full"
+            >
+              <div v-if="exportingCards" class="spinner mr-2"></div>
+              <Icon v-else name="heroicons:credit-card" class="h-5 w-5 mr-2" />
+              {{ exportingCards ? 'Exporting...' : 'Export NFC Cards' }}
             </button>
-            <button @click="exportAnalytics" class="btn btn-outline w-full">
-              <Icon name="heroicons:chart-bar" class="h-5 w-5 mr-2" />
-              Export Analytics
+            <button 
+              @click="exportAnalytics" 
+              :disabled="exportingAnalytics"
+              class="btn btn-outline w-full"
+            >
+              <div v-if="exportingAnalytics" class="spinner mr-2"></div>
+              <Icon v-else name="heroicons:chart-bar" class="h-5 w-5 mr-2" />
+              {{ exportingAnalytics ? 'Exporting...' : 'Export Analytics' }}
             </button>
           </div>
         </div>
@@ -354,8 +369,14 @@ definePageMeta({
   middleware: "admin",
 });
 
+const { $api, $toast } = useNuxtApp();
 const adminStore = useAdminStore();
 const { stats, loading, dashboard } = storeToRefs(adminStore);
+
+// Export loading states
+const exportingUsers = ref(false);
+const exportingCards = ref(false);
+const exportingAnalytics = ref(false);
 
 // Stats cards data
 const statsCards = computed(() => [
@@ -443,19 +464,69 @@ const formatTimeAgo = (timestamp) => {
   return `${Math.floor(diffInMinutes / 1440)}d ago`;
 };
 
+// Download helper
+const downloadCsv = async (endpoint, filename, loadingRef) => {
+  loadingRef.value = true;
+  try {
+    const config = useRuntimeConfig();
+    const apiBaseUrl = config.public.apiBaseUrl;
+    const tokenCookie = useCookie("auth-token");
+    const token = tokenCookie.value;
+
+    if (!token) {
+      $toast.error("Authentication required. Please log in again.");
+      return;
+    }
+
+    const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "text/csv",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Export failed");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create temp link and trigger download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    
+    $toast.success("Export completed successfully");
+  } catch (error) {
+    console.error("Export error:", error);
+    $toast.error("Export failed. Please try again.");
+  } finally {
+    loadingRef.value = false;
+  }
+};
+
 // Export functions
 const exportUsers = () => {
-  // Implementation for exporting users data
-  alert("Export users functionality would be implemented here");
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  downloadCsv('/admin/export/users', `users_export_${today}.csv`, exportingUsers);
 };
 
 const exportNfcCards = () => {
-  // Implementation for exporting NFC cards data
-  alert("Export NFC cards functionality would be implemented here");
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  downloadCsv('/admin/export/nfc-cards', `nfc_cards_export_${today}.csv`, exportingCards);
 };
 
 const exportAnalytics = () => {
-  // Implementation for exporting analytics data
-  alert("Export analytics functionality would be implemented here");
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0].replace(/-/g, '');
+  downloadCsv('/admin/export/analytics', `analytics_export_${thirtyDaysAgo}_to_${today}.csv`, exportingAnalytics);
 };
 </script>

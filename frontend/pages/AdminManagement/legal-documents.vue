@@ -54,15 +54,25 @@
                 <label
                   class="block text-sm font-medium text-secondary-700 mb-1"
                 >
-                  Version
+                  Version *
                 </label>
                 <input
-                  v-model="termsData.version"
-                  type="text"
-                  class="input"
+                  v-model.number="termsData.version"
+                  type="number"
+                  min="1.0"
+                  step="0.1"
+                  :class="[
+                    'input',
+                    versionErrors.terms ? 'border-red-500 focus:ring-red-500' : ''
+                  ]"
                   placeholder="1.0"
+                  @input="validateTermsVersion"
+                  @change="validateTermsVersion"
                   required
                 />
+                <p v-if="versionErrors.terms" class="text-xs text-red-500 mt-1">
+                  {{ versionErrors.terms }}
+                </p>
               </div>
               <div>
                 <label
@@ -198,15 +208,25 @@
                 <label
                   class="block text-sm font-medium text-secondary-700 mb-1"
                 >
-                  Version
+                  Version *
                 </label>
                 <input
-                  v-model="privacyData.version"
-                  type="text"
-                  class="input"
+                  v-model.number="privacyData.version"
+                  type="number"
+                  min="1.0"
+                  step="0.1"
+                  :class="[
+                    'input',
+                    versionErrors.privacy ? 'border-red-500 focus:ring-red-500' : ''
+                  ]"
                   placeholder="1.0"
+                  @input="validatePrivacyVersion"
+                  @change="validatePrivacyVersion"
                   required
                 />
+                <p v-if="versionErrors.privacy" class="text-xs text-red-500 mt-1">
+                  {{ versionErrors.privacy }}
+                </p>
               </div>
               <div>
                 <label
@@ -433,7 +453,7 @@ const onPdfError = (errorMessage) => {
 
 const termsData = reactive({
   content: "",
-  version: "1.0",
+  version: 1.0,
   effective_date: new Date().toISOString().split("T")[0],
   updated_at: null,
   updater: null,
@@ -441,11 +461,45 @@ const termsData = reactive({
 
 const privacyData = reactive({
   content: "",
-  version: "1.0",
+  version: 1.0,
   effective_date: new Date().toISOString().split("T")[0],
   updated_at: null,
   updater: null,
 });
+
+// Version validation errors
+const versionErrors = reactive({
+  terms: "",
+  privacy: "",
+});
+
+// Validate Terms version
+const validateTermsVersion = () => {
+  const version = termsData.version;
+  if (version === null || version === undefined || version === '') {
+    termsData.version = 1.0;
+    versionErrors.terms = "";
+  } else if (typeof version === 'number' && version < 1.0) {
+    versionErrors.terms = "Version cannot be less than 1.0";
+    termsData.version = 1.0;
+  } else {
+    versionErrors.terms = "";
+  }
+};
+
+// Validate Privacy version
+const validatePrivacyVersion = () => {
+  const version = privacyData.version;
+  if (version === null || version === undefined || version === '') {
+    privacyData.version = 1.0;
+    versionErrors.privacy = "";
+  } else if (typeof version === 'number' && version < 1.0) {
+    versionErrors.privacy = "Version cannot be less than 1.0";
+    privacyData.version = 1.0;
+  } else {
+    versionErrors.privacy = "";
+  }
+};
 
 // Load documents on mount
 onMounted(async () => {

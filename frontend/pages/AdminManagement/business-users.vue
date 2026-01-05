@@ -110,7 +110,9 @@
               @input="debounceSearch"
               placeholder="Search by name, email..."
               class="input"
+              maxlength="150"
             />
+            <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
           </div>
 
           <div>
@@ -305,37 +307,16 @@
     </div>
 
     <!-- Pagination -->
-    <div
+    <AdminPagination
       v-if="pagination.total > 0"
-      class="mt-6 flex items-center justify-between"
-    >
-      <div class="text-sm text-secondary-500">
-        Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to
-        {{
-          Math.min(
-            pagination.current_page * pagination.per_page,
-            pagination.total
-          )
-        }}
-        of {{ pagination.total }} results
-      </div>
-      <div class="flex space-x-2">
-        <button
-          @click="changePage(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <button
-          @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="results"
+      @page-change="changePage"
+      @per-page-change="changeItemsPerPage"
+    />
 
     <!-- Create Employee Modal -->
     <div

@@ -1,6 +1,6 @@
 // plugins/router.client.js
 export default defineNuxtPlugin((nuxtApp) => {
-  const router = useRouter();
+  const router = nuxtApp.$router;
   let isNavigating = false;
 
   // Add route change start handler

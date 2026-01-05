@@ -34,7 +34,7 @@
               maxlength="150"
               @input="handleSearch"
             />
-            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/150</span>
+            <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -294,69 +294,16 @@
     </div>
 
     <!-- Pagination -->
-    <div
+    <AdminPagination
       v-if="users.length > 0"
-      class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-    >
-      <div class="flex items-center space-x-4">
-        <span class="text-sm text-secondary-700">
-          Showing
-          {{ pagination.total === 0 ? 0 : (pagination.current_page - 1) * pagination.per_page + 1 }} to
-          {{
-            Math.min(
-              pagination.current_page * pagination.per_page,
-              pagination.total
-            )
-          }}
-          of {{ pagination.total }} users
-        </span>
-        <div class="flex items-center space-x-2">
-          <label class="text-sm text-secondary-600">Per page:</label>
-          <select
-            v-model.number="itemsPerPage"
-            @change="changeItemsPerPage"
-            class="input py-1 px-2 text-sm w-20"
-          >
-            <option :value="10">10</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-            <option :value="100">100</option>
-          </select>
-        </div>
-      </div>
-      <div v-if="pagination.total > pagination.per_page" class="flex items-center space-x-2">
-        <button
-          @click="changePage(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <!-- Page numbers -->
-        <div class="flex items-center space-x-1">
-          <button
-            v-for="page in visiblePages"
-            :key="page"
-            @click="changePage(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded',
-              page === pagination.current_page
-                ? 'bg-primary-600 text-white'
-                : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button
-          @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="users"
+      @page-change="changePage"
+      @per-page-change="changeItemsPerPage"
+    />
 
     <!-- Create/Edit User Modal -->
     <div
@@ -434,19 +381,12 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Phone</label
               >
-              <input
+              <PhoneInput
                 v-model="form.phone"
-                type="text"
-                maxlength="16"
-                :class="['input', formErrors.phone ? 'border-red-500' : '']"
-                @input="validatePhone"
-                placeholder="Digits only (0-9)"
+                :has-error="!!formErrors.phone"
+                placeholder="Phone number"
               />
-              <div class="flex justify-between mt-1">
-                <span v-if="formErrors.phone" class="text-xs text-red-500">{{ formErrors.phone }}</span>
-                <span v-else class="text-xs text-secondary-500">Digits only, max 16</span>
-                <span class="text-xs text-secondary-500">{{ form.phone.length }}/16</span>
-              </div>
+              <p v-if="formErrors.phone" class="text-xs text-red-500 mt-1">{{ formErrors.phone }}</p>
             </div>
           </div>
 
@@ -1104,17 +1044,27 @@ const validateEmail = () => {
   }
 };
 
+// Phone number formatting composable
+const { formatPhoneNumber } = usePhoneFormat();
+
 const validatePhone = () => {
   const value = form.value.phone;
-  // Strip any non-digit characters and reassign to enforce digits only
-  const digitsOnly = value.replace(/\D/g, "");
-  if (value !== digitsOnly) {
-    form.value.phone = digitsOnly;
+  // Allow digits, +, spaces, and dashes for international format
+  const cleaned = value.replace(/[^\d\s\-+]/g, '');
+  if (value !== cleaned) {
+    form.value.phone = cleaned;
   }
-  if (value && !PHONE_PATTERN.test(value)) {
-    formErrors.value.phone = "Only digits (0-9) allowed";
+  if (cleaned.length > 16) {
+    formErrors.value.phone = "Maximum 16 characters allowed";
   } else {
     formErrors.value.phone = "";
+  }
+};
+
+// Format phone number on blur
+const formatPhoneOnBlur = () => {
+  if (form.value.phone) {
+    form.value.phone = formatPhoneNumber(form.value.phone);
   }
 };
 

@@ -138,81 +138,16 @@
     </div>
 
     <!-- Pagination -->
-    <div
+    <AdminPagination
       v-if="pagination.last_page > 1"
-      class="mt-6 flex items-center justify-between border-t border-secondary-200 bg-white px-4 py-3 sm:px-6"
-    >
-      <div class="flex flex-1 justify-between sm:hidden">
-        <button
-          @click="changePage(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <button
-          @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-      </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-secondary-700">
-            Showing
-            <span class="font-medium">{{
-              (pagination.current_page - 1) * pagination.per_page + 1
-            }}</span>
-            to
-            <span class="font-medium">{{
-              Math.min(
-                pagination.current_page * pagination.per_page,
-                pagination.total
-              )
-            }}</span>
-            of
-            <span class="font-medium">{{ pagination.total }}</span>
-            results
-          </p>
-        </div>
-        <div>
-          <nav
-            class="isolate inline-flex -space-x-px rounded-md shadow-sm"
-            aria-label="Pagination"
-          >
-            <button
-              @click="changePage(pagination.current_page - 1)"
-              :disabled="pagination.current_page === 1"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-secondary-400 ring-1 ring-inset ring-secondary-300 hover:bg-secondary-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <Icon name="heroicons:chevron-left" class="h-5 w-5" />
-            </button>
-            <button
-              v-for="page in visiblePages"
-              :key="page"
-              @click="changePage(page)"
-              :class="[
-                page === pagination.current_page
-                  ? 'z-10 bg-primary-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
-                  : 'text-secondary-900 ring-1 ring-inset ring-secondary-300 hover:bg-secondary-50 focus:outline-offset-0',
-                'relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20',
-              ]"
-            >
-              {{ page }}
-            </button>
-            <button
-              @click="changePage(pagination.current_page + 1)"
-              :disabled="pagination.current_page === pagination.last_page"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-secondary-400 ring-1 ring-inset ring-secondary-300 hover:bg-secondary-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <Icon name="heroicons:chevron-right" class="h-5 w-5" />
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="results"
+      @page-change="changePage"
+      @per-page-change="() => {}"
+    />
   </div>
 </template>
 

@@ -26,9 +26,15 @@ class AdminNotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 50);
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
         $type = $request->input('type');
         $userId = $request->input('user_id');
+        $status = $request->input('status');
+        $search = $request->input('search');
+        $dateRange = $request->input('date_range');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
 
         $query = Notification::with('user')
             ->orderBy('pinned', 'desc') // Pinned notifications first
@@ -42,7 +48,38 @@ class AdminNotificationController extends Controller
             $query->where('user_id', $userId);
         }
 
-        $notifications = $query->paginate($perPage);
+        // Status filter
+        if ($status === 'read') {
+            $query->where('is_read', true);
+        } elseif ($status === 'unread') {
+            $query->where('is_read', false);
+        }
+
+        // Search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('message', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Date range filter
+        if ($dateRange === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($dateRange === 'week') {
+            $query->where('created_at', '>=', now()->subDays(7));
+        } elseif ($dateRange === 'month') {
+            $query->where('created_at', '>=', now()->subDays(30));
+        } elseif ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
+        }
+
+        $notifications = $query->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,

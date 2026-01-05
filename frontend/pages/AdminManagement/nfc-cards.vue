@@ -33,10 +33,10 @@
               type="text"
               placeholder="Search cards..."
               class="input"
-              maxlength="100"
+              maxlength="150"
               @input="handleSearch"
             />
-            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/100</span>
+            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/150</span>
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -76,7 +76,7 @@
             >
             <select
               v-model="filters.sort_by"
-              @change="handleFilterChange"
+              @change="handleSortFieldChange"
               class="input"
             >
               <option value="created_at">Date Created</option>
@@ -265,62 +265,16 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <!-- Results counter (always visible) -->
-      <div class="flex items-center space-x-4">
-        <span class="text-sm text-secondary-700">
-          Showing
-          {{ pagination.total === 0 ? 0 : (pagination.current_page - 1) * pagination.per_page + 1 }} -
-          {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
-          of {{ pagination.total }} cards
-        </span>
-        <!-- Per page selector -->
-        <div class="flex items-center space-x-2">
-          <span class="text-sm text-secondary-600">Per page:</span>
-          <select
-            v-model="itemsPerPage"
-            @change="changeItemsPerPage"
-            class="input input-sm w-20"
-          >
-            <option :value="10">10</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-            <option :value="100">100</option>
-          </select>
-        </div>
-      </div>
-      <!-- Page navigation -->
-      <div class="flex items-center space-x-2">
-        <button
-          @click="changePage(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <!-- Page numbers -->
-        <template v-for="page in visiblePages" :key="page">
-          <button
-            @click="changePage(page)"
-            :class="[
-              'btn btn-sm',
-              page === pagination.current_page
-                ? 'btn-primary'
-                : 'btn-outline'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </template>
-        <button
-          @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <AdminPagination
+      v-if="nfcCards.length > 0"
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="cards"
+      @page-change="changePage"
+      @per-page-change="changeItemsPerPage"
+    />
 
     <!-- Register NFC Card Modal -->
     <div
@@ -360,12 +314,23 @@
               v-model="form.nfc_card_id"
               type="text"
               required
+              maxlength="16"
+              @input="validateNfcCardId"
               placeholder="e.g., NFC-ABC123DEF456"
-              class="input font-mono"
+              :class="[
+                'input font-mono',
+                formErrors.nfc_card_id ? 'border-red-500 focus:ring-red-500' : ''
+              ]"
             />
-            <p class="text-xs text-secondary-500 mt-1">
-              Enter the unique identifier printed on the physical NFC card
-            </p>
+            <div class="flex justify-between mt-1">
+              <p v-if="formErrors.nfc_card_id" class="text-xs text-red-500">
+                {{ formErrors.nfc_card_id }}
+              </p>
+              <p v-else class="text-xs text-secondary-500">
+                Enter the unique identifier printed on the physical NFC card
+              </p>
+              <span class="text-xs text-secondary-400">{{ form.nfc_card_id.length }}/16</span>
+            </div>
           </div>
 
           <div>
@@ -376,9 +341,20 @@
               v-model="form.card_owner"
               type="text"
               required
+              maxlength="100"
+              @input="validateCardOwner"
               placeholder="Full name of card owner"
-              class="input"
+              :class="[
+                'input',
+                formErrors.card_owner ? 'border-red-500 focus:ring-red-500' : ''
+              ]"
             />
+            <div class="flex justify-between mt-1">
+              <p v-if="formErrors.card_owner" class="text-xs text-red-500">
+                {{ formErrors.card_owner }}
+              </p>
+              <span class="text-xs text-secondary-400 ml-auto">{{ form.card_owner.length }}/100</span>
+            </div>
           </div>
 
           <div>
@@ -399,13 +375,15 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Contact Number *</label
               >
-              <input
+              <PhoneInput
                 v-model="form.contact_number"
-                type="tel"
-                required
+                :required="true"
+                :has-error="!!formErrors.contact_number"
                 placeholder="Phone number"
-                class="input"
               />
+              <p v-if="formErrors.contact_number" class="text-xs text-red-500 mt-1">
+                {{ formErrors.contact_number }}
+              </p>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -425,13 +403,22 @@
                 >Purchase Amount *</label
               >
               <input
-                v-model="form.purchase_amount"
+                v-model.number="form.purchase_amount"
                 type="number"
-                step="0.01"
+                min="0"
+                step="1"
                 required
-                placeholder="0.00"
-                class="input"
+                @input="validatePurchaseAmount"
+                @change="validatePurchaseAmount"
+                placeholder="0"
+                :class="[
+                  'input',
+                  formErrors.purchase_amount ? 'border-red-500 focus:ring-red-500' : ''
+                ]"
               />
+              <p v-if="formErrors.purchase_amount" class="text-xs text-red-500 mt-1">
+                {{ formErrors.purchase_amount }}
+              </p>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -529,11 +516,9 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Contact Number</label
               >
-              <input
+              <PhoneInput
                 v-model="editForm.contact_number"
-                type="tel"
-                required
-                class="input"
+                placeholder="Phone number"
               />
             </div>
             <div>
@@ -751,10 +736,18 @@ const form = ref({
   billing_address: "",
   contact_number: "",
   subscription_plan: "basic",
-  purchase_amount: "",
+  purchase_amount: 0,
   payment_method: "",
   shipping_address: "",
   notes: "",
+});
+
+// Form validation errors
+const formErrors = ref({
+  nfc_card_id: "",
+  card_owner: "",
+  contact_number: "",
+  purchase_amount: "",
 });
 
 const editForm = ref({
@@ -774,7 +767,16 @@ const filters = ref({
   status: "",
   subscription_plan: "",
   sort_by: "created_at",
+  sort_order: "desc",
 });
+
+// Default sort orders for each field (applied when field changes)
+const defaultSortOrders = {
+  created_at: "desc",    // Newest first
+  card_owner: "asc",     // A-Z
+  nfc_card_id: "desc",   // Latest IDs first
+  purchase_amount: "desc", // High to low
+};
 
 // Pagination state
 const itemsPerPage = ref(15);
@@ -791,7 +793,13 @@ onMounted(async () => {
 // Fetch available users for registration
 const fetchAvailableUsers = async () => {
   try {
-    const { $api } = useNuxtApp();
+    const nuxtApp = useNuxtApp();
+    const $api = nuxtApp.$api;
+    if (!$api) {
+      // Retry after a short delay if API not ready
+      setTimeout(() => fetchAvailableUsers(), 500);
+      return;
+    }
     const response = await $api.get("/admin/users", {
       params: { per_page: 100 },
     });
@@ -813,10 +821,97 @@ const handleSearch = () => {
   }, 500);
 };
 
+// Validation functions
+const validateNfcCardId = () => {
+  // Remove non-alphanumeric characters (allow letters, numbers, and hyphens)
+  form.value.nfc_card_id = form.value.nfc_card_id.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
+  if (form.value.nfc_card_id.length > 16) {
+    formErrors.value.nfc_card_id = "Maximum 16 characters allowed";
+  } else {
+    formErrors.value.nfc_card_id = "";
+  }
+};
+
+const validateCardOwner = () => {
+  if (form.value.card_owner.length > 100) {
+    formErrors.value.card_owner = "Maximum 100 characters allowed";
+  } else {
+    formErrors.value.card_owner = "";
+  }
+};
+
+// Phone number formatting composable
+const { formatPhoneNumber } = usePhoneFormat();
+
+const validateContactNumber = () => {
+  // Allow digits, spaces, dashes, and + for international format
+  const cleaned = form.value.contact_number.replace(/[^\d\s\-+]/g, '');
+  form.value.contact_number = cleaned;
+  if (cleaned.length > 16) {
+    formErrors.value.contact_number = "Maximum 16 characters allowed";
+  } else {
+    formErrors.value.contact_number = "";
+  }
+};
+
+// Format phone number on blur for registration form
+const formatContactNumberOnBlur = () => {
+  if (form.value.contact_number) {
+    form.value.contact_number = formatPhoneNumber(form.value.contact_number);
+  }
+};
+
+// Format phone number on blur for edit form
+const formatEditContactNumberOnBlur = () => {
+  if (editForm.value.contact_number) {
+    editForm.value.contact_number = formatPhoneNumber(editForm.value.contact_number);
+  }
+};
+
+const validatePurchaseAmount = () => {
+  // Ensure value is a number and not negative
+  const amount = form.value.purchase_amount;
+  
+  if (amount === null || amount === undefined || amount === '') {
+    form.value.purchase_amount = 0;
+  } else if (typeof amount === 'number' && amount < 0) {
+    formErrors.value.purchase_amount = "Amount cannot be negative";
+    // Correct the value to 0
+    form.value.purchase_amount = 0;
+  } else if (typeof amount === 'number' && amount >= 0) {
+    formErrors.value.purchase_amount = "";
+  }
+};
+
+const validateAllFields = () => {
+  validateNfcCardId();
+  validateCardOwner();
+  validateContactNumber();
+  validatePurchaseAmount();
+  return !formErrors.value.nfc_card_id && !formErrors.value.card_owner && 
+         !formErrors.value.contact_number && !formErrors.value.purchase_amount;
+};
+
+const clearFormErrors = () => {
+  formErrors.value = {
+    nfc_card_id: "",
+    card_owner: "",
+    contact_number: "",
+    purchase_amount: "",
+  };
+};
+
 // Handle filter changes
 const handleFilterChange = () => {
   adminStore.updateFilters(filters.value);
   adminStore.fetchNfcCards();
+};
+
+// Handle sort field change from dropdown (applies default order for new field)
+const handleSortFieldChange = () => {
+  // When changing sort field, apply the default order for that field
+  filters.value.sort_order = defaultSortOrders[filters.value.sort_by] || "desc";
+  handleFilterChange();
 };
 
 // Clear all filters
@@ -827,6 +922,7 @@ const clearFilters = () => {
     status: "",
     subscription_plan: "",
     sort_by: "created_at",
+    sort_order: "desc",
   };
   adminStore.fetchNfcCards();
 };
@@ -890,6 +986,11 @@ const editCard = (card) => {
 
 // Handle form submission
 const handleSubmit = async () => {
+  // Validate all fields before submission
+  if (!validateAllFields()) {
+    return;
+  }
+  
   submitting.value = true;
   try {
     await adminStore.registerNfcCard(form.value);
@@ -917,6 +1018,7 @@ const handleEditSubmit = async () => {
 // Close modal
 const closeModal = () => {
   showRegisterModal.value = false;
+  clearFormErrors();
   form.value = {
     user_id: "",
     nfc_card_id: "",
@@ -924,7 +1026,7 @@ const closeModal = () => {
     billing_address: "",
     contact_number: "",
     subscription_plan: "basic",
-    purchase_amount: "",
+    purchase_amount: 0,
     payment_method: "",
     shipping_address: "",
     notes: "",

@@ -85,10 +85,12 @@
           <input
             v-model="filters.search"
             type="text"
+            maxlength="150"
             placeholder="Search by name, email..."
             class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             @input="applyFilters"
           />
+          <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
         </div>
 
         <!-- Status Filter -->
@@ -239,29 +241,15 @@
           </div>
 
           <!-- Pagination -->
-          <div class="mt-6 flex items-center justify-between">
-            <p class="text-sm text-secondary-600">
-              Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to
-              {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
-              of {{ pagination.total }}
-            </p>
-            <div class="flex space-x-2">
-              <button
-                :disabled="pagination.current_page === 1"
-                @click="previousPage"
-                class="px-3 py-2 border border-secondary-300 rounded-lg text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button
-                :disabled="pagination.current_page >= pagination.last_page"
-                @click="nextPage"
-                class="px-3 py-2 border border-secondary-300 rounded-lg text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <AdminPagination
+            :current-page="pagination.current_page"
+            :last-page="pagination.last_page"
+            :per-page="pagination.per_page"
+            :total="pagination.total"
+            item-label="results"
+            @page-change="changePage"
+            @per-page-change="changeItemsPerPage"
+          />
         </div>
 
         <div v-else class="text-center py-12">
@@ -455,9 +443,11 @@ const filters = ref({
   currentPage: 1,
 });
 
+const itemsPerPage = ref(10);
+
 const pagination = ref({
   total: 0,
-  per_page: 20,
+  per_page: 10,
   current_page: 1,
   last_page: 1,
 });
@@ -467,7 +457,7 @@ const loadFeedback = async () => {
   loading.value = true;
   try {
     const query = new URLSearchParams({
-      per_page: pagination.value.per_page,
+      per_page: itemsPerPage.value,
       page: filters.value.currentPage,
     });
 
@@ -520,23 +510,43 @@ const resetFilters = () => {
     is_read: '',
     currentPage: 1,
   };
+  itemsPerPage.value = 10;
   loadFeedback();
 };
 
 // Pagination
-const nextPage = () => {
-  if (filters.value.currentPage < pagination.value.last_page) {
-    filters.value.currentPage++;
+const changePage = (page) => {
+  if (page >= 1 && page <= pagination.value.last_page) {
+    filters.value.currentPage = page;
     loadFeedback();
   }
 };
 
-const previousPage = () => {
-  if (filters.value.currentPage > 1) {
-    filters.value.currentPage--;
-    loadFeedback();
-  }
+const changeItemsPerPage = () => {
+  filters.value.currentPage = 1;
+  loadFeedback();
 };
+
+// Compute visible page numbers
+const visiblePages = computed(() => {
+  const total = pagination.value.last_page || 1;
+  const current = pagination.value.current_page || 1;
+  const pages = [];
+  
+  let start = Math.max(1, current - 2);
+  let end = Math.min(total, start + 4);
+  
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4);
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  return pages;
+});
 
 // Mark as read
 const markAsRead = async () => {

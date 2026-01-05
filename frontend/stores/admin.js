@@ -3,10 +3,7 @@
 // Helper function to safely get API instance
 const getApi = () => {
   const nuxtApp = useNuxtApp();
-  if (!nuxtApp.$api) {
-    throw new Error('API plugin not initialized');
-  }
-  return nuxtApp.$api;
+  return nuxtApp.$api || null;
 };
 
 export const useAdminStore = defineStore("admin", {
@@ -30,6 +27,8 @@ export const useAdminStore = defineStore("admin", {
       is_admin: "",
       businessUserId: "",
       employeeId: "",
+      sort_by: "created_at",
+      sort_order: "desc",
     },
   }),
 
@@ -88,6 +87,12 @@ export const useAdminStore = defineStore("admin", {
       try {
         this.loading = true;
         const $api = getApi();
+
+        // If API not ready, retry after delay
+        if (!$api) {
+          setTimeout(() => this.fetchNfcCards(params), 500);
+          return;
+        }
 
         const queryParams = {
           ...this.filters,
