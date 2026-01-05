@@ -303,7 +303,14 @@
           </nav>
 
           <!-- Upgrade Banner - Fixed at bottom (hide for Business/Premium users) -->
-          <div v-if="!['business', 'premium'].includes(authStore.user?.subscription_plan)" class="p-4 border-t border-secondary-200">
+          <div
+            v-if="
+              !['business', 'premium'].includes(
+                authStore.user?.subscription_plan
+              )
+            "
+            class="p-4 border-t border-secondary-200"
+          >
             <div
               class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-4 text-white"
             >
@@ -480,10 +487,12 @@ const user = computed(() => authStore.user);
 // Development mode check
 const isDevelopment = computed(() => {
   if (process.client) {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname === '127.0.0.1' || 
-           window.location.hostname.includes('192.168') || 
-           window.location.hostname.includes('172.19');
+    return (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.includes("192.168") ||
+      window.location.hostname.includes("172.19")
+    );
   }
   return false;
 });
@@ -492,6 +501,8 @@ const isDevelopment = computed(() => {
 const navigation = computed(() => {
   const plan = authStore.user?.subscription_plan || "free";
   const isBusinessPlan = plan === "business";
+  const isPremiumPlan = plan === "premium";
+  const isBasicPlan = plan === "basic";
   const isFreePlan = plan === "free";
 
   const baseNavigation = [
@@ -499,9 +510,11 @@ const navigation = computed(() => {
       name: "Profile Builder",
       href: isBusinessPlan
         ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder"
-        : isFreePlan
-        ? "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder"
-        : "/UserDashboard/ProfileBuilder",
+        : isPremiumPlan
+        ? "/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder"
+        : isBasicPlan
+        ? "/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder"
+        : "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder",
       icon: "heroicons:user",
     },
     {

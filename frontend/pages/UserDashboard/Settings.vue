@@ -511,39 +511,66 @@
                         class="block text-sm font-medium text-secondary-700 mb-2"
                         >Current Password</label
                       >
-                      <input
-                        v-model="passwordForm.current_password"
-                        type="password"
-                        required
-                        class="input input-bordered w-full"
-                        placeholder="Enter current password"
-                      />
+                      <div class="relative">
+                        <input
+                          v-model="passwordForm.current_password"
+                          :type="showCurrentPassword ? 'text' : 'password'"
+                          required
+                          class="input input-bordered w-full pr-10"
+                          placeholder="Enter current password"
+                        />
+                        <button
+                          type="button"
+                          @click="showCurrentPassword = !showCurrentPassword"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                        >
+                          <Icon :name="showCurrentPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label
                         class="block text-sm font-medium text-secondary-700 mb-2"
                         >New Password</label
                       >
-                      <input
-                        v-model="passwordForm.new_password"
-                        type="password"
-                        required
-                        class="input input-bordered w-full"
-                        placeholder="Enter new password"
-                      />
+                      <div class="relative">
+                        <input
+                          v-model="passwordForm.new_password"
+                          :type="showNewPassword ? 'text' : 'password'"
+                          required
+                          class="input input-bordered w-full pr-10"
+                          placeholder="Enter new password"
+                        />
+                        <button
+                          type="button"
+                          @click="showNewPassword = !showNewPassword"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                        >
+                          <Icon :name="showNewPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label
                         class="block text-sm font-medium text-secondary-700 mb-2"
                         >Confirm New Password</label
                       >
-                      <input
-                        v-model="passwordForm.confirm_password"
-                        type="password"
-                        required
-                        class="input input-bordered w-full"
-                        placeholder="Confirm new password"
-                      />
+                      <div class="relative">
+                        <input
+                          v-model="passwordForm.confirm_password"
+                          :type="showConfirmNewPassword ? 'text' : 'password'"
+                          required
+                          class="input input-bordered w-full pr-10"
+                          placeholder="Confirm new password"
+                        />
+                        <button
+                          type="button"
+                          @click="showConfirmNewPassword = !showConfirmNewPassword"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                        >
+                          <Icon :name="showConfirmNewPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div class="flex justify-end mt-6">
@@ -739,14 +766,23 @@
                     <label class="block text-sm font-medium text-secondary-700 mb-2">
                       Current Password
                     </label>
-                    <input
-                      v-model="linkAccountPassword"
-                      type="password"
-                      required
-                      class="input input-bordered w-full"
-                      placeholder="Enter your password"
-                      :disabled="linkingAccount"
-                    />
+                    <div class="relative">
+                      <input
+                        v-model="linkAccountPassword"
+                        :type="showLinkAccountPassword ? 'text' : 'password'"
+                        required
+                        class="input input-bordered w-full pr-10"
+                        placeholder="Enter your password"
+                        :disabled="linkingAccount"
+                      />
+                      <button
+                        type="button"
+                        @click="showLinkAccountPassword = !showLinkAccountPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                      >
+                        <Icon :name="showLinkAccountPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                      </button>
+                    </div>
                     <p v-if="linkAccountError" class="text-sm text-red-600 mt-1">
                       {{ linkAccountError }}
                     </p>
@@ -1341,6 +1377,12 @@ const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
 const exportingData = ref(false);
 const deletingAccount = ref(false);
+
+// Password visibility toggles
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmNewPassword = ref(false);
+const showLinkAccountPassword = ref(false);
 
 // Modal states
 const showDeleteConfirmation = ref(false);

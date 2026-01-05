@@ -33,8 +33,10 @@
               type="text"
               placeholder="Search cards..."
               class="input"
+              maxlength="100"
               @input="handleSearch"
             />
+            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/100</span>
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -263,23 +265,31 @@
     </div>
 
     <!-- Pagination -->
-    <div
-      v-if="pagination.total > pagination.per_page"
-      class="mt-6 flex items-center justify-between"
-    >
-      <div class="flex items-center space-x-2">
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Results counter (always visible) -->
+      <div class="flex items-center space-x-4">
         <span class="text-sm text-secondary-700">
           Showing
-          {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to
-          {{
-            Math.min(
-              pagination.current_page * pagination.per_page,
-              pagination.total
-            )
-          }}
-          of {{ pagination.total }} results
+          {{ pagination.total === 0 ? 0 : (pagination.current_page - 1) * pagination.per_page + 1 }} -
+          {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
+          of {{ pagination.total }} cards
         </span>
+        <!-- Per page selector -->
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-secondary-600">Per page:</span>
+          <select
+            v-model="itemsPerPage"
+            @change="changeItemsPerPage"
+            class="input input-sm w-20"
+          >
+            <option :value="10">10</option>
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+        </div>
       </div>
+      <!-- Page navigation -->
       <div class="flex items-center space-x-2">
         <button
           @click="changePage(pagination.current_page - 1)"
@@ -288,12 +298,23 @@
         >
           Previous
         </button>
-        <span class="text-sm text-secondary-700">
-          Page {{ pagination.current_page }} of {{ pagination.total_pages }}
-        </span>
+        <!-- Page numbers -->
+        <template v-for="page in visiblePages" :key="page">
+          <button
+            @click="changePage(page)"
+            :class="[
+              'btn btn-sm',
+              page === pagination.current_page
+                ? 'btn-primary'
+                : 'btn-outline'
+            ]"
+          >
+            {{ page }}
+          </button>
+        </template>
         <button
           @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.total_pages"
+          :disabled="pagination.current_page === pagination.last_page"
           class="btn btn-outline btn-sm"
         >
           Next
@@ -755,6 +776,9 @@ const filters = ref({
   sort_by: "created_at",
 });
 
+// Pagination state
+const itemsPerPage = ref(15);
+
 // Available users for registration
 const availableUsers = ref([]);
 
@@ -813,6 +837,32 @@ const changePage = (page) => {
     adminStore.fetchNfcCards({ page });
   }
 };
+
+// Change items per page
+const changeItemsPerPage = () => {
+  adminStore.fetchNfcCards({ page: 1, per_page: itemsPerPage.value });
+};
+
+// Compute visible page numbers (show max 5 pages at a time)
+const visiblePages = computed(() => {
+  const total = pagination.value.last_page || 1;
+  const current = pagination.value.current_page || 1;
+  const pages = [];
+  
+  let start = Math.max(1, current - 2);
+  let end = Math.min(total, start + 4);
+  
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4);
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  return pages;
+});
 
 // View card details
 const viewCard = (card) => {

@@ -103,8 +103,25 @@ onMounted(async () => {
         authStore.token = token;
         console.log('✅ Token set in store');
         
-        // Small delay to ensure cookie is readable
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Longer delay to ensure cookie is written and readable by Vue's reactivity
+        // This is critical for OAuth flow where the API plugin reads from the cookie
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Verify the cookie was set correctly
+        const savedToken = useCookie('auth-token').value;
+        console.log('🔍 Verifying saved token:', savedToken ? 'Token exists' : 'Token missing');
+        
+        if (!savedToken) {
+          console.error('❌ Cookie was not saved correctly, retrying...');
+          const tokenCookieRetry = useCookie('auth-token', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+          });
+          tokenCookieRetry.value = token;
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
       }
       
       // Fetch user profile with the token
@@ -152,7 +169,9 @@ onMounted(async () => {
       console.error('OAuth callback error:', err);
       error.value = true;
       errorMessage.value = 'Failed to complete authentication. Please try again.';
-      $toast.error(errorMessage.value);
+      if ($toast && typeof $toast.error === 'function') {
+        $toast.error(errorMessage.value);
+      }
     }
   } else {
     // No token found, something went wrong

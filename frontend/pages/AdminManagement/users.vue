@@ -31,8 +31,10 @@
               type="text"
               placeholder="Search users..."
               class="input"
+              maxlength="150"
               @input="handleSearch"
             />
+            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/150</span>
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -43,7 +45,8 @@
               @change="handleFilterChange"
               class="input"
             >
-              <option value="">All Business Plan Users</option>
+              <option value="">Select Business User</option>
+              <option value="all">All Business Plan Users</option>
               <option v-for="u in businessUserList" :key="u.id" :value="u.id">
                 {{ u.first_name }} {{ u.last_name }}
               </option>
@@ -292,23 +295,36 @@
 
     <!-- Pagination -->
     <div
-      v-if="pagination.total > pagination.per_page"
-      class="mt-6 flex items-center justify-between"
+      v-if="users.length > 0"
+      class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
     >
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-4">
         <span class="text-sm text-secondary-700">
           Showing
-          {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to
+          {{ pagination.total === 0 ? 0 : (pagination.current_page - 1) * pagination.per_page + 1 }} to
           {{
             Math.min(
               pagination.current_page * pagination.per_page,
               pagination.total
             )
           }}
-          of {{ pagination.total }} results
+          of {{ pagination.total }} users
         </span>
+        <div class="flex items-center space-x-2">
+          <label class="text-sm text-secondary-600">Per page:</label>
+          <select
+            v-model.number="itemsPerPage"
+            @change="changeItemsPerPage"
+            class="input py-1 px-2 text-sm w-20"
+          >
+            <option :value="10">10</option>
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+        </div>
       </div>
-      <div class="flex items-center space-x-2">
+      <div v-if="pagination.total > pagination.per_page" class="flex items-center space-x-2">
         <button
           @click="changePage(pagination.current_page - 1)"
           :disabled="pagination.current_page === 1"
@@ -316,12 +332,25 @@
         >
           Previous
         </button>
-        <span class="text-sm text-secondary-700">
-          Page {{ pagination.current_page }} of {{ pagination.total_pages }}
-        </span>
+        <!-- Page numbers -->
+        <div class="flex items-center space-x-1">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            @click="changePage(page)"
+            :class="[
+              'px-3 py-1 text-sm rounded',
+              page === pagination.current_page
+                ? 'bg-primary-600 text-white'
+                : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
+            ]"
+          >
+            {{ page }}
+          </button>
+        </div>
         <button
           @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.total_pages"
+          :disabled="pagination.current_page === pagination.last_page"
           class="btn btn-outline btn-sm"
         >
           Next
@@ -352,8 +381,15 @@
                 v-model="form.first_name"
                 type="text"
                 required
-                class="input"
+                maxlength="100"
+                :class="['input', formErrors.first_name ? 'border-red-500' : '']"
+                @input="validateFirstName"
               />
+              <div class="flex justify-between mt-1">
+                <span v-if="formErrors.first_name" class="text-xs text-red-500">{{ formErrors.first_name }}</span>
+                <span v-else class="text-xs text-secondary-500"></span>
+                <span class="text-xs text-secondary-500">{{ form.first_name.length }}/100</span>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
@@ -363,8 +399,15 @@
                 v-model="form.last_name"
                 type="text"
                 required
-                class="input"
+                maxlength="100"
+                :class="['input', formErrors.last_name ? 'border-red-500' : '']"
+                @input="validateLastName"
               />
+              <div class="flex justify-between mt-1">
+                <span v-if="formErrors.last_name" class="text-xs text-red-500">{{ formErrors.last_name }}</span>
+                <span v-else class="text-xs text-secondary-500"></span>
+                <span class="text-xs text-secondary-500">{{ form.last_name.length }}/100</span>
+              </div>
             </div>
           </div>
 
@@ -373,13 +416,37 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Email *</label
               >
-              <input v-model="form.email" type="email" required class="input" />
+              <input
+                v-model="form.email"
+                type="email"
+                required
+                maxlength="100"
+                :class="['input', formErrors.email ? 'border-red-500' : '']"
+                @input="validateEmail"
+              />
+              <div class="flex justify-between mt-1">
+                <span v-if="formErrors.email" class="text-xs text-red-500">{{ formErrors.email }}</span>
+                <span v-else class="text-xs text-secondary-500"></span>
+                <span class="text-xs text-secondary-500">{{ form.email.length }}/100</span>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Phone</label
               >
-              <input v-model="form.phone" type="tel" class="input" />
+              <input
+                v-model="form.phone"
+                type="text"
+                maxlength="16"
+                :class="['input', formErrors.phone ? 'border-red-500' : '']"
+                @input="validatePhone"
+                placeholder="Digits only (0-9)"
+              />
+              <div class="flex justify-between mt-1">
+                <span v-if="formErrors.phone" class="text-xs text-red-500">{{ formErrors.phone }}</span>
+                <span v-else class="text-xs text-secondary-500">Digits only, max 16</span>
+                <span class="text-xs text-secondary-500">{{ form.phone.length }}/16</span>
+              </div>
             </div>
           </div>
 
@@ -388,13 +455,25 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Company</label
               >
-              <input v-model="form.company" type="text" class="input" />
+              <input
+                v-model="form.company"
+                type="text"
+                maxlength="150"
+                class="input"
+              />
+              <span class="text-xs text-secondary-500 mt-1 block text-right">{{ (form.company || '').length }}/150</span>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Job Title</label
               >
-              <input v-model="form.job_title" type="text" class="input" />
+              <input
+                v-model="form.job_title"
+                type="text"
+                maxlength="30"
+                class="input"
+              />
+              <span class="text-xs text-secondary-500 mt-1 block text-right">{{ (form.job_title || '').length }}/30</span>
             </div>
           </div>
 
@@ -406,23 +485,41 @@
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Password *</label
               >
-              <input
-                v-model="form.password"
-                type="password"
-                required
-                class="input"
-              />
+              <div class="relative">
+                <input
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  class="input pr-10"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                >
+                  <Icon :name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                </button>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Confirm Password *</label
               >
-              <input
-                v-model="form.password_confirmation"
-                type="password"
-                required
-                class="input"
-              />
+              <div class="relative">
+                <input
+                  v-model="form.password_confirmation"
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  required
+                  class="input pr-10"
+                />
+                <button
+                  type="button"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-secondary-600"
+                >
+                  <Icon :name="showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -785,6 +882,10 @@ const showUserModal = ref(false);
 const selectedUser = ref(null);
 const submitting = ref(false);
 
+// Password visibility toggles
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+
 // Form data
 const form = ref({
   first_name: "",
@@ -805,6 +906,14 @@ const form = ref({
   total_card_quota: 10, // Default for Business plan
 });
 
+// Form validation errors
+const formErrors = ref({
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+});
+
 // Filters
 const filters = ref({
   search: "",
@@ -817,6 +926,7 @@ const filters = ref({
 
 const businessUserList = ref([]);
 const employeeList = ref([]);
+const itemsPerPage = ref(15);
 onMounted(async () => {
   await adminStore.fetchUsers();
   const { $api } = useNuxtApp();
@@ -878,6 +988,32 @@ const changePage = (page) => {
   }
 };
 
+// Change items per page
+const changeItemsPerPage = () => {
+  adminStore.fetchUsers({ page: 1, per_page: itemsPerPage.value });
+};
+
+// Compute visible page numbers (show max 5 pages at a time)
+const visiblePages = computed(() => {
+  const total = pagination.value.last_page || 1;
+  const current = pagination.value.current_page || 1;
+  const pages = [];
+  
+  let start = Math.max(1, current - 2);
+  let end = Math.min(total, start + 4);
+  
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4);
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  return pages;
+});
+
 // View user details
 const viewUser = (user) => {
   selectedUser.value = user;
@@ -928,8 +1064,90 @@ const createUser = () => {
   showCreateModal.value = true;
 };
 
+// Form validation functions
+const NAME_PATTERN = /^[a-zA-Z\s\-']+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^\d*$/;
+
+const validateFirstName = () => {
+  const value = form.value.first_name.trim();
+  if (!value) {
+    formErrors.value.first_name = "First name is required";
+  } else if (!NAME_PATTERN.test(value)) {
+    formErrors.value.first_name = "Only letters, spaces, hyphens, apostrophes allowed";
+  } else {
+    formErrors.value.first_name = "";
+  }
+};
+
+const validateLastName = () => {
+  const value = form.value.last_name.trim();
+  if (!value) {
+    formErrors.value.last_name = "Last name is required";
+  } else if (!NAME_PATTERN.test(value)) {
+    formErrors.value.last_name = "Only letters, spaces, hyphens, apostrophes allowed";
+  } else {
+    formErrors.value.last_name = "";
+  }
+};
+
+const validateEmail = () => {
+  const value = form.value.email.trim();
+  if (!value) {
+    formErrors.value.email = "Email is required";
+  } else if (value.length < 5) {
+    formErrors.value.email = "Email must be at least 5 characters";
+  } else if (!EMAIL_PATTERN.test(value)) {
+    formErrors.value.email = "Invalid email format";
+  } else {
+    formErrors.value.email = "";
+  }
+};
+
+const validatePhone = () => {
+  const value = form.value.phone;
+  // Strip any non-digit characters and reassign to enforce digits only
+  const digitsOnly = value.replace(/\D/g, "");
+  if (value !== digitsOnly) {
+    form.value.phone = digitsOnly;
+  }
+  if (value && !PHONE_PATTERN.test(value)) {
+    formErrors.value.phone = "Only digits (0-9) allowed";
+  } else {
+    formErrors.value.phone = "";
+  }
+};
+
+const validateAllFields = () => {
+  validateFirstName();
+  validateLastName();
+  validateEmail();
+  validatePhone();
+  
+  return !formErrors.value.first_name && 
+         !formErrors.value.last_name && 
+         !formErrors.value.email && 
+         !formErrors.value.phone;
+};
+
+const clearFormErrors = () => {
+  formErrors.value = {
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+  };
+};
+
 // Handle form submission
 const handleSubmit = async () => {
+  // Validate all fields first
+  if (!validateAllFields()) {
+    const { $toast } = useNuxtApp();
+    $toast.error("Please fix the validation errors before submitting.");
+    return;
+  }
+
   if (form.value.password !== form.value.password_confirmation) {
     alert("Passwords do not match");
     return;
@@ -956,6 +1174,7 @@ const closeModal = () => {
   showEditModal.value = false;
   showUserModal.value = false;
   selectedUser.value = null;
+  clearFormErrors(); // Reset validation errors
   form.value = {
     first_name: "",
     last_name: "",

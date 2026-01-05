@@ -1,0 +1,96 @@
+{
+  "subscription_plan": "basic",
+  "nfc_card_id": "BASIC-USER-001",
+  "card_owner": "Emma Chen",
+  
+  "profile": {
+    "profilePicture": "/images/profiles/emma-chen.jpg",
+    "coverBanner": null,
+    "name": "Emma Chen",
+    "position": "Freelance Graphic Designer",
+    "pronouns": null,
+    "qualification": null,
+    "bio": "Creative graphic designer specializing in branding and visual identity. I help businesses tell their stories through beautiful, strategic design. Available for freelance projects and collaborations.",
+    "tagline": null,
+    "contactNumber": "+60123456789",
+    "emailAddress": "emma.chen@email.com",
+    "website": "https://emmachen.design",
+    "address": "Petaling Jaya, Selangor, Malaysia",
+    "education": [],
+    "certifications": [],
+    "profileStats": []
+  },
+  
+  "company": null,
+  
+  "services": null,
+  
+  "links": {
+    "phone": "+60123456789",
+    "whatsapp": "+60123456789",
+    "socialLinks": [
+      {
+        "id": 1,
+        "platform": "instagram",
+        "title": "Instagram Portfolio",
+        "url": "https://instagram.com/emmachendesign",
+        "icon": "mdi:instagram",
+        "is_active": true,
+        "order": 1,
+        "click_count": 45
+      },
+      {
+        "id": 2,
+        "platform": "linkedin",
+        "title": "LinkedIn Profile",
+        "url": "https://linkedin.com/in/emmachen",
+        "icon": "mdi:linkedin",
+        "is_active": true,
+        "order": 2,
+        "click_count": 28
+      }
+    ],
+    "linkIcon": null,
+    "linkType": null,
+    "utmParameters": null,
+    "clickTracking": false
+  },
+  
+  "portfolio": null,
+  
+  "blog": null,
+  
+  "design": {
+    "profileStyle": "classic",
+    "theme": "minimal",
+    "backgroundColor": "#FFFFFF",
+    "textColor": "#1F2937",
+    "font": "inter",
+    "buttonStyle": "solid",
+    "colorScheme": "light",
+    "layout": "single-column",
+    "showWatermark": true
+  },
+  
+  "features": {
+    "contact_form": false,
+    "vcard_download": true,
+    "qr_code": true,
+    "remove_branding": false,
+    "booking_integration": false,
+    "social_sharing": false
+  },
+  
+  "analytics": {
+    "viewCount": 127,
+    "tapCount": 34,
+    "linkClicks": 73
+  },
+  
+  "metadata": {
+    "created_at": "2025-11-15T10:30:00Z",
+    "updated_at": "2025-12-28T14:22:00Z",
+    "is_active": true,
+    "status": "active"
+  }
+}

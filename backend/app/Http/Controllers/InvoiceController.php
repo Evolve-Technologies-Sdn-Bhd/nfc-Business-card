@@ -23,7 +23,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         $query = Invoice::forUser($user->id)
             ->with(['transaction'])
             ->latest('created_at');

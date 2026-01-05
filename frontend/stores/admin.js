@@ -90,6 +90,7 @@ export const useAdminStore = defineStore("admin", {
         const $api = getApi();
 
         const queryParams = {
+          ...this.filters,
           ...params,
           page: params.page || this.pagination.current_page,
           per_page: params.per_page || this.pagination.per_page,

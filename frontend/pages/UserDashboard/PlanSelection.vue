@@ -611,12 +611,16 @@ const selectPlan = async (plan) => {
     const { $api } = useNuxtApp();
     await $api.post("/onboarding/select-plan", { plan });
 
-    // Redirect all non-business plans to NFC card customization first.
-    // Onboarding completion now happens only AFTER successful payment.
+    // Free plan users skip NFC customization and go directly to their profile builder
+    if (plan === "free") {
+      $toast.success("Free plan activated! Welcome to your profile builder.");
+      await navigateTo("/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder");
+      return;
+    }
+
+    // Paid plans continue to NFC card customization
     $toast.success(
-      plan === "free"
-        ? "Free plan selected! Let's customize your NFC card."
-        : `Great choice! Let's customize your ${plan} plan NFC card.`
+      `Great choice! Let's customize your ${plan} plan NFC card.`
     );
     
     // Use navigateTo for proper Nuxt 3 navigation instead of router.push

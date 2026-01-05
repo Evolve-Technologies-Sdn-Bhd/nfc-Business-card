@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProfileBuilderFieldsSeeder::class,
             AddMissingProfileFieldsSeeder::class,
+            MockUserSeeder::class,
         ]);
 
         $this->command->info('Sample data created successfully!');

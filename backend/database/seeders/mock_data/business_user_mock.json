@@ -1,0 +1,701 @@
+{
+  "subscription_plan": "business",
+  "nfc_card_id": "BIZ-TECH-HQ-001",
+  "card_owner": "Sarah Lim",
+  
+  "profile": {
+    "profilePicture": "/images/profiles/sarah-lim.jpg",
+    "coverBanner": "/images/banners/techsolutions-cover.jpg",
+    "name": "Sarah Lim",
+    "position": "Chief Executive Officer",
+    "pronouns": "She/Her",
+    "qualification": "Ph.D. Computer Science, MBA",
+    "bio": "Passionate technology leader with 15+ years of experience driving digital transformation for enterprises across Southeast Asia. As CEO of TechSolutions Malaysia, I lead a team of 50+ talented professionals delivering cutting-edge software solutions to clients in banking, healthcare, and e-commerce sectors. My mission is to bridge the gap between complex technology and business outcomes, ensuring our clients stay ahead in an increasingly digital world. I'm also an active mentor for women in tech and frequently speak at industry conferences about innovation, leadership, and the future of work. Let's connect to explore how technology can transform your business.",
+    "tagline": "Innovate. Transform. Lead.",
+    "contactNumber": "+60123456780",
+    "emailAddress": "sarah.lim@techsolutions.my",
+    "website": "https://sarahlim.tech",
+    "address": "Bangsar South, Kuala Lumpur, Malaysia",
+    "education": [
+      {
+        "id": 1,
+        "institution": "Stanford University",
+        "degree": "Ph.D.",
+        "field": "Computer Science",
+        "year": "2012"
+      },
+      {
+        "id": 2,
+        "institution": "INSEAD",
+        "degree": "MBA",
+        "field": "Technology Management",
+        "year": "2015"
+      },
+      {
+        "id": 3,
+        "institution": "National University of Singapore",
+        "degree": "B.Eng",
+        "field": "Software Engineering",
+        "year": "2006"
+      }
+    ],
+    "certifications": [
+      {
+        "id": 1,
+        "name": "Certified Scrum Master",
+        "issuer": "Scrum Alliance",
+        "year": "2024"
+      },
+      {
+        "id": 2,
+        "name": "AWS Solutions Architect - Professional",
+        "issuer": "Amazon Web Services",
+        "year": "2023"
+      },
+      {
+        "id": 3,
+        "name": "Project Management Professional (PMP)",
+        "issuer": "PMI",
+        "year": "2018"
+      }
+    ],
+    "profileStats": [
+      {
+        "id": 1,
+        "label": "Years in Tech",
+        "value": "15+",
+        "icon": "heroicons:code-bracket"
+      },
+      {
+        "id": 2,
+        "label": "Team Size",
+        "value": "50+",
+        "icon": "heroicons:user-group"
+      },
+      {
+        "id": 3,
+        "label": "Projects Delivered",
+        "value": "200+",
+        "icon": "heroicons:rocket-launch"
+      },
+      {
+        "id": 4,
+        "label": "Client Satisfaction",
+        "value": "98%",
+        "icon": "heroicons:star"
+      }
+    ]
+  },
+  
+  "company": {
+    "companyLogo": "/images/logos/techsolutions.png",
+    "companyLogoText": "TechSolutions Malaysia",
+    "companyName": "TechSolutions Malaysia Sdn Bhd",
+    "companyRegistrationNo": "202001234567 (SSM)",
+    "companyDepartment": "Executive Office",
+    "companySlogan": "Building Tomorrow's Technology Today",
+    "companyDescription": "<p><strong>TechSolutions Malaysia</strong> is a premier software development and IT consultancy firm specializing in enterprise digital transformation. Since 2015, we've been helping organizations harness the power of technology to drive growth, efficiency, and innovation.</p><p>Our expertise spans custom software development, cloud migration, mobile applications, AI/ML integration, and cybersecurity solutions. We pride ourselves on delivering world-class solutions with a personal touch, understanding that every business has unique challenges and opportunities.</p><p>With offices in Kuala Lumpur and Singapore, we serve clients across ASEAN and beyond. Our team of certified professionals brings deep technical expertise combined with business acumen to ensure projects are delivered on time, within budget, and exceed expectations.</p>",
+    "companyVideo": "https://youtube.com/watch?v=techsolutions-intro",
+    "industry": "Information Technology & Software Development",
+    "establishedYear": "2015",
+    "employeeCount": "50",
+    "expertise": [
+      {
+        "id": 1,
+        "skill": "Cloud Architecture (AWS, Azure, GCP)",
+        "level": "Expert"
+      },
+      {
+        "id": 2,
+        "skill": "Custom Software Development",
+        "level": "Expert"
+      },
+      {
+        "id": 3,
+        "skill": "Mobile App Development (iOS, Android)",
+        "level": "Expert"
+      },
+      {
+        "id": 4,
+        "skill": "AI & Machine Learning",
+        "level": "Advanced"
+      },
+      {
+        "id": 5,
+        "skill": "Cybersecurity Solutions",
+        "level": "Expert"
+      },
+      {
+        "id": 6,
+        "skill": "DevOps & CI/CD",
+        "level": "Advanced"
+      }
+    ],
+    "addressName": "Menara TechHub",
+    "addressStreet": "No. 8, Jalan Kerinchi",
+    "addressArea": "Bangsar South",
+    "addressCityState": "Kuala Lumpur",
+    "addressCountry": "Malaysia",
+    "postalCode": "59200",
+    "mapUrl": "https://maps.google.com/?q=Menara+TechHub+Bangsar+South",
+    "coordinates": "3.1142°N, 101.6669°E",
+    "phoneLabel": "Headquarters",
+    "phoneNumber": "+60321234500",
+    "companyWhatsapp": "+60123456780",
+    "workingHours": [
+      {
+        "id": 1,
+        "day": "Monday - Thursday",
+        "hours": "8:30 AM - 6:00 PM"
+      },
+      {
+        "id": 2,
+        "day": "Friday",
+        "hours": "8:30 AM - 5:30 PM"
+      },
+      {
+        "id": 3,
+        "day": "Saturday - Sunday",
+        "hours": "Closed (Emergency support available)"
+      }
+    ],
+    "awards": [
+      {
+        "id": 1,
+        "title": "Best IT Solution Provider 2024",
+        "issuer": "Malaysia Tech Awards",
+        "year": "2024",
+        "description": "Recognized for excellence in enterprise software solutions"
+      },
+      {
+        "id": 2,
+        "title": "SME Excellence Award",
+        "issuer": "SME Corporation Malaysia",
+        "year": "2023",
+        "description": "Outstanding SME in technology sector"
+      },
+      {
+        "id": 3,
+        "title": "Top 10 Tech Startups ASEAN",
+        "issuer": "ASEAN Business Forum",
+        "year": "2022",
+        "description": "Listed among fastest-growing tech companies in region"
+      }
+    ],
+    "teamMembers": [
+      {
+        "id": 1,
+        "name": "David Wong",
+        "role": "Chief Technology Officer",
+        "photo": "/images/team/david-wong.jpg",
+        "email": "david.wong@techsolutions.my",
+        "linkedin": "https://linkedin.com/in/davidwong"
+      },
+      {
+        "id": 2,
+        "name": "Priya Sharma",
+        "role": "Head of Development",
+        "photo": "/images/team/priya-sharma.jpg",
+        "email": "priya.sharma@techsolutions.my",
+        "linkedin": "https://linkedin.com/in/priyasharma"
+      },
+      {
+        "id": 3,
+        "name": "Ahmad Razak",
+        "role": "Solutions Architect",
+        "photo": "/images/team/ahmad-razak.jpg",
+        "email": "ahmad.razak@techsolutions.my",
+        "linkedin": "https://linkedin.com/in/ahmadrazak"
+      },
+      {
+        "id": 4,
+        "name": "Michelle Koh",
+        "role": "Product Manager",
+        "photo": "/images/team/michelle-koh.jpg",
+        "email": "michelle.koh@techsolutions.my",
+        "linkedin": "https://linkedin.com/in/michellekoh"
+      }
+    ]
+  },
+  
+  "services": [
+    {
+      "id": 1,
+      "serviceName": "Custom Software Development",
+      "serviceCategory": "Software Development",
+      "serviceImage": "/images/services/custom-software.jpg",
+      "serviceVideo": "https://youtube.com/watch?v=custom-dev-demo",
+      "serviceDescription": "<p>Bespoke software solutions tailored to your unique business requirements. From concept to deployment, our experienced team delivers scalable, secure, and user-friendly applications that drive business value.</p><p>We follow agile methodology, ensuring transparency and collaboration throughout the development lifecycle. Our solutions integrate seamlessly with your existing systems and are built for long-term maintainability.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Requirements Analysis & Planning" },
+        { "id": 2, "feature": "UI/UX Design" },
+        { "id": 3, "feature": "Agile Development Process" },
+        { "id": 4, "feature": "Quality Assurance & Testing" },
+        { "id": 5, "feature": "Deployment & Training" },
+        { "id": 6, "feature": "Ongoing Support & Maintenance" }
+      ],
+      "servicePrice": "Starting from RM 80,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "3-9 months (project-based)",
+      "serviceTags": [
+        { "id": 1, "tag": "Custom Development" },
+        { "id": 2, "tag": "Enterprise Software" },
+        { "id": 3, "tag": "Full-Stack Development" }
+      ],
+      "serviceBrochure": "/downloads/brochures/custom-development.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 2,
+      "serviceName": "Cloud Migration & Management",
+      "serviceCategory": "Cloud Solutions",
+      "serviceImage": "/images/services/cloud-migration.jpg",
+      "serviceVideo": "https://youtube.com/watch?v=cloud-migration-guide",
+      "serviceDescription": "<p>Seamlessly migrate your infrastructure to the cloud or optimize your existing cloud deployment. We specialize in AWS, Azure, and Google Cloud Platform, helping you reduce costs while improving performance and scalability.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Cloud Readiness Assessment" },
+        { "id": 2, "feature": "Migration Strategy & Planning" },
+        { "id": 3, "feature": "Data Migration & Security" },
+        { "id": 4, "feature": "Cost Optimization" },
+        { "id": 5, "feature": "24/7 Monitoring & Support" }
+      ],
+      "servicePrice": "RM 25,000 - RM 150,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "2-6 months",
+      "serviceTags": [
+        { "id": 1, "tag": "Cloud Migration" },
+        { "id": 2, "tag": "AWS" },
+        { "id": 3, "tag": "Azure" },
+        { "id": 4, "tag": "Infrastructure" }
+      ],
+      "serviceBrochure": "/downloads/brochures/cloud-services.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 3,
+      "serviceName": "Mobile App Development",
+      "serviceCategory": "Mobile Solutions",
+      "serviceImage": "/images/services/mobile-apps.jpg",
+      "serviceVideo": "https://youtube.com/watch?v=mobile-showcase",
+      "serviceDescription": "<p>Native iOS and Android applications, or cross-platform solutions using React Native and Flutter. We create engaging mobile experiences that delight users and drive business results.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "iOS & Android Development" },
+        { "id": 2, "feature": "UI/UX Design for Mobile" },
+        { "id": 3, "feature": "Backend API Development" },
+        { "id": 4, "feature": "App Store Submission" },
+        { "id": 5, "feature": "Push Notifications & Analytics" }
+      ],
+      "servicePrice": "Starting from RM 60,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "3-8 months",
+      "serviceTags": [
+        { "id": 1, "tag": "Mobile Development" },
+        { "id": 2, "tag": "iOS" },
+        { "id": 3, "tag": "Android" },
+        { "id": 4, "tag": "React Native" }
+      ],
+      "serviceBrochure": "/downloads/brochures/mobile-development.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 4,
+      "serviceName": "AI & Machine Learning Solutions",
+      "serviceCategory": "Artificial Intelligence",
+      "serviceImage": "/images/services/ai-ml.jpg",
+      "serviceVideo": "https://youtube.com/watch?v=ai-solutions-demo",
+      "serviceDescription": "<p>Harness the power of AI and machine learning to automate processes, gain insights from data, and create intelligent applications. From predictive analytics to natural language processing, we bring cutting-edge AI to your business.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Machine Learning Model Development" },
+        { "id": 2, "feature": "Natural Language Processing" },
+        { "id": 3, "feature": "Computer Vision Solutions" },
+        { "id": 4, "feature": "Predictive Analytics" },
+        { "id": 5, "feature": "AI Model Deployment & Monitoring" }
+      ],
+      "servicePrice": "RM 50,000 - RM 250,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "4-12 months",
+      "serviceTags": [
+        { "id": 1, "tag": "Artificial Intelligence" },
+        { "id": 2, "tag": "Machine Learning" },
+        { "id": 3, "tag": "Data Science" },
+        { "id": 4, "tag": "Automation" }
+      ],
+      "serviceBrochure": "/downloads/brochures/ai-solutions.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 5,
+      "serviceName": "Cybersecurity Assessment & Implementation",
+      "serviceCategory": "Security",
+      "serviceImage": "/images/services/cybersecurity.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Protect your digital assets with comprehensive cybersecurity solutions. We conduct thorough security audits and implement robust security measures to safeguard your business from evolving threats.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Security Vulnerability Assessment" },
+        { "id": 2, "feature": "Penetration Testing" },
+        { "id": 3, "feature": "Security Architecture Design" },
+        { "id": 4, "feature": "Compliance Consultation (ISO 27001, PDPA)" },
+        { "id": 5, "feature": "Incident Response Planning" }
+      ],
+      "servicePrice": "RM 18,000 - RM 80,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "1-4 months",
+      "serviceTags": [
+        { "id": 1, "tag": "Cybersecurity" },
+        { "id": 2, "tag": "Security Audit" },
+        { "id": 3, "tag": "Compliance" },
+        { "id": 4, "tag": "Risk Management" }
+      ],
+      "serviceBrochure": "/downloads/brochures/cybersecurity-services.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 6,
+      "serviceName": "DevOps & CI/CD Implementation",
+      "serviceCategory": "DevOps",
+      "serviceImage": "/images/services/devops.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Streamline your development and deployment processes with modern DevOps practices. We help teams ship faster, with higher quality and better collaboration.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "CI/CD Pipeline Setup" },
+        { "id": 2, "feature": "Infrastructure as Code (IaC)" },
+        { "id": 3, "feature": "Container Orchestration (Kubernetes)" },
+        { "id": 4, "feature": "Monitoring & Logging Setup" },
+        { "id": 5, "feature": "Team Training & Best Practices" }
+      ],
+      "servicePrice": "RM 30,000 - RM 100,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "2-5 months",
+      "serviceTags": [
+        { "id": 1, "tag": "DevOps" },
+        { "id": 2, "tag": "CI/CD" },
+        { "id": 3, "tag": "Kubernetes" },
+        { "id": 4, "tag": "Automation" }
+      ],
+      "serviceBrochure": "/downloads/brochures/devops-services.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 7,
+      "serviceName": "IT Consultancy & Strategy",
+      "serviceCategory": "Consulting",
+      "serviceImage": "/images/services/it-consulting.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Expert guidance on technology strategy, digital transformation, and IT governance. Our consultants bring deep industry experience to help you make informed technology decisions.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Technology Roadmap Development" },
+        { "id": 2, "feature": "Digital Transformation Strategy" },
+        { "id": 3, "feature": "Vendor Selection & Management" },
+        { "id": 4, "feature": "IT Budget Planning" },
+        { "id": 5, "feature": "Executive Advisory" }
+      ],
+      "servicePrice": "RM 5,000/day",
+      "serviceOldPrice": null,
+      "serviceDuration": "Ongoing/Project-based",
+      "serviceTags": [
+        { "id": 1, "tag": "IT Consulting" },
+        { "id": 2, "tag": "Digital Strategy" },
+        { "id": 3, "tag": "Technology Advisory" }
+      ],
+      "serviceBrochure": "/downloads/brochures/consulting-services.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    },
+    {
+      "id": 8,
+      "serviceName": "Enterprise Integration Solutions",
+      "serviceCategory": "Systems Integration",
+      "serviceImage": "/images/services/integration.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Connect disparate systems and applications to create a unified technology ecosystem. We specialize in API development, middleware solutions, and data synchronization.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "System Analysis & Integration Design" },
+        { "id": 2, "feature": "API Development & Management" },
+        { "id": 3, "feature": "Data Migration & ETL" },
+        { "id": 4, "feature": "Legacy System Modernization" },
+        { "id": 5, "feature": "Real-time Data Synchronization" }
+      ],
+      "servicePrice": "RM 35,000 - RM 120,000",
+      "serviceOldPrice": null,
+      "serviceDuration": "2-6 months",
+      "serviceTags": [
+        { "id": 1, "tag": "System Integration" },
+        { "id": 2, "tag": "API Development" },
+        { "id": 3, "tag": "Enterprise Architecture" }
+      ],
+      "serviceBrochure": "/downloads/brochures/integration-services.pdf",
+      "bookingEnabled": true,
+      "bookingUrl": "https://techsolutions.my/book-consultation"
+    }
+  ],
+  
+  "links": {
+    "phone": "+60321234500",
+    "whatsapp": "+60123456780",
+    "appointmentLink": "https://techsolutions.my/book-consultation",
+    "paymentButtonText": "Request Quote",
+    "paymentButtonUrl": "https://techsolutions.my/quote",
+    "socialLinks": [
+      {
+        "id": 1,
+        "platform": "linkedin",
+        "title": "LinkedIn - TechSolutions Malaysia",
+        "url": "https://linkedin.com/company/techsolutions-malaysia",
+        "icon": "mdi:linkedin",
+        "is_active": true,
+        "order": 1,
+        "click_count": 892
+      },
+      {
+        "id": 2,
+        "platform": "facebook",
+        "title": "Facebook Page",
+        "url": "https://facebook.com/techsolutionsmalaysia",
+        "icon": "mdi:facebook",
+        "is_active": true,
+        "order": 2,
+        "click_count": 567
+      },
+      {
+        "id": 3,
+        "platform": "x",
+        "title": "X (Twitter)",
+        "url": "https://x.com/techsolmy",
+        "icon": "mdi:twitter",
+        "is_active": true,
+        "order": 3,
+        "click_count": 423
+      },
+      {
+        "id": 4,
+        "platform": "youtube",
+        "title": "YouTube Channel",
+        "url": "https://youtube.com/@techsolutionsmalaysia",
+        "icon": "mdi:youtube",
+        "is_active": true,
+        "order": 4,
+        "click_count": 312
+      },
+      {
+        "id": 5,
+        "platform": "instagram",
+        "title": "Instagram",
+        "url": "https://instagram.com/techsolutionsmy",
+        "icon": "mdi:instagram",
+        "is_active": true,
+        "order": 5,
+        "click_count": 278
+      },
+      {
+        "id": 6,
+        "platform": "github",
+        "title": "GitHub",
+        "url": "https://github.com/techsolutions-my",
+        "icon": "mdi:github",
+        "is_active": true,
+        "order": 6,
+        "click_count": 189
+      },
+      {
+        "id": 7,
+        "platform": "telegram",
+        "title": "Telegram Support",
+        "url": "https://t.me/techsolutionsmy",
+        "icon": "mdi:telegram",
+        "is_active": true,
+        "order": 7,
+        "click_count": 156
+      }
+    ],
+    "linkIcon": "custom-branded",
+    "linkType": "external-tracked",
+    "utmParameters": "utm_source=nfc&utm_medium=card&utm_campaign=ceo_card",
+    "clickTracking": true
+  },
+  
+  "portfolio": {
+    "portfolioTitle": "Healthcare Digital Transformation Project",
+    "portfolioDescription": "<p>Led the complete digital transformation of a major private hospital group, implementing an integrated Hospital Information System (HIS) that connected patient records, billing, pharmacy, and diagnostic services. The solution improved operational efficiency by 60% and significantly enhanced patient care quality.</p><p>This multi-phase project involved cloud migration, custom software development, mobile app creation for patients and staff, and comprehensive training programs. The system now serves 5 hospitals and processes over 10,000 patient visits daily.</p>",
+    "portfolioCategory": "Healthcare Technology",
+    "portfolioTags": [
+      { "id": 1, "tag": "Healthcare" },
+      { "id": 2, "tag": "Digital Transformation" },
+      { "id": 3, "tag": "Cloud Migration" },
+      { "id": 4, "tag": "Mobile Apps" }
+    ],
+    "portfolioCoverImage": "/images/portfolio/healthcare-project-cover.jpg",
+    "portfolioGallery": [
+      "/images/portfolio/healthcare/dashboard.jpg",
+      "/images/portfolio/healthcare/mobile-app.jpg",
+      "/images/portfolio/healthcare/doctor-interface.jpg",
+      "/images/portfolio/healthcare/patient-portal.jpg",
+      "/images/portfolio/healthcare/analytics.jpg",
+      "/images/portfolio/healthcare/system-architecture.jpg",
+      "/images/portfolio/healthcare/training-session.jpg",
+      "/images/portfolio/healthcare/launch-event.jpg"
+    ],
+    "projects": [
+      {
+        "id": 1,
+        "title": "Healthcare Digital Transformation",
+        "client": "MediCare Hospital Group",
+        "category": "Healthcare IT",
+        "description": "Complete HIS implementation for 5 hospitals",
+        "dateCompleted": "2024-09-30",
+        "image": "/images/portfolio/project-healthcare.jpg"
+      },
+      {
+        "id": 2,
+        "title": "Banking Core System Modernization",
+        "client": "Regional Bank Malaysia",
+        "category": "Financial Services",
+        "description": "Legacy system migration to cloud-based microservices",
+        "dateCompleted": "2024-05-15",
+        "image": "/images/portfolio/project-banking.jpg"
+      },
+      {
+        "id": 3,
+        "title": "E-Commerce Platform Development",
+        "client": "RetailHub Malaysia",
+        "category": "E-Commerce",
+        "description": "Multi-vendor marketplace with AI recommendations",
+        "dateCompleted": "2024-02-28",
+        "image": "/images/portfolio/project-ecommerce.jpg"
+      },
+      {
+        "id": 4,
+        "title": "Smart City IoT Platform",
+        "client": "Cyberjaya Smart City",
+        "category": "IoT & Smart Cities",
+        "description": "Integrated platform for smart parking, waste management, and utilities",
+        "dateCompleted": "2023-11-10",
+        "image": "/images/portfolio/project-smartcity.jpg"
+      }
+    ],
+    "projectUrl": "https://techsolutions.my/portfolio/healthcare-transformation",
+    "dateCompleted": "2024-09-30",
+    "clientName": "MediCare Hospital Group",
+    "location": "Kuala Lumpur, Malaysia",
+    "skillsUsed": [
+      { "id": 1, "skill": "Cloud Architecture (AWS)" },
+      { "id": 2, "skill": "Microservices Development" },
+      { "id": 3, "skill": "React Native Mobile Apps" },
+      { "id": 4, "skill": "API Development" },
+      { "id": 5, "skill": "Data Migration" },
+      { "id": 6, "skill": "DevOps & CI/CD" }
+    ],
+    "pdfDownload": "/downloads/case-studies/healthcare-transformation.pdf"
+  },
+  
+  "blog": {
+    "blogEnabled": true,
+    "blogPosts": [
+      {
+        "id": 1,
+        "blogTitle": "5 Key Trends Shaping Enterprise Software in 2025",
+        "blogSlug": "enterprise-software-trends-2025",
+        "blogCoverImage": "/images/blog/trends2025-cover.jpg",
+        "blogCategory": "Industry Insights",
+        "blogTags": [
+          { "id": 1, "tag": "Enterprise Software" },
+          { "id": 2, "tag": "Technology Trends" },
+          { "id": 3, "tag": "Digital Transformation" }
+        ],
+        "authorName": "Sarah Lim",
+        "publishedDate": "2025-12-15",
+        "readingTime": "8 min read",
+        "blogContent": "<p>As we move into 2025, the enterprise software landscape continues to evolve at an unprecedented pace. Here are the five key trends that will shape how businesses leverage technology...</p>",
+        "externalLink": null,
+        "relatedPosts": []
+      },
+      {
+        "id": 2,
+        "blogTitle": "Cloud Migration: A Step-by-Step Guide for SMEs",
+        "blogSlug": "cloud-migration-guide-smes",
+        "blogCoverImage": "/images/blog/cloud-migration-cover.jpg",
+        "blogCategory": "Technical Guide",
+        "blogTags": [
+          { "id": 1, "tag": "Cloud Computing" },
+          { "id": 2, "tag": "Migration" },
+          { "id": 3, "tag": "SME" }
+        ],
+        "authorName": "David Wong",
+        "publishedDate": "2025-11-22",
+        "readingTime": "12 min read",
+        "blogContent": "<p>Moving to the cloud can seem daunting for small and medium enterprises. This comprehensive guide breaks down the process into manageable steps...</p>",
+        "externalLink": null,
+        "relatedPosts": []
+      },
+      {
+        "id": 3,
+        "blogTitle": "AI Ethics in Software Development: What Developers Need to Know",
+        "blogSlug": "ai-ethics-software-development",
+        "blogCoverImage": "/images/blog/ai-ethics-cover.jpg",
+        "blogCategory": "AI & Ethics",
+        "blogTags": [
+          { "id": 1, "tag": "Artificial Intelligence" },
+          { "id": 2, "tag": "Ethics" },
+          { "id": 3, "tag": "Best Practices" }
+        ],
+        "authorName": "Sarah Lim",
+        "publishedDate": "2025-10-08",
+        "readingTime": "10 min read",
+        "blogContent": "<p>As AI becomes increasingly integrated into software applications, developers must consider the ethical implications of their work. This article explores key ethical considerations...</p>",
+        "externalLink": null,
+        "relatedPosts": []
+      }
+    ],
+    "blogGallery": [
+      "/images/blog/gallery/img1.jpg",
+      "/images/blog/gallery/img2.jpg",
+      "/images/blog/gallery/img3.jpg"
+    ]
+  },
+  
+  "design": {
+    "profileStyle": "executive",
+    "theme": "corporate",
+    "backgroundColor": "#FFFFFF",
+    "textColor": "#1E293B",
+    "font": "inter",
+    "buttonStyle": "solid-professional",
+    "colorScheme": "blue-corporate",
+    "layout": "executive-layout",
+    "showWatermark": false
+  },
+  
+  "features": {
+    "contact_form": true,
+    "vcard_download": true,
+    "qr_code": true,
+    "remove_branding": true,
+    "booking_integration": true,
+    "social_sharing": true,
+    "analytics_dashboard": true,
+    "custom_domain": true
+  },
+  
+  "analytics": {
+    "viewCount": 5847,
+    "tapCount": 1234,
+    "linkClicks": 2156,
+    "topReferrers": ["LinkedIn", "Company Website", "Email Campaigns", "Google Search"],
+    "conversionRate": "18.5%",
+    "averageTimeOnPage": "2m 45s"
+  },
+  
+  "metadata": {
+    "created_at": "2024-03-10T08:00:00Z",
+    "updated_at": "2025-12-31T18:30:00Z",
+    "is_active": true,
+    "status": "active",
+    "featured": true,
+    "customDomain": "ceo.techsolutions.my"
+  }
+}

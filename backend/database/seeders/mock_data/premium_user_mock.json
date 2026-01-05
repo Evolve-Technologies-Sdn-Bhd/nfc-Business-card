@@ -1,0 +1,440 @@
+{
+  "subscription_plan": "premium",
+  "nfc_card_id": "PREMIUM-USER-001",
+  "card_owner": "Marcus Tan",
+  
+  "profile": {
+    "profilePicture": "/images/profiles/marcus-tan.jpg",
+    "coverBanner": "/images/banners/marcus-cover.jpg",
+    "name": "Marcus Tan",
+    "position": "Senior Marketing Consultant",
+    "pronouns": "He/Him",
+    "qualification": "MBA, Digital Marketing",
+    "bio": "Award-winning marketing strategist with over 10 years of experience helping brands amplify their digital presence. Specialized in SEO, content marketing, and conversion optimization. I've worked with Fortune 500 companies and startups alike, delivering measurable results through data-driven strategies. Passionate about mentoring the next generation of marketers and staying ahead of industry trends. Let's connect and discuss how I can help your business grow through strategic marketing initiatives.",
+    "tagline": "Transform Your Brand. Drive Real Results.",
+    "contactNumber": "+60127654321",
+    "emailAddress": "marcus@marketingpro.my",
+    "website": "https://marcustan.com",
+    "address": "KLCC, Kuala Lumpur, Malaysia",
+    "education": [
+      {
+        "id": 1,
+        "institution": "National University of Singapore",
+        "degree": "MBA",
+        "field": "Marketing & Strategy",
+        "year": "2015"
+      },
+      {
+        "id": 2,
+        "institution": "University of Malaya",
+        "degree": "Bachelor of Business",
+        "field": "Marketing",
+        "year": "2010"
+      }
+    ],
+    "certifications": [
+      {
+        "id": 1,
+        "name": "Google Analytics Certified",
+        "issuer": "Google",
+        "year": "2024"
+      },
+      {
+        "id": 2,
+        "name": "HubSpot Inbound Marketing",
+        "issuer": "HubSpot Academy",
+        "year": "2023"
+      }
+    ],
+    "profileStats": [
+      {
+        "id": 1,
+        "label": "Years Experience",
+        "value": "10+",
+        "icon": "heroicons:briefcase"
+      },
+      {
+        "id": 2,
+        "label": "Clients Served",
+        "value": "150+",
+        "icon": "heroicons:user-group"
+      },
+      {
+        "id": 3,
+        "label": "ROI Increase Avg",
+        "value": "320%",
+        "icon": "heroicons:chart-bar"
+      }
+    ]
+  },
+  
+  "company": {
+    "companyLogo": "/images/logos/marketingpro.png",
+    "companyLogoText": "MarketingPro Consultancy",
+    "companyName": "MarketingPro Consultancy",
+    "companyRegistrationNo": null,
+    "companyDepartment": null,
+    "companyDescription": "<p>MarketingPro Consultancy is a boutique digital marketing agency helping businesses achieve their growth objectives through strategic marketing solutions. We combine data analytics with creative storytelling to deliver campaigns that resonate with your target audience.</p>",
+    "companyVideo": null,
+    "industry": "Marketing & Advertising",
+    "establishedYear": "2018",
+    "employeeCount": null,
+    "expertise": [
+      {
+        "id": 1,
+        "skill": "SEO & SEM",
+        "level": "Expert"
+      },
+      {
+        "id": 2,
+        "skill": "Content Marketing",
+        "level": "Expert"
+      },
+      {
+        "id": 3,
+        "skill": "Social Media Strategy",
+        "level": "Advanced"
+      },
+      {
+        "id": 4,
+        "skill": "Marketing Analytics",
+        "level": "Expert"
+      }
+    ],
+    "addressName": "Menara KLCC",
+    "addressStreet": "Jalan Ampang",
+    "addressArea": "KLCC",
+    "addressCityState": "Kuala Lumpur",
+    "addressCountry": "Malaysia",
+    "postalCode": "50088",
+    "mapUrl": "https://maps.google.com/?q=Menara+KLCC",
+    "coordinates": null,
+    "phoneLabel": "Office",
+    "phoneNumber": "+60321234567",
+    "companyWhatsapp": "+60127654321",
+    "workingHours": [
+      {
+        "id": 1,
+        "day": "Monday - Friday",
+        "hours": "9:00 AM - 6:00 PM"
+      },
+      {
+        "id": 2,
+        "day": "Saturday",
+        "hours": "10:00 AM - 2:00 PM"
+      },
+      {
+        "id": 3,
+        "day": "Sunday",
+        "hours": "Closed"
+      }
+    ],
+    "awards": [],
+    "teamMembers": []
+  },
+  
+  "services": [
+    {
+      "id": 1,
+      "serviceName": "SEO Optimization",
+      "serviceCategory": "Digital Marketing",
+      "serviceImage": "/images/services/seo.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Comprehensive SEO strategy to improve your search rankings and drive organic traffic. Includes keyword research, on-page optimization, and monthly reporting.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Keyword Research & Analysis" },
+        { "id": 2, "feature": "On-Page SEO Optimization" },
+        { "id": 3, "feature": "Technical SEO Audit" },
+        { "id": 4, "feature": "Monthly Performance Reports" }
+      ],
+      "servicePrice": "RM 2,500/month",
+      "serviceOldPrice": "RM 3,500/month",
+      "serviceDuration": "3-6 months",
+      "serviceTags": [
+        { "id": 1, "tag": "SEO" },
+        { "id": 2, "tag": "Digital Marketing" },
+        { "id": 3, "tag": "Google Ranking" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    },
+    {
+      "id": 2,
+      "serviceName": "Content Marketing Strategy",
+      "serviceCategory": "Content Creation",
+      "serviceImage": "/images/services/content.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Strategic content planning and creation to engage your audience and establish thought leadership in your industry.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Content Calendar Planning" },
+        { "id": 2, "feature": "Blog Post Writing (4/month)" },
+        { "id": 3, "feature": "Social Media Content" },
+        { "id": 4, "feature": "Email Newsletter Templates" }
+      ],
+      "servicePrice": "RM 3,200/month",
+      "serviceOldPrice": null,
+      "serviceDuration": "6-12 months",
+      "serviceTags": [
+        { "id": 1, "tag": "Content Marketing" },
+        { "id": 2, "tag": "Blogging" },
+        { "id": 3, "tag": "Brand Storytelling" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    },
+    {
+      "id": 3,
+      "serviceName": "Social Media Management",
+      "serviceCategory": "Social Media",
+      "serviceImage": "/images/services/social-media.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Full-service social media management including content creation, scheduling, engagement, and monthly analytics.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Daily Post Scheduling" },
+        { "id": 2, "feature": "Community Management" },
+        { "id": 3, "feature": "Graphic Design for Posts" },
+        { "id": 4, "feature": "Monthly Analytics Report" }
+      ],
+      "servicePrice": "RM 2,800/month",
+      "serviceOldPrice": null,
+      "serviceDuration": "Ongoing",
+      "serviceTags": [
+        { "id": 1, "tag": "Social Media" },
+        { "id": 2, "tag": "Community Building" },
+        { "id": 3, "tag": "Brand Awareness" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    },
+    {
+      "id": 4,
+      "serviceName": "Pay-Per-Click Advertising",
+      "serviceCategory": "Paid Advertising",
+      "serviceImage": "/images/services/ppc.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Targeted PPC campaigns on Google Ads and social platforms to drive qualified traffic and conversions.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Campaign Setup & Strategy" },
+        { "id": 2, "feature": "Ad Copy & Creative Design" },
+        { "id": 3, "feature": "A/B Testing" },
+        { "id": 4, "feature": "Budget Optimization" }
+      ],
+      "servicePrice": "RM 1,800/month + ad spend",
+      "serviceOldPrice": null,
+      "serviceDuration": "3+ months",
+      "serviceTags": [
+        { "id": 1, "tag": "PPC" },
+        { "id": 2, "tag": "Google Ads" },
+        { "id": 3, "tag": "Facebook Ads" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    },
+    {
+      "id": 5,
+      "serviceName": "Email Marketing Campaigns",
+      "serviceCategory": "Email Marketing",
+      "serviceImage": "/images/services/email.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>Design and execute email marketing campaigns that drive engagement and conversions. Includes automation setup and list management.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Email Template Design" },
+        { "id": 2, "feature": "List Segmentation" },
+        { "id": 3, "feature": "Automation Workflows" },
+        { "id": 4, "feature": "Performance Tracking" }
+      ],
+      "servicePrice": "RM 2,200/month",
+      "serviceOldPrice": null,
+      "serviceDuration": "Ongoing",
+      "serviceTags": [
+        { "id": 1, "tag": "Email Marketing" },
+        { "id": 2, "tag": "Marketing Automation" },
+        { "id": 3, "tag": "Lead Nurturing" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    },
+    {
+      "id": 6,
+      "serviceName": "Marketing Consultation",
+      "serviceCategory": "Consulting",
+      "serviceImage": "/images/services/consulting.jpg",
+      "serviceVideo": null,
+      "serviceDescription": "<p>One-on-one strategic marketing consultation to identify opportunities and develop actionable marketing plans.</p>",
+      "serviceFeatures": [
+        { "id": 1, "feature": "Marketing Audit" },
+        { "id": 2, "feature": "Strategy Session (2 hours)" },
+        { "id": 3, "feature": "Action Plan Document" },
+        { "id": 4, "feature": "Follow-up Support" }
+      ],
+      "servicePrice": "RM 800/session",
+      "serviceOldPrice": "RM 1,200/session",
+      "serviceDuration": "Single Session",
+      "serviceTags": [
+        { "id": 1, "tag": "Consulting" },
+        { "id": 2, "tag": "Strategy" },
+        { "id": 3, "tag": "Business Growth" }
+      ],
+      "serviceBrochure": null,
+      "bookingEnabled": false,
+      "bookingUrl": null
+    }
+  ],
+  
+  "links": {
+    "phone": "+60127654321",
+    "whatsapp": "+60127654321",
+    "appointmentLink": "https://calendly.com/marcustan",
+    "paymentButtonText": null,
+    "paymentButtonUrl": null,
+    "socialLinks": [
+      {
+        "id": 1,
+        "platform": "linkedin",
+        "title": "LinkedIn Profile",
+        "url": "https://linkedin.com/in/marcustan",
+        "icon": "mdi:linkedin",
+        "is_active": true,
+        "order": 1,
+        "click_count": 156
+      },
+      {
+        "id": 2,
+        "platform": "instagram",
+        "title": "Instagram",
+        "url": "https://instagram.com/marketingpromalaysia",
+        "icon": "mdi:instagram",
+        "is_active": true,
+        "order": 2,
+        "click_count": 98
+      },
+      {
+        "id": 3,
+        "platform": "facebook",
+        "title": "Facebook Page",
+        "url": "https://facebook.com/marketingpromalaysia",
+        "icon": "mdi:facebook",
+        "is_active": true,
+        "order": 3,
+        "click_count": 72
+      },
+      {
+        "id": 4,
+        "platform": "youtube",
+        "title": "YouTube Channel",
+        "url": "https://youtube.com/@marketingpromalaysia",
+        "icon": "mdi:youtube",
+        "is_active": true,
+        "order": 4,
+        "click_count": 45
+      },
+      {
+        "id": 5,
+        "platform": "x",
+        "title": "X (Twitter)",
+        "url": "https://x.com/marcustanmy",
+        "icon": "mdi:twitter",
+        "is_active": true,
+        "order": 5,
+        "click_count": 38
+      }
+    ],
+    "linkIcon": "custom",
+    "linkType": "external",
+    "utmParameters": null,
+    "clickTracking": true
+  },
+  
+  "portfolio": {
+    "portfolioTitle": "E-Commerce Growth Campaign",
+    "portfolioDescription": "<p>Led a comprehensive digital marketing campaign for a Malaysian e-commerce startup, resulting in 450% revenue growth in 12 months. Strategy included SEO optimization, paid advertising, and influencer partnerships.</p>",
+    "portfolioCategory": "Case Study",
+    "portfolioTags": [
+      { "id": 1, "tag": "E-Commerce" },
+      { "id": 2, "tag": "Growth Marketing" },
+      { "id": 3, "tag": "SEO" }
+    ],
+    "portfolioCoverImage": "/images/portfolio/ecommerce-case.jpg",
+    "portfolioGallery": [
+      "/images/portfolio/gallery/img1.jpg",
+      "/images/portfolio/gallery/img2.jpg",
+      "/images/portfolio/gallery/img3.jpg",
+      "/images/portfolio/gallery/img4.jpg",
+      "/images/portfolio/gallery/img5.jpg",
+      "/images/portfolio/gallery/img6.jpg"
+    ],
+    "projects": [
+      {
+        "id": 1,
+        "title": "E-Commerce Growth Campaign",
+        "client": "TrendShop Malaysia",
+        "category": "Digital Marketing",
+        "description": "Full-funnel marketing strategy",
+        "dateCompleted": "2024-06-30",
+        "image": "/images/portfolio/project1.jpg"
+      },
+      {
+        "id": 2,
+        "title": "B2B Lead Generation",
+        "client": "TechSolutions Asia",
+        "category": "B2B Marketing",
+        "description": "LinkedIn and content marketing campaign",
+        "dateCompleted": "2024-03-15",
+        "image": "/images/portfolio/project2.jpg"
+      }
+    ],
+    "projectUrl": "https://marcustan.com/portfolio/ecommerce-growth",
+    "dateCompleted": "2024-06-30",
+    "clientName": "TrendShop Malaysia",
+    "location": "Kuala Lumpur, Malaysia",
+    "skillsUsed": [
+      { "id": 1, "skill": "SEO" },
+      { "id": 2, "skill": "Google Ads" },
+      { "id": 3, "skill": "Facebook Ads" },
+      { "id": 4, "skill": "Email Marketing" }
+    ],
+    "pdfDownload": null
+  },
+  
+  "blog": null,
+  
+  "design": {
+    "profileStyle": "modern",
+    "theme": "professional",
+    "backgroundColor": "#F9FAFB",
+    "textColor": "#111827",
+    "font": "poppins",
+    "buttonStyle": "rounded",
+    "colorScheme": "blue-gradient",
+    "layout": "two-column",
+    "showWatermark": false
+  },
+  
+  "features": {
+    "contact_form": true,
+    "vcard_download": true,
+    "qr_code": true,
+    "remove_branding": true,
+    "booking_integration": true,
+    "social_sharing": true
+  },
+  
+  "analytics": {
+    "viewCount": 1847,
+    "tapCount": 423,
+    "linkClicks": 509,
+    "topReferrers": ["LinkedIn", "Google", "Direct"]
+  },
+  
+  "metadata": {
+    "created_at": "2024-08-20T09:15:00Z",
+    "updated_at": "2025-12-30T16:45:00Z",
+    "is_active": true,
+    "status": "active"
+  }
+}

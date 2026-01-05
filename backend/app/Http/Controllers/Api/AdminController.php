@@ -82,12 +82,15 @@ class AdminController extends Controller
         $query = User::with(['nfcCards.landingPage', 'nfcTag', 'nfcCards'])
             ->withCount(['analytics', 'nfcCards']);
 
-        // Filter by businessUserId: show the business user and all their employees
-        if ($request->filled('businessUserId')) {
+        // Filter by businessUserId: handle 'all' for "All Business Plan Users" or specific ID
+        if ($request->businessUserId === 'all') {
+            // Show only business plan users (owners + employees)
+            $query->where('subscription_plan', 'business');
+        } elseif ($request->filled('businessUserId')) {
             $businessUserId = $request->businessUserId;
             $query->where(function ($q) use ($businessUserId) {
                 $q->where('id', $businessUserId)
-                  ->orWhere('parent_business_id', $businessUserId);
+                    ->orWhere('parent_business_id', $businessUserId);
             });
         }
 
@@ -210,7 +213,7 @@ class AdminController extends Controller
 
         // Verify business account exists and is a Business plan
         $businessAccount = User::find($validated['business_account_id']);
-        
+
         if (!$businessAccount || !$businessAccount->isBusinessAccount()) {
             return response()->json([
                 'success' => false,
@@ -220,7 +223,7 @@ class AdminController extends Controller
 
         // Check quota
         $quotaInfo = $businessAccount->getQuotaInfo();
-        
+
         if ($quotaInfo['available_account_slots'] <= 0) {
             return response()->json([
                 'success' => false,
@@ -278,19 +281,23 @@ class AdminController extends Controller
     public function createUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'first_name' => 'required|string|max:100|regex:/^[a-zA-Z\s\-\']+$/',
+            'last_name' => 'required|string|max:100|regex:/^[a-zA-Z\s\-\']+$/',
+            'email' => 'required|email|min:5|max:100|unique:users',
             'password' => 'required|string|min:8',
-            'company' => 'nullable|string|max:255',
-            'job_title' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'company' => 'nullable|string|max:150',
+            'job_title' => 'nullable|string|max:30',
+            'phone' => 'nullable|string|max:16|regex:/^\d*$/',
             'subscription_plan' => 'nullable|in:free,basic,premium,business',
             'is_admin' => 'boolean',
             'admin_role' => 'nullable|in:admin,moderator',
             'admin_permissions' => 'nullable|array',
             'total_account_slots' => 'nullable|integer|min:0',
             'total_card_quota' => 'nullable|integer|min:0',
+        ], [
+            'first_name.regex' => 'First name can only contain letters, spaces, hyphens, and apostrophes',
+            'last_name.regex' => 'Last name can only contain letters, spaces, hyphens, and apostrophes',
+            'phone.regex' => 'Phone can only contain digits (0-9)',
         ]);
 
         if ($validator->fails()) {
@@ -453,7 +460,7 @@ class AdminController extends Controller
             // Changing from Business to another plan
             if ($user->subscription_plan === 'business') {
                 $quotaInfo = $user->getQuotaInfo();
-                
+
                 if ($quotaInfo['employees_count'] > 0) {
                     return response()->json([
                         'success' => false,
@@ -766,7 +773,7 @@ class AdminController extends Controller
     private function getStorageUsage()
     {
         $totalBytes = 0;
-        
+
         try {
             if (Storage::disk('public')->exists('profile-images')) {
                 $profileImages = Storage::disk('public')->size('profile-images');
@@ -775,7 +782,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             // Directory doesn't exist or can't be accessed
         }
-        
+
         try {
             if (Storage::disk('public')->exists('company-logos')) {
                 $companyLogos = Storage::disk('public')->size('company-logos');
@@ -784,7 +791,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             // Directory doesn't exist or can't be accessed
         }
-        
+
         try {
             if (Storage::disk('public')->exists('card-designs')) {
                 $cardDesigns = Storage::disk('public')->size('card-designs');
