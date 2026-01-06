@@ -27,6 +27,14 @@
             >
               <Icon name="heroicons:envelope" class="h-5 w-5" />
             </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=61568045614509"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-secondary-400 hover:text-white transition-colors"
+            >
+              <Icon name="mdi:facebook" class="h-5 w-5" />
+            </a>
           </div>
         </div>
         <div>
@@ -136,8 +144,7 @@
       </div>
       <div class="border-t border-secondary-800 mt-12 pt-8 text-center">
         <p class="text-secondary-400">
-          © 2025 NFCGo. Evolve Technology Platform Sdn. Bhd. All rights
-          reserved.
+          @Copyright CLB SDN BHD – 2025 -RFID Label Supplier , RFID Solution and Stick Printing I All Rights Reserved
         </p>
       </div>
     </div>
