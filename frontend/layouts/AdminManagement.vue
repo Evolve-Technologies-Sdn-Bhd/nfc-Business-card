@@ -134,7 +134,8 @@
 
             <!-- Right side actions -->
             <div class="flex items-center space-x-4">
-              <!-- Icons removed as requested -->
+              <!-- Theme Switcher -->
+              <ThemeSwitcher />
             </div>
           </div>
         </header>

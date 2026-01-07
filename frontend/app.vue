@@ -15,7 +15,15 @@
 </template>
 
 <script setup>
-// Chatbot is now only on the Homepage
+import { onMounted } from 'vue';
+import { useTheme } from '~/composables/useTheme';
+
+// Initialize theme on app load
+const { initTheme } = useTheme();
+
+onMounted(() => {
+  initTheme();
+});
 </script>
 
 <style>

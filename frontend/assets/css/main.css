@@ -4,9 +4,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme CSS Custom Properties - Default: Holographic Purple */
+:root {
+  --theme-primary-50: #F5F3FF;
+  --theme-primary-100: #EDE9FE;
+  --theme-primary-200: #DDD6FE;
+  --theme-primary-300: #C4B5FD;
+  --theme-primary-400: #A78BFA;
+  --theme-primary-500: #8B5CF6;
+  --theme-primary-600: #7C3AED;
+  --theme-primary-700: #6D28D9;
+  --theme-primary-800: #5B21B6;
+  --theme-primary-900: #4C1D95;
+  --theme-accent: #22D3EE;
+  --theme-accent-secondary: #FBBF24;
+  --theme-secondary-50: #F8FAFC;
+  --theme-secondary-100: #F1F5F9;
+  --theme-secondary-200: #E2E8F0;
+  --theme-secondary-300: #CBD5E1;
+  --theme-secondary-400: #94A3B8;
+  --theme-secondary-500: #64748B;
+  --theme-secondary-600: #475569;
+  --theme-secondary-700: #334155;
+  --theme-secondary-800: #1E293B;
+  --theme-secondary-900: #0F172A;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
+  }
+
+  /* Smooth transitions for theme color changes */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: ease-in-out;
+    transition-duration: 0.15s;
+  }
+
+  /* Exclude elements that shouldn't have transitions */
+  *:focus,
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow, transform, opacity;
   }
 
   html {
@@ -188,7 +233,7 @@
 
   /* NFC Specific */
   .nfc-card {
-    @apply relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white;
+    @apply relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100 text-gray-900;
   }
 
   .nfc-card::before {

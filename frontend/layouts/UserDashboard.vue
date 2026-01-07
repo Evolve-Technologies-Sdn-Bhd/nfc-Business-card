@@ -351,8 +351,8 @@
             <Icon name="heroicons:bars-3" class="h-6 w-6" />
           </button>
           <h1 class="text-lg font-semibold text-secondary-900">NFCGo</h1>
-          <div class="w-10"></div>
-          <!-- Spacer for centering -->
+          <!-- Theme Switcher -->
+          <ThemeSwitcher />
         </div>
 
         <!-- Page Content - Scrollable -->

@@ -6,7 +6,7 @@
       class="fixed top-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20 shadow-sm"
     >
       <div class="container">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between md:justify-start md:gap-8 h-16">
           <div class="flex items-center">
             <Icon
               name="heroicons:identification"
@@ -30,19 +30,19 @@
             <a
               href="#who-uses"
               @click="smoothScroll('#who-uses')"
-              class="block px-3 py-2 nav-link"
+              class="nav-link"
               >Who Uses</a
             >
             <a
               href="#product-gallery"
               @click="smoothScroll('#product-gallery')"
-              class="block px-3 py-2 nav-link"
+              class="nav-link"
               >Product Gallery</a
             >
             <a
               href="#testimonials"
               @click="smoothScroll('#testimonials')"
-              class="block px-3 py-2 nav-link"
+              class="nav-link"
               >Testimonials</a
             >
             <a
@@ -65,6 +65,8 @@
             >
               <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6" />
             </button>
+            <!-- Theme Switcher -->
+            <ThemeSwitcher />
           </div>
           <div class="md:hidden">
             <button
@@ -178,21 +180,35 @@
           </div>
           <div class="relative animate-fade-in">
             <div
-                class="nfc-card w-64 h-40 mx-auto lg:w-80 lg:h-48 p-6 flex flex-col justify-between shadow-2xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                            <Icon name="heroicons:user" class="h-6 w-6 text-white" />
-                        </div>
+                class="nfc-card w-64 h-40 mx-auto lg:w-80 lg:h-48 p-6 flex flex-col justify-between shadow-2xl transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100 border border-white/40 relative overflow-hidden">
+                <!-- Iridescent/Holographic sheen overlay -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-70 pointer-events-none mix-blend-overlay"></div>
+                <!-- Shimmer effect -->
+                <div class="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-30 group-hover:animate-shine" />
+                
+                <div class="flex items-start justify-between relative z-10">
+                    <div class="flex flex-col">
+                        <!-- Simulated Gold Logo - Retained as requested -->
+                        <span class="text-3xl font-black tracking-tighter bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent leading-none drop-shadow-sm">CLB</span>
+                        <span class="text-[0.6rem] font-bold tracking-widest text-amber-600 uppercase mt-1">CLB GROUP</span>
                     </div>
                     <div>
-                        <Icon name="heroicons:wifi" class="h-8 w-8 text-white/60 animate-pulse" />
+                        <Icon name="heroicons:wifi" class="h-8 w-8 text-gray-500/50 animate-pulse" />
                     </div>
                 </div>
-                <div>
-                    <h3 class="text-white text-xl font-semibold">John Doe</h3>
-                    <p class="text-white/80 text-sm">Senior Developer</p>
-                    <p class="text-white/60 text-xs mt-1">👆 Tap to connect</p>
+                
+                <!-- Spacer -->
+                <div class="relative z-0"></div>
+
+                <div class="relative z-10 flex justify-between items-end">
+                    <div>
+                        <h3 class="text-gray-900 text-xl font-bold tracking-wide">John Doe</h3>
+                        <p class="text-gray-600 text-sm font-medium">Senior Developer</p>
+                    </div>
+                    <!-- QR Code -->
+                    <div class="bg-white/80 p-1 rounded-sm backdrop-blur-sm">
+                        <Icon name="heroicons:qr-code" class="h-8 w-8 text-gray-900" />
+                    </div>
                 </div>
             </div>
             <!-- Floating elements -->
@@ -224,91 +240,66 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div
-            class="card-hover p-8 text-center group animate-fade-in-up"
-            style="animation-delay: 0.1s"
-          >
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
+        <!-- Auto-Sliding Feature Rows -->
+        <div class="space-y-8 overflow-hidden">
+          <!-- Top Row -->
+          <div class="relative">
+            <div 
+              class="flex transition-transform duration-700 ease-in-out"
+              :class="{ 'duration-0': !featureTopIsTransitioning }"
+              :style="{ transform: `translateX(-${featureTopCurrentSlide * (featureMobileMode ? 100 : 100/3)}%)` }"
             >
-              <Icon name="heroicons:bolt" class="h-8 w-8 text-blue-600" />
+              <div
+                v-for="(feature, index) in featuresRow1"
+                :key="`row1-${index}`"
+                class="flex-shrink-0 w-full md:w-1/3 px-4"
+              >
+                <div class="h-full bg-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 group border border-secondary-100/50">
+                  <div
+                    class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
+                    :class="feature.bgClass"
+                  >
+                    <Icon :name="feature.icon" class="h-8 w-8" :class="feature.textClass" />
+                  </div>
+                  <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+                    {{ feature.title }}
+                  </h3>
+                  <p class="text-secondary-600 leading-relaxed">
+                    {{ feature.description }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              Works Instantly
-            </h3>
-            <p class="text-secondary-600 leading-relaxed">No app needed</p>
           </div>
 
-          <div
-            class="card-hover p-8 text-center group animate-fade-in-up"
-            style="animation-delay: 0.2s"
-          >
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
+          <!-- Bottom Row -->
+          <div class="relative">
+            <div 
+              class="flex transition-transform duration-700 ease-in-out"
+              :class="{ 'duration-0': !featureBottomIsTransitioning }"
+              :style="{ transform: `translateX(-${featureBottomCurrentSlide * (featureMobileMode ? 100 : 100/3)}%)` }"
             >
-              <Icon
-                name="heroicons:paint-brush"
-                class="h-8 w-8 text-purple-600"
-              />
+              <div
+                v-for="(feature, index) in featuresRow2"
+                :key="`row2-${index}`"
+                class="flex-shrink-0 w-full md:w-1/3 px-4"
+              >
+                <div class="h-full bg-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 group border border-secondary-100/50">
+                  <div
+                    class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
+                    :class="feature.bgClass"
+                  >
+                    <Icon :name="feature.icon" class="h-8 w-8" :class="feature.textClass" />
+                  </div>
+                  <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+                    {{ feature.title }}
+                  </h3>
+                  <p class="text-secondary-600 leading-relaxed">
+                    {{ feature.description }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              Customizable Profiles
-            </h3>
-            <p class="text-secondary-600 leading-relaxed">
-              Customizable and ready template for content and card
-            </p>
-          </div>
-
-          <div
-            class="card-hover p-8 text-center group animate-fade-in-up"
-            style="animation-delay: 0.3s"
-          >
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <Icon name="heroicons:wifi" class="h-8 w-8 text-green-600" />
-            </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              Seamless Linking
-            </h3>
-            <p class="text-secondary-600 leading-relaxed">
-              Link to WhatsApp, LinkedIn, website, and other social media apps
-            </p>
-          </div>
-
-          <div
-            class="card-hover p-8 text-center group animate-fade-in-up"
-            style="animation-delay: 0.4s"
-          >
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <Icon
-                name="heroicons:chart-bar"
-                class="h-8 w-8 text-orange-600"
-              />
-            </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              Analytics
-            </h3>
-            <p class="text-secondary-600 leading-relaxed">
-              Track taps and engagement
-            </p>
-          </div>
-
-          <div
-            class="card-hover p-8 text-center group animate-fade-in-up"
-            style="animation-delay: 0.6s"
-          >
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <Icon name="heroicons:users" class="h-8 w-8 text-indigo-600" />
-            </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              Centralized Connection Management
-            </h3>
           </div>
         </div>
       </div>
@@ -332,13 +323,20 @@
             class="text-center"
           >
             <div class="relative mb-6">
-              <div
-                class="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center mx-auto shadow-lg"
+              <a 
+                href="https://youtu.be/PER3f8EIGjs" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="block w-20 h-20 mx-auto relative z-10"
               >
-                <span class="text-2xl font-bold text-white">{{
-                  index + 1
-                }}</span>
-              </div>
+                <div
+                  class="w-full h-full bg-primary-600 rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 cursor-pointer hover:scale-110 hover:shadow-xl"
+                >
+                  <span class="text-2xl font-bold text-white">{{
+                    index + 1
+                  }}</span>
+                </div>
+              </a>
               <div
                 v-if="index < steps.length - 1"
                 class="hidden md:block absolute top-10 left-1/2 w-full h-0.5 bg-primary-200 transform translate-x-10"
@@ -542,6 +540,114 @@
                   class="h-4 w-4 text-success-600 mr-2"
                 />
                 Lead scoring system
+              </li>
+            </ul>
+          </div>
+
+          <!-- Real Estate Agents -->
+          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
+            <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:home-modern" class="h-8 w-8 text-cyan-600" />
+            </div>
+            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+              Real Estate Agents
+            </h3>
+            <p class="text-secondary-600 leading-relaxed mb-4">
+              Close properties faster with instant access to listings, virtual tours, and mortgage calculators. Schedule showings on the spot.
+            </p>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Property listing links
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Virtual tour integration
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Instant showing scheduler
+              </li>
+            </ul>
+          </div>
+
+          <!-- Consultants & Coaches -->
+          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:presentation-chart-line" class="h-8 w-8 text-indigo-600" />
+            </div>
+            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+              Consultants & Coaches
+            </h3>
+            <p class="text-secondary-600 leading-relaxed mb-4">
+              Convert conversations into consultations with embedded booking links and testimonials. Share your methodology instantly.
+            </p>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Discovery call scheduler
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Case study gallery
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Assessment forms
+              </li>
+            </ul>
+          </div>
+
+          <!-- Recruiters & HR -->
+          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
+            <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:user-group" class="h-8 w-8 text-rose-600" />
+            </div>
+            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+              Recruiters & HR
+            </h3>
+            <p class="text-secondary-600 leading-relaxed mb-4">
+              Capture candidate info instantly at job fairs. Share open positions and company culture videos on tap.
+            </p>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Job board integration
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Application form links
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Company overview videos
+              </li>
+            </ul>
+          </div>
+
+          <!-- Financial Advisors -->
+          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:banknotes" class="h-8 w-8 text-emerald-600" />
+            </div>
+            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
+              Financial Advisors
+            </h3>
+            <p class="text-secondary-600 leading-relaxed mb-4">
+              Build trust with credentials, client testimonials, and secure meeting scheduling. Share market insights and resources.
+            </p>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Compliance-friendly sharing
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Document portal links
+              </li>
+              <li class="flex items-center text-secondary-600">
+                <Icon name="heroicons:check" class="h-4 w-4 text-success-600 mr-2" />
+                Educational content hub
               </li>
             </ul>
           </div>
@@ -769,7 +875,9 @@
       </div>
     </section>
 
-    <!-- Testimonials Section -->
+
+
+    <!-- Testimonials Section - Auto-Sliding Carousel -->
     <section id="testimonials" class="section bg-white">
       <div class="container">
         <div class="text-center mb-16">
@@ -782,42 +890,92 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <div
-            v-for="testimonial in testimonials"
-            :key="testimonial.id"
-            class="card p-6 hover:shadow-xl transition-all duration-300 relative"
-          >
-            <div class="absolute top-6 right-6 opacity-10">
-              <Icon
-                name="heroicons:chat-bubble-bottom-center-text"
-                class="h-16 w-16 text-primary-600"
-              />
-            </div>
-            <div class="flex items-center mb-4">
-              <Icon
-                v-for="i in 5"
-                :key="i"
-                name="heroicons:star"
-                class="h-5 w-5 text-yellow-500 fill-current"
-              />
-            </div>
-            <p class="text-secondary-600 mb-6 italic leading-relaxed">
-              "{{ testimonial.text }}"
-            </p>
-            <div class="flex items-center">
-              <img
-                :src="testimonial.avatar"
-                :alt="testimonial.name"
-                class="w-12 h-12 rounded-full object-cover mr-4"
-              />
-              <div>
-                <h4 class="font-semibold text-secondary-900">
-                  {{ testimonial.name }}
-                </h4>
-                <p class="text-sm text-secondary-500">{{ testimonial.role }}</p>
+        <!-- Auto-Sliding Carousel -->
+        <div 
+          class="relative mb-16"
+          @mouseenter="pauseCarousel"
+          @mouseleave="resumeCarousel"
+        >
+          <!-- Carousel Container with overflow hidden -->
+          <div class="overflow-hidden">
+            <!-- Slides Wrapper -->
+            <div 
+              class="flex"
+              :class="[isTransitioning ? 'transition-transform duration-700 ease-in-out' : '']"
+              :style="{ transform: `translateX(-${carouselPosition}%)` }"
+            >
+              <!-- Testimonial Cards -->
+              <div
+                v-for="(testimonial, index) in extendedTestimonials"
+                :key="`testimonial-${index}`"
+                class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
+              >
+                <div class="card p-6 hover:shadow-xl transition-all duration-300 relative h-full bg-white rounded-xl">
+                  <div class="absolute top-6 right-6 opacity-10">
+                    <Icon
+                      name="heroicons:chat-bubble-bottom-center-text"
+                      class="h-16 w-16 text-primary-600"
+                    />
+                  </div>
+                  <div class="flex items-center mb-4">
+                    <Icon
+                      v-for="i in 5"
+                      :key="i"
+                      name="heroicons:star"
+                      class="h-5 w-5 text-yellow-500 fill-current"
+                    />
+                  </div>
+                  <p class="text-secondary-600 mb-6 italic leading-relaxed min-h-[100px]">
+                    "{{ testimonial.text }}"
+                  </p>
+                  <div class="flex items-center">
+                    <img
+                      :src="testimonial.avatar"
+                      :alt="testimonial.name"
+                      class="w-12 h-12 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <h4 class="font-semibold text-secondary-900">
+                        {{ testimonial.name }}
+                      </h4>
+                      <p class="text-sm text-secondary-500">{{ testimonial.role }}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- Navigation Arrows -->
+          <button
+            @click="prevTestimonial"
+            class="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-white shadow-lg hover:shadow-xl hover:bg-secondary-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400"
+            aria-label="Previous testimonial"
+          >
+            <Icon name="heroicons:chevron-left" class="h-5 w-5 md:h-6 md:w-6 text-secondary-600" />
+          </button>
+          <button
+            @click="nextTestimonial"
+            class="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-white shadow-lg hover:shadow-xl hover:bg-secondary-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400"
+            aria-label="Next testimonial"
+          >
+            <Icon name="heroicons:chevron-right" class="h-5 w-5 md:h-6 md:w-6 text-secondary-600" />
+          </button>
+
+          <!-- Navigation Dots -->
+          <div class="flex justify-center mt-8 gap-2">
+            <button
+              v-for="(_, index) in testimonials"
+              :key="`dot-${index}`"
+              @click="goToTestimonial(index)"
+              class="w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
+              :class="[
+                currentTestimonial === index
+                  ? 'bg-primary-600 w-8'
+                  : 'bg-secondary-300 hover:bg-secondary-400'
+              ]"
+              :aria-label="`Go to testimonial ${index + 1}`"
+            />
           </div>
         </div>
 
@@ -905,7 +1063,7 @@
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
         >
           <div
-            class="card p-6 text-center relative transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg"
+            class="card p-6 text-center relative transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg flex flex-col h-full"
           >
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Free</h3>
             <div class="mb-6">
@@ -969,7 +1127,7 @@
           </div>
 
           <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg"
+            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
           >
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Basic</h3>
             <div class="mb-6">
@@ -1000,7 +1158,7 @@
           </div>
 
           <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg"
+            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
           >
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Premium</h3>
             <div class="mb-6">
@@ -1029,7 +1187,7 @@
           </div>
 
           <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg"
+            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
           >
             <h3 class="text-xl font-bold text-secondary-900 mb-2">Business</h3>
             <div class="mb-6">
@@ -1141,7 +1299,9 @@
             </p>
             <div class="flex space-x-4">
               <a
-                href="#"
+                href="https://clbgroups.com/"
+                target="_blank"
+                rel="noopener noreferrer"
                 class="text-secondary-400 hover:text-white transition-colors"
               >
                 <Icon name="heroicons:globe-alt" class="h-5 w-5" />
@@ -1151,6 +1311,14 @@
                 class="text-secondary-400 hover:text-white transition-colors"
               >
                 <Icon name="heroicons:envelope" class="h-5 w-5" />
+              </a>
+              <a
+                href="https://www.facebook.com/profile.php?id=61568045614509"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-secondary-400 hover:text-white transition-colors"
+              >
+                <Icon name="bi:facebook" class="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -1261,8 +1429,8 @@
         </div>
         <div class="border-t border-secondary-800 mt-12 pt-8 text-center">
           <p class="text-secondary-400">
-            © 2025 NFCGo. Evolve Technology Platform Sdn. Bhd. All rights
-            reserved.
+            @Copyright CLB SDN BHD – 2025 -RFID Label Supplier , 
+            RFID Solution and Stick Printing I All Rights Reserved
           </p>
         </div>
       </div>
@@ -1869,7 +2037,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { watch, onMounted, onBeforeUnmount, computed } from 'vue';
 
 useHead({
   title: "NFCGo - Smart Digital Business Cards with NFC Technology",
@@ -2021,6 +2189,116 @@ const testimonials = [
       "https://ui-avatars.com/api/?name=Robert+Kim&background=8b5cf6&color=fff",
   },
 ];
+
+// Testimonial Carousel State & Logic
+const currentTestimonial = ref(0);
+let carouselTimer = null;
+const CAROUSEL_INTERVAL = 4000; // 4 seconds between slides
+const isTransitioning = ref(true); // Control transition class
+
+// Extended testimonials for seamless loop
+// Add clones: [Last3, ...Originals, First3] to allow infinite sliding both ways if needed
+// For simple forward infinite loop, we just need [ ...Originals, ...First3 ]
+const extendedTestimonials = computed(() => {
+  return [...testimonials, ...testimonials.slice(0, 3)];
+});
+
+// Calculate carousel position (33.333% per card on desktop)
+const carouselPosition = computed(() => {
+  return currentTestimonial.value * 33.333;
+});
+
+// Go to specific testimonial
+const goToTestimonial = (index) => {
+  isTransitioning.value = true;
+  currentTestimonial.value = index;
+  resetCarouselTimer();
+};
+
+// Next testimonial with seamless loop
+const nextTestimonial = () => {
+  if (!isTransitioning.value) isTransitioning.value = true;
+  
+  // If we are at the last real item, slide to the first clone
+  if (currentTestimonial.value >= testimonials.length) {
+    // Should verify if we are already dealing with reset logic
+    return;
+  }
+  
+  currentTestimonial.value++;
+  
+  // If we reached the clone of the first item (index == length)
+  if (currentTestimonial.value === testimonials.length) {
+    // Wait for transition to finish, then snap back to 0
+    setTimeout(() => {
+      isTransitioning.value = false; // Disable transition
+      currentTestimonial.value = 0;  // Snap to real 0
+      
+      // Re-enable transition after a small tick
+      setTimeout(() => {
+        isTransitioning.value = true;
+      }, 50);
+    }, 700); // Match CSS transition duration
+  }
+  
+  resetCarouselTimer();
+};
+
+// Previous testimonial
+const prevTestimonial = () => {
+  isTransitioning.value = true;
+  if (currentTestimonial.value <= 0) {
+    // For simple implementation, just loop back to end (with rewind effect)
+    // or implement similar clone logic for reverse direction if critical
+    currentTestimonial.value = testimonials.length - 1;
+  } else {
+    currentTestimonial.value--;
+  }
+  resetCarouselTimer();
+};
+
+// Start auto-sliding
+const startCarousel = () => {
+  stopCarousel();
+  carouselTimer = setInterval(() => {
+    nextTestimonial();
+  }, CAROUSEL_INTERVAL);
+};
+
+// Stop auto-sliding
+const stopCarousel = () => {
+  if (carouselTimer) {
+    clearInterval(carouselTimer);
+    carouselTimer = null;
+  }
+};
+
+// Pause on hover
+const pauseCarousel = () => {
+  stopCarousel();
+};
+
+// Resume after hover
+const resumeCarousel = () => {
+  startCarousel();
+};
+
+// Reset timer after manual navigation
+const resetCarouselTimer = () => {
+  stopCarousel();
+  startCarousel();
+};
+
+// Start carousel on mount
+onMounted(() => {
+  startCarousel();
+});
+
+// Cleanup on unmount
+onBeforeUnmount(() => {
+  stopCarousel();
+});
+
 
 const brandLogos = [
   { name: "Microsoft", icon: "simple-icons:microsoft" },
@@ -2461,6 +2739,143 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
   document.removeEventListener("keydown", handleEscKey);
+});
+// Feature Auto-Slide Logic
+const featureTopCurrentSlide = ref(0);
+const featureBottomCurrentSlide = ref(0);
+const featureTopIsTransitioning = ref(true);
+const featureBottomIsTransitioning = ref(true);
+const featureMobileMode = ref(false);
+let featureSlideInterval;
+
+const featuresList = [
+  {
+    title: 'Works Instantly',
+    description: 'No app needed',
+    icon: 'heroicons:bolt',
+    bgClass: 'bg-gradient-to-br from-blue-100 to-blue-200',
+    textClass: 'text-blue-600'
+  },
+  {
+    title: 'Customizable Profiles',
+    description: 'Customizable and ready template for content and card',
+    icon: 'heroicons:paint-brush',
+    bgClass: 'bg-gradient-to-br from-purple-100 to-purple-200',
+    textClass: 'text-purple-600'
+  },
+  {
+    title: 'Seamless Linking',
+    description: 'Link to WhatsApp, LinkedIn, website, and other social media apps',
+    icon: 'heroicons:wifi',
+    bgClass: 'bg-gradient-to-br from-green-100 to-green-200',
+    textClass: 'text-green-600'
+  },
+  {
+    title: 'Analytics',
+    description: 'Track taps and engagement',
+    icon: 'heroicons:chart-bar',
+    bgClass: 'bg-gradient-to-br from-orange-100 to-orange-200',
+    textClass: 'text-orange-600'
+  },
+  {
+    title: 'Centralized Connection Management',
+    description: 'Organize every connection in one dashboard. Add notes, set reminders, and never lose a lead.',
+    icon: 'heroicons:users',
+    bgClass: 'bg-gradient-to-br from-indigo-100 to-indigo-200',
+    textClass: 'text-indigo-600'
+  },
+  {
+    title: 'Eco-Friendly',
+    description: 'Eliminate paper waste. One digital card lasts forever.',
+    icon: 'heroicons:globe-americas',
+    bgClass: 'bg-gradient-to-br from-teal-100 to-teal-200',
+    textClass: 'text-teal-600'
+  },
+  {
+    title: 'QR Code Backup',
+    description: 'Built-in QR code for non-NFC devices. Universal compatibility guaranteed.',
+    icon: 'heroicons:qr-code',
+    bgClass: 'bg-gradient-to-br from-slate-100 to-slate-200',
+    textClass: 'text-slate-600'
+  },
+  {
+    title: 'Privacy Controls',
+    description: 'Choose what to share and when. Disable temporarily without replacing the card.',
+    icon: 'heroicons:shield-check',
+    bgClass: 'bg-gradient-to-br from-rose-100 to-rose-200',
+    textClass: 'text-rose-600'
+  },
+  {
+    title: 'Video Introduction',
+    description: 'Add a personal video message. Memorable first impressions every time.',
+    icon: 'heroicons:video-camera',
+    bgClass: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200',
+    textClass: 'text-fuchsia-600'
+  }
+];
+
+// Double the features to create seamless loop
+const featuresRow1 = computed(() => [...featuresList, ...featuresList]);
+// For row 2, we start from index 3 (offset), and also double to ensure enough items
+const featuresRow2 = computed(() => {
+  const rotated = [...featuresList.slice(3), ...featuresList.slice(0, 3)];
+  return [...rotated, ...rotated];
+});
+
+const startFeatureSlideShow = () => {
+  // Initialize start positions
+  // Top row starts at index 9 (end of first set) to slide right (decrement)
+  featureTopCurrentSlide.value = featuresList.length; 
+  // Bottom row starts at 0 to slide left (increment)
+  featureBottomCurrentSlide.value = 0;
+
+  featureSlideInterval = setInterval(() => {
+    // Enable transitions
+    featureTopIsTransitioning.value = true;
+    featureBottomIsTransitioning.value = true;
+
+    // Slide Top Row Right (Decrement)
+    featureTopCurrentSlide.value--;
+
+    // Slide Bottom Row Left (Increment)
+    featureBottomCurrentSlide.value++;
+
+    // Check bounds and snap back
+    // For Top Row (Right Slide): When we reach 0, we are identical to index 9.
+    // We allow the transition to 0 to finish, then snap back to 9.
+    const topReset = featureTopCurrentSlide.value <= 0;
+    
+    // For Bottom Row (Left Slide): When we reach length, we are identical to index 0.
+    const bottomReset = featureBottomCurrentSlide.value >= featuresList.length;
+
+    if (topReset || bottomReset) {
+      setTimeout(() => {
+        if (topReset) {
+          featureTopIsTransitioning.value = false;
+          featureTopCurrentSlide.value = featuresList.length;
+        }
+        if (bottomReset) {
+          featureBottomIsTransitioning.value = false;
+          featureBottomCurrentSlide.value = 0;
+        }
+      }, 700); // Match CSS duration
+    }
+  }, 3500); // 3-4 seconds per slide
+};
+
+const checkFeatureMobile = () => {
+  featureMobileMode.value = window.innerWidth < 768;
+};
+
+onMounted(() => {
+  startFeatureSlideShow();
+  checkFeatureMobile();
+  window.addEventListener('resize', checkFeatureMobile);
+});
+
+onUnmounted(() => {
+  clearInterval(featureSlideInterval);
+  window.removeEventListener('resize', checkFeatureMobile);
 });
 </script>
 
