@@ -26,17 +26,21 @@
     />
 
     <!-- Textarea -->
-    <textarea
-      v-else-if="field.field_type === 'textarea'"
-      v-model="modelValue[field.field_key]"
-      :placeholder="field.placeholder"
-      :required="field.is_required"
-      :minlength="field.validation_rules?.min"
-      :maxlength="field.validation_rules?.max"
-      :rows="field.config?.rows || 4"
-      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-      @input="$emit('update:modelValue', modelValue)"
-    ></textarea>
+    <div v-else-if="field.field_type === 'textarea'" class="space-y-1">
+      <textarea
+        v-model="modelValue[field.field_key]"
+        :placeholder="field.placeholder"
+        :required="field.is_required"
+        :minlength="field.validation_rules?.min"
+        :maxlength="field.validation_rules?.max || 500"
+        :rows="field.config?.rows || 4"
+        class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        @input="$emit('update:modelValue', modelValue)"
+      ></textarea>
+      <p class="text-xs text-gray-500 text-right">
+        {{ (modelValue[field.field_key] || '').length }} / {{ field.validation_rules?.max || 500 }} characters
+      </p>
+    </div>
 
     <!-- Number Input -->
     <input
@@ -57,12 +61,14 @@
         v-model="modelValue[field.field_key]"
         :placeholder="field.placeholder"
         :required="field.is_required"
+        :maxlength="field.validation_rules?.max || 500"
         rows="8"
         class="w-full px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         @input="$emit('update:modelValue', modelValue)"
       ></textarea>
-      <div class="bg-gray-50 px-3 py-1 text-xs text-gray-500 border-t">
-        Rich text editor (basic). Use formatting in your text.
+      <div class="bg-gray-50 px-3 py-1 text-xs text-gray-500 border-t flex justify-between items-center">
+        <span>Rich text editor (basic). Use formatting in your text.</span>
+        <span>{{ (modelValue[field.field_key] || '').length }} / {{ field.validation_rules?.max || 500 }}</span>
       </div>
     </div>
 

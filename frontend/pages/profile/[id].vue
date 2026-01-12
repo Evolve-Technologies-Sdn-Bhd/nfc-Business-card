@@ -1177,6 +1177,8 @@
                 :style="{
                   color: 'rgba(255, 255, 255, 0.8)',
                   lineHeight: '1.8',
+                  whiteSpace: 'normal',
+                  overflowWrap: 'break-word',
                   fontSize: responsive.bodySize,
                   marginBottom: stats.length > 0 ? (isMobile ? '20px' : '30px') : '0',
                 }"
@@ -1534,6 +1536,8 @@
                     fontSize: responsive.bodySize,
                     fontWeight: 600,
                     margin: 0,
+                    whiteSpace: 'normal',
+                    overflowWrap: 'break-word',
                   }"
                 >
                   {{ service.name }}
@@ -1773,10 +1777,10 @@
               <a
                 v-for="(contact, idx) in filteredContactMethods"
                 :key="idx"
-                :href="contact.href"
-                :target="contact.href.startsWith('http') ? '_blank' : undefined"
+                :href="contact.href || '#'"
+                :target="contact.href && contact.href.startsWith('http') ? '_blank' : '_top'"
                 :rel="
-                  contact.href.startsWith('http')
+                  contact.href && contact.href.startsWith('http')
                     ? 'noopener noreferrer'
                     : undefined
                 "
@@ -2537,7 +2541,7 @@
                     <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize }">⏱️ {{ post.reading_time }}</span>
                   </div>
                   
-                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ post.title }}</h3>
+                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, whiteSpace: 'normal', overflowWrap: 'break-word' }">{{ post.title }}</h3>
                   
                   <!-- Author -->
                   <div
@@ -3236,7 +3240,7 @@ const isDesktop = computed(() => windowWidth.value >= 1024);
 // Responsive values - Modern design system
 const responsive = computed(() => ({
   // Container
-  containerPadding: isMobile.value ? "20px" : isTablet.value ? "30px" : "40px",
+  containerPadding: isMobile.value ? "20px 0" : isTablet.value ? "30px" : "40px",
   maxWidth: "1200px",
 
   // Profile image
@@ -3252,7 +3256,7 @@ const responsive = computed(() => ({
   smallSize: isMobile.value ? "13px" : "14px",
 
   // Card styling - Glassmorphism
-  cardPadding: isMobile.value ? "24px" : isTablet.value ? "32px" : "40px",
+  cardPadding: isMobile.value ? "16px" : isTablet.value ? "32px" : "40px",
   cardMarginBottom: isMobile.value ? "24px" : "32px",
   cardBackground: "rgba(255, 255, 255, 0.03)",
   cardBorder: "1px solid rgba(255, 255, 255, 0.08)",
@@ -3281,7 +3285,7 @@ const responsive = computed(() => ({
 
   // Borders and radius - Softer edges
   borderRadius: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
-  cardRadius: isMobile.value ? "20px" : isTablet.value ? "24px" : "28px",
+  cardRadius: isMobile.value ? "0" : isTablet.value ? "24px" : "28px",
   smallRadius: isMobile.value ? "12px" : "16px",
 
   // Badge styling
@@ -3594,19 +3598,38 @@ const contactMethods = ref([
     href: "",
     color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
   },
+  {
+    icon: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+    label: "Address",
+    subtitle: "",
+    href: "",
+    color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
+  },
 ]);
 
-// Filtered contact methods based on field visibility
+// Filtered contact methods based on field visibility AND data presence
 const filteredContactMethods = computed(() => {
   return contactMethods.value.filter((method, idx) => {
-    // Map index to field key: 0=phone, 1=email, 2=whatsapp, 3=website
-    const fieldKeyMap = { 0: 'phone', 1: 'email', 2: 'whatsapp', 3: 'website' };
+    // Map index to field key: 0=phone, 1=email, 2=whatsapp, 3=website, 4=address
+    const fieldKeyMap = { 0: 'phone', 1: 'email', 2: 'whatsapp', 3: 'website', 4: 'address' };
     const fieldKey = fieldKeyMap[idx];
-    // Only check visibility for phone and whatsapp (as defined in fieldKeys)
+    
+    // First check: method must have data (non-empty subtitle)
+    if (!method.subtitle || method.subtitle.trim() === '') {
+      return false;
+    }
+    
+    // Second check: method must have a href (except address which may just show text)
+    if (!method.href && fieldKey !== 'address') {
+      return false;
+    }
+    
+    // Third check: visibility settings for phone and whatsapp
     if (fieldKey === 'phone' || fieldKey === 'whatsapp') {
       return isFieldVisible('contact', fieldKey);
     }
-    return true; // email and website are always visible if they have data
+    
+    return true;
   });
 });
 
@@ -3767,12 +3790,27 @@ const loadPreviewData = (data) => {
   }
 
   // ============ CONTACT METHODS ============
-  contactMethods.value[0].subtitle = data.contactNumber || data.phone || "";
-  contactMethods.value[0].href = data.contactNumber ? `tel:${data.contactNumber}` : "";
-  contactMethods.value[1].subtitle = data.email || "";
-  contactMethods.value[1].href = data.email ? `mailto:${data.email}` : "";
-  contactMethods.value[2].subtitle = data.whatsapp || "";
-  contactMethods.value[2].href = data.whatsapp ? `https://wa.me/${data.whatsapp.replace(/[^0-9]/g, '')}` : "";
+  contactMethods.value[0].subtitle = data.phoneNumber || data.contactNumber || data.phone || "";
+  contactMethods.value[0].href = (data.phoneNumber || data.contactNumber) ? `tel:${(data.phoneNumber || data.contactNumber).replace(/\s/g, '')}` : "";
+  contactMethods.value[1].subtitle = data.emailAddress || data.email || "";
+  contactMethods.value[1].href = (data.emailAddress || data.email) ? `mailto:${data.emailAddress || data.email}` : "";
+  contactMethods.value[2].subtitle = data.whatsappNumber || data.whatsapp ? "Chat with me" : "";
+  contactMethods.value[2].href = (data.whatsappNumber || data.whatsapp) ? `https://wa.me/${(data.whatsappNumber || data.whatsapp).replace(/[^0-9]/g, '')}` : "";
+  contactMethods.value[3].subtitle = data.websiteUrl || data.website || "";
+  contactMethods.value[3].href = data.websiteUrl || data.website || "";
+  
+  // Address for preview
+  const previewAddressParts = [
+    data.addressStreet || data.address,
+    data.addressArea,
+    data.addressCityState,
+    data.addressCountry
+  ].filter(Boolean);
+  const previewFullAddress = previewAddressParts.join(', ');
+  if (previewFullAddress) {
+    contactMethods.value[4].subtitle = previewFullAddress;
+    contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(previewFullAddress)}`;
+  }
 
   // ============ STATS ============
   if (data.stats && Array.isArray(data.stats)) {
@@ -4081,7 +4119,7 @@ const loadProfileData = async () => {
 
       // Address Info
       address.value.name = data.address_name || "";
-      address.value.street = data.address_street || "";
+      address.value.street = data.address_street || data.address || "";
       address.value.area = data.address_area || "";
       address.value.cityState = data.address_city_state || "";
       address.value.country = data.address_country || "";
@@ -4103,6 +4141,7 @@ const loadProfileData = async () => {
       }
 
       // Contact Methods
+      // Phone - with fallback to Basic Info phone
       if (data.phone_number) {
         contactMethods.value[0].subtitle = data.phone_number;
         contactMethods.value[0].href = `tel:${data.phone_number.replace(
@@ -4110,6 +4149,14 @@ const loadProfileData = async () => {
           ""
         )}`;
         contactMethods.value[0].label = data.phone_label || "Phone";
+      } else if (data.phone) {
+        // Fallback to Basic Info phone
+        contactMethods.value[0].subtitle = data.phone;
+        contactMethods.value[0].href = `tel:${data.phone.replace(
+          /\s/g,
+          ""
+        )}`;
+        contactMethods.value[0].label = "Phone";
       }
 
       if (data.email_address || data.email) {
@@ -4136,6 +4183,21 @@ const loadProfileData = async () => {
         );
         contactMethods.value[3].href = websiteUrl;
         contactMethods.value[3].label = data.website_label || "Website";
+      }
+
+      // Address - combine address fields or use single address field
+      const addressParts = [
+        data.address_street || data.address,
+        data.address_area,
+        data.address_city_state,
+        data.address_country
+      ].filter(Boolean);
+      const fullAddress = addressParts.join(', ');
+      
+      if (fullAddress) {
+        contactMethods.value[4].subtitle = fullAddress;
+        contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`;
+        contactMethods.value[4].label = "Address";
       }
 
       // Social Links - now from socialLinks relationship (social_links table)
