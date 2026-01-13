@@ -608,29 +608,44 @@ const exportAnalytics = async () => {
   }
 
   try {
-    const params = new URLSearchParams({
-      period: selectedPeriod.value,
-    });
+    $toast.info("Preparing export...");
 
+    // Build params
+    const params = { period: selectedPeriod.value };
     if (selectedEmployeeId.value) {
-      params.append("employee_id", selectedEmployeeId.value);
+      params.employee_id = selectedEmployeeId.value;
     }
 
-    const token = localStorage.getItem("token");
-    const config = useRuntimeConfig();
-    const apiBaseUrl = config.public.apiBaseUrl || "http://localhost:8000";
+    // Determine endpoint based on card selection
+    const endpoint = selectedCardId.value === "all"
+      ? `/analytics/business/overview/export`
+      : `/analytics/nfc-card/${selectedCardId.value}/export`;
 
-    // Determine export endpoint based on card selection
-    const exportUrl = selectedCardId.value === "all"
-      ? `${apiBaseUrl}/api/analytics/business/overview/export?${params}&token=${token}`
-      : `${apiBaseUrl}/api/analytics/nfc-card/${selectedCardId.value}/export?${params}&token=${token}`;
+    // Make authenticated API call (returns raw text/csv)
+    const response = await $api.get(endpoint, { 
+      params,
+      // Tell axios to return the raw response
+      responseType: 'text'
+    });
 
-    window.open(exportUrl, "_blank");
+    // Create blob from CSV data
+    const csvData = typeof response === 'string' ? response : response.data || response;
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics_${selectedCardId.value === 'all' ? 'business' : selectedCardId.value}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 
-    $toast.success("Exporting analytics...");
+    $toast.success("Analytics exported successfully!");
   } catch (error) {
-    $toast.error("Failed to export analytics");
     console.error("Export error:", error);
+    $toast.error(error.message || "Failed to export analytics");
   }
 };
 

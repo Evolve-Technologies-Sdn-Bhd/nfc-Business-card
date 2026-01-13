@@ -1489,14 +1489,14 @@
                 <!-- Phone Screen with iframe -->
                 <div class="rounded-[2rem] bg-white overflow-hidden relative">
                   <!-- Embedded Landing Page iframe -->
-                  <template v-if="selectedNfcCardId && getSelectedCard()?.nfc_card_id">
+                  <template v-if="selectedNfcCardId && getSelectedCard()">
                     <div class="w-full h-10 bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
                       <Icon name="heroicons:signal" class="h-4 w-4 mr-1" />
                       <span>Digital Business Card</span>
                     </div>
                     <iframe
                       :key="previewKey"
-                      :src="`/profile/${getSelectedCard().nfc_card_id}?preview=true&t=${previewKey}`"
+                      :src="`/profile/${getSelectedCard().nfc_card_id || getSelectedCard().id}?preview=true&t=${previewKey}`"
                       class="w-full border-0"
                       :style="{
                         height: 'calc(100vh - 280px)',
@@ -1509,7 +1509,7 @@
                     <!-- NFC Card ID Badge -->
                     <div class="absolute bottom-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-md flex items-center gap-1">
                       <Icon name="heroicons:credit-card" class="h-3 w-3" />
-                      <span>{{ getSelectedCard()?.nfc_card_id }}</span>
+                      <span>{{ getSelectedCard()?.nfc_card_id || `Card #${getSelectedCard()?.id}` }}</span>
                     </div>
                   </template>
                   
@@ -2133,6 +2133,17 @@ const popularPlatforms = [
   { id: "telegram", name: "Telegram", icon: "mdi:telegram", color: "bg-blue-500", placeholder: "Telegram", urlExample: "https://t.me/yourusername" },
   { id: "website", name: "Website", icon: "heroicons:globe-alt", color: "bg-gray-700", placeholder: "My Website", urlExample: "https://yourwebsite.com" },
   { id: "email", name: "Email", icon: "heroicons:envelope", color: "bg-gray-600", placeholder: "Email Me", urlExample: "mailto:your@email.com" },
+  // New platforms
+  { id: "reddit", name: "Reddit", icon: "mdi:reddit", color: "bg-orange-600", placeholder: "Reddit Profile", urlExample: "https://reddit.com/user/yourusername" },
+  { id: "pinterest", name: "Pinterest", icon: "mdi:pinterest", color: "bg-red-700", placeholder: "Pinterest Profile", urlExample: "https://pinterest.com/yourusername" },
+  { id: "wechat", name: "WeChat", icon: "mdi:wechat", color: "bg-green-500", placeholder: "WeChat ID", urlExample: "weixin://dl/chat?yourwechatid" },
+  { id: "douyin", name: "Douyin (抖音)", icon: "simple-icons:douyin", color: "bg-black", placeholder: "Douyin Profile", urlExample: "https://douyin.com/user/yourusername" },
+  { id: "discord", name: "Discord", icon: "mdi:discord", color: "bg-indigo-600", placeholder: "Discord Server/Profile", urlExample: "https://discord.gg/yourserver" },
+  { id: "threads", name: "Threads", icon: "simple-icons:threads", color: "bg-black", placeholder: "Threads Profile", urlExample: "https://threads.net/@yourusername" },
+  { id: "xiaohongshu", name: "Xiao Hong Shu (小红书)", icon: "simple-icons:xiaohongshu", color: "bg-red-500", placeholder: "Xiao Hong Shu Profile", urlExample: "https://xiaohongshu.com/user/profile/yourid" },
+  { id: "quora", name: "Quora", icon: "mdi:quora", color: "bg-red-700", placeholder: "Quora Profile", urlExample: "https://quora.com/profile/yourusername" },
+  // Custom platform option
+  { id: "custom", name: "Custom", icon: "heroicons:link", color: "bg-gradient-to-br from-blue-500 via-green-500 to-orange-500", placeholder: "Custom Link", urlExample: "https://yourlink.com" },
 ];
 
 // Computed
@@ -4860,7 +4871,7 @@ const openLandingPage = () => {
     (card) => card.id === selectedNfcCardId.value
   );
 
-  if (!selectedCard || !selectedCard.nfc_card_id) {
+  if (!selectedCard) {
     $toast.error("Card information not found");
     return;
   }
@@ -4868,8 +4879,9 @@ const openLandingPage = () => {
   // Update preview data before opening
   updatePreviewData();
 
-  // Open landing page in new tab with preview mode
-  const landingPageUrl = `/profile/${selectedCard.nfc_card_id}?preview=true`;
+  // Open landing page in new tab with preview mode (use nfc_card_id or id as fallback)
+  const cardIdentifier = selectedCard.nfc_card_id || selectedCard.id;
+  const landingPageUrl = `/profile/${cardIdentifier}?preview=true`;
   window.open(landingPageUrl, '_blank');
   
   $toast.success("Opening live preview in new tab");
@@ -4886,13 +4898,15 @@ const openSavedLandingPage = () => {
     (card) => card.id === selectedNfcCardId.value
   );
 
-  if (!selectedCard || !selectedCard.nfc_card_id) {
+  if (!selectedCard) {
     $toast.error("Card information not found");
     return;
   }
 
   // Open real landing page without preview mode (shows saved data from backend)
-  const landingPageUrl = `/profile/${selectedCard.nfc_card_id}`;
+  // Use nfc_card_id or id as fallback
+  const cardIdentifier = selectedCard.nfc_card_id || selectedCard.id;
+  const landingPageUrl = `/profile/${cardIdentifier}`;
   window.open(landingPageUrl, '_blank');
   
   $toast.success("Opening saved landing page");

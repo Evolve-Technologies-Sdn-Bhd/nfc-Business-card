@@ -1488,6 +1488,7 @@
                 @mouseleave="!isMobile && (activeService = null)"
                 @touchstart="activeService = idx"
                 @touchend="setTimeout(() => (activeService = null), 2000)"
+                @click="openServiceModal(service)"
                 :style="{
                   position: 'relative',
                   background: 'rgba(255, 255, 255, 0.05)',
@@ -1496,16 +1497,16 @@
                   padding: isMobile ? '25px 15px' : '30px 20px',
                   textAlign: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.3s',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   overflow: 'hidden',
                   transform:
                     activeService === idx
-                      ? 'translateY(-10px)'
-                      : 'translateY(0)',
+                      ? 'translateY(-8px) scale(1.03)'
+                      : 'translateY(0) scale(1)',
                   boxShadow:
                     activeService === idx
-                      ? '0 15px 40px rgba(102, 126, 234, 0.3)'
-                      : 'none',
+                      ? '0 20px 50px rgba(102, 126, 234, 0.4)'
+                      : '0 4px 15px rgba(0, 0, 0, 0.1)',
                 }"
               >
                 <div
@@ -1723,6 +1724,82 @@
                 >
                   📅 Book Now
                 </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expertise & Skills -->
+          <div
+            v-if="expertise.length > 0"
+            :style="{
+              background: responsive.cardBackground,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: responsive.cardBorder,
+              borderRadius: responsive.cardRadius,
+              padding: responsive.cardPadding,
+              boxShadow: responsive.cardShadow,
+            }"
+          >
+            <div
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                marginBottom: isMobile ? '20px' : '30px',
+              }"
+            >
+              <div
+                :style="{
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: isMobile ? '20px' : '24px',
+                }"
+              >
+                💡
+              </div>
+              <h2
+                :style="{
+                  fontSize: responsive.h2Size,
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0,
+                }"
+              >
+                Expertise & Skills
+              </h2>
+            </div>
+            <div :style="{ display: 'grid', gap: '15px' }">
+              <div
+                v-for="(skill, idx) in expertise"
+                :key="idx"
+                :style="{
+                  padding: isMobile ? '15px' : '20px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '15px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }"
+              >
+                <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }">
+                  <span :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 600 }">{{ skill.name }}</span>
+                  <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize }">{{ skill.level }}%</span>
+                </div>
+                <div :style="{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }">
+                  <div
+                    :style="{
+                      width: `${skill.level || 0}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                      borderRadius: '4px',
+                      transition: 'width 0.5s ease-out',
+                    }"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
@@ -2255,12 +2332,14 @@
               <div
                 v-for="(project, idx) in portfolio"
                 :key="idx"
+                @click="openPortfolioModal(project)"
                 :style="{
                   background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.05))',
                   borderRadius: '24px',
                   border: '1px solid rgba(102, 126, 234, 0.15)',
                   overflow: 'hidden',
                   transition: 'all 0.4s ease',
+                  cursor: 'pointer',
                 }"
                 @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(102, 126, 234, 0.2)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
                 @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.15)'; }"
@@ -2510,7 +2589,7 @@
               >
                 <!-- Cover Image with overlay -->
                 <div
-                  v-if="post.cover_image && isFieldVisible('blog', 'blogCoverImage')"
+                  v-if="((post.gallery && post.gallery.length > 0) || post.cover_image) && isFieldVisible('blog', 'blogCoverImage')"
                   :style="{
                     position: 'relative',
                     width: '100%',
@@ -2519,7 +2598,7 @@
                   }"
                 >
                   <img
-                    :src="post.cover_image"
+                    :src="getGalleryImageUrl(post.gallery?.[0]) || post.cover_image"
                     :alt="post.title"
                     :style="{
                       width: '100%',
@@ -2578,30 +2657,57 @@
                     >#{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}</span>
                   </div>
                   
-                  <!-- External Link -->
-                  <a
-                    v-if="post.external_link && isFieldVisible('blog', 'externalLink')"
-                    :href="post.external_link"
-                    target="_blank"
-                    :style="{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '12px 24px',
-                      background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                      borderRadius: '25px',
-                      color: 'white',
-                      fontSize: responsive.smallSize,
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      transition: 'all 0.3s',
-                      boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)',
-                    }"
-                    @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)'; }"
-                    @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(240, 147, 251, 0.3)'; }"
-                  >
-                    📖 Read More
-                  </a>
+                  <!-- Buttons Row -->
+                  <div :style="{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }">
+                    <!-- Read More (Modal) -->
+                    <button
+                      @click="openBlogModal(post)"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 20px',
+                        background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                        border: 'none',
+                        borderRadius: '25px',
+                        color: 'white',
+                        fontSize: responsive.smallSize,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)',
+                      }"
+                      @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)'; }"
+                      @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(240, 147, 251, 0.3)'; }"
+                    >
+                      📖 Read More
+                    </button>
+
+                    <!-- External Link (if available) -->
+                    <a
+                      v-if="post.external_link && isFieldVisible('blog', 'externalLink')"
+                      :href="post.external_link"
+                      target="_blank"
+                      :style="{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 20px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '25px',
+                        color: 'white',
+                        fontSize: responsive.smallSize,
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        transition: 'all 0.3s',
+                      }"
+                      @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; }"
+                      @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.1)'; }"
+                    >
+                      🔗 Visit Link
+                    </a>
+                  </div>
                 </div>
               </article>
             </div>
@@ -3201,6 +3307,707 @@
         </div>
       </div>
     </div>
+
+    <!-- Service Detail Modal -->
+    <div
+      v-if="showServiceModal && selectedService"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.85)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="closeServiceModal"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '600px',
+          maxHeight: '85vh',
+          overflowY: 'auto',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          borderRadius: '28px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          padding: isMobile ? '24px' : '32px',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="closeServiceModal"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '20px',
+            transition: 'all 0.3s',
+          }"
+          @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
+          @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+        >✕</button>
+
+        <!-- Service Icon & Title -->
+        <div :style="{ textAlign: 'center', marginBottom: '24px' }">
+          <div :style="{ 
+            width: '80px', 
+            height: '80px', 
+            margin: '0 auto 16px', 
+            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))', 
+            borderRadius: '24px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            fontSize: '40px',
+          }">
+            {{ selectedService.icon || '🚀' }}
+          </div>
+          <h3 :style="{ color: 'white', fontSize: '28px', fontWeight: 700, marginBottom: '8px' }">
+            {{ selectedService.name }}
+          </h3>
+          <div v-if="selectedService.category" :style="{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }">
+            <span :style="{ 
+              padding: '6px 16px', 
+              background: 'rgba(102, 126, 234, 0.2)', 
+              border: '1px solid rgba(102, 126, 234, 0.4)',
+              borderRadius: '20px', 
+              color: '#a8b3ff', 
+              fontSize: '13px',
+              fontWeight: 500,
+            }">
+              {{ selectedService.category }}
+            </span>
+            <span v-if="selectedService.duration" :style="{ 
+              padding: '6px 16px', 
+              background: 'rgba(240, 147, 251, 0.15)', 
+              border: '1px solid rgba(240, 147, 251, 0.4)',
+              borderRadius: '20px', 
+              color: '#f0a8ff', 
+              fontSize: '13px',
+              fontWeight: 500,
+            }">
+              ⏱️ {{ selectedService.duration }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Price Section -->
+        <div v-if="selectedService.price" :style="{ 
+          textAlign: 'center', 
+          marginBottom: '24px',
+          padding: '20px',
+          background: 'rgba(0, 255, 136, 0.1)',
+          borderRadius: '16px',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
+        }">
+          <div :style="{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '12px' }">
+            <span :style="{ fontSize: '32px', fontWeight: 800, color: '#00ff88' }">
+              {{ selectedService.price }}
+            </span>
+            <span v-if="selectedService.oldPrice" :style="{ 
+              fontSize: '18px', 
+              color: 'rgba(255, 255, 255, 0.4)', 
+              textDecoration: 'line-through',
+            }">
+              {{ selectedService.oldPrice }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div v-if="selectedService.description" :style="{ marginBottom: '24px' }">
+          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            📝 Description
+          </h4>
+          <p :style="{ 
+            color: 'rgba(255, 255, 255, 0.75)', 
+            fontSize: '15px', 
+            lineHeight: '1.7',
+            padding: '16px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+          }" v-html="selectedService.description"></p>
+        </div>
+
+        <!-- Features -->
+        <div v-if="selectedService.features && selectedService.features.length > 0" :style="{ marginBottom: '24px' }">
+          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            ✨ Key Features
+          </h4>
+          <div :style="{ display: 'grid', gap: '10px' }">
+            <div 
+              v-for="(feature, idx) in selectedService.features" 
+              :key="idx"
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '10px',
+              }"
+            >
+              <span :style="{ color: '#00ff88', fontSize: '16px' }">✓</span>
+              <span :style="{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '14px' }">
+                {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div v-if="selectedService.tags && selectedService.tags.length > 0" :style="{ marginBottom: '24px' }">
+          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            🏷️ Keywords
+          </h4>
+          <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
+            <span 
+              v-for="(tag, idx) in selectedService.tags" 
+              :key="idx"
+              :style="{
+                padding: '6px 14px',
+                background: 'rgba(102, 126, 234, 0.2)',
+                border: '1px solid rgba(102, 126, 234, 0.3)',
+                borderRadius: '16px',
+                color: '#a8b3ff',
+                fontSize: '13px',
+              }"
+            >
+              #{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Gallery -->
+        <div v-if="selectedService.gallery && selectedService.gallery.length > 0" :style="{ marginBottom: '24px' }">
+          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            🖼️ Gallery
+          </h4>
+          <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }">
+            <div 
+              v-for="(img, idx) in selectedService.gallery.slice(0, 6)" 
+              :key="idx"
+              :style="{
+                paddingBottom: '100%',
+                position: 'relative',
+                borderRadius: '12px',
+                overflow: 'hidden',
+              }"
+            >
+              <img 
+                :src="img.url || img" 
+                :style="{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Video -->
+        <div v-if="selectedService.video" :style="{ marginBottom: '24px' }">
+          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            🎬 Promo Video
+          </h4>
+          <a 
+            :href="selectedService.video" 
+            target="_blank"
+            :style="{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '16px',
+              background: 'rgba(255, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 0, 0, 0.2)',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              transition: 'all 0.3s',
+            }"
+          >
+            <span :style="{ fontSize: '24px' }">▶️</span>
+            <span :style="{ color: 'white', fontSize: '14px', fontWeight: 500 }">Watch Video</span>
+          </a>
+        </div>
+
+        <!-- Actions: Brochure & Booking -->
+        <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap' }">
+          <!-- Brochure Download -->
+          <a
+            v-if="selectedService.brochure"
+            :href="selectedService.brochure"
+            download
+            :style="{
+              flex: 1,
+              minWidth: '150px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '16px 24px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '14px',
+              color: 'white',
+              fontSize: '15px',
+              fontWeight: 600,
+              textDecoration: 'none',
+              transition: 'all 0.3s',
+            }"
+            @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'"
+            @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+          >
+            📄 Download Brochure
+          </a>
+
+          <!-- Booking Button -->
+          <a
+            v-if="selectedService.bookingEnabled && selectedService.bookingUrl"
+            :href="selectedService.bookingUrl"
+            target="_blank"
+            :style="{
+              flex: 1,
+              minWidth: '150px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '16px 24px',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              borderRadius: '14px',
+              color: 'white',
+              fontSize: '15px',
+              fontWeight: 600,
+              textDecoration: 'none',
+              transition: 'all 0.3s',
+              boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+            }"
+            @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
+            @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
+          >
+            📅 Book Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio Detail Modal -->
+    <div
+      v-if="showPortfolioModal && selectedProject"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.9)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="closePortfolioModal"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '800px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          borderRadius: '28px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="closePortfolioModal"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '20px',
+            zIndex: 10,
+            transition: 'all 0.3s',
+          }"
+          @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
+          @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+        >✕</button>
+
+        <!-- Cover Image -->
+        <div 
+          v-if="selectedProject.cover_image"
+          :style="{ 
+            width: '100%', 
+            height: '300px', 
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: '28px 28px 0 0',
+          }"
+        >
+          <img 
+            :src="selectedProject.cover_image" 
+            :style="{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover',
+            }"
+          />
+          <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(20, 20, 40, 1) 0%, transparent 60%)' }" />
+        </div>
+
+        <!-- Content -->
+        <div :style="{ padding: isMobile ? '24px' : '32px', marginTop: selectedProject.cover_image ? '-60px' : 0, position: 'relative', zIndex: 2 }">
+          <!-- Title -->
+          <h3 :style="{ color: 'white', fontSize: '28px', fontWeight: 700, marginBottom: '16px' }">
+            {{ selectedProject.title }}
+          </h3>
+
+          <!-- Meta Info -->
+          <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }">
+            <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.4)', borderRadius: '20px', color: '#a8b3ff', fontSize: '13px' }">
+              {{ selectedProject.category }}
+            </span>
+            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+              👤 {{ selectedProject.client_name }}
+            </span>
+            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+              📅 {{ selectedProject.date_completed }}
+            </span>
+            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+              📍 {{ selectedProject.location }}
+            </span>
+          </div>
+
+          <!-- Description -->
+          <div v-if="selectedProject.description" :style="{ marginBottom: '24px' }">
+            <p :style="{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '15px', lineHeight: '1.8' }" v-html="selectedProject.description"></p>
+          </div>
+
+          <!-- Gallery -->
+          <div v-if="selectedProject.gallery && selectedProject.gallery.length > 0" :style="{ marginBottom: '24px' }">
+            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+              🖼️ Project Gallery
+            </h4>
+            <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }">
+              <div 
+                v-for="(img, idx) in selectedProject.gallery" 
+                :key="idx"
+                :style="{
+                  paddingBottom: '100%',
+                  position: 'relative',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'transform 0.3s',
+                }"
+                @mouseover="(e) => e.currentTarget.style.transform = 'scale(1.05)'"
+                @mouseout="(e) => e.currentTarget.style.transform = 'scale(1)'"
+              >
+                <img 
+                  :src="typeof img === 'object' ? (img.url || img.image) : img" 
+                  :style="{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Skills/Tags -->
+          <div v-if="(selectedProject.skills_used && selectedProject.skills_used.length > 0) || (selectedProject.tags && selectedProject.tags.length > 0)" :style="{ marginBottom: '24px' }">
+            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
+              🏷️ Skills & Tags
+            </h4>
+            <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
+              <span 
+                v-for="(skill, idx) in (selectedProject.skills_used || [])" 
+                :key="'skill-' + idx"
+                :style="{ padding: '6px 14px', background: 'rgba(79, 172, 254, 0.2)', border: '1px solid rgba(79, 172, 254, 0.3)', borderRadius: '16px', color: '#7dd3fc', fontSize: '13px' }"
+              >{{ typeof skill === 'object' ? (skill.skill || skill.name) : skill }}</span>
+              <span 
+                v-for="(tag, idx) in (selectedProject.tags || [])" 
+                :key="'tag-' + idx"
+                :style="{ padding: '6px 14px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.3)', borderRadius: '16px', color: '#a8b3ff', fontSize: '13px' }"
+              >#{{ typeof tag === 'object' ? (tag.tag || tag.name) : tag }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap' }">
+            <a
+              v-if="selectedProject.url"
+              :href="selectedProject.url"
+              target="_blank"
+              :style="{
+                flex: 1,
+                minWidth: '150px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                padding: '16px 24px',
+                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                borderRadius: '14px',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.3s',
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+              }"
+            >
+              🔗 View Project
+            </a>
+            <a
+              v-if="selectedProject.pdf_download"
+              :href="selectedProject.pdf_download"
+              download
+              :style="{
+                flex: 1,
+                minWidth: '150px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                padding: '16px 24px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '14px',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }"
+            >
+              📄 Download PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Blog Detail Modal -->
+    <div
+      v-if="showBlogModal && selectedBlog"
+      :style="{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.9)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '20px',
+      }"
+      @click.self="closeBlogModal"
+    >
+      <div
+        :style="{
+          width: '100%',
+          maxWidth: '800px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          borderRadius: '28px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          position: 'relative',
+        }"
+      >
+        <!-- Close Button -->
+        <button
+          @click="closeBlogModal"
+          :style="{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '20px',
+            zIndex: 10,
+            transition: 'all 0.3s',
+          }"
+          @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
+          @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+        >✕</button>
+
+        <!-- Media Gallery Carousel/Slider -->
+        <!-- Priority: gallery array, then cover_image -->
+        <div
+            v-if="(selectedBlog.gallery && selectedBlog.gallery.length > 0) || selectedBlog.cover_image"
+            :style="{
+                width: '100%',
+                position: 'relative',
+                borderRadius: '28px 28px 0 0',
+                overflow: 'hidden',
+                background: '#000',
+            }"
+        >
+            <!-- Check if we have multiple images for a slider/grid, or just one -->
+            <div
+                v-if="selectedBlog.gallery && selectedBlog.gallery.length > 0"
+                :style="{
+                    display: 'flex',
+                    overflowX: 'auto',
+                    scrollSnapType: 'x mandatory',
+                    height: isMobile ? '250px' : '400px',
+                    scrollbarWidth: 'none', // Hide scrollbar
+                }"
+            >
+                <img
+                    v-for="(img, idx) in selectedBlog.gallery"
+                    :key="idx"
+                    :src="getGalleryImageUrl(img)"
+                    :style="{
+                        minWidth: '100%',
+                        height: '100%',
+                        objectFit: 'contain', // contain to see full image
+                        scrollSnapAlign: 'center',
+                        background: 'black' // Letterboxing
+                    }"
+                />
+            </div>
+            <!-- Fallback to single cover image if no gallery array -->
+            <div v-else :style="{ height: isMobile ? '200px' : '300px' }">
+                <img
+                    :src="selectedBlog.cover_image"
+                    :style="{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                    }"
+                />
+            </div>
+             <div :style="{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to top, rgba(20, 20, 40, 1) 0%, transparent 100%)', pointerEvents: 'none' }" />
+        </div>
+
+        <!-- Content -->
+        <div :style="{ padding: isMobile ? '24px' : '32px', position: 'relative', zIndex: 2 }">
+          <!-- Meta Info Header -->
+           <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }">
+             <span v-if="selectedBlog.category" :style="{ padding: '6px 14px', background: 'rgba(240, 147, 251, 0.15)', border: '1px solid rgba(240, 147, 251, 0.3)', borderRadius: '20px', color: '#f0a3fb', fontSize: '13px', fontWeight: 600 }">
+              {{ selectedBlog.category }}
+             </span>
+             <span v-if="selectedBlog.published_date" :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+               📅 {{ selectedBlog.published_date }}
+             </span>
+             <span v-if="selectedBlog.reading_time" :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+               ⏱️ {{ selectedBlog.reading_time }}
+             </span>
+           </div>
+
+          <!-- Title -->
+          <h3 :style="{ color: 'white', fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3 }">
+            {{ selectedBlog.title }}
+          </h3>
+
+          <!-- Author -->
+          <div v-if="selectedBlog.author_name" :style="{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }">
+              <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }">
+                  ✍️
+              </div>
+              <div>
+                  <div :style="{ color: 'white', fontWeight: 600, fontSize: '15px' }">{{ selectedBlog.author_name }}</div>
+                  <div :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '13px' }">Author</div>
+              </div>
+          </div>
+
+          <!-- Full Content (Rich Text) -->
+          <div
+            v-if="selectedBlog.content || selectedBlog.description"
+            :style="{
+                color: 'rgba(255, 255, 255, 0.85)',
+                fontSize: responsive.bodySize,
+                lineHeight: '1.8',
+                marginBottom: '32px',
+                whiteSpace: 'pre-wrap' // Preserve newlines if not HTML, but v-html handles HTML
+            }"
+            class="rich-text-content"
+            v-html="selectedBlog.content || selectedBlog.description"
+          />
+
+          <!-- Tags -->
+          <div v-if="selectedBlog.tags && selectedBlog.tags.length > 0" :style="{ marginBottom: '32px' }">
+            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
+              🏷️ Tags
+            </h4>
+            <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
+              <span
+                v-for="(tag, idx) in selectedBlog.tags"
+                :key="'tag-' + idx"
+                :style="{ padding: '6px 14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px' }"
+              >#{{ typeof tag === 'object' ? (tag.tag || tag.name) : tag }}</span>
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div v-if="selectedBlog.external_link" :style="{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '24px', display: 'flex', justifyContent: 'center' }">
+             <a
+                :href="selectedBlog.external_link"
+                target="_blank"
+                :style="{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '14px 32px',
+                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  borderRadius: '30px',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: '0 8px 25px rgba(240, 147, 251, 0.4)',
+                  transition: 'all 0.3s'
+                }"
+                @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
+                @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
+              >
+                🔗 Visit External Page
+              </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -3646,6 +4453,9 @@ const teamMembers = ref([]);
 // Working Hours
 const workingHours = ref([]);
 
+// Expertise & Skills
+const expertise = ref([]);
+
 // Awards
 const awards = ref([]);
 
@@ -3699,6 +4509,62 @@ const showQRCode = ref(false);
 
 // Social Share state
 const showSocialShare = ref(false);
+
+// Service Modal state
+const showServiceModal = ref(false);
+const selectedService = ref(null);
+
+// Open service detail modal
+const openServiceModal = (service) => {
+  selectedService.value = service;
+  showServiceModal.value = true;
+};
+
+// Close service detail modal
+const closeServiceModal = () => {
+  showServiceModal.value = false;
+  selectedService.value = null;
+};
+
+// Portfolio Modal state
+const showPortfolioModal = ref(false);
+const selectedProject = ref(null);
+
+// Open portfolio detail modal
+const openPortfolioModal = (project) => {
+  selectedProject.value = project;
+  showPortfolioModal.value = true;
+};
+
+// Blog Modal State
+const showBlogModal = ref(false);
+const selectedBlog = ref(null);
+
+// Open blog detail modal
+const openBlogModal = (blog) => {
+  console.log('Opening blog modal for:', blog);
+  selectedBlog.value = blog;
+  showBlogModal.value = true;
+};
+
+const closeBlogModal = () => {
+  showBlogModal.value = false;
+  selectedBlog.value = null;
+};
+
+// Helper function to extract URL from gallery image items
+// Gallery items can be plain URL strings or objects with { type, url, name }
+const getGalleryImageUrl = (item) => {
+  if (!item) return null;
+  if (typeof item === 'string') return item;
+  return item.url || item.image || null;
+};
+
+// Close portfolio detail modal
+const closePortfolioModal = () => {
+  showPortfolioModal.value = false;
+  selectedProject.value = null;
+};
 
 // Check if a feature is enabled
 // A feature is enabled only if:
@@ -3799,17 +4665,12 @@ const loadPreviewData = (data) => {
   contactMethods.value[3].subtitle = data.websiteUrl || data.website || "";
   contactMethods.value[3].href = data.websiteUrl || data.website || "";
   
-  // Address for preview
-  const previewAddressParts = [
-    data.addressStreet || data.address,
-    data.addressArea,
-    data.addressCityState,
-    data.addressCountry
-  ].filter(Boolean);
-  const previewFullAddress = previewAddressParts.join(', ');
-  if (previewFullAddress) {
-    contactMethods.value[4].subtitle = previewFullAddress;
-    contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(previewFullAddress)}`;
+  // Contact Address for "Get In Touch" (uses profile contact address, NOT company location)
+  const contactAddressPreview = data.address || '';
+  if (contactAddressPreview) {
+    contactMethods.value[4].subtitle = contactAddressPreview;
+    contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddressPreview)}`;
+    contactMethods.value[4].label = "Contact Address";
   }
 
   // ============ STATS ============
@@ -3817,9 +4678,32 @@ const loadPreviewData = (data) => {
     stats.value = data.stats.filter(stat => stat.num && stat.label);
   }
 
+  // ============ EXPERTISE & SKILLS ============
+  if (data.expertise && Array.isArray(data.expertise)) {
+    expertise.value = data.expertise.filter(skill => skill.name);
+  }
+
   // ============ SERVICES ============
   if (data.services && Array.isArray(data.services)) {
-    services.value = data.services.filter(service => service.name);
+    services.value = data.services
+      .filter(service => service.name || service.serviceName)
+      .map(service => ({
+        ...service,
+        name: service.name || service.service_name || service.serviceName,
+        icon: service.icon || "🚀",
+        category: service.category || service.service_category || service.serviceCategory || "",
+        duration: service.duration || service.service_duration || service.serviceDuration || "",
+        description: service.description || service.service_description || service.serviceDescription || "",
+        features: service.features || service.service_features || service.serviceFeatures || [],
+        tags: service.tags || service.service_tags || service.serviceTags || [],
+        price: service.price || service.service_price || service.servicePrice || "",
+        oldPrice: service.old_price || service.oldPrice || service.service_old_price || service.serviceOldPrice || "",
+        gallery: service.gallery || service.service_gallery || service.images || [],
+        video: service.video || service.service_video || service.promo_video || "",
+        brochure: service.brochure || service.service_brochure || "",
+        bookingUrl: service.booking_url || service.bookingUrl || "",
+        bookingEnabled: service.booking_enabled !== undefined ? service.booking_enabled : (service.bookingEnabled !== undefined ? service.bookingEnabled : false)
+      }));
     // Load service details for first service
     if (services.value.length > 0) {
       serviceDetails.value = {
@@ -3846,11 +4730,41 @@ const loadPreviewData = (data) => {
 
   // ============ PORTFOLIO ============
   if (data.portfolio && Array.isArray(data.portfolio)) {
-    // New preview structure using `portfolio`
-    portfolio.value = data.portfolio.filter(p => p.title || p.name);
+    portfolio.value = data.portfolio
+      .filter(p => p.title || p.name || p.projectTitle)
+      .map(project => ({
+        ...project,
+        title: project.title || project.projectTitle || project.name || "",
+        description: project.description || project.projectDetails || "",
+        cover_image: project.cover_image || project.coverImage || project.image || "",
+        gallery: project.gallery || project.projectGallery || project.images || [],
+        client_name: project.client_name || project.clientName || "",
+        location: project.location || "",
+        date_completed: project.date_completed || project.dateCompleted || project.completionDate || "",
+        url: project.url || project.projectUrl || project.externalLink || "",
+        pdf_download: project.pdf_download || project.pdfDownload || "",
+        skills_used: project.skills_used || project.skillsUsed || [],
+        tags: project.tags || [],
+        category: project.category || project.portfolioCategory || "",
+      }));
   } else if (data.projects && Array.isArray(data.projects)) {
-    // Fallback to legacy `projects` array (same as API load logic)
-    portfolio.value = data.projects.filter(p => p.title || p.name);
+    portfolio.value = data.projects
+      .filter(p => p.title || p.name)
+      .map(project => ({
+        ...project,
+        title: project.title || project.projectTitle || project.name || "",
+        description: project.description || project.projectDetails || "",
+        cover_image: project.cover_image || project.coverImage || project.image || "",
+        gallery: project.gallery || project.projectGallery || project.images || [],
+        client_name: project.client_name || project.clientName || "",
+        location: project.location || "",
+        date_completed: project.date_completed || project.dateCompleted || project.completionDate || "",
+        url: project.url || project.projectUrl || project.externalLink || "",
+        pdf_download: project.pdf_download || project.pdfDownload || "",
+        skills_used: project.skills_used || project.skillsUsed || [],
+        tags: project.tags || [],
+        category: project.category || project.portfolioCategory || "",
+      }));
   }
 
   // ============ BLOG ============
@@ -3971,6 +4885,15 @@ const getPlatformEmoji = (platform) => {
     telegram: "✈️",
     website: "🌐",
     email: "📧",
+    // New platforms
+    reddit: "🤖",
+    pinterest: "📌",
+    wechat: "💬",
+    douyin: "🎵",
+    discord: "🎮",
+    threads: "🧵",
+    xiaohongshu: "📕",
+    quora: "❓",
     custom: "🔗",
   };
   return platformMap[platform?.toLowerCase()] || "🔗";
@@ -3990,6 +4913,15 @@ const getPlatformColor = (platform) => {
     telegram: "#0088cc",
     website: "#667eea",
     email: "#ea4335",
+    // New platforms
+    reddit: "#ff4500",
+    pinterest: "#e60023",
+    wechat: "#07c160",
+    douyin: "#000000",
+    discord: "#5865f2",
+    threads: "#000000",
+    xiaohongshu: "#fe2c55",
+    quora: "#b92b27",
     custom: "#667eea",
   };
   return colorMap[platform?.toLowerCase()] || "#667eea";
@@ -4137,7 +5069,23 @@ const loadProfileData = async () => {
         Array.isArray(data.services) &&
         data.services.length > 0
       ) {
-        services.value = data.services;
+        services.value = data.services.map(service => ({
+          ...service,
+          name: service.name || service.service_name || service.serviceName,
+          icon: service.icon || "🚀",
+          category: service.category || service.service_category || service.serviceCategory || "",
+          duration: service.duration || service.service_duration || service.serviceDuration || "",
+          description: service.description || service.service_description || service.serviceDescription || "",
+          features: service.features || service.service_features || service.serviceFeatures || [],
+          tags: service.tags || service.service_tags || service.serviceTags || [],
+          price: service.price || service.service_price || service.servicePrice || "",
+          oldPrice: service.old_price || service.oldPrice || service.service_old_price || service.serviceOldPrice || "",
+          gallery: service.gallery || service.service_gallery || service.images || [],
+          video: service.video || service.service_video || service.promo_video || "",
+          brochure: service.brochure || service.service_brochure || "",
+          bookingUrl: service.booking_url || service.bookingUrl || "",
+          bookingEnabled: service.booking_enabled !== undefined ? service.booking_enabled : (service.bookingEnabled !== undefined ? service.bookingEnabled : false)
+        }));
       }
 
       // Contact Methods
@@ -4185,19 +5133,14 @@ const loadProfileData = async () => {
         contactMethods.value[3].label = data.website_label || "Website";
       }
 
-      // Address - combine address fields or use single address field
-      const addressParts = [
-        data.address_street || data.address,
-        data.address_area,
-        data.address_city_state,
-        data.address_country
-      ].filter(Boolean);
-      const fullAddress = addressParts.join(', ');
+      // Contact Address - use profile contact address for "Get In Touch" section
+      // This is separate from location address (Company & Team → Location & Address)
+      const contactAddress = data.address || '';
       
-      if (fullAddress) {
-        contactMethods.value[4].subtitle = fullAddress;
-        contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`;
-        contactMethods.value[4].label = "Address";
+      if (contactAddress) {
+        contactMethods.value[4].subtitle = contactAddress;
+        contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddress)}`;
+        contactMethods.value[4].label = "Contact Address";
       }
 
       // Social Links - now from socialLinks relationship (social_links table)
@@ -4233,6 +5176,11 @@ const loadProfileData = async () => {
         workingHours.value = data.working_hours;
       }
 
+      // Expertise & Skills
+      if (data.expertise && Array.isArray(data.expertise)) {
+        expertise.value = data.expertise;
+      }
+
       // Awards
       if (data.awards && Array.isArray(data.awards)) {
         awards.value = data.awards;
@@ -4245,9 +5193,37 @@ const loadProfileData = async () => {
 
       // Portfolio / Projects
       if (data.projects && Array.isArray(data.projects)) {
-        portfolio.value = data.projects;
+        portfolio.value = data.projects.map(project => ({
+          ...project,
+          title: project.title || project.project_title || project.name || "",
+          description: project.description || project.project_details || "",
+          cover_image: project.cover_image || project.coverImage || project.image || "",
+          gallery: project.gallery || project.project_gallery || project.images || [],
+          client_name: project.client_name || project.clientName || "",
+          location: project.location || "",
+          date_completed: project.date_completed || project.dateCompleted || project.completion_date || "",
+          url: project.url || project.project_url || project.external_link || project.externalLink || "",
+          pdf_download: project.pdf_download || project.pdfDownload || project.brochure || "",
+          skills_used: project.skills_used || project.skillsUsed || [],
+          tags: project.tags || [],
+          category: project.category || project.portfolio_category || "",
+        }));
       } else if (data.portfolio && Array.isArray(data.portfolio)) {
-        portfolio.value = data.portfolio;
+        portfolio.value = data.portfolio.map(project => ({
+          ...project,
+          title: project.title || project.project_title || project.name || "",
+          description: project.description || project.project_details || "",
+          cover_image: project.cover_image || project.coverImage || project.image || "",
+          gallery: project.gallery || project.project_gallery || project.images || [],
+          client_name: project.client_name || project.clientName || "",
+          location: project.location || "",
+          date_completed: project.date_completed || project.dateCompleted || project.completion_date || "",
+          url: project.url || project.project_url || project.external_link || project.externalLink || "",
+          pdf_download: project.pdf_download || project.pdfDownload || project.brochure || "",
+          skills_used: project.skills_used || project.skillsUsed || [],
+          tags: project.tags || [],
+          category: project.category || project.portfolio_category || "",
+        }));
       }
 
       // Blog Posts

@@ -298,37 +298,16 @@
     </div>
 
     <!-- Pagination -->
-    <div
+    <AdminPagination
       v-if="pagination.total > 0"
-      class="mt-6 flex items-center justify-between"
-    >
-      <div class="text-sm text-secondary-500">
-        Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to
-        {{
-          Math.min(
-            pagination.current_page * pagination.per_page,
-            pagination.total
-          )
-        }}
-        of {{ pagination.total }} results
-      </div>
-      <div class="flex space-x-2">
-        <button
-          @click="changePage(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="btn btn-outline btn-sm"
-        >
-          Previous
-        </button>
-        <button
-          @click="changePage(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="btn btn-outline btn-sm"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="results"
+      @page-change="changePage"
+      @per-page-change="changePerPage"
+    />
 
     <!-- Details Modal -->
     <div
@@ -337,7 +316,7 @@
       @click="closeDetailsModal"
     >
       <div class="card max-w-4xl w-full" @click.stop>
-        <div class="card-header">
+        <div class="card-header flex items-center justify-between">
           <h2 class="text-xl font-bold text-secondary-900">Activity Details</h2>
           <button
             @click="closeDetailsModal"
@@ -619,21 +598,35 @@ const fetchStatistics = async () => {
 // Export logs
 const exportLogs = async () => {
   try {
-    const queryParams = new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(filters.value).filter(([_, v]) => v !== "")
-      )
+    // Build query params from filters
+    const queryParams = Object.fromEntries(
+      Object.entries(filters.value).filter(([_, v]) => v !== "")
     );
 
-    // Use $api to get the token automatically
-    const token = localStorage.getItem("token");
-    window.open(
-      `${apiBaseUrl}/business/activity-logs/export?${queryParams}&token=${token}`,
-      "_blank"
-    );
+    // Make authenticated API call
+    const response = await $api.get("/business/activity-logs/export", {
+      params: queryParams,
+      responseType: 'text'
+    });
+
+    // Create blob from CSV data
+    const csvData = typeof response === 'string' ? response : response.data || response;
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `activity_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    alert("Activity logs exported successfully!");
   } catch (error) {
     console.error("Error exporting logs:", error);
-    alert("Failed to export logs. Please try again.");
+    alert(`Failed to export logs: ${error.message || "Please try again."}`);
   }
 };
 
@@ -674,6 +667,12 @@ const changePage = (page) => {
   if (page >= 1 && page <= pagination.value.last_page) {
     fetchActivityLogs(page);
   }
+};
+
+// Change per page
+const changePerPage = (newPerPage) => {
+  pagination.value.per_page = newPerPage;
+  fetchActivityLogs(1); // Reset to first page when changing per page
 };
 
 // Format action type

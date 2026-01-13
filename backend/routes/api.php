@@ -225,8 +225,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index']);
         Route::get('/activity-logs/statistics', [ActivityLogController::class, 'statistics']);
         Route::get('/activity-logs/action-types', [ActivityLogController::class, 'actionTypes']);
+        Route::get('/activity-logs/export', [ActivityLogController::class, 'export']); // Must be before {id}
         Route::get('/activity-logs/{id}', [ActivityLogController::class, 'show']);
-        Route::get('/activity-logs/export', [ActivityLogController::class, 'export']);
         // Note: No DELETE endpoint - Business Admin can only view, not delete
     });
 

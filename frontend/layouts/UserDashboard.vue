@@ -529,6 +529,8 @@ const navigation = computed(() => {
       name: "Analytics",
       href: isBusinessPlan
         ? "/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics"
+        : isPremiumPlan
+        ? "/UserDashboard/UserManagement/PremiumPlanUser/PremiumAnalytics"
         : "/UserDashboard/Analytics",
       icon: "heroicons:chart-bar",
     },
