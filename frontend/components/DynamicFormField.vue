@@ -32,13 +32,21 @@
         :placeholder="field.placeholder"
         :required="field.is_required"
         :minlength="field.validation_rules?.min"
-        :maxlength="field.validation_rules?.max || 500"
+        :maxlength="getTextareaMaxLength(field)"
         :rows="field.config?.rows || 4"
         class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        :class="{ 'border-amber-400 focus:ring-amber-400': isNearCharLimit(field) }"
         @input="$emit('update:modelValue', modelValue)"
       ></textarea>
-      <p class="text-xs text-gray-500 text-right">
-        {{ (modelValue[field.field_key] || '').length }} / {{ field.validation_rules?.max || 500 }} characters
+      <p 
+        class="text-xs text-right"
+        :class="isNearCharLimit(field) ? 'text-amber-600 font-medium' : 'text-gray-500'"
+      >
+        <span v-if="isAtCharLimit(field) && getTextareaMaxLength(field) === 300" class="text-red-500 font-bold mr-1">About Me cannot exceed 300 characters</span>
+        <span v-else>
+            {{ (modelValue[field.field_key] || '').length }} / {{ getTextareaMaxLength(field) }} characters
+            <span v-if="isAtCharLimit(field)" class="text-red-500 ml-1">• Limit reached</span>
+        </span>
       </p>
     </div>
 
@@ -56,19 +64,29 @@
     />
 
     <!-- Rich Text Editor -->
-    <div v-else-if="field.field_type === 'richtext'" class="border border-gray-300 rounded-lg overflow-hidden">
+    <div v-else-if="field.field_type === 'richtext'" class="border border-gray-300 rounded-lg overflow-hidden"
+         :class="{ 'border-amber-400': userPlan === 'basic' && isNearCharLimit(field), 'border-red-500': userPlan === 'basic' && isAtCharLimit(field) }">
       <textarea
         v-model="modelValue[field.field_key]"
         :placeholder="field.placeholder"
         :required="field.is_required"
-        :maxlength="field.validation_rules?.max || 500"
+        :maxlength="userPlan === 'basic' ? getTextareaMaxLength(field) : undefined"
         rows="8"
-        class="w-full px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent origin-top"
         @input="$emit('update:modelValue', modelValue)"
       ></textarea>
-      <div class="bg-gray-50 px-3 py-1 text-xs text-gray-500 border-t flex justify-between items-center">
+      <div class="bg-gray-50 px-3 py-1 text-xs text-gray-500 border-t flex justify-between items-center"
+           :class="{ 'bg-amber-50 text-amber-700': userPlan === 'basic' && isNearCharLimit(field) }">
         <span>Rich text editor (basic). Use formatting in your text.</span>
-        <span>{{ (modelValue[field.field_key] || '').length }} / {{ field.validation_rules?.max || 500 }}</span>
+        <!-- Basic Plan: Show limit and error -->
+        <span v-if="userPlan === 'basic' && isAtCharLimit(field)" class="text-red-500 font-bold">About Me cannot exceed 300 characters</span>
+        <span v-else-if="userPlan === 'basic'">
+           {{ (modelValue[field.field_key] || '').length }} / {{ getTextareaMaxLength(field) }}
+        </span>
+        <!-- Business/Premium Plan: Show count only, no limit -->
+        <span v-else class="text-gray-500">
+           {{ (modelValue[field.field_key] || '').length }} characters
+        </span>
       </div>
     </div>
 
@@ -474,6 +492,41 @@ const shouldShowField = computed(() => {
   // Check if user's plan is in available plans
   return props.field.available_plans.includes(props.userPlan);
 });
+
+// Textarea character limit helpers
+const getTextareaMaxLength = (field) => {
+  const fieldKey = field.field_key?.toLowerCase() || '';
+  const isBioField = fieldKey.includes('bio') || fieldKey.includes('biography') || fieldKey.includes('about');
+  
+  // Bio/About fields: 300 char limit for Basic plan only, unlimited for others
+  if (isBioField) {
+    if (props.userPlan === 'basic') {
+      return 300;
+    }
+    // Business/Premium plans have no limit - return a very high number
+    return 10000;
+  }
+
+  // Otherwise, use backend max if provided
+  if (field.validation_rules?.max) {
+    return field.validation_rules.max;
+  }
+  
+  // Default fallback
+  return 500;
+};
+
+const isNearCharLimit = (field) => {
+  const currentLength = (props.modelValue[field.field_key] || '').length;
+  const maxLength = getTextareaMaxLength(field);
+  return currentLength >= maxLength * 0.9; // 90% threshold
+};
+
+const isAtCharLimit = (field) => {
+  const currentLength = (props.modelValue[field.field_key] || '').length;
+  const maxLength = getTextareaMaxLength(field);
+  return currentLength >= maxLength;
+};
 
 // Tags input handling
 const newTagInput = ref('');

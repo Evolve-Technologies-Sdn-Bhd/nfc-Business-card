@@ -44,9 +44,21 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <!-- Free Plan -->
         <div
-          class="bg-white rounded-2xl shadow-lg border-2 border-secondary-200 p-6 relative"
+          :class="[
+            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
+            isCurrentPlan('free') 
+              ? 'border-green-500 ring-2 ring-green-200' 
+              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-primary-300'
+          ]"
         >
-          <div class="text-center">
+          <!-- Current Plan Badge -->
+          <div v-if="isCurrentPlan('free')" class="absolute -top-3 right-4">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <Icon name="heroicons:check-circle" class="h-3 w-3" />
+              Current Plan
+            </span>
+          </div>
+          <div class="text-center flex flex-col flex-1">
             <div
               class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4"
             >
@@ -101,24 +113,46 @@
 
             <button
               @click="selectPlan('free')"
-              class="w-full py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl font-medium hover:bg-secondary-200 transition-colors"
+              :disabled="isCurrentPlan('free')"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                isCurrentPlan('free')
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
+              ]"
             >
-              Get Started Free
+              {{ isCurrentPlan('free') ? '✓ Current Plan' : 'Get Started Free' }}
             </button>
           </div>
         </div>
 
         <!-- Basic Plan -->
         <div
-          class="bg-white rounded-2xl shadow-lg border-2 border-primary-200 p-6 relative"
+          :class="[
+            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
+            isCurrentPlan('basic')
+              ? 'border-green-500 ring-2 ring-green-200'
+              : 'border-primary-200 hover:scale-105 hover:shadow-2xl hover:border-primary-400'
+          ]"
         >
-          <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <!-- Current Plan Badge -->
+          <div v-if="isCurrentPlan('basic')" class="absolute -top-3 right-4 z-10">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <Icon name="heroicons:check-circle" class="h-3 w-3" />
+              Current Plan
+            </span>
+          </div>
+          <!-- Most Popular Badge - positioned left when Current Plan badge exists -->
+          <div :class="[
+            'absolute -top-3 z-10',
+            isCurrentPlan('basic') ? 'left-4' : 'left-1/2 transform -translate-x-1/2'
+          ]">
             <span
               class="bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium"
               >Most Popular</span
             >
           </div>
-          <div class="text-center">
+          <div class="text-center flex flex-col flex-1">
             <div
               class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4"
             >
@@ -146,18 +180,36 @@
 
             <button
               @click="selectPlan('basic')"
-              class="w-full py-3 px-4 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+              :disabled="isCurrentPlan('basic')"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                isCurrentPlan('basic')
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-primary-600 text-white hover:bg-primary-700'
+              ]"
             >
-              Choose Basic
+              {{ isCurrentPlan('basic') ? '✓ Current Plan' : 'Choose Basic' }}
             </button>
           </div>
         </div>
 
         <!-- Premium Plan -->
         <div
-          class="bg-white rounded-2xl shadow-lg border-2 border-secondary-200 p-6 relative"
+          :class="[
+            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
+            isCurrentPlan('premium')
+              ? 'border-green-500 ring-2 ring-green-200'
+              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-purple-300'
+          ]"
         >
-          <div class="text-center">
+          <!-- Current Plan Badge -->
+          <div v-if="isCurrentPlan('premium')" class="absolute -top-3 right-4">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <Icon name="heroicons:check-circle" class="h-3 w-3" />
+              Current Plan
+            </span>
+          </div>
+          <div class="text-center flex flex-col flex-1">
             <div
               class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"
             >
@@ -185,18 +237,36 @@
 
             <button
               @click="selectPlan('premium')"
-              class="w-full py-3 px-4 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors"
+              :disabled="isCurrentPlan('premium')"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                isCurrentPlan('premium')
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              ]"
             >
-              Choose Premium
+              {{ isCurrentPlan('premium') ? '✓ Current Plan' : 'Choose Premium' }}
             </button>
           </div>
         </div>
 
         <!-- Business Plan -->
         <div
-          class="bg-white rounded-2xl shadow-lg border-2 border-secondary-200 p-6 relative"
+          :class="[
+            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
+            isCurrentPlan('business')
+              ? 'border-green-500 ring-2 ring-green-200'
+              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-indigo-300'
+          ]"
         >
-          <div class="text-center">
+          <!-- Current Plan Badge -->
+          <div v-if="isCurrentPlan('business')" class="absolute -top-3 right-4">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <Icon name="heroicons:check-circle" class="h-3 w-3" />
+              Current Plan
+            </span>
+          </div>
+          <div class="text-center flex flex-col flex-1">
             <div
               class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4"
             >
@@ -227,9 +297,15 @@
 
             <button
               @click="selectPlan('business')"
-              class="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+              :disabled="isCurrentPlan('business')"
+              :class="[
+                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                isCurrentPlan('business')
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              ]"
             >
-              Choose Business
+              {{ isCurrentPlan('business') ? '✓ Current Plan' : 'Choose Business' }}
             </button>
           </div>
         </div>
@@ -450,6 +526,19 @@ const { loading, getFormattedPrice, getPlanDetails, loadPrices } = usePlanPrices
 const basicPlan = computed(() => getPlanDetails('basic'));
 const premiumPlan = computed(() => getPlanDetails('premium'));
 const businessPlan = computed(() => getPlanDetails('business'));
+
+// Get user's current plan
+const currentPlan = computed(() => authStore.user?.subscription_plan || 'free');
+
+// Check if a plan is the current plan (only for free/basic/premium, NOT business)
+const PLANS_WITH_INDICATOR = ['free', 'basic', 'premium'];
+const isCurrentPlan = (plan) => {
+  // Business plan users should NOT see any current plan indicator
+  if (!PLANS_WITH_INDICATOR.includes(currentPlan.value)) {
+    return false;
+  }
+  return currentPlan.value === plan;
+};
 
 // Business plan modal state
 const showBusinessModal = ref(false);

@@ -815,20 +815,22 @@ const goToProfileBuilder = () => {
   }
 
   // Get user's subscription plan
-  const userPlan = authStore.user?.subscription_plan?.toLowerCase() || 'free';
-  
+  const userPlan = authStore.user?.subscription_plan?.toLowerCase() || "free";
+
   // Determine the correct ProfileBuilder path based on plan
-  let profileBuilderPath = '';
-  
-  if (userPlan === 'premium') {
+  let profileBuilderPath = "";
+
+  if (userPlan === "premium") {
     // Premium users go to dedicated Premium ProfileBuilder
-    profileBuilderPath = '/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder';
-  } else if (userPlan === 'basic') {
+    profileBuilderPath =
+      "/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder";
+  } else if (userPlan === "basic") {
     // Basic users go to dedicated Basic ProfileBuilder
-    profileBuilderPath = '/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder';
+    profileBuilderPath =
+      "/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder";
   } else {
     // Free users go to shared ProfileBuilder
-    profileBuilderPath = '/UserDashboard/ProfileBuilder';
+    profileBuilderPath = "/UserDashboard/ProfileBuilder";
   }
 
   // If card has a linked profile, edit it
@@ -878,8 +880,27 @@ const deactivateCard = async (card) => {
 };
 
 const viewAnalytics = (card) => {
-  // Navigate to analytics page for this specific card
-  navigateTo(`/UserDashboard/card-management/${card.id}/analytics`);
+  // Get user's subscription plan
+  const userPlan = authStore.user?.subscription_plan?.toLowerCase() || "free";
+
+  // Determine the correct Analytics path based on plan
+  let analyticsPath = "";
+
+  if (userPlan === "business") {
+    // Business users go to Business Analytics
+    analyticsPath =
+      "/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics";
+  } else if (userPlan === "premium") {
+    // Premium users go to Premium Analytics
+    analyticsPath =
+      "/UserDashboard/UserManagement/PremiumPlanUser/PremiumAnalytics";
+  } else {
+    // Free/Basic users go to shared Analytics
+    analyticsPath = "/UserDashboard/Analytics";
+  }
+
+  // Navigate to analytics page with card ID as query parameter to pre-filter
+  navigateTo(`${analyticsPath}?cardId=${card.id}`);
 };
 
 const getStatusBadgeClass = (status) => {

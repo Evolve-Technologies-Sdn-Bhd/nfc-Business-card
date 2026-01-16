@@ -140,6 +140,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analytics/profile', [AnalyticsController::class, 'profileAnalytics']);
     Route::get('/analytics/nfc/{tag}', [AnalyticsController::class, 'nfcAnalytics']);
 
+    // User Analytics (for Premium/Basic Plan users - aggregate all cards)
+    Route::get('/analytics/user/overview', [AnalyticsController::class, 'userOverview']);
+    Route::get('/analytics/user/overview/export', [AnalyticsController::class, 'userOverviewExport']);
+
     // Business Analytics (for Business Plan users)
     Route::get('/analytics/business/overview', [AnalyticsController::class, 'businessOverview']);
     Route::get('/analytics/business/overview/export', [AnalyticsController::class, 'businessOverviewExport']);

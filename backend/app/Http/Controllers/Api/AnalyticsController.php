@@ -803,4 +803,80 @@ class AnalyticsController extends Controller
 
         return $csv;
     }
+
+    /**
+     * Get user overview analytics (all cards for Premium/Basic users)
+     */
+    public function userOverview(Request $request)
+    {
+        $user = $request->user();
+
+        // Get period from request
+        $period = $request->get('period', '30d');
+        $dates = $this->getPeriodDates($period);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+        $previousStartDate = $dates['previous_start'];
+        $previousEndDate = $dates['previous_end'];
+
+        // Get all NFC cards for this user
+        $nfcCardIds = \App\Models\NfcCard::where('user_id', $user->id)
+            ->pluck('id')->toArray();
+
+        if (empty($nfcCardIds)) {
+            return response()->json([
+                'success' => true,
+                'data' => $this->getEmptyAnalyticsData()
+            ]);
+        }
+
+        // Calculate analytics
+        $analytics = $this->calculateAnalyticsForCards($nfcCardIds, $startDate, $endDate, $previousStartDate, $previousEndDate);
+        
+        // Get recent taps
+        $recentTaps = Analytics::where('trackable_type', \App\Models\NfcCard::class)
+            ->whereIn('trackable_id', $nfcCardIds)
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        $analytics['recent_taps'] = $recentTaps;
+
+        // Add daily taps for chart
+        $dailyTaps = Analytics::where('trackable_type', \App\Models\NfcCard::class)
+            ->whereIn('trackable_id', $nfcCardIds)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+        $analytics['daily_taps'] = $dailyTaps;
+
+        return response()->json([
+            'success' => true,
+            'data' => $analytics
+        ]);
+    }
+
+    /**
+     * Export user overview analytics
+     */
+    public function userOverviewExport(Request $request)
+    {
+        $user = $request->user();
+
+        $period = $request->get('period', '30d');
+        $dates = $this->getPeriodDates($period);
+
+        // Get all NFC cards for this user
+        $nfcCards = \App\Models\NfcCard::where('user_id', $user->id)->get();
+
+        // Build CSV data
+        $csvData = $this->buildExportCsv($nfcCards, $dates['start'], $dates['end']);
+
+        return response($csvData, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user_analytics_' . date('Y-m-d') . '.csv"',
+        ]);
+    }
 }

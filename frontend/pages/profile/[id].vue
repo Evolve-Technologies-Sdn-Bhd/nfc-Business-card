@@ -2475,10 +2475,8 @@
                 
                   <!-- Action Buttons -->
                   <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }">
-                    <a
-                      v-if="(project.url || project.project_url) && isFieldVisible('portfolio', 'projectUrl')"
-                      :href="project.url || project.project_url"
-                      target="_blank"
+                    <button
+                      @click.stop="openPortfolioModal(project)"
                       :style="{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -2486,10 +2484,11 @@
                         padding: '12px 20px',
                         background: 'linear-gradient(135deg, #667eea, #764ba2)',
                         borderRadius: '25px',
+                        border: 'none',
                         color: 'white',
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
-                        textDecoration: 'none',
+                        cursor: 'pointer',
                         transition: 'all 0.3s',
                         boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
                       }"
@@ -2497,7 +2496,7 @@
                       @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)'; }"
                     >
                       🔗 View Project
-                    </a>
+                    </button>
                     <a
                       v-if="project.pdf_download && isFieldVisible('portfolio', 'pdfDownload')"
                       :href="project.pdf_download"
@@ -4440,12 +4439,9 @@ const filteredContactMethods = computed(() => {
   });
 });
 
-const socialLinks = ref([
-  { emoji: "📘", name: "Facebook", href: "#", color: "#1877f2" },
-  { emoji: "💼", name: "LinkedIn", href: "#", color: "#0a66c2" },
-  { emoji: "📸", name: "Instagram", href: "#", color: "#e4405f" },
-  { emoji: "🐦", name: "Twitter", href: "#", color: "#1da1f2" },
-]);
+const socialLinks = ref([]);
+// Social links will be populated dynamically from API data (social_links table)
+// via loadProfileData() or loadPreviewData() functions
 
 const teamMembers = ref([]);
 

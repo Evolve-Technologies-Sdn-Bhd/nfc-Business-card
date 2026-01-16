@@ -302,13 +302,9 @@
             </div>
           </nav>
 
-          <!-- Upgrade Banner - Fixed at bottom (hide for Business/Premium users) -->
+          <!-- Upgrade Banner - Fixed at bottom (hide only for Business users) -->
           <div
-            v-if="
-              !['business', 'premium'].includes(
-                authStore.user?.subscription_plan
-              )
-            "
+            v-if="authStore.user?.subscription_plan !== 'business'"
             class="p-4 border-t border-secondary-200"
           >
             <div
@@ -320,13 +316,16 @@
                   class="h-6 w-6 text-yellow-300 flex-shrink-0"
                 />
                 <div class="ml-3 flex-1">
-                  <p class="text-sm font-medium">Upgrade to Premium</p>
+                  <p class="text-sm font-medium">
+                    {{ authStore.user?.subscription_plan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
+                  </p>
                   <p class="text-xs text-primary-100">
-                    Unlock premium features
+                    {{ authStore.user?.subscription_plan === 'premium' ? 'Unlock business features' : 'Unlock premium features' }}
                   </p>
                 </div>
               </div>
               <button
+                @click="navigateTo('/UserDashboard/PlanSelection')"
                 class="mt-3 w-full bg-white text-primary-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-primary-50 transition-colors"
               >
                 Upgrade Now

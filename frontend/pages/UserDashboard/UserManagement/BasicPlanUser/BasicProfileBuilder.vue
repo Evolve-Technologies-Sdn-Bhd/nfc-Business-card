@@ -1487,7 +1487,7 @@
                 <div class="absolute right-[-8px] top-20 h-12 w-2 bg-gray-700 rounded-l-md"></div>
                 
                 <!-- Phone Screen with iframe -->
-                <div class="rounded-[2rem] bg-white overflow-hidden relative">
+                <div class="rounded-[2rem] bg-white overflow-y-auto relative custom-scrollbar section-scroll">
                   <!-- Embedded Landing Page iframe -->
                   <template v-if="selectedNfcCardId && getSelectedCard()">
                     <div class="w-full h-10 bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
@@ -3649,9 +3649,9 @@ const saveProfile = async () => {
   // BASIC PLAN QUANTITY LIMITS VALIDATION
   // ========================================
   
-  // Validate bio length (250 char max for Basic)
-  if (profileData.bio && profileData.bio.length > BASIC_MAX_BIO_LENGTH) {
-    $toast.error(`Bio exceeds ${BASIC_MAX_BIO_LENGTH} character limit for Basic plan. Please shorten or upgrade to Premium.`);
+  // Validate bio length (300 char max for Basic)
+  if (profileData.bio && profileData.bio.length > 300) {
+    $toast.error(`Bio exceeds 300 character limit for Basic plan. Please shorten or upgrade to Premium.`);
     return;
   }
 
