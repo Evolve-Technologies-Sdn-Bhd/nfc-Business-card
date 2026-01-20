@@ -259,7 +259,12 @@
           </div>
 
           <!-- Card Examples -->
-          <CardExamples />
+          <CardExamples 
+            :card-info="cardInfo"
+            :selected-template="selectedTemplateData"
+            :design-method="designMethod"
+            :custom-design="cardDesign"
+          />
         </div>
 
         <!-- Right Panel - Card Design -->
@@ -315,12 +320,51 @@
                 Choose Template
               </h3>
 
+              <!-- Loading State -->
+              <div v-if="templatesLoading" class="flex justify-center py-8">
+                <div
+                  class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
+                ></div>
+              </div>
+
+              <!-- Error State -->
+              <div v-else-if="templatesError" class="text-center py-8">
+                <Icon
+                  name="heroicons:exclamation-circle"
+                  class="h-12 w-12 text-red-400 mx-auto mb-2"
+                />
+                <p class="text-sm text-red-600">{{ templatesError }}</p>
+                <button
+                  @click="fetchTemplates"
+                  class="mt-2 text-sm text-primary-600 hover:underline"
+                >
+                  Try again
+                </button>
+              </div>
+
+              <!-- Empty State -->
+              <div
+                v-else-if="!availableTemplates.length"
+                class="text-center py-8"
+              >
+                <Icon
+                  name="heroicons:photo"
+                  class="h-12 w-12 text-secondary-300 mx-auto mb-2"
+                />
+                <p class="text-sm text-secondary-500">
+                  No templates available for your {{ currentPlanName }} plan.
+                </p>
+                <p class="text-xs text-secondary-400 mt-1">
+                  Contact support if you believe this is an error.
+                </p>
+              </div>
+
               <!-- Template Options -->
-              <div class="grid grid-cols-2 gap-4">
+              <div v-else class="grid grid-cols-2 gap-4">
                 <div
                   v-for="template in availableTemplates"
                   :key="template.id"
-                  @click="selectedTemplate = template.id"
+                  @click="selectTemplate(template)"
                   :class="[
                     'relative cursor-pointer rounded-lg border-2 p-4 transition-all',
                     selectedTemplate === template.id
@@ -329,20 +373,24 @@
                   ]"
                 >
                   <div
-                    class="aspect-[90/54] bg-gradient-to-br from-blue-500 to-blue-700 rounded mb-2 relative overflow-hidden"
+                    class="aspect-[90/54] rounded mb-2 relative overflow-hidden bg-secondary-100"
                   >
-                    <!-- Template Preview -->
-                    <div class="absolute inset-0 p-2 text-white text-xs">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <div class="font-bold">JOHN DOE</div>
-                          <div class="opacity-80">Software Engineer</div>
-                        </div>
-                        <div class="text-right">
-                          <div>+60 12-345 6789</div>
-                          <div>john@example.com</div>
-                        </div>
-                      </div>
+                    <!-- Template Image -->
+                    <img
+                      v-if="template.front_image_url"
+                      :src="getTemplateImageUrl(template.front_image_url)"
+                      :alt="template.name"
+                      class="w-full h-full object-cover"
+                    />
+                    <!-- Fallback if no image -->
+                    <div
+                      v-else
+                      class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700"
+                    >
+                      <Icon
+                        name="heroicons:photo"
+                        class="h-8 w-8 text-white/50"
+                      />
                     </div>
                   </div>
                   <p class="text-sm font-medium text-center">
@@ -564,12 +612,19 @@ useHead({
 
 // Stores
 const authStore = useAuthStore();
-const { $toast } = useNuxtApp();
+const { $api, $toast } = useNuxtApp();
+const config = useRuntimeConfig();
 
 // Reactive data
 const designMethod = ref("template");
-const selectedTemplate = ref("basic");
+const selectedTemplate = ref(null);
+const selectedTemplateData = ref(null);
 const showBack = ref(false);
+
+// Template fetching state
+const apiTemplates = ref([]);
+const templatesLoading = ref(true);
+const templatesError = ref(null);
 
 // Card information
 const cardInfo = reactive({
@@ -597,25 +652,63 @@ const cardDesign = reactive({
   backFile: null,
 });
 
-// Available templates based on plan
-const availableTemplates = computed(() => {
-  const selectedPlan = sessionStorage.getItem("selectedPlan");
-  if (selectedPlan === "basic") {
-    return [{ id: "basic", name: "Basic Template" }];
-  } else {
-    return [
-      { id: "free", name: "Free Template" },
-      { id: "basic", name: "Basic Template" },
-      { id: "premium", name: "Premium Template" },
-      { id: "business", name: "Business Template" },
-    ];
+// Available templates from API
+const availableTemplates = computed(() => apiTemplates.value);
+
+// Get template image URL
+const getTemplateImageUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  // Handle relative URLs
+  const apiBase = config.public.apiBase || "";
+  return `${apiBase.replace("/api", "")}${url}`;
+};
+
+// Select template
+const selectTemplate = (template) => {
+  selectedTemplate.value = template.id;
+  selectedTemplateData.value = template;
+};
+
+// Get user's current plan (prioritize auth store, fallback to sessionStorage for onboarding)
+const getCurrentUserPlan = () => {
+  return authStore.user?.subscription_plan || sessionStorage.getItem("selectedPlan") || "basic";
+};
+
+// Fetch templates from API based on user's plan
+const fetchTemplates = async () => {
+  templatesLoading.value = true;
+  templatesError.value = null;
+  try {
+    const userPlan = getCurrentUserPlan();
+    const response = await $api.get(`/card-templates?plan=${userPlan}`);
+    if (response.success) {
+      apiTemplates.value = response.data;
+      // Auto-select first template if available
+      if (response.data.length > 0 && !selectedTemplate.value) {
+        selectTemplate(response.data[0]);
+      }
+    } else {
+      templatesError.value = response.message || "Failed to load templates";
+    }
+  } catch (error) {
+    console.error("Failed to fetch templates:", error);
+    templatesError.value = "Failed to load templates. Please try again.";
+  } finally {
+    templatesLoading.value = false;
   }
-});
+};
 
 // Check if user has premium plan
 const isPremiumPlan = computed(() => {
-  const selectedPlan = sessionStorage.getItem("selectedPlan");
-  return ["premium", "business"].includes(selectedPlan);
+  const userPlan = getCurrentUserPlan();
+  return ["premium", "business"].includes(userPlan);
+});
+
+// Get current plan name for display
+const currentPlanName = computed(() => {
+  const plan = getCurrentUserPlan();
+  return plan.charAt(0).toUpperCase() + plan.slice(1);
 });
 
 // Form validation
@@ -648,9 +741,8 @@ onMounted(async () => {
     cardInfo.position = authStore.user.job_title || "";
   }
 
-  // Note: Removed active NFC card check during onboarding
-  // Users customize their card design BEFORE payment and card activation
-  // The card will be activated after successful payment
+  // Fetch templates from API
+  await fetchTemplates();
 });
 
 // Save card information
@@ -683,23 +775,21 @@ const saveCardInfo = async () => {
     $toast.success("Card information saved successfully!");
   } catch (error) {
     console.error("Save card info error:", error);
-    
+
     // Handle specific error cases
     const { $toast } = useNuxtApp();
-    
+
     if (error.response?.status === 404) {
       // No active NFC card found
       $toast.error(
-        "You don't have an active NFC card yet. Please purchase or activate a card first."
+        "You don't have an active NFC card yet. Please purchase or activate a card first.",
       );
     } else if (error.response?.status === 422) {
       // Validation error
       const errors = error.response.data?.errors;
       if (errors) {
         const firstError = Object.values(errors)[0];
-        $toast.error(
-          Array.isArray(firstError) ? firstError[0] : firstError
-        );
+        $toast.error(Array.isArray(firstError) ? firstError[0] : firstError);
       } else {
         $toast.error("Validation failed. Please check your input.");
       }
@@ -804,7 +894,7 @@ const uploadCardDesigns = async () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.success) {

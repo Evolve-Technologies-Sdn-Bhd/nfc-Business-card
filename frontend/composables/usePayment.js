@@ -8,7 +8,9 @@ export const usePayment = () => {
   const baseURL = config.public.apiBaseUrl || 'http://localhost:8000/api'
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken')
+    // Read token from cookie (where auth store saves it)
+    const tokenCookie = useCookie('auth-token')
+    const token = tokenCookie.value
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -136,7 +138,9 @@ export const usePayment = () => {
       const formData = new FormData()
       formData.append('proof_file', proofFile)
 
-      const token = localStorage.getItem('authToken')
+      // Read token from cookie (where auth store saves it)
+      const tokenCookie = useCookie('auth-token')
+      const token = tokenCookie.value
       const response = await $fetch(`${baseURL}/payment/transactions/${transactionId}/proof`, {
         method: 'POST',
         headers: {

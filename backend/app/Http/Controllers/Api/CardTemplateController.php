@@ -18,14 +18,20 @@ class CardTemplateController extends Controller
      */
     public function index(Request $request)
     {
+        $plan = $request->plan;
+
+        Log::info('Fetching templates for user', [
+            'plan' => $plan,
+            'all_filters' => $request->all(),
+        ]);
+
         $query = CardTemplate::active()->completed()->orderBy('sort_order');
 
         // Filter by plan type
-        if ($request->has('plan')) {
-            $plan = $request->plan;
-            $query->where(function($q) use ($plan) {
+        if ($plan) {
+            $query->where(function ($q) use ($plan) {
                 $q->whereJsonContains('plan_types', $plan)
-                  ->orWhereNull('plan_types');
+                    ->orWhereNull('plan_types');
             });
         }
 
@@ -35,6 +41,11 @@ class CardTemplateController extends Controller
         }
 
         $templates = $query->get();
+
+        Log::info('Templates fetched', [
+            'count' => $templates->count(),
+            'template_ids' => $templates->pluck('id')->toArray(),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -87,11 +98,21 @@ class CardTemplateController extends Controller
     }
 
     /**
-     * Admin: Upload template and send to n8n for processing
+     * Admin: Upload template and store directly on Cloudinary
      * POST /api/admin/card-templates
      */
     public function store(Request $request)
     {
+        // Increase execution time limit for large image uploads
+        set_time_limit(120);
+
+        Log::info('=== TEMPLATE UPLOAD START ===', [
+            'user_id' => auth()->id(),
+            'has_front' => $request->hasFile('front_image'),
+            'has_back' => $request->hasFile('back_image'),
+            'name' => $request->name,
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -103,49 +124,193 @@ class CardTemplateController extends Controller
         ]);
 
         try {
-            // Store original images
-            $frontPath = null;
-            $backPath = null;
+            // Upload to Cloudinary
+            $frontImageUrl = null;
+            $backImageUrl = null;
+            $thumbnailUrl = null;
 
+            // Step 1: Upload front image
             if ($request->hasFile('front_image')) {
-                $frontPath = $request->file('front_image')->store('templates/original', 'public');
+                Log::info('Step 1: Uploading front image to Cloudinary...');
+                $frontResult = $this->uploadToCloudinary(
+                    $request->file('front_image'),
+                    'nfc_templates/front'
+                );
+                $frontImageUrl = $frontResult['secure_url'];
+                $thumbnailUrl = $frontResult['thumbnail_url'] ?? $frontResult['secure_url'];
+                Log::info('Step 1 COMPLETE: Front image uploaded', ['url' => $frontImageUrl]);
             }
 
+            // Step 2: Upload back image (optional)
             if ($request->hasFile('back_image')) {
-                $backPath = $request->file('back_image')->store('templates/original', 'public');
+                Log::info('Step 2: Uploading back image to Cloudinary...');
+                $backResult = $this->uploadToCloudinary(
+                    $request->file('back_image'),
+                    'nfc_templates/back'
+                );
+                $backImageUrl = $backResult['secure_url'];
+                Log::info('Step 2 COMPLETE: Back image uploaded', ['url' => $backImageUrl]);
+            } else {
+                Log::info('Step 2: No back image provided, skipping');
             }
 
-            // Create template record
+            // Step 3: Create template record
+            Log::info('Step 3: Creating database record...');
             $template = CardTemplate::create([
                 'name' => $request->name,
                 'description' => $request->description,
                 'category' => $request->category ?? 'business',
                 'plan_types' => $request->plan_types,
-                'original_front_url' => $frontPath ? Storage::url($frontPath) : null,
-                'original_back_url' => $backPath ? Storage::url($backPath) : null,
-                'front_image_url' => $frontPath ? Storage::url($frontPath) : null, // Initially same as original
-                'back_image_url' => $backPath ? Storage::url($backPath) : null,
-                'processing_status' => 'pending',
+                'original_front_url' => $frontImageUrl,
+                'original_back_url' => $backImageUrl,
+                'front_image_url' => $frontImageUrl,
+                'back_image_url' => $backImageUrl,
+                'thumbnail_url' => $thumbnailUrl,
+                'processing_status' => 'completed', // Immediately completed
                 'created_by' => auth()->id(),
             ]);
+            Log::info('Step 3 COMPLETE: Database record created', ['template_id' => $template->id]);
 
-            // Trigger n8n workflow
-            $this->triggerN8nWorkflow($template);
+            // Step 4: Send response
+            Log::info('Step 4: Sending success response...');
+            Log::info('=== TEMPLATE UPLOAD COMPLETE ===', ['template_id' => $template->id]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Template created and sent for processing',
+                'message' => 'Template uploaded successfully',
                 'data' => $template,
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Failed to create template: ' . $e->getMessage());
+            Log::error('=== TEMPLATE UPLOAD FAILED ===', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create template: ' . $e->getMessage(),
+                'error_details' => [
+                    'message' => $e->getMessage(),
+                    'file' => basename($e->getFile()),
+                    'line' => $e->getLine(),
+                ]
             ], 500);
         }
     }
+
+    /**
+     * Upload image to Cloudinary using direct cURL (to control SSL verification on Windows)
+     */
+    private function uploadToCloudinary($file, $folder)
+    {
+        try {
+            $cloudName = config('filesystems.disks.cloudinary.cloud');
+            $apiKey = config('filesystems.disks.cloudinary.key');
+            $apiSecret = config('filesystems.disks.cloudinary.secret');
+
+            if (!$cloudName || !$apiKey || !$apiSecret) {
+                throw new \Exception('Cloudinary credentials not configured properly');
+            }
+
+            $timestamp = time();
+
+            // Build signature - Cloudinary expects: folder=value&timestamp=value + api_secret
+            // Must NOT be URL-encoded, just plain key=value pairs sorted alphabetically
+            $params = [
+                'folder' => $folder,
+                'timestamp' => $timestamp,
+            ];
+            ksort($params);
+
+            // Build signature string manually (no URL encoding)
+            $signatureParts = [];
+            foreach ($params as $key => $value) {
+                $signatureParts[] = "{$key}={$value}";
+            }
+            $signatureString = implode('&', $signatureParts) . $apiSecret;
+            $signature = sha1($signatureString);
+
+            // Prepare upload URL
+            $uploadUrl = "https://api.cloudinary.com/v1_1/{$cloudName}/image/upload";
+
+            // Prepare file for upload
+            $filePath = $file->getRealPath();
+            $mimeType = $file->getMimeType();
+            $fileName = $file->getClientOriginalName();
+
+            // Use cURL for upload
+            $ch = curl_init();
+
+            $postFields = [
+                'file' => new \CURLFile($filePath, $mimeType, $fileName),
+                'api_key' => $apiKey,
+                'timestamp' => $timestamp,
+                'signature' => $signature,
+                'folder' => $folder,
+            ];
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $uploadUrl,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $postFields,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 120,
+            ]);
+
+            // Handle SSL verification for Windows development
+            $verifySSL = env('CURL_VERIFY_SSL', true);
+            if ($verifySSL === false || $verifySSL === 'false') {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            } else {
+                // Use downloaded CA bundle if available
+                $cacertPath = storage_path('cacert.pem');
+                if (file_exists($cacertPath)) {
+                    curl_setopt($ch, CURLOPT_CAINFO, $cacertPath);
+                }
+            }
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($curlError) {
+                throw new \Exception("cURL error: {$curlError}");
+            }
+
+            if ($httpCode !== 200) {
+                Log::error('Cloudinary upload failed', ['http_code' => $httpCode, 'response' => $response]);
+                throw new \Exception("Cloudinary upload failed with HTTP {$httpCode}: {$response}");
+            }
+
+            $result = json_decode($response, true);
+
+            if (!$result || !isset($result['secure_url'])) {
+                throw new \Exception('Invalid response from Cloudinary: ' . $response);
+            }
+
+            $secureUrl = $result['secure_url'];
+            $publicId = $result['public_id'] ?? null;
+
+            Log::info('Cloudinary upload successful', ['public_id' => $publicId, 'secure_url' => $secureUrl]);
+
+            // Generate thumbnail URL by modifying the secure URL
+            $thumbnailUrl = preg_replace('/\/upload\//', '/upload/w_300,h_180,c_fill,q_80/', $secureUrl);
+
+            return [
+                'secure_url' => $secureUrl,
+                'public_id' => $publicId,
+                'thumbnail_url' => $thumbnailUrl,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Cloudinary upload failed: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
 
     /**
      * Trigger n8n workflow for image processing
@@ -188,13 +353,13 @@ class CardTemplateController extends Controller
                 // Required - n8n回调时需要
                 'template_id' => $template->id,
                 'callback_url' => url('/api/webhooks/n8n/template-processed'),
-                
+
                 // Template info - 模板信息
                 'template_name' => $template->name,
                 'description' => $template->description,
                 'category' => $template->category,
                 'plan_types' => $template->plan_types, // ['basic', 'premium', 'business'] 等
-                
+
                 // Images - 图片URL
                 'front_image_url' => $frontUrl,
                 'back_image_url' => $backUrl,
@@ -419,8 +584,13 @@ class CardTemplateController extends Controller
         ]);
 
         $template->update($request->only([
-            'name', 'description', 'category', 'plan_types', 
-            'is_active', 'is_hidden', 'sort_order'
+            'name',
+            'description',
+            'category',
+            'plan_types',
+            'is_active',
+            'is_hidden',
+            'sort_order'
         ]));
 
         return response()->json([

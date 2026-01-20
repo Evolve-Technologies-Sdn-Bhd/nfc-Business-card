@@ -125,15 +125,16 @@ class PaymentController extends Controller
             'payment_rail' => 'required|in:card,fpx,duitnow,ewallet,manual_bank',
             'description' => 'nullable|string|max:500',
             'metadata' => 'nullable|array',
-            
-            // Card specific
-            'payment_method_id' => 'required_if:payment_rail,card|string',
-            
-            // FPX specific
-            'bank_code' => 'required_if:payment_rail,fpx|string',
-            
-            // E-wallet specific
-            'wallet_type' => 'required_if:payment_rail,ewallet|in:tng,grabpay,boost,shopeepay',
+
+            // For Fiuu redirect-based flow, these are optional since user selects on Fiuu's page
+            // Card specific - optional for redirect flow
+            'payment_method_id' => 'nullable|string',
+
+            // FPX specific - optional for redirect flow (user selects bank on Fiuu page)
+            'bank_code' => 'nullable|string',
+
+            // E-wallet specific - optional for redirect flow (user selects wallet on Fiuu page)
+            'wallet_type' => 'nullable|in:tng,grabpay,boost,shopeepay',
         ]);
 
         if ($validator->fails()) {
@@ -148,7 +149,7 @@ class PaymentController extends Controller
             $data = $request->all();
 
             // Dispatch to appropriate payment method
-            $transaction = match($request->payment_rail) {
+            $transaction = match ($request->payment_rail) {
                 'card' => $this->paymentService->processCardPayment($user, $data),
                 'fpx' => $this->paymentService->processFPXPayment($user, $data),
                 'ewallet' => $this->paymentService->processEWalletPayment($user, $data),
@@ -174,10 +175,13 @@ class PaymentController extends Controller
                     'currency' => $transaction->currency,
                     'status' => $transaction->status,
                     'payment_rail' => $transaction->payment_rail,
-                    'client_secret' => $transaction->client_secret, // For 3DS
-                    'requires_action' => $transaction->requiresAction(),
+                    'client_secret' => $transaction->client_secret ?? null, // For 3DS (Stripe legacy)
+                    'requires_action' => $transaction->status === 'pending',
                     'metadata' => $transaction->metadata,
                     'created_at' => $transaction->created_at,
+                    // Fiuu specific - redirect URL and form data
+                    'redirect_url' => $transaction->metadata['redirect_url'] ?? null,
+                    'payment_form_data' => $transaction->metadata['payment_form_data'] ?? null,
                 ],
             ], 201);
 
@@ -431,12 +435,12 @@ class PaymentController extends Controller
         try {
             $amount = $request->amount;
             $rail = $request->payment_rail;
-            
+
             // Handle manual_bank_transfer alias
             if ($rail === 'manual_bank_transfer') {
                 $rail = 'manual_bank';
             }
-            
+
             $railConfig = config("payment.rails.{$rail}");
 
             if (!$railConfig) {
@@ -480,7 +484,7 @@ class PaymentController extends Controller
                 'amount' => $request->amount ?? null,
                 'rail' => $request->payment_rail ?? null,
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to calculate fees',

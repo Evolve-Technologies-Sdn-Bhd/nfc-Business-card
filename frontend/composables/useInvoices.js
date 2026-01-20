@@ -50,7 +50,7 @@ export const useInvoices = () => {
       return response;
     } catch (error) {
       console.error("Error fetching invoices:", error);
-      toast.showToast("Failed to load invoices", "error");
+      if (toast.error) toast.error("Failed to load invoices");
       throw error;
     } finally {
       loading.value = false;
@@ -72,7 +72,7 @@ export const useInvoices = () => {
       return response;
     } catch (error) {
       console.error("Error fetching invoice:", error);
-      toast.showToast("Failed to load invoice details", "error");
+      if (toast.error) toast.error("Failed to load invoice details");
       throw error;
     } finally {
       loading.value = false;
@@ -94,7 +94,7 @@ export const useInvoices = () => {
       return response;
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      toast.showToast("Failed to load invoice statistics", "error");
+      if (toast.error) toast.error("Failed to load invoice statistics");
       // Set default empty statistics instead of throwing
       statistics.value = {
         total_invoices: 0,
@@ -156,10 +156,10 @@ export const useInvoices = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
 
-      toast.showToast("Invoice downloaded successfully", "success");
+      if (toast.success) toast.success("Invoice downloaded successfully");
     } catch (error) {
       console.error("Error downloading invoice:", error);
-      toast.showToast("Failed to download invoice", "error");
+      if (toast.error) toast.error("Failed to download invoice");
       throw error;
     }
   };

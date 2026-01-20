@@ -259,7 +259,11 @@
           </div>
 
           <!-- Card Examples -->
-          <CardExamples />
+          <CardExamples 
+            :card-info="cardInfo"
+            :design-method="designMethod"
+            :custom-design="cardDesign"
+          />
         </div>
 
         <!-- Right Panel - Card Design -->

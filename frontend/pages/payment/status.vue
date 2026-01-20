@@ -147,7 +147,14 @@ const status = ref(null)
 const transaction = ref(null)
 
 onMounted(async () => {
-  const transactionId = route.query.transaction_id || route.query.billplz_id
+  // Handle Fiuu return URL parameters
+  const fiuuOrderId = route.query.order_id
+  const fiuuStatus = route.query.status_code || route.query.status
+  const fiuuAmount = route.query.amount
+  const fiuuTranId = route.query.tran_id
+  
+  // Legacy support for other payment providers
+  const transactionId = route.query.transaction_id || route.query.billplz_id || fiuuOrderId
   
   if (!transactionId) {
     status.value = 'error'
@@ -155,7 +162,49 @@ onMounted(async () => {
     return
   }
 
-  await checkPaymentStatus(transactionId)
+  // If we have Fiuu status code directly from URL, map it
+  if (fiuuStatus) {
+    const statusMap = {
+      '00': 'succeeded',
+      'Success': 'succeeded',
+      '11': 'failed',
+      'Failed': 'failed',
+      '22': 'pending',
+      'Pending': 'pending',
+      '33': 'processing',
+      'Processing': 'processing'
+    }
+    
+    status.value = statusMap[fiuuStatus] || 'unknown'
+    
+    // Create a basic transaction object from URL params
+    transaction.value = {
+      transaction_id: fiuuOrderId,
+      fiuu_tran_id: fiuuTranId,
+      amount: parseFloat(fiuuAmount) || 0,
+      currency: route.query.currency || 'MYR',
+      status: status.value,
+      payment_rail: route.query.channel || 'card'
+    }
+    
+    loading.value = false
+    
+    // If successful, try to get full transaction details from API
+    if (status.value === 'succeeded') {
+      try {
+        const result = await getTransaction(fiuuOrderId)
+        if (result) {
+          transaction.value = result
+        }
+      } catch (err) {
+        console.log('Could not fetch full transaction details:', err)
+        // Keep using URL params
+      }
+    }
+  } else {
+    // Fetch transaction status from API
+    await checkPaymentStatus(transactionId)
+  }
 })
 
 const checkPaymentStatus = async (transactionId) => {
@@ -174,7 +223,7 @@ const checkPaymentStatus = async (transactionId) => {
 }
 
 const checkAgain = async () => {
-  const transactionId = route.query.transaction_id || route.query.billplz_id
+  const transactionId = route.query.transaction_id || route.query.billplz_id || route.query.order_id
   if (transactionId) {
     await checkPaymentStatus(transactionId)
   }

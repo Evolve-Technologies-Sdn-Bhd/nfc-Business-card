@@ -435,6 +435,12 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // Public endpoint for viewing current plan prices
 Route::get('/plan-prices/public', [PlanPriceController::class, 'publicPrices']);
 
+// ✅ Public Payment Routes (for payment method selection on checkout)
+Route::prefix('payment')->group(function () {
+    Route::get('/rails', [PaymentController::class, 'getPaymentRails']);
+    Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
+});
+
 // ✅ n8n Webhook (Public - receives processed images)
 Route::post('/webhooks/n8n/template-processed', [CardTemplateController::class, 'n8nWebhook']);
 
@@ -442,3 +448,9 @@ Route::post('/webhooks/n8n/template-processed', [CardTemplateController::class, 
 Route::get('/card-templates', [CardTemplateController::class, 'index']);
 Route::get('/card-templates/{id}', [CardTemplateController::class, 'show']);
 
+// ✅ Fiuu Payment Gateway Webhooks (Public - receives payment notifications)
+Route::prefix('webhooks/fiuu')->group(function () {
+    Route::any('/return', [\App\Http\Controllers\Api\FiuuWebhookController::class, 'handleReturn']);
+    Route::post('/notification', [\App\Http\Controllers\Api\FiuuWebhookController::class, 'handleNotification']);
+    Route::any('/callback', [\App\Http\Controllers\Api\FiuuWebhookController::class, 'handleCallback']);
+});

@@ -114,10 +114,12 @@ class Invoice extends Model
 
     public function scopeLatestVersions($query)
     {
-        return $query->whereNull('parent_invoice_id')
-            ->orWhereHas('regeneratedVersions', function($q) {
-                $q->whereNull('id'); // No newer versions
-            });
+        // Latest versions are those that have NOT been regenerated (i.e., are not parents of another invoice)
+        // Wait, if an invoice is regenerated, it becomes a parent.
+        // So the "latest" version is the one that is NOT a parent.
+        // But the relationship is: regeneratedVersions() -> hasMany(Invoice::class, 'parent_invoice_id')
+        // So we want invoices that do NOT have any children in this relation.
+        return $query->doesntHave('regeneratedVersions');
     }
 
     /**
@@ -217,18 +219,18 @@ class Invoice extends Model
     {
         $year = date('Y');
         $prefix = 'INV-' . $year . '-';
-        
+
         $lastInvoice = static::where('invoice_number', 'like', $prefix . '%')
             ->orderBy('invoice_number', 'desc')
             ->first();
-        
+
         if ($lastInvoice) {
             $lastNumber = (int) substr($lastInvoice->invoice_number, -5);
             $newNumber = $lastNumber + 1;
         } else {
             $newNumber = 1;
         }
-        
+
         return $prefix . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
     }
 }

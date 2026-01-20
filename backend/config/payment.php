@@ -12,12 +12,12 @@ return [
     |
     */
 
-    'default_provider' => env('PAYMENT_DEFAULT_PROVIDER', 'stripe'),
-    
+    'default_provider' => env('PAYMENT_DEFAULT_PROVIDER', 'fiuu'),
+
     'currency' => env('PAYMENT_CURRENCY', 'MYR'),
 
     'providers' => [
-        
+
         /*
         |--------------------------------------------------------------------------
         | Stripe Configuration (International Cards + 3DS)
@@ -29,7 +29,7 @@ return [
             'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
             'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
             'api_version' => '2024-12-18.acacia',
-            
+
             'supports' => [
                 'cards' => true,
                 'fpx' => false,
@@ -54,7 +54,7 @@ return [
             'collection_id' => env('BILLPLZ_COLLECTION_ID'),
             'x_signature_key' => env('BILLPLZ_X_SIGNATURE_KEY'),
             'sandbox' => env('BILLPLZ_SANDBOX', true),
-            
+
             'supports' => [
                 'cards' => false,
                 'fpx' => true,
@@ -75,7 +75,7 @@ return [
             'merchant_id' => env('SENANGPAY_MERCHANT_ID'),
             'secret_key' => env('SENANGPAY_SECRET_KEY'),
             'sandbox' => env('SENANGPAY_SANDBOX', true),
-            
+
             'supports' => [
                 'cards' => true,
                 'fpx' => true,
@@ -94,7 +94,7 @@ return [
             'secret_key' => env('XENDIT_SECRET_KEY'),
             'public_key' => env('XENDIT_PUBLIC_KEY'),
             'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
-            
+
             'supports' => [
                 'cards' => true,
                 'fpx' => false,
@@ -118,10 +118,10 @@ return [
             'verify_key' => env('FIUU_VERIFY_KEY'),
             'secret_key' => env('FIUU_SECRET_KEY'),
             'sandbox' => env('FIUU_SANDBOX', true),
-            'api_url' => env('FIUU_SANDBOX', true) 
+            'api_url' => env('FIUU_SANDBOX', true)
                 ? 'https://sandbox.merchant.razer.com/RMS/API/Direct/1.0.0/'
                 : 'https://payment.ipay88.com.my/epayment/entry.asp',
-            
+
             'supports' => [
                 'cards' => true,
                 'fpx' => true,
@@ -139,7 +139,7 @@ return [
                 'shopeepay' => 'ShopeePay',
                 'maybank_qr' => 'Maybank QRPay',
             ],
-            
+
             // Webhook URLs (configured for your environment)
             'return_url' => env('FIUU_RETURN_URL', 'http://localhost:8000/payment/return-url.php'),
             'notification_url' => env('FIUU_NOTIFICATION_URL', 'http://localhost:8000/payment/notification-url.php'),
@@ -153,10 +153,10 @@ return [
     |--------------------------------------------------------------------------
     */
     'rails' => [
-        
+
         'card' => [
             'enabled' => true,
-            'providers' => ['stripe', 'senangpay', 'xendit'],
+            'providers' => ['fiuu', 'stripe', 'senangpay', 'xendit'],
             'min_amount' => 1.00,
             'max_amount' => 50000.00,
             'fee_percentage' => 2.9,
@@ -165,7 +165,7 @@ return [
 
         'fpx' => [
             'enabled' => true,
-            'providers' => ['billplz', 'senangpay'],
+            'providers' => ['fiuu', 'billplz', 'senangpay'],
             'min_amount' => 1.00,
             'max_amount' => 30000.00,
             'fee_percentage' => 1.5,
@@ -192,7 +192,7 @@ return [
 
         'duitnow' => [
             'enabled' => true,
-            'providers' => ['billplz'],
+            'providers' => ['fiuu', 'billplz'],
             'min_amount' => 1.00,
             'max_amount' => 50000.00,
             'fee_percentage' => 0.5,
@@ -201,7 +201,7 @@ return [
 
         'ewallet' => [
             'enabled' => true,
-            'providers' => ['billplz', 'senangpay', 'xendit'],
+            'providers' => ['fiuu', 'billplz', 'senangpay', 'xendit'],
             'min_amount' => 1.00,
             'max_amount' => 10000.00,
             'fee_percentage' => 2.0,
@@ -259,7 +259,7 @@ return [
     'subscriptions' => [
         'enabled' => true,
         'provider' => 'stripe', // Primary provider for subscriptions
-        
+
         'plans' => [
             'basic' => [
                 'monthly' => 29.90,
@@ -276,7 +276,7 @@ return [
         ],
 
         'trial_days' => 14,
-        
+
         // Dunning management
         'dunning' => [
             'enabled' => true,
@@ -321,7 +321,7 @@ return [
         'log_all_events' => true,
         'retry_failed' => true,
         'max_retries' => 3,
-        
+
         'events' => [
             'stripe' => [
                 'payment_intent.succeeded',

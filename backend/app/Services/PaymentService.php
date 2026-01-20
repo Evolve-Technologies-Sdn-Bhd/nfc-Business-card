@@ -9,222 +9,304 @@ use App\Models\Refund;
 use App\Models\WebhookLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Stripe\Stripe as StripeClient;
-use Stripe\PaymentIntent;
-use Stripe\PaymentMethod as StripePaymentMethod;
-use Stripe\Customer as StripeCustomer;
-use Stripe\Subscription as StripeSubscription;
-use Stripe\Refund as StripeRefund;
-use Stripe\Webhook;
 use Exception;
 
+/**
+ * Fiuu Payment Service
+ * 
+ * Handles all payment processing through Fiuu (formerly MOLPay/Razer Merchant Services)
+ * Supports: Credit/Debit Cards, FPX, E-wallets (TNG, GrabPay, Boost, ShopeePay), DuitNow
+ */
 class PaymentService
 {
-    protected $provider;
-    protected $config;
+    protected string $provider = 'fiuu';
+    protected array $config;
 
-    public function __construct(string $provider = null)
+    // Fiuu Status Codes
+    const STATUS_SUCCESS = '00';
+    const STATUS_FAILED = '11';
+    const STATUS_PENDING = '22';
+    const STATUS_PROCESSING = '33';
+
+    public function __construct(?string $provider = null)
     {
-        $this->provider = $provider ?? config('payment.default_provider');
-        $this->config = config("payment.providers.{$this->provider}");
-        
-        if ($this->provider === 'stripe') {
-            StripeClient::setApiKey($this->config['secret_key']);
-        }
+        $this->provider = $provider ?? config('payment.default_provider', 'fiuu');
+        $this->config = config("payment.providers.{$this->provider}", []);
     }
 
     /**
-     * Process card payment with 3DS support
+     * Generate vcode for payment request
+     * Formula: MD5(amount + merchant_id + order_id + verify_key)
+     */
+    public function generateVcode(float $amount, string $orderId, string $currency = 'MYR'): string
+    {
+        $formattedAmount = number_format($amount, 2, '.', '');
+        $merchantId = $this->config['merchant_id'];
+        $verifyKey = $this->config['verify_key'];
+
+        // Formula: MD5(amount + merchant_id + order_id + verify_key + currency)
+        $string = $formattedAmount . $merchantId . $orderId . $verifyKey . $currency;
+
+        return md5($string);
+    }
+
+    /**
+     * Verify skey from Fiuu webhook response
+     * Formula: MD5(amount + merchant_id + order_id + verify_key)
+     */
+    public function verifySkey(float $amount, string $orderId, string $receivedSkey, string $currency = 'MYR'): bool
+    {
+        $formattedAmount = number_format($amount, 2, '.', '');
+        $merchantId = $this->config['merchant_id'];
+        $verifyKey = $this->config['verify_key'];
+
+        // Formula: MD5(amount + merchant_id + order_id + verify_key + currency)
+        $string = $formattedAmount . $merchantId . $orderId . $verifyKey . $currency;
+        $expectedSkey = md5($string);
+
+        $isValid = hash_equals($expectedSkey, $receivedSkey);
+
+        if (!$isValid) {
+            Log::warning('Fiuu skey verification failed', [
+                'order_id' => $orderId,
+                'expected' => $expectedSkey,
+                'received' => $receivedSkey,
+            ]);
+        }
+
+        return $isValid;
+    }
+
+    /**
+     * Map Fiuu status code to internal status
+     */
+    public function mapFiuuStatus(string $fiuuStatus): string
+    {
+        return match ($fiuuStatus) {
+            self::STATUS_SUCCESS => 'succeeded',
+            self::STATUS_FAILED => 'failed',
+            self::STATUS_PENDING => 'pending',
+            self::STATUS_PROCESSING => 'processing',
+            default => 'failed',
+        };
+    }
+
+    /**
+     * Get Fiuu payment URL based on environment
+     * Note: Fiuu migrated from sandbox.merchant.razer.com to sandbox-payment.fiuu.com
+     */
+    protected function getPaymentUrl(): string
+    {
+        // New Fiuu domain (rebranded from Razer Merchant Services)
+        if ($this->config['sandbox'] ?? true) {
+            return 'https://sandbox-payment.fiuu.com/RMS/pay/';
+        }
+        return 'https://pay.fiuu.com/RMS/pay/';
+    }
+
+    /**
+     * Process card payment via Fiuu
      */
     public function processCardPayment(User $user, array $data): Transaction
     {
-        try {
-            $amount = $data['amount'];
-            $currency = $data['currency'] ?? config('payment.currency');
-            $description = $data['description'] ?? 'Payment';
-            $metadata = $data['metadata'] ?? [];
-
-            // Calculate fees
-            $railConfig = config('payment.rails.card');
-            $fee = ($amount * $railConfig['fee_percentage'] / 100) + $railConfig['fee_fixed'];
-            $netAmount = $amount - $fee;
-
-            if ($this->provider === 'stripe') {
-                // Create or get Stripe customer
-                $stripeCustomer = $this->getOrCreateStripeCustomer($user);
-
-                // Create payment intent with 3DS
-                $paymentIntent = PaymentIntent::create([
-                    'amount' => $amount * 100, // Convert to cents
-                    'currency' => strtolower($currency),
-                    'customer' => $stripeCustomer->id,
-                    'description' => $description,
-                    'metadata' => array_merge($metadata, ['user_id' => $user->id]),
-                    'payment_method' => $data['payment_method_id'] ?? null,
-                    'confirm' => isset($data['payment_method_id']),
-                    'automatic_payment_methods' => [
-                        'enabled' => true,
-                        'allow_redirects' => 'never',
-                    ],
-                ]);
-
-                // Create transaction record
-                $transaction = Transaction::create([
-                    'user_id' => $user->id,
-                    'type' => $data['type'] ?? 'payment',
-                    'payment_rail' => 'card',
-                    'provider' => 'stripe',
-                    'provider_transaction_id' => $paymentIntent->id,
-                    'amount' => $amount,
-                    'currency' => $currency,
-                    'fee' => $fee,
-                    'net_amount' => $netAmount,
-                    'status' => $this->mapStripeStatus($paymentIntent->status),
-                    'description' => $description,
-                    'metadata' => $metadata,
-                    'client_secret' => $paymentIntent->client_secret,
-                    'three_ds_status' => $paymentIntent->status === 'requires_action' ? 'challenge_required' : null,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-
-                return $transaction;
-            }
-
-            throw new Exception("Provider {$this->provider} not supported for card payments");
-
-        } catch (Exception $e) {
-            Log::error('Card payment failed', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        return $this->initiateFiuuPayment($user, $data, 'credit');
     }
 
     /**
-     * Process FPX bank payment
+     * Process FPX bank payment via Fiuu 
      */
     public function processFPXPayment(User $user, array $data): Transaction
     {
-        try {
-            $amount = $data['amount'];
-            $currency = 'MYR';
-            $bankCode = $data['bank_code'];
-            $description = $data['description'] ?? 'FPX Payment';
-
-            // Calculate fees
-            $railConfig = config('payment.rails.fpx');
-            $fee = ($amount * $railConfig['fee_percentage'] / 100) + $railConfig['fee_fixed'];
-            $netAmount = $amount - $fee;
-
-            // Create transaction
-            $transaction = Transaction::create([
-                'user_id' => $user->id,
-                'type' => 'payment',
-                'payment_rail' => 'fpx',
-                'provider' => $this->provider,
-                'amount' => $amount,
-                'currency' => $currency,
-                'fee' => $fee,
-                'net_amount' => $netAmount,
-                'status' => 'pending',
-                'bank_name' => $railConfig['banks'][$bankCode] ?? $bankCode,
-                'description' => $description,
-                'metadata' => $data['metadata'] ?? [],
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-
-            // Process with provider
-            if ($this->provider === 'billplz') {
-                $billplzResponse = $this->createBillplzBill($transaction, $data);
-                $transaction->update([
-                    'provider_transaction_id' => $billplzResponse['id'],
-                    'metadata' => array_merge($transaction->metadata ?? [], [
-                        'payment_url' => $billplzResponse['url'],
-                    ]),
-                ]);
-            }
-
-            return $transaction;
-
-        } catch (Exception $e) {
-            Log::error('FPX payment failed', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        $channel = $data['bank_code'] ?? $data['channel'] ?? 'fpx';
+        return $this->initiateFiuuPayment($user, $data, $channel);
     }
 
     /**
-     * Process e-wallet payment
+     * Process e-wallet payment via Fiuu
      */
     public function processEWalletPayment(User $user, array $data): Transaction
     {
+        $walletType = $data['wallet_type'] ?? 'tng';
+
+        // Map wallet types to Fiuu channel codes
+        $walletMap = [
+            'tng' => 'TNG-EWALLET',
+            'grabpay' => 'GRABPAY',
+            'boost' => 'BOOST',
+            'shopeepay' => 'SHOPEEPAY',
+        ];
+
+        $channel = $walletMap[$walletType] ?? $walletType;
+
+        return $this->initiateFiuuPayment($user, $data, $channel);
+    }
+
+    /**
+     * Verify Notification Signature (Server-to-Server)
+     * Formula:
+     * key0 = md5(tranID + orderid + status + domain + amount + currency)
+     * key1 = md5(paydate + domain + key0 + appcode + secret_key)
+     */
+    public function verifyNotificationSignature(array $data): bool
+    {
+        $tranID = $data['tranID'] ?? '';
+        $orderid = $data['orderid'] ?? '';
+        $status = $data['status'] ?? '';
+        $domain = $data['domain'] ?? '';
+        $amount = $data['amount'] ?? '';
+        $currency = $data['currency'] ?? 'MYR';
+        $paydate = $data['paydate'] ?? '';
+        $appcode = $data['appcode'] ?? '';
+        $skey = $data['skey'] ?? '';
+
+        $secretKey = $this->config['secret_key'] ?? '';
+
+        $key0 = md5($tranID . $orderid . $status . $domain . $amount . $currency);
+        $key1 = md5($paydate . $domain . $key0 . $appcode . $secretKey);
+
+        return $skey === $key1;
+    }
+
+    /**
+     * Initiate Fiuu payment and create transaction
+     */
+    public function initiateFiuuPayment(User $user, array $data, ?string $channel = null): Transaction
+    {
         try {
             $amount = $data['amount'];
-            $currency = 'MYR';
-            $walletType = $data['wallet_type']; // tng, grabpay, boost, shopeepay
-            $description = $data['description'] ?? 'E-Wallet Payment';
-            $callbackUrl = $data['callback_url'] ?? config('app.url') . '/api/webhooks/billplz';
+            $currency = $data['currency'] ?? config('payment.currency', 'MYR');
+            $description = $data['description'] ?? 'Payment';
+            $metadata = $data['metadata'] ?? [];
 
-            // Calculate fees
-            $railConfig = config('payment.rails.ewallet');
-            $fee = ($amount * $railConfig['fee_percentage'] / 100) + $railConfig['fee_fixed'];
+            // Generate unique order ID
+            $orderId = 'NFC-' . strtoupper(Str::random(16));
+
+            // Calculate fees based on payment rail
+            $railType = $this->determineRailType($channel);
+            $railConfig = config("payment.rails.{$railType}", []);
+            $feePercentage = $railConfig['fee_percentage'] ?? 2.0;
+            $feeFixed = $railConfig['fee_fixed'] ?? 0;
+            $fee = ($amount * $feePercentage / 100) + $feeFixed;
             $netAmount = $amount - $fee;
 
-            // Create transaction
+            // Generate vcode
+            $vcode = $this->generateVcode($amount, $orderId, $currency);
+
+            // Construct Payment URL with parameters
+            $paymentUrl = $this->getPaymentUrl() . $this->config['merchant_id'] . '/?' . http_build_query([
+                'amount' => number_format($amount, 2, '.', ''),
+                'orderid' => $orderId,
+                'bill_name' => $user->name ?? 'Customer',
+                'bill_email' => $user->email,
+                'bill_mobile' => $data['bill_mobile'] ?? $user->phone ?? '0123456789',
+                'bill_desc' => $description,
+                'currency' => $currency,
+                'vcode' => $vcode,
+                'channel' => $channel, // Optional
+                'returnurl' => $this->config['return_url'],
+                'callbackurl' => $this->config['notification_url'],
+            ]);
+
+            // Create transaction record
             $transaction = Transaction::create([
                 'user_id' => $user->id,
-                'type' => 'payment',
-                'payment_rail' => 'ewallet',
-                'provider' => $this->provider,
+                'type' => $data['type'] ?? 'payment',
+                'payment_rail' => $railType,
+                'provider' => 'fiuu',
+                'provider_transaction_id' => $orderId,
                 'amount' => $amount,
                 'currency' => $currency,
                 'fee' => $fee,
                 'net_amount' => $netAmount,
                 'status' => 'pending',
-                'ewallet_type' => $walletType,
                 'description' => $description,
-                'metadata' => array_merge($data['metadata'] ?? [], [
-                    'wallet_type' => $walletType,
-                    'initiated_at' => now()->toIso8601String(),
+                'bank_name' => $data['bank_code'] ?? null,
+                'ewallet_type' => $data['wallet_type'] ?? null,
+                'metadata' => array_merge($metadata, [
+                    'fiuu_channel' => $channel,
+                    'vcode' => $vcode,
+                    'payment_url' => $this->getPaymentUrl(),
                 ]),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
 
-            // Process with provider
-            if ($this->provider === 'billplz') {
-                $billplzResponse = $this->createBillplzEWalletBill($transaction, [
-                    'wallet_type' => $walletType,
-                    'callback_url' => $callbackUrl,
-                    'redirect_url' => $data['redirect_url'] ?? null,
-                ]);
-                
-                $transaction->update([
-                    'provider_transaction_id' => $billplzResponse['id'],
-                    'metadata' => array_merge($transaction->metadata ?? [], [
-                        'payment_url' => $billplzResponse['url'],
-                        'qr_code_url' => $billplzResponse['qr_code_url'] ?? null,
-                        'deep_link_url' => $billplzResponse['deep_link_url'] ?? null,
-                        'expires_at' => now()->addMinutes(15)->toIso8601String(),
-                    ]),
-                ]);
+            // Build payment form data
+            $paymentData = [
+                'MerchantID' => $this->config['merchant_id'],
+                'orderid' => $orderId,
+                'amount' => number_format($amount, 2, '.', ''),
+                'bill_name' => $user->name ?? 'Customer',
+                'bill_email' => $user->email,
+                'bill_mobile' => $user->phone ?? '',
+                'bill_desc' => $description,
+                'currency' => $currency,
+                'vcode' => $vcode,
+                'returnurl' => $this->config['return_url'],
+                'callbackurl' => $this->config['notification_url'],
+            ];
+
+            if ($channel) {
+                $paymentData['channel'] = $channel;
             }
+
+            // Store payment data in transaction metadata
+            $transaction->update([
+                'metadata' => array_merge($transaction->metadata ?? [], [
+                    'payment_form_data' => $paymentData,
+                    'payment_url' => $paymentUrl, // Add this for frontend
+                    'redirect_url' => $paymentUrl, // Unified key
+                ]),
+            ]);
+
+            Log::info('Fiuu payment initiated', [
+                'order_id' => $orderId,
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'channel' => $channel,
+            ]);
 
             return $transaction;
 
         } catch (Exception $e) {
-            Log::error('E-wallet payment failed', [
+            Log::error('Fiuu payment initiation failed', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Determine payment rail type from channel
+     */
+    protected function determineRailType(?string $channel): string
+    {
+        if (!$channel) {
+            return 'card';
+        }
+
+        $channel = strtolower($channel);
+
+        if (in_array($channel, ['credit', 'mastercard', 'visa', 'amex'])) {
+            return 'card';
+        }
+
+        if (str_starts_with($channel, 'fpx') || in_array($channel, ['maybank2u', 'cimb', 'rhb', 'pbb'])) {
+            return 'fpx';
+        }
+
+        if (in_array($channel, ['tng', 'tng-ewallet', 'grabpay', 'boost', 'shopeepay'])) {
+            return 'ewallet';
+        }
+
+        if (str_starts_with($channel, 'duitnow')) {
+            return 'duitnow';
+        }
+
+        return 'card';
     }
 
     /**
@@ -273,8 +355,6 @@ class PaymentService
             'payment_proof_uploaded_at' => now(),
         ]);
 
-        // TODO: Send notification to admin for verification
-
         return $transaction;
     }
 
@@ -294,13 +374,6 @@ class PaymentService
             'paid_at' => now(),
         ]);
 
-        // Generate invoice for verified payment
-        if (config('invoice.queue.enabled', true)) {
-            \App\Jobs\GenerateInvoiceJob::dispatch($transaction);
-        }
-
-        // TODO: Send confirmation notification to user
-
         return $transaction;
     }
 
@@ -310,7 +383,7 @@ class PaymentService
     public function savePaymentMethod(User $user, array $data): PaymentMethod
     {
         $type = $data['type']; // card, bank, ewallet
-        
+
         $paymentMethod = PaymentMethod::create([
             'user_id' => $user->id,
             'type' => $type,
@@ -351,14 +424,14 @@ class PaymentService
     }
 
     /**
-     * Process refund
+     * Process refund via Fiuu
      */
     public function processRefund(Transaction $transaction, array $data): Refund
     {
         try {
             $amount = $data['amount'] ?? $transaction->refundable_amount;
             $reason = $data['reason'] ?? 'requested';
-            
+
             if ($amount > $transaction->refundable_amount) {
                 throw new Exception('Refund amount exceeds refundable amount');
             }
@@ -376,21 +449,13 @@ class PaymentService
                 'processed_by' => $data['processed_by'] ?? null,
             ]);
 
-            // Process with provider
-            if ($this->provider === 'stripe') {
-                $stripeRefund = StripeRefund::create([
-                    'payment_intent' => $transaction->provider_transaction_id,
-                    'amount' => $amount * 100, // Convert to cents
-                    'reason' => $reason,
-                    'metadata' => [
-                        'refund_id' => $refund->refund_id,
-                        'transaction_id' => $transaction->transaction_id,
-                    ],
-                ]);
+            // For Fiuu refunds, we need to call their API
+            if ($transaction->provider === 'fiuu') {
+                $refundResult = $this->processFiuuRefund($transaction, $amount, $reason);
 
                 $refund->update([
-                    'provider_refund_id' => $stripeRefund->id,
-                    'status' => $this->mapStripeStatus($stripeRefund->status),
+                    'provider_refund_id' => $refundResult['refund_id'] ?? null,
+                    'status' => $refundResult['success'] ? 'succeeded' : 'failed',
                     'processed_at' => now(),
                 ]);
             }
@@ -415,43 +480,74 @@ class PaymentService
     }
 
     /**
-     * Verify webhook signature
+     * Process refund through Fiuu API
      */
-    public function verifyWebhookSignature(string $payload, string $signature, string $provider = null): bool
+    protected function processFiuuRefund(Transaction $transaction, float $amount, string $reason): array
     {
-        $provider = $provider ?? $this->provider;
-
         try {
-            if ($provider === 'stripe') {
-                $webhookSecret = $this->config['webhook_secret'];
-                Webhook::constructEvent($payload, $signature, $webhookSecret);
-                return true;
+            $refundUrl = $this->config['sandbox'] ?? true
+                ? 'https://sandbox.merchant.razer.com/RMS/API/refundAPI/index.php'
+                : 'https://api.merchant.razer.com/RMS/API/refundAPI/index.php';
+
+            $response = Http::asForm()->post($refundUrl, [
+                'RefundType' => 'P', // Partial refund
+                'MerchantID' => $this->config['merchant_id'],
+                'RefID' => $transaction->provider_transaction_id,
+                'TxnID' => $transaction->metadata['fiuu_tran_id'] ?? '',
+                'Amount' => number_format($amount, 2, '.', ''),
+                'signature' => $this->generateRefundSignature($transaction, $amount),
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'refund_id' => $response->json('RefundID'),
+                ];
             }
 
-            // Add other provider signature verification here
+            return [
+                'success' => false,
+                'error' => $response->body(),
+            ];
 
-            return false;
         } catch (Exception $e) {
-            Log::warning('Webhook signature verification failed', [
-                'provider' => $provider,
+            Log::error('Fiuu refund API call failed', [
+                'transaction_id' => $transaction->id,
                 'error' => $e->getMessage(),
             ]);
-            return false;
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
         }
     }
 
     /**
-     * Handle webhook event
+     * Generate refund signature for Fiuu
      */
-    public function handleWebhook(array $data, string $provider = null): WebhookLog
+    protected function generateRefundSignature(Transaction $transaction, float $amount): string
     {
-        $provider = $provider ?? $this->provider;
+        $string = $transaction->provider_transaction_id
+            . number_format($amount, 2, '.', '')
+            . $this->config['merchant_id']
+            . $this->config['secret_key'];
+
+        return md5($string);
+    }
+
+    /**
+     * Handle Fiuu webhook event
+     */
+    public function handleWebhook(array $data, ?string $provider = null): WebhookLog
+    {
+        $provider = $provider ?? 'fiuu';
 
         // Create webhook log
         $webhookLog = WebhookLog::create([
             'provider' => $provider,
-            'event_type' => $data['type'] ?? $data['event_type'] ?? 'unknown',
-            'event_id' => $data['id'] ?? null,
+            'event_type' => $data['status'] ?? 'unknown',
+            'event_id' => $data['tranID'] ?? null,
             'payload' => $data,
             'signature_verified' => $data['signature_verified'] ?? false,
             'status' => 'pending',
@@ -460,15 +556,8 @@ class PaymentService
         ]);
 
         try {
-            // Process webhook based on provider
-            if ($provider === 'stripe') {
-                $this->handleStripeWebhook($data, $webhookLog);
-            } elseif ($provider === 'billplz') {
-                $this->handleBillplzWebhook($data, $webhookLog);
-            }
-
+            $this->processFiuuWebhook($data, $webhookLog);
             $webhookLog->markAsProcessed();
-
         } catch (Exception $e) {
             $webhookLog->markAsFailed($e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -479,257 +568,120 @@ class PaymentService
     }
 
     /**
-     * Helper: Get or create Stripe customer
+     * Process Fiuu webhook
      */
-    protected function getOrCreateStripeCustomer(User $user)
+    protected function processFiuuWebhook(array $data, WebhookLog $log): void
     {
-        if ($user->stripe_customer_id) {
-            try {
-                return StripeCustomer::retrieve($user->stripe_customer_id);
-            } catch (Exception $e) {
-                // Customer not found, create new one
-            }
+        $orderId = $data['orderid'] ?? null;
+        $status = $data['status'] ?? null;
+        $tranId = $data['tranID'] ?? null;
+        $amount = $data['amount'] ?? 0;
+
+        if (!$orderId || !$status) {
+            throw new Exception('Missing required webhook fields: orderid or status');
         }
 
-        $customer = StripeCustomer::create([
-            'email' => $user->email,
-            'name' => $user->name,
-            'metadata' => [
-                'user_id' => $user->id,
-            ],
-        ]);
+        // Find transaction by order ID
+        $transaction = Transaction::where('provider_transaction_id', $orderId)->first();
 
-        $user->update(['stripe_customer_id' => $customer->id]);
-
-        return $customer;
-    }
-
-    /**
-     * Helper: Map Stripe status to our status
-     */
-    protected function mapStripeStatus(string $stripeStatus): string
-    {
-        return match($stripeStatus) {
-            'requires_payment_method' => 'pending',
-            'requires_confirmation' => 'pending',
-            'requires_action' => 'requires_action',
-            'processing' => 'processing',
-            'succeeded' => 'succeeded',
-            'canceled' => 'cancelled',
-            'failed' => 'failed',
-            default => $stripeStatus,
-        };
-    }
-
-    /**
-     * Helper: Handle Stripe webhook
-     */
-    protected function handleStripeWebhook(array $event, WebhookLog $log)
-    {
-        $type = $event['type'];
-        $object = $event['data']['object'];
-
-        switch ($type) {
-            case 'payment_intent.succeeded':
-                $this->handlePaymentIntentSucceeded($object);
-                break;
-            case 'payment_intent.payment_failed':
-                $this->handlePaymentIntentFailed($object);
-                break;
-            // Add more event handlers
-        }
-    }
-
-    protected function handlePaymentIntentSucceeded($paymentIntent)
-    {
-        $transaction = Transaction::where('provider_transaction_id', $paymentIntent['id'])->first();
-        if ($transaction) {
-            $transaction->update([
-                'status' => 'succeeded',
-                'paid_at' => now(),
-            ]);
-            
-            // Generate invoice for successful payment
-            if (config('invoice.queue.enabled', true)) {
-                GenerateInvoiceJob::dispatch($transaction);
-            }
-        }
-    }
-
-    protected function handlePaymentIntentFailed($paymentIntent)
-    {
-        $transaction = Transaction::where('provider_transaction_id', $paymentIntent['id'])->first();
-        if ($transaction) {
-            $transaction->update([
-                'status' => 'failed',
-                'failure_code' => $paymentIntent['last_payment_error']['code'] ?? null,
-                'failure_message' => $paymentIntent['last_payment_error']['message'] ?? null,
-            ]);
-        }
-    }
-
-    /**
-     * Helper: Create Billplz e-wallet bill with deep link
-     */
-    protected function createBillplzEWalletBill(Transaction $transaction, array $options)
-    {
-        $apiKey = config('payment.providers.billplz.api_key');
-        $collectionId = config('payment.providers.billplz.collection_id');
-        $isSandbox = config('payment.providers.billplz.sandbox');
-        
-        $baseUrl = $isSandbox ? 'https://www.billplz-sandbox.com/api/v4' : 'https://www.billplz.com/api/v4';
-        
-        // Map wallet types to Billplz codes
-        $walletMap = [
-            'tng' => 'TNG_EWALLET',
-            'grabpay' => 'GRABPAY',
-            'boost' => 'BOOST',
-            'shopeepay' => 'SHOPEEPAY',
-        ];
-        
-        $walletCode = $walletMap[$options['wallet_type']] ?? 'TNG_EWALLET';
-        
-        // Create bill via Billplz API
-        $billData = [
-            'collection_id' => $collectionId,
-            'description' => $transaction->description,
-            'email' => $transaction->user->email,
-            'name' => $transaction->user->name,
-            'amount' => (int)($transaction->amount * 100), // Convert to cents
-            'callback_url' => $options['callback_url'],
-            'redirect_url' => $options['redirect_url'] ?? config('app.frontend_url') . '/payment/status',
-            'reference_1_label' => 'Transaction ID',
-            'reference_1' => $transaction->transaction_id,
-            'payment_method_type' => [$walletCode],
-        ];
-        
-        try {
-            $response = \Illuminate\Support\Facades\Http::withBasicAuth($apiKey, '')
-                ->post($baseUrl . '/bills', $billData);
-            
-            if ($response->successful()) {
-                $billData = $response->json();
-                
-                // Generate deep link based on wallet type
-                $deepLink = $this->generateEWalletDeepLink(
-                    $options['wallet_type'],
-                    $billData['url']
-                );
-                
-                return [
-                    'id' => $billData['id'],
-                    'url' => $billData['url'],
-                    'qr_code_url' => $billData['url'] . '/qr',
-                    'deep_link_url' => $deepLink,
-                ];
-            }
-            
-            throw new Exception('Billplz API error: ' . $response->body());
-            
-        } catch (Exception $e) {
-            Log::error('Failed to create Billplz bill', [
-                'transaction_id' => $transaction->transaction_id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            // Return mock data for testing if API fails
-            return [
-                'id' => 'bill_test_' . Str::random(10),
-                'url' => 'https://billplz-sandbox.com/bills/test',
-                'qr_code_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode('https://billplz-sandbox.com/bills/test'),
-                'deep_link_url' => $this->generateEWalletDeepLink($options['wallet_type'], 'https://billplz-sandbox.com/bills/test'),
-            ];
-        }
-    }
-    
-    /**
-     * Generate e-wallet deep link for app redirection
-     */
-    protected function generateEWalletDeepLink(string $walletType, string $paymentUrl): string
-    {
-        // Generate deep links that open the wallet apps
-        switch ($walletType) {
-            case 'tng':
-                // Touch 'n Go eWallet deep link
-                return 'tngd://payment?url=' . urlencode($paymentUrl);
-                
-            case 'grabpay':
-                // GrabPay deep link
-                return 'grab://payment?url=' . urlencode($paymentUrl);
-                
-            case 'boost':
-                // Boost deep link
-                return 'boostapp://payment?url=' . urlencode($paymentUrl);
-                
-            case 'shopeepay':
-                // ShopeePay deep link
-                return 'shopeemy://payment?url=' . urlencode($paymentUrl);
-                
-            default:
-                return $paymentUrl;
-        }
-    }
-
-    /**
-     * Helper: Handle Billplz webhook
-     */
-    protected function handleBillplzWebhook(array $event, WebhookLog $log)
-    {
-        $eventType = $event['type'];
-        $payload = $event['data'];
-        
-        // Find transaction by bill ID
-        $billId = $payload['id'] ?? null;
-        if (!$billId) {
-            throw new Exception('Bill ID not found in webhook payload');
-        }
-        
-        $transaction = Transaction::where('provider_transaction_id', $billId)->first();
-        
         if (!$transaction) {
-            Log::warning('Transaction not found for Billplz webhook', [
-                'bill_id' => $billId,
-                'event_type' => $eventType,
+            Log::warning('Transaction not found for Fiuu webhook', [
+                'order_id' => $orderId,
+                'status' => $status,
             ]);
             return;
         }
-        
-        // Update transaction based on event
-        if ($eventType === 'bill.paid' && $payload['paid'] === 'true') {
-            $transaction->update([
-                'status' => 'succeeded',
-                'paid_at' => $payload['paid_at'] ?? now(),
-                'metadata' => array_merge($transaction->metadata ?? [], [
-                    'webhook_received_at' => now()->toIso8601String(),
-                    'payment_state' => $payload['state'] ?? 'paid',
-                    'transaction_id' => $payload['transaction_id'] ?? null,
-                    'transaction_status' => $payload['transaction_status'] ?? null,
-                ]),
-            ]);
-            
-            Log::info('E-wallet payment succeeded via webhook', [
-                'transaction_id' => $transaction->transaction_id,
-                'bill_id' => $billId,
-                'wallet_type' => $transaction->ewallet_type,
-            ]);
-            
-            // Generate invoice for successful payment
-            if (config('invoice.queue.enabled', true)) {
-                GenerateInvoiceJob::dispatch($transaction);
-            }
-        } elseif ($payload['state'] === 'deleted' || $payload['paid'] === 'false') {
-            $transaction->update([
-                'status' => 'failed',
-                'metadata' => array_merge($transaction->metadata ?? [], [
-                    'webhook_received_at' => now()->toIso8601String(),
-                    'payment_state' => $payload['state'] ?? 'failed',
-                ]),
-            ]);
-            
-            Log::info('E-wallet payment failed via webhook', [
-                'transaction_id' => $transaction->transaction_id,
-                'bill_id' => $billId,
-            ]);
+
+        // Map status and update transaction
+        $mappedStatus = $this->mapFiuuStatus($status);
+
+        $transaction->update([
+            'status' => $mappedStatus,
+            'paid_at' => $mappedStatus === 'succeeded' ? now() : null,
+            'metadata' => array_merge($transaction->metadata ?? [], [
+                'fiuu_tran_id' => $tranId,
+                'fiuu_appcode' => $data['appcode'] ?? null,
+                'fiuu_channel' => $data['channel'] ?? null,
+                'fiuu_paydate' => $data['paydate'] ?? null,
+                'fiuu_status_code' => $status,
+                'webhook_received_at' => now()->toIso8601String(),
+            ]),
+        ]);
+
+        Log::info('Fiuu webhook processed', [
+            'order_id' => $orderId,
+            'status' => $mappedStatus,
+            'tran_id' => $tranId,
+        ]);
+
+        // If payment succeeded, mark user as not new
+        if ($mappedStatus === 'succeeded' && $transaction->user) {
+            $transaction->user->update(['is_new_user' => false]);
         }
+    }
+
+    /**
+     * Query transaction status from Fiuu API
+     */
+    public function queryTransactionStatus(string $orderId): array
+    {
+        try {
+            $queryUrl = $this->config['sandbox'] ?? true
+                ? 'https://sandbox.merchant.razer.com/RMS/API/chkstat/q_by_oid.php'
+                : 'https://api.merchant.razer.com/RMS/API/chkstat/q_by_oid.php';
+
+            $response = Http::asForm()->post($queryUrl, [
+                'MerchantID' => $this->config['merchant_id'],
+                'orderid' => $orderId,
+                'vcode' => $this->generateVcode(0, $orderId, 'MYR'), // Amount doesn't matter for query, assuming MYR
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json(),
+                ];
+            }
+
+            return [
+                'success' => false,
+                'error' => $response->body(),
+            ];
+
+        } catch (Exception $e) {
+            Log::error('Fiuu query API call failed', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get available payment channels
+     */
+    public function getAvailableChannels(): array
+    {
+        return $this->config['payment_channels'] ?? [];
+    }
+
+    /**
+     * Verify webhook signature
+     */
+    public function verifyWebhookSignature(string $payload, string $signature, ?string $provider = null): bool
+    {
+        // For Fiuu, we verify using skey
+        $data = json_decode($payload, true);
+
+        if (!$data || !isset($data['amount']) || !isset($data['orderid']) || !isset($data['skey'])) {
+            return false;
+        }
+
+        $currency = $data['currency'] ?? 'MYR';
+        return $this->verifySkey((float) $data['amount'], $data['orderid'], $data['skey'], $currency);
     }
 }

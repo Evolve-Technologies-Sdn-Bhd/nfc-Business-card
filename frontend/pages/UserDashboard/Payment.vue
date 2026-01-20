@@ -183,11 +183,12 @@
             />
           </div>
 
-          <!-- Card Payment Form -->
+          <!-- Card Payment Form (Fiuu) -->
           <div v-else-if="selectedPaymentRail === 'card'" class="bg-white rounded-2xl shadow-lg p-6">
-            <CardPaymentForm
+            <FiuuPaymentForm
               :amount="orderSummary.total"
               :fee="paymentFee"
+              payment-rail="card"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
               @payment-success="handlePaymentSuccess"
@@ -196,11 +197,12 @@
             />
           </div>
 
-          <!-- FPX Bank Payment Form -->
+          <!-- FPX Bank Payment Form (Fiuu) -->
           <div v-else-if="selectedPaymentRail === 'fpx'" class="bg-white rounded-2xl shadow-lg p-6">
-            <BankPaymentForm
+            <FiuuPaymentForm
               :amount="orderSummary.total"
               :fee="paymentFee"
+              payment-rail="fpx"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
               @payment-success="handlePaymentSuccess"
@@ -209,11 +211,12 @@
             />
           </div>
 
-          <!-- E-Wallet Payment Form -->
+          <!-- E-Wallet Payment Form (Fiuu) -->
           <div v-else-if="selectedPaymentRail === 'ewallet'" class="bg-white rounded-2xl shadow-lg p-6">
-            <EWalletSelector
+            <FiuuPaymentForm
               :amount="orderSummary.total"
               :fee="paymentFee"
+              payment-rail="ewallet"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
               @payment-success="handlePaymentSuccess"
@@ -513,9 +516,7 @@
 <script setup>
 // Import payment components
 import PaymentMethodSelector from '~/components/PaymentMethodSelector.vue';
-import CardPaymentForm from '~/components/CardPaymentForm.vue';
-import BankPaymentForm from '~/components/BankPaymentForm.vue';
-import EWalletSelector from '~/components/EWalletSelector.vue';
+import FiuuPaymentForm from '~/components/FiuuPaymentForm.vue';
 import ManualBankTransfer from '~/components/ManualBankTransfer.vue';
 
 // Meta tags

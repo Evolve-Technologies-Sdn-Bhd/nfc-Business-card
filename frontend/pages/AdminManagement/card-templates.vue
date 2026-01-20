@@ -284,14 +284,14 @@
                 </div>
               </div>
 
-              <!-- n8n Processing Info -->
-              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <!-- Cloudinary Upload Info -->
+              <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div class="flex">
-                  <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <div class="ml-3">
-                    <p class="text-sm text-blue-800">
-                      After upload, the image will be sent to n8n for processing. 
-                      The processed template will appear once n8n completes the workflow.
+                    <p class="text-sm text-green-800">
+                      Images will be uploaded to Cloudinary CDN for fast, worldwide delivery. 
+                      Your template will be available immediately after upload.
                     </p>
                   </div>
                 </div>
