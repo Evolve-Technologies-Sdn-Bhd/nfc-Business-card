@@ -1,4 +1,5 @@
 <template>
+  <Teleport to="body">
   <div class="chatbot-widget" :class="{ 'chatbot-mobile': isMobile }">
     <!-- Floating Chat Button -->
     <button
@@ -174,6 +175,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -339,7 +341,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 /* Widget Container */
 .chatbot-widget {
   position: fixed;

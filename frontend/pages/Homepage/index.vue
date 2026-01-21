@@ -57,14 +57,6 @@
             <NuxtLink to="/UserAccount/register" class="btn btn-primary"
               >Get Started</NuxtLink
             >
-            <!-- AI Chatbot Button -->
-            <button
-              @click="showChatbot = true"
-              class="btn btn-ghost btn-circle"
-              title="AI Assistant"
-            >
-              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6" />
-            </button>
             <!-- Theme Switcher -->
             <ThemeSwitcher />
           </div>
@@ -129,16 +121,54 @@
             class="block px-3 py-2 text-primary-600 font-medium"
             >Get Started</NuxtLink
           >
-          <button
-            @click="showChatbot = true"
-            class="block px-3 py-2 nav-link text-left"
-          >
-            <Icon name="heroicons:chat-bubble-left-right" class="h-5 w-5 inline mr-2" />
-            AI Assistant
-          </button>
         </div>
       </div>
     </nav>
+
+    <!-- Business Plan Request Success Alert -->
+    <Transition
+      enter-active-class="transition-all duration-500 ease-out"
+      enter-from-class="opacity-0 -translate-y-full"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-full"
+    >
+      <div
+        v-if="showBusinessRequestSuccess"
+        class="fixed top-20 left-0 right-0 z-40 px-4"
+      >
+        <div class="max-w-3xl mx-auto">
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl shadow-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <Icon name="heroicons:check-circle" class="h-7 w-7 text-green-600" />
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-green-800 mb-1">
+                  Business Plan Request Submitted!
+                </h3>
+                <p class="text-green-700 mb-3">
+                  Thank you for your interest in our Business plan. Our sales team will review your request and contact you within 1-2 business days via email or phone.
+                </p>
+                <div class="flex items-center gap-2 text-sm text-green-600">
+                  <Icon name="heroicons:clock" class="h-4 w-4" />
+                  <span>Expected response time: 1-2 business days</span>
+                </div>
+              </div>
+              <button
+                @click="dismissBusinessRequestSuccess"
+                class="flex-shrink-0 p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Hero Section -->
     <section class="section relative overflow-hidden pt-24">
@@ -2033,6 +2063,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Floating AI Chatbot Widget (bottom-right) -->
+    <ChatbotWidget />
   </div>
 </template>
 
@@ -2101,6 +2134,7 @@ const feedbackForm = reactive({
 
 // Business Plan Modal
 const showBusinessModal = ref(false);
+const showBusinessRequestSuccess = ref(false);
 const submittingBusinessRequest = ref(false);
 
 // Legal Document Modal (Privacy Policy / Terms of Service)
@@ -2380,6 +2414,15 @@ const closeBusinessModal = () => {
   });
 };
 
+// Dismiss business request success alert
+const dismissBusinessRequestSuccess = () => {
+  showBusinessRequestSuccess.value = false;
+  // Clean up URL query parameter
+  const url = new URL(window.location.href);
+  url.searchParams.delete('businessRequest');
+  window.history.replaceState({}, '', url.pathname);
+};
+
 // Open legal document modal (Privacy Policy or Terms of Service)
 const openLegalModal = async (type) => {
   legalModalType.value = type;
@@ -2472,18 +2515,18 @@ This is an automated request from NFCGo platform.
 
     // Show success message
     $toast.success(
-      "Opening Gmail... Please send the email, then you'll be redirected to your dashboard."
+      "Opening Gmail... Please send the email to complete your Business Plan request."
     );
 
-    // Close modal and redirect to dashboard after a short delay
+    // Close modal and show success alert after a short delay
     setTimeout(() => {
       closeBusinessModal();
-      // Navigate to dashboard if user is authenticated, otherwise to login
-      if (authStore.isAuthenticated) {
-        window.location.href = "/UserDashboard";
-      } else {
-        window.location.href = "/UserAccount/login";
-      }
+      // Show inline success alert since already on Homepage
+      showBusinessRequestSuccess.value = true;
+      // Auto-dismiss after 15 seconds
+      setTimeout(() => {
+        dismissBusinessRequestSuccess();
+      }, 15000);
     }, 2000);
   } catch (error) {
     console.error("Business plan request error:", error);
@@ -2726,8 +2769,22 @@ onMounted(() => {
   loadPrices();
   loadPopularQuestions();
 
+  // Check for business request success query parameter
+  const route = useRoute();
+  if (route.query.businessRequest === 'success') {
+    showBusinessRequestSuccess.value = true;
+    // Auto-dismiss after 15 seconds
+    setTimeout(() => {
+      dismissBusinessRequestSuccess();
+    }, 15000);
+  }
+
   const authStore = useAuthStore();
   if (authStore.isAuthenticated) {
+    // Don't redirect if coming from business request success
+    if (route.query.businessRequest === 'success') {
+      return;
+    }
     if (authStore.isAdmin()) {
       navigateTo("/AdminManagement/nfc-cards");
     } else {
