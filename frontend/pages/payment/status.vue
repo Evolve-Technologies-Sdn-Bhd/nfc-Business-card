@@ -233,7 +233,28 @@ const tryAgain = () => {
   router.push('/user-dashboard/payment')
 }
 
-const goToDashboard = () => {
-  router.push('/user-dashboard')
+const goToDashboard = async () => {
+  const authStore = useAuthStore()
+  const { $toast } = useNuxtApp()
+  
+  if (status.value === 'succeeded') {
+    // Payment successful
+    try {
+      await authStore.fetchProfile()
+      router.push('/UserDashboard')
+      $toast.success('Payment successful! Welcome to your dashboard.')
+    } catch (error) {
+      console.error('Failed to refresh user data:', error)
+      router.push('/UserDashboard')
+    }
+  } else if (status.value === 'pending' || status.value === 'processing') {
+    // Payment pending
+    router.push('/Homepage')
+    $toast.info('Your payment is pending. We will notify you once it is confirmed.')
+  } else {
+    // Payment failed or cancelled
+    router.push('/Homepage')
+    $toast.warning('Payment was not completed.')
+  }
 }
 </script>

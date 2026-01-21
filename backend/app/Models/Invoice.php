@@ -134,11 +134,11 @@ class Invoice extends Model
         ]);
     }
 
-    public function markAsPaid(): void
+    public function markAsPaid($paidAt = null): void
     {
         $this->update([
             'status' => 'paid',
-            'paid_at' => now(),
+            'paid_at' => $paidAt ?? now(),
         ]);
     }
 

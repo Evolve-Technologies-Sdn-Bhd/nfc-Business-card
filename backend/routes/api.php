@@ -238,8 +238,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('invoices')->group(function () {
         Route::get('/', [InvoiceController::class, 'index']);
         Route::get('/statistics', [InvoiceController::class, 'statistics']);
+        Route::post('/download-by-order', [InvoiceController::class, 'downloadByOrderId']);
         Route::get('/{invoice}', [InvoiceController::class, 'show']);
         Route::get('/{invoice}/preview', [InvoiceController::class, 'preview']);
+        Route::post('/{invoice}/send-email', [InvoiceController::class, 'sendEmail']);
     });
 
     // Invoice download with signed URL

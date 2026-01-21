@@ -259,7 +259,7 @@
           </div>
 
           <!-- Card Examples -->
-          <CardExamples 
+          <CardExamples
             :card-info="cardInfo"
             :selected-template="selectedTemplateData"
             :design-method="designMethod"
@@ -672,7 +672,11 @@ const selectTemplate = (template) => {
 
 // Get user's current plan (prioritize auth store, fallback to sessionStorage for onboarding)
 const getCurrentUserPlan = () => {
-  return authStore.user?.subscription_plan || sessionStorage.getItem("selectedPlan") || "basic";
+  return (
+    authStore.user?.subscription_plan ||
+    sessionStorage.getItem("selectedPlan") ||
+    "basic"
+  );
 };
 
 // Fetch templates from API based on user's plan
@@ -744,6 +748,19 @@ onMounted(async () => {
   // Fetch templates from API
   await fetchTemplates();
 });
+
+// Watch for route changes to refetch templates on navigation
+// This fixes the issue where templates don't load when navigating from another page
+const route = useRoute();
+watch(
+  () => route.fullPath,
+  async (newPath, oldPath) => {
+    // Only refetch if we're navigating TO this page (not away from it)
+    if (newPath && newPath !== oldPath && newPath.includes("NFCCardDesign")) {
+      await fetchTemplates();
+    }
+  },
+);
 
 // Save card information
 const saveCardInfo = async () => {

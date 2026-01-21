@@ -15,8 +15,8 @@ class InvoiceController extends Controller
     public function __construct(InvoiceService $invoiceService)
     {
         $this->invoiceService = $invoiceService;
-        $this->middleware('auth:sanctum');
-        // Add admin middleware here: $this->middleware('admin');
+        // Note: Middleware should be applied at route level in Laravel 11+
+        // The routes already have 'auth:sanctum' and 'admin' middleware applied in routes/api.php
     }
 
     /**
@@ -49,10 +49,10 @@ class InvoiceController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', '%' . $search . '%')
-                  ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->where('email', 'like', '%' . $search . '%')
-                               ->orWhere('name', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('email', 'like', '%' . $search . '%')
+                            ->orWhere('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 

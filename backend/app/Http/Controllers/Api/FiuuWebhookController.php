@@ -63,8 +63,27 @@ class FiuuWebhookController extends Controller
             default => 'Unknown',
         };
 
-        // If payment successful, ensure invoice is generated
+        // If payment successful, update transaction status and generate invoice
         if ($status === '00' && $transaction) {
+            // Update transaction status (in case notification webhook didn't reach)
+            if ($transaction->status !== 'succeeded') {
+                $transaction->update([
+                    'status' => 'succeeded',
+                    'paid_at' => now(),
+                    'metadata' => array_merge($transaction->metadata ?? [], [
+                        'fiuu_tran_id' => $tranId,
+                        'fiuu_status_code' => $status,
+                        'return_url_received_at' => now()->toIso8601String(),
+                    ]),
+                ]);
+
+                // Mark user as not new
+                if ($transaction->user) {
+                    $transaction->user->update(['is_new_user' => false]);
+                }
+            }
+
+            // Generate invoice
             try {
                 $this->invoiceService->generateInvoiceFromTransaction($transaction);
             } catch (Exception $e) {
