@@ -270,16 +270,16 @@ This is an automated request from NFCGo platform.
 
     // Show success message
     $toast.success(
-      "Opening Gmail... Please send the email, then you'll be redirected to your dashboard."
+      "Opening Gmail... Please send the email to complete your Business Plan request."
     )
 
-    // Close modal and redirect to dashboard after a short delay
+    // Close modal and redirect to Homepage with success parameter after a short delay
     setTimeout(() => {
       emit('update:show', false)
       resetForm()
-      // Navigate to dashboard if user is authenticated
+      // Navigate to Homepage with success parameter if authenticated, otherwise login
       if (authStore.isAuthenticated) {
-        window.location.href = '/UserDashboard'
+        window.location.href = '/Homepage?businessRequest=success'
       } else {
         window.location.href = '/UserAccount/login'
       }

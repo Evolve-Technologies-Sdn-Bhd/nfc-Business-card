@@ -666,13 +666,13 @@ This is an automated request from NFCGo platform.
 
     // Show success message
     $toast.success(
-      "Opening Gmail... Please send the email, then you'll be redirected to your dashboard."
+      "Opening Gmail... Please send the email to complete your Business Plan request."
     );
 
-    // Close modal and redirect to dashboard after a short delay
+    // Close modal and redirect to Homepage with success parameter after a short delay
     setTimeout(() => {
       closeBusinessModal();
-      navigateTo("/UserDashboard");
+      navigateTo("/Homepage?businessRequest=success");
     }, 2000);
   } catch (error) {
     console.error("Business plan request error:", error);
