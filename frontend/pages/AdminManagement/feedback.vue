@@ -337,10 +337,31 @@
             </div>
           </div>
 
-          <!-- Message -->
-          <div>
-            <h4 class="text-sm font-semibold text-secondary-700 mb-2">Message</h4>
+          <!-- Message Context -->
+          <div v-if="selectedFeedback.user_question || selectedFeedback.bot_response" class="grid grid-cols-1 gap-4">
+            <div v-if="selectedFeedback.user_question">
+               <h4 class="text-sm font-semibold text-secondary-700 mb-2">User Question</h4>
+               <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-700">
+                  {{ selectedFeedback.user_question }}
+               </div>
+            </div>
+            <div v-if="selectedFeedback.bot_response">
+               <h4 class="text-sm font-semibold text-secondary-700 mb-2">Bot Response</h4>
+               <div class="bg-blue-50 p-3 rounded-lg text-sm text-gray-700 border-l-4 border-blue-400">
+                  {{ selectedFeedback.bot_response }}
+               </div>
+            </div>
+          </div>
+
+          <!-- User Feedback Message -->
+          <div v-if="selectedFeedback.user_message">
+            <h4 class="text-sm font-semibold text-secondary-700 mb-2">Feedback Message</h4>
             <div class="bg-secondary-50 p-4 rounded-lg">
+              <div class="flex items-center gap-2 mb-2" v-if="selectedFeedback.feedback_type">
+                  <span class="text-xs font-bold uppercase tracking-wide text-gray-500">
+                    Type: {{ selectedFeedback.feedback_type === 'thumbs_up' ? '👍 Positive' : (selectedFeedback.feedback_type === 'thumbs_down' ? '👎 Negative' : '💬 Comment') }}
+                  </span>
+              </div>
               <p class="text-secondary-800 whitespace-pre-wrap">
                 {{ selectedFeedback.user_message }}
               </p>
@@ -692,6 +713,7 @@ onMounted(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

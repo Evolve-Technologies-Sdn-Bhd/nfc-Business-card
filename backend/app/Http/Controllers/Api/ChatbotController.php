@@ -36,12 +36,15 @@ class ChatbotController extends Controller
         \Log::info('Request Input Keys', array_keys($request->all()));
 
         $validator = Validator::make($request->all(), [
-            'category' => 'required|string|in:bug,feature,question,complaint,suggestion,other',
+            'category' => 'required|string',
             'message' => 'required|string|max:1000',
             'user_name' => 'nullable|string|max:255',
             'user_email' => 'nullable|email|max:255',
             'rating' => 'nullable|integer|min:1|max:5',
             'question_id' => 'nullable|exists:chatbot_questions,id',
+            'feedback_type' => 'nullable|string',
+            'bot_response' => 'nullable|string',
+            'user_question' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -60,21 +63,22 @@ class ChatbotController extends Controller
 
         try {
             \Log::info('Validation passed, creating feedback');
-            
+
             // Use the message field from frontend
             $feedbackMessage = $request->input('message');
-            
+
             $feedback = ChatbotFeedback::create([
                 'question_id' => $request->question_id,
-                'user_question' => 'User Feedback Submission',
+                'user_question' => $request->input('user_question') ?? 'User Feedback Submission',
                 'user_message' => $feedbackMessage,
                 'user_name' => $request->user_name,
                 'user_email' => $request->user_email,
                 'rating' => $request->rating,
-                'feedback_type' => 'general',
+                'feedback_type' => $request->input('feedback_type') ?? 'general',
                 'category' => $request->category ?? 'other',
                 'status' => 'pending',
                 'ip_address' => $request->ip(),
+                'bot_response' => $request->input('bot_response'),
             ]);
 
             \Log::info('=== FEEDBACK CREATED SUCCESSFULLY ===', [

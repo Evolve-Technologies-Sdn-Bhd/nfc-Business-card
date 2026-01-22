@@ -27,6 +27,7 @@ class ChatbotFeedback extends Model
         'resolved_at',
         'is_read',
         'ip_address',
+        'bot_response',
     ];
 
     protected $casts = [
@@ -77,15 +78,15 @@ class ChatbotFeedback extends Model
     /**
      * Update status
      */
-    public function updateStatus(string $status, int $userId = null): void
+    public function updateStatus(string $status, ?int $userId = null): void
     {
         $data = ['status' => $status];
-        
+
         if ($status === 'resolved' && $userId) {
             $data['resolved_by'] = $userId;
             $data['resolved_at'] = now();
         }
-        
+
         $this->update($data);
     }
 

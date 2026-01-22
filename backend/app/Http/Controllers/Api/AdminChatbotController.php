@@ -51,11 +51,11 @@ class AdminChatbotController extends Controller
             // Search by user name, email, or message
             if ($request->has('search') && $request->search) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('user_name', 'like', "%{$search}%")
-                      ->orWhere('user_email', 'like', "%{$search}%")
-                      ->orWhere('user_message', 'like', "%{$search}%")
-                      ->orWhere('user_question', 'like', "%{$search}%");
+                        ->orWhere('user_email', 'like', "%{$search}%")
+                        ->orWhere('user_message', 'like', "%{$search}%")
+                        ->orWhere('user_question', 'like', "%{$search}%");
                 });
             }
 
@@ -77,6 +77,7 @@ class AdminChatbotController extends Controller
                         'feedback_type' => $item->feedback_type,
                         'status' => $item->status ?? 'pending',
                         'category' => $item->category,
+                        'bot_response' => $item->bot_response,
                         'admin_notes' => $item->admin_notes,
                         'resolved_by' => $item->resolved_by,
                         'resolver_name' => $item->resolver ? $item->resolver->name : null,
@@ -177,7 +178,7 @@ class AdminChatbotController extends Controller
 
         try {
             $feedback = ChatbotFeedback::findOrFail($id);
-            
+
             $updateData = [
                 'status' => $request->status,
                 'is_read' => true
@@ -241,7 +242,7 @@ class AdminChatbotController extends Controller
             $totalFeedback = ChatbotFeedback::count();
             $unreadFeedback = ChatbotFeedback::where('is_read', false)->count();
             $pendingFeedback = ChatbotFeedback::where('status', 'pending')->count();
-            
+
             $categoryBreakdown = ChatbotFeedback::selectRaw('category, COUNT(*) as count')
                 ->groupBy('category')
                 ->pluck('count', 'category')
