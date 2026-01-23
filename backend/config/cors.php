@@ -19,25 +19,44 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:3001',
-        'http://127.0.0.1:3002',
-        'http://172.19.1.57:3000',
-        'http://172.19.1.57:3001',
-        'http://172.19.1.57:3002',
-        'http://10.124.187.100:3000',
-        'http://10.124.187.100:3001',
-        'http://10.124.187.100:3002',
-    ],
+    /*
+    |--------------------------------------------------------------------------
+    | Allowed Origins
+    |--------------------------------------------------------------------------
+    |
+    | In production, set FRONTEND_URL in your .env file to your production
+    | domain (e.g., https://yourdomain.com). The development origins below
+    | are only used when APP_ENV is 'local' or 'development'.
+    |
+    */
 
-    'allowed_origins_patterns' => [
-        '/^http:\/\/(localhost|127\.0\.0\.1|172\.19\.1\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d{4}$/',
-    ],
+    'allowed_origins' => array_filter(array_merge(
+        // Always include the FRONTEND_URL from environment
+        [env('FRONTEND_URL', 'http://localhost:3000')],
+
+        // Development-only origins (only included when not in production)
+        env('APP_ENV') === 'production' ? [] : [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:3002',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:3001',
+            'http://127.0.0.1:3002',
+            'http://172.19.1.57:3000',
+            'http://172.19.1.57:3001',
+            'http://172.19.1.57:3002',
+            'http://10.124.187.100:3000',
+            'http://10.124.187.100:3001',
+            'http://10.124.187.100:3002',
+        ]
+    )),
+
+    'allowed_origins_patterns' => env('APP_ENV') === 'production'
+        ? []
+        : [
+            // Allow any local network IP during development
+            '/^http:\/\/(localhost|127\.0\.0\.1|172\.\d{1,3}\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d{4}$/',
+        ],
 
     'allowed_headers' => ['*'],
 

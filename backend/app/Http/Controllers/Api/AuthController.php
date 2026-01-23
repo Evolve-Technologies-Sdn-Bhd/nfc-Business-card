@@ -29,11 +29,18 @@ class AuthController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/', // Require uppercase, lowercase, number, special char
+            ],
             'company' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
         ], [
             'email.unique' => 'This email is already registered. Please login or use a different email.',
+            'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).',
         ]);
 
         if ($validator->fails()) {
@@ -76,7 +83,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             \Log::error('Registration error: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Registration failed. Please try again.',
@@ -138,7 +145,7 @@ class AuthController extends Controller
         // Check if this is a new device/location (simplified check)
         $lastLoginDevice = $user->last_login_device ?? '';
         $currentDevice = $request->userAgent();
-        
+
         if ($lastLoginDevice && $lastLoginDevice !== $currentDevice) {
             // Send new device login notification
             $this->notificationService->create($user, 'login_new_device', [
@@ -147,7 +154,7 @@ class AuthController extends Controller
                 'time' => now()->format('Y-m-d H:i:s'),
             ]);
         }
-        
+
         // Update last login device
         $user->update(['last_login_device' => $currentDevice]);
 
@@ -175,7 +182,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        
+
         // Log logout activity before deleting token
         ActivityLog::logActivity(
             $user,
@@ -189,7 +196,7 @@ class AuthController extends Controller
                 ]
             ]
         );
-        
+
         $user->currentAccessToken()->delete();
 
         // Revoke remember me token if present
@@ -201,7 +208,7 @@ class AuthController extends Controller
         if ($request->hasCookie('remember_token')) {
             $rememberToken = $request->cookie('remember_token');
             RememberToken::revokeToken(RememberToken::hashToken($rememberToken));
-            
+
             // Clear the cookie
             $response->withCookie(Cookie::forget('remember_token'));
         }
@@ -225,7 +232,7 @@ class AuthController extends Controller
         if ($user->is_new_user === true && $user->subscription_active === true) {
             try {
                 $user->update(['is_new_user' => false]);
-                
+
                 \Log::info('Auto-completed onboarding for paid user (profile fetch fallback)', [
                     'user_id' => $user->id,
                     'email' => $user->email,
@@ -272,7 +279,7 @@ class AuthController extends Controller
     public function completeOnboarding(Request $request)
     {
         $user = $request->user();
-        
+
         $user->update(['is_new_user' => false]);
 
         return response()->json([
@@ -448,7 +455,7 @@ class AuthController extends Controller
 
         // Generate a secure linking token that will be used to verify this is a link operation
         $linkToken = Str::random(64);
-        
+
         // Store the link token in cache for 10 minutes
         // The token is tied to the user ID and provider
         \Cache::put(

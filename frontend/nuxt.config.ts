@@ -85,7 +85,7 @@ export default defineNuxtConfig({
   // Development configuration
   devServer: {
     host: "0.0.0.0", // Bind to all network interfaces (accessible from localhost and LAN/mobile)
-    port: 3000,
+    port: 3001,
   },
 
   vite: {
@@ -94,6 +94,14 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["vue", "vue-router"],
+    },
+    server: {
+      hmr: {
+        // Use 'ws' by default, but allow overriding for HTTPS tunneling
+        protocol: process.env.NUXT_PUBLIC_APP_URL?.startsWith('https') ? 'wss' : 'ws',
+      },
+      // Allow all hosts (useful for tunneling/LAN access)
+      allowedHosts: true,
     },
   },
 

@@ -3,14 +3,16 @@
 namespace App\Imports;
 
 use Maatwebsite\Excel\Concerns\ToArray;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class EmployeeImport implements ToArray, WithHeadingRow
+class EmployeeImport implements ToArray
 {
     /**
+     * Convert the spreadsheet to an array
+     * 
      * @param array $array
+     * @return array
      */
-    public function array(array $array)
+    public function array(array $array): array
     {
         return $array;
     }

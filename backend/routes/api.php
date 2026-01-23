@@ -60,9 +60,9 @@ Route::get('/test', function () {
 });
 Route::post('/magick/replace-text', [\App\Http\Controllers\MagickController::class, 'replace']);
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Public routes (with rate limiting to prevent abuse)
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1'); // 10 per minute
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1'); // 10 per minute
 
 // Public profile viewing (using landing pages)
 Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);

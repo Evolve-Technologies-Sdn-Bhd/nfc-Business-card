@@ -1,439 +1,302 @@
-# NFC Business Card - Digital Business Card Platform
+# NFC Business Card Platform - Comprehensive Documentation
 
-A modern, full-stack digital business card platform that allows users to create, customize, and share their professional profiles with NFC technology integration.
+**Welcome to the NFC Business Card Platform!**
 
-## 🚀 Features
+This document describes the entire system in detail. We have written it to be useful for **Developers** (Technical) and **Project Managers/Stakeholders** (Non-Technical).
 
-### Core Features
+---
 
-- **Digital Business Cards**: Create and customize professional profiles
-- **NFC Integration**: Tap NFC cards to instantly share contact information
-- **Social Media Links**: Add and organize social media profiles
-- **Analytics Dashboard**: Track profile views, NFC taps, and link clicks
-- **Responsive Design**: Mobile-first approach for all devices
-- **Custom Themes**: Multiple design themes and customization options
-- **AI Chatbot Widget**: Instant FAQ answers with smart keyword matching and feedback system
+## 📋 Table of Contents
 
-### User Tiers
+1.  [Overview](#1-overview)
+2.  [Key Features](#2-key-features)
+3.  [Architecture & Technology](#3-architecture--technology)
+4.  [Complete Project Structure](#4-complete-project-structure)
+5.  [Installation & Setup Guide](#5-installation--setup-guide)
+    - [Prerequisites](#prerequisites)
+    - [Backend Setup](#step-1-backend-setup)
+    - [Frontend Setup](#step-2-frontend-setup)
+    - [Starting Servers](#step-3-start-development-servers)
+6.  [Source Code Flows](#6-source-code-flows)
+7.  [API Documentation](#7-api-documentation)
+8.  [Important Notes](#8-important-notes)
+9.  [Testing Accounts](#9-testing-accounts)
+10. [Additional Documentation](#10-additional-documentation)
 
-- **Free Tier**: Basic profile creation and social links
-- **Pro Tier**: Advanced analytics, NFC card management, custom domains
-- **Enterprise Tier**: Team management, advanced features, priority support
+---
 
-### Admin Features
+## 1. Overview
 
-- **User Management**: View, create, edit, and delete users
-- **NFC Card Management**: Register and track physical NFC cards
-- **System Analytics**: Comprehensive system statistics and monitoring
-- **Content Moderation**: Manage user content and profiles
-- **Chatbot Management**: Create FAQ questions, manage knowledge base, review user feedback
+The **NFC Business Card Platform** is a digital solution that replaces traditional paper business cards with smart, digital profiles.
 
-## 🛠 Tech Stack
+**How it works:**
 
-### Backend
+1.  **Create**: A user signs up and builds a beautiful digital profile.
+2.  **Connect**: They purchase a physical NFC card.
+3.  **Share**: Tapping the card on a phone opens the digital profile instantly.
+
+---
+
+## 2. Key Features
+
+### 👤 For Users
+
+- **Digital Profile Builder**: Drag-and-drop editor to customize the look and feel.
+- **NFC Card Integration**: Link physical cards to digital profiles.
+- **Analytics**: Track profile views and card taps.
+
+### 🏢 For Business Accounts
+
+- **Employee Management**: Bulk create employee accounts via CSV.
+- **Brand Control**: Enforce corporate branding on employee cards.
+- **Unified Billing**: Centralized payment for all subscriptions.
+
+### ⚙️ For Administrators
+
+- **Dashboard**: System-wide analytics (users, revenue).
+- **Card Inventory**: Manage physical card encoding and shipping.
+- **Chatbot Management**: Train the AI support assistant.
+
+---
+
+## 3. Architecture & Technology
+
+### 🎨 Frontend (The Face)
+
+- **Framework**: Nuxt.js 3 (Vue 3)
+- **Styling**: Tailwind CSS
+- **State**: Pinia
+
+### 🧠 Backend (The Brain)
 
 - **Framework**: Laravel 11 (PHP 8.2+)
-- **Database**: MySQL/PostgreSQL/SQLite
-- **Authentication**: Laravel Sanctum
-- **File Storage**: Laravel Storage with local/cloud support
-- **API**: RESTful API with JSON responses
-- **Testing**: PHPUnit with Pest support
+- **Auth**: Laravel Sanctum
+- **Database**: MySQL 8.0+
 
-### Frontend
+---
 
-- **Framework**: Nuxt.js 3 (Vue.js 3)
-- **Styling**: Tailwind CSS
-- **State Management**: Pinia stores
-- **Authentication**: JWT tokens with Sanctum
-- **UI Components**: Custom Vue components
-- **Responsive**: Mobile-first design
+## 4. Complete Project Structure
 
-### Infrastructure
+This section provides a detailed walk-through of the codebase.
 
-- **Web Server**: Apache/Nginx
-- **Database**: MySQL 8.0+ / PostgreSQL 13+
-- **Cache**: Redis (optional)
-- **Queue**: Laravel Queue with database driver
-- **Storage**: Local storage with cloud migration support
+### 📁 Frontend Structure (`frontend/`)
 
-## 📋 Prerequisites
-
-- PHP 8.2 or higher
-- Composer 2.0+
-- Node.js 18+ and npm
-- MySQL 8.0+ or PostgreSQL 13+
-- Web server (Apache/Nginx)
-
-## 🚀 Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd nfc-business-card
+```
+frontend/
+├── assets/                  # CSS files, images, and fonts
+├── components/              # Reusable UI building blocks
+│   ├── ChatbotWidget.vue    # Floating AI help button
+│   ├── Payment.vue          # Checkout form for buying cards
+│   ├── ProfileBuilder.vue   # The drag-and-drop profile editor
+│   └── ...
+├── composables/             # Shared logic functions (Hooks)
+│   ├── usePayment.js        # Handles Fiuu payment logic & fee calc
+│   ├── useProfileData.js    # Manages state of the profile being edited
+│   └── useAuth.js           # Handles login/logout state
+├── layouts/                 # Page templates
+│   ├── default.vue          # Standard layout with navbar/footer
+│   └── auth.vue             # Clean layout for login pages
+├── middleware/              # Route protection rules
+│   ├── auth.js              # Redirects to login if not authenticated
+│   └── admin.js             # Redirects if user is not an Admin
+├── pages/                   # Application Screens (Routes)
+│   ├── index.vue            # Homepage (Landing)
+│   ├── login.vue            # Login Screen
+│   ├── register.vue         # Registration Screen
+│   ├── UserDashboard/       # User Area
+│   │   ├── index.vue        # Main Dashboard
+│   │   ├── Settings.vue     # Account Settings
+│   │   └── ...
+│   └── AdminManagement/     # Admin Area
+│       ├── users.vue        # User List
+│       ├── nfc-cards.vue    # Card Inventory
+│       └── ...
+├── stores/                  # Pinia State Management
+│   └── auth.js              # Stores user token & profile data
+└── nuxt.config.ts           # Main Nuxt Framework Configuration
 ```
 
-### 2. Backend Setup
+### 📁 Backend Structure (`backend/`)
+
+```
+backend/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/Api/ # Request Handlers
+│   │   │   ├── AuthController.php       # Login, Register, Password Reset
+│   │   │   ├── NfcCardController.php    # Card Activation, Taps
+│   │   │   ├── PaymentController.php    # Payment Processing
+│   │   │   ├── ProfileController.php    # Saving Profile Changes
+│   │   │   ├── AdminController.php      # Admin Stats & Management
+│   │   │   └── ...
+│   │   └── Middleware/      # Request Filters
+│   │       └── AdminMiddleware.php      # Checks if user is Admin
+│   ├── Models/              # Database Objects
+│   │   ├── User.php         # Represents a User
+│   │   ├── NfcCard.php      # Represents a Physical Card
+│   │   ├── LandingPage.php  # Represents a Digital Profile
+│   │   └── Transaction.php  # Represents a Payment
+│   └── Services/            # Business Logic
+│       ├── PaymentService.php       # Fiuu Calculation & Verification
+│       └── NotificationService.php  # Email Sending Logic
+├── config/                  # Configuration Files
+│   ├── database.php         # DB Connection Settings
+│   └── payment.php          # Payment Gateway Settings
+├── database/
+│   ├── migrations/          # Schema Definitions (Create Tables)
+│   ├── seeders/             # Test Data Generators
+│   └── factories/           # Model Factories
+└── routes/
+    └── api.php              # API Endpoint Definitions
+```
+
+---
+
+## 5. Installation & Setup Guide
+
+### Prerequisites
+
+- **Node.js** v18+ (for Frontend)
+- **PHP** v8.2+ (for Backend)
+- **Composer** v2+ (PHP Dependency Manager)
+- **MySQL** Database Server
+
+### Step 1: Backend Setup
+
+1.  **Navigate**: Open terminal in `backend/`.
+2.  **Dependencies**: Run `composer install`.
+3.  **Environment**:
+    - Copy file: `cp .env.example .env`
+    - Update `.env`:
+      ```env
+      DB_DATABASE=nfc_business_card
+      DB_USERNAME=root
+      DB_PASSWORD=your_password
+      APP_URL=http://localhost:8000
+      FRONTEND_URL=http://localhost:3000
+      ```
+4.  **Database Initialization**:
+    ```bash
+    php artisan key:generate       # Generate encryption key
+    php artisan migrate            # Create tables
+    php artisan db:seed            # Insert test data (Admin/Users)
+    php artisan storage:link       # Enable public image access
+    ```
+
+### Step 2: Frontend Setup
+
+1.  **Navigate**: Open new terminal in `frontend/`.
+2.  **Dependencies**: Run `npm install`.
+3.  **Environment**:
+    - Copy file: `cp .env.example .env`
+    - Update `.env`:
+      ```env
+      NUXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+      ```
+
+### Step 3: Start Development Servers
+
+You must run **two** terminals simultaneously.
+
+**Terminal 1 (Backend):**
 
 ```bash
 cd backend
-composer install
-cp .env.example .env
+php artisan serve --host 0.0.0.0 --port 8000
 ```
 
-Configure your `.env` file:
+> Server will start at `http://localhost:8000`
 
-```env
-APP_NAME="NFC Business Card"
-APP_ENV=local
-APP_KEY=base64:your-key-here
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nfc_business_card
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-
-FRONTEND_URL=http://localhost:3000
-```
-
-### 3. Database Setup
+**Terminal 2 (Frontend):**
 
 ```bash
-php artisan migrate
-php artisan db:seed
-```
-
-### 4. Storage Setup
-
-```bash
-php artisan storage:link
-```
-
-### 5. Frontend Setup
-
-```bash
-cd ../frontend
-npm install
-```
-
-### 6. Start Development Servers
-
-```bash
-# Backend (Terminal 1)
-cd backend
-php artisan serve
-
-# Frontend (Terminal 2)
 cd frontend
 npm run dev
 ```
 
-## 🧪 Testing Accounts
+> Server will start at `http://localhost:3000`
 
-After running the seeders, you'll have these test accounts:
+---
 
-### Admin Accounts
+## 6. Source Code Flows
 
-- **Super Admin**: `admin@nfcgo.com` / `admin123`
+### Registration Flow
 
-  - Full system access
-  - User management
-  - NFC card management
-  - System analytics
+1.  **User** submits form on `/register`.
+2.  **Frontend** sends POST to `/api/register`.
+3.  **Backend** creates User record and generates Sanctum Token.
+4.  **Frontend** saves Token and redirects to Dashboard.
 
-- **Regular Admin**: `admin2@nfcgo.com` / `admin123`
-  - Limited admin access
-  - User management
-  - NFC card management
+### Payment Flow (Fiuu)
 
-### User Accounts
+1.  **User** initiates payment in Dashboard.
+2.  **Backend** (`PaymentService`) generates secure `vcode` and returns Fiuu URL.
+3.  **User** completes payment on Fiuu Gateway.
+4.  **Fiuu** sends Webhook to Backend (`/api/webhooks/fiuu`).
+5.  **Backend** verifies signature and marks Order as "Paid".
 
-- **Free Tier User**: `john@example.com` / `password`
+---
 
-  - Basic profile features
-  - Social media links
-  - Basic analytics
+## 7. API Documentation
 
-- **Pro Tier User**: `test@example.com` / `password`
-  - All free features
-  - Advanced analytics
-  - NFC card management
-  - Custom themes
+| Endpoint            | Method | Description            |
+| :------------------ | :----- | :--------------------- |
+| `/api/login`        | POST   | Authenticate user      |
+| `/api/register`     | POST   | Create new account     |
+| `/api/nfc-cards`    | GET    | List user's cards      |
+| `/api/user/profile` | PUT    | Update profile details |
 
-## 🔧 Configuration
+---
 
-### Environment Variables
+## 8. Important Notes
 
-#### Production Settings
+### 🔒 Security Considerations
 
-```env
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://yourdomain.com
+- **Change Defaults**: Immediately change the default Admin password (`admin123`) and User passwords after deployment.
+- **HTTPS**: Ensure HTTPS is enabled in production to protect payment data and auth tokens.
+- **Permissions**: Files in `storage/` must be writable, but code directories should be read-only in production.
 
-DB_CONNECTION=mysql
-DB_HOST=your-db-host
-DB_DATABASE=your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+### 🚀 Performance
 
-CACHE_DRIVER=redis
-QUEUE_CONNECTION=redis
-SESSION_DRIVER=redis
+- **Caching**: In production, set `CACHE_DRIVER=redis` in `.env` for faster response times.
+- **Optimization**: Run `php artisan config:cache` and `php artisan route:cache` when deploying to production.
+- **Images**: Configure Cloudinary to offload image hosting from your main server.
 
-MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
-MAIL_PORT=587
-MAIL_USERNAME=your-email
-MAIL_PASSWORD=your-password
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@yourdomain.com
-```
+### 🛠 Maintenance
 
-#### Alpha/Beta Testing Settings
+- **Backups**: Regularly backup your MySQL database.
+- **Logs**: Check `backend/storage/logs/laravel.log` if errors occur.
+- **Updates**: Run `composer update` and `npm update` periodically to patch security vulnerabilities.
 
-```env
-APP_ENV=staging
-APP_DEBUG=true
-APP_URL=https://staging.yourdomain.com
+---
 
-# Use separate database for testing
-DB_DATABASE=nfc_business_card_staging
+## 9. Testing Accounts
 
-# Enable detailed logging
-LOG_LEVEL=debug
-LOG_CHANNELS=daily,stack
-```
+Use these credentials to log in immediately:
 
-## 🚀 Deployment
+| Role            | Email              | Password   |
+| :-------------- | :----------------- | :--------- |
+| **Super Admin** | `admin@nfcgo.com`  | `admin123` |
+| **Free User**   | `john@example.com` | `password` |
+| **Pro User**    | `test@example.com` | `password` |
 
-### Alpha Testing Deployment
+---
 
-1. **Server Setup**
+## 10. Additional Documentation
 
-   ```bash
-   # Update system
-   sudo apt update && sudo apt upgrade -y
+For deeper technical details, please refer to the documents in the `docs/` folder:
 
-   # Install required packages
-   sudo apt install nginx mysql-server php8.2-fpm php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl composer
-   ```
+- [**Database Schema**](docs/database/DATABASE_SCHEMA.md): Complete breakdown of tables, columns, and relationships.
 
-2. **Database Setup**
+### 🔌 Integrations
 
-   ```bash
-   sudo mysql_secure_installation
-   mysql -u root -p
-   CREATE DATABASE nfc_business_card_alpha;
-   CREATE USER 'nfc_user'@'localhost' IDENTIFIED BY 'secure_password';
-   GRANT ALL PRIVILEGES ON nfc_business_card_alpha.* TO 'nfc_user'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
+**Fiuu (Payment Gateway)**
 
-3. **Application Deployment**
+- [**Integration Guide**](docs/integrations/fiuu/README.md): Detailed setup and configuration.
+- [**Verification Checklist**](docs/integrations/fiuu/VERIFICATION.md): Testing steps for go-live.
 
-   ```bash
-   cd /var/www
-   sudo git clone <repository-url> nfc-business-card
-   sudo chown -R www-data:www-data nfc-business-card
-   cd nfc-business-card/backend
+**OAuth (Social Login)**
 
-   composer install --optimize-autoloader --no-dev
-   cp .env.example .env
-   # Configure .env for alpha environment
+- [**OAuth Guide**](docs/integrations/oauth/README.md): Google & Apple login configuration and flow.
 
-   php artisan key:generate
-   php artisan migrate --force
-   php artisan storage:link
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-   ```
-
-4. **Nginx Configuration**
-
-   ```nginx
-   server {
-       listen 80;
-       server_name alpha.yourdomain.com;
-       root /var/www/nfc-business-card/backend/public;
-
-       add_header X-Frame-Options "SAMEORIGIN";
-       add_header X-Content-Type-Options "nosniff";
-
-       index index.php;
-
-       charset utf-8;
-
-       location / {
-           try_files $uri $uri/ /index.php?$query_string;
-       }
-
-       location = /favicon.ico { access_log off; log_not_found off; }
-       location = /robots.txt  { access_log off; log_not_found off; }
-
-       error_page 404 /index.php;
-
-       location ~ \.php$ {
-           fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
-           fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-           include fastcgi_params;
-       }
-
-       location ~ /\.(?!well-known).* {
-           deny all;
-       }
-   }
-   ```
-
-### Beta Testing Deployment
-
-1. **Production-like Environment**
-
-   - Use production database
-   - Enable caching and optimization
-   - Set up monitoring and logging
-   - Configure SSL certificates
-
-2. **Load Testing**
-
-   ```bash
-   # Install Apache Bench
-   sudo apt install apache2-utils
-
-   # Test API endpoints
-   ab -n 1000 -c 10 https://beta.yourdomain.com/api/test
-   ```
-
-3. **Monitoring Setup**
-   - Set up Laravel Telescope for debugging
-   - Configure error tracking (Sentry, Bugsnag)
-   - Set up uptime monitoring
-
-### Production Deployment
-
-1. **Security Hardening**
-
-   ```bash
-   # Disable debug mode
-   APP_DEBUG=false
-
-   # Enable HTTPS only
-   FORCE_HTTPS=true
-
-   # Set secure headers
-   SECURE_HEADERS=true
-   ```
-
-2. **Performance Optimization**
-
-   ```bash
-   # Enable all caches
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-
-   # Optimize autoloader
-   composer install --optimize-autoloader --no-dev
-
-   # Set up queue workers
-   php artisan queue:work --daemon
-   ```
-
-3. **Backup Strategy**
-
-   ```bash
-   # Database backup
-   mysqldump -u username -p database_name > backup.sql
-
-   # File backup
-   tar -czf storage_backup.tar.gz storage/
-   ```
-
-## 🔍 Testing
-
-### Backend Testing
-
-```bash
-cd backend
-php artisan test
-```
-
-### Frontend Testing
-
-```bash
-cd frontend
-npm run test
-```
-
-### API Testing
-
-```bash
-# Test endpoints
-curl http://localhost:8000/api/test
-curl -X POST http://localhost:8000/api/login -H "Content-Type: application/json" -d '{"email":"test@example.com","password":"password"}'
-```
-
-## 📁 Project Structure
-
-```
-nfc-business-card/
-├── backend/                 # Laravel API
-│   ├── app/
-│   │   ├── Http/Controllers/Api/  # API Controllers
-│   │   ├── Models/                # Eloquent Models
-│   │   ├── Services/              # Business Logic
-│   │   └── Middleware/            # Custom Middleware
-│   ├── database/
-│   │   ├── migrations/            # Database Schema
-│   │   └── seeders/               # Test Data
-│   ├── routes/api.php             # API Routes
-│   └── config/                    # Configuration Files
-├── frontend/               # Nuxt.js Application
-│   ├── pages/              # Application Pages
-│   ├── components/         # Vue Components
-│   ├── stores/             # Pinia Stores
-│   ├── middleware/         # Route Middleware
-│   └── composables/        # Composables
-└── README.md               # This file
-```
-
-## 🚨 Important Notes
-
-### Security Considerations
-
-- **CHANGE DEFAULT PASSWORDS** before production deployment
-- Enable HTTPS in production
-- Set up proper firewall rules
-- Regular security updates
-- Database access restrictions
-
-### Performance Considerations
-
-- Enable Redis for caching in production
-- Set up database indexing
-- Configure CDN for static assets
-- Monitor database query performance
-
-### Maintenance
-
-- Regular database backups
-- Monitor error logs
-- Update dependencies regularly
-- Performance monitoring
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
+_**End of Documentation**_
