@@ -189,6 +189,12 @@
         </div>
       </div>
     </div>
+    
+    <!-- Feedback Modal (renders OUTSIDE chatbot via its own Teleport) -->
+    <FeedbackModal
+      v-model:show="showFeedbackPanel"
+      :context-data="feedbackContext"
+    />
   </Teleport>
 </template>
 
@@ -281,14 +287,15 @@ const sendMessage = async () => {
   scrollToBottom();
 
   try {
-    // Call n8n webhook directly
+    // Call n8n webhook directly with correct payload format
     const response = await $fetch(
       "https://n8n.jiosgroup.com/webhook/e529b3a4-d09d-45d6-8de5-01cc6885bcb7/chat",
       {
         method: "POST",
         body: {
-          question,
-          chatId: Date.now(), // Simple session identifier
+          action: "sendMessage",
+          sessionId: `session-${Date.now()}`, // Session identifier
+          chatInput: question,
         },
       },
     );
@@ -296,8 +303,8 @@ const sendMessage = async () => {
     // Simulate typing delay
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    // Handle n8n response
-    const answer = response.answer || response.message || response.data?.answer;
+    // Handle n8n response - n8n returns { output: "..." }
+    const answer = response.output || response.answer || response.message || response.data?.answer;
 
     if (answer) {
       // Add bot response
@@ -372,10 +379,6 @@ const closeFeedbackForm = () => {
   showFeedbackForm.value = false;
   feedbackData.value = { name: "", email: "", message: "" };
 };
-
-// Submit feedback for thumbs up/down
-// Active message for feedback context
-const activeFeedbackMessage = ref(null);
 
 // Handle Inline Feedback (Yes/No)
 const handleInlineFeedback = async (message, type, index) => {

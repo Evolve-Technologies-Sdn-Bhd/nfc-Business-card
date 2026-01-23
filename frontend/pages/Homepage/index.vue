@@ -170,6 +170,66 @@
       </div>
     </Transition>
 
+    <!-- Business Plan Pending Alert (shown when blocked from login/register) -->
+    <Transition
+      enter-active-class="transition-all duration-500 ease-out"
+      enter-from-class="opacity-0 -translate-y-full"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-full"
+    >
+      <div
+        v-if="showBusinessPlanPending"
+        class="fixed top-20 left-0 right-0 z-40 px-4"
+      >
+        <div class="max-w-3xl mx-auto">
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Icon name="heroicons:clock" class="h-7 w-7 text-amber-600" />
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-amber-800 mb-1">
+                  Business Plan - Account Pending
+                </h3>
+                <p class="text-amber-700 mb-3">
+                  Your Business plan request has been submitted. Our team will create your account and contact you within 24 hours.
+                  <strong>You cannot login or register</strong> until your account is created by our admin team.
+                </p>
+                <div v-if="businessPlanEmail" class="flex items-center gap-2 text-sm text-amber-600 mb-3">
+                  <Icon name="heroicons:envelope" class="h-4 w-4" />
+                  <span>We'll contact you at: {{ businessPlanEmail }}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <button
+                    @click="showBusinessPlanPending = false"
+                    class="text-sm text-amber-600 hover:text-amber-800 font-medium"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    @click="clearBusinessPlanRestriction"
+                    class="text-sm text-amber-700 hover:text-amber-900 underline"
+                  >
+                    Clear & Login Anyway
+                  </button>
+                </div>
+              </div>
+              <button
+                @click="showBusinessPlanPending = false"
+                class="flex-shrink-0 p-1 text-amber-500 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-colors"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Hero Section -->
     <section class="section relative overflow-hidden pt-24">
       <div class="container">
@@ -2135,7 +2195,22 @@ const feedbackForm = reactive({
 // Business Plan Modal
 const showBusinessModal = ref(false);
 const showBusinessRequestSuccess = ref(false);
+const showBusinessPlanPending = ref(false); // Shown when business plan user is blocked from login/register
+const businessPlanEmail = ref(''); // Email of the business plan requester
 const submittingBusinessRequest = ref(false);
+
+// Clear business plan restriction and allow login
+const clearBusinessPlanRestriction = () => {
+  if (process.client) {
+    localStorage.removeItem('businessPlanRequested');
+    localStorage.removeItem('businessPlanEmail');
+    localStorage.removeItem('businessPlanCompany');
+    localStorage.removeItem('businessPlanTimestamp');
+  }
+  showBusinessPlanPending.value = false;
+  // Navigate to login
+  navigateTo('/UserAccount/login');
+};
 
 // Legal Document Modal (Privacy Policy / Terms of Service)
 const showLegalModal = ref(false);
@@ -2777,6 +2852,20 @@ onMounted(() => {
     setTimeout(() => {
       dismissBusinessRequestSuccess();
     }, 15000);
+  }
+  
+  // Check if business plan user was redirected from login/register
+  if (route.query.businessPlanPending === 'true') {
+    showBusinessPlanPending.value = true;
+    // Get the email from localStorage if available
+    businessPlanEmail.value = localStorage.getItem('businessPlanEmail') || '';
+  }
+  
+  // Also check localStorage for business plan pending status
+  const businessPlanRequested = localStorage.getItem('businessPlanRequested');
+  if (businessPlanRequested === 'true') {
+    showBusinessPlanPending.value = true;
+    businessPlanEmail.value = localStorage.getItem('businessPlanEmail') || '';
   }
 
   const authStore = useAuthStore();

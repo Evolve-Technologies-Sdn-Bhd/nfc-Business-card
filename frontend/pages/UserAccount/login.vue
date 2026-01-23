@@ -255,6 +255,11 @@
 </template>
 
 <script setup>
+// Apply middleware to block business plan requesters
+definePageMeta({
+  middleware: ['business-plan-guard']
+})
+
 // Meta tags
 useHead({
   title: "Login - NFCGo",

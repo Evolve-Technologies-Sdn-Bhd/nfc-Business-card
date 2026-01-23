@@ -209,7 +209,7 @@ async function submitFeedback() {
 }
 </script>
 
-<style scoped>
+<style>
 /* Dark overlay that covers entire screen */
 .feedback-modal-overlay {
   position: fixed;

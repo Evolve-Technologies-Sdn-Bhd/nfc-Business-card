@@ -277,12 +277,18 @@ This is an automated request from NFCGo platform.
     setTimeout(() => {
       emit('update:show', false)
       resetForm()
-      // Navigate to Homepage with success parameter if authenticated, otherwise login
-      if (authStore.isAuthenticated) {
-        window.location.href = '/Homepage?businessRequest=success'
-      } else {
-        window.location.href = '/UserAccount/login'
+      
+      // Set localStorage flag to indicate business plan request was submitted
+      // This will block login/register access until admin creates the account
+      if (process.client) {
+        localStorage.setItem('businessPlanRequested', 'true')
+        localStorage.setItem('businessPlanEmail', form.email)
+        localStorage.setItem('businessPlanCompany', form.company_name)
+        localStorage.setItem('businessPlanTimestamp', new Date().toISOString())
       }
+      
+      // Always redirect to Homepage - business plan users will be blocked from login/register
+      window.location.href = '/Homepage?businessRequest=success'
     }, 2000)
   } catch (error) {
     console.error('Business plan request error:', error)
