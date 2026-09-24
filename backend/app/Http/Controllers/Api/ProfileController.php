@@ -222,10 +222,38 @@ class ProfileController extends Controller
                 ]
             );
 
-            // Check if storage link exists
+            // Validate storage configuration
+            $storageReady = true;
+            $storageIssues = [];
+
+            try {
+                $publicDisk = Storage::disk('public');
+                if (!$publicDisk) {
+                    $storageReady = false;
+                    $storageIssues[] = 'Public storage disk is not configured';
+                }
+            } catch (\Exception $e) {
+                $storageReady = false;
+                $storageIssues[] = 'Storage driver error: ' . $e->getMessage();
+            }
+
             if (!file_exists(public_path('storage'))) {
-                Log::error('Storage link does not exist. Run: php artisan storage:link');
-                throw new \Exception('Storage is not properly configured. Please contact support.');
+                Log::warning('Storage symbolic link missing. Images saved but may not be accessible via URL. Run: php artisan storage:link');
+                $storageIssues[] = 'Storage link not created';
+            } else {
+                $targetPath = storage_path('app/public');
+                $publicStoragePath = public_path('storage');
+                if (is_link($publicStoragePath) && readlink($publicStoragePath) !== realpath($targetPath)) {
+                    Log::warning('Storage symlink points to wrong target', [
+                        'link_target' => readlink($publicStoragePath),
+                        'expected' => realpath($targetPath)
+                    ]);
+                }
+            }
+
+            if (!$storageReady) {
+                Log::error('Storage configuration issues', ['issues' => $storageIssues]);
+                throw new \Exception('Storage is not properly configured. Please contact support. Issues: ' . implode(', ', $storageIssues));
             }
 
             // Delete old image if exists
@@ -331,10 +359,38 @@ class ProfileController extends Controller
                 ]
             );
 
-            // Check if storage link exists
+            // Validate storage configuration
+            $storageReady = true;
+            $storageIssues = [];
+
+            try {
+                $publicDisk = Storage::disk('public');
+                if (!$publicDisk) {
+                    $storageReady = false;
+                    $storageIssues[] = 'Public storage disk is not configured';
+                }
+            } catch (\Exception $e) {
+                $storageReady = false;
+                $storageIssues[] = 'Storage driver error: ' . $e->getMessage();
+            }
+
             if (!file_exists(public_path('storage'))) {
-                Log::error('Storage link does not exist. Run: php artisan storage:link');
-                throw new \Exception('Storage is not properly configured. Please contact support.');
+                Log::warning('Storage symbolic link missing. Images saved but may not be accessible via URL. Run: php artisan storage:link');
+                $storageIssues[] = 'Storage link not created';
+            } else {
+                $targetPath = storage_path('app/public');
+                $publicStoragePath = public_path('storage');
+                if (is_link($publicStoragePath) && readlink($publicStoragePath) !== realpath($targetPath)) {
+                    Log::warning('Storage symlink points to wrong target', [
+                        'link_target' => readlink($publicStoragePath),
+                        'expected' => realpath($targetPath)
+                    ]);
+                }
+            }
+
+            if (!$storageReady) {
+                Log::error('Storage configuration issues', ['issues' => $storageIssues]);
+                throw new \Exception('Storage is not properly configured. Please contact support. Issues: ' . implode(', ', $storageIssues));
             }
 
             // Delete old logo if exists
