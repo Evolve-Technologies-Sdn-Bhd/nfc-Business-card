@@ -23,15 +23,21 @@ class LogActivity
             return $response;
         }
 
+        /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        // Only log for Business accounts and their employees
-        if (!$user->isBusinessAccount() && !$user->parent_business_id) {
+        $isAdmin = (bool) $user->is_admin;
+        $isBusiness = (bool) $user->isBusinessAccount();
+        $isBusinessEmployee = (bool) $user->parent_business_id;
+
+        // Skip log for non-business / non-admin / non-employee users
+        if (!$isAdmin && !$isBusiness && !$isBusinessEmployee) {
             return $response;
         }
 
-        // Only log successful responses (2xx)
-        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+        // Only log successful responses (2xx) — skip 204 empty content
+        $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300 || $status === 204) {
             return $response;
         }
 
@@ -44,13 +50,29 @@ class LogActivity
         $method = $request->method();
         $path = $request->path();
         $actionMapping = $this->getActionMapping($method, $path, $request);
+        if (!$actionMapping && $isAdmin) {
+            // Fallback for any admin routes that don't have an explicit mapping
+            // (avoids holes in audit log coverage for Admin pages)
+            $actionMapping = $this->getFallbackAdminMapping($method, $path, $request);
+        }
 
         if ($actionMapping) {
+            $options = $actionMapping['options'] ?? [];
+            $options['metadata'] = array_merge(
+                $options['metadata'] ?? [],
+                [
+                    'route_uri' => $request->route()?->uri(),
+                    'http_method' => $method,
+                    'request_path' => $path,
+                    'response_status' => $status,
+                    'admin_context' => $isAdmin,
+                ]
+            );
             ActivityLog::logActivity(
                 $user,
                 $actionMapping['type'],
                 $actionMapping['description'],
-                $actionMapping['options'] ?? []
+                $options
             );
         }
 
@@ -203,6 +225,115 @@ class LogActivity
         }
 
         return null;
+    }
+
+    /**
+     * Fallback auto-mapper for admin routes.
+     * Uses route name + HTTP method to infer action_type + description
+     * + entity_type / entity_id from URL segments.
+     */
+    private function getFallbackAdminMapping(string $method, string $path, Request $request): ?array
+    {
+        if (!str_starts_with($path, 'api/admin/') && !str_starts_with($path, 'admin/')) {
+            return null;
+        }
+
+        // Strip admin prefix
+        $cleanPath = preg_replace('#^/?api/admin/?#', '', $path);
+        if ($cleanPath === null) {
+            return null;
+        }
+        $segments = explode('/', trim($cleanPath, '/'));
+        if ($segments === []) {
+            return null;
+        }
+
+        $first = $segments[0];
+
+        // Known mutating admin entity routes
+        $mutations = [
+            'POST' => ['verb' => 'Created', 'type_prefix' => 'admin_create'],
+            'PUT'  => ['verb' => 'Updated', 'type_prefix' => 'admin_update'],
+            'PATCH' => ['verb' => 'Updated', 'type_prefix' => 'admin_update'],
+            'DELETE' => ['verb' => 'Deleted', 'type_prefix' => 'admin_delete'],
+        ];
+
+        // Admin dashboards / stat pages are GET-only — no audit
+        if (!isset($mutations[$method]) && !in_array($first, ['notifications', 'payments', 'invoices', 'plan-prices'], true)) {
+            // For POST/PUT/DELETE of other routes, fall through to the mutation handling below.
+            // For GET routes that don't need audit:
+            if ($method === 'GET' || $method === 'HEAD' || $method === 'OPTIONS') {
+                return null;
+            }
+        }
+
+        if (isset($mutations[$method])) {
+            $verb = $mutations[$method]['verb'];
+            $prefix = $mutations[$method]['type_prefix'];
+
+            $entityType = $this->adminSegmentToEntity($first);
+            $entityId = $segments[1] ?? null;
+            if (!ctype_digit((string) $entityId)) {
+                $entityId = null;
+            }
+
+            // Sub-entity action e.g. admin/users/123/reset-password → verb includes sub
+            $subAction = null;
+            if (count($segments) >= 3 && ctype_digit((string) ($segments[1] ?? ''))) {
+                $subAction = implode(' ', array_slice($segments, 2));
+            }
+
+            $action = $verb . ' ' . ucwords(str_replace('_', ' ', $entityType));
+            if ($subAction) {
+                $action .= ' → ' . ucwords(str_replace(['-', '_'], ' ', $subAction));
+            }
+
+            $type = $prefix . '_' . $entityType;
+            if ($subAction) {
+                $type .= '_' . str_replace(['-', ' '], '_', strtolower($subAction));
+            }
+
+            $sensitiveFields = ['password', 'password_confirmation', 'current_password', 'secret', 'two_factor_secret'];
+
+            return [
+                'type' => $type,
+                'description' => $action,
+                'options' => [
+                    'entity_type' => $entityType,
+                    'entity_id' => $entityId,
+                    'new_values' => $method !== 'DELETE' ? $request->except($sensitiveFields) : null,
+                    'metadata' => [
+                        'admin_path' => $cleanPath,
+                        'route_segments' => $segments,
+                    ],
+                ],
+            ];
+        }
+
+        // Admin notification subactions (approve/reject etc.) already have specific POST prefix
+        return null;
+    }
+
+    /**
+     * Convert first admin URL segment → entity_type label for activity logs.
+     */
+    private function adminSegmentToEntity(string $segment): string
+    {
+        return match ($segment) {
+            'users' => 'user',
+            'business-users' => 'business_user',
+            'business_user_assignments' => 'business_user',
+            'nfc-cards' => 'nfc_card',
+            'legal' => 'legal_document',
+            'notifications' => 'admin_notification',
+            'chatbot' => 'chatbot_item',
+            'payments' => 'payment',
+            'manual-transfers' => 'payment',
+            'refunds' => 'refund',
+            'invoices' => 'invoice',
+            'plan-prices' => 'plan_price',
+            default => str_replace(['-', ' '], '_', strtolower($segment)),
+        };
     }
 
     /**

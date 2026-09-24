@@ -1,19 +1,50 @@
 // composables/useTheme.js
-// Global theme switcher composable with 4 themes and localStorage persistence
+// Global theme switcher composable with 5 themes and localStorage persistence
+// Icons use Heroicons name paths (SVG) — EMOJI-FREE per UI guidelines
 
 const THEME_STORAGE_KEY = 'nfcgo-color-theme';
-const DEFAULT_THEME = 'holographicPurple';
+const DEFAULT_THEME = 'zoraPro';
 
 // Theme definitions with complete color palettes
-// NOTE: Secondary colors are kept CONSISTENT across all themes to maintain text readability
-// Only primary colors and accents change between themes
+// NOTE: Secondary colors can change between themes now since we support warm slate vs cool slate
 const themes = {
+  zoraPro: {
+    name: 'Zora Pro',
+    description: 'Matte Deep Navy + Matte Teal. Mature-eyes friendly, premium professional tone.',
+    icon: 'heroicons:squares-2x2',
+    colors: {
+      // Primary — Matte Deep Navy (non-glare, non-neon)
+      primary50: '#F4F6FA',
+      primary100: '#E5E9F1',
+      primary200: '#C9D0DE',
+      primary300: '#9FAAC1',
+      primary400: '#6F7EA0',
+      primary500: '#4F5D82',
+      primary600: '#3D496A',
+      primary700: '#323B56',
+      primary800: '#2A3248',
+      primary900: '#23293B',
+      // Accents — Matte Teal (calm) + Burnished Gold (luxury)
+      accent: '#5D8C87',
+      accentSecondary: '#B8956A',
+      // Secondary — Warm Slate Neutral (matte, not OLED-black)
+      secondary50: '#FAFAF7',
+      secondary100: '#F4F2EC',
+      secondary200: '#E6E2D8',
+      secondary300: '#CDC7B9',
+      secondary400: '#A8A190',
+      secondary500: '#7F7763',
+      secondary600: '#5C5548',
+      secondary700: '#454037',
+      secondary800: '#2E2A24',
+      secondary900: '#1C1A15',
+    }
+  },
   holographicPurple: {
     name: 'Holographic Purple',
-    description: 'Futuristic purple with holographic accents',
-    icon: '✨',
+    description: 'Futuristic purple with holographic accents (original default)',
+    icon: 'heroicons:sparkles',
     colors: {
-      // Primary colors - Purple holographic theme (DEFAULT)
       primary50: '#F5F3FF',
       primary100: '#EDE9FE',
       primary200: '#DDD6FE',
@@ -26,7 +57,6 @@ const themes = {
       primary900: '#4C1D95',
       accent: '#22D3EE',
       accentSecondary: '#FBBF24',
-      // Secondary colors - CONSISTENT for text readability
       secondary50: '#F8FAFC',
       secondary100: '#F1F5F9',
       secondary200: '#E2E8F0',
@@ -40,11 +70,10 @@ const themes = {
     }
   },
   landingPage: {
-    name: 'Landing Page',
-    description: 'Original blue theme for brand consistency',
-    icon: '🏠',
+    name: 'Corporate Blue',
+    description: 'Original blue theme for brand landing consistency',
+    icon: 'heroicons:building-office-2',
     colors: {
-      // Primary colors - Original blue from landing page
       primary50: '#EFF6FF',
       primary100: '#DBEAFE',
       primary200: '#BFDBFE',
@@ -57,7 +86,6 @@ const themes = {
       primary900: '#1E3A8A',
       accent: '#3B82F6',
       accentSecondary: '#10B981',
-      // Secondary colors - CONSISTENT for text readability
       secondary50: '#F8FAFC',
       secondary100: '#F1F5F9',
       secondary200: '#E2E8F0',
@@ -72,10 +100,9 @@ const themes = {
   },
   cyberExecutive: {
     name: 'Cyber-Executive',
-    description: 'Deep space navy with electric cyan accents',
-    icon: '⚡',
+    description: 'Deep space navy with cool electric cyan accents',
+    icon: 'heroicons:bolt',
     colors: {
-      // Primary colors - Cyan/Teal theme
       primary50: '#ECFEFF',
       primary100: '#CFFAFE',
       primary200: '#A5F3FC',
@@ -88,7 +115,6 @@ const themes = {
       primary900: '#164E63',
       accent: '#22D3EE',
       accentSecondary: '#3B82F6',
-      // Secondary colors - CONSISTENT for text readability
       secondary50: '#F8FAFC',
       secondary100: '#F1F5F9',
       secondary200: '#E2E8F0',
@@ -103,10 +129,9 @@ const themes = {
   },
   obsidianGlass: {
     name: 'Obsidian Glass',
-    description: 'Premium dark palette with metallic gold accents',
-    icon: '💎',
+    description: 'Warm dark palette with burnished gold accents',
+    icon: 'heroicons:gem',
     colors: {
-      // Primary colors - Gold/Amber luxury theme
       primary50: '#FFFBEB',
       primary100: '#FEF3C7',
       primary200: '#FDE68A',
@@ -119,7 +144,6 @@ const themes = {
       primary900: '#78350F',
       accent: '#D4AF37',
       accentSecondary: '#C0C0C0',
-      // Secondary colors - CONSISTENT for text readability
       secondary50: '#F8FAFC',
       secondary100: '#F1F5F9',
       secondary200: '#E2E8F0',

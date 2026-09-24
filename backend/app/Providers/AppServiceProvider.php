@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Subscription;
+use App\Observers\SubscriptionObserver;
 use Illuminate\Support\ServiceProvider;
 use App\Services\FileUploadService;
 use GuzzleHttp\Client;
@@ -53,5 +55,8 @@ class AppServiceProvider extends ServiceProvider
                 ],
             ]);
         }
+
+        // Single source of truth: subscriptions table → write-through sync legacy user columns
+        Subscription::observe(SubscriptionObserver::class);
     }
 }

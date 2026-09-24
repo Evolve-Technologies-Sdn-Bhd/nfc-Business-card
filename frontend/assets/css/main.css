@@ -4,30 +4,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme CSS Custom Properties - Default: Holographic Purple */
+/* Theme CSS Custom Properties - Default: Zora Pro (Matte Navy + Matte Teal) */
+/* Accessibility-first: mature-eyes friendly, matte non-neon, warm neutrals */
 :root {
-  --theme-primary-50: #f5f3ff;
-  --theme-primary-100: #ede9fe;
-  --theme-primary-200: #ddd6fe;
-  --theme-primary-300: #c4b5fd;
-  --theme-primary-400: #a78bfa;
-  --theme-primary-500: #8b5cf6;
-  --theme-primary-600: #7c3aed;
-  --theme-primary-700: #6d28d9;
-  --theme-primary-800: #5b21b6;
-  --theme-primary-900: #4c1d95;
-  --theme-accent: #22d3ee;
-  --theme-accent-secondary: #fbbf24;
-  --theme-secondary-50: #f8fafc;
-  --theme-secondary-100: #f1f5f9;
-  --theme-secondary-200: #e2e8f0;
-  --theme-secondary-300: #cbd5e1;
-  --theme-secondary-400: #94a3b8;
-  --theme-secondary-500: #64748b;
-  --theme-secondary-600: #475569;
-  --theme-secondary-700: #334155;
-  --theme-secondary-800: #1e293b;
-  --theme-secondary-900: #0f172a;
+  /* Primary palette — Matte Deep Navy (mature, professional, non-glare) */
+  --theme-primary-50: #f4f6fa;
+  --theme-primary-100: #e5e9f1;
+  --theme-primary-200: #c9d0de;
+  --theme-primary-300: #9faac1;
+  --theme-primary-400: #6f7ea0;
+  --theme-primary-500: #4f5d82;
+  --theme-primary-600: #3d496a;
+  --theme-primary-700: #323b56;
+  --theme-primary-800: #2a3248;
+  --theme-primary-900: #23293b;
+  /* Accent — Matte Teal (calm, premium, non-neon) */
+  --theme-accent: #5d8c87;
+  --theme-accent-secondary: #b8956a;
+  /* Secondary palette — Warm Slate Neutral (matte, not cold OLED-black) */
+  --theme-secondary-50: #fafaf7;
+  --theme-secondary-100: #f4f2ec;
+  --theme-secondary-200: #e6e2d8;
+  --theme-secondary-300: #cdc7b9;
+  --theme-secondary-400: #a8a190;
+  --theme-secondary-500: #7f7763;
+  --theme-secondary-600: #5c5548;
+  --theme-secondary-700: #454037;
+  --theme-secondary-800: #2e2a24;
+  --theme-secondary-900: #1c1a15;
 }
 
 @layer base {
@@ -422,10 +426,10 @@
   width: 60px !important;
   height: 60px !important;
   border-radius: 50% !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%) !important;
   color: white !important;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary-600, #3d496a) 40%, transparent) !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
@@ -438,7 +442,7 @@
 
 .chatbot-float-button:hover {
   transform: scale(1.1) !important;
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--theme-primary-600, #3d496a) 50%, transparent) !important;
 }
 
 .chatbot-badge {
@@ -495,7 +499,7 @@
 
 /* Chat Header */
 .chatbot-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%);
   color: white;
   padding: 16px 20px;
   display: flex;
@@ -604,9 +608,9 @@
 }
 
 .chatbot-quick-btn:hover {
-  background: #f3f4f6;
-  border-color: #667eea;
-  color: #667eea;
+  background: var(--theme-secondary-50, #f4f2ec);
+  border-color: var(--theme-primary-500, #4f5d82);
+  color: var(--theme-primary-500, #4f5d82);
 }
 
 /* Messages */
@@ -640,7 +644,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -674,7 +678,7 @@
 }
 
 .chatbot-message-user .chatbot-message-bubble {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -792,7 +796,7 @@
 .chatbot-btn-primary {
   flex: 1;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -843,7 +847,7 @@
 
 .chatbot-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--theme-primary-500, #4f5d82);
 }
 
 .chatbot-input:disabled {
@@ -855,7 +859,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%);
   color: white;
   border: none;
   cursor: pointer;
@@ -884,7 +888,7 @@
 }
 
 .chatbot-feedback-link {
-  color: #6366f1;
+  color: var(--theme-primary-500, #4f5d82);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
@@ -892,7 +896,7 @@
 }
 
 .chatbot-feedback-link:hover {
-  color: #4f46e5;
+  color: var(--theme-primary-600, #3d496a);
   text-decoration: underline;
 }
 
@@ -1081,8 +1085,8 @@
 
 .feedback-modal select:focus {
   outline: none !important;
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+  border-color: var(--theme-primary-500, #4f5d82) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 10%, transparent) !important;
 }
 
 .feedback-modal textarea {
@@ -1100,8 +1104,8 @@
 
 .feedback-modal textarea:focus {
   outline: none !important;
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+  border-color: var(--theme-primary-500, #4f5d82) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 10%, transparent) !important;
 }
 
 .feedback-modal .char-count {
@@ -1166,13 +1170,13 @@
 }
 
 .feedback-modal .btn-submit {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+  background: linear-gradient(135deg, var(--theme-primary-600, #3d496a) 0%, var(--theme-accent, #5d8c87) 100%) !important;
   color: white !important;
 }
 
 .feedback-modal .btn-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--theme-primary-600, #3d496a) 30%, transparent) !important;
 }
 
 .feedback-modal .btn-submit:disabled {

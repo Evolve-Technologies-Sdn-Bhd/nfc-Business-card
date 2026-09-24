@@ -14,6 +14,13 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * Subscription SOURCE OF TRUTH is the `subscriptions` table.
+     * Columns users.subscription_* are maintained LEGACY — kept for query performance
+     * and backward compatibility; they are write-through synced via Subscription Observer.
+     * Never read these values directly when Subscription relationship is available.
+     */
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -78,6 +85,116 @@ class User extends Authenticatable implements MustVerifyEmail
         return trim($this->first_name . ' ' . $this->last_name);
     }
 
+    // =========================================================================
+    // Subscription relationship — the SINGLE SOURCE OF TRUTH for paid status
+    // =========================================================================
+
+    /**
+     * Subscriptions (all history — lifecycle: active → cancelled → soft-deleted.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->latest('next_billing_date');
+    }
+
+    /**
+     * The single authoritative ACTIVE or MOST RECENT subscription for plan-level decisions.
+     * Eager load this as `with('latestSubscription')` whenever possible.
+     */
+    public function latestSubscription()
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    /**
+     * Convenience scope to eager-load only active subscriptions (used by listings.
+     */
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active')->ofMany('created_at', 'max');
+    }
+
+    // =========================================================================
+    // Legacy column accessors OVERRIDE — return subscriptions-backed values (read-through cache
+    // Uses subscriptions table first, fall back to raw column for rows not yet migrated.
+    // =========================================================================
+
+    /**
+     * Source-of-truth plan name. Prefer subscriptions over legacy column.
+     */
+    public function getSubscriptionPlanAttribute($value)
+    {
+        $latest = $this->getRelationValue('latestSubscription') ?? null;
+
+        if (!$latest && $this->relationLoaded('subscriptions')) {
+            $latest = $this->subscriptions->firstWhere('status', 'active') ?? $this->subscriptions->first();
+        }
+
+        if (!$latest) {
+            try {
+                $latest = $this->subscriptions()->where('status', 'active')->latest('created_at')->first(['plan_type']);
+            } catch (\Throwable) {
+                $latest = null;
+            }
+        }
+
+        if ($latest && !empty($latest->plan_type)) {
+            return strtolower($latest->plan_type);
+        }
+
+        // Fallback to legacy column (may be empty/null on free users)
+        return $value ?: 'free';
+    }
+
+    /**
+     * Source-of-truth boolean active flag.
+     */
+    public function getSubscriptionActiveAttribute($value): bool
+    {
+        $this->loadMissing('subscriptions');
+        $active = $this->subscriptions->firstWhere('status', 'active');
+        if ($active instanceof Subscription) {
+            return true;
+        }
+        return (bool) $value;
+    }
+
+    /**
+     * Source-of-truth subscription start date (first ever active sub start, or legacy).
+     */
+    public function getSubscriptionStartDateAttribute($value)
+    {
+        if ($this->relationLoaded('subscriptions')) {
+            $first = $this->subscriptions->sortBy('created_at')->first();
+            if ($first?->current_period_start ?? null) {
+                return $first->current_period_start?->toDateString();
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Source-of-truth subscription end date (next billing of active subs or cancelled_at end.
+     */
+    public function getSubscriptionEndDateAttribute($value)
+    {
+        if ($this->relationLoaded('subscriptions')) {
+            $active = $this->subscriptions->firstWhere('status', 'active');
+            if ($active?->next_billing_date ?? false) {
+                return $active->next_billing_date->toDateString();
+            }
+            $cancelled = $this->subscriptions->firstWhere('status', 'cancelled');
+            if ($cancelled?->current_period_end ?? false) {
+                return $cancelled->current_period_end->toDateString();
+            }
+        }
+        return $value;
+    }
+
+    // =========================================================================
+    // NFC relationships (kept intact below untouched
+    // =========================================================================
+
     public function nfcTag()
     {
         return $this->hasOne(NfcTag::class);
@@ -110,14 +227,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(NfcCard::class)->where('status', 'active');
     }
 
+    /**
+     * Plan check helpers — now use accessors (accessors are SoT-backed already).
+     */
     public function hasPremiumSubscription()
     {
-        return in_array($this->subscription_plan, ['premium', 'basic','business']) && $this->subscription_active;
+        return in_array($this->subscription_plan, ['premium', 'basic','business'], true) && $this->subscription_active;
     }
+
     public function hasBasicSubscription()
-{
-    return in_array($this->subscription_plan, ['basic', 'premium', 'business']) && $this->subscription_active;
-}
+    {
+        return in_array($this->subscription_plan, ['basic', 'premium', 'business'], true) && $this->subscription_active;
+    }
+
+    /**
+     * Strictly Business-plan only (includes active and trial grace period expired).
+     */
+    public function hasBusinessSubscription(): bool
+    {
+        return $this->subscription_plan === 'business' && $this->subscription_active;
+    }
 
     public function hasPhysicalCard()
     {

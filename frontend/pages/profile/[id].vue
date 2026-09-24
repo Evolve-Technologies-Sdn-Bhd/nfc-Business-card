@@ -27,6 +27,28 @@
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
+        :root {
+          --sat: env(safe-area-inset-top, 0px);
+          --sab: env(safe-area-inset-bottom, 0px);
+          --sal: env(safe-area-inset-left, 0px);
+          --sar: env(safe-area-inset-right, 0px);
+        }
+
+        html, body, #__nuxt, #__layout {
+          -webkit-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+          -webkit-tap-highlight-color: transparent;
+          overflow-x: hidden;
+        }
+
+        * {
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a {
+          -webkit-touch-callout: none;
+        }
+
         .fade-slide-enter-active, .fade-slide-leave-active {
           transition: opacity 0.3s ease, transform 0.3s ease;
         }
@@ -37,6 +59,12 @@
         .fade-slide-leave-to {
           opacity: 0;
           transform: translateX(-20px);
+        }
+
+        @media (max-width: 374px) {
+          .profile-page__orbs {
+            display: none;
+          }
         }
       `
       }}
@@ -121,32 +149,41 @@
         tabindex="0"
         :style="{
           position: 'fixed',
-          top: isMobile ? '15px' : '20px',
-          left: isMobile ? '15px' : '20px',
+          top: `calc(${isPreviewMode ? '22px' : (isSmallMobile ? '10px' : isMobile ? '12px' : '18px')} + var(--sat, 0px))`,
+          left: `calc(${isSmallMobile ? '10px' : isMobile ? '12px' : '20px'} + var(--sal, 0px))`,
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '8px' : '10px',
-          padding: isMobile ? '10px 15px' : '12px 20px',
+          gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
+          padding: isSmallMobile ? '8px 12px' : isMobile ? '10px 14px' : '12px 20px',
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: isMobile ? '12px' : '15px',
           color: 'white',
-          fontSize: isMobile ? '14px' : '16px',
+          fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
           fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.3s',
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
           willChange: 'opacity, transform',
+          maxWidth: `calc(50vw - ${isSmallMobile ? '16px' : isMobile ? '20px' : '40px'} - var(--sal, 0px) - var(--sar, 0px))`,
+          overflow: 'hidden',
         }"
       >
         <Icon
           name="heroicons:arrow-left"
-          :class="['mr-1.5', isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
+          :class="['flex-shrink-0', isSmallMobile ? 'w-4 h-4' : isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
           aria-hidden="true"
         />
-        <span>Home</span>
+        <span
+          :style="{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }"
+        >Home</span>
       </button>
     </Transition>
 
@@ -162,52 +199,67 @@
         tabindex="0"
         :style="{
           position: 'fixed',
-          top: isMobile ? '15px' : '20px',
-          right: isMobile ? '15px' : '20px',
+          top: `calc(${isPreviewMode ? '22px' : (isSmallMobile ? '10px' : isMobile ? '12px' : '18px')} + var(--sat, 0px))`,
+          right: `calc(${isSmallMobile ? '10px' : isMobile ? '12px' : '20px'} + var(--sar, 0px))`,
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '8px' : '10px',
-          padding: isMobile ? '10px 15px' : '12px 20px',
+          gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
+          padding: isSmallMobile ? '8px 12px' : isMobile ? '10px 14px' : '12px 20px',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           borderRadius: isMobile ? '12px' : '15px',
           color: 'white',
-          fontSize: isMobile ? '14px' : '16px',
+          fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
           fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.3s',
           boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
           willChange: 'opacity, transform',
+          maxWidth: `calc(50vw - ${isSmallMobile ? '16px' : isMobile ? '20px' : '40px'} - var(--sal, 0px) - var(--sar, 0px))`,
+          overflow: 'hidden',
         }"
       >
         <Icon
           name="heroicons:pencil-square"
-          :class="['mr-1.5', isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
+          :class="['flex-shrink-0', isSmallMobile ? 'w-4 h-4' : isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
           aria-hidden="true"
         />
-        <span>Edit Profile</span>
+        <span
+          :style="{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }"
+        >Edit Profile</span>
       </button>
     </Transition>
 
-    <!-- Preview Mode Banner - Minimal -->
+    <!-- Preview Mode Banner - Minimal (sits above fixed chrome buttons) -->
     <Transition name="fade-slide">
       <div
         v-if="isPreviewMode"
-        :class="[
-          'fixed top-0 left-0 right-0 z-50 text-center',
-          'bg-blue-500 text-white font-medium'
-        ]"
         :style="{
-          fontSize: '10px',
-          padding: '3px 8px',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1001,
+          textAlign: 'center',
+          background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
+          color: 'white',
+          fontWeight: 600,
+          fontSize: isSmallMobile ? '10px' : '11px',
+          padding: `calc(4px + var(--sat, 0px)) 10px 4px`,
+          letterSpacing: '0.4px',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
         }"
       >
-        <span class="inline-flex items-center gap-1">
-          <Icon name="heroicons:eye" class="w-3.5 h-3.5" aria-hidden="true" />
-          Preview
+        <span class="inline-flex items-center gap-1.5">
+          <Icon name="heroicons:eye" :class="isSmallMobile ? 'w-3 h-3' : 'w-3.5 h-3.5'" aria-hidden="true" />
+          Preview Mode
         </span>
       </div>
     </Transition>
@@ -347,30 +399,30 @@
             v-if="!isFeatureEnabled('remove_branding')"
             :style="{
               position: 'absolute',
-              top: isMobile ? '12px' : '16px',
-              left: isMobile ? '12px' : '16px',
+              top: isSmallMobile ? '10px' : isMobile ? '12px' : '16px',
+              left: isSmallMobile ? '10px' : isMobile ? '12px' : '16px',
               zIndex: 10,
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: isMobile ? '6px 12px' : '8px 14px',
+              gap: isSmallMobile ? '6px' : '8px',
+              padding: isSmallMobile ? '5px 10px' : isMobile ? '6px 12px' : '8px 14px',
               background: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: '8px',
+              borderRadius: isSmallMobile ? '6px' : '8px',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
             }"
           >
             <div
               :style="{
-                width: isMobile ? '20px' : '24px',
-                height: isMobile ? '20px' : '24px',
+                width: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
+                height: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
                 border: '2px solid #2563eb',
-                borderRadius: '5px',
+                borderRadius: isSmallMobile ? '4px' : '5px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }"
             >
-              <svg :width="isMobile ? '12' : '14'" :height="isMobile ? '12' : '14'" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg :width="isSmallMobile ? '10' : isMobile ? '12' : '14'" :height="isSmallMobile ? '10' : isMobile ? '12' : '14'" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="16" rx="2"/>
                 <circle cx="9" cy="10" r="2"/>
                 <path d="M15 8h2"/>
@@ -381,21 +433,31 @@
             <span
               :style="{
                 color: '#2563eb',
-                fontSize: isMobile ? '13px' : '15px',
+                fontSize: isSmallMobile ? '11px' : isMobile ? '13px' : '15px',
                 fontWeight: 700,
                 letterSpacing: '0.3px',
+                lineHeight: 1,
               }"
             >
               NFCGo
             </span>
           </div>
 
-          <!-- Hero Content -->
+          <!-- Hero Content - tiered responsive padding -->
           <div
             :style="{
-              padding: isMobile ? '48px 24px' : isTablet ? '64px 40px' : '80px 48px',
+              padding:
+                isSmallMobile ? '56px 14px 28px'
+                : isPhablet ? '60px 18px 32px'
+                : isMobile ? '64px 24px 36px'
+                : isTablet ? '72px 40px 48px'
+                : isSmallLaptop ? '80px 48px 56px'
+                : '88px 56px 64px',
               position: 'relative',
               zIndex: 1,
+              paddingTop: isFeatureEnabled('remove_branding')
+                ? (isSmallMobile ? '28px' : isPhablet ? '32px' : isMobile ? '36px' : isTablet ? '48px' : '56px')
+                : undefined,
             }"
           >
           <div :style="{ position: 'relative', zIndex: 2, textAlign: 'center' }">
@@ -404,7 +466,7 @@
                 position: 'relative',
                 width: responsive.profileSize,
                 height: responsive.profileSize,
-                margin: '0 auto 40px',
+                margin: `0 auto ${isSmallMobile ? '24px' : isPhablet ? '28px' : isMobile ? '32px' : isTablet ? '36px' : '40px'}`,
                 cursor: 'pointer',
               }"
               @mouseenter="imageHover = true"
@@ -456,8 +518,13 @@
                 fontSize: responsive.nameSize,
                 fontWeight: 800,
                 color: 'white',
-                marginBottom: '30px',
-                letterSpacing: '2px',
+                marginBottom: isSmallMobile ? '18px' : isPhablet ? '22px' : isMobile ? '26px' : isTablet ? '28px' : '30px',
+                letterSpacing: isSmallMobile ? '0.5px' : isPhablet ? '1px' : isMobile ? '1.2px' : '2px',
+                lineHeight: 1.15,
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                hyphens: 'auto',
+                padding: '0 4px',
               }"
             >
               <span
@@ -468,6 +535,7 @@
                   animation: 'charBounce 0.5s ease-out forwards',
                   opacity: 0,
                   animationDelay: `${i * 0.05}s`,
+                  maxWidth: '100%',
                 }"
               >
                 {{ char === ' ' ? '\u00A0' : char }}
@@ -480,6 +548,7 @@
                 gap: responsive.flexGap,
                 justifyContent: 'center',
                 flexWrap: 'wrap',
+                rowGap: isSmallMobile ? '8px' : '10px',
               }"
             >
               <div
@@ -487,44 +556,50 @@
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
                   padding: responsive.badgePadding,
                   borderRadius: '50px',
                   fontSize: responsive.smallSize,
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
                   color: '#fff',
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.3s',
+                  maxWidth: '100%',
+                  overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">🎓</span>
-                {{ profile.qualification }}
+                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">🎓</span>
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.qualification }}</span>
               </div>
               <div
                 v-if="profile.position"
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
                   padding: responsive.badgePadding,
                   borderRadius: '50px',
                   fontSize: responsive.smallSize,
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3))',
                   color: '#fff',
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.4s',
+                  maxWidth: '100%',
+                  overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">💼</span>
-                {{ profile.position }}
+                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">💼</span>
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.position }}</span>
               </div>
               <!-- Pronouns Badge -->
               <div
@@ -532,22 +607,25 @@
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
                   padding: responsive.badgePadding,
                   borderRadius: '50px',
                   fontSize: responsive.smallSize,
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3))',
                   color: '#fff',
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.5s',
+                  maxWidth: '100%',
+                  overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isMobile ? '16px' : '18px' }">👤</span>
-                {{ profile.pronouns }}
+                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">👤</span>
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.pronouns }}</span>
               </div>
             </div>
             
@@ -558,11 +636,15 @@
                 color: 'rgba(255, 255, 255, 0.8)',
                 fontSize: responsive.bodySize,
                 fontStyle: 'italic',
-                marginTop: '20px',
+                marginTop: isSmallMobile ? '14px' : isPhablet ? '16px' : '20px',
                 textAlign: 'center',
                 animation: 'fadeInUp 0.6s ease-out forwards',
                 opacity: 0,
                 animationDelay: '0.6s',
+                lineHeight: 1.6,
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                padding: '0 6px',
               }"
             >
               "{{ profile.tagline }}"
@@ -605,6 +687,7 @@
             gap: responsive.actionGap,
             marginBottom: responsive.sectionGap,
             flexWrap: 'wrap',
+            rowGap: isSmallMobile ? '8px' : '10px',
           }"
         >
           <button
@@ -618,11 +701,14 @@
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
+              gap: isSmallMobile ? '6px' : '8px',
               padding: responsive.actionPadding,
-              minWidth: isMobile ? '70px' : '80px',
+              minWidth: isSmallMobile ? '62px' : isMobile ? '70px' : '80px',
+              flex: isSmallMobile ? '1 1 calc(50% - 8px)' : undefined,
+              maxWidth: isSmallMobile ? 'calc(50% - 8px)' : undefined,
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: isMobile ? '15px' : '20px',
               color: 'white',
@@ -634,12 +720,23 @@
               transition: 'all 0.3s',
             }"
           >
-            <span :style="{ fontSize: responsive.actionIconSize }">{{
-              action.icon
-            }}</span>
-            <span :style="{ fontSize: responsive.smallSize }">{{
-              action.label
-            }}</span>
+            <span
+              :style="{
+                fontSize: responsive.actionIconSize,
+                lineHeight: 1,
+                flexShrink: 0,
+              }"
+            >{{ action.icon }}</span>
+            <span
+              :style="{
+                fontSize: responsive.smallSize,
+                textAlign: 'center',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                lineHeight: 1.2,
+                maxWidth: '100%',
+              }"
+            >{{ action.label }}</span>
           </button>
         </div>
 
@@ -1790,8 +1887,8 @@
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: isMobile ? '15px' : '20px',
-                  padding: isMobile ? '20px' : '25px',
+                  gap: isSmallMobile ? '12px' : isMobile ? '15px' : '20px',
+                  padding: isSmallMobile ? '14px' : isMobile ? '18px' : '25px',
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: isMobile ? '15px' : '20px',
@@ -1807,7 +1904,7 @@
                   :style="{
                     width: responsive.contactIconBox,
                     height: responsive.contactIconBox,
-                    borderRadius: '15px',
+                    borderRadius: isSmallMobile ? '12px' : '15px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1832,10 +1929,11 @@
                       color: 'white',
                       fontSize: responsive.h4Size,
                       fontWeight: 700,
-                      margin: '0 0 5px 0',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: isMobile ? 'nowrap' : 'normal',
+                      margin: isSmallMobile ? '0 0 3px 0' : '0 0 5px 0',
+                      whiteSpace: 'normal',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
+                      lineHeight: 1.3,
                     }"
                   >
                     {{ contact.label }}
@@ -1845,9 +1943,10 @@
                       color: 'rgba(255, 255, 255, 0.6)',
                       fontSize: responsive.smallSize,
                       margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: isMobile ? 'nowrap' : 'normal',
+                      whiteSpace: 'normal',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
+                      lineHeight: 1.45,
                     }"
                   >
                     {{ contact.subtitle }}
@@ -1859,6 +1958,7 @@
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontSize: '24px',
                     transition: 'all 0.3s',
+                    flexShrink: 0,
                   }"
                 >
                   →
@@ -1934,16 +2034,17 @@
                 {{ address.name }}
               </h4>
               <p
+                v-if="addressDisplayLines.length > 0"
                 :style="{
                   color: 'rgba(255, 255, 255, 0.7)',
                   lineHeight: '1.8',
                   fontSize: responsive.bodySize,
                 }"
               >
-                {{ address.street }}<br />
-                {{ address.area }}<br />
-                {{ address.cityState }}<span v-if="address.postalCode"> {{ address.postalCode }}</span><br />
-                {{ address.country }}
+                <template v-for="(line, idx) in addressDisplayLines" :key="idx">
+                  <template v-if="idx > 0"><br /></template>
+                  {{ line }}
+                </template>
               </p>
             </div>
             <a
@@ -2024,10 +2125,12 @@
             <div
               :style="{
                 display: 'grid',
-                gridTemplateColumns: isMobile
-                  ? 'repeat(2, 1fr)'
-                  : 'repeat(auto-fit, minmax(150px, 1fr))',
-                gap: '15px',
+                gridTemplateColumns: isSmallMobile
+                  ? '1fr'
+                  : isMobile
+                    ? 'repeat(2, 1fr)'
+                    : 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: isSmallMobile ? '10px' : '15px',
               }"
             >
               <a
@@ -2039,11 +2142,15 @@
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '10px',
-                  padding: isMobile ? '15px 10px' : '18px',
+                  gap: isSmallMobile ? '8px' : '10px',
+                  padding: isSmallMobile
+                    ? '12px 10px'
+                    : isMobile
+                      ? '15px 10px'
+                      : '18px',
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '15px',
+                  borderRadius: isSmallMobile ? '12px' : '15px',
                   color: 'white',
                   textDecoration: 'none',
                   fontWeight: 600,
@@ -2052,14 +2159,26 @@
                     : responsive.bodySize,
                   transition: 'all 0.3s',
                   overflow: 'hidden',
+                  overflowWrap: 'break-word',
+                  textAlign: 'center',
+                  minWidth: 0,
                 }"
                 @mouseover="(e) => handleSocialHoverIn(e, social.color)"
                 @mouseout="handleSocialHoverOut"
               >
-                <span :style="{ fontSize: isMobile ? '20px' : '24px' }">{{
-                  social.emoji
-                }}</span>
-                {{ social.name }}
+                <span
+                  :style="{
+                    fontSize: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
+                    flexShrink: 0,
+                  }"
+                >{{ social.emoji }}</span>
+                <span
+                  :style="{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    minWidth: 0,
+                  }"
+                >{{ social.name }}</span>
               </a>
             </div>
           </div>
@@ -2642,25 +2761,25 @@
           <!-- Hide entire Quick Actions section when admin has not assigned any features -->
           <div v-if="availableFeatures && availableFeatures.length > 0" :style="{ 
             background: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: '20px',
-            padding: isMobile ? '16px' : '20px',
+            borderRadius: isSmallMobile ? '16px' : '20px',
+            padding: isSmallMobile ? '12px' : isMobile ? '16px' : '20px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
           }">
             <!-- Section Title -->
             <div :style="{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '8px', 
-              marginBottom: '16px',
-              paddingBottom: '12px',
+              gap: isSmallMobile ? '6px' : '8px', 
+              marginBottom: isSmallMobile ? '12px' : '16px',
+              paddingBottom: isSmallMobile ? '10px' : '12px',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }">
-              <span :style="{ fontSize: '18px' }">⚡</span>
-              <span :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
+              <span :style="{ fontSize: isSmallMobile ? '16px' : '18px' }">⚡</span>
+              <span :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: isSmallMobile ? '13px' : '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
             </div>
             
             <!-- Buttons Grid -->
-            <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }">
+            <div :style="{ display: 'grid', gridTemplateColumns: isSmallMobile && availableFeatures.length > 4 ? '1fr' : 'repeat(2, 1fr)', gap: isSmallMobile ? '10px' : '12px' }">
               
               <!-- vCard Button -->
               <button
@@ -3962,73 +4081,121 @@ const profileNotFound = ref(false);
 const noProfileData = ref(false);  // New: when card exists but has no landing page data
 const isPreviewMode = ref(false);
 let scrollTimeout = null;
+let resizeDebounce = null;
 
-// Responsive breakpoints
-const isMobile = computed(() => windowWidth.value < 640);
+// Responsive breakpoints - granular tiers for all device sizes
+const isSmallMobile = computed(() => windowWidth.value < 375);      // iPhone SE 1/2/3, very small phones
+const isMobile = computed(() => windowWidth.value < 640);            // All phones
+const isPhablet = computed(
+  () => windowWidth.value >= 375 && windowWidth.value < 640
+);                                                                   // Large phones (iPhone Pro Max, Pixel)
 const isTablet = computed(
   () => windowWidth.value >= 640 && windowWidth.value < 1024
-);
-const isDesktop = computed(() => windowWidth.value >= 1024);
+);                                                                   // iPads, tablets
+const isSmallLaptop = computed(
+  () => windowWidth.value >= 1024 && windowWidth.value < 1440
+);                                                                   // MacBook 13", small laptops
+const isDesktop = computed(() => windowWidth.value >= 1024);         // 1024px+
+const isLargeDesktop = computed(() => windowWidth.value >= 1440);    // 27" monitors, 4K
 
-// Responsive values - Modern design system
-const responsive = computed(() => ({
-  // Container
-  containerPadding: isMobile.value ? "20px 0" : isTablet.value ? "30px" : "40px",
-  maxWidth: "1200px",
+// iOS safe area helpers (notch / dynamic island)
+const safeTop = computed(() => {
+  if (typeof window === "undefined") return "0px";
+  const val = getComputedStyle(document.documentElement).getPropertyValue("--sat") || "0px";
+  return val && val.trim() !== "" ? val : "0px";
+});
+const safeBottom = computed(() => {
+  if (typeof window === "undefined") return "0px";
+  const val = getComputedStyle(document.documentElement).getPropertyValue("--sab") || "0px";
+  return val && val.trim() !== "" ? val : "0px";
+});
 
-  // Profile image
-  profileSize: isMobile.value ? "140px" : isTablet.value ? "160px" : "200px",
-  profileBorder: "4px solid rgba(255, 255, 255, 0.15)",
+// Responsive values - Modern design system, tiered for every device
+const responsive = computed(() => {
+  const sm = isSmallMobile.value;
+  const ph = isPhablet.value;
+  const mob = isMobile.value;
+  const tab = isTablet.value;
+  const sl = isSmallLaptop.value;
+  const ld = isLargeDesktop.value;
 
-  // Typography - Modern scale
-  nameSize: isMobile.value ? "36px" : isTablet.value ? "48px" : "56px",
-  h2Size: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
-  h3Size: isMobile.value ? "20px" : isTablet.value ? "24px" : "28px",
-  h4Size: isMobile.value ? "16px" : isTablet.value ? "18px" : "20px",
-  bodySize: isMobile.value ? "15px" : "16px",
-  smallSize: isMobile.value ? "13px" : "14px",
+  return {
+    // Container - always have horizontal breathing room on mobile
+    containerPadding: sm
+      ? "60px 12px 24px"
+      : ph
+        ? "64px 16px 28px"
+        : mob
+          ? "68px 20px 32px"
+          : tab
+            ? "72px 32px 40px"
+            : sl
+              ? "76px 40px 48px"
+              : "80px 48px 56px",
+    maxWidth: "1200px",
 
-  // Card styling - Glassmorphism
-  cardPadding: isMobile.value ? "16px" : isTablet.value ? "32px" : "40px",
-  cardMarginBottom: isMobile.value ? "24px" : "32px",
-  cardBackground: "rgba(255, 255, 255, 0.03)",
-  cardBorder: "1px solid rgba(255, 255, 255, 0.08)",
-  cardShadow: "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
-  cardHoverShadow: "0 12px 48px rgba(102, 126, 234, 0.15)",
+    // Profile image - scales gracefully
+    profileSize: sm ? "112px" : ph ? "128px" : mob ? "148px" : tab ? "180px" : "208px",
+    profileBorder: "4px solid rgba(255, 255, 255, 0.15)",
 
-  // Quick actions
-  actionPadding: isMobile.value ? "16px" : "20px",
-  actionIconSize: isMobile.value ? "28px" : "36px",
-  actionGap: isMobile.value ? "12px" : "16px",
+    // Typography - fluid modular scale
+    nameSize: sm ? "26px" : ph ? "30px" : mob ? "34px" : tab ? "46px" : ld ? "60px" : "54px",
+    h2Size: sm ? "20px" : ph ? "22px" : mob ? "24px" : tab ? "27px" : "31px",
+    h3Size: sm ? "17px" : ph ? "18px" : mob ? "20px" : tab ? "23px" : "27px",
+    h4Size: sm ? "14px" : ph ? "15px" : mob ? "16px" : tab ? "17px" : "19px",
+    bodySize: sm ? "14px" : mob ? "15px" : "16px",
+    smallSize: sm ? "12px" : mob ? "13px" : "14px",
 
-  // Grid columns
-  statsGrid: isMobile.value
-    ? "repeat(auto-fit, minmax(110px, 1fr))"
-    : "repeat(auto-fit, minmax(160px, 1fr))",
-  servicesGrid: isMobile.value
-    ? "repeat(auto-fit, minmax(160px, 1fr))"
-    : "repeat(auto-fit, minmax(220px, 1fr))",
-  galleryGrid: isMobile.value ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
+    // Card styling - Glassmorphism
+    cardPadding: sm ? "14px" : ph ? "16px" : mob ? "18px" : tab ? "30px" : "38px",
+    cardMarginBottom: sm ? "18px" : mob ? "22px" : tab ? "28px" : "32px",
+    cardBackground: "rgba(255, 255, 255, 0.03)",
+    cardBorder: "1px solid rgba(255, 255, 255, 0.08)",
+    cardShadow:
+      "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+    cardHoverShadow: "0 12px 48px rgba(102, 126, 234, 0.15)",
 
-  // Icon sizes
-  serviceIconSize: isMobile.value ? "28px" : "40px",
-  serviceIconBox: isMobile.value ? "56px" : "72px",
-  contactIconBox: isMobile.value ? "56px" : "64px",
-  contactIconSize: isMobile.value ? "28px" : "32px",
+    // Quick actions
+    actionPadding: sm ? "12px 10px" : ph ? "14px 12px" : mob ? "16px 14px" : "20px",
+    actionIconSize: sm ? "22px" : ph ? "26px" : mob ? "28px" : "36px",
+    actionGap: sm ? "8px" : ph ? "10px" : mob ? "12px" : "16px",
 
-  // Borders and radius - Softer edges
-  borderRadius: isMobile.value ? "24px" : isTablet.value ? "28px" : "32px",
-  cardRadius: isMobile.value ? "0" : isTablet.value ? "24px" : "28px",
-  smallRadius: isMobile.value ? "12px" : "16px",
+    // Grid columns - tighter minmax on tiny screens
+    statsGrid: sm
+      ? "repeat(auto-fit, minmax(90px, 1fr))"
+      : mob
+        ? "repeat(auto-fit, minmax(110px, 1fr))"
+        : "repeat(auto-fit, minmax(160px, 1fr))",
+    servicesGrid: sm
+      ? "repeat(auto-fit, minmax(130px, 1fr))"
+      : mob
+        ? "repeat(auto-fit, minmax(160px, 1fr))"
+        : "repeat(auto-fit, minmax(220px, 1fr))",
+    galleryGrid: sm ? "1fr" : mob ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
 
-  // Badge styling
-  badgePadding: isMobile.value ? "10px 20px" : "12px 24px",
+    // Icon sizes
+    serviceIconSize: sm ? "22px" : ph ? "26px" : mob ? "28px" : "40px",
+    serviceIconBox: sm ? "46px" : ph ? "52px" : mob ? "58px" : "72px",
+    contactIconBox: sm ? "48px" : ph ? "54px" : mob ? "58px" : "64px",
+    contactIconSize: sm ? "22px" : ph ? "26px" : mob ? "28px" : "32px",
 
-  // Gaps - More breathing room
-  flexGap: isMobile.value ? "12px" : "20px",
-  gridGap: isMobile.value ? "16px" : "24px",
-  sectionGap: isMobile.value ? "24px" : "32px",
-}));
+    // Borders and radius - Softer edges, never fully sharp on mobile
+    borderRadius: sm ? "20px" : mob ? "22px" : tab ? "26px" : "30px",
+    cardRadius: sm ? "14px" : mob ? "18px" : tab ? "24px" : "28px",
+    smallRadius: sm ? "10px" : mob ? "12px" : "16px",
+
+    // Badge styling
+    badgePadding: sm ? "8px 14px" : mob ? "10px 18px" : "12px 24px",
+
+    // Gaps - More breathing room
+    flexGap: sm ? "8px" : mob ? "12px" : "20px",
+    gridGap: sm ? "12px" : mob ? "16px" : "24px",
+    sectionGap: sm ? "18px" : mob ? "24px" : tab ? "28px" : "32px",
+
+    // Safe-area aware top offset for hero (avoids overlap with fixed buttons + iOS notch)
+    heroTopOffset: sm ? "48px" : ph ? "52px" : mob ? "56px" : tab ? "60px" : "64px",
+  };
+});
 
 // Profile Data - Will be loaded from API (matches ProfileBuilder fields)
 const profile = ref({
@@ -4233,6 +4400,27 @@ const address = ref({
   country: "",
   postalCode: "",  // Postal code
   mapUrl: "",
+  // New simplified 3-line format
+  line1: "",
+  line2: "",
+  line3: "",
+});
+
+// Build display lines: new 3-line format first, fallback to legacy separate fields
+const addressDisplayLines = computed(() => {
+  const newFormat = [address.value.line1, address.value.line2, address.value.line3].filter(Boolean);
+  if (newFormat.length > 0) return newFormat;
+  // Legacy fallback
+  const legacy = [];
+  if (address.value.street) legacy.push(address.value.street);
+  if (address.value.area) legacy.push(address.value.area);
+  const line3Legacy = [
+    address.value.postalCode,
+    address.value.cityState,
+  ].filter(Boolean).join(" ");
+  if (line3Legacy) legacy.push(line3Legacy);
+  if (address.value.country) legacy.push(address.value.country);
+  return legacy;
 });
 
 // ==================== C. QUICK ACTIONS (dynamically generated) ====================
@@ -4524,8 +4712,10 @@ const loadPreviewData = (data) => {
   profile.value.certifications = data.certifications || [];
   profile.value.profileStats = data.profileStats || [];
 
-  // Profile Image
-  if (data.image) {
+  // Profile Image - priority: profilePicture (new) > image (legacy) > initials
+  if (data.profilePicture) {
+    profileImage.value = data.profilePicture;
+  } else if (data.image) {
     profileImage.value = data.image;
   } else if (data.name) {
     const initials = data.name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
@@ -4551,13 +4741,18 @@ const loadPreviewData = (data) => {
   company.value.employeeCount = data.employeeCount || "";
 
   // ============ ADDRESS SECTION ============
+  // New simplified 3-line format takes priority
+  address.value.line1 = data.address1 || "";
+  address.value.line2 = data.address2 || "";
+  address.value.line3 = data.address3 || "";
+  // Legacy separate address fields (for fallback display)
   address.value.name = data.addressName || "";
-  address.value.street = data.addressStreet || "";
+  address.value.street = data.addressStreet || data.address || "";
   address.value.area = data.addressArea || "";
   address.value.cityState = data.addressCityState || "";
   address.value.country = data.addressCountry || "";
   address.value.postalCode = data.postalCode || "";
-  address.value.mapUrl = data.addressMapUrl || "";
+  address.value.mapUrl = data.addressMapUrl || data.mapUrl || "";
 
   // ============ CONTACT METHODS ============
   contactMethods.value[0].subtitle = data.phoneNumber || data.contactNumber || data.phone || "";
@@ -4904,9 +5099,9 @@ const loadProfileData = async () => {
         coverBanner.value = data.cover_banner || data.coverBanner;
       }
 
-      // Profile Image
-      if (data.profile_image) {
-        profileImage.value = data.profile_image;
+      // Profile Image - priority: profile_image > profilePicture > image > initials
+      if (data.profile_image || data.profilePicture || data.image) {
+        profileImage.value = data.profile_image || data.profilePicture || data.image;
       } else if (data.name) {
         // Generate initials from name
         const initials = data.name
@@ -4931,7 +5126,11 @@ const loadProfileData = async () => {
       company.value.establishedYear = data.established_year || "";
       company.value.employeeCount = data.employee_count || "";
 
-      // Address Info
+      // Address Info (new 3-line format first, then legacy fallback)
+      address.value.line1 = data.address_1 || data.address1 || "";
+      address.value.line2 = data.address_2 || data.address2 || "";
+      address.value.line3 = data.address_3 || data.address3 || "";
+      // Legacy separate address fields
       address.value.name = data.address_name || "";
       address.value.street = data.address_street || data.address || "";
       address.value.area = data.address_area || "";
@@ -5491,7 +5690,10 @@ const handleScroll = () => {
 };
 
 const handleResize = () => {
-  windowWidth.value = window.innerWidth;
+  if (resizeDebounce) clearTimeout(resizeDebounce);
+  resizeDebounce = setTimeout(() => {
+    windowWidth.value = window.innerWidth;
+  }, 50);
 };
 
 // Hover handlers for desktop-only interactions

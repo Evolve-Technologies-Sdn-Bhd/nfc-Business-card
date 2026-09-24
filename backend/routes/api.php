@@ -63,6 +63,13 @@ Route::post('/magick/replace-text', [\App\Http\Controllers\MagickController::cla
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1'); // 10 per minute
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1'); // 10 per minute
 
+// Email verification (public - signed URLs from email + resend)
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware('throttle:3,1'); // 3 per minute
+
 // Public profile viewing (using landing pages)
 Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
 Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackTap']);
@@ -174,6 +181,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/initiate-link-account', [AuthController::class, 'initiateLinkAccount']);
     Route::delete('/user/linked-accounts/{provider}', [AuthController::class, 'unlinkAccount']);
 
+    // Security: password + sessions
+    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+    Route::get('/user/sessions', [AuthController::class, 'getActiveSessions']);
+    Route::delete('/user/sessions/{id}', [AuthController::class, 'revokeSession']);
+
+    // Security: Two-Factor Authentication (TOTP)
+    Route::prefix('/user/2fa')->group(function () {
+        Route::post('/setup', [AuthController::class, 'setupTwoFactor']);
+        Route::post('/confirm', [AuthController::class, 'confirmTwoFactor']);
+        Route::post('/disable', [AuthController::class, 'disableTwoFactor']);
+        Route::post('/recovery-codes/regenerate', [AuthController::class, 'regenerate2FARecoveryCodes']);
+    });
+
     // Logout from all devices (revoke all tokens)
     Route::post('/user/logout-everywhere', [AuthController::class, 'logoutEverywhere']);
 
@@ -275,8 +295,8 @@ Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
 // Public admin info endpoint (for getting super admin to send notifications)
 Route::middleware('auth:sanctum')->get('/admin/super-admin', [AdminController::class, 'getSuperAdmin']);
 
-// Admin routes (protected by admin middleware)
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+// Admin routes (protected by admin middleware + ActivityLog audit)
+Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::class])->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/stats', [AdminController::class, 'getSystemStats']);
@@ -432,6 +452,12 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/nfc-cards', [AdminExportController::class, 'exportNfcCards']);
         Route::get('/users', [AdminExportController::class, 'exportUsers']);
         Route::get('/analytics', [AdminExportController::class, 'exportAnalytics']);
+    });
+
+    // ✅ System Audit Log (Admin) — full filterable list + CSV export
+    Route::prefix('audit-logs')->group(function () {
+        Route::get('/', [AdminController::class, 'auditLogsIndex']);
+        Route::get('/export-csv', [AdminController::class, 'auditLogsExportCsv']);
     });
 });
 

@@ -851,4 +851,166 @@ class AdminController extends Controller
             ],
         ]);
     }
+
+    /**
+     * System-wide Admin Audit Log — list all activity_logs entries with filters:
+     *   ?action_type=admin_create_user
+     *   ?entity_type=user&entity_id=123
+     *   ?actor_id=7 (user_id that performed the action)
+     *   ?date_from=2026-01-01 &date_to=2026-01-31
+     *   ?search= (wildcard across description, action_type, entity_type)
+     *   ?per_page=25
+     *
+     * GET /admin/audit-logs
+     */
+    public function auditLogsIndex(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'action_type' => 'sometimes|string|max:100',
+            'entity_type' => 'sometimes|string|max:100',
+            'entity_id' => 'sometimes|string',
+            'actor_id' => 'sometimes|integer',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'search' => 'sometimes|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:200',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $query = \App\Models\ActivityLog::query()
+            ->with(['user:id,email,first_name,last_name,avatar_url,admin_role'])
+            ->orderByDesc('created_at');
+
+        if ($request->filled('action_type')) {
+            $query->where('action_type', $request->action_type);
+        }
+        if ($request->filled('entity_type')) {
+            $query->where('entity_type', $request->entity_type);
+        }
+        if ($request->filled('entity_id')) {
+            $query->where('entity_id', $request->entity_id);
+        }
+        if ($request->filled('actor_id')) {
+            $query->where('user_id', (int) $request->actor_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->where('created_at', '>=', Carbon::parse($request->date_from)->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $query->where('created_at', '<=', Carbon::parse($request->date_to)->endOfDay());
+        }
+        if ($request->filled('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('action_description', 'like', $searchTerm)
+                  ->orWhere('action_type', 'like', $searchTerm)
+                  ->orWhere('entity_type', 'like', $searchTerm)
+                  ->orWhere('entity_id', 'like', $searchTerm)
+                  ->orWhere('ip_address', 'like', $searchTerm);
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 25);
+        $logs = $query->paginate($perPage);
+
+        // Distinct action types for filter dropdown
+        $distinctActionTypes = \App\Models\ActivityLog::query()
+            ->distinct()
+            ->orderBy('action_type')
+            ->limit(100)
+            ->pluck('action_type');
+
+        $logs->getCollection()->transform(function (\App\Models\ActivityLog $log) {
+            return [
+                'id' => $log->id,
+                'created_at' => $log->created_at->toIso8601String(),
+                'action_type' => $log->action_type,
+                'action_description' => $log->action_description,
+                'entity_type' => $log->entity_type,
+                'entity_id' => $log->entity_id,
+                'old_values' => $log->old_values,
+                'new_values' => $log->new_values,
+                'metadata' => $log->metadata,
+                'ip_address' => $log->ip_address,
+                'user_agent' => $log->user_agent,
+                'actor' => $log->user ? [
+                    'id' => $log->user->id,
+                    'email' => $log->user->email,
+                    'name' => $log->user->full_name ?? trim(($log->user->first_name ?? '') . ' ' . ($log->user->last_name ?? '')),
+                    'avatar_url' => $log->user->avatar_url ?? null,
+                    'admin_role' => $log->user->admin_role ?? null,
+                ] : null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'logs' => $logs,
+            'meta' => [
+                'available_action_types' => $distinctActionTypes->values()->all(),
+                'total_count' => $logs->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Audit Log CSV export (same filters as index, no pagination).
+     *
+     * GET /admin/audit-logs/export-csv
+     */
+    public function auditLogsExportCsv(Request $request)
+    {
+        // Reuse same filters from index
+        $filters = $request->only(['action_type', 'entity_type', 'entity_id', 'actor_id', 'date_from', 'date_to', 'search']);
+        $internalRequest = Request::create('/internal/audit-export', 'GET', $filters + ['per_page' => 5000]);
+        $indexResponse = $this->auditLogsIndex($internalRequest);
+
+        // Extract log entries from paginated data
+        $data = $indexResponse->getData(true);
+        $logs = $data['logs']['data'] ?? [];
+
+        $csvHeaders = [
+            'Timestamp',
+            'Actor Email',
+            'Actor Name',
+            'Action Type',
+            'Description',
+            'Entity Type',
+            'Entity ID',
+            'IP Address',
+            'User Agent',
+            'Old Values (JSON)',
+            'New Values (JSON)',
+            'Metadata (JSON)',
+        ];
+
+        $filename = 'audit-log-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response()->streamDownload(function () use ($csvHeaders, $logs) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $csvHeaders);
+            foreach ($logs as $l) {
+                fputcsv($handle, [
+                    $l['created_at'],
+                    $l['actor']['email'] ?? '',
+                    $l['actor']['name'] ?? '',
+                    $l['action_type'],
+                    $l['action_description'],
+                    (string) $l['entity_type'],
+                    (string) $l['entity_id'],
+                    (string) $l['ip_address'],
+                    (string) $l['user_agent'],
+                    $l['old_values'] !== null ? json_encode($l['old_values'], JSON_UNESCAPED_SLASHES) : '',
+                    $l['new_values'] !== null ? json_encode($l['new_values'], JSON_UNESCAPED_SLASHES) : '',
+                    $l['metadata'] !== null ? json_encode($l['metadata'], JSON_UNESCAPED_SLASHES) : '',
+                ]);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
 }

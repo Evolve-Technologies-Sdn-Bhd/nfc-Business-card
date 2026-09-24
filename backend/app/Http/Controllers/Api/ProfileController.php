@@ -712,6 +712,9 @@ class ProfileController extends Controller
                         $role = ($landingPage && $landingPage->title) ? $landingPage->title : ($employee->job_title ?? 'Team Member');
                         $profileImage = ($landingPage && $landingPage->profile_image) ? $landingPage->profile_image : null;
                         
+                        $normalizedPhone = NfcCard::normalizePhoneNumber($card->contact_number ?? '');
+                        $urlIdentifier = !empty($normalizedPhone) ? $normalizedPhone : $card->nfc_card_id;
+
                         $teamMembers[] = [
                             'id' => $employee->id,
                             'user_id' => $employee->id,
@@ -721,7 +724,10 @@ class ProfileController extends Controller
                             'email' => $employee->email,
                             'profile_image' => $profileImage,
                             'nfc_card_id' => $card->nfc_card_id,
-                            'landing_page_url' => url('/profile/' . $card->nfc_card_id),
+                            'contact_number' => $card->contact_number,
+                            'normalized_contact_number' => $normalizedPhone,
+                            'landing_page_url' => url('/profile/' . $urlIdentifier),
+                            'landing_page_url_legacy' => url('/profile/' . $card->nfc_card_id),
                             'is_admin' => $employee->isBusinessAccount(),
                         ];
                     }

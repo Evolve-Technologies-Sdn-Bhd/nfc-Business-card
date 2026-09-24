@@ -225,14 +225,14 @@
                           <Icon name="heroicons:link" class="h-4 w-4 text-gray-400" />
                           <span class="text-xs text-gray-500">Live URL:</span>
                           <code class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                            {{ baseUrl }}/profile/{{ card.nfc_card_id }}
+                            {{ getCardDisplayLiveUrl(card) }}
                           </code>
                         </div>
                         <div class="flex items-center gap-2">
                           <Icon name="heroicons:eye" class="h-4 w-4 text-gray-400" />
                           <span class="text-xs text-gray-500">Preview URL:</span>
                           <code class="text-sm text-purple-600 bg-purple-50 px-2 py-1 rounded">
-                            {{ baseUrl }}/profile/{{ card.nfc_card_id }}?preview=true
+                            {{ getCardDisplayPreviewUrl(card) }}
                           </code>
                         </div>
                       </div>
@@ -247,19 +247,19 @@
                           <Icon name="heroicons:clipboard" class="h-4 w-4" />
                         </button>
                         <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                          <li><a @click="copyProfileUrl(card.nfc_card_id, false)">Copy Live URL</a></li>
-                          <li><a @click="copyProfileUrl(card.nfc_card_id, true)">Copy Preview URL</a></li>
+                          <li><a @click="copyProfileUrl(card, false)">Copy Live URL</a></li>
+                          <li><a @click="copyProfileUrl(card, true)">Copy Preview URL</a></li>
                         </ul>
                       </div>
                       <button
-                        @click="openProfileUrl(card.nfc_card_id)"
+                        @click="openProfileUrl(card)"
                         class="btn btn-outline btn-sm"
                         title="Open in new tab"
                       >
                         <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
                       </button>
                       <button
-                        @click="openProfilePreview(card.nfc_card_id)"
+                        @click="openProfilePreview(card)"
                         class="btn btn-outline btn-sm"
                         title="Preview mode"
                       >
@@ -1342,6 +1342,24 @@ const securitySettings = ref({
   login_notifications: true,
 });
 
+// ---------------- 2FA / TOTP State ---------------- //
+const twoFactor = ref({
+  loading: false,
+  showSetup: false,
+  showDisable: false,
+  secret: '',
+  qrData: '',
+  recoveryCodes: [],
+  recoveryCodeInput: '',
+  otpInput: '',
+  passwordInput: '',
+  recoveryCodesShown: false,
+});
+
+const loadingSessions = ref(false);
+const loadingLogoutEverywhere = ref(false);
+const revokingSessionId = ref(null);
+
 const privacySettings = ref({
   public_profile: true,
   search_indexing: true,
@@ -1587,99 +1605,304 @@ const checkUserPermissions = () => {
 };
 
 const loadActiveSessions = async () => {
-  // Check authentication first
   if (!authStore.user || !authToken.value) {
-    console.log("⚠️ No authentication, using mock session data");
     activeSessions.value = [
       {
         id: 1,
-        device_name: 'Current Session',
-        device_type: 'desktop',
-        location: 'Unknown',
-        last_activity: new Date().toISOString(),
-        is_current: true
-      }
+        name: 'Current Session',
+        device: 'Current Device',
+        platform: null,
+        browser: null,
+        ip_address: null,
+        last_seen_at: new Date().toISOString(),
+        is_current: true,
+      },
     ];
     return;
   }
 
+  loadingSessions.value = true;
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.get("/settings/sessions");
-    
-    if (response.success && response.sessions) {
+    const response = await $api.get("/user/sessions");
+
+    if (response?.success && Array.isArray(response.sessions)) {
       activeSessions.value = response.sessions;
       console.log("✅ Loaded active sessions:", activeSessions.value.length);
     } else {
-      // Mock data for development
-      activeSessions.value = [
-        {
-          id: 1,
-          device_name: 'Chrome on Windows',
-          device_type: 'desktop',
-          location: 'New York, US',
-          last_activity: new Date().toISOString(),
-          is_current: true
-        },
-        {
-          id: 2,
-          device_name: 'Safari on iPhone',
-          device_type: 'mobile',
-          location: 'California, US',
-          last_activity: new Date(Date.now() - 86400000).toISOString(),
-          is_current: false
-        }
-      ];
+      throw new Error("Invalid response format");
     }
   } catch (error) {
     console.error("Error loading sessions:", error);
-    if (error.response?.status === 403) {
-      console.log("🚫 Access denied for sessions - using mock data");
-    } else if (error.response?.status === 401) {
-      console.log("🚫 Unauthorized - using mock data");
-    }
-    // Always provide mock data instead of showing errors
+    // Graceful fallback: still show at least "current session" indicator
     activeSessions.value = [
       {
-        id: 1,
-        device_name: 'Current Session',
-        device_type: 'desktop',
-        location: 'Unknown',
-        last_activity: new Date().toISOString(),
-        is_current: true
-      }
+        id: 'fallback-current',
+        type: 'token',
+        name: 'Current Session',
+        device: 'Current Device',
+        platform: null,
+        browser: null,
+        ip_address: null,
+        last_seen_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        is_current: true,
+      },
     ];
+  } finally {
+    loadingSessions.value = false;
+  }
+};
+
+/**
+ * Map backend session fields → icon for visual display
+ */
+const sessionDeviceIcon = (session) => {
+  const d = (session.device || session.platform || '').toString().toLowerCase();
+  if (d.includes('iphone') || d.includes('mobile') || d.includes('android')) {
+    return 'heroicons:device-phone-mobile';
+  }
+  if (d.includes('ipad') || d.includes('tablet')) {
+    return 'heroicons:device-tablet';
+  }
+  return 'heroicons:computer-desktop';
+};
+
+const revokeSession = async (sessionId) => {
+  if (revokingSessionId.value) return;
+  revokingSessionId.value = sessionId;
+  try {
+    const { $api } = useNuxtApp();
+    const resp = await $api.delete(`/user/sessions/${sessionId}`);
+    if (resp?.success) {
+      showSuccess(resp.message || 'Sesi telah dilog keluar.');
+      activeSessions.value = activeSessions.value.filter(s => s.id !== sessionId);
+    } else {
+      showError(resp?.message || 'Gagal membatalkan sesi.');
+    }
+  } catch (e) {
+    console.error('Revoke session failed', e);
+    showError(e.data?.message || e.message || 'Gagal membatalkan sesi.');
+  } finally {
+    revokingSessionId.value = null;
+  }
+};
+
+const logoutEverywhere = async () => {
+  if (loadingLogoutEverywhere.value) return;
+  if (!confirm('Log keluar dari SEMUA peranti? Anda perlu login semula pada peranti ini.')) return;
+  loadingLogoutEverywhere.value = true;
+  try {
+    const { $api } = useNuxtApp();
+    const resp = await $api.post('/user/logout-everywhere');
+    if (resp?.success) {
+      showSuccess('Anda telah log keluar dari semua peranti.');
+      await authStore.logout();
+      await navigateTo('/UserAccount/login');
+    } else {
+      showError(resp?.message || 'Gagal.');
+    }
+  } catch (e) {
+    console.error('logoutEverywhere failed', e);
+    showError(e.data?.message || 'Gagal logout semua peranti.');
+  } finally {
+    loadingLogoutEverywhere.value = false;
+  }
+};
+
+const setup2FA = async () => {
+  twoFactor.value.loading = true;
+  try {
+    const { $api } = useNuxtApp();
+    const resp = await $api.post('/user/2fa/setup');
+    if (resp?.success) {
+      twoFactor.value.secret = resp.secret || '';
+      twoFactor.value.qrData = resp.qr_data || '';
+      twoFactor.value.recoveryCodes = resp.recovery_codes || [];
+      twoFactor.value.otpInput = '';
+      twoFactor.value.recoveryCodesShown = true;
+      twoFactor.value.showSetup = true;
+      twoFactor.value.showDisable = false;
+    } else {
+      showError(resp?.message || 'Gagal setup 2FA.');
+    }
+  } catch (e) {
+    console.error('setup2FA failed', e);
+    showError(e.data?.message || 'Gagal menjana setup 2FA.');
+  } finally {
+    twoFactor.value.loading = false;
+  }
+};
+
+const close2FASetup = () => {
+  twoFactor.value.showSetup = false;
+  twoFactor.value.otpInput = '';
+  twoFactor.value.passwordInput = '';
+};
+
+const confirm2FA = async () => {
+  if (!/^[0-9]{6}$/.test(twoFactor.value.otpInput)) {
+    showError('Masukkan 6 digit kod OTP dari Authenticator app anda.');
+    return;
+  }
+  twoFactor.value.loading = true;
+  try {
+    const { $api } = useNuxtApp();
+    const resp = await $api.post('/user/2fa/confirm', { code: twoFactor.value.otpInput });
+    if (resp?.success) {
+      twoFactor.value.recoveryCodes = resp.recovery_codes || twoFactor.value.recoveryCodes;
+      // Mark 2FA enabled at user object
+      if (user.value) {
+        user.value.two_factor_enabled = true;
+      }
+      // Keep modal open a moment longer so user sees success + copies recovery codes
+      showSuccess('2FA berjaya diaktifkan. Simpan recovery codes di tempat selamat.');
+      setTimeout(() => {
+        twoFactor.value.showSetup = false;
+        twoFactor.value.otpInput = '';
+      }, 1500);
+    } else {
+      showError(resp?.message || 'Kod OTP tidak tepat.');
+    }
+  } catch (e) {
+    console.error('confirm2FA failed', e);
+    showError(e.data?.message || 'Gagal aktifkan 2FA. Cuba lagi.');
+  } finally {
+    twoFactor.value.loading = false;
+  }
+};
+
+const copyText = (text, label) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showSuccess(`${label} disalin ke clipboard.`);
+    }).catch(() => {
+      // Fallback
+      fallbackCopy(text);
+      showSuccess(`${label} disalin ke clipboard.`);
+    });
+  } else {
+    fallbackCopy(text);
+    showSuccess(`${label} disalin ke clipboard.`);
+  }
+};
+
+const fallbackCopy = (text) => {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch {}
+};
+
+const downloadRecoveryCodes = () => {
+  const codes = twoFactor.value.recoveryCodes || [];
+  const lines = [
+    'NFCGo Business Card — 2FA Recovery Codes',
+    `Dijana: ${new Date().toLocaleString()}`,
+    '',
+    ...codes.map((c, i) => `${String(i + 1).padStart(2, '0')}. ${c}`),
+    '',
+    'GUNAKAN SATU SAHAJA BILA PERLU. SETIAP CODE SEKALI GUNA.',
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'nfcgo-2fa-recovery-codes.txt';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+};
+
+const disable2FA = async () => {
+  const needPassword = !twoFactor.value.passwordInput && !twoFactor.value.recoveryCodeInput;
+  if (needPassword && !twoFactor.value.passwordInput) {
+    showError('Masukkan kata laluan anda untuk sahkan nyahaktif 2FA.');
+    return;
+  }
+  twoFactor.value.loading = true;
+  try {
+    const payload = {};
+    if (twoFactor.value.passwordInput) payload.password = twoFactor.value.passwordInput;
+    if (twoFactor.value.recoveryCodeInput) payload.recovery_code = twoFactor.value.recoveryCodeInput;
+    const { $api } = useNuxtApp();
+    const resp = await $api.post('/user/2fa/disable', payload);
+    if (resp?.success) {
+      if (user.value) user.value.two_factor_enabled = false;
+      twoFactor.value.showDisable = false;
+      twoFactor.value.passwordInput = '';
+      twoFactor.value.recoveryCodeInput = '';
+      showSuccess(resp.message || '2FA berjaya dinyahaktifkan.');
+    } else {
+      showError(resp?.message || 'Gagal nyahaktifkan 2FA.');
+    }
+  } catch (e) {
+    console.error('disable2FA failed', e);
+    showError(e.data?.message || 'Gagal nyahaktifkan 2FA.');
+  } finally {
+    twoFactor.value.loading = false;
+  }
+};
+
+const regenerateRecoveryCodes = async () => {
+  if (!confirm('Regenerate 8 recovery codes baru? Semua recovery codes sedia ada akan batal serta-merta.')) return;
+  twoFactor.value.loading = true;
+  try {
+    const { $api } = useNuxtApp();
+    const resp = await $api.post('/user/2fa/recovery-codes/regenerate');
+    if (resp?.success) {
+      twoFactor.value.recoveryCodes = resp.recovery_codes || [];
+      twoFactor.value.recoveryCodesShown = true;
+      showSuccess(resp.message || 'Recovery codes baharu dijana.');
+    } else {
+      showError(resp?.message || 'Gagal jana recovery codes.');
+    }
+  } catch (e) {
+    console.error('regenerateRecoveryCodes failed', e);
+    showError(e.data?.message || 'Gagal jana recovery codes.');
+  } finally {
+    twoFactor.value.loading = false;
   }
 };
 
 const changePassword = async () => {
   if (passwordForm.value.new_password !== passwordForm.value.confirm_password) {
-    showError("New passwords do not match");
+    showError("Kata laluan baharu tidak sepadan.");
     return;
   }
 
   changingPassword.value = true;
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.put("/settings/change-password", {
+    const payload = {
       current_password: passwordForm.value.current_password,
-      new_password: passwordForm.value.new_password,
-      confirm_password: passwordForm.value.confirm_password,
-    });
+      password: passwordForm.value.new_password,
+      password_confirmation: passwordForm.value.confirm_password,
+    };
+    const response = await $api.post("/user/change-password", payload);
 
-    if (response.success) {
+    if (response?.success) {
       passwordForm.value = {
         current_password: "",
         new_password: "",
         confirm_password: "",
       };
-      showSuccess("Password updated successfully");
+      showSuccess(response.message || "Kata laluan berjaya dikemaskini.");
     } else {
-      showError(response.message || "Failed to change password");
+      showError(response?.message || "Gagal menukar kata laluan.");
     }
   } catch (error) {
     console.error("Error changing password:", error);
-    showError(error.data?.message || "Failed to change password");
+    showError(error?.data?.message || error?.message || "Gagal menukar kata laluan.");
   } finally {
     changingPassword.value = false;
   }
@@ -1808,11 +2031,27 @@ const loadPlanPrices = async () => {
   }
 };
 
+// Profile URL helpers — prefer normalized phone number, fall back to legacy nfc_card_id
+const normalizePhoneNumber = (raw) => {
+  if (!raw) return '';
+  return String(raw).replace(/\D/g, '');
+};
+
+const getProfileUrlIdentifier = (card) => {
+  if (!card) return '';
+  const normalizedPhone = normalizePhoneNumber(card.contact_number || card.normalized_contact_number || '');
+  if (normalizedPhone && normalizedPhone.length >= 9) {
+    return normalizedPhone;
+  }
+  return card.nfc_card_id || (`Card #${card.id}`);
+};
+
+const getCardDisplayLiveUrl = (card) => `${baseUrl.value}/profile/${getProfileUrlIdentifier(card)}`;
+const getCardDisplayPreviewUrl = (card) => `${getCardDisplayLiveUrl(card)}?preview=true`;
+
 // Profile URL management functions
-const copyProfileUrl = async (nfcCardId, isPreview = false) => {
-  const baseProfileUrl = `${baseUrl.value}/profile/${nfcCardId}`;
-  const url = isPreview ? `${baseProfileUrl}?preview=true` : baseProfileUrl;
-  
+const copyProfileUrl = async (card, isPreview = false) => {
+  const url = isPreview ? getCardDisplayPreviewUrl(card) : getCardDisplayLiveUrl(card);
   try {
     await navigator.clipboard.writeText(url);
     const urlType = isPreview ? "Preview URL" : "Live URL";
@@ -1823,18 +2062,16 @@ const copyProfileUrl = async (nfcCardId, isPreview = false) => {
   }
 };
 
-const openProfileUrl = (nfcCardId) => {
-  const url = `${baseUrl.value}/profile/${nfcCardId}`;
-  window.open(url, '_blank');
+const openProfileUrl = (card) => {
+  window.open(getCardDisplayLiveUrl(card), '_blank');
 };
 
-const openProfilePreview = (nfcCardId) => {
-  const url = `${baseUrl.value}/profile/${nfcCardId}?preview=true`;
-  window.open(url, '_blank');
+const openProfilePreview = (card) => {
+  window.open(getCardDisplayPreviewUrl(card), '_blank');
 };
 
 const editCardProfile = (nfcCardId) => {
-  // Navigate to BusinessProfileBuilder with the card ID
+  // Navigate to BusinessProfileBuilder with the ORIGINAL nfc_card_id (internal routing)
   navigateTo(`/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?cardId=${nfcCardId}`);
 };
 

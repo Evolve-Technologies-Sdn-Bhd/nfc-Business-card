@@ -406,6 +406,56 @@
                 </div>
               </div>
 
+              <!-- Simplified Location & Address (3 lines) -->
+              <div v-if="shouldShowField('addressName') || shouldShowField('mapUrl') || shouldShowField('address1')" class="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <Icon name="heroicons:map-pin" class="w-5 h-5 text-blue-600" />
+                  <h3 class="text-sm font-semibold text-gray-800">Location &amp; Address</h3>
+                </div>
+                <div class="space-y-4">
+                  <!-- Address Line 1 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Address Line 1</label>
+                    <input
+                      v-model="profileData.address1"
+                      type="text"
+                      placeholder="e.g., No 38, Jalan Riang 21"
+                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  </div>
+                  <!-- Address Line 2 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Address Line 2 <span class="text-gray-400 font-normal">(Optional)</span></label>
+                    <input
+                      v-model="profileData.address2"
+                      type="text"
+                      placeholder="e.g., Taman Ria, Kawasan Perindustrian"
+                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  </div>
+                  <!-- Address Line 3 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Address Line 3 <span class="text-gray-400 font-normal">(Optional)</span></label>
+                    <input
+                      v-model="profileData.address3"
+                      type="text"
+                      placeholder="e.g., 81200 Johor Bahru, Johor, Malaysia"
+                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  </div>
+                  <!-- Google Maps URL -->
+                  <div v-if="shouldShowField('mapUrl')">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Google Maps URL <span class="text-gray-400 font-normal">(Optional)</span></label>
+                    <input
+                      v-model="profileData.mapUrl"
+                      type="url"
+                      placeholder="e.g., https://maps.google.com/..."
+                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <!-- Team Members Section (Special handling) -->
               <div v-if="shouldShowField('teamMembers')" class="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
                 <div class="flex items-center justify-between pb-2 border-b border-gray-100">
@@ -1885,6 +1935,11 @@ const profileData = reactive({
   industry: "",               // Industry Type (select)
   establishedYear: "",        // Year Founded
   employeeCount: "",          // Number of Employees
+  // Company Address (Simplified: 3 lines)
+  address1: "",               // Address Line 1
+  address2: "",               // Address Line 2
+  address3: "",               // Address Line 3 (Postcode, City, State, Country)
+  // Legacy separate address fields (for backward compatibility)
   addressName: "",            // Building/Location Name
   addressStreet: "",          // Street Address
   addressArea: "",            // Area/District
@@ -2435,7 +2490,7 @@ const landingPageSectionsConfig = [
   { id: 'portfolio', name: 'Portfolio', icon: 'heroicons:folder', description: 'Projects and work samples', apiSource: 'portfolio', fieldKeys: ['portfolioTitle', 'portfolioDescription', 'portfolioCoverImage', 'portfolioGallery', 'projectUrl', 'dateCompleted', 'clientName', 'location', 'skillsUsed', 'pdfDownload'] },
   { id: 'blog', name: 'Blog', icon: 'heroicons:newspaper', description: 'Blog posts and articles', apiSource: 'blog', fieldKeys: ['blogTitle', 'blogCoverImage', 'blogCategory', 'blogTags', 'authorName', 'readingTime', 'blogContent', 'externalLink'] },
   { id: 'contact', name: 'Contact', icon: 'heroicons:phone', description: 'Phone, email, WhatsApp', apiSource: 'links', fieldKeys: ['phone', 'whatsapp'] },
-  { id: 'location', name: 'Location', icon: 'heroicons:map-pin', description: 'Address and map', apiSource: 'company', fieldKeys: ['addressName', 'addressStreet', 'addressArea', 'addressCityState', 'addressCountry', 'postalCode', 'mapUrl'] },
+  { id: 'location', name: 'Location', icon: 'heroicons:map-pin', description: 'Address and map', apiSource: 'company', fieldKeys: ['address1', 'address2', 'address3', 'mapUrl'] },
   { id: 'social', name: 'Social Media', icon: 'heroicons:share', description: 'Social media links', apiSource: 'links', fieldKeys: ['socialLinks'] },
   { id: 'gallery', name: 'Gallery', icon: 'heroicons:photo', description: 'Image gallery', apiSource: 'portfolio', fieldKeys: ['portfolioGallery'] },
 ];
@@ -2994,8 +3049,18 @@ const getGroupedFields = (fields) => {
     .sort((a, b) => a.order - b.order);
 };
 
+// Fields to exclude from dynamic company rendering (replaced by simplified 3-line address section)
+const COMPANY_ADDRESS_EXCLUDED_FIELDS = [
+  'addressName', 'addressStreet', 'addressArea', 'addressCityState',
+  'addressCountry', 'postalCode', 'mapUrl', 'coordinates',
+  'address1', 'address2', 'address3',
+];
+
 const getGroupedProfileFields = () => getGroupedFields(profileFields.value);
-const getGroupedCompanyFields = () => getGroupedFields(companyFields.value);
+const getGroupedCompanyFields = () => {
+  const filtered = companyFields.value.filter(f => !COMPANY_ADDRESS_EXCLUDED_FIELDS.includes(f.field_key));
+  return getGroupedFields(filtered);
+};
 const getGroupedServicesFields = () => getGroupedFields(servicesFields.value);
 const getGroupedLinksFields = () => getGroupedFields(linksFields.value);
 const getGroupedPortfolioFields = () => getGroupedFields(portfolioFields.value);
@@ -3819,14 +3884,18 @@ const saveProfile = async () => {
       employee_count: profileData.employeeCount,
       company_whatsapp: profileData.companyWhatsapp,
 
-      // Address Details
+      // Address Details (new simplified 3-line format)
+      address_1: profileData.address1,
+      address_2: profileData.address2,
+      address_3: profileData.address3,
+      // Legacy separate address fields (for backward compatibility)
       address_name: profileData.addressName,
       address_street: profileData.addressStreet,
       address_area: profileData.addressArea,
       address_city_state: profileData.addressCityState,
       address_country: profileData.addressCountry,
       postal_code: profileData.postalCode,
-      address_map_url: profileData.addressMapUrl,
+      address_map_url: profileData.mapUrl,
       coordinates: profileData.coordinates,
 
       // Repeater Fields
@@ -4170,14 +4239,28 @@ const loadProfile = async () => {
       profileData.employeeCount = landingPage.employee_count || "";
       profileData.companyWhatsapp = landingPage.company_whatsapp || "";
 
-      // Address Details
+      // Address Details (new 3-line format, fallback auto-compose from legacy)
+      if (landingPage.address_1 || landingPage.address1) {
+        profileData.address1 = landingPage.address_1 || landingPage.address1 || "";
+        profileData.address2 = landingPage.address_2 || landingPage.address2 || "";
+        profileData.address3 = landingPage.address_3 || landingPage.address3 || "";
+      } else {
+        // Auto-compose 3 lines from legacy fields for smooth migration
+        profileData.address1 = [landingPage.address_name, landingPage.address_street].filter(Boolean).join(", ");
+        profileData.address2 = landingPage.address_area || "";
+        profileData.address3 = [
+          [landingPage.postal_code, landingPage.address_city_state].filter(Boolean).join(" "),
+          landingPage.address_country
+        ].filter(Boolean).join(", ");
+      }
+      // Legacy separate address fields (preserve values)
       profileData.addressName = landingPage.address_name || "";
       profileData.addressStreet = landingPage.address_street || "";
       profileData.addressArea = landingPage.address_area || "";
       profileData.addressCityState = landingPage.address_city_state || "";
       profileData.addressCountry = landingPage.address_country || "";
       profileData.postalCode = landingPage.postal_code || "";
-      profileData.addressMapUrl = landingPage.address_map_url || "";
+      profileData.mapUrl = landingPage.address_map_url || landingPage.map_url || "";
       profileData.coordinates = landingPage.coordinates || "";
 
       // Stats
@@ -4428,14 +4511,17 @@ const resetProfileData = () => {
   profileData.employeeCount = "";
   profileData.companyWhatsapp = "";
 
-  // Address Info
+  // Address Info (new 3-line + legacy)
+  profileData.address1 = "";
+  profileData.address2 = "";
+  profileData.address3 = "";
   profileData.addressName = "";
   profileData.addressStreet = "";
   profileData.addressArea = "";
   profileData.addressCityState = "";
   profileData.addressCountry = "";
   profileData.postalCode = "";
-  profileData.addressMapUrl = "";
+  profileData.mapUrl = "";
   profileData.coordinates = "";
 
   // Stats (reset to default examples)

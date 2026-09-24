@@ -34,8 +34,51 @@
         </p>
       </div>
 
+      <!-- Status banners -->
+      <Transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+      >
+        <div
+          v-if="emailVerifiedBanner"
+          class="flex items-start gap-3 p-4 rounded-xl bg-success-50 border border-success-200 text-success-800"
+          role="status"
+        >
+          <Icon name="heroicons:check-circle" class="w-6 h-6 flex-shrink-0" />
+          <div>
+            <h3 class="font-semibold">
+              {{ emailVerifiedBanner === 'new' ? 'Email verified successfully' : 'Email already verified' }}
+            </h3>
+            <p class="text-sm mt-0.5">
+              {{ emailVerifiedBanner === 'new' ? 'Thanks for confirming your email. You can now sign in.' : 'Your email was confirmed earlier. Please sign in.' }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-else-if="needsVerificationBanner"
+          class="flex items-start gap-3 p-4 rounded-xl bg-warning-50 border border-warning-200 text-warning-800"
+          role="alert"
+        >
+          <Icon name="heroicons:exclamation-triangle" class="w-6 h-6 flex-shrink-0" />
+          <div class="flex-1">
+            <h3 class="font-semibold">Verify your email to unlock full access</h3>
+            <p class="text-sm mt-0.5">
+              We sent a confirmation link when you signed up. Please check your inbox.
+            </p>
+            <NuxtLink
+              :to="`/UserAccount/verify-email${form.email ? '?email=' + encodeURIComponent(form.email) : ''}`"
+              class="inline-flex items-center gap-1 mt-2 text-sm font-medium text-primary-700 hover:text-primary-800 underline-offset-2 hover:underline"
+            >
+              Resend link or troubleshoot
+              <Icon name="heroicons:arrow-right" class="w-4 h-4" />
+            </NuxtLink>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Login Form -->
-      <div class="card p-8">
+      <div class="card p-8" :class="emailVerifiedBanner || needsVerificationBanner ? 'mt-0' : ''">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <div class="form-group">
             <label for="email" class="form-label">Email address</label>
@@ -295,6 +338,23 @@ const form = reactive({
   email: "",
   password: "",
   remember: false,
+});
+
+// Verification status banners
+const emailVerifiedBanner = computed(() => {
+  if (route.query.email_verified === '1') return 'new';
+  if (route.query.email_already_verified === '1') return 'already';
+  return null;
+});
+
+// Show "verify your email" banner if user IS authenticated but email not verified yet
+// (User came from register or tried login and backend attached needs_email_verification flag)
+const needsVerificationBanner = computed(() => {
+  if (!authStore.isAuthenticated) return false;
+  if (emailVerifiedBanner.value) return false;
+  const user = authStore.user;
+  if (!user) return false;
+  return !user.email_verified_at;
 });
 
 // Debounce timer for email check
