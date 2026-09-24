@@ -243,10 +243,10 @@ class ProfileController extends Controller
             } else {
                 $targetPath = storage_path('app/public');
                 $publicStoragePath = public_path('storage');
-                if (is_link($publicStoragePath) && readlink($publicStoragePath) !== realpath($targetPath)) {
+                if (function_exists('is_link') && function_exists('readlink') && \is_link($publicStoragePath) && \readlink($publicStoragePath) !== \realpath($targetPath)) {
                     Log::warning('Storage symlink points to wrong target', [
-                        'link_target' => readlink($publicStoragePath),
-                        'expected' => realpath($targetPath)
+                        'link_target' => \readlink($publicStoragePath),
+                        'expected' => \realpath($targetPath)
                     ]);
                 }
             }
@@ -380,10 +380,10 @@ class ProfileController extends Controller
             } else {
                 $targetPath = storage_path('app/public');
                 $publicStoragePath = public_path('storage');
-                if (is_link($publicStoragePath) && readlink($publicStoragePath) !== realpath($targetPath)) {
+                if (function_exists('is_link') && function_exists('readlink') && \is_link($publicStoragePath) && \readlink($publicStoragePath) !== \realpath($targetPath)) {
                     Log::warning('Storage symlink points to wrong target', [
-                        'link_target' => readlink($publicStoragePath),
-                        'expected' => realpath($targetPath)
+                        'link_target' => \readlink($publicStoragePath),
+                        'expected' => \realpath($targetPath)
                     ]);
                 }
             }

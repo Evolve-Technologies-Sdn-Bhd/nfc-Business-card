@@ -268,6 +268,8 @@ Route::get('/legal/pdf/privacy/view', [LegalDocumentController::class, 'viewPriv
 Route::get('/legal/pdf/{type}/info', [LegalDocumentController::class, 'getPdfInfo']);
 
 // Public chatbot routes
+Route::get('/chatbot/questions', [ChatbotController::class, 'getPublicQuestions']);
+Route::post('/chatbot/ask', [ChatbotController::class, 'askQuestion']);
 Route::post('/chatbot/feedback', [ChatbotController::class, 'submitFeedback']);
 
 // Public admin info endpoint (for getting super admin to send notifications)

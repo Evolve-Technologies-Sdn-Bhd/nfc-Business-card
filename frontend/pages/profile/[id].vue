@@ -141,11 +141,11 @@
           willChange: 'opacity, transform',
         }"
       >
-        <span
-          :style="{ fontSize: isMobile ? '18px' : '20px' }"
+        <Icon
+          name="heroicons:arrow-left"
+          :class="['mr-1.5', isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
           aria-hidden="true"
-          >←</span
-        >
+        />
         <span>Home</span>
       </button>
     </Transition>
@@ -182,7 +182,11 @@
           willChange: 'opacity, transform',
         }"
       >
-        <span :style="{ fontSize: isMobile ? '18px' : '20px' }" aria-hidden="true">✏️</span>
+        <Icon
+          name="heroicons:pencil-square"
+          :class="['mr-1.5', isMobile ? 'w-[18px] h-[18px]' : 'w-5 h-5']"
+          aria-hidden="true"
+        />
         <span>Edit Profile</span>
       </button>
     </Transition>
@@ -201,7 +205,10 @@
           boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         }"
       >
-        <span>👁️ Preview</span>
+        <span class="inline-flex items-center gap-1">
+          <Icon name="heroicons:eye" class="w-3.5 h-3.5" aria-hidden="true" />
+          Preview
+        </span>
       </div>
     </Transition>
 
@@ -219,7 +226,9 @@
         v-if="loading"
         :style="{ textAlign: 'center', padding: '60px 20px', color: 'white' }"
       >
-        <div :style="{ fontSize: '48px', marginBottom: '20px' }">⏳</div>
+        <div :style="{ marginBottom: '20px' }">
+          <Icon name="heroicons:arrow-path" class="w-12 h-12 animate-spin text-white/70 mx-auto" aria-hidden="true" />
+        </div>
         <p :style="{ fontSize: responsive.h2Size }">Loading profile...</p>
       </div>
 
@@ -233,7 +242,9 @@
           margin: '0 auto',
         }"
       >
-        <div :style="{ fontSize: '80px', marginBottom: '20px' }">📝</div>
+        <div :style="{ marginBottom: '20px' }">
+          <Icon name="heroicons:document-text" class="w-20 h-20 text-white/60 mx-auto" aria-hidden="true" />
+        </div>
         <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px', color: 'white' }">
           No Profile Data Yet
         </h2>
@@ -276,7 +287,9 @@
         v-else-if="profileNotFound"
         :style="{ textAlign: 'center', padding: '60px 20px', color: 'white' }"
       >
-        <div :style="{ fontSize: '72px', marginBottom: '20px' }">😢</div>
+        <div :style="{ marginBottom: '20px' }">
+          <Icon name="heroicons:x-circle" class="w-[72px] h-[72px] text-white/60 mx-auto" aria-hidden="true" />
+        </div>
         <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px' }">
           Profile Not Found
         </h2>
@@ -2472,7 +2485,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                📝
+                <Icon name="heroicons:document-text" :class="isMobile ? 'w-5 h-5' : 'w-6 h-6'" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -3343,7 +3356,8 @@
         <!-- Description -->
         <div v-if="selectedService.description" :style="{ marginBottom: '24px' }">
           <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-            📝 Description
+            <Icon name="heroicons:document-text" class="w-4 h-4" aria-hidden="true" />
+            Description
           </h4>
           <p :style="{ 
             color: 'rgba(255, 255, 255, 0.75)', 
@@ -5176,7 +5190,7 @@ const loadProfileData = async () => {
 
       // === Use visible_fields to control display ===
       if (data.visible_fields) {
-        console.log('👁️ Visible fields config:', data.visible_fields);
+        console.log('Visible fields config:', data.visible_fields);
         visibleFieldsConfig.value = data.visible_fields;
       }
 

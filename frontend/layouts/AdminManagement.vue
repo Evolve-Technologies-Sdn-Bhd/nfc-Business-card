@@ -42,15 +42,6 @@
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
                 ]"
               >
-                <Icon
-                  :name="item.icon"
-                  :class="[
-                    'mr-3 h-5 w-5 flex-shrink-0',
-                    isActiveRoute(item.href)
-                      ? 'text-primary-500'
-                      : 'text-secondary-400 group-hover:text-secondary-500',
-                  ]"
-                />
                 {{ item.name }}
                 <!-- Notification Badge -->
                 <span

@@ -94,9 +94,15 @@
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 required
-                :class="['input pr-10', errors.password ? 'input-error' : '']"
+                :class="[
+                  'input pr-10',
+                  errors.password ? 'input-error' : '',
+                  form.password && passwordStrength === 0 && !errors.password ? 'border-warning-400 focus:ring-warning-500 focus:border-warning-500' : '',
+                  form.password && passwordStrength >= 3 ? 'border-success-400 focus:ring-success-500 focus:border-success-500' : '',
+                ]"
                 placeholder="Create a strong password"
                 :disabled="loading"
+                aria-describedby="password-requirements"
               />
               <button
                 type="button"
@@ -110,6 +116,61 @@
                 />
               </button>
             </div>
+
+            <!-- Password Strength Meter -->
+            <div v-if="form.password" class="mt-2 space-y-2" aria-live="polite">
+              <!-- Strength bar segments -->
+              <div class="flex gap-1.5" role="group" :aria-label="`Password strength: ${getPasswordStrengthText(passwordStrength)}`">
+                <div
+                  v-for="segment in 4"
+                  :key="segment"
+                  :class="[
+                    'h-1.5 flex-1 rounded-full transition-colors duration-200',
+                    segment <= passwordStrength
+                      ? getPasswordStrengthColor(passwordStrength)
+                      : 'bg-secondary-200',
+                  ]"
+                  :aria-hidden="segment > passwordStrength"
+                ></div>
+              </div>
+              <!-- Strength label + requirements summary -->
+              <div class="flex items-center justify-between text-xs">
+                <span
+                  :class="[
+                    'font-medium',
+                    passwordStrength <= 1 ? 'text-error-600' : '',
+                    passwordStrength === 2 ? 'text-warning-600' : '',
+                    passwordStrength === 3 ? 'text-success-500' : '',
+                    passwordStrength >= 4 ? 'text-success-600' : '',
+                  ]"
+                >
+                  {{ getPasswordStrengthText(passwordStrength) }}
+                </span>
+                <span class="text-secondary-500">
+                  {{ form.password.length }} characters
+                </span>
+              </div>
+              <!-- Requirement checklist -->
+              <ul id="password-requirements" class="grid grid-cols-2 gap-x-3 gap-y-1.5 pt-1">
+                <li class="flex items-center gap-1.5 text-xs" :class="form.password.length >= 8 ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="form.password.length >= 8 ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                  Min 8 characters
+                </li>
+                <li class="flex items-center gap-1.5 text-xs" :class="/[A-Z]/.test(form.password) && /[a-z]/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="/[A-Z]/.test(form.password) && /[a-z]/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                  Upper + lowercase
+                </li>
+                <li class="flex items-center gap-1.5 text-xs" :class="/\d/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="/\d/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                  Contains a number
+                </li>
+                <li class="flex items-center gap-1.5 text-xs" :class="/[!@#$%^&*(),.?\":{}|<>]/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="/[!@#$%^&*(),.?\":{}|<>]/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                  Special symbol
+                </li>
+              </ul>
+            </div>
+
             <p v-if="errors.password" class="form-error">
               {{ errors.password[0] }}
             </p>
@@ -126,27 +187,57 @@
                 :type="showConfirmPassword ? 'text' : 'password'"
                 required
                 :class="[
-                  'input pr-10',
+                  'input pr-16',
                   errors.password_confirmation ? 'input-error' : '',
+                  !errors.password_confirmation && form.password && form.password_confirmation && form.password === form.password_confirmation
+                    ? 'border-success-400 focus:ring-success-500 focus:border-success-500 pr-16'
+                    : '',
+                  !errors.password_confirmation && form.password && form.password_confirmation && form.password !== form.password_confirmation
+                    ? 'border-error-400 focus:ring-error-500 focus:border-error-500 pr-16'
+                    : '',
                 ]"
                 placeholder="Confirm your password"
                 :disabled="loading"
+                aria-invalid="
+                  form.password &&
+                  form.password_confirmation &&
+                  form.password !== form.password_confirmation
+                "
               />
-              <button
-                type="button"
-                @click="showConfirmPassword = !showConfirmPassword"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                :disabled="loading"
-              >
-                <Icon
-                  :name="
-                    showConfirmPassword
-                      ? 'heroicons:eye-slash'
-                      : 'heroicons:eye'
-                  "
-                  class="h-5 w-5 text-secondary-400"
-                />
-              </button>
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1">
+                <!-- Match status icon -->
+                <span
+                  v-if="form.password && form.password_confirmation"
+                  class="flex-shrink-0"
+                  aria-hidden="true"
+                >
+                  <Icon
+                    v-if="form.password === form.password_confirmation"
+                    name="heroicons:check-circle"
+                    class="w-5 h-5 text-success-500"
+                  />
+                  <Icon
+                    v-else
+                    name="heroicons:x-circle"
+                    class="w-5 h-5 text-error-500"
+                  />
+                </span>
+                <button
+                  type="button"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  class="flex-shrink-0"
+                  :disabled="loading"
+                >
+                  <Icon
+                    :name="
+                      showConfirmPassword
+                        ? 'heroicons:eye-slash'
+                        : 'heroicons:eye'
+                    "
+                    class="h-5 w-5 text-secondary-400"
+                  />
+                </button>
+              </div>
             </div>
             <p v-if="errors.password_confirmation" class="form-error">
               {{ errors.password_confirmation[0] }}
@@ -157,9 +248,23 @@
                 form.password_confirmation &&
                 form.password !== form.password_confirmation
               "
-              class="text-xs text-error-600 mt-1"
+              class="flex items-center gap-1 text-xs text-error-600 mt-1 font-medium"
+              role="alert"
             >
+              <Icon name="heroicons:information-circle" class="w-3.5 h-3.5 flex-shrink-0" />
               Passwords do not match
+            </p>
+            <p
+              v-if="
+                form.password &&
+                form.password_confirmation &&
+                form.password === form.password_confirmation
+              "
+              class="flex items-center gap-1 text-xs text-success-600 mt-1 font-medium"
+              role="status"
+            >
+              <Icon name="heroicons:check-circle" class="w-3.5 h-3.5 flex-shrink-0" />
+              Passwords match
             </p>
           </div>
 

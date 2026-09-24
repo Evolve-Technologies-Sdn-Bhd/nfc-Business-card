@@ -7,11 +7,16 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use App\Models\RememberToken;
 use App\Services\NotificationService;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
@@ -69,8 +74,14 @@ class AuthController extends Controller
                     'profile_url' => config('app.frontend_url') . '/UserDashboard/PlanSelection',
                 ]);
             } catch (\Exception $e) {
-                // Log notification error but don't fail registration
-                \Log::error('Failed to send registration notification: ' . $e->getMessage());
+                Log::error('Failed to send registration notification: ' . $e->getMessage());
+            }
+
+            // Send email verification link (non-blocking)
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Exception $e) {
+                Log::warning('Failed to send email verification link after registration: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -78,6 +89,8 @@ class AuthController extends Controller
                 'user' => $user->fresh(),
                 'token' => $token,
                 'token_type' => 'Bearer',
+                'needs_email_verification' => !$user->hasVerifiedEmail(),
+                'verification_email_sent' => true,
             ], 201);
         } catch (\Exception $e) {
             \Log::error('Registration error: ' . $e->getMessage());

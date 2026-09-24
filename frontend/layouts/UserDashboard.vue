@@ -52,15 +52,6 @@
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
                 ]"
               >
-                <Icon
-                  :name="item.icon"
-                  :class="[
-                    'mr-3 h-5 w-5 flex-shrink-0',
-                    isActiveRoute(item.href)
-                      ? 'text-primary-500'
-                      : 'text-secondary-400 group-hover:text-secondary-500',
-                  ]"
-                />
                 {{ item.name }}
                 <span
                   v-if="item.badge"
@@ -421,11 +412,49 @@
                   />
                 </button>
               </div>
-              <!-- Profile preview content would go here -->
-              <div class="bg-secondary-100 rounded-lg p-8 text-center">
-                <p class="text-secondary-600">
-                  Profile preview will be displayed here
-                </p>
+              <!-- Profile preview content -->
+              <div v-if="hasPreviewProfile" class="space-y-3">
+                <div class="flex items-center justify-between text-sm text-secondary-500">
+                  <span>
+                    Live preview of your public landing page
+                  </span>
+                  <a
+                    :href="userPreviewProfileUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                  >
+                    <Icon name="heroicons:arrow-top-right-on-square" class="w-4 h-4" />
+                    Open in new tab
+                  </a>
+                </div>
+                <div class="overflow-hidden rounded-xl border border-secondary-200 shadow-sm bg-secondary-50">
+                  <iframe
+                    :src="userPreviewProfileUrl"
+                    title="Profile Preview"
+                    class="block w-full bg-white"
+                    :style="{ height: '70vh', minHeight: '480px', border: 0 }"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                  />
+                </div>
+              </div>
+              <div v-else class="bg-secondary-50 rounded-xl p-8 text-center space-y-4 border border-dashed border-secondary-200">
+                <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-white shadow-sm border border-secondary-200">
+                  <Icon name="heroicons:identification" class="w-7 h-7 text-secondary-400" />
+                </div>
+                <div class="space-y-1">
+                  <h4 class="font-semibold text-secondary-800">No profile available yet</h4>
+                  <p class="text-sm text-secondary-500">
+                    Create your first NFC card and set up your profile landing page to preview it here.
+                  </p>
+                </div>
+                <NuxtLink
+                  to="/UserDashboard/CardManagement"
+                  class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+                  @click="showProfilePreview = false"
+                >
+                  Go to Card Management
+                </NuxtLink>
               </div>
             </div>
           </Transition>
@@ -482,6 +511,17 @@ const logoutLoading = ref(false);
 
 // Computed
 const user = computed(() => authStore.user);
+
+const userPreviewProfileUrl = computed(() => {
+  const cards = user.value?.nfc_cards ?? user.value?.nfcCards;
+  if (!Array.isArray(cards) || cards.length === 0) return null;
+  const primary = cards[0];
+  const identifier = primary.card_id ?? primary.slug ?? primary.id;
+  if (!identifier) return null;
+  return `/profile/${identifier}`;
+});
+
+const hasPreviewProfile = computed(() => !!userPreviewProfileUrl.value);
 
 // Development mode check
 const isDevelopment = computed(() => {
