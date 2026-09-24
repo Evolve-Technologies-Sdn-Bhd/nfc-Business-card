@@ -4064,18 +4064,17 @@ const defaultSections = [
   'hero',       // 1. Introduction - always first
   'about',      // 2. About Me - personal introduction
   'company',    // 3. Company - business context
-  'video',      // 4. Video - company/personal intro video
-  'services',   // 5. Services - what you offer
-  'portfolio',  // 6. Portfolio - work samples
-  'blog',       // 7. Blog - thought leadership
-  'contact',    // 8. Contact - how to reach
-  'location',   // 9. Location - where to find
-  'social',     // 10. Social - connect online
-  'team',       // 11. Team - who else is involved
-  'gallery',    // 12. Gallery - visual showcase
-  'education',  // 13. Education - credentials
-  'awards',     // 14. Awards - achievements
-  'vcard',      // 15. vCard - always last, save contact action
+  'services',   // 4. Services - what you offer
+  'portfolio',  // 5. Portfolio - work samples
+  'blog',       // 6. Blog - thought leadership
+  'contact',    // 7. Contact - how to reach
+  'location',   // 8. Location - where to find
+  'social',     // 9. Social - connect online
+  'team',       // 10. Team - who else is involved
+  'gallery',    // 11. Gallery - visual showcase
+  'education',  // 12. Education - credentials
+  'awards',     // 13. Awards - achievements
+  'vcard',      // 14. vCard - always last, save contact action
 ];
 
 // Computed: Ordered sections based on Layout Designer
@@ -4146,10 +4145,6 @@ const hasAboutData = computed(() => {
   return !!(profile.value.bio || stats.value.length > 0);
 });
 
-const hasVideoData = computed(() => {
-  return !!videoData.value.url;
-});
-
 const hasServicesData = computed(() => {
   return services.value.length > 0;
 });
@@ -4200,7 +4195,6 @@ const showPortfolioSection = computed(() => hasPortfolioData.value && isSectionV
 const showBlogSection = computed(() => hasBlogData.value && isSectionVisible('blog'));
 
 // Sub-section visibility (within combined cards)
-const showVideoSection = computed(() => hasVideoData.value && isSubSectionVisible('companyTeam', 'video'));
 const showTeamSection = computed(() => hasTeamData.value && isSubSectionVisible('companyTeam', 'team'));
 const showEducationSection = computed(() => (profile.value.education?.length > 0 || profile.value.certifications?.length > 0) && isSubSectionVisible('profileAchievements', 'education'));
 const showAwardsSection = computed(() => awards.value.length > 0 && isSubSectionVisible('profileAchievements', 'awards'));
@@ -4280,12 +4274,6 @@ const serviceDetails = ref({
   brochure: null,    // PDF brochure
   bookingEnabled: false,
   bookingUrl: "",
-});
-
-const videoData = ref({
-  url: '',
-  title: '',
-  description: '',
 });
 
 const contactMethods = ref([
@@ -4557,17 +4545,6 @@ const loadPreviewData = (data) => {
   address.value.postalCode = data.postalCode || "";
   address.value.mapUrl = data.addressMapUrl || "";
 
-  // ============ VIDEO SECTION ============
-  if (data.companyVideo) {
-    videoData.value.url = data.companyVideo;
-    videoData.value.title = data.companyVideoTitle || '';
-    videoData.value.description = data.companyVideoDescription || '';
-  } else {
-    videoData.value.url = '';
-    videoData.value.title = '';
-    videoData.value.description = '';
-  }
-
   // ============ CONTACT METHODS ============
   contactMethods.value[0].subtitle = data.phoneNumber || data.contactNumber || data.phone || "";
   contactMethods.value[0].href = (data.phoneNumber || data.contactNumber) ? `tel:${(data.phoneNumber || data.contactNumber).replace(/\s/g, '')}` : "";
@@ -4838,28 +4815,6 @@ const getPlatformColor = (platform) => {
     custom: "#667eea",
   };
   return colorMap[platform?.toLowerCase()] || "#667eea";
-};
-
-// Helper function to convert video URLs to embed format
-const getEmbedUrl = (url) => {
-  if (!url) return '';
-  
-  // YouTube
-  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
-  const youtubeMatch = url.match(youtubeRegex);
-  if (youtubeMatch) {
-    return `https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0`;
-  }
-  
-  // Vimeo
-  const vimeoRegex = /(?:vimeo\.com\/)([0-9]+)/;
-  const vimeoMatch = url.match(vimeoRegex);
-  if (vimeoMatch) {
-    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  }
-  
-  // If already an embed URL or direct link, return as is
-  return url;
 };
 
 // Load profile data from API
@@ -5142,17 +5097,6 @@ const loadProfileData = async () => {
       // Blog Posts
       if (data.blog_posts && Array.isArray(data.blog_posts)) {
         blogPosts.value = data.blog_posts;
-      }
-
-      // Video Data
-      if (data.company_video) {
-        videoData.value.url = data.company_video;
-        videoData.value.title = data.video_title || '';
-        videoData.value.description = data.video_description || '';
-      } else {
-        videoData.value.url = '';
-        videoData.value.title = '';
-        videoData.value.description = '';
       }
 
       // Service Details
