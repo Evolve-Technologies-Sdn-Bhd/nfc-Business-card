@@ -2420,15 +2420,14 @@ const landingPageSectionsConfig = [
       { id: 'awards', name: 'Awards', icon: 'heroicons:trophy', apiSource: 'company', fieldKeys: ['awards'] },
     ]
   },
-  // Combined: Company & Team (Company Info + Video + Team)
+  // Combined: Company & Team (Company Info + Team)
   { 
     id: 'companyTeam', 
     name: 'Company & Team', 
     icon: 'heroicons:building-office-2', 
-    description: 'Company info, video, and team members',
+    description: 'Company info and team members',
     subSections: [
       { id: 'company', name: 'Company Info', icon: 'heroicons:building-office', apiSource: 'company', fieldKeys: ['companyLogo', 'companyLogoText', 'companyName', 'companyRegNo', 'companyDescription', 'industry', 'establishedYear', 'employeeCount'] },
-      { id: 'video', name: 'Video', icon: 'heroicons:video-camera', apiSource: 'company', fieldKeys: ['companyVideo'] },
       { id: 'team', name: 'Team', icon: 'heroicons:user-group', apiSource: 'company', fieldKeys: ['teamMembers'] },
     ]
   },

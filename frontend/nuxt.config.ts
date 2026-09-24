@@ -39,14 +39,16 @@ export default defineNuxtConfig({
   // Runtime Config
   runtimeConfig: {
     public: {
-      // Updated to use NUXT_PUBLIC_ prefix
       apiBaseUrl:
-        process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api",
-      appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3002",
+        (process.env.NUXT_PUBLIC_API_BASE_URL ? process.env.NUXT_PUBLIC_API_BASE_URL.replace(/[\u0060\u00B4\u2018\u2019\u0027\u0022]/g, "") : "") ||
+        "https://nfcgo.clbgroups.com/api",
+      appUrl:
+        (process.env.NUXT_PUBLIC_APP_URL ? process.env.NUXT_PUBLIC_APP_URL.replace(/[\u0060\u00B4\u2018\u2019\u0027\u0022]/g, "") : "") ||
+        "https://nfcgo.clbgroups.com",
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
       appleClientId: process.env.NUXT_PUBLIC_APPLE_CLIENT_ID || "",
       stripePublishableKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
-      maxFileSize: process.env.NUXT_PUBLIC_MAX_FILE_SIZE || "5242880", // 5MB
+      maxFileSize: process.env.NUXT_PUBLIC_MAX_FILE_SIZE || "5242880",
       allowedFileTypes:
         process.env.NUXT_PUBLIC_ALLOWED_FILE_TYPES ||
         "image/jpeg,image/png,image/gif,image/webp",

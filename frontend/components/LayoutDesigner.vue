@@ -273,7 +273,6 @@ const subSectionDefs = {
   ],
   companyTeam: [
     { id: 'company', name: 'Company Info', fields: ['companyLogo', 'companyLogoText', 'companyName', 'companyRegNo', 'companyDescription', 'industry', 'establishedYear', 'employeeCount'] },
-    { id: 'video', name: 'Video', fields: ['companyVideo'] },
     { id: 'team', name: 'Team', fields: ['teamMembers'] }
   ]
 };
@@ -341,7 +340,7 @@ const sectionMeta = {
   hero: { emoji: '👤', color: 'linear-gradient(135deg, #667eea, #764ba2)', description: 'Profile picture, name, badges' },
   // Combined sections
   profileAchievements: { emoji: '✨', color: 'linear-gradient(135deg, #667eea, #764ba2)', description: 'About me, education, awards' },
-  companyTeam: { emoji: '🏢', color: 'linear-gradient(135deg, #11998e, #38ef7d)', description: 'Company, video, team' },
+  companyTeam: { emoji: '🏢', color: 'linear-gradient(135deg, #11998e, #38ef7d)', description: 'Company details and team' },
   // Sub-section icons
   aboutMe: { emoji: '✨', color: 'linear-gradient(135deg, #667eea, #764ba2)', description: 'Bio and statistics' },
   companyInfo: { emoji: '🏢', color: 'linear-gradient(135deg, #11998e, #38ef7d)', description: 'Company details' },

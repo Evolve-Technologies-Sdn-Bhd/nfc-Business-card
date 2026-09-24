@@ -632,9 +632,9 @@
 
         <!-- Main Content Grid -->
         <div :style="{ display: 'grid', gap: responsive.sectionGap }">
-          <!-- Company Card (Combined: Company Info + Video + Team) -->
+          <!-- Company Card (Combined: Company Info + Team) -->
           <div
-            v-if="showCompanySection || showVideoSection || showTeamSection"
+            v-if="showCompanySection || showTeamSection"
             ref="companyCardRef"
             @mousemove="!isMobile && handleCardTilt"
             @mouseleave="!isMobile && resetCardTilt"
@@ -689,7 +689,7 @@
             <div
               v-if="hasCompanyData"
               :style="{
-                marginBottom: (showVideoSection || showTeamSection) ? '30px' : '0',
+                marginBottom: showTeamSection ? '30px' : '0',
               }"
             >
               <div
@@ -866,100 +866,12 @@
               </div>
             </div>
             
-            <!-- Video Sub-section -->
-            <div
-              v-if="showVideoSection"
-              :style="{
-                marginBottom: showTeamSection ? '30px' : '0',
-                paddingTop: hasCompanyData ? '20px' : '0',
-                borderTop: hasCompanyData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-              }"
-            >
-              <div
-                v-if="videoData.title"
-                :style="{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '20px',
-                }"
-              >
-                <div
-                  :style="{
-                    width: isMobile ? '32px' : '40px',
-                    height: isMobile ? '32px' : '40px',
-                    background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: isMobile ? '16px' : '20px',
-                  }"
-                >
-                  🎥
-                </div>
-                <h3
-                  :style="{
-                    fontSize: responsive.h3Size,
-                    fontWeight: 700,
-                    color: 'white',
-                    margin: 0,
-                  }"
-                >
-                  {{ videoData.title }}
-                </h3>
-              </div>
-
-              <!-- Video Player -->
-              <div
-                :style="{
-                  position: 'relative',
-                  paddingBottom: '56.25%', /* 16:9 aspect ratio */
-                  height: 0,
-                  overflow: 'hidden',
-                  borderRadius: '15px',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-                  marginBottom: videoData.description ? (isMobile ? '12px' : '15px') : '0',
-                }"
-              >
-                <iframe
-                  :src="getEmbedUrl(videoData.url)"
-                  :style="{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    borderRadius: '15px',
-                  }"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                />
-              </div>
-
-              <!-- Video Description -->
-              <p
-                v-if="videoData.description"
-                :style="{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  lineHeight: '1.6',
-                  fontSize: responsive.bodySize,
-                  margin: 0,
-                  textAlign: 'center',
-                }"
-              >
-                {{ videoData.description }}
-              </p>
-            </div>
-            
             <!-- Team Sub-section -->
             <div
               v-if="showTeamSection"
               :style="{
-                paddingTop: (hasCompanyData || showVideoSection) ? '20px' : '0',
-                borderTop: (hasCompanyData || showVideoSection) ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                paddingTop: hasCompanyData ? '20px' : '0',
+                borderTop: hasCompanyData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
               }"
             >
               <div
