@@ -17,11 +17,6 @@ class Kernel extends ConsoleKernel
             $deleted = \App\Models\PasswordReset::cleanupExpired();
             \Log::info("Cleaned up {$deleted} expired password reset tokens");
         })->dailyAt('02:00');
-        
-        // Or you can run it every 6 hours
-        // $schedule->call(function () {
-        //     \App\Models\PasswordReset::cleanupExpired();
-        // })->everySixHours();
     }
 
     /**

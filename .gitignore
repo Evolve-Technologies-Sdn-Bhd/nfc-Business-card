@@ -1,0 +1,113 @@
+# ========================================
+# NFC Business Card — MONOREPO .gitignore
+# ========================================
+
+# ---- Composer (Backend) ----
+backend/.composer_home/
+backend/vendor/
+backend/composer.phar
+backend/public/hot
+backend/public/build
+backend/public/storage
+backend/storage/*.key
+backend/storage/pail/
+backend/storage/framework/views/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/logs/*
+backend/storage/app/private/*
+backend/storage/app/public/*
+backend/bootstrap/cache/*.php
+backend/auth.json
+!backend/storage/framework/views/.gitignore
+!backend/storage/app/.gitignore
+!backend/storage/app/public/.gitignore
+!backend/storage/framework/.gitignore
+!backend/storage/framework/cache/.gitignore
+!backend/storage/framework/sessions/.gitignore
+!backend/storage/logs/.gitignore
+!backend/.htaccess
+!backend/storage/templates/employee_template.csv
+backend/storage/app/backup_*.sql
+backend/storage/app/public/backup_*.sql
+
+# ---- Node / Nuxt (Frontend) ----
+frontend/node_modules/
+frontend/.nuxt/
+frontend/.output/
+frontend/.nitro/
+frontend/.data/
+frontend/.cache/
+frontend/dist/
+frontend/build/
+
+# ---- IDE / Editor ----
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
+*.swp
+*.swo
+
+# ---- OS ----
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+System Volume Information/
+
+# ---- Logs ----
+*.log
+backend/*.log
+frontend/logs/
+logs/
+
+# ---- Testing ----
+backend/.phpunit.result.cache
+backend/.phpunit.cache/
+backend/tests/temp/
+coverage/
+.nyc_output/
+
+# ---- Env files ----
+.env
+.env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+!backend/env.*.template
+
+# ---- Deployment output ----
+.spa/
+/dist/
+/backend/public/build/
+/backend/storage/app/public/private/
+
+# ---- Misc ----
+*.bak
+*.tmp
+*.pid
+*.lock.tmp
+backend/composer.lock.tmp
+frontend/package-lock.json.tmp
+.pnp/
+.pnp.js
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+.turbo/
+
+# ---- aaPanel / Server-local files ----
+.user.ini.bak
+site_total.conf.bak
+*.sql
+!backend/database/migrations/*.sql
+!backend/database/*.sql

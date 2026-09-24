@@ -29,7 +29,6 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\Admin\ManualBankTransferController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
-use App\Http\Controllers\BusinessPlanRequestController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Api\Admin\PlanPriceController;

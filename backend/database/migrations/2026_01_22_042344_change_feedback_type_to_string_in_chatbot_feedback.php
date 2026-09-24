@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
@@ -10,7 +10,20 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE chatbot_feedback MODIFY COLUMN feedback_type VARCHAR(255) DEFAULT 'general'");
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
+        if (! Schema::hasColumn('chatbot_feedback', 'feedback_type')) {
+            return;
+        }
+
+        try {
+            DB::statement("ALTER TABLE chatbot_feedback MODIFY COLUMN feedback_type VARCHAR(255) DEFAULT 'general'");
+        } catch (\Throwable $e) {
+            // Ignore if column type is already correct / lock / driver-specific error.
+            // Must never break the migration chain.
+        }
     }
 
     /**

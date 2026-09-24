@@ -12,14 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add pinned column to notifications table
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->boolean('pinned')->default(false)->after('is_read');
-            $table->json('attachments')->nullable()->after('data');
-        });
+        try {
+            if (!Schema::hasColumn('notifications', 'pinned')) {
+                Schema::table('notifications', function (Blueprint $table) {
+                    $table->boolean('pinned')->default(false)->after('is_read');
+                    $table->json('attachments')->nullable()->after('data');
+                });
+            }
+        } catch (\Exception $e) {
+        }
 
-        // Add new notification type for bulk orders
-        DB::statement("ALTER TABLE notifications MODIFY COLUMN type ENUM(
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE notifications MODIFY COLUMN type ENUM(
             'registration_success',
             'email_verification',
             'login_new_device',
@@ -43,25 +47,33 @@ return new class extends Migration
             'business_bulk_order_placed',
             'employee_password_reset'
         )");
+        }
 
-        // Add index for pinned notifications
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->index(['user_id', 'pinned', 'created_at']);
-        });
+        try {
+            Schema::table('notifications', function (Blueprint $table) {
+                $table->index(['user_id', 'pinned', 'created_at']);
+            });
+        } catch (\Exception $e) {
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropColumn(['pinned', 'attachments']);
-            $table->dropIndex(['user_id', 'pinned', 'created_at']);
-        });
+        try {
+            if (Schema::hasColumn('notifications', 'pinned')) {
+                Schema::table('notifications', function (Blueprint $table) {
+                    try {
+                        $table->dropIndex(['user_id', 'pinned', 'created_at']);
+                    } catch (\Exception $e) {
+                    }
+                    $table->dropColumn(['pinned', 'attachments']);
+                });
+            }
+        } catch (\Exception $e) {
+        }
 
-        // Revert notification type enum
-        DB::statement("ALTER TABLE notifications MODIFY COLUMN type ENUM(
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE notifications MODIFY COLUMN type ENUM(
             'registration_success',
             'email_verification',
             'login_new_device',
@@ -83,5 +95,6 @@ return new class extends Migration
             'system_message',
             'admin_announcement'
         )");
+        }
     }
 };

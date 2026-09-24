@@ -876,6 +876,7 @@
               }"
             >
               <div
+                v-if="videoData.title"
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
@@ -905,7 +906,7 @@
                     margin: 0,
                   }"
                 >
-                  {{ videoData.title || 'Company Introduction' }}
+                  {{ videoData.title }}
                 </h3>
               </div>
 
@@ -4370,9 +4371,9 @@ const serviceDetails = ref({
 });
 
 const videoData = ref({
-  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // YouTube, Vimeo, or direct embed URL
-  title: 'Company Introduction',
-  description: 'Watch our introduction video to learn more about what we do',
+  url: '',
+  title: '',
+  description: '',
 });
 
 const contactMethods = ref([
@@ -4647,8 +4648,12 @@ const loadPreviewData = (data) => {
   // ============ VIDEO SECTION ============
   if (data.companyVideo) {
     videoData.value.url = data.companyVideo;
-    videoData.value.title = data.companyVideoTitle || "Company Video";
-    videoData.value.description = data.companyVideoDescription || "";
+    videoData.value.title = data.companyVideoTitle || '';
+    videoData.value.description = data.companyVideoDescription || '';
+  } else {
+    videoData.value.url = '';
+    videoData.value.title = '';
+    videoData.value.description = '';
   }
 
   // ============ CONTACT METHODS ============
@@ -5230,8 +5235,12 @@ const loadProfileData = async () => {
       // Video Data
       if (data.company_video) {
         videoData.value.url = data.company_video;
-        videoData.value.title = data.video_title || 'Company Introduction';
+        videoData.value.title = data.video_title || '';
         videoData.value.description = data.video_description || '';
+      } else {
+        videoData.value.url = '';
+        videoData.value.title = '';
+        videoData.value.description = '';
       }
 
       // Service Details

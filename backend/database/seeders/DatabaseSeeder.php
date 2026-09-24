@@ -6,16 +6,69 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\NfcTag;
 use App\Models\NfcCard;
+use App\Models\ProfileBuilderSection;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // Create a test user (or find existing)
+        $this->command->warn('====================================');
+        $this->command->warn('  NFC Business Card - Database Seed');
+        $this->command->warn('====================================');
+
+        $env = config('app.env');
+        $isProduction = ($env === 'production');
+
+        if ($isProduction) {
+            $this->command->warn('⚠️  ENVIRONMENT: PRODUCTION');
+            $this->command->warn('   Mock/test data akan DILANGKAUTI.');
+        } else {
+            $this->command->warn('ℹ️  ENVIRONMENT: LOCAL / STAGING');
+            $this->command->warn('   Semua data termasuk mock akan di-seed.');
+        }
+
+        $this->command->newLine();
+
+        if (! $isProduction) {
+            $this->seedDevelopmentUser();
+            $this->call(NfcCardSeeder::class);
+            $this->call(MockUserSeeder::class);
+        }
+
+        $this->call(AdminUserSeeder::class);
+        $this->call(PlanPriceSeeder::class);
+
+        if (ProfileBuilderSection::count() === 0) {
+            $this->call(ProfileBuilderSectionsSeeder::class);
+        } else {
+            $this->command->info('✅ ProfileBuilderSections sudah wujud — skip seeder.');
+        }
+
+        $this->call(ProfileBuilderFieldsSeeder::class);
+        $this->call(AddMissingProfileFieldsSeeder::class);
+        $this->call(UpdateFieldGroupsSeeder::class);
+        $this->call(UpdateFieldValidationSeeder::class);
+        $this->call(BlogSectionSeeder::class);
+        $this->call(PortfolioSectionSeeder::class);
+        $this->call(ProfileDesignOptionSeeder::class);
+        $this->call(FeatureToggleSeeder::class);
+        $this->call(ChatbotSeeder::class);
+        $this->call(LegalDocumentSeeder::class);
+        $this->call(CardTemplateSeeder::class);
+
+        $this->command->newLine();
+        $this->command->info('🎉 Database seeding selesai!');
+
+        if (! $isProduction) {
+            $this->command->info('Test user: john@example.com / password');
+        }
+    }
+
+    private function seedDevelopmentUser(): void
+    {
+        $this->command->info('🔹 Membangunkan test user dan NFC card sample...');
+
         $user = User::firstOrCreate(
             ['email' => 'john@example.com'],
             [
@@ -29,30 +82,31 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Create NFC Card for test user
-        $nfcCard = NfcCard::create([
-            'user_id' => $user->id,
-            'card_owner' => $user->full_name,
-            'billing_address' => '123 Tech Street, San Francisco, CA 94105',
-            'contact_number' => '+1234567890',
-            'purchase_date' => now(),
-            'subscription_plan' => 'free',
-            'status' => 'active',
-        ]);
+        if ($user->wasRecentlyCreated || NfcCard::where('user_id', $user->id)->count() === 0) {
+            $nfcCard = NfcCard::create([
+                'user_id' => $user->id,
+                'card_owner' => $user->full_name,
+                'billing_address' => '123 Tech Street, San Francisco, CA 94105',
+                'contact_number' => '+1234567890',
+                'purchase_date' => now(),
+                'subscription_plan' => 'free',
+                'status' => 'active',
+            ]);
 
-        // Create Landing Page for the NFC Card
-        \App\Models\LandingPage::create([
-            'nfc_card_id' => $nfcCard->id,
-            'name' => $user->full_name,
-            'title' => $user->job_title,
-            'company_name' => $user->company,
-            'email' => $user->email,
-            'phone' => '+1234567890',
-            'bio' => 'Passionate software engineer with 5+ years of experience.',
-            'is_active' => true,
-        ]);
+            \App\Models\LandingPage::firstOrCreate(
+                ['nfc_card_id' => $nfcCard->id],
+                [
+                    'name' => $user->full_name,
+                    'title' => $user->job_title,
+                    'company_name' => $user->company,
+                    'email' => $user->email,
+                    'phone' => '+1234567890',
+                    'bio' => 'Passionate software engineer with 5+ years of experience.',
+                    'is_active' => true,
+                ]
+            );
+        }
 
-        // Create NFC tag (or find existing)
         NfcTag::firstOrCreate(
             ['nfc_id' => 'test-nfc-123'],
             [
@@ -62,25 +116,5 @@ class DatabaseSeeder extends Seeder
                 'tap_count' => 0,
             ]
         );
-
-        // Run NFC Card seeder for development
-        $this->call([
-            NfcCardSeeder::class,
-        ]);
-
-        // Create admin users
-        $this->call([
-            AdminUserSeeder::class,
-        ]);
-
-        // Seed profile builder fields
-        $this->call([
-            ProfileBuilderFieldsSeeder::class,
-            AddMissingProfileFieldsSeeder::class,
-            MockUserSeeder::class,
-        ]);
-
-        $this->command->info('Sample data created successfully!');
-        $this->command->info('Test user: john@example.com / password');
     }
 }

@@ -286,9 +286,10 @@ class AdminController extends Controller
             'email' => 'required|email|min:5|max:100|unique:users',
             'password' => 'required|string|min:8',
             'company' => 'nullable|string|max:150',
-            'job_title' => 'nullable|string|max:30',
-            'phone' => 'nullable|string|max:16|regex:/^\d*$/',
+            'job_title' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20|regex:/^\+?\d*$/',
             'subscription_plan' => 'nullable|in:free,basic,premium,business',
+            'subscription_active' => 'nullable|boolean',
             'is_admin' => 'boolean',
             'admin_role' => 'nullable|in:admin,moderator',
             'admin_permissions' => 'nullable|array',
@@ -297,7 +298,7 @@ class AdminController extends Controller
         ], [
             'first_name.regex' => 'First name can only contain letters, spaces, hyphens, and apostrophes',
             'last_name.regex' => 'Last name can only contain letters, spaces, hyphens, and apostrophes',
-            'phone.regex' => 'Phone can only contain digits (0-9)',
+            'phone.regex' => 'Phone can only contain digits and optional + prefix (e.g. +60123456789)',
         ]);
 
         if ($validator->fails()) {
@@ -312,6 +313,9 @@ class AdminController extends Controller
         try {
             $subscriptionPlan = $request->subscription_plan ?? 'free';
             $isBusinessPlan = $subscriptionPlan === 'business';
+            $subscriptionActive = $request->has('subscription_active')
+                ? $request->boolean('subscription_active')
+                : ($subscriptionPlan !== 'free');
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -322,9 +326,9 @@ class AdminController extends Controller
                 'job_title' => $request->job_title,
                 'phone' => $request->phone,
                 'subscription_plan' => $subscriptionPlan,
-                'subscription_active' => $subscriptionPlan !== 'free',
-                'subscription_start_date' => $subscriptionPlan !== 'free' ? now() : null,
-                'subscription_end_date' => $subscriptionPlan !== 'free' ? now()->addYear() : null,
+                'subscription_active' => $subscriptionActive,
+                'subscription_start_date' => $subscriptionActive ? now() : null,
+                'subscription_end_date' => $subscriptionActive ? now()->addYear() : null,
                 'is_admin' => $request->boolean('is_admin'),
                 'admin_role' => $request->admin_role,
                 'admin_permissions' => $request->admin_permissions,
@@ -387,7 +391,7 @@ class AdminController extends Controller
             'last_name' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|regex:/^\+?\d*$/',
             'subscription_plan' => 'nullable|in:free,basic,premium,business',
             'subscription_active' => 'boolean',
             'subscription_start_date' => 'nullable|date',
