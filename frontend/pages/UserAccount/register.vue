@@ -152,20 +152,20 @@
               </div>
               <!-- Requirement checklist -->
               <ul id="password-requirements" class="grid grid-cols-2 gap-x-3 gap-y-1.5 pt-1">
-                <li class="flex items-center gap-1.5 text-xs" :class="form.password.length >= 8 ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="form.password.length >= 8 ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                <li class="flex items-center gap-1.5 text-xs" :class="hasMinLength ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="hasMinLength ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
                   Min 8 characters
                 </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="/[A-Z]/.test(form.password) && /[a-z]/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="/[A-Z]/.test(form.password) && /[a-z]/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                <li class="flex items-center gap-1.5 text-xs" :class="hasMixedCase ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="hasMixedCase ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
                   Upper + lowercase
                 </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="/\d/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="/\d/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                <li class="flex items-center gap-1.5 text-xs" :class="hasNumber ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="hasNumber ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
                   Contains a number
                 </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="/[!@#$%^&*(),.?\":{}|<>]/.test(form.password) ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="/[!@#$%^&*(),.?\":{}|<>]/.test(form.password) ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
+                <li class="flex items-center gap-1.5 text-xs" :class="hasSymbol ? 'text-success-600' : 'text-secondary-400'">
+                  <Icon :name="hasSymbol ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
                   Special symbol
                 </li>
               </ul>
@@ -712,15 +712,28 @@ const form = reactive({
   marketing: false,
 });
 
+// Regex patterns (defined in script to avoid template parser issues with
+// characters like " and < that break attribute binding)
+const RE_UPPER = /[A-Z]/;
+const RE_LOWER = /[a-z]/;
+const RE_DIGIT = /\d/;
+const RE_SYMBOL = /[!@#$%^&*(),.?"':{}|<>[\]\\\/+=`~_-]/;
+
+// Individual requirement flags (used by template checklist UI)
+const hasMinLength = computed(() => form.password.length >= 8);
+const hasMixedCase = computed(() => RE_UPPER.test(form.password) && RE_LOWER.test(form.password));
+const hasNumber    = computed(() => RE_DIGIT.test(form.password));
+const hasSymbol    = computed(() => RE_SYMBOL.test(form.password));
+
 // Password strength computation
 const passwordStrength = computed(() => {
   const password = form.password;
   let strength = 0;
 
   if (password.length >= 8) strength++;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-  if (/\d/.test(password)) strength++;
-  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+  if (RE_LOWER.test(password) && RE_UPPER.test(password)) strength++;
+  if (RE_DIGIT.test(password)) strength++;
+  if (RE_SYMBOL.test(password)) strength++;
 
   return strength;
 });
