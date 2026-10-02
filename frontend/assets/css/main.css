@@ -315,26 +315,18 @@
        (c) anti-aliased edge of the stage div against a background
   */
   .nfc-wave-stage,
-  .nfc-wave-stage *,
   .nfc-wave-stage::before,
   .nfc-wave-stage::after,
-  .nfc-wave-stage *::before,
-  .nfc-wave-stage *::after {
+  .nfc-wave-stage > div {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
-    text-shadow: none !important;
-    background-image: none !important;
-    background: transparent !important;
   }
-  /* Chip is the only exception — it needs its 3D box-shadow back. */
-  .nfc-wave-stage .nfc-chip-3d,
-  .nfc-wave-stage .nfc-chip-3d::before,
-  .nfc-wave-stage .nfc-chip-3d::after {
-    box-shadow: initial !important;
-    background-image: initial !important;
-    background: initial !important;
-    border: initial !important;
+  .nfc-wave-stage .nfc-fan-wrap,
+  .nfc-wave-stage .nfc-fan-group {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* ============================================================
