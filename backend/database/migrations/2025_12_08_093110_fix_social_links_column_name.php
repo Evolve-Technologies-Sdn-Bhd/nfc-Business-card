@@ -7,70 +7,106 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     * Fix: Rename 'profile_id' to 'landing_page_id' to match the expected schema.
-     * Fully defensive against production databases where the exact FK name or
-     * column state may differ from the original development snapshot.
-     */
     public function up(): void
     {
         $tableName = 'social_links';
-        $dbName = DB::getDatabaseName();
+        $driver = DB::getDriverName();
 
-        // ---------------------------------------------------------------
-        // STEP 1: DROP any existing FOREIGN KEY related to profile_id
-        // or landing_page_id. We must do this BEFORE renaming columns.
-        // ---------------------------------------------------------------
-        $existingFks = DB::select(
-            "SELECT CONSTRAINT_NAME
-             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-             WHERE TABLE_SCHEMA = ?
-               AND TABLE_NAME = ?
-               AND CONSTRAINT_NAME != 'PRIMARY'
-               AND REFERENCED_TABLE_NAME IS NOT NULL",
-            [$dbName, $tableName]
-        );
-
-        foreach ($existingFks as $fk) {
-            $fkName = $fk->CONSTRAINT_NAME;
+        if ($driver === 'mysql') {
+            $dbName = DB::getDatabaseName();
+            $existingFks = DB::select(
+                "SELECT CONSTRAINT_NAME
+                 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = ?
+                   AND TABLE_NAME = ?
+                   AND CONSTRAINT_NAME != 'PRIMARY'
+                   AND REFERENCED_TABLE_NAME IS NOT NULL",
+                [$dbName, $tableName]
+            );
+            foreach ($existingFks as $fk) {
+                $fkName = $fk->CONSTRAINT_NAME;
+                try {
+                    DB::statement("ALTER TABLE `{$tableName}` DROP FOREIGN KEY `{$fkName}`");
+                } catch (\Throwable $e) {
+                    // ignore
+                }
+            }
+        } else {
             try {
-                DB::statement("ALTER TABLE `{$tableName}` DROP FOREIGN KEY `{$fkName}`");
+                Schema::table($tableName, function (Blueprint $table) use ($tableName) {
+                    $existing = Schema::getForeignKeys($tableName);
+                    foreach ($existing as $fk) {
+                        $cols = $fk['columns'] ?? [];
+                        if (in_array('profile_id', $cols, true) || in_array('landing_page_id', $cols, true)) {
+                            try {
+                                $table->dropForeign($fk['name']);
+                            } catch (\Throwable $e) {
+                                // ignore
+                            }
+                        }
+                    }
+                });
             } catch (\Throwable $e) {
-                // Safe to ignore — prevent migration crash on partial state.
+                // ignore
             }
         }
 
-        // ---------------------------------------------------------------
-        // STEP 2: Rename column profile_id -> landing_page_id if needed
-        // ---------------------------------------------------------------
         $hasProfileId   = Schema::hasColumn($tableName, 'profile_id');
         $hasLandingPage = Schema::hasColumn($tableName, 'landing_page_id');
 
         if ($hasProfileId && ! $hasLandingPage) {
-            DB::statement("ALTER TABLE `{$tableName}` RENAME COLUMN `profile_id` TO `landing_page_id`");
+            try {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->renameColumn('profile_id', 'landing_page_id');
+                });
+            } catch (\Throwable $e) {
+                try {
+                    DB::statement("ALTER TABLE `{$tableName}` RENAME COLUMN `profile_id` TO `landing_page_id`");
+                } catch (\Throwable $e2) {
+                    // ignore
+                }
+            }
         } elseif (! $hasProfileId && ! $hasLandingPage) {
-            // Neither column exists — create it so downstream logic can proceed
-            Schema::table($tableName, function (Blueprint $table) {
-                $table->unsignedBigInteger('landing_page_id')->nullable();
-            });
+            try {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->unsignedBigInteger('landing_page_id')->nullable();
+                });
+            } catch (\Throwable $e) {
+                // ignore
+            }
         }
 
-        // ---------------------------------------------------------------
-        // STEP 3: Add the correct landing_page_id foreign key (idempotent)
-        // ---------------------------------------------------------------
-        $hasFkLanding = DB::selectOne(
-            "SELECT CONSTRAINT_NAME
-             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-             WHERE TABLE_SCHEMA = ?
-               AND TABLE_NAME = ?
-               AND COLUMN_NAME = 'landing_page_id'
-               AND REFERENCED_TABLE_NAME = 'landing_pages'
-             LIMIT 1",
-            [$dbName, $tableName]
-        );
+        $needFk = true;
+        if ($driver === 'mysql') {
+            $dbName = DB::getDatabaseName();
+            $hasFkLanding = DB::selectOne(
+                "SELECT CONSTRAINT_NAME
+                 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = ?
+                   AND TABLE_NAME = ?
+                   AND COLUMN_NAME = 'landing_page_id'
+                   AND REFERENCED_TABLE_NAME = 'landing_pages'
+                 LIMIT 1",
+                [$dbName, $tableName]
+            );
+            $needFk = ! $hasFkLanding;
+        } else {
+            try {
+                $existing = Schema::getForeignKeys($tableName);
+                foreach ($existing as $fk) {
+                    $cols = $fk['columns'] ?? [];
+                    $refTable = $fk['foreign_table'] ?? ($fk['references_table'] ?? null);
+                    if (in_array('landing_page_id', $cols, true) && $refTable === 'landing_pages') {
+                        $needFk = false;
+                        break;
+                    }
+                }
+            } catch (\Throwable $e) {
+                $needFk = true;
+            }
+        }
 
-        if (! $hasFkLanding) {
+        if ($needFk) {
             try {
                 Schema::table($tableName, function (Blueprint $table) {
                     $table->foreign('landing_page_id')
@@ -79,33 +115,65 @@ return new class extends Migration
                         ->onDelete('cascade');
                 });
             } catch (\Throwable $e) {
-                // Ignore duplicate / data mismatch errors — migration must not fail.
+                // ignore
             }
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         $tableName = 'social_links';
-        $dbName    = DB::getDatabaseName();
+        $driver = DB::getDriverName();
 
-        $hasFkLanding = DB::selectOne(
-            "SELECT CONSTRAINT_NAME
-             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-             WHERE TABLE_SCHEMA = ?
-               AND TABLE_NAME = ?
-               AND COLUMN_NAME = 'landing_page_id'
-               AND REFERENCED_TABLE_NAME = 'landing_pages'
-             LIMIT 1",
-            [$dbName, $tableName]
-        );
+        $hasFkLanding = false;
+        $fkNameToDrop = null;
+
+        if ($driver === 'mysql') {
+            $dbName = DB::getDatabaseName();
+            $row = DB::selectOne(
+                "SELECT CONSTRAINT_NAME
+                 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = ?
+                   AND TABLE_NAME = ?
+                   AND COLUMN_NAME = 'landing_page_id'
+                   AND REFERENCED_TABLE_NAME = 'landing_pages'
+                 LIMIT 1",
+                [$dbName, $tableName]
+            );
+            if ($row) {
+                $hasFkLanding = true;
+                $fkNameToDrop = $row->CONSTRAINT_NAME;
+            }
+        } else {
+            try {
+                $existing = Schema::getForeignKeys($tableName);
+                foreach ($existing as $fk) {
+                    $cols = $fk['columns'] ?? [];
+                    $refTable = $fk['foreign_table'] ?? ($fk['references_table'] ?? null);
+                    if (in_array('landing_page_id', $cols, true) && $refTable === 'landing_pages') {
+                        $hasFkLanding = true;
+                        $fkNameToDrop = $fk['name'];
+                        break;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // ignore
+            }
+        }
 
         if ($hasFkLanding) {
             try {
-                DB::statement("ALTER TABLE `{$tableName}` DROP FOREIGN KEY `{$hasFkLanding->CONSTRAINT_NAME}`");
+                if ($driver === 'mysql' && $fkNameToDrop) {
+                    DB::statement("ALTER TABLE `{$tableName}` DROP FOREIGN KEY `{$fkNameToDrop}`");
+                } else {
+                    Schema::table($tableName, function (Blueprint $table) use ($fkNameToDrop) {
+                        if ($fkNameToDrop) {
+                            $table->dropForeign($fkNameToDrop);
+                        } else {
+                            $table->dropForeign(['landing_page_id']);
+                        }
+                    });
+                }
             } catch (\Throwable $e) {
                 // ignore
             }
@@ -113,7 +181,17 @@ return new class extends Migration
 
         if (Schema::hasColumn($tableName, 'landing_page_id')
             && ! Schema::hasColumn($tableName, 'profile_id')) {
-            DB::statement("ALTER TABLE `{$tableName}` RENAME COLUMN `landing_page_id` TO `profile_id`");
+            try {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->renameColumn('landing_page_id', 'profile_id');
+                });
+            } catch (\Throwable $e) {
+                try {
+                    DB::statement("ALTER TABLE `{$tableName}` RENAME COLUMN `landing_page_id` TO `profile_id`");
+                } catch (\Throwable $e2) {
+                    // ignore
+                }
+            }
         }
     }
 };
