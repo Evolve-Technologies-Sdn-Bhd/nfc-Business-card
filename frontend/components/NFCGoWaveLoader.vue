@@ -632,9 +632,16 @@ const wrapperClass = computed(() => {
   } else if (props.inline) {
     c.push('inline-flex flex-col items-center align-middle py-0');
   } else {
+    // STANDALONE / BLOCK usage (not overlay, not inline): ALWAYS self-center
+    // both horizontal + vertical axes, filling full viewport screen when used
+    // directly on a page without a height-constrained parent.
     c.push(
-      'flex flex-col items-center justify-center w-full h-full',
-      'min-h-[80px] p-2',
+      'flex flex-col items-center justify-center',
+      'w-full max-w-full mx-auto',
+      'min-h-screen h-full my-auto',
+      'p-2 m-auto',
+      'text-center',
+      'place-self-center',
     );
   }
 
