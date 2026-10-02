@@ -115,7 +115,7 @@
             to="/UserDashboard/PlanSelection"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm hover:shadow whitespace-nowrap flex-shrink-0"
           >
-            <Icon name="heroicons:arrow-up-trending-up" class="h-4 w-4" />
+            <Icon name="heroicons:arrow-trending-up" class="h-4 w-4" />
             <span class="truncate max-w-[180px]">
               {{ resolvedPlan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
             </span>

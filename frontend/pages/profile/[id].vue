@@ -2,12 +2,18 @@
   <div
     :style="{
       minHeight: '100vh',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       background: designSettings.bgGradient || designSettings.backgroundColor,
       color: designSettings.textColor,
       position: 'relative',
       overflow: 'hidden',
+      overflowX: 'hidden',
       fontFamily: designSettings.fontFamily,
       '--accent': designSettings.accentColor,
+      boxSizing: 'border-box',
     }"
   >
     <!-- Animations & Global Styles -->
@@ -501,9 +507,11 @@
       :style="{
         position: 'relative',
         zIndex: 1,
-        maxWidth: '1200px',
+        width: '100%',
+        maxWidth: responsive.pageMaxWidth || '1200px',
         margin: '0 auto',
         padding: responsive.containerPadding,
+        boxSizing: 'border-box',
       }"
     >
       <!-- Loading State -->
@@ -4497,6 +4505,15 @@ const responsive = computed(() => {
               ? "76px 40px 48px"
               : "80px 48px 56px",
     maxWidth: "1200px",
+    pageMaxWidth: sm
+      ? '100%'
+      : ph
+        ? '100%'
+        : mob
+          ? '100%'
+          : tab
+            ? '768px'
+            : '1200px',
 
     // Profile image - scales gracefully
     profileSize: sm ? "112px" : ph ? "128px" : mob ? "148px" : tab ? "180px" : "208px",

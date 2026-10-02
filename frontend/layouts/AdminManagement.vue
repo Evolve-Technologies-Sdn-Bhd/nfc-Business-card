@@ -24,7 +24,7 @@
               </template>
               <template v-else>
                 <Icon
-                  name="heroicons:identification"
+                  name="heroicons:id-card"
                   class="h-9 w-9 text-primary-600 flex-shrink-0"
                 />
                 <span class="ml-3 text-lg font-bold text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>

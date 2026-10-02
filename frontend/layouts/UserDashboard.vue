@@ -29,7 +29,7 @@
           >
             <NuxtLink to="/" class="flex items-center">
               <Icon
-                name="heroicons:identification"
+                name="heroicons:id-card"
                 class="h-8 w-8 text-primary-600"
               />
               <span class="ml-2 text-xl font-bold text-secondary-900"
@@ -127,7 +127,7 @@
                 @click="navigateTo('/UserDashboard/PlanSelection')"
                 class="mt-3.5 w-full bg-white text-primary-600 py-2 px-4 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors shadow-sm whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5"
               >
-                <Icon name="heroicons:arrow-up-trending-up" class="h-3.5 w-3.5 flex-shrink-0" />
+                <Icon name="heroicons:arrow-trending-up" class="h-3.5 w-3.5 flex-shrink-0" />
                 <span class="truncate">Upgrade Now</span>
               </button>
             </div>
@@ -418,7 +418,7 @@
               </div>
               <div v-else class="bg-secondary-50 rounded-xl p-8 text-center space-y-4 border border-dashed border-secondary-200">
                 <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-white shadow-sm border border-secondary-200">
-                  <Icon name="heroicons:identification" class="w-7 h-7 text-secondary-400" />
+                  <Icon name="heroicons:id-card" class="w-7 h-7 text-secondary-400" />
                 </div>
                 <div class="space-y-1">
                   <h4 class="font-semibold text-secondary-800">No profile available yet</h4>
@@ -602,7 +602,7 @@ const navigation = computed(() => {
   baseNavigation.push({
     name: "Dashboard",
     href: "/UserDashboard/",
-    icon: "heroicons:squares-2x2",
+    icon: "heroicons:square-3-stack-3d",
     disabled: false,
   });
 

@@ -2886,13 +2886,17 @@ const switchToCategory = (category) => {
   
   mainCategory.value = category;
   
-  // Auto-select first tab in the category
+  // Auto-select first tab AND register it as mounted so content renders immediately.
+  // BUG FIX (previous version only set activeTab.value directly, skipped visitTab()
+  // → mountedTabs never received the id → all content blocks with mountedTabs.has()
+  // guard rendered as <div v-if="false"> → complete blank body when switching to
+  // Design Sections for the first time).
   if (category === 'general') {
     const firstTab = availableGeneralTabs.value[0];
-    if (firstTab) activeTab.value = firstTab.id;
+    if (firstTab) visitTab(firstTab.id);
   } else if (category === 'design') {
     const firstTab = availableDesignTabs.value[0];
-    if (firstTab) activeTab.value = firstTab.id;
+    if (firstTab) visitTab(firstTab.id);
   }
 };
 

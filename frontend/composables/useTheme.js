@@ -130,7 +130,7 @@ const themes = {
   obsidianGlass: {
     name: 'Obsidian Glass',
     description: 'Warm dark palette with burnished gold accents',
-    icon: 'heroicons:gem',
+    icon: 'heroicons:moon',
     colors: {
       primary50: '#FFFBEB',
       primary100: '#FEF3C7',
