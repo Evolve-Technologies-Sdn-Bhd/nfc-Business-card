@@ -160,19 +160,6 @@
           {{ labelText }}
         </span>
 
-        <!-- Animated accent underline under brand text (size sm+) -->
-        <div
-          v-if="size !== 'xs'"
-          class="animate-nfc-accent-line rounded-full origin-center"
-          :class="sizes[size].accentLine"
-          :style="{
-            backgroundImage: 'linear-gradient(90deg, ' +
-              'color-mix(in srgb, var(--theme-primary-500,#4f5d82) 72%, transparent) 0%, ' +
-              'color-mix(in srgb, var(--theme-accent,#5d8c87) 96%, transparent) 50%, ' +
-              'color-mix(in srgb, var(--theme-accent-secondary,#b8956a) 72%, transparent) 100%)',
-          }"
-        ></div>
-
         <span
           v-if="showHintText && hintText"
           class="nfcgo-hint-text font-inter whitespace-nowrap"
@@ -338,44 +325,47 @@ const TEAL = 'var(--theme-accent, #5d8c87)';
 const GOLD = 'var(--theme-accent-secondary, #b8956a)';
 
 // Common SVG fan geometry (VIEWBOX 100x100, center 50,50).
-// Exactly matching the reference image: 3 CONCENTRIC CIRCULAR OPEN ARCS.
-// - Same center (50,50)
-// - Equal stroke thickness for ALL 3 layers
-// - Uniform gap between each radius (10px)
-// - Each arc sweeps 140° on the LEFT side, opening toward the RIGHT (chip)
-// - Start/end points at angle ±70° from +x axis:
-//     Top endpoint   : 70° above horizontal  → on the RIGHT side of arc
-//     Bottom endpoint: 70° below horizontal  → on the RIGHT side of arc
-//   The arc curves counter-clockwise from top→bottom through the FAR LEFT,
-//   leaving a pure opening on the right (toward chip) with NO chord line.
+// Exactly as in the reference image: 3 CONCENTRIC CIRCULAR OPEN ARCS,
+// with a UNIFORM PERPENDICULAR GAP between each stroke (6px visual
+// clearance), and ALL 3 ARCs OPEN AT THE SAME X-COORDINATE (on the side
+// facing the chip) so they LOOK ALIGNED just like the reference image.
+// Opening sits at openXOffset = 10 units inside from center → x = 40.
 const VB = '0 0 100 100';
 const cx = 50;
 const cy = 50;
-const sweepDeg = 70;           // half-angle → 140° total sweep
-const cosA = Math.cos((sweepDeg * Math.PI) / 180);
-const sinA = Math.sin((sweepDeg * Math.PI) / 180);
-// Draw one OPEN CIRCULAR ARC on the LEFT side (opening faces +x / chip).
-// Uses pure SVG ellipse-arc with CORRECT flags so only the 140° left-facing
-// curve is drawn — mathematically NO chord/vertical stem can exist because
-// the arc doesn't trace any straight segment.
+// -------- Geometry tuned to match reference image exactly --------
+const OPEN_OFFSET = 10;        // Opening x = cx - OPEN_OFFSET = 40 (ALL arcs open here)
+const R1 = 16;                 // inner (navy)  radius
+const STROKE_STEP = 9;         // 9px between stroke centerlines → 9 - strokeW visual gap
+const R2 = R1 + STROKE_STEP;   // middle (teal) radius
+const R3 = R2 + STROKE_STEP;   // outer  (gold) radius
+// For a given r, compute sweep angle (half-angle) so that the arc's
+// endpoint lands exactly at x = cx - OPEN_OFFSET (the opening line).
+// r · cos(θ) = r_projected  (where projected is the length from center
+//                              toward the opening, measured along x)
+// The opening is at x = cx - OPEN_OFFSET (10 units inward from center)
+// → along the circle, the x-coordinate at angle θ from +x toward -x is:
+//      cx - r·cos θ = cx - OPEN_OFFSET  ←  must equal the opening x line
+//   →  r·cos θ = OPEN_OFFSET
+//   →  θ = arccos(OPEN_OFFSET / r)
+const arcHalfAngle = (r) => Math.acos(Math.min(OPEN_OFFSET / r, 0.999));
+// Draw one OPEN CIRCULAR ARC. All arcs share the same center. All open
+// toward +x (chip side) at exactly the same x boundary (cx - OPEN_OFFSET).
+// Sweep counter-clockwise through the FAR LEFT side → no chord line.
 const circularFan = (r) => {
-  // Opening toward RIGHT (chip) → endpoints on the RIGHT half of the circle.
-  const x1 = cx + r * cosA;   // x > 50 (right side near chip, ~ r*0.34)
-  const y1 = cy - r * sinA;   // y < 50 (top endpoint)
-  const x2 = x1;              // same x-coordinate → perfectly vertical gap
-  const y2 = cy + r * sinA;   // y > 50 (bottom endpoint)
-  // large-arc-flag = 0 : we only sweep 140° (less than 180° → small arc)
-  // sweep-flag     = 0 : go counter-clockwise from (x1,y1) → (x2,y2)
-  //                     which means we curve through the LEFT side (the
-  //                     side AWAY from chip), leaving clean opening on right.
+  const theta = arcHalfAngle(r);
+  const sinA = Math.sin(theta);
+  // Endpoints sit on the opening x line (cx - OPEN_OFFSET), vertically
+  // separated by ±r·sin θ → produces the reference's nested look.
+  const x1 = cx - OPEN_OFFSET;
+  const y1 = cy - r * sinA;
+  const x2 = x1;
+  const y2 = cy + r * sinA;
+  // large-arc-flag = 0 (2θ < 180° for any valid r > OPEN_OFFSET)
+  // sweep-flag     = 0 (counter-clockwise → curves through FAR LEFT)
   const f = (v) => v.toFixed(3);
   return `M ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 0 0 ${f(x2)} ${f(y2)}`;
 };
-// 3 concentric radii — uniform 10px step between layers so spacing looks
-// identical like the reference image.
-const R1 = 16;                   // inner  (navy)
-const R2 = R1 + 10;              // middle (teal)  → +10px
-const R3 = R2 + 10;              // outer  (gold)  → +10px
 const FANPATH_1 = circularFan(R1);
 const FANPATH_2 = circularFan(R2);
 const FANPATH_3 = circularFan(R3);
@@ -389,8 +379,8 @@ const FANPATH_3 = circularFan(R3);
 const sizes = {
   xs: {
     stage: 'w-16 h-7',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -407,15 +397,15 @@ const sizes = {
     chipWrapper: 'w-6 h-6',
     chip: 'w-6 h-6',
     isLg: false,
-    stackGap: 'gap-0.5 mt-1.5',
+    stackGap: 'gap-1 mt-1',
     brand: 'text-[11px] leading-tight',
     hint: 'text-[9px] leading-tight',
     accentLine: 'h-[1px] w-5',
   },
   sm: {
     stage: 'w-28 h-12',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -432,15 +422,15 @@ const sizes = {
     chipWrapper: 'w-10 h-10',
     chip: 'w-10 h-10',
     isLg: false,
-    stackGap: 'gap-0.5 mt-3',
+    stackGap: 'gap-1 mt-2',
     brand: 'text-[13px] leading-tight',
     hint: 'text-[10.5px] leading-tight',
     accentLine: 'h-[1px] w-7 mt-0.5',
   },
   md: {
     stage: 'w-44 h-20',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -457,15 +447,15 @@ const sizes = {
     chipWrapper: 'w-16 h-16',
     chip: 'w-16 h-16',
     isLg: false,
-    stackGap: 'gap-1 mt-5',
+    stackGap: 'gap-1.5 mt-3',
     brand: 'text-lg leading-tight',
     hint: 'text-xs leading-tight',
     accentLine: 'h-[1.5px] w-12 mt-1',
   },
   lg: {
     stage: 'w-60 h-24',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -482,15 +472,15 @@ const sizes = {
     chipWrapper: 'w-20 h-20',
     chip: 'w-20 h-20',
     isLg: true,
-    stackGap: 'gap-1.5 mt-7',
+    stackGap: 'gap-2 mt-4',
     brand: 'text-2xl leading-tight',
     hint: 'text-sm leading-tight',
     accentLine: 'h-[1.5px] w-18 mt-1',
   },
   xl: {
     stage: 'w-72 h-28',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -507,15 +497,15 @@ const sizes = {
     chipWrapper: 'w-22 h-22',
     chip: 'w-22 h-22',
     isLg: true,
-    stackGap: 'gap-1.5 mt-8',
+    stackGap: 'gap-2 mt-5',
     brand: 'text-3xl leading-tight',
     hint: 'text-[15px] leading-tight',
     accentLine: 'h-[2px] w-20 mt-1.5',
   },
   full: {
     stage: 'w-96 h-32',
-    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanLeft: 'nfc-fan-left',
+    fanRight: 'nfc-fan-right',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -532,7 +522,7 @@ const sizes = {
     chipWrapper: 'w-28 h-28',
     chip: 'w-28 h-28',
     isLg: true,
-    stackGap: 'gap-2 mt-10',
+    stackGap: 'gap-3 mt-6',
     brand: 'text-4xl leading-tight',
     hint: 'text-base leading-tight',
     accentLine: 'h-[2px] w-24 mt-1.5',

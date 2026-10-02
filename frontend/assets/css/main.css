@@ -311,6 +311,12 @@
   .nfc-fan-group {
     @apply absolute top-1/2 -translate-y-1/2 z-[1] pointer-events-none;
   }
+  /* Explicit width classes so Tailwind never drops them during purge.
+     70% width ensures the arc endpoints (at x=40 on a 100-wide viewbox
+     inside the left fan, and mirrored on the right) are fully visible
+     without any clipping that could look like a vertical stem. */
+  .nfc-fan-left { left: 0;  width: 70%; height: 100%; top: 0; bottom: 0; }
+  .nfc-fan-right { right: 0; width: 70%; height: 100%; top: 0; bottom: 0; }
 
   /* Stroke gradients for each arc layer (SVG fills use CSS vars via currentColor) */
   .nfc-fan-svg {

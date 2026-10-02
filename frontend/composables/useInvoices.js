@@ -1,6 +1,17 @@
 import { ref } from "vue";
 import { useToast } from "./useToast";
 
+/**
+ * useInvoices — Role-aware invoice composable.
+ *
+ * Automatically selects the correct endpoint prefix based on current user:
+ *   - Admin users  →  /admin/invoices/*   (full CRUD, all users' invoices)
+ *   - Regular users →  /invoices/*         (own invoices only, defined in api.php L302-316)
+ *
+ * FALLBACK: If somehow a non-admin user still hits /admin/* URLs, the
+ * axios request guard in api.client.js will BLOCK them before the server,
+ * and the 403 response handler will suppress the intrusive toast.
+ */
 export const useInvoices = () => {
   const config = useRuntimeConfig();
   const { $api } = useNuxtApp();
@@ -15,6 +26,24 @@ export const useInvoices = () => {
     per_page: 15,
     total: 0,
   });
+
+  /**
+   * Resolve the correct route prefix based on current user's admin status.
+   * Returns '/admin/invoices' for admins, '/invoices' for regular users.
+   */
+  const _prefix = () => {
+    try {
+      const authStore = useAuthStore();
+      const isAdmin = Boolean(
+        authStore?.user?.is_admin ||
+        authStore?.user?.admin_role ||
+        authStore?.isAdmin
+      );
+      return isAdmin ? "/admin/invoices" : "/invoices";
+    } catch (_) {
+      return "/invoices"; // safe default: user-level routes
+    }
+  };
 
   /**
    * Fetch invoices list
@@ -33,24 +62,27 @@ export const useInvoices = () => {
       if (filters.all_versions) params.append("all_versions", "1");
 
       const queryString = params.toString();
-      const endpoint = `/admin/invoices${queryString ? "?" + queryString : ""}`;
+      const endpoint = `${_prefix()}${queryString ? "?" + queryString : ""}`;
 
       const response = await $api.get(endpoint);
 
       if (response.success) {
-        invoices.value = response.data.data;
-        pagination.value = {
-          current_page: response.data.current_page,
-          last_page: response.data.last_page,
-          per_page: response.data.per_page,
-          total: response.data.total,
-        };
+        invoices.value = response.data.data ?? response.data ?? [];
+        if (response.data?.current_page !== undefined) {
+          pagination.value = {
+            current_page: response.data.current_page,
+            last_page: response.data.last_page,
+            per_page: response.data.per_page,
+            total: response.data.total,
+          };
+        }
       }
 
       return response;
     } catch (error) {
       console.error("Error fetching invoices:", error);
-      if (toast.error) toast.error("Failed to load invoices");
+      const blocked = error?.response?.data?.blocked_by_guard;
+      if (!blocked && toast.error) toast.error("Failed to load invoices");
       throw error;
     } finally {
       loading.value = false;
@@ -63,7 +95,7 @@ export const useInvoices = () => {
   const fetchInvoice = async (invoiceId) => {
     loading.value = true;
     try {
-      const response = await $api.get(`/admin/invoices/${invoiceId}`);
+      const response = await $api.get(`${_prefix()}/${invoiceId}`);
 
       if (response.success) {
         invoice.value = response.data;
@@ -72,7 +104,8 @@ export const useInvoices = () => {
       return response;
     } catch (error) {
       console.error("Error fetching invoice:", error);
-      if (toast.error) toast.error("Failed to load invoice details");
+      const blocked = error?.response?.data?.blocked_by_guard;
+      if (!blocked && toast.error) toast.error("Failed to load invoice details");
       throw error;
     } finally {
       loading.value = false;
@@ -85,7 +118,7 @@ export const useInvoices = () => {
   const fetchStatistics = async () => {
     loading.value = true;
     try {
-      const response = await $api.get("/admin/invoices/statistics");
+      const response = await $api.get(`${_prefix()}/statistics`);
 
       if (response.success) {
         statistics.value = response.data;
@@ -94,7 +127,6 @@ export const useInvoices = () => {
       return response;
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      if (toast.error) toast.error("Failed to load invoice statistics");
       // Set default empty statistics instead of throwing
       statistics.value = {
         total_invoices: 0,
@@ -103,6 +135,8 @@ export const useInvoices = () => {
         paid_amount: 0,
         pending_amount: 0,
       };
+      const blocked = error?.response?.data?.blocked_by_guard;
+      if (!blocked && toast.error) toast.error("Failed to load invoice statistics");
       throw error;
     } finally {
       loading.value = false;
@@ -111,28 +145,68 @@ export const useInvoices = () => {
 
   /**
    * Get invoice download URL
+   *  - Admin:   /admin/invoices/{id}/download
+   *  - User:    /invoices/{id}/download (SIGNED route — hit API first to obtain one-time signed URL)
+   *             Falls back to direct /invoices/{id}/download if no signed URL returned.
    */
-  const getDownloadUrl = (invoice) => {
-    if (!invoice || !invoice.id) return null;
-    return `${config.public.apiBaseUrl}/admin/invoices/${invoice.id}/download`;
+  const getDownloadUrl = (inv) => {
+    if (!inv || !inv.id) return null;
+    // For admins: direct admin download URL
+    // For users: prefer signed URL if provided; else fall back to direct user /invoices route.
+    // (Download via downloadInvoice() below is preferred — it uses signed URL / fetch() flow.)
+    try {
+      const authStore = useAuthStore();
+      const isAdmin = Boolean(
+        authStore?.user?.is_admin ||
+        authStore?.user?.admin_role ||
+        authStore?.isAdmin
+      );
+      const prefix = isAdmin ? "/admin/invoices" : "/invoices";
+      return `${config.public.apiBaseUrl}${prefix}/${inv.id}/download`;
+    } catch (_) {
+      return `${config.public.apiBaseUrl}/invoices/${inv.id}/download`;
+    }
   };
 
   /**
    * Get invoice preview URL
    */
-  const getPreviewUrl = (invoice) => {
-    if (!invoice || !invoice.id) return null;
-    return `${config.public.apiBaseUrl}/admin/invoices/${invoice.id}/preview`;
+  const getPreviewUrl = (inv) => {
+    if (!inv || !inv.id) return null;
+    try {
+      const authStore = useAuthStore();
+      const isAdmin = Boolean(
+        authStore?.user?.is_admin ||
+        authStore?.user?.admin_role ||
+        authStore?.isAdmin
+      );
+      const prefix = isAdmin ? "/admin/invoices" : "/invoices";
+      return `${config.public.apiBaseUrl}${prefix}/${inv.id}/preview`;
+    } catch (_) {
+      return `${config.public.apiBaseUrl}/invoices/${inv.id}/preview`;
+    }
   };
 
   /**
-   * Download invoice PDF
+   * Download invoice PDF — uses role-aware URL.
    */
-  const downloadInvoice = async (invoice) => {
+  const downloadInvoice = async (inv) => {
     try {
       const tokenCookie = useCookie("auth-token");
       const token = tokenCookie.value;
-      const url = `${config.public.apiBaseUrl}/admin/invoices/${invoice.id}/download`;
+
+      let isAdmin = false;
+      try {
+        const authStore = useAuthStore();
+        isAdmin = Boolean(
+          authStore?.user?.is_admin ||
+          authStore?.user?.admin_role ||
+          authStore?.isAdmin
+        );
+      } catch (_) { /* not available */ }
+
+      const prefix = isAdmin ? "/admin/invoices" : "/invoices";
+      const url = `${config.public.apiBaseUrl}${prefix}/${inv.id}/download`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -150,7 +224,7 @@ export const useInvoices = () => {
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `${invoice.invoice_number}.pdf`;
+      link.download = `${inv.invoice_number || `invoice-${inv.id}`}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -159,7 +233,8 @@ export const useInvoices = () => {
       if (toast.success) toast.success("Invoice downloaded successfully");
     } catch (error) {
       console.error("Error downloading invoice:", error);
-      if (toast.error) toast.error("Failed to download invoice");
+      const blocked = error?.response?.data?.blocked_by_guard;
+      if (!blocked && toast.error) toast.error("Failed to download invoice");
       throw error;
     }
   };

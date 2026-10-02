@@ -2593,75 +2593,52 @@ const loadUserNfcCards = async () => {
   }
 };
 
-// Load plan prices - always use PUBLIC user-only route, NEVER admin routes
+// Load plan prices — SAFETY FIRST: only call PUBLIC user route, with multiple fallback layers,
+// never fall back to any /admin/* endpoint even on total failure.
+const _planPricesLoaded = ref(false);
 const loadPlanPrices = async () => {
-  console.log("🔄 Loading plan prices...");
-  
-  // Default static fallback plan prices (in case API is down)
-  planPrices.value = [
-    {
-      id: 1,
-      plan_type: 'basic',
-      price: 99.00,
-      currency: 'MYR',
-      description: 'Basic NFC Card Plan',
-      features: [
-        'One NFC card',
-        'Basic profile',
-        'Contact sharing',
-        'Basic analytics'
-      ],
-      is_active: true
-    },
-    {
-      id: 2,
-      plan_type: 'premium',
-      price: 199.00,
-      currency: 'MYR',
-      description: 'Premium NFC Card Plan',
-      features: [
-        'One premium NFC card',
-        'Advanced profile customization',
-        'Social media integration',
-        'Advanced analytics',
-        'Priority support'
-      ],
-      is_active: true
-    },
-    {
-      id: 3,
-      plan_type: 'business',
-      price: 299.00,
-      currency: 'MYR',
-      description: 'Business NFC Card Plan',
-      features: [
-        'Multiple NFC cards',
-        'Employee management',
-        'Bulk ordering',
-        'Business analytics',
-        'Dedicated support'
-      ],
-      is_active: true
-    }
+  // Guard: avoid duplicate load if already successfully loaded + populated
+  if (_planPricesLoaded.value && planPrices.value?.length > 0) return;
+
+  console.log("🔄 [User Settings] Loading plan prices (PUBLIC route only)...");
+
+  // ── Layer 1: Static fallback (always available even before any API call) ──
+  const STATIC_FALLBACK = [
+    { id: 1, plan_type: 'free', price: 0, currency: 'MYR', description: 'Free Plan', features: ['Digital business card', 'Basic analytics', 'Up to 5 social links'], is_active: true },
+    { id: 2, plan_type: 'basic', price: 29.00, currency: 'MYR', description: 'Basic NFC Card Plan', features: ['One NFC card', 'Basic profile', 'Contact sharing', 'Basic analytics'], is_active: true },
+    { id: 3, plan_type: 'premium', price: 99.00, currency: 'MYR', description: 'Premium NFC Card Plan', features: ['One premium NFC card', 'Advanced profile customization', 'Social media integration', 'Advanced analytics', 'Priority support'], is_active: true },
+    { id: 4, plan_type: 'business', price: 299.00, currency: 'MYR', description: 'Business NFC Card Plan', features: ['Multiple NFC cards', 'Employee management', 'Bulk ordering', 'Business analytics', 'Dedicated support'], is_active: true }
   ];
-  
-  console.log("✅ Plan prices fallback loaded:", planPrices.value.length, "plans");
-  
-  // Now try PUBLIC user-safe route (works for everyone, no admin guard)
+  planPrices.value = STATIC_FALLBACK.slice();
+  console.log("✅ [User Settings] Static fallback plan prices ready:", planPrices.value.length, "plans");
+
+  // ── Layer 2: Try PUBLIC user-safe endpoint (/plan-prices/public) ──
+  //    NOTE: We NEVER call /admin/plan-prices here — that route is for Admin Dashboard ONLY.
+  //    Non-admin guard in api.client.js will BLOCK /admin/* calls automatically anyway.
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.get("/plan-prices/public");
+    const response = await $api.get("/plan-prices/public", { _skipAbort: false, timeout: 15000 });
     if (response && response.success && Array.isArray(response.data) && response.data.length > 0) {
-      const activePlans = response.data.filter(plan => (plan.is_active !== false));
+      const activePlans = response.data.filter(plan => plan.is_active !== false && plan.is_active !== 0);
       if (activePlans.length > 0) {
         planPrices.value = activePlans;
-        console.log("✅ Plan prices loaded from public API:", planPrices.value.length, "plans");
+        _planPricesLoaded.value = true;
+        console.log("✅ [User Settings] Plan prices loaded from PUBLIC API:", planPrices.value.length, "plans");
+        return;
       }
     }
   } catch (error) {
-    // Silent fail - keep the static fallback plan list so the UI never breaks
-    console.log("ℹ️ Public plan prices unavailable, using fallback schema.");
+    const code = error?.response?.status ?? error?.status ?? 'network';
+    const blocked = error?.response?.data?.blocked_by_guard;
+    if (blocked) {
+      console.warn("ℹ️  [User Settings] Admin guard blocked a plan-price call — check for stale /admin/* URL in user pages.");
+    } else {
+      console.log("ℹ️  [User Settings] Public plan prices endpoint failed (" + code + "), keeping static fallback.");
+    }
   }
+
+  // Mark loaded so we don't spam the API; fallback list is already in place.
+  _planPricesLoaded.value = true;
 };
 
 const getCardPublicUrl = (card, opts = {}) => {

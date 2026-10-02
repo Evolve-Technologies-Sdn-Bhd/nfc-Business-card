@@ -213,6 +213,37 @@ export default defineNuxtPlugin((nuxtApp) => {
         config.timeout = 60000;
       }
 
+      // ─── NON-ADMIN GUARD: Prevent non-admin users from hitting /admin/* URLs ───
+      // Catches accidental admin route calls from user-facing pages (e.g. /admin/plan-prices
+      // on User Settings page) BEFORE they hit the server → avoids 403 toasts entirely.
+      try {
+        const rawUrl = config.url ?? "";
+        const isAdminUrl = typeof rawUrl === "string" &&
+          (rawUrl.startsWith("/admin") || rawUrl.includes("/admin/"));
+        if (isAdminUrl) {
+          const authStore = useAuthStore();
+          const userIsAdmin = Boolean(
+            authStore?.user?.is_admin ||
+            authStore?.user?.admin_role ||
+            authStore?.isAdmin
+          );
+          if (!userIsAdmin) {
+            // REJECT THE REQUEST BEFORE IT LEAVES THE BROWSER
+            if (process.env.NODE_ENV !== "production") {
+              console.warn(
+                `🛡️  Non-admin guard BLOCKED call to admin URL: ${config.method?.toUpperCase()} ${rawUrl}. ` +
+                `User pages must NEVER call /admin/* endpoints — use public/user routes instead.`
+              );
+            }
+            const err = new Error(`Non-admin users cannot call admin endpoint: ${rawUrl}`);
+            err.name = "AdminGuardBlocked";
+            err.response = { status: 403, data: { blocked_by_guard: true } };
+            err.status = 403;
+            return Promise.reject(err);
+          }
+        }
+      } catch (_) { /* guard unavailable, allow the request to proceed as normal */ }
+
       return config;
     },
     (error) => {
@@ -366,12 +397,34 @@ export default defineNuxtPlugin((nuxtApp) => {
         return Promise.reject(error);
       }
 
-      // Handle 403 Forbidden
+      // Handle 403 Forbidden — SMART FILTER:
+      // - If forbidden URL is an ADMIN (/admin/*) AND current user is NOT admin:
+      //   DON'T show intrusive toast. User-level page accidentally hit admin route → console only.
+      // - Otherwise show toast normally.
       if (error.response?.status === 403) {
         const { $toast } = nuxtApp;
-        $toast.error(
-          "Access denied. You do not have permission to perform this action."
-        );
+        const reqUrl = originalRequest.url || '';
+        const isAdminRoute = typeof reqUrl === 'string' && (reqUrl.startsWith('/admin') || reqUrl.includes('/admin/'));
+        let userIsAdmin = false;
+
+        try {
+          const authStore = useAuthStore();
+          userIsAdmin = Boolean(authStore?.user?.is_admin || authStore?.user?.admin_role || authStore?.isAdmin);
+        } catch (_) { /* store unavailable */ }
+
+        if (isAdminRoute && !userIsAdmin) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `ℹ️  Non-admin user hit admin route ${reqUrl} (403 toast suppressed — accidental call from user-facing page)`
+            );
+          }
+        } else {
+          if ($toast && typeof $toast.error === 'function') {
+            $toast.error(
+              "Access denied. You do not have permission to perform this action."
+            );
+          }
+        }
       }
 
       // Handle 404 Not Found (skip landing-page 404s as they're handled above)
