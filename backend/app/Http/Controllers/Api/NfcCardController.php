@@ -574,10 +574,12 @@ class NfcCardController extends Controller
                 $baseUrl = $fallbackUrl;
             }
 
-            // ── Store proof ──
+            // ── Store proof to public disk ──
             $ext = $file->getClientOriginalExtension() ?: $file->extension() ?: 'pdf';
-            $fileName = 'payment-proofs/' . $nfcCard->nfc_card_id . '-' . time() . '.' . $ext;
-            $storedPath = $file->storeAs('public', $fileName);
+            $relativeDir = 'payment-proofs';
+            $fileNameNoDir = $nfcCard->nfc_card_id . '-' . time() . '.' . $ext;
+            $storedPath = $file->storeAs($relativeDir, $fileNameNoDir, 'public');
+            $fileName = $relativeDir . '/' . $fileNameNoDir;
             if (!$storedPath) {
                 return response()->json([
                     'success' => false,
