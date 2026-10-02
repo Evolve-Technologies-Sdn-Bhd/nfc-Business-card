@@ -170,20 +170,6 @@
           </button>
         </form>
 
-        <!-- Divider -->
-        <div class="mt-6">
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-secondary-300"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-secondary-500"
-                >Or continue with</span
-              >
-            </div>
-          </div>
-        </div>
-
         <!-- OAuth Blocked Warning -->
         <div v-if="oauthBlocked && form.email" class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <div class="flex items-start">

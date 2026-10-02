@@ -14,159 +14,180 @@
     <template v-if="variant === 'wave'">
       <div
         :class="[
-          'relative select-none nfc-wave-stage',
+          'flex flex-row items-center justify-center relative select-none nfc-wave-stage',
           sizes[size].stage,
           !inline ? 'animate-nfc-fade-up' : '',
         ]"
         :style="!inline ? { animationDelay: '60ms' } : {}"
       >
-        <!-- ============== LEFT HALF-WAVE FAN (3 arcs) ============== -->
+        <!-- ==================== COLUMN 1: LEFT WAVE (3 arcs container) ==================== -->
         <div
-          class="nfc-fan-group"
-          :class="sizes[size].fanLeft"
+          :class="['relative h-full flex items-center justify-end', sizes[size].leftCol]"
         >
-          <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
-          <div class="nfc-fan-wrap nfc-fan-left-c">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-l-3"
-              :class="sizes[size].fanSvg3"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath3"
-                :stroke="sizes[size].strokeGold"
-                :stroke-width="sizes[size].strokeW3"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-          <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
-          <div class="nfc-fan-wrap nfc-fan-left-b">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-l-2"
-              :class="sizes[size].fanSvg2"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath2"
-                :stroke="sizes[size].strokeTeal"
-                :stroke-width="sizes[size].strokeW2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-          <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
-          <div class="nfc-fan-wrap nfc-fan-left-a">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-l-1"
-              :class="sizes[size].fanSvg1"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath1"
-                :stroke="sizes[size].strokeNavy"
-                :stroke-width="sizes[size].strokeW1"
-                stroke-linecap="round"
-              />
-            </svg>
+          <div class="nfc-fan-group nfc-fan-left relative h-full w-full">
+            <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
+            <div class="nfc-fan-wrap nfc-fan-left-c absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-l-3"
+                :class="sizes[size].fanSvg3"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath3"
+                  :stroke="sizes[size].strokeGold"
+                  :stroke-width="sizes[size].strokeW3"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
+            <div class="nfc-fan-wrap nfc-fan-left-b absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-l-2"
+                :class="sizes[size].fanSvg2"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath2"
+                  :stroke="sizes[size].strokeTeal"
+                  :stroke-width="sizes[size].strokeW2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
+            <div class="nfc-fan-wrap nfc-fan-left-a absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-l-1"
+                :class="sizes[size].fanSvg1"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath1"
+                  :stroke="sizes[size].strokeNavy"
+                  :stroke-width="sizes[size].strokeW1"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 
-        <!-- ============== CENTER: 3D BEVELLED NFC CHIP ============== -->
+        <!-- ==================== COLUMN 2: CENTER — NFCGo BRAND + HINT ==================== -->
         <div
-          class="relative z-[2] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-          :class="sizes[size].chipWrapper"
+          v-if="showText"
+          :class="[
+            'flex flex-col items-center justify-center relative z-[2]',
+            sizes[size].centerCol,
+          ]"
         >
+          <!-- ============== CENTER: 3D BEVELLED NFC CHIP (directly above brand logo) ============== -->
           <div
-            class="nfc-chip-3d"
-            :class="[
-              sizes[size].isLg ? 'animate-nfc-chip-3d-lg' : 'animate-nfc-chip-3d',
-              sizes[size].chip,
-            ]"
-          ></div>
+            class="relative"
+            :class="sizes[size].chipWrapper"
+          >
+            <div
+              class="nfc-chip-3d"
+              :class="[
+                sizes[size].isLg ? 'animate-nfc-chip-3d-lg' : 'animate-nfc-chip-3d',
+                sizes[size].chip,
+              ]"
+            ></div>
+          </div>
+
+          <span
+            class="nfcgo-brand-text animate-nfc-text-shimmer font-poppins whitespace-nowrap relative"
+            :class="sizes[size].brand"
+          >
+            {{ labelText }}
+          </span>
+
+          <span
+            v-if="showHintText && hintText"
+            class="nfcgo-hint-text font-inter whitespace-nowrap"
+            :class="sizes[size].hint"
+          >
+            {{ hintText }}
+          </span>
         </div>
 
-        <!-- ============== RIGHT HALF-WAVE FAN (3 arcs) ============== -->
+        <!-- If no text shown (inline), still render a centered chip as anchor -->
         <div
-          class="nfc-fan-group"
-          :class="sizes[size].fanRight"
+          v-else
+          :class="[
+            'flex flex-col items-center justify-center relative z-[2]',
+            sizes[size].centerCol,
+          ]"
         >
-          <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
-          <div class="nfc-fan-wrap nfc-fan-right-c">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-r-3"
-              :class="sizes[size].fanSvg3"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath3"
-                :stroke="sizes[size].strokeGold"
-                :stroke-width="sizes[size].strokeW3"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-          <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
-          <div class="nfc-fan-wrap nfc-fan-right-b">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-r-2"
-              :class="sizes[size].fanSvg2"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath2"
-                :stroke="sizes[size].strokeTeal"
-                :stroke-width="sizes[size].strokeW2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-          <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
-          <div class="nfc-fan-wrap nfc-fan-right-a">
-            <svg
-              class="nfc-fan-svg animate-nfc-fan-r-1"
-              :class="sizes[size].fanSvg1"
-              :viewBox="sizes[size].fanViewBox"
-              fill="none"
-            >
-              <path
-                :d="sizes[size].fanPath1"
-                :stroke="sizes[size].strokeNavy"
-                :stroke-width="sizes[size].strokeW1"
-                stroke-linecap="round"
-              />
-            </svg>
+          <div class="relative" :class="sizes[size].chipWrapper">
+            <div
+              class="nfc-chip-3d"
+              :class="[
+                sizes[size].isLg ? 'animate-nfc-chip-3d-lg' : 'animate-nfc-chip-3d',
+                sizes[size].chip,
+              ]"
+            ></div>
           </div>
         </div>
-      </div>
 
-      <!-- ============== BRAND LABEL STACK ============== -->
-      <div
-        v-if="showText"
-        :class="[
-          'flex flex-col items-center justify-center',
-          sizes[size].stackGap,
-        ]"
-      >
-        <span
-          class="nfcgo-brand-text animate-nfc-text-shimmer font-poppins whitespace-nowrap relative"
-          :class="sizes[size].brand"
+        <!-- ==================== COLUMN 3: RIGHT WAVE (3 arcs container) ==================== -->
+        <div
+          :class="['relative h-full flex items-center justify-start', sizes[size].rightCol]"
         >
-          {{ labelText }}
-        </span>
-
-        <span
-          v-if="showHintText && hintText"
-          class="nfcgo-hint-text font-inter whitespace-nowrap"
-          :class="sizes[size].hint"
-        >
-          {{ hintText }}
-        </span>
+          <div class="nfc-fan-group nfc-fan-right relative h-full w-full">
+            <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
+            <div class="nfc-fan-wrap nfc-fan-right-c absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-r-3"
+                :class="sizes[size].fanSvg3"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath3"
+                  :stroke="sizes[size].strokeGold"
+                  :stroke-width="sizes[size].strokeW3"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
+            <div class="nfc-fan-wrap nfc-fan-right-b absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-r-2"
+                :class="sizes[size].fanSvg2"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath2"
+                  :stroke="sizes[size].strokeTeal"
+                  :stroke-width="sizes[size].strokeW2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
+            <div class="nfc-fan-wrap nfc-fan-right-a absolute inset-0">
+              <svg
+                class="nfc-fan-svg animate-nfc-fan-r-1"
+                :class="sizes[size].fanSvg1"
+                :viewBox="sizes[size].fanViewBox"
+                fill="none"
+              >
+                <path
+                  :d="sizes[size].fanPath1"
+                  :stroke="sizes[size].strokeNavy"
+                  :stroke-width="sizes[size].strokeW1"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -352,23 +373,39 @@ const arcHalfAngle = (r) => Math.acos(Math.min(OPEN_OFFSET / r, 0.999));
 // Draw one OPEN CIRCULAR ARC. All arcs share the same center. All open
 // toward +x (chip side) at exactly the same x boundary (cx - OPEN_OFFSET).
 // Sweep counter-clockwise through the FAR LEFT side → no chord line.
-const circularFan = (r) => {
-  const theta = arcHalfAngle(r);
+/* Construct a single half-circle WiFi fan arc using pure SVG elliptical arc.
+   All 3 arcs share the same center (cx, cy) but have DIFFERENT RADII and
+   DIFFERENT OPENING OFFSETS (per-radius).
+   Critical detail about OPEN_OFFSET:
+     - If all 3 arcs use the SAME opening x-line (cx - 10 = 40), then all 6
+       endpoints (3 left + 3 right, 2 each top/bottom) land on the SAME
+       horizontal Y-level because they all sit on the same x vertical line and
+       have roughly proportional arc angles. This creates a "fake horizontal
+       line" visual caused by 6 rounded stroke endpoints lining up perfectly.
+     - To eliminate that spurious "red box line" artifact, the inner arc's
+       endpoints sit DEEPER (larger offset, closer to chip) while outer arc's
+       endpoints sit FURTHER OUT (smaller offset). This staggers the endpoint
+       Y-levels so they never form a straight horizontal line.
+   Per-layer offsets chosen for a natural nested WiFi symbol look:
+     Arc1/R=16 (Navy,  innermost): off = 13  (deepest opening)
+     Arc2/R=25 (Teal,  middle   ): off = 10  (middle)
+     Arc3/R=34 (Gold,  outermost): off = 7   (widest opening)
+*/
+const circularFan = (r, openOffset) => {
+  const theta = Math.acos(openOffset / r); // angle subtended by opening
   const sinA = Math.sin(theta);
-  // Endpoints sit on the opening x line (cx - OPEN_OFFSET), vertically
-  // separated by ±r·sin θ → produces the reference's nested look.
-  const x1 = cx - OPEN_OFFSET;
+  const x1 = cx - openOffset;
   const y1 = cy - r * sinA;
   const x2 = x1;
   const y2 = cy + r * sinA;
-  // large-arc-flag = 0 (2θ < 180° for any valid r > OPEN_OFFSET)
-  // sweep-flag     = 0 (counter-clockwise → curves through FAR LEFT)
+  // large-arc-flag = 0 (2θ < 180°, small arc)
+  // sweep-flag     = 0 (counter-clockwise → curve bulges toward FAR LEFT)
   const f = (v) => v.toFixed(3);
   return `M ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 0 0 ${f(x2)} ${f(y2)}`;
 };
-const FANPATH_1 = circularFan(R1);
-const FANPATH_2 = circularFan(R2);
-const FANPATH_3 = circularFan(R3);
+const FANPATH_1 = circularFan(R1, 13); // Navy inner  — deep opening  (x=37)
+const FANPATH_2 = circularFan(R2, 10); // Teal middle — standard      (x=40)
+const FANPATH_3 = circularFan(R3, 7);  // Gold outer  — wide opening  (x=43)
 
 // Wave variant — Size map (HALF-WAVE fan style)
 // Horizontal gap between arc layers (via margin so it doesn't clash with
@@ -378,12 +415,13 @@ const FANPATH_3 = circularFan(R3);
 //   Right inner/arc1 = marginLeft 0px,   mid/arc2 = +6px,   outer/arc3 = +13px
 const sizes = {
   xs: {
-    stage: 'w-16 h-7',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-28 h-8',
+    leftCol: 'w-6 h-6 shrink-0 mr-1',
+    rightCol: 'w-6 h-6 shrink-0 ml-1',
+    centerCol: 'shrink-0 max-w-[70%] -mt-1',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -391,24 +429,23 @@ const sizes = {
     strokeNavy: NAVY,
     strokeTeal: TEAL,
     strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-6 h-6',
-    chip: 'w-6 h-6',
+    strokeW1: 4,
+    strokeW2: 4,
+    strokeW3: 4,
+    chipWrapper: 'w-4 h-4 mb-0.5',
+    chip: 'w-4 h-4',
     isLg: false,
-    stackGap: 'gap-0.5 mt-0.5',
-    brand: 'text-[11px] leading-tight',
-    hint: 'text-[9px] leading-tight',
-    accentLine: 'h-[1px] w-5',
+    brand: 'text-[10px] leading-none font-bold tracking-wide',
+    hint: 'text-[8px] leading-tight mt-0.5',
   },
   sm: {
-    stage: 'w-28 h-12',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-48 h-14',
+    leftCol: 'w-12 h-12 shrink-0 mr-2',
+    rightCol: 'w-12 h-12 shrink-0 ml-2',
+    centerCol: 'shrink-0 max-w-[65%] -mt-1',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -416,24 +453,23 @@ const sizes = {
     strokeNavy: NAVY,
     strokeTeal: TEAL,
     strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-10 h-10',
-    chip: 'w-10 h-10',
+    strokeW1: 4,
+    strokeW2: 4,
+    strokeW3: 4,
+    chipWrapper: 'w-8 h-8 mb-1',
+    chip: 'w-8 h-8',
     isLg: false,
-    stackGap: 'gap-0.5 mt-1',
-    brand: 'text-[13px] leading-tight',
-    hint: 'text-[10.5px] leading-tight',
-    accentLine: 'h-[1px] w-7 mt-0.5',
+    brand: 'text-[13px] leading-none font-bold tracking-wide',
+    hint: 'text-[10px] leading-tight mt-0.5',
   },
   md: {
-    stage: 'w-44 h-20',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-72 h-20',
+    leftCol: 'w-20 h-20 shrink-0 mr-3',
+    rightCol: 'w-20 h-20 shrink-0 ml-3',
+    centerCol: 'shrink-0 max-w-[60%] -mt-1',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -444,21 +480,20 @@ const sizes = {
     strokeW1: 5,
     strokeW2: 5,
     strokeW3: 5,
-    chipWrapper: 'w-16 h-16',
-    chip: 'w-16 h-16',
+    chipWrapper: 'w-12 h-12 mb-1',
+    chip: 'w-12 h-12',
     isLg: false,
-    stackGap: 'gap-1 mt-1.5',
-    brand: 'text-lg leading-tight',
-    hint: 'text-xs leading-tight',
-    accentLine: 'h-[1.5px] w-12 mt-1',
+    brand: 'text-lg leading-none font-bold tracking-wide',
+    hint: 'text-xs leading-tight mt-1',
   },
   lg: {
-    stage: 'w-60 h-24',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-96 h-24',
+    leftCol: 'w-24 h-24 shrink-0 mr-4',
+    rightCol: 'w-24 h-24 shrink-0 ml-4',
+    centerCol: 'shrink-0 max-w-[55%] -mt-1',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -469,21 +504,20 @@ const sizes = {
     strokeW1: 5,
     strokeW2: 5,
     strokeW3: 5,
-    chipWrapper: 'w-20 h-20',
-    chip: 'w-20 h-20',
+    chipWrapper: 'w-16 h-16 mb-1.5',
+    chip: 'w-16 h-16',
     isLg: true,
-    stackGap: 'gap-1 mt-2',
-    brand: 'text-2xl leading-tight',
-    hint: 'text-sm leading-tight',
-    accentLine: 'h-[1.5px] w-18 mt-1',
+    brand: 'text-2xl leading-none font-bold tracking-wide',
+    hint: 'text-sm leading-tight mt-1',
   },
   xl: {
-    stage: 'w-72 h-28',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-[36rem] h-32',
+    leftCol: 'w-32 h-32 shrink-0 mr-5',
+    rightCol: 'w-32 h-32 shrink-0 ml-5',
+    centerCol: 'shrink-0 max-w-[50%] -mt-2',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -494,21 +528,20 @@ const sizes = {
     strokeW1: 5,
     strokeW2: 5,
     strokeW3: 5,
-    chipWrapper: 'w-22 h-22',
-    chip: 'w-22 h-22',
+    chipWrapper: 'w-20 h-20 mb-1.5',
+    chip: 'w-20 h-20',
     isLg: true,
-    stackGap: 'gap-0.5 mt-1',
-    brand: 'text-3xl leading-tight',
-    hint: 'text-[15px] leading-tight',
-    accentLine: 'h-[2px] w-20 mt-1.5',
+    brand: 'text-3xl leading-none font-bold tracking-wide',
+    hint: 'text-[15px] leading-tight mt-1.5',
   },
   full: {
-    stage: 'w-96 h-32',
-    fanLeft: 'nfc-fan-left',
-    fanRight: 'nfc-fan-right',
-    fanSvg1: 'absolute inset-0 w-full h-full',
-    fanSvg2: 'absolute inset-0 w-full h-full',
-    fanSvg3: 'absolute inset-0 w-full h-full',
+    stage: 'w-full max-w-[48rem] h-40',
+    leftCol: 'w-40 h-40 shrink-0 mr-6',
+    rightCol: 'w-40 h-40 shrink-0 ml-6',
+    centerCol: 'shrink-0 max-w-[50%] -mt-2',
+    fanSvg1: 'w-full h-full block',
+    fanSvg2: 'w-full h-full block',
+    fanSvg3: 'w-full h-full block',
     fanViewBox: VB,
     fanPath1: FANPATH_1,
     fanPath2: FANPATH_2,
@@ -519,13 +552,11 @@ const sizes = {
     strokeW1: 5,
     strokeW2: 5,
     strokeW3: 5,
-    chipWrapper: 'w-28 h-28',
-    chip: 'w-28 h-28',
+    chipWrapper: 'w-24 h-24 mb-2',
+    chip: 'w-24 h-24',
     isLg: true,
-    stackGap: 'gap-1 mt-2',
-    brand: 'text-4xl leading-tight',
-    hint: 'text-base leading-tight',
-    accentLine: 'h-[2px] w-24 mt-1.5',
+    brand: 'text-4xl leading-none font-bold tracking-wide',
+    hint: 'text-base leading-tight mt-2',
   },
 };
 

@@ -308,19 +308,33 @@
   /* Stage outer wrapper: ZERO visual artifacts.
      No 1px borders, no outlines, no box-shadows. This eliminates the
      "thin gray horizontal line" users sometimes see underneath the wave
-     stage (often mistaken for an accent line but it's just an antialiased
-     container edge or stray outline). */
-  .nfc-wave-stage {
+     stage: usually caused by either:
+       (a) stray 1px border/outline/box-shadow pseudo elements
+       (b) SVG stroke endpoints perfectly aligned at the same horizontal Y
+           (fixed via per-radius OPEN_OFFSET stagger)
+       (c) anti-aliased edge of the stage div against a background
+  */
+  .nfc-wave-stage,
+  .nfc-wave-stage *,
+  .nfc-wave-stage::before,
+  .nfc-wave-stage::after,
+  .nfc-wave-stage *::before,
+  .nfc-wave-stage *::after {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
-    background: transparent;
+    text-shadow: none !important;
+    background-image: none !important;
+    background: transparent !important;
   }
-  .nfc-wave-stage::before,
-  .nfc-wave-stage::after {
-    content: none !important;
-    border: none !important;
-    background: none !important;
+  /* Chip is the only exception — it needs its 3D box-shadow back. */
+  .nfc-wave-stage .nfc-chip-3d,
+  .nfc-wave-stage .nfc-chip-3d::before,
+  .nfc-wave-stage .nfc-chip-3d::after {
+    box-shadow: initial !important;
+    background-image: initial !important;
+    background: initial !important;
+    border: initial !important;
   }
 
   /* ============================================================
@@ -344,6 +358,25 @@
     /* Explicit no-fill so even if path's fill attr is dropped by mistake,
        we never render a filled shape or a "closed" polygon. */
     fill: none !important;
+    /* CRITICAL FIX — prevent aspect-ratio distortion.
+       The SVG viewBox is 100x100 (1:1). Previously `w-full h-full` forced
+       the SVG to stretch horizontally whenever the fan wrapper (width 70%) is wider
+       than the stage height. That turns circles into ellipses and the
+       thick stroke endpoints at cx-OPEN_OFFSET appear as a thin
+       horizontal "line" spanning across the middle of the stage (the "red
+       box" artifact users kept seeing).
+
+       Solution: height = wrapper height; width AUTO-SCALE to maintain 1:1 ratio.
+       This keeps arcs PERFECT CIRCLES regardless of wrapper dimensions. */
+    height: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  .nfc-fan-right .nfc-fan-svg {
+    /* Align right-side SVGs to the right edge so the scaleX(-1) mirrored
+    arcs stay inside the wrapper (they would otherwise clip on the left). */
+    margin-left: auto;
   }
   .nfc-fan-svg path {
     /* round caps + round joins eliminate any spiky miter artifacts

@@ -15,7 +15,8 @@
     <Transition name="nfc-boot-fade" mode="out-in">
       <div
         v-if="appBootLoading"
-        class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white"
+        class="fixed inset-0 z-[999999] flex flex-col items-center justify-center"
+        style="background-color: #ffffff !important; opacity: 1;"
       >
         <NFCGoWaveLoader
           variant="wave"
