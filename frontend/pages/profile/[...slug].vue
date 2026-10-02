@@ -4619,6 +4619,8 @@ const designSettings = reactive({
   textColor: '#ffffff',
   accentColor: '#667eea',
   bgGradient: null,
+  cardEffectColor: '#22D3EE',
+  cardEffectOpacity: 0.55,
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
   theme: 'default',
   buttonStyle: 'solid',
@@ -5397,6 +5399,14 @@ const loadPreviewData = (data) => {
   if (data.bgGradient || data.bg_gradient) {
     designSettings.bgGradient = data.bgGradient || data.bg_gradient;
   }
+  if (data.cardEffectColor || data.card_effect_color) {
+    designSettings.cardEffectColor = data.cardEffectColor || data.card_effect_color;
+  }
+  if (data.cardEffectOpacity !== undefined && data.cardEffectOpacity !== null) {
+    designSettings.cardEffectOpacity = Number(data.cardEffectOpacity);
+  } else if (data.card_effect_opacity !== undefined && data.card_effect_opacity !== null) {
+    designSettings.cardEffectOpacity = Number(data.card_effect_opacity);
+  }
   if (data.cardStyle || data.card_style) {
     designSettings.cardStyle = data.cardStyle || data.card_style;
   }
@@ -6002,6 +6012,20 @@ const applyDesignConfig = (designConfig) => {
       }
     }
 
+    // Apply Card Style & Background Animation
+    if (designConfig.cardStyle) {
+      designSettings.cardStyle = designConfig.cardStyle.id || designConfig.cardStyle;
+    }
+    if (designConfig.bgAnimation) {
+      designSettings.bgAnimation = designConfig.bgAnimation.id || designConfig.bgAnimation;
+    }
+    if (designConfig.cardEffectColor) {
+      designSettings.cardEffectColor = designConfig.cardEffectColor;
+    }
+    if (designConfig.cardEffectOpacity !== undefined && designConfig.cardEffectOpacity !== null) {
+      designSettings.cardEffectOpacity = Number(designConfig.cardEffectOpacity);
+    }
+
     // Apply Button Style
     if (designConfig.buttonStyle) {
       const buttonStyle = designConfig.buttonStyle;
@@ -6040,6 +6064,14 @@ const applyDirectDesignFields = (data) => {
   }
   if (data.bg_gradient || data.bgGradient) {
     designSettings.bgGradient = data.bg_gradient || data.bgGradient;
+  }
+  if (data.card_effect_color || data.cardEffectColor) {
+    designSettings.cardEffectColor = data.card_effect_color || data.cardEffectColor;
+  }
+  if (data.card_effect_opacity !== undefined && data.card_effect_opacity !== null) {
+    designSettings.cardEffectOpacity = Number(data.card_effect_opacity);
+  } else if (data.cardEffectOpacity !== undefined && data.cardEffectOpacity !== null) {
+    designSettings.cardEffectOpacity = Number(data.cardEffectOpacity);
   }
   if (data.card_style || data.cardStyle) {
     designSettings.cardStyle = data.card_style || data.cardStyle;
