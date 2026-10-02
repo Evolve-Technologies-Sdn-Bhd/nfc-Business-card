@@ -338,49 +338,47 @@ const TEAL = 'var(--theme-accent, #5d8c87)';
 const GOLD = 'var(--theme-accent-secondary, #b8956a)';
 
 // Common SVG fan geometry (VIEWBOX 100x100, center 50,50).
-// Build LEFT-side OPEN WiFi-signal half-arc using a CUBIC BEZIER CURVE.
-// NO SVG `A` command at all — so impossible for a "chord line" or
-// vertical stem to appear regardless of arc flags.
-// Curve shape (opening toward +x / center chip):
-//     S (top opening)              E (bottom opening)
-//       \                          /
-//        ------- M (apex) --------
-//                 ^
-//                 (farthest LEFT, on horizontal centerline)
+// Exactly matching the reference image: 3 CONCENTRIC CIRCULAR OPEN ARCS.
+// - Same center (50,50)
+// - Equal stroke thickness for ALL 3 layers
+// - Uniform gap between each radius (10px)
+// - Each arc sweeps 140° on the LEFT side, opening toward the RIGHT (chip)
+// - Start/end points at angle ±70° from +x axis:
+//     Top endpoint   : 70° above horizontal  → on the RIGHT side of arc
+//     Bottom endpoint: 70° below horizontal  → on the RIGHT side of arc
+//   The arc curves counter-clockwise from top→bottom through the FAR LEFT,
+//   leaving a pure opening on the right (toward chip) with NO chord line.
 const VB = '0 0 100 100';
 const cx = 50;
 const cy = 50;
-// Build one pure bezier open-arc (bell-shape) with apex at (-depth, cy)
-// and opening endpoints vertically separated by (span) on the x-axis.
-// depth = how far LEFT the apex sits from center
-// span  = horizontal offset of opening (where arc "opens" toward chip)
-// spread= vertical distance (±spread) from centerline for endpoints
-const bezFanPath = (depth, span, spread) => {
-  // Endpoints (opening toward +x / chip, on the right side of curve)
-  const Sx = cx - span;
-  const Sy = cy - spread;
-  const Ex = cx - span;
-  const Ey = cy + spread;
-  // Apex — farthest LEFT from center
-  const Mx = cx - depth;
-  const My = cy;
-  // Control points — placed at 55% along line S->M and M->E for smooth bell
-  const k = 0.55;
-  const C1x = Sx + k * (Mx - Sx);
-  const C1y = Sy + k * (My - Sy);
-  const C2x = Mx + k * (Ex - Mx);
-  const C2y = My + k * (Ey - My);
+const sweepDeg = 70;           // half-angle → 140° total sweep
+const cosA = Math.cos((sweepDeg * Math.PI) / 180);
+const sinA = Math.sin((sweepDeg * Math.PI) / 180);
+// Draw one OPEN CIRCULAR ARC on the LEFT side (opening faces +x / chip).
+// Uses pure SVG ellipse-arc with CORRECT flags so only the 140° left-facing
+// curve is drawn — mathematically NO chord/vertical stem can exist because
+// the arc doesn't trace any straight segment.
+const circularFan = (r) => {
+  // Opening toward RIGHT (chip) → endpoints on the RIGHT half of the circle.
+  const x1 = cx + r * cosA;   // x > 50 (right side near chip, ~ r*0.34)
+  const y1 = cy - r * sinA;   // y < 50 (top endpoint)
+  const x2 = x1;              // same x-coordinate → perfectly vertical gap
+  const y2 = cy + r * sinA;   // y > 50 (bottom endpoint)
+  // large-arc-flag = 0 : we only sweep 140° (less than 180° → small arc)
+  // sweep-flag     = 0 : go counter-clockwise from (x1,y1) → (x2,y2)
+  //                     which means we curve through the LEFT side (the
+  //                     side AWAY from chip), leaving clean opening on right.
   const f = (v) => v.toFixed(3);
-  return `M ${f(Sx)} ${f(Sy)} C ${f(C1x)} ${f(C1y)}, ${f(C2x)} ${f(C2y)}, ${f(Ex)} ${f(Ey)}`;
+  return `M ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 0 0 ${f(x2)} ${f(y2)}`;
 };
-// Three layers — consistent depths (apex position), spans (opening x),
-// spreads (vertical end separation) so each layer looks like a nested
-// WiFi-signal arc without touching or overlapping.
-// depth=radius,  span=radius*0.45 (opens on the right side, near chip)
-// spread=radius*sin(55°) to match intended ~110° total fan sweep
-const FANPATH_1 = bezFanPath(16, 16 * 0.46, 16 * 0.81); // inner (navy)  — apex at x=34
-const FANPATH_2 = bezFanPath(29, 29 * 0.46, 29 * 0.81); // middle (teal) — apex at x=21
-const FANPATH_3 = bezFanPath(42, 42 * 0.46, 42 * 0.81); // outer (gold) — apex at x=8
+// 3 concentric radii — uniform 10px step between layers so spacing looks
+// identical like the reference image.
+const R1 = 16;                   // inner  (navy)
+const R2 = R1 + 10;              // middle (teal)  → +10px
+const R3 = R2 + 10;              // outer  (gold)  → +10px
+const FANPATH_1 = circularFan(R1);
+const FANPATH_2 = circularFan(R2);
+const FANPATH_3 = circularFan(R3);
 
 // Wave variant — Size map (HALF-WAVE fan style)
 // Horizontal gap between arc layers (via margin so it doesn't clash with
@@ -391,8 +389,8 @@ const FANPATH_3 = bezFanPath(42, 42 * 0.46, 42 * 0.81); // outer (gold) — apex
 const sizes = {
   xs: {
     stage: 'w-16 h-7',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -416,8 +414,8 @@ const sizes = {
   },
   sm: {
     stage: 'w-28 h-12',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -441,8 +439,8 @@ const sizes = {
   },
   md: {
     stage: 'w-44 h-20',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -466,8 +464,8 @@ const sizes = {
   },
   lg: {
     stage: 'w-60 h-24',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -491,8 +489,8 @@ const sizes = {
   },
   xl: {
     stage: 'w-72 h-28',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',
@@ -516,8 +514,8 @@ const sizes = {
   },
   full: {
     stage: 'w-96 h-32',
-    fanLeft: 'left-0 w-[44%] h-full absolute top-0 bottom-0',
-    fanRight: 'right-0 w-[44%] h-full absolute top-0 bottom-0',
+    fanLeft: 'left-0 w-[70%] h-full absolute top-0 bottom-0',
+    fanRight: 'right-0 w-[70%] h-full absolute top-0 bottom-0',
     fanSvg1: 'absolute inset-0 w-full h-full',
     fanSvg2: 'absolute inset-0 w-full h-full',
     fanSvg3: 'absolute inset-0 w-full h-full',

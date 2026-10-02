@@ -2593,12 +2593,11 @@ const loadUserNfcCards = async () => {
   }
 };
 
-// Load plan prices - avoid permission errors for regular users
+// Load plan prices - always use PUBLIC user-only route, NEVER admin routes
 const loadPlanPrices = async () => {
   console.log("🔄 Loading plan prices...");
   
-  // Directly use database data to avoid permission issues
-  // This ensures consistent pricing without API dependency
+  // Default static fallback plan prices (in case API is down)
   planPrices.value = [
     {
       id: 1,
@@ -2646,21 +2645,22 @@ const loadPlanPrices = async () => {
     }
   ];
   
-  console.log("✅ Plan prices loaded from database schema:", planPrices.value.length, "plans");
+  console.log("✅ Plan prices fallback loaded:", planPrices.value.length, "plans");
   
-  // Optional: Only admins try to get live data (silently)
-  if (authStore.user?.admin_role) {
-    try {
-      const { $api } = useNuxtApp();
-      const response = await $api.get("/admin/plan-prices");
-      if (response.success && response.data) {
-        planPrices.value = response.data.filter(plan => plan.is_active);
-        console.log("🔄 Updated with live admin data:", planPrices.value.length, "plans");
+  // Now try PUBLIC user-safe route (works for everyone, no admin guard)
+  try {
+    const { $api } = useNuxtApp();
+    const response = await $api.get("/plan-prices/public");
+    if (response && response.success && Array.isArray(response.data) && response.data.length > 0) {
+      const activePlans = response.data.filter(plan => (plan.is_active !== false));
+      if (activePlans.length > 0) {
+        planPrices.value = activePlans;
+        console.log("✅ Plan prices loaded from public API:", planPrices.value.length, "plans");
       }
-    } catch (error) {
-      // Silent fail for admins - just use database data
-      console.log("ℹ️ Using database data (admin API unavailable)");
     }
+  } catch (error) {
+    // Silent fail - keep the static fallback plan list so the UI never breaks
+    console.log("ℹ️ Public plan prices unavailable, using fallback schema.");
   }
 };
 

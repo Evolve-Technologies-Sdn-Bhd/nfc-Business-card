@@ -1715,20 +1715,25 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* ====== FAN LAYER POSITIONING (horizontal gap) ======
+/* ====== FAN LAYER POSITIONING (horizontal fine-tuning) ======
  *  Applied on WRAPPER divs around the SVG. Wrapper div has no keyframes
  *  of its own, so translateX() is NEVER overwritten. Inner SVG still
  *  animates scale()/scaleX(-1) via keyframes — they're on different
  *  DOM nodes → no conflict, no jitter.
- *  Gap ~ 8-9px relative to the 100-wide viewbox so layers are OBVIOUS.
+ *
+ *  NOTE: The 3 arcs ARE ALREADY at different x positions because they
+ *  have DIFFERENT RADII (16 / 26 / 36). Wider radius = apex farther
+ *  from chip. So these translateX values are just FINE-TUNING to keep
+ *  the opening (toward chip) at the same near-chip zone for all 3,
+ *  giving exactly the nested look in the reference image.
  */
 .nfc-fan-wrap  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.nfc-fan-left-a  { transform: translateX(0px);   }   /* LEFT  inner (navy)  — right at chip */
-.nfc-fan-left-b  { transform: translateX(-10px); }   /* LEFT  middle (teal) — push out */
-.nfc-fan-left-c  { transform: translateX(-20px); }   /* LEFT  outer  (gold) — far out */
-.nfc-fan-right-a { transform: translateX(0px);   }   /* RIGHT inner (navy)  — right at chip */
-.nfc-fan-right-b { transform: translateX(10px);  }   /* RIGHT middle (teal) — push out */
-.nfc-fan-right-c { transform: translateX(20px);  }   /* RIGHT outer  (gold) — far out */
+.nfc-fan-left-a  { transform: translateX(0px);   }   /* LEFT  inner (navy)  — opening at chip */
+.nfc-fan-left-b  { transform: translateX(0px);   }   /* LEFT  middle (teal) — already 10px wider */
+.nfc-fan-left-c  { transform: translateX(0px);   }   /* LEFT  outer  (gold) — already 20px wider */
+.nfc-fan-right-a { transform: translateX(0px);   }   /* RIGHT inner (navy)  — opening at chip */
+.nfc-fan-right-b { transform: translateX(0px);   }   /* RIGHT middle (teal) — already 10px wider */
+.nfc-fan-right-c { transform: translateX(0px);   }   /* RIGHT outer  (gold) — already 20px wider */
 
 .animate-nfc-fan-l-1 { animation: nfcFanL1 1.8s ease-in-out infinite; }
 .animate-nfc-fan-l-2 { animation: nfcFanL2 1.8s ease-in-out infinite; }
