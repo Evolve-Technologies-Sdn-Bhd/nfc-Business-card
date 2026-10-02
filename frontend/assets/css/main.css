@@ -305,6 +305,24 @@
       inset 0 1px 0 color-mix(in srgb, #ffffff 16%, transparent);
   }
 
+  /* Stage outer wrapper: ZERO visual artifacts.
+     No 1px borders, no outlines, no box-shadows. This eliminates the
+     "thin gray horizontal line" users sometimes see underneath the wave
+     stage (often mistaken for an accent line but it's just an antialiased
+     container edge or stray outline). */
+  .nfc-wave-stage {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent;
+  }
+  .nfc-wave-stage::before,
+  .nfc-wave-stage::after {
+    content: none !important;
+    border: none !important;
+    background: none !important;
+  }
+
   /* ============================================================
        FAN-WAVE HALF ARCS (left & right, 3 each)
        ============================================================ */
