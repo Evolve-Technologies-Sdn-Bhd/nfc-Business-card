@@ -102,11 +102,11 @@ class SendSubscriptionExpiryReminders extends Command
 
     private function sendRenewal(User $user, Subscription $sub, int $days): void
     {
-        $title = 'Bayaran Langganan Akan Datang';
+        $title = 'Upcoming Subscription Payment';
         if ($days === 1) {
-            $msg = "Langganan {$sub->plan_name} anda akan ditarik pada hari ini. Sila pastikan kaedah pembayaran anda aktif.";
+            $msg = "Your {$sub->plan_name} subscription will be charged today. Please ensure your payment method is active.";
         } else {
-            $msg = "Langganan {$sub->plan_name} anda akan ditarik dalam {$days} hari lagi. Jumlah: {$sub->amount} {$sub->currency}.";
+            $msg = "Your {$sub->plan_name} subscription will be charged in {$days} days. Amount: {$sub->amount} {$sub->currency}.";
         }
         Notification::create([
             'user_id' => $user->id,
@@ -128,11 +128,11 @@ class SendSubscriptionExpiryReminders extends Command
     private function sendTrial(User $user, Subscription $sub, int $days): void
     {
         if ($days === 1) {
-            $title = 'Tempoh Percubaan Tamat Hari Ini';
-            $msg = "Tempoh percubaan {$sub->plan_name} anda tamat hari ini. Sila naik taraf ke pelan berbayar untuk terus menikmati semua ciri premium.";
+            $title = 'Trial Period Ends Today';
+            $msg = "Your {$sub->plan_name} trial period ends today. Please upgrade to a paid plan to continue enjoying all premium features.";
         } else {
-            $title = 'Tempoh Percubaan Akan Tamat';
-            $msg = "Tempoh percubaan {$sub->plan_name} anda akan tamat dalam {$days} hari. Tingkatkan ke pelan berbayar sebelum ia tamat.";
+            $title = 'Trial Period Ending Soon';
+            $msg = "Your {$sub->plan_name} trial period will end in {$days} days. Upgrade to a paid plan before it expires.";
         }
         Notification::create([
             'user_id' => $user->id,

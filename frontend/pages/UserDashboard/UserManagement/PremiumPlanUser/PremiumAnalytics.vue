@@ -6,7 +6,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">Analytics</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Analytics</h1>
           <p class="mt-2 text-secondary-600">
             Track engagement and performance metrics
           </p>

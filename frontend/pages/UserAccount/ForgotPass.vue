@@ -13,7 +13,7 @@
           />
           <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
         </NuxtLink>
-        <h2 class="mt-6 text-3xl font-bold text-secondary-900">
+        <h2 class="mt-6 text-2xl sm:text-3xl font-bold text-secondary-900">
           Reset your password
         </h2>
         <p class="mt-2 text-sm text-secondary-600">

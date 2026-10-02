@@ -125,6 +125,31 @@ class ManualBankTransferController extends Controller
                 // Verify the payment
                 $transaction = $this->paymentService->verifyManualBankTransfer($transaction, $admin);
 
+                // Auto sync linked NFC Card order
+                if ($transaction->nfc_card_id) {
+                    $nfcCard = \App\Models\NfcCard::find($transaction->nfc_card_id);
+                    if ($nfcCard && !in_array($nfcCard->status, ['payment_verified','processing','shipped','delivered','active','cancelled'])) {
+                        $nfcCard->update([
+                            'status' => 'payment_verified',
+                            'order_confirmed_at' => now(),
+                        ]);
+                        try {
+                            $ns = app(\App\Services\NotificationService::class);
+                            $ns->create($nfcCard->user, 'nfc_card_payment_verified', [
+                                'nfc_card_id' => $nfcCard->nfc_card_id,
+                                'amount' => ($transaction->currency ?? 'RM') . ' ' . number_format($transaction->amount, 2),
+                                'action_url' => '/UserDashboard/ProfileBuilder',
+                                'action_text' => 'Design Profil Sekarang',
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to send payment verified notification after manual transfer approve', [
+                                'nfc_card_id' => $nfcCard->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+                }
+
                 Log::info('Manual bank transfer approved', [
                     'transaction_id' => $transaction->transaction_id,
                     'admin_id' => $admin->id,

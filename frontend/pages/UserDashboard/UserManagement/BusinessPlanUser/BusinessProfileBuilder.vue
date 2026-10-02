@@ -184,69 +184,72 @@
               </p>
             </div>
             
-            <div v-else class="border-b border-gray-200">
-              <!-- Only show General Sections button when general options are available -->
-              <button
-                v-if="availableGeneralTabs.length > 0"
-                @click="switchToCategory('general')"
-                :class="[
-                  'pb-2 px-1 font-medium text-sm border-b-2 mr-8',
-                  mainCategory === 'general'
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                ]"
-              >
-                General Sections
-              </button>
-              <!-- Only show Design Sections button when design options are available -->
-              <button
-                v-if="availableDesignTabs.length > 0"
-                @click="switchToCategory('design')"
-                :class="[
-                  'pb-2 px-1 font-medium text-sm border-b-2',
-                  mainCategory === 'design'
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                ]"
-              >
-                Design Sections
-              </button>
-            </div>
+            <div v-else>
+              <!-- Main Category Tabs Container -->
+              <div class="flex items-center gap-1 sm:gap-2 border-b border-gray-200 pb-3 mb-5">
+                <!-- Only show General Sections button when general options are available -->
+                <button
+                  v-if="availableGeneralTabs.length > 0"
+                  @click="switchToCategory('general')"
+                  :class="[
+                    'px-4 sm:px-5 py-2.5 font-medium text-sm rounded-xl transition-all duration-200',
+                    mainCategory === 'general'
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
+                  ]"
+                >
+                  General Sections
+                </button>
+                <!-- Only show Design Sections button when design options are available -->
+                <button
+                  v-if="availableDesignTabs.length > 0"
+                  @click="switchToCategory('design')"
+                  :class="[
+                    'px-4 sm:px-5 py-2.5 font-medium text-sm rounded-xl transition-all duration-200',
+                    mainCategory === 'design'
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
+                  ]"
+                >
+                  Design Sections
+                </button>
+              </div>
 
-            <!-- Sub Tabs for General Sections -->
-            <div v-if="mainCategory === 'general'" class="flex flex-wrap gap-2">
-              <button
-                v-for="tab in availableGeneralTabs"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
-                  'px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2',
-                  activeTab === tab.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900',
-                ]"
-              >
-                <Icon :name="tab.icon" class="w-4 h-4" />
-                {{ tab.name }}
-              </button>
-            </div>
+              <!-- Sub Tabs for General Sections -->
+              <div v-if="mainCategory === 'general'" class="flex flex-wrap gap-2.5 sm:gap-3">
+                <button
+                  v-for="tab in availableGeneralTabs"
+                  :key="tab.id"
+                  @click="activeTab = tab.id"
+                  :class="[
+                    'px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2.5 border',
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md shadow-blue-200/50'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800',
+                  ]"
+                >
+                  <Icon :name="tab.icon" class="w-4.5 h-4.5" />
+                  {{ tab.name }}
+                </button>
+              </div>
 
-            <!-- Sub Tabs for Design Sections -->
-            <div v-if="mainCategory === 'design'" class="flex flex-wrap gap-2">
-              <button
-                v-for="tab in availableDesignTabs"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
-                  'px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2',
-                  activeTab === tab.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900',
-                ]"
-              >
-                <Icon :name="tab.icon" class="w-4 h-4" />
-                {{ tab.name }}
-              </button>
+              <!-- Sub Tabs for Design Sections -->
+              <div v-if="mainCategory === 'design'" class="flex flex-wrap gap-2.5 sm:gap-3">
+                <button
+                  v-for="tab in availableDesignTabs"
+                  :key="tab.id"
+                  @click="activeTab = tab.id"
+                  :class="[
+                    'px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2.5 border',
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md shadow-blue-200/50'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800',
+                  ]"
+                >
+                  <Icon :name="tab.icon" class="w-4.5 h-4.5" />
+                  {{ tab.name }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -547,6 +550,65 @@
                 </div>
               </div>
 
+              <!-- Service Icon Picker & Form Fields Container -->
+              <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-5">
+                <!-- Service Icon Picker -->
+                <div>
+                  <div class="flex items-center gap-2 pb-2 mb-3 border-b border-gray-100">
+                    <Icon name="heroicons:face-smile" class="w-5 h-5 text-purple-600" />
+                    <h3 class="text-sm font-semibold text-gray-800">Service Icon</h3>
+                    <span class="text-xs text-gray-400">(Select icon for this service)</span>
+                  </div>
+                  <!-- Selected Icon Preview -->
+                  <div class="mb-4 flex items-center gap-4">
+                    <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 shadow-sm ring-1 ring-blue-200">
+                      <span class="text-4xl">{{ profileData.serviceIcon || "🚀" }}</span>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-800 mb-0.5">Selected Icon</p>
+                      <p class="text-xs text-gray-500">Click on an icon below to change</p>
+                    </div>
+                  </div>
+                  <!-- Icon Grid Picker -->
+                  <div class="grid grid-cols-8 gap-2 max-h-52 overflow-y-auto p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <button
+                      v-for="icon in SERVICE_ICONS"
+                      :key="icon"
+                      @click="profileData.serviceIcon = icon"
+                      :class="[
+                        'w-full aspect-square rounded-xl flex items-center justify-center text-2xl transition-all duration-150 hover:scale-110',
+                        profileData.serviceIcon === icon
+                          ? 'bg-blue-600 shadow-md ring-2 ring-blue-400'
+                          : 'bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+                      ]"
+                      type="button"
+                    >
+                      {{ icon }}
+                    </button>
+                  </div>
+                  <!-- Custom Emoji Input -->
+                  <div class="mt-3">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Atau masukkan custom emoji sendiri:</label>
+                    <div class="flex gap-2">
+                      <input
+                        v-model="profileData.serviceIcon"
+                        type="text"
+                        maxlength="4"
+                        placeholder="Tampal emoji di sini..."
+                        class="flex-1 px-3 py-2 text-lg border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                      <button
+                        @click="profileData.serviceIcon = '🚀'"
+                        type="button"
+                        class="px-3 py-2 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Add/Update Service Button -->
               <div class="flex justify-end gap-2">
                 <button 
@@ -583,8 +645,13 @@
                   >
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <h4 class="text-sm font-medium text-gray-900 truncate">{{ service.name }}</h4>
-                        <span v-if="editingServiceIndex === index" class="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Editing</span>
+                        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-xl ring-1 ring-blue-100">
+                          {{ service.icon || "🚀" }}
+                        </div>
+                        <div class="min-w-0">
+                          <h4 class="text-sm font-medium text-gray-900 truncate">{{ service.name }}</h4>
+                          <span v-if="editingServiceIndex === index" class="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Editing</span>
+                        </div>
                       </div>
                       <p class="text-xs text-gray-500 mt-0.5">
                         <span v-if="service.category" class="mr-2">{{ service.category }}</span>
@@ -945,107 +1012,113 @@
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
                     <Icon name="heroicons:sparkles" class="h-5 w-5 text-purple-600" />
-                    <h3 class="text-sm font-medium text-secondary-900">Theme Presets</h3>
+                    <h3 class="text-sm font-semibold text-secondary-900">Theme Presets</h3>
                   </div>
-                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full">{{ themes.length }} available</span>
+                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full font-medium">{{ themes.length }} available</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                   <div
                     v-for="theme in themes"
                     :key="theme.id"
                     @click="applyTheme(theme)"
                     :class="[
-                      'relative cursor-pointer rounded-xl border-2 p-3 transition-all hover:shadow-md',
+                      'relative cursor-pointer rounded-2xl border-2 p-3 transition-all hover:shadow-lg hover:-translate-y-0.5',
                       profileData.theme === theme.id
-                        ? 'border-primary-500 bg-primary-50 shadow-md'
-                        : 'border-secondary-200 hover:border-secondary-300',
+                        ? 'border-primary-500 bg-primary-50/60 shadow-md'
+                        : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
                     <div
-                      :class="['w-full h-20 rounded-lg mb-2', theme.preview]"
+                      class="w-full h-20 rounded-xl mb-2.5 shadow-inner ring-1 ring-black/5 overflow-hidden"
+                      :style="theme.previewCss || 'background: #FFFFFF;'"
                     ></div>
-                    <p class="text-xs text-center font-medium text-secondary-700">
+                    <p class="text-xs text-center font-semibold text-secondary-700">
                       {{ theme.name }}
                     </p>
                     <Icon
                       v-if="profileData.theme === theme.id"
                       name="heroicons:check-circle-solid"
-                      class="absolute top-2 right-2 w-5 h-5 text-primary-500"
+                      class="absolute top-2 right-2 w-5 h-5 text-primary-500 drop-shadow"
                     />
                   </div>
                 </div>
               </div>
 
-              <!-- Font Selection -->
-              <div v-if="fonts.length > 0" class="border-t border-secondary-200 pt-6">
+              <!-- Background Animations (screensaver effects) -->
+              <div v-if="bgAnimations.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:language" class="h-5 w-5 text-blue-600" />
-                    <h3 class="text-sm font-medium text-secondary-900">Typography</h3>
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-fuchsia-600" />
+                    <h3 class="text-sm font-semibold text-secondary-900">Background Animation</h3>
                   </div>
-                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full">{{ fonts.length }} fonts</span>
+                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full font-medium">{{ bgAnimations.length }} effects</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div
-                    v-for="font in fonts"
-                    :key="font.id"
-                    @click="profileData.font = font.id"
+                    v-for="anim in bgAnimations"
+                    :key="anim.id"
+                    @click="profileData.bgAnimation = anim.id"
                     :class="[
-                      'relative cursor-pointer rounded-xl border-2 p-4 transition-all hover:shadow-md',
-                      profileData.font === font.id
-                        ? 'border-primary-500 bg-primary-50'
-                        : 'border-secondary-200 hover:border-secondary-300',
+                      'relative cursor-pointer rounded-2xl border-2 p-3 transition-all hover:shadow-md',
+                      profileData.bgAnimation === anim.id
+                        ? 'border-fuchsia-500 bg-fuchsia-50/60 shadow-md'
+                        : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
-                    <p :style="{ fontFamily: font.family || font.name }" class="text-lg font-medium text-secondary-900 mb-1">
-                      {{ font.name }}
-                    </p>
-                    <p :style="{ fontFamily: font.family || font.name }" class="text-xs text-secondary-500">
-                      The quick brown fox jumps
+                    <div
+                      class="w-full h-16 rounded-xl mb-2 ring-1 ring-black/5 overflow-hidden"
+                      :style="anim.previewCss + 'background-color: #312e81;'"
+                    ></div>
+                    <p class="text-[11px] text-center font-semibold text-secondary-700 leading-tight">
+                      {{ anim.name }}
                     </p>
                     <Icon
-                      v-if="profileData.font === font.id"
+                      v-if="profileData.bgAnimation === anim.id"
                       name="heroicons:check-circle-solid"
-                      class="absolute top-2 right-2 w-5 h-5 text-primary-500"
+                      class="absolute top-2 right-2 w-4.5 h-4.5 text-fuchsia-500"
                     />
                   </div>
                 </div>
               </div>
 
-              <!-- Button Style Selection -->
-              <div v-if="buttonStyles.length > 0" class="border-t border-secondary-200 pt-6">
+              <!-- Card / Section Container Style -->
+              <div v-if="cardStyles.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:cursor-arrow-rays" class="h-5 w-5 text-green-600" />
-                    <h3 class="text-sm font-medium text-secondary-900">Button Style</h3>
+                    <Icon name="heroicons:rectangle-stack" class="h-5 w-5 text-teal-600" />
+                    <h3 class="text-sm font-semibold text-secondary-900">Card Style</h3>
                   </div>
-                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full">{{ buttonStyles.length }} styles</span>
+                  <span class="text-xs text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full font-medium">{{ cardStyles.length }} styles</span>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                   <div
-                    v-for="style in buttonStyles"
-                    :key="style.id"
-                    @click="profileData.buttonStyle = style.id"
+                    v-for="cs in cardStyles"
+                    :key="cs.id"
+                    @click="profileData.cardStyle = cs.id"
                     :class="[
-                      'relative p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md',
-                      profileData.buttonStyle === style.id
-                        ? 'border-primary-500 bg-primary-50'
-                        : 'border-secondary-200 hover:border-secondary-300',
+                      'relative cursor-pointer rounded-2xl border-2 p-3.5 transition-all hover:shadow-md',
+                      profileData.cardStyle === cs.id
+                        ? 'border-teal-500 bg-teal-50/60 shadow-md'
+                        : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
-                    <div class="mb-3">
-                      <button
-                        :class="['w-full py-2 px-4 text-sm', style.class]"
-                        disabled
-                      >
-                        Sample Button
-                      </button>
+                    <div
+                      class="w-full h-20 rounded-xl mb-2.5 ring-1 ring-black/5 overflow-hidden flex items-center justify-center"
+                      style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);"
+                    >
+                      <div class="w-[70%] h-[70%]" :style="cs.previewCss">
+                        <div class="w-full h-full flex items-center justify-center">
+                          <div class="w-4/5 h-3 bg-white/30 rounded-full mb-2"></div>
+                        </div>
+                      </div>
                     </div>
-                    <p class="text-xs text-center font-medium text-secondary-700">{{ style.name }}</p>
+                    <p class="text-xs text-center font-semibold text-secondary-700">
+                      {{ cs.name }}
+                    </p>
                     <Icon
-                      v-if="profileData.buttonStyle === style.id"
+                      v-if="profileData.cardStyle === cs.id"
                       name="heroicons:check-circle-solid"
-                      class="absolute top-2 right-2 w-5 h-5 text-primary-500"
+                      class="absolute top-2 right-2 w-4.5 h-4.5 text-teal-500"
                     />
                   </div>
                 </div>
@@ -1456,61 +1529,93 @@
                 </div>
               </div>
               
-              <!-- Mobile Phone Frame with Embedded Landing Page -->
-              <div class="bg-gradient-to-b from-gray-800 to-gray-900 rounded-[2.5rem] sm:rounded-[3rem] p-3 sm:p-4 shadow-xl relative overflow-hidden border-8 border-gray-800">
-                <!-- Phone Frame Elements -->
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-xl z-10 flex items-center justify-center">
-                  <div class="w-16 h-2 bg-gray-800 rounded-full"></div>
-                </div>
-                <div class="absolute right-5 top-3 h-2 w-2 rounded-full bg-gray-600"></div>
-                <div class="absolute right-5 top-7 h-2 w-2 rounded-full bg-gray-600"></div>
-                
-                <!-- Phone Power Button -->
-                <div class="absolute right-[-8px] top-20 h-12 w-2 bg-gray-700 rounded-l-md"></div>
-                
-                <!-- Phone Screen with iframe -->
-                <div class="rounded-[2rem] bg-white overflow-hidden relative">
-                  <!-- Embedded Landing Page iframe -->
-                  <template v-if="selectedNfcCardId && getSelectedCard()">
-                    <div class="w-full h-10 bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
-                      <Icon name="heroicons:signal" class="h-4 w-4 mr-1" />
-                      <span>Digital Business Card</span>
-                    </div>
-                    <iframe
-                      :key="previewKey"
-                      :src="`/profile/${getSelectedCard().nfc_card_id || getSelectedCard().id}?preview=true&t=${previewKey}`"
-                      class="w-full border-0"
-                      :style="{
-                        height: 'calc(100vh - 280px)',
-                        minHeight: '600px'
-                      }"
-                      @load="onPreviewLoad"
-                      @error="onPreviewError"
-                    ></iframe>
-                      
-                    <!-- NFC Card ID Badge -->
-                    <div class="absolute bottom-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-md flex items-center gap-1">
-                      <Icon name="heroicons:credit-card" class="h-3 w-3" />
-                      <span>{{ getSelectedCard()?.nfc_card_id || `Card #${getSelectedCard()?.id}` }}</span>
-                    </div>
-                  </template>
+              <!-- iPhone 15 Mockup - Real Proportions (9:19.5 aspect ratio) -->
+              <div class="w-full max-w-[360px] mx-auto">
+                <div class="relative aspect-[9/19.5] w-full rounded-[54px] bg-neutral-900 shadow-2xl p-[10px] ring-[2px] ring-neutral-700">
+                  <!-- Outer Frame Gradient for Titanium Effect -->
+                  <div class="absolute inset-0 rounded-[54px] bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 pointer-events-none"></div>
+                  <div class="absolute inset-[2px] rounded-[52px] bg-gradient-to-br from-neutral-600/40 to-neutral-900/80 pointer-events-none"></div>
+
+                  <!-- Left Side Buttons -->
+                  <div class="absolute left-[-2px] top-[15%] w-[3px] h-8 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
+                  <div class="absolute left-[-2px] top-[23%] w-[3px] h-14 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
+                  <div class="absolute left-[-2px] top-[34%] w-[3px] h-14 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
                   
-                  <!-- Empty State - Beautiful empty state -->
-                  <div v-else class="bg-gradient-to-b from-blue-50 to-indigo-50 h-[700px] flex items-center justify-center">
-                    <div class="text-center px-6 py-12 max-w-xs mx-auto">
-                      <div class="relative w-24 h-24 mx-auto mb-6">
-                        <div class="absolute inset-0 bg-blue-100 rounded-full animate-pulse"></div>
-                        <Icon name="heroicons:device-phone-mobile" class="absolute inset-0 h-24 w-24 text-blue-500 p-5" />
-                      </div>
-                      <h3 class="text-lg font-semibold text-indigo-900 mb-2">Preview Area</h3>
-                      <p class="text-sm text-indigo-700 mb-6">
-                        Select a card from the left to view real-time preview
-                      </p>
-                      <div class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-100 text-blue-600 rounded-full text-sm">
-                        <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
-                        <span>Please select a card first</span>
+                  <!-- Right Side Action Button -->
+                  <div class="absolute right-[-2px] top-[20%] w-[3px] h-16 bg-gradient-to-l from-neutral-600 to-neutral-500 rounded-r-sm"></div>
+
+                  <!-- Inner Screen Container -->
+                  <div class="relative w-full h-full rounded-[44px] bg-black overflow-hidden shadow-inner">
+                    
+                    <!-- Dynamic Island -->
+                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-[110px] h-[32px] bg-black rounded-full z-30 flex items-center justify-center">
+                      <div class="w-[48px] h-[6px] bg-neutral-800 rounded-full opacity-70"></div>
+                    </div>
+
+                    <!-- Status Bar (Real iPhone Style) -->
+                    <div class="absolute top-0 left-0 right-0 h-11 flex items-center justify-between px-7 z-20 text-white text-[14px] font-semibold tracking-tight">
+                      <span class="pl-1">9:41</span>
+                      <div class="flex items-center gap-1.5 pr-1">
+                        <!-- Signal -->
+                        <div class="flex items-end gap-0.5 h-3.5">
+                          <div class="w-0.5 h-1 bg-white rounded-sm"></div>
+                          <div class="w-0.5 h-1.5 bg-white rounded-sm"></div>
+                          <div class="w-0.5 h-2 bg-white rounded-sm"></div>
+                          <div class="w-0.5 h-3 bg-white rounded-sm"></div>
+                        </div>
+                        <!-- WiFi -->
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 3C7.8 3 3.9 4.6 1 7.2L12 21L23 7.2C20.1 4.6 16.2 3 12 3Z" opacity="1"/>
+                          <path d="M12 7C9 7 6.2 8.1 4.1 10.1L12 18.5L19.9 10.1C17.8 8.1 15 7 12 7Z" opacity="0.7"/>
+                        </svg>
+                        <!-- Battery -->
+                        <div class="w-6 h-3 border border-white/60 rounded-[3px] p-[1px] relative">
+                          <div class="w-[85%] h-full bg-white rounded-[1.5px]"></div>
+                          <div class="absolute -right-0.5 top-1/2 -translate-y-1/2 w-0.5 h-1.5 bg-white/60 rounded-r-[1px]"></div>
+                        </div>
                       </div>
                     </div>
+
+                    <!-- Main Content Area with Iframe -->
+                    <div class="absolute inset-0 pt-11 pb-0 bg-white">
+                      <template v-if="selectedNfcCardId && getSelectedCard()">
+                        <iframe
+                          :key="previewKey"
+                          :src="`${getCardPublicUrl(getSelectedCard(), { preview: true })}&t=${previewKey}`"
+                          class="w-full h-full border-0"
+                          @load="onPreviewLoad"
+                          @error="onPreviewError"
+                        ></iframe>
+                          
+                        <!-- NFC Card ID Badge -->
+                        <div class="absolute bottom-3 right-3 bg-blue-600/95 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 z-20">
+                          <Icon name="heroicons:credit-card" class="h-3 w-3" />
+                          <span class="font-semibold">{{ getSelectedCard()?.nfc_card_id || `Card #${getSelectedCard()?.id}` }}</span>
+                        </div>
+                      </template>
+                      
+                      <!-- Empty State -->
+                      <div v-else class="w-full h-full bg-gradient-to-b from-blue-50 via-indigo-50 to-white flex items-center justify-center overflow-hidden">
+                        <div class="text-center px-6 max-w-xs">
+                          <div class="relative w-24 h-24 mx-auto mb-6">
+                            <div class="absolute inset-0 bg-blue-100 rounded-full animate-pulse"></div>
+                            <div class="absolute inset-2 bg-blue-200 rounded-full opacity-50"></div>
+                            <Icon name="heroicons:device-phone-mobile" class="absolute inset-0 h-24 w-24 text-blue-500 p-5" />
+                          </div>
+                          <h3 class="text-lg font-bold text-indigo-900 mb-2">Preview Area</h3>
+                          <p class="text-sm text-indigo-700/80 mb-6 leading-relaxed">
+                            Select a card from the left to view real-time preview
+                          </p>
+                          <div class="inline-flex items-center justify-center px-4 py-2 bg-white text-blue-700 rounded-full text-xs font-semibold shadow-sm border border-blue-100">
+                            <Icon name="heroicons:arrow-left" class="h-3.5 w-3.5 mr-1.5" />
+                            <span>Please select a card first</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Home Indicator -->
+                    <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-[134px] h-[5px] bg-black rounded-full z-30"></div>
                   </div>
                 </div>
               </div>
@@ -1766,6 +1871,18 @@ const { $api, $toast } = useNuxtApp();
 const authStore = useAuthStore();
 const config = useRuntimeConfig();
 
+// ─── IMPORTS (fast-fix performance: navigation cache + request abort) ─────
+// Singleton module-level cache for builder config data (sections/fields/design)
+// and NFC cards list — re-served for 2 minutes so rapid sidebar clicks cost 0ms
+// instead of 4 fresh API calls per navigation.
+import {
+  getCachedBuilderInit,
+  setCachedBuilderInit,
+  getCachedNfcCards,
+  setCachedNfcCards,
+  createAbortOnRouteChange,
+} from "~/plugins/api.client.js";
+
 // Reactive data
 const mainCategory = ref("general"); // 'general' or 'design'
 const activeTab = ref("profile");
@@ -1796,6 +1913,106 @@ const insertIndex = ref(null);
 // Preview Management
 const previewKey = ref(0);
 const loadingCards = ref(false);
+
+// ============================================================
+// CLIENT-SIDE DESIGN LIBRARY (OVERRIDES DB — ensures full previews)
+// This guarantees previews work even before DB seeder is re-run.
+// ============================================================
+const DESIGN_LIBRARY = {
+  themes: [
+    { id: "minimal", name: "Minimal White", previewCss: "background: #FFFFFF; border: 1px solid #E5E7EB;", backgroundColor: "#FFFFFF", textColor: "#111827", accentColor: "#1F2937", bgGradient: null },
+    { id: "modern", name: "Modern Soft Grey", previewCss: "background: linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%);", backgroundColor: "#F9FAFB", textColor: "#111827", accentColor: "#2563EB", bgGradient: "linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%)" },
+    { id: "creative", name: "Creative Purple Pink", previewCss: "background: linear-gradient(135deg, #A855F7 0%, #EC4899 100%);", backgroundColor: "#A855F7", textColor: "#FFFFFF", accentColor: "#EC4899", bgGradient: "linear-gradient(135deg, #A855F7 0%, #EC4899 100%)" },
+    { id: "zora-pro", name: "Zora Pro Navy Teal", previewCss: "background: linear-gradient(160deg, #0F2744 0%, #18395E 55%, #1F5177 100%);", backgroundColor: "#0F2744", textColor: "#E8EEF4", accentColor: "#5B8A86", bgGradient: "linear-gradient(160deg, #0F2744 0%, #18395E 55%, #1F5177 100%)" },
+    { id: "professional", name: "Corporate Blue", previewCss: "background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);", backgroundColor: "#2563EB", textColor: "#FFFFFF", accentColor: "#BFDBFE", bgGradient: "linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)" },
+    { id: "dark", name: "Dark Night Matte", previewCss: "background: linear-gradient(135deg, #111827 0%, #0B1220 100%);", backgroundColor: "#111827", textColor: "#F9FAFB", accentColor: "#60A5FA", bgGradient: "linear-gradient(135deg, #111827 0%, #0B1220 100%)" },
+    { id: "warm-sand", name: "Warm Sand Beige", previewCss: "background: linear-gradient(135deg, #FBF7F0 0%, #F3EADB 50%, #E9D9BE 100%);", backgroundColor: "#FBF7F0", textColor: "#3F3427", accentColor: "#B45309", bgGradient: "linear-gradient(135deg, #FBF7F0 0%, #F3EADB 50%, #E9D9BE 100%)" },
+    { id: "deep-charcoal", name: "Deep Charcoal Slate", previewCss: "background: linear-gradient(160deg, #1E293B 0%, #0F172A 100%);", backgroundColor: "#1E293B", textColor: "#E2E8F0", accentColor: "#60A5FA", bgGradient: "linear-gradient(160deg, #1E293B 0%, #0F172A 100%)" },
+    { id: "sunset-gold", name: "Sunset Gold Orange", previewCss: "background: linear-gradient(135deg, #F97316 0%, #EF4444 45%, #DB2777 100%);", backgroundColor: "#F97316", textColor: "#FFFBEB", accentColor: "#F59E0B", bgGradient: "linear-gradient(135deg, #F97316 0%, #EF4444 45%, #DB2777 100%)" },
+    { id: "ocean-breeze", name: "Ocean Breeze Cyan", previewCss: "background: linear-gradient(160deg, #0284C7 0%, #0EA5E9 40%, #14B8A6 100%);", backgroundColor: "#0EA5E9", textColor: "#ECFEFF", accentColor: "#14B8A6", bgGradient: "linear-gradient(160deg, #0284C7 0%, #0EA5E9 40%, #14B8A6 100%)" },
+    { id: "emerald-forest", name: "Emerald Forest Green", previewCss: "background: linear-gradient(160deg, #065F46 0%, #047857 40%, #166534 100%);", backgroundColor: "#166534", textColor: "#F0FDF4", accentColor: "#84CC16", bgGradient: "linear-gradient(160deg, #065F46 0%, #047857 40%, #166534 100%)" },
+    { id: "sakura-dusk", name: "Sakura Dusk Pastel", previewCss: "background: linear-gradient(135deg, #FCE7F3 0%, #EDE9FE 50%, #DBEAFE 100%);", backgroundColor: "#FCE7F3", textColor: "#831843", accentColor: "#A78BFA", bgGradient: "linear-gradient(135deg, #FCE7F3 0%, #EDE9FE 50%, #DBEAFE 100%)" },
+    { id: "midnight-rose", name: "Midnight Rose Dark", previewCss: "background: linear-gradient(135deg, #4C1D95 0%, #831843 55%, #9D174D 100%);", backgroundColor: "#4C1D95", textColor: "#FCE7F3", accentColor: "#F472B6", bgGradient: "linear-gradient(135deg, #4C1D95 0%, #831843 55%, #9D174D 100%)" },
+    { id: "mint-fresh", name: "Mint Fresh Cool", previewCss: "background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 45%, #A7F3D0 100%);", backgroundColor: "#ECFDF5", textColor: "#065F46", accentColor: "#10B981", bgGradient: "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 45%, #A7F3D0 100%)" },
+    { id: "cyberpunk-neon", name: "Cyberpunk Neon", previewCss: "background: linear-gradient(160deg, #0B0F19 0%, #1A0B2E 40%, #312E81 100%);", backgroundColor: "#0B0F19", textColor: "#F0ABFC", accentColor: "#22D3EE", bgGradient: "linear-gradient(160deg, #0B0F19 0%, #1A0B2E 40%, #312E81 100%)" },
+    { id: "desert-mirage", name: "Desert Mirage Peach", previewCss: "background: linear-gradient(160deg, #FFF7ED 0%, #FFEDD5 45%, #FED7AA 100%);", backgroundColor: "#FFF7ED", textColor: "#7C2D12", accentColor: "#EA580C", bgGradient: "linear-gradient(160deg, #FFF7ED 0%, #FFEDD5 45%, #FED7AA 100%)" },
+    { id: "royal-navy", name: "Royal Navy Gold", previewCss: "background: linear-gradient(160deg, #1E3A8A 0%, #1E40AF 50%, #0C4A6E 100%);", backgroundColor: "#1E3A8A", textColor: "#FEF3C7", accentColor: "#FBBF24", bgGradient: "linear-gradient(160deg, #1E3A8A 0%, #1E40AF 50%, #0C4A6E 100%)" },
+    { id: "lavender-cream", name: "Lavender Cream", previewCss: "background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 45%, #E9D5FF 100%);", backgroundColor: "#FAF5FF", textColor: "#581C87", accentColor: "#A855F7", bgGradient: "linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 45%, #E9D5FF 100%)" },
+    { id: "midnight-gold", name: "Midnight Matte Gold", previewCss: "background: linear-gradient(160deg, #0A0A0A 0%, #171717 50%, #262626 100%);", backgroundColor: "#0A0A0A", textColor: "#FDE68A", accentColor: "#EAB308", bgGradient: "linear-gradient(160deg, #0A0A0A 0%, #171717 50%, #262626 100%)" },
+    { id: "coffee-bean", name: "Coffee Bean Mocha", previewCss: "background: linear-gradient(160deg, #451A03 0%, #78350F 55%, #92400E 100%);", backgroundColor: "#451A03", textColor: "#FEF3C7", accentColor: "#F59E0B", bgGradient: "linear-gradient(160deg, #451A03 0%, #78350F 55%, #92400E 100%)" },
+  ],
+  cardStyles: [
+    { id: "minimal", name: "Minimal Clean", previewCss: "background: rgba(255,255,255,0.92); border-radius: 18px; border: 1.5px solid rgba(229,231,235,0.7); box-shadow: 0 6px 20px rgba(15,23,42,0.06);", class: "bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/60" },
+    { id: "glass", name: "Glassmorphism Pro", previewCss: "background: linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.08) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 26px; border: 1.5px solid rgba(255,255,255,0.3); box-shadow: 0 30px 60px -12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.45);", class: "bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl" },
+    { id: "neumorph", name: "Neumorphism Soft", previewCss: "background: #F3F4F6; border-radius: 26px; box-shadow: 12px 12px 26px rgba(0,0,0,0.08), -12px -12px 26px rgba(255,255,255,0.98), inset 0 0 0 1px rgba(255,255,255,0.6);", class: "rounded-3xl bg-gray-100 shadow-[12px_12px_24px_rgba(0,0,0,0.08),-12px_-12px_24px_rgba(255,255,255,0.9)]" },
+    { id: "frosted-bordered", name: "Frosted 3px Frame", previewCss: "background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.04)); backdrop-filter: blur(20px); border-radius: 26px; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.2);", class: "bg-white/5 backdrop-blur-xl rounded-3xl border-[3px] border-white/40" },
+    { id: "neon-outline", name: "Neon Outline Glow", previewCss: "background: rgba(0,0,0,0.3); backdrop-filter: blur(16px); border-radius: 26px; border: 1.5px solid #22D3EE; box-shadow: 0 0 22px rgba(34,211,238,0.5), inset 0 0 18px rgba(34,211,238,0.12), 0 0 60px rgba(34,211,238,0.22);", class: "bg-black/20 backdrop-blur-md rounded-3xl border border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.3)]" },
+    { id: "mica-blur", name: "Mica Fluent Blur", previewCss: "background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 100%); backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%); border-radius: 22px; border-top: 1px solid rgba(255,255,255,0.45); border-left: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.35);", class: "backdrop-blur-2xl rounded-3xl" },
+    { id: "liquid-chrome", name: "Liquid Chrome Metallic", previewCss: "background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(226,232,240,0.25) 35%, rgba(255,255,255,0.45) 55%, rgba(148,163,184,0.22) 80%, rgba(255,255,255,0.5) 100%); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 18px 40px rgba(15,23,42,0.3), inset 0 0 0 1px rgba(255,255,255,0.35);", class: "backdrop-blur-xl rounded-3xl border" },
+    { id: "aurora-tint", name: "Aurora Gradient Tint", previewCss: "background: linear-gradient(140deg, rgba(56,189,248,0.32) 0%, rgba(168,85,247,0.26) 45%, rgba(236,72,153,0.3) 100%); backdrop-filter: blur(18px); border-radius: 26px; border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 24px 55px rgba(168,85,247,0.25);", class: "backdrop-blur-xl rounded-3xl border" },
+    { id: "cyber-lines", name: "Cyber Lines Frame", previewCss: "background: rgba(11,15,25,0.68); backdrop-filter: blur(14px); border-radius: 22px; border: 1.5px solid transparent; background-clip: padding-box, border-box; background-origin: padding-box, border-box; background-image: linear-gradient(135deg, rgba(11,15,25,0.85), rgba(11,15,25,0.55)), linear-gradient(135deg, #22D3EE 0%, #A855F7 45%, #F472B6 100%); box-shadow: 0 20px 40px rgba(34,211,238,0.18);", class: "rounded-3xl backdrop-blur-md" },
+    { id: "dot-matrix-frame", name: "Dot Matrix Border", previewCss: "background: rgba(255,255,255,0.82); border-radius: 22px; border: 2px dotted #6366F1; box-shadow: 0 14px 35px rgba(99,102,241,0.12), inset 0 0 0 3px rgba(255,255,255,0.88);", class: "bg-white/90 rounded-3xl border border-dotted" },
+    { id: "velvet-matte", name: "Velvet Matte Dark", previewCss: "background: linear-gradient(160deg, rgba(17,24,39,0.88) 0%, rgba(30,41,59,0.82) 100%); backdrop-filter: blur(18px); border-radius: 24px; border: 1px solid rgba(148,163,184,0.25); box-shadow: 0 24px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);", class: "bg-slate-900/80 backdrop-blur-xl rounded-3xl border" },
+  ],
+  bgAnimations: [
+    { id: "none", name: "None / Static Flat", previewCss: "background: transparent;" },
+    { id: "particles", name: "Floating Particles Blob", previewCss: "background: radial-gradient(circle at 18% 25%, rgba(255,255,255,0.32) 0%, transparent 38%), radial-gradient(circle at 72% 62%, rgba(255,255,255,0.28) 0%, transparent 42%), radial-gradient(circle at 38% 82%, rgba(255,255,255,0.2) 0%, transparent 36%), radial-gradient(circle at 88% 30%, rgba(255,255,255,0.18) 0%, transparent 30%);" },
+    { id: "aurora", name: "Aurora Borealis Shift", previewCss: "background: linear-gradient(120deg, rgba(56,189,248,0.62), rgba(168,85,247,0.58), rgba(236,72,153,0.62), rgba(56,189,248,0.62)); background-size: 300% 300%;" },
+    { id: "mesh-gradient", name: "Gradient Mesh 4 Blob", previewCss: "background: radial-gradient(circle at 18% 18%, rgba(99,102,241,0.55) 0%, transparent 48%), radial-gradient(circle at 82% 28%, rgba(236,72,153,0.48) 0%, transparent 48%), radial-gradient(circle at 50% 85%, rgba(20,184,166,0.48) 0%, transparent 48%), radial-gradient(circle at 65% 55%, rgba(251,191,36,0.32) 0%, transparent 48%);" },
+    { id: "starfield", name: "Starfield Twinkle", previewCss: "background: radial-gradient(2.5px 2.5px at 20% 30%, rgba(255,255,255,0.95), transparent 60%), radial-gradient(2px 2px at 60% 70%, rgba(255,255,255,0.85), transparent 60%), radial-gradient(1.5px 1.5px at 40% 12%, rgba(255,255,255,0.9), transparent 60%), radial-gradient(2px 2px at 85% 45%, rgba(255,255,255,0.8), transparent 60%), radial-gradient(1.5px 1.5px at 15% 55%, rgba(255,255,255,0.75), transparent 60%), radial-gradient(2.5px 2.5px at 78% 88%, rgba(255,255,255,0.9), transparent 60%), radial-gradient(1.5px 1.5px at 5% 82%, rgba(255,255,255,0.7), transparent 60%);" },
+    { id: "slow-waves", name: "Slow Waves Layered", previewCss: "background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.08) 28%, transparent 56%, rgba(255,255,255,0.12) 82%, transparent 100%), repeating-linear-gradient(transparent, transparent 12px, rgba(255,255,255,0.18) 12px, rgba(255,255,255,0.18) 14px);" },
+    { id: "sparkle", name: "Magic Sparkle Burst", previewCss: "background: radial-gradient(circle at 22% 22%, rgba(255,255,255,0.45) 0%, transparent 10%), radial-gradient(circle at 78% 68%, rgba(255,255,255,0.45) 0%, transparent 10%), radial-gradient(circle at 52% 48%, rgba(255,255,255,0.28) 0%, transparent 14%), radial-gradient(circle at 38% 78%, rgba(255,255,255,0.35) 0%, transparent 9%), radial-gradient(circle at 88% 28%, rgba(255,255,255,0.38) 0%, transparent 10%);" },
+    { id: "grid-dots", name: "Dotted Grid Pattern", previewCss: "background-image: radial-gradient(rgba(255,255,255,0.3) 1.8px, transparent 1.8px); background-size: 20px 20px; background-position: 0 0;" },
+    { id: "fireflies", name: "Fireflies Amber", previewCss: "background: radial-gradient(circle at 20% 30%, rgba(251,191,36,0.65) 0%, transparent 8%), radial-gradient(circle at 40% 75%, rgba(251,191,36,0.55) 0%, transparent 7%), radial-gradient(circle at 65% 35%, rgba(250,204,21,0.6) 0%, transparent 8%), radial-gradient(circle at 82% 68%, rgba(234,179,8,0.6) 0%, transparent 7%), radial-gradient(circle at 50% 20%, rgba(253,224,71,0.5) 0%, transparent 6%);" },
+    { id: "bokeh", name: "Bokeh Circles Dreamy", previewCss: "background: radial-gradient(circle at 18% 28%, rgba(96,165,250,0.55) 0%, transparent 28%), radial-gradient(circle at 72% 38%, rgba(244,114,182,0.5) 0%, transparent 30%), radial-gradient(circle at 38% 72%, rgba(52,211,153,0.52) 0%, transparent 28%), radial-gradient(circle at 85% 75%, rgba(250,204,21,0.48) 0%, transparent 26%), radial-gradient(circle at 58% 55%, rgba(168,85,247,0.48) 0%, transparent 30%);" },
+    { id: "liquid-blobs", name: "Liquid Metaball Blobs", previewCss: "background: radial-gradient(ellipse 38% 30% at 28% 28%, rgba(244,114,182,0.65), transparent 60%), radial-gradient(ellipse 40% 32% at 72% 72%, rgba(34,211,238,0.62), transparent 60%), radial-gradient(ellipse 30% 26% at 70% 22%, rgba(168,85,247,0.55), transparent 62%), radial-gradient(ellipse 35% 28% at 30% 78%, rgba(250,204,21,0.55), transparent 60%);" },
+    { id: "neon-lines", name: "Neon Diagonal Lines", previewCss: "background: repeating-linear-gradient(125deg, transparent 0, transparent 28px, rgba(34,211,238,0.3) 28px, rgba(34,211,238,0.3) 30px), repeating-linear-gradient(55deg, transparent 0, transparent 40px, rgba(244,114,182,0.26) 40px, rgba(244,114,182,0.26) 42px);" },
+    { id: "snow-fall", name: "Snow Fall White", previewCss: "background: radial-gradient(2.5px 2.5px at 15% 18%, rgba(255,255,255,0.95), transparent 60%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,0.88), transparent 60%), radial-gradient(3px 3px at 55% 32%, rgba(255,255,255,1), transparent 60%), radial-gradient(2px 2px at 78% 72%, rgba(255,255,255,0.85), transparent 60%), radial-gradient(2.5px 2.5px at 92% 28%, rgba(255,255,255,0.95), transparent 60%), radial-gradient(1.5px 1.5px at 8% 78%, rgba(255,255,255,0.78), transparent 60%), radial-gradient(2px 2px at 65% 88%, rgba(255,255,255,0.85), transparent 60%);" },
+    { id: "cosmic-dust", name: "Cosmic Dust Purple", previewCss: "background: radial-gradient(circle at 20% 20%, rgba(168,85,247,0.45) 0%, transparent 45%), radial-gradient(circle at 80% 30%, rgba(236,72,153,0.38) 0%, transparent 45%), radial-gradient(circle at 35% 85%, rgba(99,102,241,0.45) 0%, transparent 45%), radial-gradient(circle at 70% 70%, rgba(56,189,248,0.4) 0%, transparent 45%), radial-gradient(1.3px 1.3px at 25% 45%, rgba(255,255,255,0.8), transparent 60%), radial-gradient(1.3px 1.3px at 75% 55%, rgba(255,255,255,0.8), transparent 60%);" },
+    { id: "confetti-pop", name: "Confetti Pop Color", previewCss: "background: radial-gradient(circle at 18% 25%, #EF4444 0 2.5%, transparent 3%), radial-gradient(circle at 35% 65%, #22D3EE 0 2.5%, transparent 3%), radial-gradient(circle at 52% 32%, #F59E0B 0 2.5%, transparent 3%), radial-gradient(circle at 70% 75%, #10B981 0 2.5%, transparent 3%), radial-gradient(circle at 85% 28%, #A855F7 0 2.5%, transparent 3%), radial-gradient(circle at 48% 80%, #EC4899 0 2%, transparent 2.5%), radial-gradient(circle at 12% 72%, #60A5FA 0 2%, transparent 2.5%);" },
+  ],
+  fonts: [
+    { id: "inter", name: "Inter Clean", family: "Inter, system-ui, -apple-system, sans-serif" },
+    { id: "poppins", name: "Poppins Rounded", family: "Poppins, Inter, system-ui, sans-serif" },
+    { id: "roboto", name: "Roboto Classic", family: "Roboto, Inter, system-ui, sans-serif" },
+    { id: "plus-jakarta", name: "Plus Jakarta Sans", family: '"Plus Jakarta Sans", Poppins, sans-serif' },
+    { id: "playfair", name: "Playfair Display Serif", family: 'Playfair Display, Georgia, serif' },
+    { id: "lora", name: "Lora Serif", family: "Lora, Georgia, serif" },
+    { id: "space-grotesk", name: "Space Grotesk", family: '"Space Grotesk", Inter, sans-serif' },
+    { id: "outfit", name: "Outfit Modern", family: "Outfit, Inter, system-ui, sans-serif" },
+    { id: "manrope", name: "Manrope Sharp", family: "Manrope, Inter, system-ui, sans-serif" },
+    { id: "dm-sans", name: "DM Sans Friendly", family: '"DM Sans", Poppins, sans-serif' },
+    { id: "montserrat", name: "Montserrat Bold", family: 'Montserrat, Poppins, sans-serif' },
+    { id: "crimson", name: "Crimson Pro Literary", family: '"Crimson Pro", Georgia, serif' },
+  ],
+  buttonStyles: [
+    { id: "solid", name: "Solid Pill Bold", class: "bg-gray-900 text-white font-semibold rounded-full" },
+    { id: "outline", name: "Outline Pill Border", class: "border-2 border-gray-800 text-gray-800 font-medium rounded-full" },
+    { id: "soft", name: "Soft Glass Rounded", class: "bg-white/18 backdrop-blur-md text-gray-900 font-medium rounded-2xl border border-gray-200/70" },
+    { id: "shadow", name: "Elevation Shadow", class: "bg-white text-gray-900 font-semibold rounded-2xl shadow-xl" },
+    { id: "gradient", name: "Gradient Glow Pop", class: "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-full shadow-lg shadow-purple-500/30" },
+    { id: "square", name: "Sharp Square Bold", class: "bg-gray-900 text-white font-semibold rounded-lg" },
+    { id: "glass-pill", name: "Glass Frosted Pill", class: "bg-white/15 backdrop-blur-xl text-white font-medium rounded-full border border-white/30 shadow-lg" },
+    { id: "neumorph-btn", name: "Neumorph Bevel", class: "rounded-3xl bg-gray-100 text-gray-800 font-semibold shadow-[6px_6px_14px_rgba(0,0,0,0.08),-6px_-6px_14px_rgba(255,255,255,0.95)]" },
+    { id: "dark-soft", name: "Dark Soft Matte", class: "bg-slate-800/90 backdrop-blur-md text-white font-semibold rounded-2xl shadow-lg border border-white/10" },
+    { id: "3d-shadow", name: "3D Offset Pop", class: "rounded-2xl text-white font-bold border-b-4 border-b-gray-900/40 shadow-[0_10px_0_0_rgba(0,0,0,0.12)]" },
+    { id: "metallic", name: "Metallic Gradient", class: "bg-gradient-to-b from-white 0%, via-slate-200 55%, to-slate-400 100% text-slate-800 font-bold rounded-full shadow-xl border border-white/70" },
+    { id: "double-outline", name: "Double Outline Frame", class: "rounded-full font-semibold border-2 border-current outline outline-2 outline-offset-4 outline-current/50" },
+  ],
+};
+
+const SERVICE_ICONS = [
+  '🚀', '💼', '🏢', '👨‍💻', '👩‍💼', '📊', '📈', '📉',
+  '🎯', '💡', '🛠️', '🔧', '⚙️', '🔩', '🏗️', '🏭',
+  '📱', '💻', '🖥️', '🖨️', '🌐', '☁️', '🔒', '🛡️',
+  '📷', '🎨', '✏️', '🖌️', '🎬', '🎵', '📝', '📚',
+  '🏥', '💊', '🦷', '👁️', '💉', '🧬', '🌿', '🍃',
+  '🛒', '🛍️', '💳', '💰', '💵', '💎', '📦', '🚚',
+  '✈️', '🚗', '🚕', '🚌', '🚢', '🏨', '🍽️', '☕',
+  '🎓', '📖', '✍️', '🎤', '🎧', '📞', '📧', '💬',
+  '🌱', '🌾', '🧑‍🌾', '🐄', '🍎', '🍽️', '🧾', '📋',
+  '🧰', '🪛', '⚖️', '🏛️', '👮', '👷', '🧑‍🍳', '👨‍🔧',
+];
 
 // Profile data - field keys match backend ProfileBuilderField.field_key
 const profileData = reactive({
@@ -1849,6 +2066,7 @@ const profileData = reactive({
 
   // ============ SERVICES TAB ============
   serviceName: "",            // Service Name
+  serviceIcon: "🚀",          // Service Icon (emoji)
   serviceCategory: "",        // Category / Type (select)
   serviceImage: null,         // Service Image
   serviceVideo: "",           // Promo Video (url)
@@ -1913,8 +2131,12 @@ const profileData = reactive({
   theme: "minimal",
   backgroundColor: "#FFFFFF",
   textColor: "#000000",
+  accentColor: "#1F2937",
+  bgGradient: null,
   font: "inter",
   buttonStyle: "solid",
+  cardStyle: "minimal",
+  bgAnimation: "none",
   colorScheme: "",
   layout: "",
   showWatermark: true,
@@ -1957,6 +2179,90 @@ const sampleLinks = computed(() => [
 
 const getSelectedCard = () => {
   return userNfcCards.value.find(card => card.id === selectedNfcCardId.value);
+};
+
+/**
+ * Resolve the PRETTIEST public profile URL for a given card object.
+ * Priority 1 — Server-computed `card.public_url`:
+ *    Auto decides SHORT "/profile/a/1" (name unique) OR LONG "/profile/a/1/userid-{pk}" (name clash).
+ * Priority 2 — Derive locally using authStore user slug + local card index.
+ * Priority 3 — Legacy fallbacks: nfc_card_id or numeric pk id.
+ */
+const getCardPublicUrl = (card, opts = {}) => {
+  if (!card) return '';
+  const { preview = false, suffix = '' } = opts;
+  let base = '';
+
+  if (typeof card.public_url === 'string' && card.public_url.startsWith('/profile/')) {
+    base = card.public_url;
+  }
+  if (!base) {
+    const authUser = authStore.user || {};
+    const userSlug = authUser.name_slug;
+    // Note: CardManagement.vue calls its array `nfcCards` not `userNfcCards`; handle both:
+    const cardsSource =
+      (typeof userNfcCards !== 'undefined' && userNfcCards && userNfcCards.value) ? userNfcCards.value :
+      (typeof nfcCards !== 'undefined' && nfcCards && nfcCards.value) ? nfcCards.value :
+      null;
+    const localCardNumber = cardsSource && cardsSource.length > 0
+      ? cardsSource
+          .slice()
+          .sort((a, b) => (new Date(a.created_at || a.createdAt || 0) - new Date(b.created_at || b.createdAt || 0)) || ((a.id ?? 0) - (b.id ?? 0)))
+          .findIndex(c => c.id === card.id) + 1
+      : null;
+    if (userSlug && (localCardNumber || card.card_number)) {
+      base = `/profile/${userSlug}/${localCardNumber || card.card_number}`;
+      if (authUser.id != null && authUser.has_name_slug_clash === true) {
+        base += '/userid-' + authUser.id;
+      }
+    }
+  }
+  if (!base) {
+    base = `/profile/${card.nfc_card_id || card.id}`;
+  }
+
+  const qs = [];
+  if (preview) qs.push('preview=true');
+  if (suffix) qs.push(suffix.replace(/^\?/, ''));
+  const qsStr = qs.length ? '?' + qs.join('&') : '';
+  return base + qsStr;
+};
+
+// Internal single-param API identifier: encodes the multi-segment URL into the [id] param
+// using "__" (double underscore) as path separator (frontend single-route-param limitation).
+// Supports both 2-segment (short) and 3-segment (name clash + userid pk) URLs.
+const getCardApiIdentifier = (card) => {
+  if (!card) return '';
+  if (typeof card.public_url === 'string' && card.public_url.startsWith('/profile/')) {
+    const path = card.public_url.substring('/profile/'.length);
+    if (path && path.includes('/')) {
+      return path.split('/').filter(Boolean).join('__');
+    }
+    if (path) return path;
+  }
+  const authUser = authStore.user || {};
+  const userSlug = authUser.name_slug;
+  if (userSlug) {
+    const cardsSource =
+      (typeof userNfcCards !== 'undefined' && userNfcCards && userNfcCards.value) ? userNfcCards.value :
+      (typeof nfcCards !== 'undefined' && nfcCards && nfcCards.value) ? nfcCards.value :
+      null;
+    const localNumber = card.card_number ??
+      (cardsSource && cardsSource.length > 0
+        ? (cardsSource
+            .slice()
+            .sort((a, b) => (new Date(a.created_at || a.createdAt || 0) - new Date(b.created_at || b.createdAt || 0)) || ((a.id ?? 0) - (b.id ?? 0)))
+            .findIndex(c => c.id === card.id) + 1)
+        : null);
+    if (localNumber) {
+      const two = `${userSlug}__${localNumber}`;
+      if (authUser.id != null && authUser.has_name_slug_clash === true) {
+        return `${two}__userid-${authUser.id}`;
+      }
+      return two;
+    }
+  }
+  return card.nfc_card_id || card.id;
 };
 
 // Link form data
@@ -2255,6 +2561,8 @@ const fonts = ref([]);
 const buttonStyles = ref([]);
 const colorSchemes = ref([]);
 const layouts = ref([]);
+const cardStyles = ref([]);
+const bgAnimations = ref([]);
 const featureToggles = ref([]);
 
 // Feature drag state
@@ -2752,36 +3060,98 @@ const loadDesignOptions = async () => {
     
     console.log('📋 Design Options API Response:', data.data);
     
-    // Load themes
+    // Load themes — MERGE with DESIGN_LIBRARY to ensure full preview data (no blank previews even from old DB)
     if (data.data.theme && data.data.theme.length > 0) {
-      themes.value = data.data.theme.map(opt => ({
+      const dbThemes = data.data.theme.map(opt => ({
         id: opt.option_id,
         name: opt.name,
-        preview: opt.config?.preview || 'bg-white',
+        previewCss: opt.config?.previewCss,
         backgroundColor: opt.config?.backgroundColor || '#FFFFFF',
+        textColor: opt.config?.textColor,
+        accentColor: opt.config?.accentColor,
+        bgGradient: opt.config?.bgGradient,
+        _previewClass: opt.config?.preview,
       }));
-      console.log('✅ Themes loaded:', themes.value.length);
+      themes.value = DESIGN_LIBRARY.themes.map(lib => {
+        const hit = dbThemes.find(d => d.id === lib.id);
+        return hit ? { ...lib, ...hit, previewCss: hit.previewCss || lib.previewCss } : lib;
+      });
+      // Append extra DB themes not in library
+      dbThemes.filter(d => !DESIGN_LIBRARY.themes.some(l => l.id === d.id)).forEach(extra => themes.value.push(extra));
+      console.log('✅ Themes loaded (merged):', themes.value.length);
+    } else {
+      themes.value = [...DESIGN_LIBRARY.themes];
     }
     
-    // Load fonts
+    // Load fonts — merge with DESIGN_LIBRARY
     if (data.data.font && data.data.font.length > 0) {
-      fonts.value = data.data.font.map(opt => ({
+      const dbFonts = data.data.font.map(opt => ({
         id: opt.option_id,
         name: opt.name,
         family: opt.config?.family || opt.name + ', sans-serif',
       }));
-      console.log('✅ Fonts loaded:', fonts.value.length);
+      fonts.value = DESIGN_LIBRARY.fonts.map(lib => {
+        const hit = dbFonts.find(d => d.id === lib.id);
+        return hit ? { ...lib, ...hit } : lib;
+      });
+      dbFonts.filter(d => !DESIGN_LIBRARY.fonts.some(l => l.id === d.id)).forEach(extra => fonts.value.push(extra));
+    } else {
+      fonts.value = [...DESIGN_LIBRARY.fonts];
     }
-    
-    // Load button styles
+
+    // Load button styles — merge with DESIGN_LIBRARY
     if (data.data.button_style && data.data.button_style.length > 0) {
-      buttonStyles.value = data.data.button_style.map(opt => ({
+      const dbBtns = data.data.button_style.map(opt => ({
         id: opt.option_id,
         name: opt.name,
-        class: opt.config?.class || 'bg-black text-white rounded-full',
+        class: opt.config?.class || '',
       }));
-      console.log('✅ Button styles loaded:', buttonStyles.value.length);
+      buttonStyles.value = DESIGN_LIBRARY.buttonStyles.map(lib => {
+        const hit = dbBtns.find(d => d.id === lib.id);
+        return hit ? { ...lib, ...hit } : lib;
+      });
+      dbBtns.filter(d => !DESIGN_LIBRARY.buttonStyles.some(l => l.id === d.id)).forEach(extra => buttonStyles.value.push(extra));
+    } else {
+      buttonStyles.value = [...DESIGN_LIBRARY.buttonStyles];
     }
+
+    // Load card styles — merge with DESIGN_LIBRARY
+    if (data.data.card_style && data.data.card_style.length > 0) {
+      const dbCards = data.data.card_style.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        previewCss: opt.config?.previewCss,
+        class: opt.config?.class || '',
+      }));
+      cardStyles.value = DESIGN_LIBRARY.cardStyles.map(lib => {
+        const hit = dbCards.find(d => d.id === lib.id);
+        return hit ? { ...lib, ...hit, previewCss: hit.previewCss || lib.previewCss } : lib;
+      });
+      dbCards.filter(d => !DESIGN_LIBRARY.cardStyles.some(l => l.id === d.id)).forEach(extra => cardStyles.value.push(extra));
+    } else {
+      cardStyles.value = [...DESIGN_LIBRARY.cardStyles];
+    }
+
+    // Load background animations — merge with DESIGN_LIBRARY
+    if (data.data.bg_animation && data.data.bg_animation.length > 0) {
+      const dbAnim = data.data.bg_animation.map(opt => ({
+        id: opt.option_id,
+        name: opt.name,
+        previewCss: opt.config?.previewCss,
+        component: opt.config?.component || null,
+      }));
+      bgAnimations.value = DESIGN_LIBRARY.bgAnimations.map(lib => {
+        const hit = dbAnim.find(d => d.id === lib.id);
+        return hit ? { ...lib, ...hit, previewCss: hit.previewCss || lib.previewCss } : lib;
+      });
+      dbAnim.filter(d => !DESIGN_LIBRARY.bgAnimations.some(l => l.id === d.id)).forEach(extra => bgAnimations.value.push(extra));
+    } else {
+      bgAnimations.value = [...DESIGN_LIBRARY.bgAnimations];
+    }
+    console.log('✅ Fonts loaded:', fonts.value.length);
+    console.log('✅ Button styles loaded:', buttonStyles.value.length);
+    console.log('✅ Card styles loaded:', cardStyles.value.length);
+    console.log('✅ Background animations loaded:', bgAnimations.value.length);
     
     // Load color schemes
     if (data.data.color_scheme && data.data.color_scheme.length > 0) {
@@ -2828,23 +3198,25 @@ const loadDesignOptions = async () => {
     console.log('🎨 All design options loaded successfully');
   } catch (error) {
     console.error('❌ Error loading design options:', error);
-    // Fallback to default options if API fails
-    themes.value = [
-      { id: "minimal", name: "Minimal", preview: "bg-white", backgroundColor: "#FFFFFF" },
-      { id: "dark", name: "Dark", preview: "bg-gray-900", backgroundColor: "#111827" },
-    ];
-    fonts.value = [
-      { id: "inter", name: "Inter", family: "Inter, sans-serif" },
-      { id: "roboto", name: "Roboto", family: "Roboto, sans-serif" },
-    ];
-    buttonStyles.value = [
-      { id: "solid", name: "Solid", class: "bg-black text-white rounded-full" },
-      { id: "outline", name: "Outline", class: "border-2 border-black text-black rounded-full" },
-    ];
+    // Fallback to DESIGN_LIBRARY defaults if API fails
+    themes.value = [...DESIGN_LIBRARY.themes];
+    fonts.value = [...DESIGN_LIBRARY.fonts];
+    buttonStyles.value = [...DESIGN_LIBRARY.buttonStyles];
+    cardStyles.value = [...DESIGN_LIBRARY.cardStyles];
+    bgAnimations.value = [...DESIGN_LIBRARY.bgAnimations];
   }
 };
 
-// Helper function to get full image URL
+// Smart host detection helper (same logic as api.client.js)
+const _isLocalHostname = (h) =>
+  h === "localhost" ||
+  h === "127.0.0.1" ||
+  h === "0.0.0.0" ||
+  h.startsWith("10.") ||
+  h.startsWith("192.168.") ||
+  /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h);
+
+// Helper function to get full image URL with smart host detection
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
 
@@ -2853,11 +3225,22 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-  // Use global config (defined at top of script setup)
-  const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
+  // Smartly pick base URL based on current runtime host so local dev
+  // always hits the local Laravel server (port 8000) for images, not production.
+  let apiBase = (config.public?.apiBaseUrl || "").trim();
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (_isLocalHostname(host)) {
+      const scheme = window.location.protocol === "https:" ? "https" : "http";
+      apiBase = `${scheme}://${host}:8000/api`;
+    }
+  }
+  if (!apiBase) {
+    apiBase = "http://localhost:8000/api";
+  }
 
   // Remove /api from the end to get base URL
-  const baseUrl = apiBase.replace("/api", "");
+  const baseUrl = apiBase.replace(/\/api\/?$/, "");
 
   // Ensure the path starts with /
   const path = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
@@ -2966,13 +3349,9 @@ const handleCompanyLogoUpload = (data) => {
 const applyTheme = (theme) => {
   profileData.theme = theme.id;
   profileData.backgroundColor = theme.backgroundColor;
-
-  // Set text color based on theme
-  if (theme.id === "dark") {
-    profileData.textColor = "#FFFFFF";
-  } else {
-    profileData.textColor = "#000000";
-  }
+  if (theme.textColor) profileData.textColor = theme.textColor;
+  if (theme.accentColor) profileData.accentColor = theme.accentColor;
+  if (theme.bgGradient) profileData.bgGradient = theme.bgGradient;
 };
 
 // Get icon for feature toggle based on feature_key
@@ -3241,6 +3620,7 @@ const addService = async () => {
   const serviceData = {
     id: editingServiceIndex.value !== null ? profileData.services[editingServiceIndex.value]?.id : Date.now(),
     name: profileData.serviceName,
+    icon: profileData.serviceIcon || "🚀",
     category: profileData.serviceCategory,
     image: profileData.serviceImage,
     video: profileData.serviceVideo,
@@ -3286,6 +3666,7 @@ const editService = (index) => {
   if (service) {
     editingServiceIndex.value = index;
     profileData.serviceName = service.name || "";
+    profileData.serviceIcon = service.icon || "🚀";
     profileData.serviceCategory = service.category || "";
     profileData.serviceImage = service.image || null;
     profileData.serviceVideo = service.video || "";
@@ -3304,6 +3685,7 @@ const editService = (index) => {
 const clearServiceForm = () => {
   editingServiceIndex.value = null;
   profileData.serviceName = "";
+  profileData.serviceIcon = "🚀";
   profileData.serviceCategory = "";
   profileData.serviceImage = null;
   profileData.serviceVideo = "";
@@ -3496,6 +3878,7 @@ const saveProfile = async () => {
       const serviceData = {
         id: editingServiceIndex.value !== null ? profileData.services[editingServiceIndex.value]?.id : Date.now(),
         name: profileData.serviceName,
+        icon: profileData.serviceIcon || "🚀",
         category: profileData.serviceCategory,
         image: profileData.serviceImage,
         video: profileData.serviceVideo,
@@ -3723,6 +4106,7 @@ const saveProfile = async () => {
       
       // Services additional
       service_name: profileData.serviceName,
+      service_icon: profileData.serviceIcon,
       service_category: profileData.serviceCategory,
       service_image: profileData.serviceImage,
       service_video: profileData.serviceVideo,
@@ -3750,14 +4134,33 @@ const saveProfile = async () => {
       theme: profileData.theme,
       background_color: profileData.backgroundColor,
       text_color: profileData.textColor,
+      accent_color: profileData.accentColor,
+      bg_gradient: profileData.bgGradient,
       font: profileData.font,
       button_style: profileData.buttonStyle,
+      card_style: profileData.cardStyle,
+      bg_animation: profileData.bgAnimation,
       color_scheme: profileData.colorScheme,
       layout: profileData.layout,
       show_watermark: profileData.showWatermark,
       
-      // Features state and order
-      features: profileData.features || {},
+      // Features state and order - include dynamic field toggle values from root profileData
+      features: (() => {
+        const mergedFeatures = { ...(profileData.features || {}) };
+        if (profileData.vcardEnabled !== undefined) mergedFeatures.vcard_download = profileData.vcardEnabled;
+        if (profileData.vcardEnabled !== undefined) mergedFeatures.vcardEnabled = profileData.vcardEnabled;
+        if (profileData.qrCodeEnabled !== undefined) mergedFeatures.qr_code = profileData.qrCodeEnabled;
+        if (profileData.qrCodeEnabled !== undefined) mergedFeatures.qrCodeEnabled = profileData.qrCodeEnabled;
+        if (profileData.contactFormEnabled !== undefined) mergedFeatures.contact_form = profileData.contactFormEnabled;
+        if (profileData.contactFormEnabled !== undefined) mergedFeatures.contactFormEnabled = profileData.contactFormEnabled;
+        if (profileData.contactFormEmail) {
+          mergedFeatures.contact_form_email = profileData.contactFormEmail;
+          mergedFeatures.contactFormEmail = profileData.contactFormEmail;
+        }
+        if (profileData.openNewTab !== undefined) mergedFeatures.openNewTab = profileData.openNewTab;
+        if (profileData.clickTracking !== undefined) mergedFeatures.clickTracking = profileData.clickTracking;
+        return mergedFeatures;
+      })(),
       available_features: featureToggles.value.map(f => f.feature_key), // Features assigned by admin
       feature_order: featureOrder.value.length > 0 ? featureOrder.value : sortedFeatureToggles.value.map(f => f.id),
       
@@ -3892,8 +4295,12 @@ const applyDesignToCards = async () => {
     const designSettings = {
       backgroundColor: profileData.backgroundColor,
       textColor: profileData.textColor,
+      accentColor: profileData.accentColor,
+      bgGradient: profileData.bgGradient,
       font: profileData.font,
       buttonStyle: profileData.buttonStyle,
+      cardStyle: profileData.cardStyle,
+      bgAnimation: profileData.bgAnimation,
       profileStyle: profileData.profileStyle,
       theme: profileData.theme,
     };
@@ -3960,16 +4367,27 @@ const loadAllEmployeeCards = async () => {
     
     if (response.success && response.nfc_cards) {
       const currentUserId = authStore.user?.id;
+      const authoritativePlan = authStore.user?.subscription_plan || null;
       // Filter to get only employee cards (cards where user_id is NOT current user)
       const employeeCardsList = response.nfc_cards.filter(card => {
         return card.user_id !== currentUserId;
       });
       
-      // Mark as employee cards
-      allEmployeeCards.value = employeeCardsList.map(card => ({
-        ...card,
-        is_employee: true
-      }));
+      // Mark as employee cards and normalize plan to authoritative subscription
+      allEmployeeCards.value = employeeCardsList.map(card => {
+        const effectivePlan =
+          authoritativePlan &&
+          (!card.subscription_plan ||
+            card.subscription_plan === "free" ||
+            card.subscription_plan !== authoritativePlan)
+            ? authoritativePlan
+            : card.subscription_plan;
+        return {
+          ...card,
+          subscription_plan: effectivePlan,
+          is_employee: true
+        };
+      });
       console.log("Employee cards loaded:", allEmployeeCards.value.length, allEmployeeCards.value);
     } else {
       console.warn("Failed to load employee cards - response not successful");
@@ -4092,6 +4510,7 @@ const loadProfile = async () => {
       
       // Services additional
       profileData.serviceName = landingPage.service_name || "";
+      profileData.serviceIcon = landingPage.service_icon || "🚀";
       profileData.serviceCategory = landingPage.service_category || "";
       profileData.serviceImage = landingPage.service_image || "";
       profileData.serviceVideo = landingPage.service_video || "";
@@ -4173,9 +4592,17 @@ const loadProfile = async () => {
         "#FFFFFF";
       profileData.textColor =
         landingPage.text_color || landingPage.textColor || "#000000";
+      profileData.accentColor =
+        landingPage.accent_color || landingPage.accentColor || "#1F2937";
+      profileData.bgGradient =
+        landingPage.bg_gradient || landingPage.bgGradient || null;
       profileData.font = landingPage.font || "inter";
       profileData.buttonStyle =
         landingPage.button_style || landingPage.buttonStyle || "solid";
+      profileData.cardStyle =
+        landingPage.card_style || landingPage.cardStyle || "minimal";
+      profileData.bgAnimation =
+        landingPage.bg_animation || landingPage.bgAnimation || "none";
       profileData.colorScheme = 
         landingPage.color_scheme || landingPage.colorScheme || "";
       profileData.layout = 
@@ -4190,6 +4617,24 @@ const loadProfile = async () => {
       // Load features state and order
       if (landingPage.features && typeof landingPage.features === 'object') {
         profileData.features = landingPage.features;
+
+        // Extract dynamic field toggle values from features back to root profileData
+        // This bridges the gap between features JSON storage and DynamicFormField bindings
+        const f = landingPage.features;
+        if (f.vcardEnabled !== undefined) profileData.vcardEnabled = f.vcardEnabled;
+        else if (f.vcard_download !== undefined) profileData.vcardEnabled = f.vcard_download;
+
+        if (f.qrCodeEnabled !== undefined) profileData.qrCodeEnabled = f.qrCodeEnabled;
+        else if (f.qr_code !== undefined) profileData.qrCodeEnabled = f.qr_code;
+
+        if (f.contactFormEnabled !== undefined) profileData.contactFormEnabled = f.contactFormEnabled;
+        else if (f.contact_form !== undefined) profileData.contactFormEnabled = f.contact_form;
+
+        if (f.contactFormEmail) profileData.contactFormEmail = f.contactFormEmail;
+        else if (f.contact_form_email) profileData.contactFormEmail = f.contact_form_email;
+
+        if (f.openNewTab !== undefined) profileData.openNewTab = f.openNewTab;
+        if (f.clickTracking !== undefined) profileData.clickTracking = f.clickTracking;
       }
       if (landingPage.feature_order && Array.isArray(landingPage.feature_order)) {
         profileData.featureOrder = landingPage.feature_order;
@@ -4380,6 +4825,7 @@ const resetProfileData = () => {
   
   // Services additional
   profileData.serviceName = "";
+  profileData.serviceIcon = "🚀";
   profileData.serviceCategory = "";
   profileData.serviceImage = "";
   profileData.serviceVideo = "";
@@ -4397,8 +4843,12 @@ const resetProfileData = () => {
   profileData.theme = "minimal";
   profileData.backgroundColor = "#FFFFFF";
   profileData.textColor = "#000000";
+  profileData.accentColor = "#1F2937";
+  profileData.bgGradient = null;
   profileData.font = "inter";
   profileData.buttonStyle = "solid";
+  profileData.cardStyle = "minimal";
+  profileData.bgAnimation = "none";
   profileData.colorScheme = "";
   profileData.layout = "";
   profileData.showWatermark = true;
@@ -4465,10 +4915,24 @@ const loadUserNfcCards = async () => {
       // Admin's cards: user_id = current user
       // Employee's cards: user_id = employee, business_account_id = admin
       const currentUserId = authStore.user?.id;
-      userNfcCards.value = response.nfc_cards.filter(card => {
+      const authoritativePlan = authStore.user?.subscription_plan || null;
+      const rawOwnCards = response.nfc_cards.filter(card => {
         // Include cards where user_id equals current user (Admin's own cards)
         // This excludes employee cards (where user_id is the employee's ID)
         return card.user_id === currentUserId;
+      });
+      userNfcCards.value = rawOwnCards.map(card => {
+        const effectivePlan =
+          authoritativePlan &&
+          (!card.subscription_plan ||
+            card.subscription_plan === "free" ||
+            card.subscription_plan !== authoritativePlan)
+            ? authoritativePlan
+            : card.subscription_plan;
+        return {
+          ...card,
+          subscription_plan: effectivePlan,
+        };
       });
 
       // Check URL parameters for card selection
@@ -4638,7 +5102,7 @@ const onPreviewLoad = () => {
   const selectedCard = getSelectedCard();
   if (selectedCard) {
     console.log('Card ID:', selectedCard.nfc_card_id);
-    console.log('Preview URL:', `/profile/${selectedCard.nfc_card_id}?preview=true`);
+    console.log('Preview URL:', getCardPublicUrl(selectedCard, { preview: true }));
   }
 };
 
@@ -4647,7 +5111,7 @@ const onPreviewError = (error) => {
   console.error('❌ Preview iframe error:', error);
   const selectedCard = getSelectedCard();
   if (selectedCard) {
-    console.error('Failed URL:', `/profile/${selectedCard.nfc_card_id}?preview=true`);
+    console.error('Failed URL:', getCardPublicUrl(selectedCard, { preview: true }));
   }
   $toast.error('Failed to load preview. Please try again.');
 };
@@ -4679,8 +5143,7 @@ const openLandingPage = () => {
   updatePreviewData();
 
   // Open landing page in new tab with preview mode (use nfc_card_id or id as fallback)
-  const cardIdentifier = selectedCard.nfc_card_id || selectedCard.id;
-  const landingPageUrl = `/profile/${cardIdentifier}?preview=true`;
+  const landingPageUrl = getCardPublicUrl(selectedCard, { preview: true });
   window.open(landingPageUrl, '_blank');
   
   $toast.success("Opening live preview in new tab");
@@ -4703,9 +5166,7 @@ const openSavedLandingPage = () => {
   }
 
   // Open real landing page without preview mode (shows saved data from backend)
-  // Use nfc_card_id or id as fallback
-  const cardIdentifier = selectedCard.nfc_card_id || selectedCard.id;
-  const landingPageUrl = `/profile/${cardIdentifier}`;
+  const landingPageUrl = getCardPublicUrl(selectedCard);
   window.open(landingPageUrl, '_blank');
   
   $toast.success("Opening saved landing page");
@@ -4715,17 +5176,61 @@ const openSavedLandingPage = () => {
 onMounted(async () => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+  const uid = authStore.user?.id;
+  const planType = 'business';
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PERFORMANCE #1 (0ms): STATIC CACHE HIT
+  // If user navigated away and comes back within 120s the builder config
+  // (sections/fields/design options + permissions + fields grouping) can be
+  // applied SYNCHRONOUSLY with ZERO network calls.
+  // ═══════════════════════════════════════════════════════════════════════
+  let batchUsed = false;
+  const cachedInit = getCachedBuilderInit(uid, planType);
+  if (cachedInit && cachedInit.applySectionsData && cachedInit.applyFieldsGroupedData && cachedInit.applyDesignOptionsData) {
+    try {
+      cachedInit.applySectionsData(cachedInit.payload.sections);
+      cachedInit.applyFieldsGroupedData(cachedInit.payload.fields);
+      cachedInit.applyDesignOptionsData(cachedInit.payload.design_options);
+      batchUsed = true;
+      console.log('✅ BUILDER-INIT CACHE APPLIED (0ms, 0 network calls)');
+    } catch (_) { /* fall-through to network */ }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PERFORMANCE #2 (NFC cards cache) — read from cache if available
+  // ═══════════════════════════════════════════════════════════════════════
+  let cachedCards = uid ? getCachedNfcCards(uid) : null;
+  if (cachedCards) {
+    userNfcCards.value = cachedCards;
+    if (cachedCards.length > 0 && !selectedNfcCardId.value) {
+      selectedNfcCardId.value = cachedCards[0].id;
+      try { await loadProfile(); } catch(_){}
+    }
+  }
 
   try {
     // Load configurations and NFC cards in parallel for faster loading
-    await Promise.all([
-      loadSections().catch(err => console.log('⚠️ Sections loading failed, using fallback:', err.message)),
-      loadUserPermissions().catch(err => console.log('User permissions skipped:', err.message)),
-      loadFieldsConfig().catch(err => console.log('Fields config skipped:', err.message)),
-      loadDesignOptions().catch(err => console.log('Design options skipped:', err.message)),
-      loadUserNfcCards().catch(err => console.log('NFC cards loading failed:', err.message)),
-    ]);
-    console.log('✅ Core configurations loaded');
+    // (or skip all config calls entirely if cache hit succeeded for both)
+    const tasks = [];
+
+    if (!batchUsed) {
+      tasks.push(
+        loadSections().catch(err => console.log('⚠️ Sections loading failed, using fallback:', err.message)),
+        loadUserPermissions().catch(err => console.log('User permissions skipped:', err.message)),
+        loadFieldsConfig().catch(err => console.log('Fields config skipped:', err.message)),
+        loadDesignOptions().catch(err => console.log('Design options skipped:', err.message)),
+      );
+    }
+    if (!cachedCards) {
+      const p = loadUserNfcCards().catch(err => console.log('NFC cards loading failed:', err.message));
+      tasks.push(p);
+      // After loading completes, cache the fresh list
+      p.then(() => { setCachedNfcCards(uid, userNfcCards.value); });
+    }
+    if (tasks.length) await Promise.all(tasks);
+
+    console.log(`✅ Core configurations loaded (configCached=${batchUsed}, nfcCardsCached=${!!cachedCards})`);
     
     // Check category availability and set initial category
     // First check if there are available categories
@@ -4743,22 +5248,23 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error loading configurations:', error);
+  } finally {
+    pageLoading.value = false;
   }
   
   // Load employee cards in background (non-blocking)
   loadAllEmployeeCards().catch(err => console.log('Employee cards skipped:', err.message));
   
-  // Initialize preview data after a short delay
-  setTimeout(() => {
-    updatePreviewData();
-  }, 500);
+  // Initialize preview data IMMEDIATELY (was 500ms delay → removed for perceived perf)
+  updatePreviewData();
 
   // Check if we should open Apply Design modal from URL parameter
   const route = useRoute();
   if (route.query.openApplyDesign === 'true') {
+    // Reduced from 1000ms → 200ms: modal only needs DOM stable, not iframe-ready
     setTimeout(() => {
       showApplyDesignModal.value = true;
-    }, 1000);
+    }, 200);
   }
 
   // Close card selector when clicking outside
@@ -4768,7 +5274,10 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
   document.removeEventListener("click", handleClickOutside);
-  
+
+  // ─── Cancel all in-flight API requests initiated by this page ──────
+  createAbortOnRouteChange("BusinessProfileBuilder unmounted")();
+
   // Clear update timeout
   if (updatePreviewTimeout) clearTimeout(updatePreviewTimeout);
 });

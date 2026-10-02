@@ -146,21 +146,21 @@
         </div>
         
         <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mt-12">
           <div class="text-center">
-            <p class="text-3xl font-bold text-primary-600 mb-1">10K+</p>
+            <p class="text-2xl sm:text-3xl font-bold text-primary-600 mb-1">10K+</p>
             <p class="text-sm text-secondary-600">Active Users</p>
           </div>
           <div class="text-center">
-            <p class="text-3xl font-bold text-primary-600 mb-1">500+</p>
+            <p class="text-2xl sm:text-3xl font-bold text-primary-600 mb-1">500+</p>
             <p class="text-sm text-secondary-600">Companies</p>
           </div>
           <div class="text-center">
-            <p class="text-3xl font-bold text-primary-600 mb-1">98%</p>
+            <p class="text-2xl sm:text-3xl font-bold text-primary-600 mb-1">98%</p>
             <p class="text-sm text-secondary-600">Satisfaction Rate</p>
           </div>
           <div class="text-center">
-            <p class="text-3xl font-bold text-primary-600 mb-1">2M+</p>
+            <p class="text-2xl sm:text-3xl font-bold text-primary-600 mb-1">2M+</p>
             <p class="text-sm text-secondary-600">Cards Tapped</p>
           </div>
         </div>

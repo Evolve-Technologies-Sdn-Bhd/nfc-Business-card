@@ -12,16 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Add Activity Logging middleware to API routes
-        $middleware->api(append: [
-            \App\Http\Middleware\RememberMe::class, // Check for remember me token
-            \App\Http\Middleware\LogActivity::class,
+        $middleware->use([
             \App\Http\Middleware\HandleCors::class,
         ]);
 
-        // Add CORS middleware to web routes as well for better compatibility
-        $middleware->web(append: [
-            \App\Http\Middleware\HandleCors::class,
+        $middleware->api(prepend: [
+            \App\Http\Middleware\RememberMe::class,
+        ]);
+
+        $middleware->api(append: [
+            \App\Http\Middleware\LogActivity::class,
         ]);
 
         // Register admin middleware alias

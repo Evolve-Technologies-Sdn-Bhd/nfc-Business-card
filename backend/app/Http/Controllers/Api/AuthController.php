@@ -719,8 +719,8 @@ class AuthController extends Controller
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kata laluan semasa tidak tepat.',
-                    'errors' => ['current_password' => ['Kata laluan semasa tidak tepat.']],
+                    'message' => 'Current password is incorrect.',
+                    'errors' => ['current_password' => ['Current password is incorrect.']],
                 ], 401);
             }
         }
@@ -747,7 +747,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Kata laluan berjaya dikemaskini.',
+            'message' => 'Password updated successfully.',
         ]);
     }
 
@@ -827,8 +827,7 @@ class AuthController extends Controller
                 return response()->json(['success' => false, 'message' => 'Session not found.'], 404);
             }
             $token->delete();
-            return response()->json(['success' => true, 'message' => 'Sesi telah dilog keluar.']);
-        }
+            return response()->json(['success' => true, 'message' => 'Session logged out.']);        }
 
         $token = $user->tokens()->find((int) $id);
         if (!$token) {
@@ -839,7 +838,7 @@ class AuthController extends Controller
         if ($currentId !== null && (int) $token->id === (int) $currentId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak boleh membatalkan sesi semasa. Gunakan Logout atau Logout Everywhere.',
+                'message' => 'You cannot revoke your current session. Use Logout or Logout Everywhere.',
             ], 400);
         }
 
@@ -852,7 +851,7 @@ class AuthController extends Controller
             ['metadata' => ['ip_address' => $request->ip(), 'revoked_token_id' => $token->id]],
         );
 
-        return response()->json(['success' => true, 'message' => 'Sesi telah dilog keluar.']);
+        return response()->json(['success' => true, 'message' => 'Session has been logged out.']);
     }
 
     // ========================================================================
@@ -880,7 +879,7 @@ class AuthController extends Controller
         if ($user->two_factor_enabled === true) {
             return response()->json([
                 'success' => false,
-                'message' => '2FA sudah diaktifkan. Sila nyahaktifkan dahulu untuk generate secret baru.',
+                'message' => '2FA is already enabled. Please disable it first to generate a new secret.',
             ], 400);
         }
 
@@ -917,7 +916,7 @@ class AuthController extends Controller
             'secret' => $secret,
             'qr_data' => $qrPayload,
             'recovery_codes' => $recoveryCodes,
-            'instructions' => 'Scan QR dalam Google Authenticator / Authy, kemudian hantar 6 digit OTP untuk /2fa/confirm.',
+            'instructions' => 'Scan the QR in Google Authenticator / Authy, then submit the 6-digit OTP to /2fa/confirm.',
         ]);
     }
 
@@ -951,7 +950,7 @@ class AuthController extends Controller
         if (!is_array($secretPayload) || ($secretPayload['status'] ?? null) !== 'pending' || empty($secretPayload['secret'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sesi setup 2FA sudah tamat. Sila jalankan /2fa/setup sekali lagi.',
+                'message' => '2FA setup session has expired. Please run /2fa/setup again.',
             ], 400);
         }
 
@@ -959,8 +958,8 @@ class AuthController extends Controller
         if (!$valid) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kod OTP tidak tepat.',
-                'errors' => ['code' => ['Kod OTP tidak tepat.']],
+                'message' => 'OTP code is incorrect.',
+                'errors' => ['code' => ['OTP code is incorrect.']],
             ], 400);
         }
 
@@ -983,7 +982,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '2FA berjaya diaktifkan. Simpan recovery codes di tempat selamat.',
+            'message' => '2FA successfully enabled. Save the recovery codes in a safe place.',
             'recovery_codes' => $confirmed['recovery_codes'],
         ]);
     }
@@ -1005,7 +1004,7 @@ class AuthController extends Controller
 
         $user = $request->user();
         if (!$user->two_factor_enabled) {
-            return response()->json(['success' => false, 'message' => '2FA tidak aktif.'], 400);
+            return response()->json(['success' => false, 'message' => '2FA is not enabled.'], 400);
         }
 
         $confirmed = false;
@@ -1027,7 +1026,7 @@ class AuthController extends Controller
         if (!$confirmed) {
             return response()->json([
                 'success' => false,
-                'message' => 'Pengesahan gagal. Sila masukkan kata laluan atau recovery code yang betul.',
+                'message' => 'Verification failed. Please enter your correct password or a valid recovery code.',
             ], 401);
         }
 
@@ -1042,7 +1041,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '2FA berjaya dinyahaktifkan.',
+            'message' => '2FA successfully disabled.',
         ]);
     }
 
@@ -1055,7 +1054,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         if (!$user->two_factor_enabled) {
-            return response()->json(['success' => false, 'message' => '2FA tidak aktif.'], 400);
+            return response()->json(['success' => false, 'message' => '2FA is not enabled.'], 400);
         }
 
         $secretPayload = null;
@@ -1066,7 +1065,7 @@ class AuthController extends Controller
         }
 
         if (!is_array($secretPayload) || empty($secretPayload['secret'])) {
-            return response()->json(['success' => false, 'message' => 'Secret 2FA tidak sah.'], 500);
+            return response()->json(['success' => false, 'message' => '2FA secret is invalid.'], 500);
         }
 
         $newCodes = $this->generateRecoveryCodes(8);
@@ -1082,7 +1081,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'recovery_codes' => $newCodes,
-            'message' => 'Recovery codes baharu telah dijana. Yang lama tidak lagi sah.',
+            'message' => 'New recovery codes have been generated. The old ones are no longer valid.',
         ]);
     }
 

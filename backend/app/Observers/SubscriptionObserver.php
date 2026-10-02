@@ -92,8 +92,14 @@ class SubscriptionObserver
                 $payload['subscription_end_date'] = $endDate;
             }
 
-            User::withoutTimestamps(static function () use ($userId, $payload) {
+            User::withoutTimestamps(static function () use ($userId, $plan, $payload) {
                 User::where('id', $userId)->update($payload);
+                \App\Models\NfcCard::where('user_id', $userId)->update([
+                    'subscription_plan' => $plan,
+                ]);
+                \App\Models\NfcCard::where('business_account_id', $userId)->update([
+                    'subscription_plan' => $plan,
+                ]);
             });
         } catch (\Throwable $e) {
             Log::warning('SubscriptionObserver syncToUserColumns failed', [

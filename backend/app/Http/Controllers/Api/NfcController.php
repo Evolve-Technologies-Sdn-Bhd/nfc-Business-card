@@ -103,6 +103,53 @@ class NfcController extends Controller
             'platform'   => $platform,
         ];
 
+        // =========================================================
+        // Priority 0 — Pretty URL encoded with "__" separator.
+        // Two possible shapes:
+        //   • 2-segment short (unique name):    nicole-tan__1
+        //   • 3-segment long (name clash + pk): nicole-tan__1__userid-87
+        // =========================================================
+        if (is_string($nfcId) && strpos($nfcId, '__') !== false) {
+            $parts = explode('__', $nfcId);
+            $uid = null;
+            if (count($parts) === 2) {
+                [$slugPart, $cardPart] = $parts;
+            } elseif (count($parts) === 3) {
+                [$slugPart, $cardPart, $userSegment] = $parts;
+                if (preg_match('/^userid-(\d+)$/i', (string) $userSegment, $m)) {
+                    $uid = (int) $m[1];
+                }
+            } else {
+                $slugPart = null;
+                $cardPart = null;
+            }
+            if (($slugPart ?? null) && ($cardPart ?? null) !== null) {
+                $nfcCard = \App\Models\NfcCard::resolveByPrettyUrl($slugPart, $cardPart, $uid);
+                if ($nfcCard) {
+                    $relatedTag = $nfcCard->nfcTag;
+                    if ($relatedTag && $relatedTag->status === 'active') {
+                        $relatedTag->increment('tap_count');
+                        $relatedTag->update(['last_tapped_at' => now()]);
+                    }
+                    $trackable = $relatedTag ?? $nfcCard;
+                    Analytics::create([
+                        'trackable_type' => $trackable ? get_class($trackable) : LandingPage::class,
+                        'trackable_id'   => $trackable->id ?? 0,
+                    ] + $commonAnalytics);
+                    $profile = $this->resolveProfileForTap($nfcCard->user ?? null, $nfcCard);
+                    return response()->json([
+                        'success' => true,
+                        'profile' => $profile ? $profile->load(['socialLinks' => function ($q) {
+                            $q->where('is_active', true)->orderBy('order');
+                        }]) : null,
+                        'nfc_card' => $nfcCard,
+                        'nfc_tag' => $relatedTag,
+                        'resolved_via' => 'pretty_url_user_slug_card_no',
+                    ]);
+                }
+            }
+        }
+
         // ========================================================
         // Priority 1 — lookup by physical NFC tag chip id (nfc_id)
         // This is the canonical behavior for actual NFC hardware.

@@ -4,20 +4,33 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Subscription;
 use App\Models\LandingPage;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\Analytics;
+use App\Models\Transaction;
+use App\Models\ActivityLog;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
 use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+    protected NotificationService $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Get admin dashboard overview
      */
@@ -25,46 +38,260 @@ class AdminController extends Controller
     {
         $user = $request->user();
 
-        // Get total counts
-        $totalUsers = User::count();
-        $totalLandingPages = LandingPage::count();
-        $totalNfcCards = NfcCard::count();
-        $totalNfcTags = NfcTag::count();
-        $totalAnalytics = Analytics::count();
+        // =========================================================
+        // 1. TIME RANGES — current month vs previous month (real trends, not hardcoded)
+        // =========================================================
+        $thisMonthStart = now()->startOfMonth();
+        $prevMonthStart = now()->subMonthNoOverflow()->startOfMonth();
+        $prevMonthEnd   = now()->subMonthNoOverflow()->endOfMonth();
 
-        // Get recent registrations
-        $recentUsers = User::with('nfcCards.landingPage')
+        $counts = function ($query) use ($thisMonthStart, $prevMonthStart, $prevMonthEnd) {
+            return [
+                'current' => (clone $query)->where('created_at', '>=', $thisMonthStart)->count(),
+                'previous' => (clone $query)->whereBetween('created_at', [$prevMonthStart, $prevMonthEnd])->count(),
+                'all_time' => (clone $query)->count(),
+            ];
+        };
+
+        $safePercentChange = function ($current, $previous) {
+            if ($previous <= 0) {
+                return $current > 0 ? 100.0 : 0.0;
+            }
+            return round((($current - $previous) / $previous) * 100, 1);
+        };
+
+        $usersStats      = $counts(User::query());
+        $profilesStats   = $counts(LandingPage::query());
+        $nfcCardsStats   = $counts(NfcCard::query());
+        $analyticsStats  = $counts(Analytics::query());
+
+        // =========================================================
+        // 2. Recent registrations (with profile image if available)
+        // =========================================================
+        $recentUsers = User::with(['nfcCards.landingPage'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        // Get subscription breakdown
+        // =========================================================
+        // 3. Subscription breakdown
+        // =========================================================
         $subscriptionBreakdown = User::selectRaw('subscription_plan, COUNT(*) as count')
             ->groupBy('subscription_plan')
             ->get();
 
-        // Get recent activity
-        $recentActivity = Analytics::with('trackable')
+        // =========================================================
+        // 4. Recent Activity — MIX of:
+        //    A) Analytics (nfc taps, profile views, link clicks) — trackable NFC/card data
+        //    B) ActivityLog (logins, registrations, payments, approvals, 2FA setup)
+        //    Result: truly varied live feed, no more "all John Doe tapped"
+        // =========================================================
+
+        // ---- A) Pull top 8 Analytics (card interactions) ----
+        $analyticsActivityRaw = Analytics::with([
+            'trackable' => function ($morphTo) {
+                $morphTo
+                    ->morphWith([
+                        NfcTag::class  => ['nfcCard.user', 'user'],
+                        NfcCard::class => ['user', 'nfcTag'],
+                        LandingPage::class => ['nfcCard.user'],
+                    ]);
+            },
+        ])
+        ->orderBy('created_at', 'desc')
+        ->limit(8)
+        ->get();
+
+        $analyticsActivity = $analyticsActivityRaw->map(function ($a) {
+            $t = $a->trackable;
+            $cardInfo = null;
+            $ownerInfo = null;
+            if ($t instanceof NfcTag) {
+                $c = $t->nfcCard;
+                if ($c) {
+                    $cardInfo = [
+                        'card_id'      => $c->card_id,
+                        'card_number'  => $c->card_number,
+                        'card_owner'   => $c->card_owner,
+                        'nfc_id'       => $t->nfc_id,
+                        'tag_name'     => $t->name,
+                    ];
+                    $u = $c->user ?? $t->user;
+                    if ($u) {
+                        $ownerInfo = [
+                            'user_id'   => $u->id,
+                            'full_name' => $u->full_name,
+                            'email'     => $u->email,
+                        ];
+                    }
+                }
+            } elseif ($t instanceof NfcCard) {
+                $cardInfo = [
+                    'card_id'      => $t->card_id,
+                    'card_number'  => $t->card_number,
+                    'card_owner'   => $t->card_owner,
+                ];
+                if ($t->user) {
+                    $ownerInfo = [
+                        'user_id'   => $t->user->id,
+                        'full_name' => $t->user->full_name,
+                        'email'     => $t->user->email,
+                    ];
+                }
+            } elseif ($t instanceof LandingPage) {
+                $c = $t->nfcCard;
+                if ($c) {
+                    $cardInfo = [
+                        'card_id'      => $c->card_id,
+                        'card_number'  => $c->card_number,
+                        'card_owner'   => $c->card_owner,
+                    ];
+                    if ($c->user) {
+                        $ownerInfo = [
+                            'user_id'   => $c->user->id,
+                            'full_name' => $c->user->full_name,
+                            'email'     => $c->user->email,
+                        ];
+                    }
+                }
+            }
+
+            $location = trim(($a->city ? $a->city . ', ' : '') . ($a->country ?? ''), ', ');
+
+            return [
+                'id'          => 'an-' . $a->id,
+                'action'      => $a->action,                 // nfc_tap, profile_view, link_click
+                'activity_source' => 'analytics',
+                'trackable_type' => $a->trackable_type,
+                'trackable_id'   => $a->trackable_id,
+                'ip_address'  => $a->ip_address,
+                'device_type' => $a->device_type,
+                'browser'     => $a->browser,
+                'platform'    => $a->platform,
+                'location'    => $location ?: null,
+                'data'        => $a->data,
+                'card'        => $cardInfo,
+                'owner'       => $ownerInfo,
+                'description' => null,                        // ActivityLog uses this
+                'actor'       => null,                        // ActivityLog uses this
+                'created_at'  => $a->created_at?->toIso8601String(),
+            ];
+        });
+
+        // ---- B) Pull top 8 ActivityLog (system events: login, register, payment, approvals) ----
+        $systemActivityRaw = ActivityLog::with(['user:id,first_name,last_name,email,full_name'])
             ->orderBy('created_at', 'desc')
-            ->limit(10)
+            ->limit(8)
             ->get();
 
-        // Get system stats
+        $systemActivity = $systemActivityRaw->map(function ($log) {
+            // Extract device/browser from user_agent
+            $ua = $log->user_agent ?? '';
+            $deviceType = 'desktop';
+            $platform = 'Unknown';
+            $browser = 'Unknown';
+
+            if (stripos($ua, 'Mobile') !== false || stripos($ua, 'Android') !== false || stripos($ua, 'iPhone') !== false || stripos($ua, 'iPad') !== false) {
+                $deviceType = 'mobile';
+            } elseif (stripos($ua, 'Tablet') !== false) {
+                $deviceType = 'tablet';
+            }
+
+            if (stripos($ua, 'Windows') !== false) $platform = 'Windows';
+            elseif (stripos($ua, 'Mac OS') !== false) $platform = 'macOS';
+            elseif (stripos($ua, 'Android') !== false) $platform = 'Android';
+            elseif (stripos($ua, 'iOS') !== false || stripos($ua, 'iPhone') !== false || stripos($ua, 'iPad') !== false) $platform = 'iOS';
+            elseif (stripos($ua, 'Linux') !== false) $platform = 'Linux';
+
+            if (stripos($ua, 'Firefox') !== false) $browser = 'Firefox';
+            elseif (stripos($ua, 'Edg/') !== false) $browser = 'Edge';
+            elseif (stripos($ua, 'Chrome') !== false) $browser = 'Chrome';
+            elseif (stripos($ua, 'Safari') !== false) $browser = 'Safari';
+
+            $actor = null;
+            if ($log->user) {
+                $actor = [
+                    'user_id'   => $log->user->id,
+                    'full_name' => $log->user->full_name,
+                    'email'     => $log->user->email,
+                ];
+            }
+
+            return [
+                'id'          => 'sl-' . $log->id,
+                'action'      => $log->action_type,         // user_logged_in, user_registered, payment_created, ...
+                'activity_source' => 'activity_log',
+                'trackable_type' => $log->entity_type,
+                'trackable_id'   => $log->entity_id,
+                'ip_address'  => $log->ip_address,
+                'device_type' => $deviceType,
+                'browser'     => $browser,
+                'platform'    => $platform,
+                'location'    => null,
+                'data'        => $log->metadata,
+                'card'        => null,
+                'owner'       => $actor,
+                'description' => $log->action_description,
+                'actor'       => $actor,
+                'created_at'  => $log->created_at?->toIso8601String(),
+            ];
+        });
+
+        // ---- C) Merge & sort by created_at descending, keep top 10 ----
+        $recentActivity = $analyticsActivity
+            ->concat($systemActivity)
+            ->sortByDesc(function ($item) {
+                return $item['created_at'] ?? '0';
+            })
+            ->take(10)
+            ->values()
+            ->all();
+
+        // =========================================================
+        // 5. System stats
+        // =========================================================
         $systemStats = [
             'total_storage_used' => $this->getStorageUsage(),
-            'active_sessions' => DB::table('sessions')->count(),
-            'last_backup' => now()->subDays(2)->format('Y-m-d H:i:s'), // Mock data
+            'active_sessions'    => DB::table('sessions')->count(),
+            'last_backup'        => now()->subDays(2)->format('Y-m-d H:i:s'),
         ];
 
         return response()->json([
             'success' => true,
             'data' => [
                 'overview' => [
-                    'total_users' => $totalUsers,
-                    'total_landing_pages' => $totalLandingPages,
-                    'total_nfc_cards' => $totalNfcCards,
-                    'total_nfc_tags' => $totalNfcTags,
-                    'total_analytics' => $totalAnalytics,
+                    'total_users'           => $usersStats['all_time'],
+                    'total_profiles'        => $profilesStats['all_time'],
+                    'total_landing_pages'   => $profilesStats['all_time'],
+                    'total_nfc_cards'       => $nfcCardsStats['all_time'],
+                    'total_nfc_tags'        => NfcTag::count(),
+                    'total_analytics'       => $analyticsStats['all_time'],
+                    'trends' => [
+                        'total_users' => [
+                            'current'  => $usersStats['current'],
+                            'previous' => $usersStats['previous'],
+                            'change_pct'   => $safePercentChange($usersStats['current'], $usersStats['previous']),
+                            'direction'    => $usersStats['current'] >= $usersStats['previous'] ? 'up' : 'down',
+                        ],
+                        'total_profiles' => [
+                            'current'  => $profilesStats['current'],
+                            'previous' => $profilesStats['previous'],
+                            'change_pct'   => $safePercentChange($profilesStats['current'], $profilesStats['previous']),
+                            'direction'    => $profilesStats['current'] >= $profilesStats['previous'] ? 'up' : 'down',
+                        ],
+                        'total_nfc_cards' => [
+                            'current'  => $nfcCardsStats['current'],
+                            'previous' => $nfcCardsStats['previous'],
+                            'change_pct'   => $safePercentChange($nfcCardsStats['current'], $nfcCardsStats['previous']),
+                            'direction'    => $nfcCardsStats['current'] >= $nfcCardsStats['previous'] ? 'up' : 'down',
+                        ],
+                        'total_analytics' => [
+                            'current'  => $analyticsStats['current'],
+                            'previous' => $analyticsStats['previous'],
+                            'change_pct'   => $safePercentChange($analyticsStats['current'], $analyticsStats['previous']),
+                            'direction'    => $analyticsStats['current'] >= $analyticsStats['previous'] ? 'up' : 'down',
+                        ],
+                    ],
                 ],
                 'recent_users' => $recentUsers,
                 'subscription_breakdown' => $subscriptionBreakdown,
@@ -79,12 +306,15 @@ class AdminController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $query = User::with(['nfcCards.landingPage', 'nfcTag', 'nfcCards'])
-            ->withCount(['analytics', 'nfcCards']);
+        $query = User::with([
+            'nfcCards.landingPage',
+            'nfcTag',
+            'latestSubscription',
+            'employees',
+        ])->withCount(['analytics', 'nfcCards']);
 
         // Filter by businessUserId: handle 'all' for "All Business Plan Users" or specific ID
         if ($request->businessUserId === 'all') {
-            // Show only business plan users (owners + employees)
             $query->where('subscription_plan', 'business');
         } elseif ($request->filled('businessUserId')) {
             $businessUserId = $request->businessUserId;
@@ -94,13 +324,10 @@ class AdminController extends Controller
             });
         }
 
-        // Filter by employeeId: show only the selected employee
         if ($request->filled('employeeId')) {
-            $employeeId = $request->employeeId;
-            $query->where('id', $employeeId);
+            $query->where('id', $request->employeeId);
         }
 
-        // Apply other filters
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -133,19 +360,19 @@ class AdminController extends Controller
             }
         }
 
-        // Apply sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        // Paginate results
         $perPage = $request->get('per_page', 15);
         $users = $query->paginate($perPage);
 
-        // Add quota information for Business accounts
+        // Single-pass hydration: name_slug clash counts for ALL users in page
+        User::hydrateNameSlugClashCounts($users->getCollection());
+
         $users->getCollection()->transform(function ($user) {
             if ($user->isBusinessAccount()) {
-                $quotaInfo = $user->getQuotaInfo();
+                $quotaInfo = $user->getQuotaInfo(true);
                 $user->quota_info = $quotaInfo;
             }
             return $user;
@@ -291,7 +518,7 @@ class AdminController extends Controller
             'subscription_plan' => 'nullable|in:free,basic,premium,business',
             'subscription_active' => 'nullable|boolean',
             'is_admin' => 'boolean',
-            'admin_role' => 'nullable|in:admin,moderator',
+            'admin_role' => 'nullable|in:admin,moderator,super_admin',
             'admin_permissions' => 'nullable|array',
             'total_account_slots' => 'nullable|integer|min:0',
             'total_card_quota' => 'nullable|integer|min:0',
@@ -316,6 +543,12 @@ class AdminController extends Controller
             $subscriptionActive = $request->has('subscription_active')
                 ? $request->boolean('subscription_active')
                 : ($subscriptionPlan !== 'free');
+            // Free plan is never an active "paid" subscription
+            if ($subscriptionPlan === 'free') {
+                $subscriptionActive = false;
+            }
+            $startDate = $subscriptionActive ? now() : null;
+            $endDate = $subscriptionActive ? now()->addYear() : null;
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -327,14 +560,44 @@ class AdminController extends Controller
                 'phone' => $request->phone,
                 'subscription_plan' => $subscriptionPlan,
                 'subscription_active' => $subscriptionActive,
-                'subscription_start_date' => $subscriptionActive ? now() : null,
-                'subscription_end_date' => $subscriptionActive ? now()->addYear() : null,
+                'subscription_start_date' => $startDate,
+                'subscription_end_date' => $endDate,
                 'is_admin' => $request->boolean('is_admin'),
                 'admin_role' => $request->admin_role,
                 'admin_permissions' => $request->admin_permissions,
                 'total_account_slots' => $isBusinessPlan ? ($request->total_account_slots ?? 10) : 0,
                 'total_card_quota' => $isBusinessPlan ? ($request->total_card_quota ?? 10) : 0,
             ]);
+
+            // =========================================================================
+            // SINGLE SOURCE OF TRUTH: create corresponding Subscription row
+            // (user accessors always read from subscriptions table first)
+            // =========================================================================
+            if ($subscriptionPlan !== 'free' && $subscriptionActive) {
+                $amountMap = [
+                    'basic'    => 0.00,
+                    'premium'  => 0.00,
+                    'business' => 0.00,
+                ];
+                Subscription::create([
+                    'user_id'               => $user->id,
+                    'provider'              => 'manual',
+                    'plan_name'             => ucfirst($subscriptionPlan) . ' Plan',
+                    'plan_type'             => $subscriptionPlan,
+                    'amount'                => $amountMap[$subscriptionPlan] ?? 0.00,
+                    'currency'              => 'MYR',
+                    'interval'              => 'yearly',
+                    'status'                => 'active',
+                    'current_period_start'  => $startDate,
+                    'current_period_end'    => $endDate,
+                    'next_billing_date'     => $endDate,
+                    'metadata'              => [
+                        'admin_created' => true,
+                        'admin_id'      => $request->user()?->id,
+                        'source'        => 'User Management (Create)',
+                    ],
+                ]);
+            }
 
             // Create NFC card for the user
             $nfcCard = NfcCard::create([
@@ -365,12 +628,19 @@ class AdminController extends Controller
                 'success' => true,
                 'message' => 'User created successfully',
                 'data' => [
-                    'user' => $user->load('nfcCards.landingPage'),
+                    'user' => $user->load(['nfcCards.landingPage', 'subscriptions']),
                     'nfc_card' => $nfcCard,
                     'landing_page' => $landingPage,
                 ]
             ], 201);
-        } catch (\Exception $e) {
+        } catch (QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error while creating user: ' . $e->getMessage(),
+                'error_code' => $e->errorInfo[1] ?? null,
+            ], 500);
+        } catch (\Throwable $e) {
             DB::rollback();
             return response()->json([
                 'success' => false,
@@ -389,6 +659,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255|unique:users,email,' . $userId,
             'company' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20|regex:/^\+?\d*$/',
@@ -397,7 +668,7 @@ class AdminController extends Controller
             'subscription_start_date' => 'nullable|date',
             'subscription_end_date' => 'nullable|date',
             'is_admin' => 'boolean',
-            'admin_role' => 'nullable|in:admin,moderator',
+            'admin_role' => 'nullable|in:admin,moderator,super_admin',
             'admin_permissions' => 'nullable|array',
             'total_account_slots' => 'nullable|integer|min:0',
             'total_card_quota' => 'nullable|integer|min:0',
@@ -406,6 +677,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -418,79 +690,178 @@ class AdminController extends Controller
             ], 403);
         }
 
-        // Handle Business Plan quota updates
-        if ($request->has('subscription_plan') && $request->subscription_plan === 'business') {
-            // If updating to Business Plan or already Business
-            if ($request->has('total_card_quota') || $request->has('total_account_slots')) {
-                $quotaInfo = $user->getQuotaInfo();
+        DB::beginTransaction();
+        try {
+            // Handle Business Plan quota updates
+            if ($request->has('subscription_plan') && $request->subscription_plan === 'business') {
+                // If updating to Business Plan or already Business
+                if ($request->has('total_card_quota') || $request->has('total_account_slots')) {
+                    $quotaInfo = $user->getQuotaInfo();
 
-                // Validate card quota
-                if ($request->has('total_card_quota')) {
-                    $newCardQuota = $request->total_card_quota;
-                    if ($newCardQuota < $quotaInfo['ordered_cards_count']) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => "Cannot set card quota to {$newCardQuota}. Already ordered: {$quotaInfo['ordered_cards_count']} cards.",
-                            'errors' => [
-                                'total_card_quota' => ["Minimum value is {$quotaInfo['ordered_cards_count']} (already ordered cards)"]
-                            ]
-                        ], 422);
+                    // Validate card quota
+                    if ($request->has('total_card_quota')) {
+                        $newCardQuota = $request->total_card_quota;
+                        if ($newCardQuota < $quotaInfo['ordered_cards_count']) {
+                            DB::rollBack();
+                            return response()->json([
+                                'success' => false,
+                                'message' => "Cannot set card quota to {$newCardQuota}. Already ordered: {$quotaInfo['ordered_cards_count']} cards.",
+                                'errors' => [
+                                    'total_card_quota' => ["Minimum value is {$quotaInfo['ordered_cards_count']} (already ordered cards)"]
+                                ]
+                            ], 422);
+                        }
+                    }
+
+                    // Validate account slots
+                    if ($request->has('total_account_slots')) {
+                        $newAccountSlots = $request->total_account_slots;
+                        if ($newAccountSlots < $quotaInfo['employees_count']) {
+                            DB::rollBack();
+                            return response()->json([
+                                'success' => false,
+                                'message' => "Cannot set account slots to {$newAccountSlots}. Current employees: {$quotaInfo['employees_count']}.",
+                                'errors' => [
+                                    'total_account_slots' => ["Minimum value is {$quotaInfo['employees_count']} (current employees)"]
+                                ]
+                            ], 422);
+                        }
                     }
                 }
 
-                // Validate account slots
+                // Update quota fields
                 if ($request->has('total_account_slots')) {
-                    $newAccountSlots = $request->total_account_slots;
-                    if ($newAccountSlots < $quotaInfo['employees_count']) {
+                    $user->total_account_slots = $request->total_account_slots;
+                }
+                if ($request->has('total_card_quota')) {
+                    $user->total_card_quota = $request->total_card_quota;
+                }
+            } elseif ($request->has('subscription_plan') && $request->subscription_plan !== 'business') {
+                // Changing from Business to another plan
+                if ($user->subscription_plan === 'business') {
+                    $quotaInfo = $user->getQuotaInfo();
+
+                    if ($quotaInfo['employees_count'] > 0) {
+                        DB::rollBack();
                         return response()->json([
                             'success' => false,
-                            'message' => "Cannot set account slots to {$newAccountSlots}. Current employees: {$quotaInfo['employees_count']}.",
+                            'message' => 'Cannot change plan. Please delete all employees first.',
                             'errors' => [
-                                'total_account_slots' => ["Minimum value is {$quotaInfo['employees_count']} (current employees)"]
+                                'subscription_plan' => ['Cannot change from Business plan while employees exist']
                             ]
                         ], 422);
                     }
+
+                    // Clear quota
+                    $user->total_account_slots = 0;
+                    $user->total_card_quota = 0;
                 }
             }
 
-            // Update quota fields
-            if ($request->has('total_account_slots')) {
-                $user->total_account_slots = $request->total_account_slots;
-            }
-            if ($request->has('total_card_quota')) {
-                $user->total_card_quota = $request->total_card_quota;
-            }
-        } elseif ($request->has('subscription_plan') && $request->subscription_plan !== 'business') {
-            // Changing from Business to another plan
-            if ($user->subscription_plan === 'business') {
-                $quotaInfo = $user->getQuotaInfo();
+            // Update other fields (exclude password and quota fields, also exclude subscription_*
+            // because we sync legacy columns from Subscription SoT below)
+            $fieldsToUpdate = $request->except([
+                'password', 'password_confirmation',
+                'total_account_slots', 'total_card_quota',
+                'subscription_plan', 'subscription_active',
+                'subscription_start_date', 'subscription_end_date',
+            ]);
+            $user->fill($fieldsToUpdate);
 
-                if ($quotaInfo['employees_count'] > 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cannot change plan. Please delete all employees first.',
-                        'errors' => [
-                            'subscription_plan' => ['Cannot change from Business plan while employees exist']
-                        ]
-                    ], 422);
+            // =========================================================================
+            // SINGLE SOURCE OF TRUTH: write changes to subscriptions table FIRST
+            // (User accessors always read from subscriptions table, so legacy columns
+            //  on users table are only caches — they get synced back by SubscriptionObserver)
+            // =========================================================================
+            $planChanged = $request->has('subscription_plan') && $request->subscription_plan !== ($user->getOriginal('subscription_plan') ?? $user->subscription_plan);
+            $activeChanged = $request->has('subscription_active') && $request->boolean('subscription_active') !== (bool)$user->subscription_active;
+            $datesChanged = $request->has('subscription_start_date') || $request->has('subscription_end_date');
+
+            if ($planChanged || $activeChanged || $datesChanged || $request->subscription_plan === 'free' || $request->subscription_plan) {
+                $newPlan = strtolower($request->subscription_plan ?? ($user->getOriginal('subscription_plan') ?? 'free'));
+                $newActive = $request->has('subscription_active')
+                    ? $request->boolean('subscription_active')
+                    : (bool)$user->subscription_active;
+                // Free plan is never "active" paid subscription
+                if ($newPlan === 'free') {
+                    $newActive = false;
                 }
 
-                // Clear quota
-                $user->total_account_slots = 0;
-                $user->total_card_quota = 0;
+                $startDate = $request->subscription_start_date
+                    ? Carbon::parse($request->subscription_start_date)->startOfDay()
+                    : Carbon::now()->startOfDay();
+                $endDate = $request->subscription_end_date
+                    ? Carbon::parse($request->subscription_end_date)->endOfDay()
+                    : ($newActive && $newPlan !== 'free'
+                        ? Carbon::now()->startOfDay()->addYear()->endOfDay()
+                        : null);
+
+                // Cancel existing active subscriptions for user if plan/status changed
+                if ($planChanged || $activeChanged) {
+                    Subscription::where('user_id', $user->id)
+                        ->where('status', 'active')
+                        ->update([
+                            'status' => $newPlan === 'free' ? 'cancelled' : 'cancelled',
+                            'cancelled_at' => now(),
+                            'cancellation_reason' => 'Admin changed plan/status via user management',
+                            'current_period_end' => $endDate,
+                        ]);
+                }
+
+                // Create new subscription row for non-free plans with active status
+                if ($newPlan !== 'free' && $newActive) {
+                    $amountMap = [
+                        'basic'    => 0.00,
+                        'premium'  => 0.00,
+                        'business' => 0.00,
+                    ];
+                    Subscription::create([
+                        'user_id'               => $user->id,
+                        'provider'              => 'manual',
+                        'plan_name'             => ucfirst($newPlan) . ' Plan',
+                        'plan_type'             => $newPlan,
+                        'amount'                => $amountMap[$newPlan] ?? 0.00,
+                        'currency'              => 'MYR',
+                        'interval'              => 'yearly',
+                        'status'                => 'active',
+                        'current_period_start'  => $startDate,
+                        'current_period_end'    => $endDate,
+                        'next_billing_date'     => $endDate,
+                        'metadata'              => [
+                            'admin_created' => true,
+                            'admin_id'      => $request->user()?->id,
+                            'source'        => 'User Management (Update)',
+                        ],
+                    ]);
+                }
             }
+
+            // Persist user model (we already filled non-subscription fields above;
+            // SubscriptionObserver will overwrite user.subscription_* cache columns
+            // AFTER the new Subscription is created, ensuring full consistency)
+            $user->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => $user->load(['nfcCards.landingPage', 'subscriptions'])
+            ]);
+        } catch (QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error while updating user: ' . $e->getMessage(),
+                'error_code' => $e->errorInfo[1] ?? null,
+            ], 500);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update user: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Update other fields (exclude password and quota fields)
-        $fieldsToUpdate = $request->except(['password', 'password_confirmation', 'total_account_slots', 'total_card_quota']);
-        $user->fill($fieldsToUpdate);
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'data' => $user->load('nfcCards.landingPage')
-        ]);
     }
 
     /**
@@ -551,7 +922,7 @@ class AdminController extends Controller
      */
     public function getNfcCards(Request $request)
     {
-        $query = NfcCard::with(['user', 'nfcTag'])
+        $query = NfcCard::with(['user', 'nfcTag', 'transaction', 'cancelledBy'])
             ->withCount('analytics');
 
         // Apply filters
@@ -567,7 +938,11 @@ class AdminController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'pending') {
+                $query->whereIn('status', ['pending_payment', 'awaiting_payment_verification']);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->filled('subscription_plan')) {
@@ -590,7 +965,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Register NFC card
+     * Register NFC card (admin-side manual register)
      */
     public function registerNfcCard(Request $request)
     {
@@ -605,6 +980,7 @@ class AdminController extends Controller
             'payment_method' => 'nullable|string|max:100',
             'shipping_address' => 'nullable|string',
             'notes' => 'nullable|string',
+            'status' => 'nullable|in:pending_payment,awaiting_payment_verification,payment_verified,processing,shipped,delivered,active,inactive,expired,cancelled,replacement',
         ]);
 
         if ($validator->fails()) {
@@ -619,6 +995,9 @@ class AdminController extends Controller
         try {
             $user = User::findOrFail($request->user_id);
 
+            $plan = $request->subscription_plan;
+            $defaultStatus = $request->status ?? ($plan === 'free' ? 'active' : 'pending_payment');
+
             // Create NFC card
             $nfcCard = NfcCard::create([
                 'user_id' => $user->id,
@@ -627,29 +1006,36 @@ class AdminController extends Controller
                 'billing_address' => $request->billing_address,
                 'contact_number' => $request->contact_number,
                 'purchase_date' => now(),
-                'subscription_plan' => $request->subscription_plan,
+                'subscription_plan' => $plan,
                 'purchase_amount' => $request->purchase_amount,
                 'payment_method' => $request->payment_method,
                 'shipping_address' => $request->shipping_address,
                 'notes' => $request->notes,
-                'status' => 'pending',
+                'status' => $defaultStatus,
             ]);
 
-            // Update user subscription
-            $user->update([
-                'subscription_plan' => $request->subscription_plan,
-                'subscription_start_date' => now(),
-                'subscription_end_date' => now()->addYear(),
-                'subscription_active' => true,
-                'has_physical_card' => true,
-            ]);
+            $shouldActivateSub = in_array($defaultStatus, ['payment_verified','processing','shipped','delivered','active']);
+
+            if ($plan === 'free' || $shouldActivateSub) {
+                // Update user subscription
+                $user->update([
+                    'subscription_plan' => $plan,
+                    'subscription_start_date' => now(),
+                    'subscription_end_date' => now()->addYear(),
+                    'subscription_active' => true,
+                    'has_physical_card' => true,
+                ]);
+                if ($defaultStatus === 'payment_verified') {
+                    $nfcCard->update(['order_confirmed_at' => now()]);
+                }
+            }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'NFC card registered successfully',
-                'data' => $nfcCard->load('user')
+                'data' => $nfcCard->load(['user','transaction'])
             ], 201);
         } catch (\Exception $e) {
             DB::rollback();
@@ -672,11 +1058,14 @@ class AdminController extends Controller
             'billing_address' => 'nullable|string',
             'contact_number' => 'nullable|string|max:20',
             'shipping_address' => 'nullable|string',
-            'status' => 'nullable|in:pending,active,inactive,shipped,delivered',
+            'status' => 'nullable|in:pending_payment,awaiting_payment_verification,payment_verified,processing,shipped,delivered,active,inactive,expired,cancelled,replacement',
             'tracking_number' => 'nullable|string|max:100',
+            'courier' => 'nullable|string|max:100',
             'shipped_date' => 'nullable|date',
             'delivered_date' => 'nullable|date',
+            'order_confirmed_at' => 'nullable|date',
             'notes' => 'nullable|string',
+            'cancelled_reason' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -686,12 +1075,30 @@ class AdminController extends Controller
             ], 422);
         }
 
-        $nfcCard->update($request->all());
+        $data = $request->except(['cancelled_by', 'transaction_id']);
+        $nfcCard->update($data);
+
+        // Auto sync subscription activation if new status is verified+
+        $status = $nfcCard->status;
+        if (in_array($status, ['payment_verified','processing','shipped','delivered','active'])) {
+            if ($status === 'payment_verified' && !$nfcCard->order_confirmed_at) {
+                $nfcCard->update(['order_confirmed_at' => now()]);
+            }
+            if (!$nfcCard->user->subscription_active) {
+                $nfcCard->user->update([
+                    'subscription_plan' => $nfcCard->subscription_plan,
+                    'subscription_start_date' => now(),
+                    'subscription_end_date' => now()->addYear(),
+                    'subscription_active' => true,
+                    'has_physical_card' => true,
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'NFC card updated successfully',
-            'data' => $nfcCard->load('user')
+            'data' => $nfcCard->load(['user','transaction'])
         ]);
     }
 
@@ -729,39 +1136,469 @@ class AdminController extends Controller
     }
 
     /**
+     * Verify NFC card payment (admin approve proof of payment)
+     * Status: awaiting_payment_verification → payment_verified
+     */
+    public function verifyNfcCardPayment(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        if ($nfcCard->status !== 'awaiting_payment_verification') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only orders with status "Awaiting Payment Verification" can be verified'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $nfcCard->update([
+                'status' => 'payment_verified',
+                'order_confirmed_at' => now(),
+            ]);
+
+            $user = $nfcCard->user;
+
+            // Sync linked transaction
+            $transaction = $nfcCard->transaction;
+            if ($transaction) {
+                $transaction->update([
+                    'status' => 'succeeded',
+                    'verified_by' => $admin->id,
+                    'verified_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            // Notify user about payment verified + profile builder access
+            $this->notificationService->create($user, 'nfc_card_payment_verified', [
+                'nfc_card_id' => $nfcCard->nfc_card_id,
+                'amount' => 'RM' . number_format($nfcCard->purchase_amount, 2),
+                'action_url' => '/UserDashboard/ProfileBuilder',
+                'action_text' => 'Design Profile Now',
+            ]);
+
+            // Notify all other admins about approval
+            $otherAdminIds = User::where('is_admin', true)->where('id', '!=', $admin->id)->pluck('id')->toArray();
+            if (!empty($otherAdminIds)) {
+                $this->notificationService->createForMultiple($otherAdminIds, 'system_message', [
+                    'system_message' => 'Admin ' . ($admin->full_name ?? $admin->name ?? $admin->email) . ' has verified payment for card order #' . $nfcCard->nfc_card_id . '.',
+                    'icon' => '✅',
+                    'priority' => 'low',
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment successfully verified. User can now start designing profile.',
+                'data' => $nfcCard->load(['transaction', 'user'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to verify payment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject NFC card payment (admin reject proof)
+     * Status: awaiting_payment_verification → pending_payment (allow user resubmit)
+     */
+    public function rejectNfcCardPayment(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        $validator = Validator::make($request->all(), [
+            'rejection_reason' => 'required|string|min:5|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if ($nfcCard->status !== 'awaiting_payment_verification') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only orders with status "Awaiting Payment Verification" can be rejected'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $nfcCard->update([
+                'status' => 'pending_payment',
+            ]);
+
+            $transaction = $nfcCard->transaction;
+            if ($transaction) {
+                $transaction->update([
+                    'status' => 'failed',
+                    'failure_message' => $request->rejection_reason,
+                    'verified_by' => $admin->id,
+                    'verified_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            $this->notificationService->create($nfcCard->user, 'nfc_card_payment_rejected', [
+                'nfc_card_id' => $nfcCard->nfc_card_id,
+                'rejection_reason' => $request->rejection_reason,
+                'action_url' => '/UserDashboard/CardManagement',
+                'action_text' => 'Upload New Proof',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment proof rejected. User notified to upload new proof.',
+                'data' => $nfcCard->load(['transaction','user'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject payment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Mark NFC card as Processing (preparing for shipping)
+     * payment_verified → processing
+     */
+    public function markNfcCardProcessing(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        if (!$nfcCard->canMarkAsProcessing()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current card status cannot be changed to Processing (must be Payment Verified first)'
+            ], 422);
+        }
+
+        $nfcCard->update(['status' => 'processing']);
+
+        $this->notificationService->create($nfcCard->user, 'nfc_card_processing', [
+            'nfc_card_id' => $nfcCard->nfc_card_id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card marked as processing.',
+            'data' => $nfcCard->load(['user','transaction'])
+        ]);
+    }
+
+    /**
+     * Mark NFC card as Shipped (already posted)
+     * payment_verified / processing → shipped
+     */
+    public function markNfcCardShipped(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        $validator = Validator::make($request->all(), [
+            'tracking_number' => 'required|string|max:100',
+            'courier' => 'nullable|string|max:100',
+            'shipped_date' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if (!$nfcCard->canMarkAsShipped()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current card status cannot be marked as shipped.'
+            ], 422);
+        }
+
+        $nfcCard->update([
+            'status' => 'shipped',
+            'tracking_number' => $request->tracking_number,
+            'courier' => $request->courier ?? null,
+            'shipped_date' => $request->shipped_date ?? now(),
+        ]);
+
+        $this->notificationService->create($nfcCard->user, 'nfc_card_shipped', [
+            'nfc_card_id' => $nfcCard->nfc_card_id,
+            'tracking_number' => $request->tracking_number,
+            'courier' => $request->courier ?? 'Pos Laju Standard',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card marked as shipped.',
+            'data' => $nfcCard->load(['user','transaction'])
+        ]);
+    }
+
+    /**
+     * ⚠️ EMERGENCY OVERRIDE ONLY: Admin force mark NFC card as Delivered
+     * NORMAL flow: USER presses "I Have Received My Card" in CardManagement
+     * Use this method ONLY if user doesn't confirm after 14+ days / customer support claim.
+     * shipped → delivered
+     */
+    public function markNfcCardDelivered(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        if (!$nfcCard->canMarkAsDelivered()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current card status cannot be marked as delivered (must be Shipped first).'
+            ], 422);
+        }
+
+        // Emergency override requires explicit reason for audit trail
+        $validator = Validator::make($request->all(), [
+            'override_reason' => 'required|string|min:5|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Override reason is required (emergency admin force delivered).',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $nfcCard->update([
+                'status' => 'delivered',
+                'delivered_date' => $request->delivered_date ?? now(),
+                'user_received_confirmed_at' => now(),
+                'cancelled_by' => $admin->id, // Reuse field to store admin_override_id (audit trail)
+                'cancelled_reason' => '[ADMIN EMERGENCY OVERRIDE FORCE DELIVERED] ' . $request->override_reason,
+            ]);
+
+            $user = $nfcCard->user;
+            if (!$user->subscription_active) {
+                $user->update([
+                    'subscription_plan' => $nfcCard->subscription_plan,
+                    'subscription_start_date' => now(),
+                    'subscription_end_date' => now()->addYear(),
+                    'subscription_active' => true,
+                    'has_physical_card' => true,
+                ]);
+            }
+
+            if ($nfcCard->transaction && $nfcCard->transaction->status !== 'succeeded') {
+                $nfcCard->transaction->update([
+                    'status' => 'succeeded',
+                    'verified_at' => $nfcCard->transaction->verified_at ?? now(),
+                    'verified_by' => $admin->id,
+                ]);
+            }
+
+            DB::commit();
+
+            // Non-critical audit log + warning (not normal user flow)
+            try {
+                ActivityLog::create([
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'user_id' => $admin->id,
+                    'business_account_id' => $admin->isBusinessAccount() ? $admin->id : ($admin->business_account_id ?? null),
+                    'action_type' => 'nfc_card_admin_override_delivered',
+                    'action_description' => 'ADMIN OVERRIDE: Force mark card #' . $nfcCard->nfc_card_id . ' as delivered. Reason: ' . $request->override_reason,
+                    'entity_type' => 'nfc_card',
+                    'entity_id' => $nfcCard->id,
+                    'metadata' => json_encode([
+                        'admin_id' => $admin->id,
+                        'admin_email' => $admin->email,
+                        'card_id' => $nfcCard->nfc_card_id,
+                        'user_email' => $user->email ?? null,
+                        'override_reason' => $request->override_reason,
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Throwable $e) { report($e); }
+
+            Log::warning('Admin ' . ($admin->email ?? $admin->id) . ' EMERGENCY OVERRIDE delivered for card ' . $nfcCard->nfc_card_id . ' (user: ' . ($user->email ?? 'n/a') . ') — reason: ' . $request->override_reason);
+
+            $this->notificationService->create($user, 'nfc_card_delivered', [
+                'order_number' => $nfcCard->nfc_card_id,
+                'message' => 'Admin has manually confirmed receipt of your card (not by you). If this is incorrect, please contact support.',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'warning' => true,
+                'message' => '⚠️ [EMERGENCY OVERRIDE OK] Card marked as delivered by ADMIN. NORMAL flow: user presses "I Have Received My Card" themselves. Activity log audit trail has been recorded.',
+                'data' => $nfcCard->load(['user','transaction'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark delivered: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel NFC card order (any status before delivered/active)
+     */
+    public function cancelNfcCard(Request $request, $cardId)
+    {
+        $admin = $request->user();
+        $nfcCard = NfcCard::findOrFail($cardId);
+
+        $validator = Validator::make($request->all(), [
+            'cancellation_reason' => 'required|string|min:3|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if (!$nfcCard->canCancel()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cards that are already delivered/activated cannot be cancelled.'
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $nfcCard->update([
+                'status' => 'cancelled',
+                'cancelled_by' => $admin->id,
+                'cancelled_reason' => $request->cancellation_reason,
+            ]);
+
+            if ($nfcCard->transaction && !in_array($nfcCard->transaction->status, ['succeeded','refunded'])) {
+                $nfcCard->transaction->update([
+                    'status' => 'cancelled',
+                    'failure_message' => 'Order cancelled by admin: ' . $request->cancellation_reason,
+                ]);
+            }
+
+            DB::commit();
+
+            $this->notificationService->create($nfcCard->user, 'nfc_card_cancelled', [
+                'nfc_card_id' => $nfcCard->nfc_card_id,
+                'cancellation_reason' => $request->cancellation_reason,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Card order has been cancelled.',
+                'data' => $nfcCard->load(['user','transaction','cancelledBy'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get system statistics
+     *
+     * PERFORMANCE OPTIMIZATION:
+     * Combine 12+ sequential COUNT(*) queries into 4 aggregate queries using
+     * conditional COUNT(CASE WHEN ...) so each table is scanned only ONCE
+     * (was: ~17 full table scans per admin dashboard load).
      */
     public function getSystemStats(Request $request)
     {
+        $currentMonth = now()->month;
+        $currentYear  = now()->year;
+
+        $usersAgg = (array) User::query()
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw('COUNT(CASE WHEN subscription_active = 1 THEN 1 END) AS active')
+            ->selectRaw('COUNT(CASE WHEN is_admin = 1 THEN 1 END) AS admin')
+            ->selectRaw("COUNT(CASE WHEN subscription_plan = 'free' THEN 1 END) AS free")
+            ->selectRaw("COUNT(CASE WHEN subscription_plan = 'basic' THEN 1 END) AS basic")
+            ->selectRaw("COUNT(CASE WHEN subscription_plan = 'premium' THEN 1 END) AS premium")
+            ->selectRaw("COUNT(CASE WHEN subscription_plan = 'business' THEN 1 END) AS business")
+            ->first()
+            ?->getAttributes() ?? [];
+
+        $newThisMonth = (int) User::query()
+            ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->count('id');
+
+        $cardsAgg = (array) NfcCard::query()
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw("COUNT(CASE WHEN status = 'active' THEN 1 END) AS active")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN status = 'shipped' THEN 1 END) AS shipped")
+            ->first()
+            ?->getAttributes() ?? [];
+
+        $analyticsAgg = (array) Analytics::query()
+            ->selectRaw('COUNT(*) AS total_tracks')
+            ->selectRaw("COUNT(CASE WHEN action = 'profile_view' THEN 1 END) AS profile_views")
+            ->selectRaw("COUNT(CASE WHEN action = 'nfc_tap' THEN 1 END) AS nfc_taps")
+            ->selectRaw("COUNT(CASE WHEN action = 'link_click' THEN 1 END) AS link_clicks")
+            ->first()
+            ?->getAttributes() ?? [];
+
+        $lpAgg = (array) LandingPage::query()
+            ->selectRaw('COUNT(CASE WHEN profile_image IS NOT NULL THEN 1 END) AS landing_pages')
+            ->selectRaw('COUNT(CASE WHEN company_logo IS NOT NULL THEN 1 END) AS logos')
+            ->first()
+            ?->getAttributes() ?? [];
+
+        $toInt = static fn ($v) => (int) ($v ?? 0);
+
         $stats = [
             'users' => [
-                'total' => User::count(),
-                'active' => User::where('subscription_active', true)->count(),
-                'admin' => User::where('is_admin', true)->count(),
-                'new_this_month' => User::whereMonth('created_at', now()->month)->count(),
+                'total'           => $toInt($usersAgg['total'] ?? null),
+                'active'          => $toInt($usersAgg['active'] ?? null),
+                'admin'           => $toInt($usersAgg['admin'] ?? null),
+                'new_this_month'  => $newThisMonth,
             ],
             'subscriptions' => [
-                'free' => User::where('subscription_plan', 'free')->count(),
-                'basic' => User::where('subscription_plan', 'basic')->count(),
-                'premium' => User::where('subscription_plan', 'premium')->count(),
-                'business' => User::where('subscription_plan', 'business')->count(),
+                'free'     => $toInt($usersAgg['free'] ?? null),
+                'basic'    => $toInt($usersAgg['basic'] ?? null),
+                'premium'  => $toInt($usersAgg['premium'] ?? null),
+                'business' => $toInt($usersAgg['business'] ?? null),
             ],
             'nfc_cards' => [
-                'total' => NfcCard::count(),
-                'active' => NfcCard::where('status', 'active')->count(),
-                'pending' => NfcCard::where('status', 'pending')->count(),
-                'shipped' => NfcCard::where('status', 'shipped')->count(),
+                'total'   => $toInt($cardsAgg['total'] ?? null),
+                'active'  => $toInt($cardsAgg['active'] ?? null),
+                'pending' => $toInt($cardsAgg['pending'] ?? null),
+                'shipped' => $toInt($cardsAgg['shipped'] ?? null),
             ],
             'analytics' => [
-                'total_tracks' => Analytics::count(),
-                'profile_views' => Analytics::where('action', 'profile_view')->count(),
-                'nfc_taps' => Analytics::where('action', 'nfc_tap')->count(),
-                'link_clicks' => Analytics::where('action', 'link_click')->count(),
+                'total_tracks'  => $toInt($analyticsAgg['total_tracks'] ?? null),
+                'profile_views' => $toInt($analyticsAgg['profile_views'] ?? null),
+                'nfc_taps'      => $toInt($analyticsAgg['nfc_taps'] ?? null),
+                'link_clicks'   => $toInt($analyticsAgg['link_clicks'] ?? null),
             ],
             'storage' => [
-                'total_used' => $this->getStorageUsage(),
-                'landing_pages' => LandingPage::whereNotNull('profile_image')->count(),
-                'logos' => LandingPage::whereNotNull('company_logo')->count(),
+                'total_used'    => $this->getStorageUsage(),
+                'landing_pages' => $toInt($lpAgg['landing_pages'] ?? null),
+                'logos'         => $toInt($lpAgg['logos'] ?? null),
             ],
         ];
 

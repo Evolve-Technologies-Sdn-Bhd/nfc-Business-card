@@ -1,487 +1,573 @@
 <!-- pages/AdminManagement/notifications.vue -->
 <template>
-  <div>
+  <div class="min-h-screen bg-secondary-50">
     <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-secondary-900">
-            Notification Management
-          </h1>
-          <p class="mt-2 text-secondary-600">
-            Manage system notifications and announcements
-          </p>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-sm">
+            <Icon name="heroicons:megaphone" class="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-secondary-900 tracking-tight">Notification Management</h1>
+            <p class="text-sm text-secondary-500 mt-0.5">
+              Manage system notifications, announcements, and delivery status
+            </p>
+          </div>
         </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="showSendModal = true" class="btn btn-primary">
-            <Icon name="heroicons:megaphone" class="h-5 w-5 mr-2" />
-            Send Announcement
-          </button>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <button
+          @click="showSendModal = true"
+          class="px-4 py-2.5 text-sm bg-primary-600 text-white rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-all duration-200 font-medium flex items-center shadow-sm hover:shadow-md hover:shadow-primary-600/10"
+        >
+          <Icon name="heroicons:megaphone" class="w-4 h-4 mr-2" />
+          Send Announcement
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-secondary-500 font-semibold uppercase tracking-wider">Total</p>
+            <p class="text-3xl font-bold text-secondary-900 mt-1.5 tabular-nums">
+              {{ statistics.total_notifications || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+            <Icon
+              name="heroicons:inbox-stack"
+              class="w-6 h-6 text-blue-600"
+            />
+          </div>
+        </div>
+        <div class="mt-4 h-1 bg-blue-100 rounded-full overflow-hidden">
+          <div class="h-full bg-blue-500 rounded-full w-full"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-orange-600 font-semibold uppercase tracking-wider">Unread</p>
+            <p class="text-3xl font-bold text-orange-600 mt-1.5 tabular-nums">
+              {{ statistics.total_unread || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+            <Icon
+              name="heroicons:envelope"
+              class="w-6 h-6 text-orange-600"
+            />
+          </div>
+        </div>
+        <div class="mt-4 h-1 bg-orange-100 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-orange-500 rounded-full transition-all duration-500"
+            :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.total_unread || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
+          ></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-green-600 font-semibold uppercase tracking-wider">Today</p>
+            <p class="text-3xl font-bold text-green-600 mt-1.5 tabular-nums">
+              {{ statistics.today || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+            <Icon
+              name="heroicons:calendar-days"
+              class="w-6 h-6 text-green-600"
+            />
+          </div>
+        </div>
+        <div class="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-green-500 rounded-full transition-all duration-500"
+            :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.today || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
+          ></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-purple-600 font-semibold uppercase tracking-wider">Last 7 Days</p>
+            <p class="text-3xl font-bold text-purple-600 mt-1.5 tabular-nums">
+              {{ statistics.recent_7_days || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+            <Icon
+              name="heroicons:chart-bar"
+              class="w-6 h-6 text-purple-600"
+            />
+          </div>
+        </div>
+        <div class="mt-4 h-1 bg-purple-100 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-purple-500 rounded-full transition-all duration-500"
+            :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.recent_7_days || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
+          ></div>
         </div>
       </div>
     </div>
 
-    <div>
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-secondary-600">Total Notifications</p>
-                <p class="text-2xl font-bold text-secondary-900">
-                  {{ statistics.total_notifications || 0 }}
-                </p>
-              </div>
-              <Icon
-                name="heroicons:bell"
-                class="w-12 h-12 text-blue-500 opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-secondary-600">Unread</p>
-                <p class="text-2xl font-bold text-warning-600">
-                  {{ statistics.total_unread || 0 }}
-                </p>
-              </div>
-              <Icon
-                name="heroicons:envelope"
-                class="w-12 h-12 text-warning-500 opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-secondary-600">Today</p>
-                <p class="text-2xl font-bold text-success-600">
-                  {{ statistics.today || 0 }}
-                </p>
-              </div>
-              <Icon
-                name="heroicons:calendar"
-                class="w-12 h-12 text-success-500 opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-secondary-600">Last 7 Days</p>
-                <p class="text-2xl font-bold text-purple-600">
-                  {{ statistics.recent_7_days || 0 }}
-                </p>
-              </div>
-              <Icon
-                name="heroicons:chart-bar"
-                class="w-12 h-12 text-purple-500 opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions Bar -->
-      <div class="card mb-6">
-        <div class="card-body">
-          <div class="flex flex-wrap items-center gap-4">
-            <!-- Search Input -->
-            <div class="flex-1 min-w-[200px]">
-              <div class="relative">
-                <Icon
-                  name="heroicons:magnifying-glass"
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                />
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search users, messages..."
-                  maxlength="150"
-                  class="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  @input="handleSearch"
-                />
-              </div>
-              <p class="text-xs text-secondary-500 mt-1">{{ searchQuery.length }}/150</p>
-            </div>
-
-            <!-- Type Filter -->
-            <select
-              v-model="filterType"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    <!-- Actions Bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 mb-5 overflow-hidden">
+      <div class="p-5">
+        <!-- Main filters row -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Search Input -->
+          <div class="flex-1 min-w-[220px] relative">
+            <Icon
+              name="heroicons:magnifying-glass"
+              class="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-400"
+            />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search users, title, or message..."
+              maxlength="150"
+              class="w-full pl-10 pr-10 py-2.5 border border-secondary-200 rounded-xl bg-secondary-50/50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm text-secondary-900 placeholder:text-secondary-400"
+              @input="handleSearch"
+            />
+            <button
+              v-if="searchQuery"
+              @click="searchQuery = ''; handleSearch()"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400 hover:text-secondary-600 transition-colors"
             >
-              <option value="">All Types</option>
-              <option value="admin_announcement">Announcements</option>
-              <option value="system_message">System Messages</option>
-              <option value="registration_success">Registration</option>
-              <option value="login_new_device">Login Alerts</option>
-              <option value="profile_updated">Profile Updates</option>
-              <option value="password_changed">Password Changes</option>
-              <option value="payment_successful">Successful Payments</option>
-              <option value="payment_failed">Failed Payments</option>
-              <option value="nfc_card_purchased">NFC Purchases</option>
-              <option value="nfc_card_activated">NFC Activations</option>
-            </select>
+              <Icon name="heroicons:x-mark" class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="text-xs text-secondary-400 font-medium min-w-[3.5rem] text-right">
+            {{ searchQuery.length }}/150
+          </div>
 
-            <!-- Status Filter -->
-            <select
-              v-model="filterStatus"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="read">Read</option>
-              <option value="unread">Unread</option>
-            </select>
+          <!-- Type Filter -->
+          <select
+            v-model="filterType"
+            @change="handleSearch"
+            class="px-3.5 py-2.5 border border-secondary-200 rounded-xl bg-white text-sm text-secondary-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none cursor-pointer min-w-[160px]"
+          >
+            <option value="">All Types</option>
+            <option value="admin_announcement">Announcements</option>
+            <option value="system_message">System Messages</option>
+            <option value="registration_success">Registration</option>
+            <option value="login_new_device">Login Alerts</option>
+            <option value="profile_updated">Profile Updates</option>
+            <option value="password_changed">Password Changes</option>
+            <option value="payment_successful">Successful Payments</option>
+            <option value="payment_failed">Failed Payments</option>
+            <option value="nfc_card_purchased">NFC Purchases</option>
+            <option value="nfc_card_activated">NFC Activations</option>
+          </select>
 
-            <!-- Date Range Filter -->
-            <select
-              v-model="filterDateRange"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="custom">Custom Range</option>
-            </select>
+          <!-- Status Filter -->
+          <select
+            v-model="filterStatus"
+            @change="handleSearch"
+            class="px-3.5 py-2.5 border border-secondary-200 rounded-xl bg-white text-sm text-secondary-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none cursor-pointer min-w-[130px]"
+          >
+            <option value="">All Status</option>
+            <option value="read">Read</option>
+            <option value="unread">Unread</option>
+          </select>
 
+          <!-- Date Range Filter -->
+          <select
+            v-model="filterDateRange"
+            @change="filterDateRange !== 'custom' && handleSearch()"
+            class="px-3.5 py-2.5 border border-secondary-200 rounded-xl bg-white text-sm text-secondary-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none cursor-pointer min-w-[140px]"
+          >
+            <option value="">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+
+        <!-- Custom Date Range Picker -->
+        <div
+          v-if="filterDateRange === 'custom'"
+          class="mt-4 flex flex-wrap items-center gap-3 pt-4 border-t border-secondary-100"
+        >
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-secondary-500 font-semibold">From</label>
+            <input
+              v-model="customDateFrom"
+              type="date"
+              class="px-3 py-2 border border-secondary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+            />
+          </div>
+          <Icon name="heroicons:arrow-right" class="w-4 h-4 text-secondary-300" />
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-secondary-500 font-semibold">To</label>
+            <input
+              v-model="customDateTo"
+              type="date"
+              class="px-3 py-2 border border-secondary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+            />
+          </div>
+          <button
+            @click="applyCustomDateRange"
+            class="ml-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 text-xs font-semibold transition-colors shadow-sm"
+          >
+            Apply Range
+          </button>
+        </div>
+
+        <!-- Action Buttons Row -->
+        <div class="mt-4 pt-4 border-t border-secondary-100 flex items-center gap-2 flex-wrap justify-between">
+          <div class="text-xs text-secondary-500 font-medium">
+            {{ loading ? 'Loading data...' : `${paginationData.total || 0} total records found` }}
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
             <button
               @click="handleRefresh"
               :disabled="refreshing"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center disabled:opacity-50"
+              class="px-3.5 py-2 bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 transition-colors flex items-center border border-secondary-200 text-xs font-semibold disabled:opacity-50"
             >
               <Icon 
                 name="heroicons:arrow-path" 
-                :class="['w-5 h-5 mr-2', { 'animate-spin': refreshing }]" 
+                :class="['w-3.5 h-3.5 mr-1.5', { 'animate-spin': refreshing }]" 
               />
-              {{ refreshing ? 'Refreshing...' : 'Refresh' }}
+              {{ refreshing ? 'Refreshing' : 'Refresh' }}
             </button>
 
             <button
               @click="showCleanupModal = true"
-              class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors flex items-center"
+              class="px-3.5 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors flex items-center border border-red-100 text-xs font-semibold"
             >
-              <Icon name="heroicons:trash" class="w-5 h-5 mr-2" />
+              <Icon name="heroicons:trash" class="w-3.5 h-3.5 mr-1.5" />
               Cleanup
             </button>
 
             <button
               @click="exportNotifications"
-              class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center"
+              class="px-3.5 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors flex items-center border border-green-100 text-xs font-semibold"
             >
-              <Icon name="heroicons:arrow-down-tray" class="w-5 h-5 mr-2" />
-              Export
-            </button>
-          </div>
-
-          <!-- Custom Date Range Picker -->
-          <div
-            v-if="filterDateRange === 'custom'"
-            class="mt-4 flex items-center gap-4"
-          >
-            <div>
-              <label class="block text-xs text-gray-600 mb-1">From</label>
-              <input
-                v-model="customDateFrom"
-                type="date"
-                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-600 mb-1">To</label>
-              <input
-                v-model="customDateTo"
-                type="date"
-                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <button
-              @click="applyCustomDateRange"
-              class="mt-5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Apply
+              <Icon name="heroicons:arrow-down-tray" class="w-3.5 h-3.5 mr-1.5" />
+              Export CSV
             </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Notifications List -->
-      <div class="card">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-secondary-200">
-            <thead class="bg-secondary-50">
-              <tr>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  User
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Type
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Message
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Priority
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Delivery
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-secondary-200">
-              <tr
-                v-for="notification in notifications"
-                :key="notification.id"
-                class="hover:bg-secondary-50"
+    <!-- Notifications Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 overflow-hidden">
+      <!-- Table Header Strip -->
+      <div class="px-5 py-3.5 border-b border-secondary-200/60 bg-secondary-50/40 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-secondary-800">Notification Log</h3>
+        <div class="flex items-center gap-1.5 text-xs text-secondary-500">
+          <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+          Showing {{ paginationData.from || 0 }}–{{ paginationData.to || 0 }} of {{ paginationData.total || 0 }}
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="bg-secondary-50/60">
+            <tr>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div>
-                      <div class="text-sm font-medium text-gray-900">
-                        {{
-                          notification.type === "business_card_order_request"
-                            ? notification.data?.requesting_user_name ||
-                              notification.data?.name ||
-                              "N/A"
-                            : notification.user?.full_name || "N/A"
-                        }}
-                      </div>
-                      <div class="text-sm text-gray-500">
-                        {{
-                          notification.type === "business_card_order_request"
-                            ? notification.data?.requesting_user_email ||
-                              notification.data?.email ||
-                              "N/A"
-                            : notification.user?.email || "N/A"
-                        }}
-                      </div>
-                      <div
-                        v-if="
-                          notification.type === 'business_card_order_request' &&
-                          notification.data?.total_cards
-                        "
-                        class="text-xs text-blue-600 mt-1"
-                      >
-                        {{ notification.data.total_cards }} card{{
-                          notification.data.total_cards > 1 ? "s" : ""
-                        }}
-                        in batch
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-2 py-1 text-xs font-medium rounded-full"
-                    :class="getTypeClass(notification.type)"
-                  >
-                    {{ formatType(notification.type) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
-                    {{ notification.title }}
-                  </div>
-                  <div class="text-sm text-gray-500">
-                    {{ truncateText(notification.message, 50) }}
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-2 py-1 text-xs font-medium rounded-full"
-                    :class="getPriorityClass(notification.priority)"
-                  >
-                    {{ notification.priority }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    v-if="notification.is_read"
-                    class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800"
-                  >
-                    Read
-                  </span>
-                  <span
-                    v-else
-                    class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-                  >
-                    Unread
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    v-if="notification.delivery_failed"
-                    class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 flex items-center w-fit"
-                  >
+                User
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Type
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Details
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Priority
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Delivery
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-left text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Date
+              </th>
+              <th
+                class="px-3 sm:px-5 py-3 text-right text-[11px] font-bold text-secondary-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-secondary-100/80">
+            <!-- Loading State -->
+            <tr v-if="loading">
+              <td colspan="8" class="px-3 sm:px-5 py-16">
+                <NFCGoWaveLoader
+                  variant="wave"
+                  size="md"
+                  :showText="true"
+                  labelText="NFCGo"
+                  hintText="Loading notifications..."
+                />
+              </td>
+            </tr>
+            <!-- Empty State -->
+            <tr v-else-if="notifications.length === 0">
+              <td colspan="8" class="px-3 sm:px-5 py-16">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-20 h-20 bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-2xl flex items-center justify-center mb-4">
                     <Icon
-                      name="heroicons:exclamation-triangle"
-                      class="w-3 h-3 mr-1"
+                      name="heroicons:bell-slash"
+                      class="w-10 h-10 text-secondary-400"
                     />
-                    Failed
-                  </span>
-                  <span
-                    v-else-if="notification.delivered_at"
-                    class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 flex items-center w-fit"
+                  </div>
+                  <h3 class="text-base font-semibold text-secondary-900 mb-1">
+                    No notifications found
+                  </h3>
+                  <p class="text-sm text-secondary-500 max-w-sm">
+                    No notifications match your current filters. Try adjusting your search or clearing filters.
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <!-- Rows -->
+            <tr
+              v-for="notification in notifications"
+              :key="notification.id"
+              class="hover:bg-secondary-50/60 transition-colors group"
+              :class="{ 'bg-primary-50/20': !notification.is_read }"
+            >
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                  <div
+                    v-if="
+                      notification.type === 'business_card_order_request'
+                        ? notification.data?.requesting_user_name
+                        : notification.user?.full_name
+                    "
+                    class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary-700 shadow-sm"
                   >
-                    <Icon name="heroicons:check-circle" class="w-3 h-3 mr-1" />
-                    Delivered
-                  </span>
-                  <span
-                    v-else
-                    class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 flex items-center w-fit"
-                  >
-                    <Icon name="heroicons:clock" class="w-3 h-3 mr-1" />
-                    Pending
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatDate(notification.created_at) }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex items-center gap-2">
-                    <!-- Approve/Reject buttons for business card order requests -->
-                    <template
+                    {{
+                      (notification.type === 'business_card_order_request'
+                        ? (notification.data?.requesting_user_name || notification.data?.name || '?')
+                        : (notification.user?.full_name || notification.user?.name || '?')
+                      ).charAt(0).toUpperCase()
+                    }}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-secondary-900 truncate max-w-[160px]">
+                      {{
+                        notification.type === "business_card_order_request"
+                          ? notification.data?.requesting_user_name ||
+                            notification.data?.name ||
+                            "—"
+                          : notification.user?.full_name || notification.user?.name || "System"
+                      }}
+                    </div>
+                    <div class="text-xs text-secondary-500 truncate max-w-[160px]">
+                      {{
+                        notification.type === "business_card_order_request"
+                          ? notification.data?.requesting_user_email ||
+                            notification.data?.email ||
+                            "—"
+                          : notification.user?.email || "—"
+                      }}
+                    </div>
+                    <div
                       v-if="
                         notification.type === 'business_card_order_request' &&
-                        !notification.is_approved &&
-                        !notification.is_rejected
+                        notification.data?.total_cards
                       "
+                      class="text-[11px] text-blue-600 font-semibold mt-0.5 inline-flex items-center gap-1"
                     >
-                      <button
-                        @click="approveOrder(notification)"
-                        :disabled="approvingId === notification.id"
-                        class="px-2 py-1 bg-success-100 text-success-700 hover:bg-success-200 rounded text-xs font-medium disabled:opacity-50"
-                        title="Approve order"
-                      >
-                        {{
-                          approvingId === notification.id
-                            ? "Approving..."
-                            : "Approve"
-                        }}
-                      </button>
-                      <button
-                        @click="openRejectModal(notification)"
-                        class="px-2 py-1 bg-error-100 text-error-700 hover:bg-error-200 rounded text-xs font-medium"
-                        title="Reject order"
-                      >
-                        Reject
-                      </button>
-                    </template>
-                    <!-- Status badges for processed orders -->
-                    <template
-                      v-else-if="
-                        notification.type === 'business_card_order_request'
-                      "
-                    >
-                      <span
-                        v-if="notification.is_approved"
-                        class="px-2 py-1 bg-success-100 text-success-800 rounded text-xs font-medium flex items-center"
-                      >
-                        <Icon
-                          name="heroicons:check-circle"
-                          class="w-3 h-3 mr-1"
-                        />
-                        Approved
-                      </span>
-                      <span
-                        v-else-if="notification.is_rejected"
-                        class="px-2 py-1 bg-error-100 text-error-800 rounded text-xs font-medium flex items-center"
-                      >
-                        <Icon name="heroicons:x-circle" class="w-3 h-3 mr-1" />
-                        Rejected
-                      </span>
-                    </template>
-                    <button
-                      @click="viewDetails(notification)"
-                      class="text-purple-600 hover:text-purple-900"
-                      title="View details"
-                    >
-                      <Icon name="heroicons:eye" class="w-5 h-5" />
-                    </button>
-                    <button
-                      @click="viewUserHistory(notification.user)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="View user's notification history"
-                    >
-                      <Icon name="heroicons:clock" class="w-5 h-5" />
-                    </button>
-                    <button
-                      @click="deleteNotification(notification.id)"
-                      class="text-red-600 hover:text-red-900"
-                      title="Delete notification"
-                    >
-                      <Icon name="heroicons:trash" class="w-5 h-5" />
-                    </button>
+                      <Icon name="heroicons:identification" class="w-3 h-3" />
+                      {{ notification.data.total_cards }} card{{
+                        notification.data.total_cards > 1 ? "s" : ""
+                      }}
+                    </div>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <span
+                  class="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-lg"
+                  :class="getTypeClass(notification.type)"
+                >
+                  {{ formatType(notification.type) }}
+                </span>
+              </td>
+              <td class="px-3 sm:px-5 py-4 max-w-[320px]">
+                <div class="text-sm font-semibold text-secondary-900 mb-0.5 leading-snug">
+                  {{ notification.title }}
+                  <span v-if="!notification.is_read" class="inline-block w-1.5 h-1.5 rounded-full bg-primary-500 ml-1.5 align-middle"></span>
+                </div>
+                <div class="text-xs text-secondary-500 leading-relaxed line-clamp-2">
+                  {{ truncateText(notification.message, 80) }}
+                </div>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <span
+                  class="inline-flex px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide rounded-lg"
+                  :class="getPriorityClass(notification.priority)"
+                >
+                  {{ (notification.priority || 'normal').charAt(0).toUpperCase() + (notification.priority || 'normal').slice(1) }}
+                </span>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <span
+                  v-if="notification.is_read"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-secondary-100 text-secondary-700"
+                >
+                  <Icon name="heroicons:check-circle-20-solid" class="w-3 h-3" />
+                  Read
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-primary-100 text-primary-700"
+                >
+                  <Icon name="heroicons:envelope" class="w-3 h-3" />
+                  Unread
+                </span>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <span
+                  v-if="notification.delivery_failed"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-red-100 text-red-700"
+                >
+                  <Icon
+                    name="heroicons:exclamation-triangle"
+                    class="w-3 h-3"
+                  />
+                  Failed
+                </span>
+                <span
+                  v-else-if="notification.delivered_at"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-green-100 text-green-700"
+                >
+                  <Icon name="heroicons:check-circle-20-solid" class="w-3 h-3" />
+                  Delivered
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-amber-100 text-amber-700"
+                >
+                  <Icon name="heroicons:clock" class="w-3 h-3" />
+                  Pending
+                </span>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
+                <div class="text-xs font-semibold text-secondary-700">
+                  {{ formatDate(notification.created_at).split(',')[0] }}
+                </div>
+                <div class="text-[11px] text-secondary-400">
+                  {{ formatDate(notification.created_at).split(',')[1]?.trim() || '' }}
+                </div>
+              </td>
+              <td class="px-3 sm:px-5 py-4 whitespace-nowrap text-right">
+                <div class="inline-flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <!-- Approve/Reject buttons for business card order requests -->
+                  <template
+                    v-if="
+                      notification.type === 'business_card_order_request' &&
+                      !notification.is_approved &&
+                      !notification.is_rejected
+                    "
+                  >
+                    <button
+                      @click="approveOrder(notification)"
+                      :disabled="approvingId === notification.id"
+                      class="px-2.5 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-[11px] font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1 border border-green-100"
+                      title="Approve order"
+                    >
+                      <Icon name="heroicons:check" class="w-3 h-3" />
+                      {{ approvingId === notification.id ? "..." : "Approve" }}
+                    </button>
+                    <button
+                      @click="openRejectModal(notification)"
+                      class="px-2.5 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors inline-flex items-center gap-1 border border-red-100"
+                      title="Reject order"
+                    >
+                      <Icon name="heroicons:x-mark" class="w-3 h-3" />
+                      Reject
+                    </button>
+                  </template>
+                  <!-- Status badges for processed orders -->
+                  <template
+                    v-else-if="
+                      notification.type === 'business_card_order_request'
+                    "
+                  >
+                    <span
+                      v-if="notification.is_approved"
+                      class="px-2.5 py-1.5 bg-green-50 text-green-700 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 border border-green-100"
+                    >
+                      <Icon
+                        name="heroicons:check-circle-20-solid"
+                        class="w-3 h-3"
+                      />
+                      Approved
+                    </span>
+                    <span
+                      v-else-if="notification.is_rejected"
+                      class="px-2.5 py-1.5 bg-red-50 text-red-700 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 border border-red-100"
+                    >
+                      <Icon name="heroicons:x-circle" class="w-3 h-3" />
+                      Rejected
+                    </span>
+                  </template>
+                  <div class="w-px h-5 bg-secondary-200 mx-1"></div>
+                  <button
+                    @click="viewDetails(notification)"
+                    class="p-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                    title="View details"
+                  >
+                    <Icon name="heroicons:eye" class="w-4 h-4" />
+                  </button>
+                  <button
+                    @click="viewUserHistory(notification.user)"
+                    class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="View user history"
+                  >
+                    <Icon name="heroicons:clock" class="w-4 h-4" />
+                  </button>
+                  <button
+                    @click="deleteNotification(notification.id)"
+                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                  >
+                    <Icon name="heroicons:trash" class="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Loading State -->
-        <div v-if="loading" class="text-center py-8">
-          <div
-            class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"
-          ></div>
-        </div>
-
-        <!-- Empty State -->
-        <div
-          v-if="!loading && notifications.length === 0"
-          class="text-center py-12"
-        >
-          <Icon
-            name="heroicons:bell-slash"
-            class="mx-auto h-12 w-12 text-gray-400"
-          />
-          <h3 class="mt-2 text-sm font-medium text-gray-900">
-            No notifications
-          </h3>
-          <p class="mt-1 text-sm text-gray-500">
-            No notifications found matching your criteria.
-          </p>
-        </div>
-
-        <!-- Pagination -->
+      <!-- Pagination -->
+      <div v-if="!loading && paginationData.total > 0" class="border-t border-secondary-200/60 px-5 py-4 bg-secondary-50/30">
         <AdminPagination
-          v-if="!loading && paginationData.total > 0"
           :current-page="currentPage"
           :last-page="paginationData.lastPage"
           :per-page="10"
@@ -848,7 +934,7 @@
                             ),
                           ]"
                         >
-                          {{ selectedNotificationDetail.priority }}
+                          {{ getPriorityLabel(selectedNotificationDetail.priority) }}
                         </span>
                       </p>
                     </div>
@@ -1192,7 +1278,7 @@
                             getPriorityClass(item.priority),
                           ]"
                         >
-                          {{ item.priority }}
+                          {{ getPriorityLabel(item.priority) }}
                         </span>
                       </div>
                       <div
@@ -1510,16 +1596,102 @@ const cleanupNotifications = async () => {
   }
 };
 
+// Export notifications to CSV
+const exportNotifications = async () => {
+  try {
+    $toast.info("Preparing export...");
+    const params = {};
+    if (filterType.value) params.type = filterType.value;
+    if (filterStatus.value) params.status = filterStatus.value;
+    if (searchQuery.value) params.search = searchQuery.value;
+    if (filterDateRange.value && filterDateRange.value !== "custom") {
+      params.date_range = filterDateRange.value;
+    }
+    if (customDateFrom.value && customDateTo.value) {
+      params.date_from = customDateFrom.value;
+      params.date_to = customDateTo.value;
+    }
+    params.per_page = 1000;
+    params.page = 1;
+
+    const response = await $api.get("/admin/notifications", { params });
+    if (!response.success) throw new Error("Failed to fetch");
+
+    const rows = response.data.data || [];
+    if (rows.length === 0) {
+      $toast.error("No data to export");
+      return;
+    }
+
+    const headers = ["ID", "User", "Email", "Type", "Title", "Message", "Priority", "Status", "Delivery", "Created At"];
+    const csvRows = [headers.join(",")];
+
+    for (const n of rows) {
+      const name =
+        n.type === "business_card_order_request"
+          ? n.data?.requesting_user_name || n.data?.name || "N/A"
+          : n.user?.full_name || n.user?.name || "System";
+      const email =
+        n.type === "business_card_order_request"
+          ? n.data?.requesting_user_email || n.data?.email || "N/A"
+          : n.user?.email || "N/A";
+      const deliveryStatus = n.delivery_failed
+        ? "Failed"
+        : n.delivered_at
+        ? "Delivered"
+        : "Pending";
+      const status = n.is_read ? "Read" : "Unread";
+      const safe = (val) => {
+        if (val == null) return "";
+        return `"${String(val).replace(/"/g, '""').replace(/\n/g, " ")}"`;
+      };
+      csvRows.push([
+        safe(n.id),
+        safe(name),
+        safe(email),
+        safe(n.type),
+        safe(n.title),
+        safe(n.message),
+        safe(n.priority || "normal"),
+        safe(status),
+        safe(deliveryStatus),
+        safe(n.created_at),
+      ].join(","));
+    }
+
+    const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `notifications_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    $toast.success(`Exported ${rows.length} notification(s)`);
+  } catch (error) {
+    console.error("Export failed:", error);
+    $toast.error("Failed to export notifications");
+  }
+};
+
 // Helper functions
 const getTypeClass = (type) => {
   const classes = {
     admin_announcement: "bg-purple-100 text-purple-800",
     system_message: "bg-blue-100 text-blue-800",
-    payment_successful: "bg-green-100 text-green-800",
+    registration_success: "bg-green-100 text-green-800",
+    login_new_device: "bg-red-100 text-red-800",
+    profile_updated: "bg-teal-100 text-teal-800",
+    password_changed: "bg-rose-100 text-rose-800",
+    payment_successful: "bg-emerald-100 text-emerald-800",
     payment_failed: "bg-red-100 text-red-800",
-    nfc_card_purchased: "bg-yellow-100 text-yellow-800",
+    nfc_card_purchased: "bg-orange-100 text-orange-800",
+    nfc_card_activated: "bg-amber-100 text-amber-800",
+    business_card_order_request: "bg-indigo-100 text-indigo-800",
   };
-  return classes[type] || "bg-gray-100 text-gray-800";
+  return classes[type] || "bg-gray-100 text-gray-700";
 };
 
 const getPriorityClass = (priority) => {
@@ -1530,6 +1702,24 @@ const getPriorityClass = (priority) => {
     urgent: "bg-red-100 text-red-800",
   };
   return classes[priority] || "bg-gray-100 text-gray-800";
+};
+
+const getPriorityLabel = (priority) => {
+  const labels = {
+    low: "Low",
+    normal: "Normal",
+    high: "High",
+    urgent: "Urgent",
+  };
+  return (
+    labels[String(priority || "").toLowerCase()] ||
+    String(priority || "Unknown")
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim() ||
+    "Unknown"
+  );
 };
 
 const formatType = (type) => {
@@ -1766,54 +1956,6 @@ const submitRejectOrder = async () => {
     $toast.error(error.data?.message || "Failed to reject order");
   } finally {
     rejectingId.value = null;
-  }
-};
-
-// Export notifications
-const exportNotifications = async () => {
-  try {
-    const params = {};
-    if (filterType.value) params.type = filterType.value;
-    if (filterStatus.value) params.status = filterStatus.value;
-    if (searchQuery.value) params.search = searchQuery.value;
-
-    // Create CSV content
-    let csv = "User,Email,Type,Title,Message,Priority,Status,Delivery,Date\n";
-
-    notifications.value.forEach((notif) => {
-      const row = [
-        notif.user?.full_name || "N/A",
-        notif.user?.email || "N/A",
-        formatType(notif.type),
-        `"${notif.title.replace(/"/g, '""')}"`,
-        `"${notif.message.replace(/"/g, '""')}"`,
-        notif.priority,
-        notif.is_read ? "Read" : "Unread",
-        notif.delivery_failed
-          ? "Failed"
-          : notif.delivered_at
-          ? "Delivered"
-          : "Pending",
-        formatDate(notif.created_at),
-      ];
-      csv += row.join(",") + "\n";
-    });
-
-    // Download CSV
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `notifications-export-${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    $toast.success("Notifications exported successfully");
-  } catch (error) {
-    console.error("Error exporting notifications:", error);
-    $toast.error("Failed to export notifications");
   }
 };
 

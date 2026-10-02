@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
             Legal Documents Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -49,7 +49,7 @@
         <form @submit.prevent="saveDocument('terms_of_service')">
           <div class="space-y-6">
             <!-- Document Info -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label
                   class="block text-sm font-medium text-secondary-700 mb-1"
@@ -203,7 +203,7 @@
         <form @submit.prevent="saveDocument('privacy_policy')">
           <div class="space-y-6">
             <!-- Document Info -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label
                   class="block text-sm font-medium text-secondary-700 mb-1"

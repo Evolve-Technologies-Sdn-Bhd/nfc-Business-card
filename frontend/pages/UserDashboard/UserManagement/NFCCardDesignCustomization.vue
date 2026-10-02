@@ -655,13 +655,32 @@ const cardDesign = reactive({
 // Available templates from API
 const availableTemplates = computed(() => apiTemplates.value);
 
-// Get template image URL
+// Smart host detection helper (same logic as api.client.js)
+const _isLocalHostname = (h) =>
+  h === "localhost" ||
+  h === "127.0.0.1" ||
+  h === "0.0.0.0" ||
+  h.startsWith("10.") ||
+  h.startsWith("192.168.") ||
+  /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h);
+
+// Get template image URL with smart host detection
 const getTemplateImageUrl = (url) => {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  // Handle relative URLs
-  const apiBase = config.public.apiBase || "";
-  return `${apiBase.replace("/api", "")}${url}`;
+  // Smartly pick base URL for local dev vs production
+  let apiBase = (config.public?.apiBase || config.public?.apiBaseUrl || "").trim();
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (_isLocalHostname(host)) {
+      const scheme = window.location.protocol === "https:" ? "https" : "http";
+      apiBase = `${scheme}://${host}:8000/api`;
+    }
+  }
+  if (!apiBase) {
+    apiBase = "http://localhost:8000/api";
+  }
+  return `${apiBase.replace(/\/api\/?$/, "")}${url.startsWith("/") ? url : "/" + url}`;
 };
 
 // Select template

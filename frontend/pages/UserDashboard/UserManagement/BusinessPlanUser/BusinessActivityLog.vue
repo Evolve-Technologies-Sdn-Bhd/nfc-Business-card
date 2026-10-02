@@ -2,7 +2,7 @@
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-secondary-900">
+      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
         Employee Activity Log
       </h1>
       <p class="mt-2 text-secondary-600">

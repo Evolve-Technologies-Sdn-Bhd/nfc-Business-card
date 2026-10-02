@@ -106,6 +106,14 @@ class CardTemplateController extends Controller
         // Increase execution time limit for large image uploads
         set_time_limit(120);
 
+        // ⚡ Clean any accidental startup/preamble output BEFORE we emit JSON
+        // (e.g., "PHP Request Startup: file created in the system's temporary directory"
+        //  on Windows/XAMPP that prepends to response body → malformed JSON frontend)
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        ob_start();
+
         Log::info('=== TEMPLATE UPLOAD START ===', [
             'user_id' => auth()->id(),
             'has_front' => $request->hasFile('front_image'),
@@ -175,11 +183,17 @@ class CardTemplateController extends Controller
             Log::info('Step 4: Sending success response...');
             Log::info('=== TEMPLATE UPLOAD COMPLETE ===', ['template_id' => $template->id]);
 
+            // ⚡ Final output buffer clean BEFORE sending JSON:
+            // Clean stray PHP notices/startup output. Return clean JSON only.
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            // Explicit JSON content type to prevent browser XSS sniffing from prepending HTML warnings
             return response()->json([
                 'success' => true,
                 'message' => 'Template uploaded successfully',
                 'data' => $template,
-            ], 201);
+            ], 201, ['Content-Type' => 'application/json; charset=utf-8']);
 
         } catch (\Exception $e) {
             Log::error('=== TEMPLATE UPLOAD FAILED ===', [
@@ -188,6 +202,10 @@ class CardTemplateController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            // ⚡ Clean buffer on error too (even for 500 malformed JSON prevention
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create template: ' . $e->getMessage(),
@@ -196,7 +214,7 @@ class CardTemplateController extends Controller
                     'file' => basename($e->getFile()),
                     'line' => $e->getLine(),
                 ]
-            ], 500);
+            ], 500, ['Content-Type' => 'application/json; charset=utf-8']);
         }
     }
 
@@ -570,6 +588,8 @@ class CardTemplateController extends Controller
      */
     public function update(Request $request, $id)
     {
+        set_time_limit(120);
+
         $template = CardTemplate::findOrFail($id);
 
         $request->validate([
@@ -577,27 +597,70 @@ class CardTemplateController extends Controller
             'description' => 'nullable|string',
             'category' => 'nullable|string|in:business,personal,creative',
             'plan_types' => 'nullable|array',
-            'plan_types.*' => 'string|in:basic,premium,business', // Free plan doesn't have NFC cards
-            'is_active' => 'nullable|boolean',
-            'is_hidden' => 'nullable|boolean',
+            'plan_types.*' => 'string|in:basic,premium,business',
+            'is_active' => 'nullable',
+            'is_hidden' => 'nullable',
             'sort_order' => 'nullable|integer',
+            'front_image' => 'nullable|image|max:10240',
+            'back_image' => 'nullable|image|max:10240',
         ]);
 
-        $template->update($request->only([
+        $updateData = $request->only([
             'name',
             'description',
             'category',
             'plan_types',
-            'is_active',
-            'is_hidden',
             'sort_order'
-        ]));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Template updated',
-            'data' => $template->fresh(),
         ]);
+
+        if ($request->has('is_active')) {
+            $updateData['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);
+        }
+        if ($request->has('is_hidden')) {
+            $updateData['is_hidden'] = filter_var($request->is_hidden, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        try {
+            // Upload front image if provided
+            if ($request->hasFile('front_image')) {
+                Log::info("Updating front image for template {$id}");
+                $frontResult = $this->uploadToCloudinary(
+                    $request->file('front_image'),
+                    'nfc_templates/front'
+                );
+                $updateData['front_image_url'] = $frontResult['secure_url'];
+                $updateData['original_front_url'] = $frontResult['secure_url'];
+                $updateData['thumbnail_url'] = $frontResult['thumbnail_url'] ?? $frontResult['secure_url'];
+            }
+
+            // Upload back image if provided
+            if ($request->hasFile('back_image')) {
+                Log::info("Updating back image for template {$id}");
+                $backResult = $this->uploadToCloudinary(
+                    $request->file('back_image'),
+                    'nfc_templates/back'
+                );
+                $updateData['back_image_url'] = $backResult['secure_url'];
+                $updateData['original_back_url'] = $backResult['secure_url'];
+            }
+
+            $template->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Template updated',
+                'data' => $template->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Template update failed: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update template: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">User Management</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">User Management</h1>
           <p class="mt-2 text-secondary-600">
             Manage all registered users and their accounts
           </p>
@@ -135,27 +135,27 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   User
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Subscription
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Last Login
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Actions
                 </th>
@@ -167,7 +167,7 @@
                 :key="user.id"
                 class="hover:bg-secondary-50"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img
                       :src="
@@ -195,14 +195,14 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
                       getSubscriptionBadgeClass(user.subscription_plan),
                     ]"
                   >
-                    {{ user.subscription_plan }}
+                    {{ String(user.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </span>
                   <div
                     v-if="user.subscription_end_date"
@@ -211,7 +211,7 @@
                     Expires: {{ formatDate(user.subscription_end_date) }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
@@ -238,7 +238,7 @@
                       : "Never"
                   }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center space-x-2">
                     <button
                       @click="toggleUserStatus(user)"
@@ -751,8 +751,8 @@
                   <dt class="text-sm font-medium text-secondary-500">
                     Subscription Plan
                   </dt>
-                  <dd class="text-sm text-secondary-900">
-                    {{ selectedUser.subscription_plan }}
+                  <dd class="text-sm text-secondary-900 capitalize">
+                    {{ String(selectedUser.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </dd>
                 </div>
                 <div>
@@ -1098,21 +1098,69 @@ const handleSubmit = async () => {
     return;
   }
 
-  if (form.value.password !== form.value.password_confirmation) {
-    alert("Passwords do not match");
-    return;
+  // Skip password confirmation check on EDIT mode if both password fields are empty
+  // (admin may only want to change plan or other fields, not password)
+  const isEditWithEmptyPassword =
+    showEditModal.value &&
+    (!form.value.password || form.value.password.trim() === "") &&
+    (!form.value.password_confirmation || form.value.password_confirmation.trim() === "");
+
+  if (!isEditWithEmptyPassword) {
+    if (form.value.password !== form.value.password_confirmation) {
+      const { $toast } = useNuxtApp();
+      $toast.error("Passwords do not match");
+      return;
+    }
+    if (!showEditModal.value && (!form.value.password || form.value.password.length < 8)) {
+      const { $toast } = useNuxtApp();
+      $toast.error("Password must be at least 8 characters");
+      return;
+    }
   }
 
   submitting.value = true;
   try {
-    if (showEditModal.value) {
-      await adminStore.updateUser(selectedUser.value.id, form.value);
-    } else {
-      await adminStore.createUser(form.value);
+    // Build clean payload
+    const payload = { ...form.value };
+    // On edit mode with empty password, remove password fields entirely so backend ignores them
+    if (isEditWithEmptyPassword) {
+      delete payload.password;
+      delete payload.password_confirmation;
     }
+    // Remove undefined/null fields to avoid backend overwriting with null
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === undefined || payload[key] === null) delete payload[key];
+    });
+
+    if (showEditModal.value) {
+      await adminStore.updateUser(selectedUser.value.id, payload);
+    } else {
+      await adminStore.createUser(payload);
+    }
+    const { $toast } = useNuxtApp();
+    $toast.success(showEditModal.value ? "User updated successfully" : "User created successfully");
     closeModal();
   } catch (error) {
+    const { $toast } = useNuxtApp();
     console.error("Failed to save user:", error);
+    const serverMsg =
+      error?.data?.message ||
+      error?.message ||
+      (typeof error?.response?.data === "string" ? error.response.data : null) ||
+      (error?.response?.data?.message ? error.response.data.message : null) ||
+      "Failed to save user. Please try again.";
+    // Collect validation errors if any
+    let detailMsg = serverMsg;
+    const errors = error?.data?.errors || error?.response?.data?.errors;
+    if (errors && typeof errors === "object") {
+      const firstField = Object.keys(errors)[0];
+      if (firstField && errors[firstField] && Array.isArray(errors[firstField])) {
+        detailMsg = `${serverMsg}: ${errors[firstField][0]}`;
+      } else if (firstField && typeof errors[firstField] === "string") {
+        detailMsg = `${serverMsg}: ${errors[firstField]}`;
+      }
+    }
+    $toast.error(detailMsg);
   } finally {
     submitting.value = false;
   }

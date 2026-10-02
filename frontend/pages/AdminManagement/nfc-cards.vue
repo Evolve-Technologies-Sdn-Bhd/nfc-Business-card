@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
             NFC Card Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -47,12 +47,18 @@
               @change="handleFilterChange"
               class="input"
             >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="">All Statuses</option>
+              <option value="pending_payment">Awaiting Payment</option>
+              <option value="awaiting_payment_verification">Awaiting Payment Verification</option>
+              <option value="payment_verified">Payment Verified</option>
+              <option value="processing">Processing</option>
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="expired">Expired</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="replacement">Replacement</option>
             </select>
           </div>
           <div>
@@ -108,27 +114,27 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Card Details
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   User
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Purchase Info
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Actions
                 </th>
@@ -140,7 +146,7 @@
                 :key="card.id"
                 class="hover:bg-secondary-50"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0">
                       <div
@@ -165,7 +171,7 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img
                       :src="
@@ -185,14 +191,14 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
                       getStatusBadgeClass(card.status),
                     ]"
                   >
-                    {{ card.status }}
+                    {{ getCardStatusLabel(card.status) }}
                   </span>
                   <div
                     v-if="card.tracking_number"
@@ -201,50 +207,176 @@
                     Tracking: {{ card.tracking_number }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-secondary-900">
                     <span class="font-medium">${{ card.purchase_amount }}</span>
                   </div>
-                  <div class="text-sm text-secondary-500">
-                    {{ card.subscription_plan }}
+                  <div class="text-sm capitalize text-secondary-500">
+                    {{ String(card.subscription_plan || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'N/A' }}
                   </div>
                   <div class="text-xs text-secondary-400">
                     {{ formatDate(card.purchase_date) }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex items-center space-x-2">
-                    <button
-                      @click="toggleCardStatus(card)"
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex items-center space-x-1.5 flex-wrap gap-y-1" :title="getCardStatusLabel(card.status)">
+                    <!-- Status Badge -->
+                    <span
                       :class="[
-                        'px-2 py-1 rounded text-xs font-medium',
-                        card.status === 'active'
-                          ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
-                          : 'bg-success-100 text-success-700 hover:bg-success-200',
+                        'px-2 py-1 text-[11px] font-medium rounded-full mr-1',
+                        getStatusBadgeClass(card.status),
                       ]"
-                      :title="
-                        card.status === 'active'
-                          ? 'Deactivate card'
-                          : 'Activate card'
-                      "
                     >
-                      {{ card.status === 'active' ? 'Deactivate' : 'Activate' }}
-                    </button>
+                      {{ getCardStatusLabel(card.status) }}
+                    </span>
+
+                    <!-- Contextual Order Flow Buttons -->
+                    <!-- awaiting_payment_verification: Verify / Reject / View proof -->
+                    <template v-if="card.status === 'awaiting_payment_verification'">
+                      <button
+                        @click="verifyNfcCardPayment(card)"
+                        :disabled="actionLoading[card.id]?.verify"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+                        title="Verify payment proof"
+                      >
+                        <span v-if="actionLoading[card.id]?.verify" class="spinner spinner-sm mr-1"></span>
+                        <Icon v-else name="heroicons:check-circle" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Verify
+                      </button>
+                      <button
+                        @click="rejectNfcCardPayment(card)"
+                        :disabled="actionLoading[card.id]?.reject"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        title="Reject payment proof"
+                      >
+                        <Icon v-if="!actionLoading[card.id]?.reject" name="heroicons:x-circle" class="h-3.5 w-3.5 inline mr-0.5" />
+                        <span v-else class="spinner spinner-sm mr-1"></span>
+                        Reject
+                      </button>
+                      <a
+                        v-if="card.transaction?.payment_proof_url"
+                        :href="card.transaction.payment_proof_url"
+                        target="_blank"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
+                        title="View payment proof"
+                      >
+                        <Icon name="heroicons:eye" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Proof
+                      </a>
+                    </template>
+
+                    <!-- payment_verified: Mark Processing / Cancel -->
+                    <template v-else-if="card.status === 'payment_verified'">
+                      <button
+                        @click="markNfcCardProcessing(card)"
+                        :disabled="actionLoading[card.id]?.processing"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50"
+                        title="Mark order as processing"
+                      >
+                        <span v-if="actionLoading[card.id]?.processing" class="spinner spinner-sm mr-1"></span>
+                        <Icon v-else name="heroicons:arrow-path" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Mark Processing
+                      </button>
+                      <button
+                        @click="cancelNfcCard(card)"
+                        :disabled="actionLoading[card.id]?.cancel"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        title="Cancel order"
+                      >
+                        <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
+                        <span v-else class="spinner spinner-sm mr-1"></span>
+                        Cancel
+                      </button>
+                    </template>
+
+                    <!-- processing: Mark Shipped / Cancel -->
+                    <template v-else-if="card.status === 'processing'">
+                      <button
+                        @click="openMarkShippedModal(card)"
+                        :disabled="actionLoading[card.id]?.shipped"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                        title="Mark card as shipped"
+                      >
+                        <span v-if="actionLoading[card.id]?.shipped" class="spinner spinner-sm mr-1"></span>
+                        <Icon v-else name="heroicons:truck" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Mark Shipped
+                      </button>
+                      <button
+                        @click="cancelNfcCard(card)"
+                        :disabled="actionLoading[card.id]?.cancel"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        title="Cancel order"
+                      >
+                        <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
+                        <span v-else class="spinner spinner-sm mr-1"></span>
+                        Cancel
+                      </button>
+                    </template>
+
+                    <!-- shipped: END USER yang akan confirm received — Admin TIADA butang Mark Delivered, cuma show shipped badge + tracking info -->
+                    <template v-else-if="card.status === 'shipped'">
+                      <div class="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-gray-100 text-gray-700 italic" title="Admin cannot mark delivered — End user must press 'I've Received The Card' in Card Management">
+                        <Icon name="heroicons:clock" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Waiting for user receipt
+                      </div>
+                    </template>
+
+                    <!-- delivered / active / inactive: Toggle activate/deactivate -->
+                    <template v-else-if="['delivered','active','inactive','expired'].includes(card.status)">
+                      <button
+                        @click="toggleCardStatus(card)"
+                        :disabled="actionLoading[card.id]?.toggle"
+                        :class="[
+                          'px-2 py-1 rounded text-[11px] font-medium disabled:opacity-50',
+                          ['active','delivered'].includes(card.status)
+                            ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
+                            : 'bg-success-100 text-success-700 hover:bg-success-200',
+                        ]"
+                        :title="
+                          ['active','delivered'].includes(card.status)
+                            ? 'Deactivate card'
+                            : 'Activate card'
+                        "
+                      >
+                        <span v-if="actionLoading[card.id]?.toggle" class="spinner spinner-sm mr-1"></span>
+                        <Icon v-else :name="['active','delivered'].includes(card.status) ? 'heroicons:pause' : 'heroicons:play'" class="h-3.5 w-3.5 inline mr-0.5" />
+                        {{ ['active','delivered'].includes(card.status) ? 'Deactivate' : 'Activate' }}
+                      </button>
+                    </template>
+
+                    <!-- cancelled / replacement / pending_payment: Show payment proof if any -->
+                    <template v-if="card.transaction?.payment_proof_url && card.status === 'pending_payment'">
+                      <a
+                        :href="card.transaction.payment_proof_url"
+                        target="_blank"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
+                        title="View existing payment proof"
+                      >
+                        <Icon name="heroicons:eye" class="h-3.5 w-3.5 inline mr-0.5" />
+                        Proof
+                      </a>
+                    </template>
+
+                    <!-- Global actions (view / edit / delete - selalu ada kecuali cancelled yg hide delete) -->
                     <button
                       @click="viewCard(card)"
-                      class="text-primary-600 hover:text-primary-900"
+                      class="text-primary-600 hover:text-primary-900 p-1"
+                      title="View full details"
                     >
                       <Icon name="heroicons:eye" class="h-4 w-4" />
                     </button>
                     <button
                       @click="editCard(card)"
-                      class="text-warning-600 hover:text-warning-900"
+                      class="text-warning-600 hover:text-warning-900 p-1"
+                      title="Edit card details"
                     >
                       <Icon name="heroicons:pencil" class="h-4 w-4" />
                     </button>
                     <button
+                      v-if="card.status !== 'cancelled'"
                       @click="deleteCard(card)"
-                      class="text-error-600 hover:text-error-900"
+                      class="text-error-600 hover:text-error-900 p-1"
+                      title="Delete card record"
                     >
                       <Icon name="heroicons:trash" class="h-4 w-4" />
                     </button>
@@ -526,11 +658,17 @@
                 >Status</label
               >
               <select v-model="editForm.status" class="input">
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="pending_payment">Awaiting Payment</option>
+                <option value="awaiting_payment_verification">Awaiting Payment Verification</option>
+                <option value="payment_verified">Payment Verified</option>
+                <option value="processing">Processing</option>
                 <option value="shipped">Shipped</option>
                 <option value="delivered">Delivered</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="expired">Expired</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="replacement">Replacement</option>
               </select>
             </div>
           </div>
@@ -538,7 +676,18 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
-                >Tracking Number</label
+                >Courier</label
+              >
+              <input
+                v-model="editForm.courier"
+                type="text"
+                placeholder="Example: Poslaju, J&T, DHL, Ninja Van"
+                class="input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 mb-2"
+                >Tracking No.</label
               >
               <input
                 v-model="editForm.tracking_number"
@@ -547,6 +696,9 @@
                 class="input"
               />
             </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-secondary-700 mb-2"
                 >Shipped Date</label
@@ -557,28 +709,87 @@
                 class="input"
               />
             </div>
+            <div>
+              <label class="block text-sm font-medium text-secondary-700 mb-2"
+                >Delivered Date</label
+              >
+              <input
+                v-model="editForm.delivered_date"
+                type="date"
+                class="input"
+              />
+            </div>
           </div>
 
-          <div>
+          <div v-if="editForm.status === 'cancelled'">
             <label class="block text-sm font-medium text-secondary-700 mb-2"
-              >Delivered Date</label
-            >
-            <input
-              v-model="editForm.delivered_date"
-              type="date"
-              class="input"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
-              >Notes</label
+              >Cancellation Reason</label
             >
             <textarea
-              v-model="editForm.notes"
+              v-model="editForm.cancellation_reason"
+              placeholder="Explain why this order is being cancelled. This will be shown to the user."
               class="input"
               rows="2"
             ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-2"
+              >Admin Notes</label
+            >
+            <textarea
+              v-model="editForm.notes"
+              placeholder="Internal notes (not shown to user)"
+              class="input"
+              rows="2"
+            ></textarea>
+          </div>
+
+          <!-- Public Profile URL (for NFC tag encoding) -->
+          <div
+            v-if="selectedCard && getCardPublicProfileUrl(selectedCard)"
+            class="p-4 bg-primary-50 border border-primary-200 rounded-lg"
+          >
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <h4
+                  class="text-sm font-semibold text-primary-900 uppercase tracking-wide"
+                >
+                  Public Profile URL
+                </h4>
+                <p class="text-xs text-primary-700 mt-1">
+                  Copy this URL and encode it into the NFC tag chip
+                </p>
+              </div>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-600 text-white"
+              >
+                FOR NFC ENCODING
+              </span>
+            </div>
+            <div class="flex items-stretch gap-2">
+              <input
+                :value="getCardPublicProfileUrl(selectedCard, true)"
+                readonly
+                class="input bg-white font-mono text-xs flex-1"
+              />
+              <button
+                type="button"
+                @click="copyToClipboard(getCardPublicProfileUrl(selectedCard, true))"
+                class="btn btn-outline btn-sm flex-shrink-0"
+                title="Copy URL"
+              >
+                <Icon name="heroicons:document-duplicate" class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                @click="openInNewTab(getCardPublicProfileUrl(selectedCard, true))"
+                class="btn btn-outline btn-sm flex-shrink-0"
+                title="Open in new tab"
+              >
+                <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           <div class="flex justify-end space-x-3 pt-4">
@@ -596,6 +807,100 @@
             >
               <div v-if="submitting" class="spinner mr-2"></div>
               Update Card
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Mark Shipped Modal -->
+    <div
+      v-if="showMarkShippedModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+      >
+        <div class="px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
+          <h3 class="text-lg font-medium text-secondary-900">
+            Mark Card As Shipped
+          </h3>
+          <button
+            type="button"
+            @click="showMarkShippedModal = false"
+            class="text-secondary-400 hover:text-secondary-600"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
+          </button>
+        </div>
+        <form @submit.prevent="submitMarkShipped" class="p-6 space-y-4">
+          <div v-if="shippedForm.card" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p class="text-sm text-blue-800">
+              <span class="font-semibold">{{ shippedForm.card.card_owner }}</span>
+              <span class="text-blue-600 text-xs block mt-0.5">
+                Card ID: {{ shippedForm.card.card_id || shippedForm.card.nfc_card_id || shippedForm.card.id }}
+              </span>
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-1">
+              Courier <span class="text-error-500">*</span>
+            </label>
+            <select v-model="shippedForm.courier" required class="input">
+              <option value="">Select courier</option>
+              <option value="Poslaju">Pos Malaysia / Poslaju</option>
+              <option value="J&T">J&T Express</option>
+              <option value="Ninja Van">Ninja Van</option>
+              <option value="DHL">DHL Express</option>
+              <option value="GDex">GDex</option>
+              <option value="Citylink">Citylink Express</option>
+              <option value="Skynet">Skynet</option>
+              <option value="Lalamove">Lalamove</option>
+              <option value="GrabExpress">GrabExpress</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-1">
+              Tracking No. <span class="text-error-500">*</span>
+            </label>
+            <input
+              v-model="shippedForm.tracking_number"
+              type="text"
+              placeholder="Example: PL1234567890MY"
+              required
+              class="input font-mono"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-secondary-700 mb-1">
+              Date Shipped
+            </label>
+            <input
+              v-model="shippedForm.shipped_date"
+              type="date"
+              class="input"
+            />
+          </div>
+          <div class="flex items-center justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              @click="showMarkShippedModal = false"
+              class="btn btn-outline"
+              :disabled="actionLoading[shippedForm.card?.id]?.shipped"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="actionLoading[shippedForm.card?.id]?.shipped"
+            >
+              <span
+                v-if="actionLoading[shippedForm.card?.id]?.shipped"
+                class="spinner spinner-sm mr-2"
+              ></span>
+              Mark As Shipped
             </button>
           </div>
         </form>
@@ -656,7 +961,7 @@
                     Subscription Plan
                   </dt>
                   <dd class="text-sm text-secondary-900">
-                    {{ selectedCard.subscription_plan }}
+                    {{ String(selectedCard.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </dd>
                 </div>
               </dl>
@@ -702,6 +1007,55 @@
             </div>
           </div>
         </div>
+
+        <!-- Public Profile URL for NFC Encoding -->
+        <div
+          v-if="selectedCard && getCardPublicProfileUrl(selectedCard)"
+          class="px-6 py-4 border-t border-secondary-200"
+        >
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div>
+              <h4
+                class="text-sm font-semibold text-primary-900 uppercase tracking-wide"
+              >
+                Public Profile URL
+                <span
+                  class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-600 text-white align-middle"
+                >
+                  FOR NFC ENCODING
+                </span>
+              </h4>
+              <p class="text-xs text-secondary-600 mt-1">
+                Copy this URL and encode/write it into the physical NFC tag chip
+              </p>
+            </div>
+          </div>
+          <div class="flex items-stretch gap-2">
+            <input
+              :value="getCardPublicProfileUrl(selectedCard, true)"
+              readonly
+              class="input bg-white font-mono text-xs flex-1"
+            />
+            <button
+              type="button"
+              @click="copyToClipboard(getCardPublicProfileUrl(selectedCard, true))"
+              class="btn btn-outline btn-sm flex-shrink-0"
+              title="Copy URL to clipboard"
+            >
+              <Icon name="heroicons:document-duplicate" class="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              @click="openInNewTab(getCardPublicProfileUrl(selectedCard, true))"
+              class="btn btn-primary btn-sm flex-shrink-0"
+              title="Open profile URL to verify it works"
+            >
+              <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4 mr-1" />
+              Test URL
+            </button>
+          </div>
+        </div>
+
         <div class="px-6 py-4 border-t border-secondary-200">
           <button @click="showCardModal = false" class="btn btn-outline">
             Close
@@ -720,13 +1074,26 @@ definePageMeta({
 
 const adminStore = useAdminStore();
 const { nfcCards, loading, pagination } = storeToRefs(adminStore);
+const { $api, $toast, $config } = useNuxtApp();
 
 // Modal states
 const showRegisterModal = ref(false);
 const showEditModal = ref(false);
 const showCardModal = ref(false);
+const showMarkShippedModal = ref(false);
 const selectedCard = ref(null);
 const submitting = ref(false);
+
+// Per-action loading state keyed by card.id → action name
+const actionLoading = reactive({});
+
+// Mark Shipped form
+const shippedForm = reactive({
+  card: null,
+  courier: "",
+  tracking_number: "",
+  shipped_date: "",
+});
 
 // Form data
 const form = ref({
@@ -755,9 +1122,11 @@ const editForm = ref({
   billing_address: "",
   contact_number: "",
   status: "",
+  courier: "",
   tracking_number: "",
   shipped_date: "",
   delivered_date: "",
+  cancellation_reason: "",
   notes: "",
 });
 
@@ -974,11 +1343,13 @@ const editCard = (card) => {
     billing_address: card.billing_address,
     contact_number: card.contact_number,
     status: card.status,
+    courier: card.courier || "",
     tracking_number: card.tracking_number || "",
     shipped_date: card.shipped_date ? card.shipped_date.split("T")[0] : "",
     delivered_date: card.delivered_date
       ? card.delivered_date.split("T")[0]
       : "",
+    cancellation_reason: card.cancelled_reason || "",
     notes: card.notes || "",
   };
   showEditModal.value = true;
@@ -1042,11 +1413,104 @@ const closeEditModal = () => {
     billing_address: "",
     contact_number: "",
     status: "",
+    courier: "",
     tracking_number: "",
     shipped_date: "",
     delivered_date: "",
+    cancellation_reason: "",
     notes: "",
   };
+};
+
+// Open Mark Shipped Modal
+const openMarkShippedModal = (card) => {
+  shippedForm.card = card;
+  shippedForm.courier = card.courier || "";
+  shippedForm.tracking_number = card.tracking_number || "";
+  shippedForm.shipped_date = card.shipped_date
+    ? card.shipped_date.split("T")[0]
+    : new Date().toISOString().split("T")[0];
+  showMarkShippedModal.value = true;
+};
+
+// Set loading flag helper
+const setLoading = (cardId, actionName, state) => {
+  if (!actionLoading[cardId]) actionLoading[cardId] = {};
+  actionLoading[cardId][actionName] = state;
+};
+
+// Generic NFC card admin order action helper
+const runNfcAdminAction = async (card, endpointPath, actionKey, payload = {}) => {
+  if (!card?.id) return false;
+  setLoading(card.id, actionKey, true);
+  try {
+    const response = await $api.post(`/admin/nfc-cards/${card.id}/${endpointPath}`, payload);
+    if (response && response.success) {
+      $toast.success(response.message || `Order ${actionKey} successful!`);
+      await adminStore.fetchNfcCards();
+      return true;
+    } else {
+      $toast.error(response?.message || `Failed: ${actionKey}`);
+      return false;
+    }
+  } catch (error) {
+    const msg = error?.response?.data?.message || error?.message || `Error during ${actionKey}`;
+    $toast.error(msg);
+    console.error(`[NFC Admin ${actionKey}] error:`, error);
+    return false;
+  } finally {
+    setLoading(card.id, actionKey, false);
+  }
+};
+
+// Admin order flow: Verify Payment
+const verifyNfcCardPayment = (card) => {
+  if (!confirm(`Verify payment for order ${card.card_owner || card.card_id || ''}? After this, the user can start designing their profile.`)) return;
+  runNfcAdminAction(card, 'verify-payment', 'verify');
+};
+
+// Admin order flow: Reject Payment
+const rejectNfcCardPayment = (card) => {
+  const reason = prompt(`State the rejection reason for order ${card.card_owner || ''} (will be shown to user). Can be left blank.`, "");
+  if (reason === null) return;
+  runNfcAdminAction(card, 'reject-payment', 'reject', { cancellation_reason: reason || undefined });
+};
+
+// Admin order flow: Mark Processing
+const markNfcCardProcessing = (card) => {
+  if (!confirm(`Mark order ${card.card_owner || ''} as PROCESSING (print + prepare card)?`)) return;
+  runNfcAdminAction(card, 'mark-processing', 'processing');
+};
+
+// Admin order flow: Submit Mark Shipped
+const submitMarkShipped = async () => {
+  if (!shippedForm.card) return;
+  const card = shippedForm.card;
+  const ok = await runNfcAdminAction(card, 'mark-shipped', 'shipped', {
+    courier: shippedForm.courier,
+    tracking_number: shippedForm.tracking_number,
+    shipped_date: shippedForm.shipped_date || undefined,
+  });
+  if (ok) {
+    showMarkShippedModal.value = false;
+    shippedForm.card = null;
+  }
+};
+
+// Admin order flow: Mark Delivered
+const markNfcCardDelivered = (card) => {
+  if (!confirm(`Mark order ${card.card_owner || ''} as DELIVERED? This will activate the user's subscription.`)) return;
+  runNfcAdminAction(card, 'mark-delivered', 'delivered');
+};
+
+// Admin order flow: Cancel
+const cancelNfcCard = (card) => {
+  const reason = prompt(`State the CANCELLATION REASON for order ${card.card_owner || ''} (required - will be shown to user).`);
+  if (!reason || !String(reason).trim()) {
+    $toast.warning("Cancellation reason is required");
+    return;
+  }
+  runNfcAdminAction(card, 'cancel', 'cancel', { cancellation_reason: reason });
 };
 
 // Delete card
@@ -1082,16 +1546,47 @@ const toggleCardStatus = async (card) => {
   }
 };
 
-// Helper functions
+// Helper functions — Status labels in ENGLISH (match backend NfcCard model statusLabels)
+const getCardStatusLabel = (status) => {
+  const fallback = {
+    pending_payment: "Pending Payment",
+    awaiting_payment_verification: "Awaiting Payment Verification",
+    payment_verified: "Payment Verified",
+    processing: "Processing",
+    shipped: "Shipped",
+    delivered: "Delivered (Not Activated)",
+    active: "Active",
+    inactive: "Inactive",
+    expired: "Expired",
+    cancelled: "Cancelled",
+    rejected: "Rejected",
+    replacement: "Replacement",
+  };
+  const label = fallback[status];
+  if (label) return label;
+  // Fallback: convert snake_case to Title Case for unknown statuses
+  return String(status || "Unknown")
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim() || "Unknown";
+};
+
 const getStatusBadgeClass = (status) => {
   const classes = {
-    pending: "bg-yellow-100 text-yellow-800",
-    active: "bg-success-100 text-success-800",
-    inactive: "bg-error-100 text-error-800",
+    pending_payment: "bg-orange-100 text-orange-800",
+    awaiting_payment_verification: "bg-yellow-100 text-yellow-800",
+    payment_verified: "bg-emerald-100 text-emerald-800",
+    processing: "bg-purple-100 text-purple-800",
     shipped: "bg-blue-100 text-blue-800",
     delivered: "bg-green-100 text-green-800",
+    active: "bg-success-100 text-success-800",
+    inactive: "bg-secondary-100 text-secondary-800",
+    expired: "bg-warning-100 text-warning-800",
+    cancelled: "bg-red-100 text-red-800",
+    replacement: "bg-info-100 text-info-800",
   };
-  return classes[status] || classes.pending;
+  return classes[status] || "bg-secondary-100 text-secondary-800";
 };
 
 const formatDate = (dateString) => {

@@ -144,7 +144,7 @@
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-secondary-200;
+    @apply px-6 py-4 border-b border-secondary-200 flex items-center justify-between;
   }
 
   .card-body {
@@ -211,9 +211,237 @@
     @apply bg-black/10 backdrop-blur-md border border-black/20;
   }
 
-  /* Loading Spinner */
+  /* Loading Spinner — Basic fallback */
   .spinner {
     @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
+  }
+
+  /* ============================================================
+       NFCGo LOADING SYSTEM — MINIMALIST + PREMIUM
+       Brand palette: Matte Navy → Matte Teal → Matte Gold
+       ============================================================ */
+
+  /* Expanding ARC rings (3 layers) — C-shaped 270° with gradient fade */
+  .nfc-arc-ring {
+    @apply absolute rounded-full;
+    inset: 0;
+    background: transparent;
+    /* C-shaped 270° + subtle opacity gradient */
+    -webkit-mask: conic-gradient(from 25deg, #000 0deg, #000 270deg, transparent 280deg, transparent 360deg);
+            mask: conic-gradient(from 25deg, #000 0deg, #000 270deg, transparent 280deg, transparent 360deg);
+    padding: 2.5px;
+  }
+
+  .nfc-arc-ring::before {
+    content: "";
+    @apply block w-full h-full rounded-full;
+    border: 2.5px solid var(--theme-primary-500, #4f5d82);
+    box-sizing: border-box;
+  }
+
+  .nfc-arc-ring.accent::before {
+    border-color: var(--theme-accent, #5d8c87);
+  }
+
+  .nfc-arc-ring.gold::before {
+    border-color: var(--theme-accent-secondary, #b8956a);
+  }
+
+  /* Minimalist NFC Chip — iconic contact pad layout + gradient depth */
+  .nfc-chip {
+    @apply relative rounded-[28%] overflow-visible;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, #ffffff 99%, var(--theme-secondary-50, #fafaf7)) 0%,
+      color-mix(in srgb, #ffffff 92%, var(--theme-primary-50, #f4f6fa)) 100%
+    );
+    border: 1.5px solid color-mix(in srgb, var(--theme-primary-300, #9faac1) 62%, transparent);
+    box-shadow:
+      0 1.5px 3px color-mix(in srgb, var(--theme-primary-900, #23293b) 8%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #ffffff 94%, transparent),
+      inset 0 -2px 6px color-mix(in srgb, var(--theme-primary-100, #e3e7ef) 58%, transparent);
+  }
+
+  .nfc-chip::before,
+  .nfc-chip::after {
+    content: "";
+    position: absolute;
+  }
+
+  /* Top contact row */
+  .nfc-chip::before {
+    left: 18%;
+    right: 18%;
+    top: 16%;
+    height: 18%;
+    border-radius: 2px;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--theme-primary-700, #323b56) 98%, #000000) 0%,
+      color-mix(in srgb, var(--theme-primary-600, #3d496a) 94%, #000000) 55%,
+      color-mix(in srgb, var(--theme-accent, #5d8c87) 86%, #000000) 100%
+    );
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 36%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #ffffff 14%, transparent);
+  }
+
+  /* Bottom contact pad */
+  .nfc-chip::after {
+    left: 18%;
+    right: 18%;
+    bottom: 16%;
+    height: 44%;
+    border-radius: 3px;
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--theme-primary-700, #323b56) 98%, #000000) 0%,
+      color-mix(in srgb, var(--theme-primary-600, #3d496a) 96%, #000000) 30%,
+      color-mix(in srgb, var(--theme-accent, #5d8c87) 88%, #000000) 62%,
+      color-mix(in srgb, var(--theme-accent-secondary, #b8956a) 80%, #000000) 100%
+    );
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 36%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #ffffff 16%, transparent);
+  }
+
+  /* ============================================================
+       FAN-WAVE HALF ARCS (left & right, 3 each)
+       ============================================================ */
+  .nfc-fan-group {
+    @apply absolute top-1/2 -translate-y-1/2 z-[1] pointer-events-none;
+  }
+
+  /* Stroke gradients for each arc layer (SVG fills use CSS vars via currentColor) */
+  .nfc-fan-svg {
+    @apply block overflow-visible;
+  }
+
+  /* ============================================================
+       3D BEVELLED NFC CHIP (center)
+       ============================================================ */
+  .nfc-chip-3d {
+    @apply relative rounded-[26%] z-[2];
+    background:
+      radial-gradient(
+        120% 110% at 32% 22%,
+        color-mix(in srgb, #ffffff 98%, var(--theme-secondary-50,#fafaf7)) 0%,
+        color-mix(in srgb, #ffffff 94%, var(--theme-primary-50,#f4f6fa)) 42%,
+        color-mix(in srgb, #ffffff 72%, var(--theme-primary-100,#e3e7ef)) 100%
+      );
+    /* Outer bevel light (top-left) + dark (bottom-right) */
+    box-shadow:
+      /* highlight top-left */
+      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 96%, transparent),
+      inset 3px 3px 6px color-mix(in srgb, #ffffff 86%, var(--theme-primary-50,#f4f6fa)),
+      /* shadow bottom-right */
+      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 52%, transparent),
+      /* contact shadow under chip */
+      0 2.5px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 10%, transparent),
+      0 6px 16px color-mix(in srgb, var(--theme-primary-800,#2c344e) 16%, transparent),
+      0 1px 2px color-mix(in srgb, var(--theme-primary-900,#23293b) 8%, transparent);
+  }
+
+  /* Contact pads: top strip + main pad with gradients + bevel */
+  .nfc-chip-3d::before,
+  .nfc-chip-3d::after {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    /* inner highlight + shadow for pad depth */
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+      inset 0 -2px 3px color-mix(in srgb, #000000 18%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--theme-primary-900,#23293b) 22%, transparent);
+  }
+
+  .nfc-chip-3d::before {
+    /* Top thin contact strip */
+    left: 19%;
+    right: 19%;
+    top: 16%;
+    height: 16%;
+    border-radius: 2.5px;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--theme-primary-600,#3d496a) 98%, #ffffff) 0%,
+      color-mix(in srgb, var(--theme-primary-700,#323b56) 96%, #ffffff) 55%,
+      color-mix(in srgb, var(--theme-accent,#5d8c87) 88%, #ffffff) 100%
+    );
+  }
+
+  .nfc-chip-3d::after {
+    /* Main big contact pad */
+    left: 19%;
+    right: 19%;
+    bottom: 16%;
+    height: 45%;
+    border-radius: 4px;
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--theme-primary-700,#323b56) 98%, #000000) 0%,
+        color-mix(in srgb, var(--theme-primary-600,#3d496a) 96%, #000000) 28%,
+        color-mix(in srgb, var(--theme-accent,#5d8c87) 90%, #000000) 62%,
+        color-mix(in srgb, var(--theme-accent-secondary,#b8956a) 82%, #000000) 100%
+      );
+  }
+
+  /* Brand gradient text with animated shimmer (background-position driven) */
+  .nfcgo-brand-text {
+    background-image: linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--theme-primary-700, #323b56) 82%, #000000) 8%,
+      color-mix(in srgb, var(--theme-accent, #5d8c87) 92%, #000000) 40%,
+      color-mix(in srgb, var(--theme-accent-secondary, #b8956a) 92%, #000000) 52%,
+      color-mix(in srgb, var(--theme-primary-500, #4f5d82) 72%, #ffffff) 78%,
+      color-mix(in srgb, var(--theme-primary-700, #323b56) 82%, #000000) 95%
+    );
+    background-size: 260% 100%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Hint subtitle — matte secondary, understated */
+  .nfcgo-hint-text {
+    color: color-mix(in srgb, var(--theme-secondary-500, #7f7763) 96%, #000000);
+    letter-spacing: 0.01em;
+  }
+
+  /* Panel skeleton — flat matte white with 1px hairline */
+  .nfc-loader-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 92%, transparent);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--theme-secondary-50, #fafaf7) 100%, white) inset,
+      0 20px 45px -28px color-mix(in srgb, var(--theme-primary-900, #23293b) 26%, transparent);
+  }
+
+  .nfc-skeleton-scan {
+    @apply absolute inset-y-0 pointer-events-none;
+    width: 42%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--theme-accent, #5d8c87) 22%, transparent) 46%,
+      color-mix(in srgb, var(--theme-primary-400, #6f7ea0) 18%, transparent) 58%,
+      transparent 100%
+    );
+  }
+
+  .nfc-skeleton-bar {
+    @apply rounded-md;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--theme-secondary-100, #f4f2ec) 96%, #ffffff) 0%,
+      color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 82%, #ffffff) 100%
+    );
   }
 
   /* Drag and Drop */
@@ -1238,3 +1466,247 @@
     padding: 20px !important;
   }
 }
+
+/* ============================================================
+   NFCGo FAN-WAVE WiFi ANIMATIONS
+   Half-arc wave animates outwards like WiFi signal pulse
+   ============================================================ */
+
+@keyframes nfcFanL1 {
+  0%, 100% {
+    opacity: 0.18;
+    transform: translateX(0) scale(0.86);
+  }
+  22% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translateX(-2px) scale(0.96);
+  }
+  80% {
+    opacity: 0.32;
+    transform: translateX(0) scale(0.9);
+  }
+}
+@keyframes nfcFanL2 {
+  0%, 100% {
+    opacity: 0.14;
+    transform: translateX(0) scale(0.82);
+  }
+  16% {
+    opacity: 0.4;
+    transform: translateX(0) scale(0.88);
+  }
+  34% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  62% {
+    opacity: 0.58;
+    transform: translateX(-3px) scale(0.95);
+  }
+  86% {
+    opacity: 0.28;
+    transform: translateX(0) scale(0.88);
+  }
+}
+@keyframes nfcFanL3 {
+  0%, 100% {
+    opacity: 0.1;
+    transform: translateX(0) scale(0.78);
+  }
+  10% {
+    opacity: 0.22;
+    transform: translateX(0) scale(0.82);
+  }
+  28% {
+    opacity: 0.5;
+    transform: translateX(0) scale(0.9);
+  }
+  46% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  72% {
+    opacity: 0.6;
+    transform: translateX(-4px) scale(0.94);
+  }
+  90% {
+    opacity: 0.24;
+    transform: translateX(0) scale(0.84);
+  }
+}
+@keyframes nfcFanR1 {
+  0%, 100% {
+    opacity: 0.18;
+    transform: scaleX(-1) scale(0.86);
+  }
+  22% {
+    opacity: 1;
+    transform: scaleX(-1) scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scaleX(-1) translateX(2px) scale(0.96);
+  }
+  80% {
+    opacity: 0.32;
+    transform: scaleX(-1) scale(0.9);
+  }
+}
+@keyframes nfcFanR2 {
+  0%, 100% {
+    opacity: 0.14;
+    transform: scaleX(-1) scale(0.82);
+  }
+  16% {
+    opacity: 0.4;
+    transform: scaleX(-1) scale(0.88);
+  }
+  34% {
+    opacity: 1;
+    transform: scaleX(-1) scale(1);
+  }
+  62% {
+    opacity: 0.58;
+    transform: scaleX(-1) translateX(3px) scale(0.95);
+  }
+  86% {
+    opacity: 0.28;
+    transform: scaleX(-1) scale(0.88);
+  }
+}
+@keyframes nfcFanR3 {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scaleX(-1) scale(0.78);
+  }
+  10% {
+    opacity: 0.22;
+    transform: scaleX(-1) scale(0.82);
+  }
+  28% {
+    opacity: 0.5;
+    transform: scaleX(-1) scale(0.9);
+  }
+  46% {
+    opacity: 1;
+    transform: scaleX(-1) scale(1);
+  }
+  72% {
+    opacity: 0.6;
+    transform: scaleX(-1) translateX(4px) scale(0.94);
+  }
+  90% {
+    opacity: 0.24;
+    transform: scaleX(-1) scale(0.84);
+  }
+}
+@keyframes nfcChip3d {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 96%, transparent),
+      inset 3px 3px 6px color-mix(in srgb, #ffffff 86%, var(--theme-primary-50,#f4f6fa)),
+      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 52%, transparent),
+      0 2.5px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 10%, transparent),
+      0 6px 16px color-mix(in srgb, var(--theme-primary-800,#2c344e) 16%, transparent),
+      0 1px 2px color-mix(in srgb, var(--theme-primary-900,#23293b) 8%, transparent);
+  }
+  25% {
+    transform: translateY(-1.5px) scale(1.02);
+  }
+  50% {
+    transform: translateY(-0.5px) scale(1.01);
+    box-shadow:
+      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 98%, transparent),
+      inset 3px 3px 8px color-mix(in srgb, #ffffff 92%, var(--theme-primary-50,#f4f6fa)),
+      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 60%, transparent),
+      0 3px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 12%, transparent),
+      0 10px 22px color-mix(in srgb, var(--theme-accent,#5d8c87) 18%, transparent),
+      0 1px 3px color-mix(in srgb, var(--theme-primary-900,#23293b) 10%, transparent);
+  }
+  75% {
+    transform: translateY(-2px) scale(1.025);
+  }
+}
+@keyframes nfcChip3dLg {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-2.5px) scale(1.02);
+  }
+  50% {
+    transform: translateY(-0.8px) scale(1.01);
+  }
+  75% {
+    transform: translateY(-3px) scale(1.03);
+  }
+}
+@keyframes nfcFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes nfcTextShimmer {
+  0% {
+    background-position: 180% 0;
+  }
+  100% {
+    background-position: -80% 0;
+  }
+}
+@keyframes nfcAccentLine {
+  0%, 100% {
+    transform: scaleX(0.4);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+@keyframes cardSkeletonScan {
+  0% {
+    transform: translateX(-160%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(260%) skewX(-12deg);
+  }
+}
+@keyframes dotBounce1 {
+  0%, 80%, 100% { transform: scale(0.55); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+@keyframes dotBounce2 {
+  0%, 80%, 100% { transform: scale(0.55); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+@keyframes dotBounce3 {
+  0%, 80%, 100% { transform: scale(0.55); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.animate-nfc-fan-l-1 { animation: nfcFanL1 1.8s ease-in-out infinite; }
+.animate-nfc-fan-l-2 { animation: nfcFanL2 1.8s ease-in-out infinite; }
+.animate-nfc-fan-l-3 { animation: nfcFanL3 1.8s ease-in-out infinite; }
+.animate-nfc-fan-r-1 { animation: nfcFanR1 1.8s ease-in-out infinite; }
+.animate-nfc-fan-r-2 { animation: nfcFanR2 1.8s ease-in-out infinite; }
+.animate-nfc-fan-r-3 { animation: nfcFanR3 1.8s ease-in-out infinite; }
+.animate-nfc-chip-3d { animation: nfcChip3d 1.8s ease-in-out infinite; }
+.animate-nfc-chip-3d-lg { animation: nfcChip3dLg 1.8s ease-in-out infinite; }
+.animate-nfc-fade-up { animation: nfcFadeUp 420ms ease-out both; }
+.animate-nfc-text-shimmer { animation: nfcTextShimmer 2.6s linear infinite; }
+.animate-nfc-accent-line { animation: nfcAccentLine 1.8s ease-in-out infinite; }
+.animate-card-skeleton-scan { animation: cardSkeletonScan 2.2s ease-in-out infinite; }
+.animate-dot-bounce-1 { animation: dotBounce1 1.2s infinite ease-in-out; animation-delay: -0.32s; }
+.animate-dot-bounce-2 { animation: dotBounce2 1.2s infinite ease-in-out; animation-delay: -0.16s; }
+.animate-dot-bounce-3 { animation: dotBounce3 1.2s infinite ease-in-out; animation-delay: 0s; }

@@ -13,9 +13,12 @@ return [
     | framework. This connection is utilized if another isn't explicitly
     | specified when running a cache operation inside the application.
     |
+    | PERFORMANCE: 'database' cache means every cache hit/miss goes through
+    | the SQL driver — use 'redis' on aaPanel (Redis 7.x is provisioned per
+    | project memory), 'file' as lightweight fallback on dev machines.
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env('CACHE_STORE', 'file'),
 
     /*
     |--------------------------------------------------------------------------

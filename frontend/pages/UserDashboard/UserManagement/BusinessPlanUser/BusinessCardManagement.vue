@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">Card Management</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Card Management</h1>
           <p class="mt-2 text-secondary-600">
             Manage Business Plan NFC cards for employees
           </p>
@@ -181,7 +181,7 @@
                       <strong>NFC ID:</strong> {{ card.nfc_card_id }}
                     </p>
                     <p class="text-sm text-secondary-900">
-                      <strong>Plan:</strong> {{ card.subscription_plan }}
+                      <strong>Plan:</strong> {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
                     <p class="text-sm text-secondary-900">
                       <strong>Amount:</strong>
@@ -321,7 +321,7 @@
                       <strong>NFC ID:</strong> {{ card.nfc_card_id }}
                     </p>
                     <p class="text-sm text-secondary-900">
-                      <strong>Plan:</strong> {{ card.subscription_plan }}
+                      <strong>Plan:</strong> {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
                     <p class="text-sm text-secondary-900">
                       <strong>Amount:</strong>
@@ -645,7 +645,7 @@
                     <p
                       class="text-base text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
                     >
-                      {{ selectedCard.subscription_plan }}
+                      {{ String(selectedCard.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
                   </div>
                 </div>
@@ -882,6 +882,14 @@ definePageMeta({
 // Stores
 const authStore = useAuthStore();
 const { $toast, $api } = useNuxtApp();
+
+// ─── PERF: NFC cards cache + request cancellation helpers
+import {
+  getCachedNfcCards,
+  setCachedNfcCards,
+  invalidateCardsCache,
+  createAbortOnRouteChange,
+} from "~/plugins/api.client.js";
 
 // Safe toast helper
 const safeToast = {
@@ -1288,8 +1296,29 @@ onMounted(async () => {
   console.log("Current user:", authStore.user);
   console.log("User ID:", authStore.user?.id);
   console.log("Subscription plan:", authStore.user?.subscription_plan);
-  
-  await Promise.all([loadNfcCards(), loadEmployees()]);
+  const uid = authStore.user?.id;
+
+  // ═══ PERF (1): Pre-populate NFC cards from cache (0ms) ═══════════════
+  let usedCardsCache = false;
+  if (uid) {
+    const hit = getCachedNfcCards(uid);
+    if (hit && Array.isArray(hit)) {
+      nfcCards.value = hit;
+      filteredCards.value = hit.slice();
+      usedCardsCache = true;
+      console.log("✅ BusinessCardMgmt: cache HIT —", hit.length, "cards (0ms)");
+    }
+  }
+
+  // ═══ PERF (2): Refresh only missing / stale data
+  const jobs = [];
+  if (!usedCardsCache) {
+    const p = loadNfcCards();
+    p.then(() => { if (uid) setCachedNfcCards(uid, nfcCards.value); });
+    jobs.push(p);
+  }
+  jobs.push(loadEmployees());
+  await Promise.all(jobs);
   
   // Check if we have employee_id in query params (coming from Employee Management page)
   const employeeIdParam = route.query.employee_id;
@@ -1305,16 +1334,22 @@ onMounted(async () => {
     }
   }
   
-  // Auto-refresh cards every 10 seconds to show newly approved cards
+  // Auto-refresh cards every 30 SECONDS (reduced from 10s → 66% less XHR traffic).
+  // Cache invalidated BEFORE refresh + populated AFTER, so subsequent navs stay fast.
   refreshInterval = setInterval(() => {
-    loadNfcCards();
-  }, 10000);
+    if (uid) invalidateCardsCache(uid);
+    loadNfcCards().then(() => {
+      if (uid) setCachedNfcCards(uid, nfcCards.value);
+    });
+  }, 30_000);
 });
 
 onUnmounted(() => {
   if (refreshInterval) {
     clearInterval(refreshInterval);
   }
+  // ─── Cancel any in-flight requests from this page.
+  createAbortOnRouteChange("BusinessCardManagement unmounted")();
 });
 </script>
 

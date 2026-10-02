@@ -178,9 +178,54 @@ const handleFileSelect = async (event) => {
   await uploadFile(file);
 };
 
+// Compute correct upload base URL using same smart host detection
+const safeParseJson = (raw) => {
+  if (!raw) return {};
+  let s = String(raw);
+  const braceIdx = s.indexOf("{");
+  const bracketIdx = s.indexOf("[");
+  let start = -1;
+  if (braceIdx === -1) start = bracketIdx;
+  else if (bracketIdx === -1) start = braceIdx;
+  else start = Math.min(braceIdx, bracketIdx);
+  if (start > 0) s = s.slice(start);
+  const lastBrace = s.lastIndexOf("}");
+  const lastBracket = s.lastIndexOf("]");
+  let end = -1;
+  if (lastBrace === -1) end = lastBracket;
+  else if (lastBracket === -1) end = lastBrace;
+  else end = Math.max(lastBrace, lastBracket);
+  if (end !== -1) s = s.slice(0, end + 1);
+  return JSON.parse(s);
+};
+
+const _isLocalHostname = (h) =>
+  h === "localhost" ||
+  h === "127.0.0.1" ||
+  h === "0.0.0.0" ||
+  h.startsWith("10.") ||
+  h.startsWith("192.168.") ||
+  /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h);
+
+const getUploadBaseUrl = () => {
+  let apiBase = (config.public?.apiBaseUrl || "").trim();
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (_isLocalHostname(host)) {
+      const scheme = window.location.protocol === "https:" ? "https" : "http";
+      apiBase = `${scheme}://${host}:8000/api`;
+    }
+  }
+  if (!apiBase) {
+    apiBase = "http://localhost:8000/api";
+  }
+  return apiBase;
+};
+
 const uploadFile = async (file) => {
   uploading.value = true;
   uploadProgress.value = 0;
+  error.value = null;
 
   try {
     const formData = new FormData();
@@ -209,10 +254,10 @@ const uploadFile = async (file) => {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
-            resolve(JSON.parse(xhr.responseText));
+            resolve(safeParseJson(xhr.responseText));
           } catch (e) {
             console.error("Failed to parse response:", xhr.responseText);
-            reject(new Error("Invalid server response"));
+            reject(new Error(e.message || "Invalid server response"));
           }
         } else {
           console.error("Upload failed:", {
@@ -221,7 +266,7 @@ const uploadFile = async (file) => {
             response: xhr.responseText,
           });
           try {
-            const errorData = JSON.parse(xhr.responseText);
+            const errorData = safeParseJson(xhr.responseText);
             reject(
               new Error(
                 errorData.message || `Upload failed with status ${xhr.status}`
@@ -230,7 +275,9 @@ const uploadFile = async (file) => {
           } catch (e) {
             reject(
               new Error(
-                `Upload failed with status ${xhr.status}: ${xhr.statusText}`
+                e?.message
+                  ? e.message
+                  : `Upload failed with status ${xhr.status}: ${xhr.statusText}`
               )
             );
           }
@@ -242,10 +289,11 @@ const uploadFile = async (file) => {
     // Get auth token
     const token = useCookie("auth-token").value;
 
-    // Send request
+    // Send request (use smart host detection for local dev, not config default)
+    const uploadApiBase = getUploadBaseUrl();
     xhr.open(
       "POST",
-      `${useRuntimeConfig().public.apiBaseUrl}${props.uploadEndpoint}`
+      `${uploadApiBase}${props.uploadEndpoint}`
     );
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("Accept", "application/json");
@@ -291,8 +339,16 @@ const uploadFile = async (file) => {
 
 const handleImageError = (event) => {
   console.error("Image failed to load:", imageUrl.value);
-  event.target.src = "/default-avatar.png";
-  error.value = "Failed to load image";
+  // Avoid triggering error loop: only flag error for the ORIGINAL image (not the fallback)
+  if (event.target.dataset.isFallback !== "true") {
+    event.target.dataset.isFallback = "true";
+    event.target.src = "/default-avatar.png";
+    error.value = "Failed to load image";
+  } else {
+    // Fallback also failed — stop trying and silently show placeholder.
+    // Do not re-set src on the failing element again.
+    console.warn("Fallback avatar also failed to load");
+  }
 };
 
 const removeImage = async () => {

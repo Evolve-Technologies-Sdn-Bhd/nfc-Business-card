@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'first_name',
         'last_name',
         'email',
+        'name_slug',
         'password',
         'provider',     
         'provider_id',
@@ -77,6 +78,113 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $appends = ['full_name'];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            if (empty($user->name_slug)) {
+                $user->name_slug = self::buildNameSlug(
+                    $user->full_name ?: trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''))
+                );
+            }
+        });
+
+        static::updating(function (User $user) {
+            $nameChanged =
+                $user->isDirty('first_name') || $user->isDirty('last_name');
+            if ($nameChanged && empty($user->getOriginal('name_slug'))) {
+                $user->name_slug = self::buildNameSlug(
+                    trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''))
+                );
+            }
+        });
+    }
+
+    /**
+     * Build a URL-safe slug from a user's display name.
+     *
+     * NOTE: name_slug is intentionally NOT unique. Multiple users who share the
+     * same legal name (e.g. many "Ahmad bin Abdullah" accounts) will share the
+     * same slug. Actual uniqueness/disambiguation is done at the URL layer with
+     * an optional 3rd segment: /profile/{slug}/{cardNo}/userid-{userPk}
+     */
+    public static function buildNameSlug(string $rawName): string
+    {
+        $base = $rawName ? Str::slug($rawName) : '';
+        if ($base === '') {
+            $base = 'user';
+        }
+        return $base;
+    }
+
+    /**
+     * Whether this user's name_slug clashes with another active registered user.
+     * TRUE means the pretty URL must include the "/userid-{id}" suffix to be unique.
+     * Uses the pre-loaded `nameSlugClashCount` relation (set via addSelect/subquery)
+     * when available to avoid N+1 queries on list pages.
+     */
+    public function getHasNameSlugClashAttribute(): bool
+    {
+        if (empty($this->name_slug)) {
+            return false;
+        }
+        if ($this->relationLoaded('nameSlugClashCount')) {
+            return (int) $this->getRelation('nameSlugClashCount') > 1;
+        }
+        $count = (int) self::where('name_slug', $this->name_slug)->count();
+        return $count > 1;
+    }
+
+    /**
+     * Bulk-load name_slug clash counts onto a collection of Users using a single query.
+     * Sets the `nameSlugClashCount` pseudo-relation so has_name_slug_clash accessor
+     * can answer without additional DB hits.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection|array  $users
+     * @return void
+     */
+    public static function hydrateNameSlugClashCounts($users): void
+    {
+        $userArr = $users instanceof \Illuminate\Database\Eloquent\Collection
+            ? $users->all()
+            : (is_array($users) ? $users : []);
+
+        $slugs = [];
+        foreach ($userArr as $u) {
+            if ($u instanceof self && !empty($u->name_slug)) {
+                $slugs[] = $u->name_slug;
+            }
+        }
+        $slugs = array_values(array_unique($slugs));
+
+        if ($slugs === []) {
+            foreach ($userArr as $u) {
+                if ($u instanceof self) {
+                    $u->setRelation('nameSlugClashCount', 0);
+                }
+            }
+            return;
+        }
+
+        $counts = self::query()
+            ->whereIn('name_slug', $slugs)
+            ->selectRaw('name_slug, COUNT(*) as c')
+            ->groupBy('name_slug')
+            ->pluck('c', 'name_slug')
+            ->all();
+
+        foreach ($userArr as $u) {
+            if (!($u instanceof self)) {
+                continue;
+            }
+            $u->setRelation(
+                'nameSlugClashCount',
+                empty($u->name_slug) ? 0 : (int) ($counts[$u->name_slug] ?? 0)
+            );
+        }
+    }
+
     /**
      * Get the user's full name.
      */
@@ -121,6 +229,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Source-of-truth plan name. Prefer subscriptions over legacy column.
+     * Only hits DB if subscriptions/latestSubscription are NOT already loaded (lazy fallback).
      */
     public function getSubscriptionPlanAttribute($value)
     {
@@ -131,10 +240,12 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if (!$latest) {
-            try {
-                $latest = $this->subscriptions()->where('status', 'active')->latest('created_at')->first(['plan_type']);
-            } catch (\Throwable) {
-                $latest = null;
+            if ($this->exists && !$this->relationLoaded('subscriptions') && !$this->relationLoaded('latestSubscription')) {
+                try {
+                    $latest = $this->subscriptions()->where('status', 'active')->latest('created_at')->first(['plan_type']);
+                } catch (\Throwable) {
+                    $latest = null;
+                }
             }
         }
 
@@ -148,13 +259,30 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Source-of-truth boolean active flag.
+     * Uses loaded subscriptions relation whenever available; only lazy-loads on
+     * direct single-model access (never on serialized collections unless eager-loaded).
      */
     public function getSubscriptionActiveAttribute($value): bool
     {
-        $this->loadMissing('subscriptions');
-        $active = $this->subscriptions->firstWhere('status', 'active');
-        if ($active instanceof Subscription) {
-            return true;
+        if ($this->relationLoaded('subscriptions')) {
+            $active = $this->subscriptions->firstWhere('status', 'active');
+            if ($active instanceof Subscription) {
+                return true;
+            }
+        } elseif ($this->relationLoaded('latestSubscription')) {
+            $latest = $this->getRelation('latestSubscription');
+            if ($latest instanceof Subscription && $latest->status === 'active') {
+                return true;
+            }
+        } elseif ($this->exists) {
+            try {
+                $exists = $this->subscriptions()->where('status', 'active')->exists();
+                if ($exists) {
+                    return true;
+                }
+            } catch (\Throwable) {
+                // fall through to legacy column
+            }
         }
         return (bool) $value;
     }
@@ -224,7 +352,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function activeNfcCard()
     {
-        return $this->hasOne(NfcCard::class)->where('status', 'active');
+        return $this->hasOne(NfcCard::class)->whereIn('status', ['active', 'delivered', 'payment_verified', 'processing', 'shipped']);
     }
 
     /**
@@ -232,12 +360,36 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasPremiumSubscription()
     {
-        return in_array($this->subscription_plan, ['premium', 'basic','business'], true) && $this->subscription_active;
+        $hasActiveSub = in_array($this->subscription_plan, ['premium', 'basic','business'], true) && $this->subscription_active;
+        if ($hasActiveSub) {
+            return true;
+        }
+        if ($this->relationLoaded('nfcCards')) {
+            return $this->getRelation('nfcCards')->contains(function ($c) {
+                return in_array($c->status, ['payment_verified','processing','shipped','delivered','active'], true);
+            });
+        }
+        return (bool) $this->nfcCards()
+            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
+            ->limit(1)
+            ->count();
     }
 
     public function hasBasicSubscription()
     {
-        return in_array($this->subscription_plan, ['basic', 'premium', 'business'], true) && $this->subscription_active;
+        $hasActiveSub = in_array($this->subscription_plan, ['basic', 'premium', 'business'], true) && $this->subscription_active;
+        if ($hasActiveSub) {
+            return true;
+        }
+        if ($this->relationLoaded('nfcCards')) {
+            return $this->getRelation('nfcCards')->contains(function ($c) {
+                return in_array($c->status, ['payment_verified','processing','shipped','delivered','active'], true);
+            });
+        }
+        return (bool) $this->nfcCards()
+            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
+            ->limit(1)
+            ->count();
     }
 
     /**
@@ -245,12 +397,49 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasBusinessSubscription(): bool
     {
-        return $this->subscription_plan === 'business' && $this->subscription_active;
+        if ($this->subscription_plan === 'business' && $this->subscription_active) {
+            return true;
+        }
+        return $this->nfcCards()
+            ->where('subscription_plan', 'business')
+            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
+            ->exists();
     }
 
     public function hasPhysicalCard()
     {
-        return $this->nfcCards()->where('status', 'active')->exists();
+        return $this->nfcCards()->whereIn('status', ['active', 'delivered', 'shipped', 'processing', 'payment_verified'])->exists();
+    }
+
+    /**
+     * Check whether user is allowed to use paid ProfileBuilder features
+     * for a given plan tier (optional). Falls back to card-order status when
+     * subscription isn't officially active yet (e.g. payment verified, waiting for delivery).
+     */
+    public function canAccessPaidProfileBuilder(?string $plan = null): bool
+    {
+        $eligibleStatuses = ['payment_verified','processing','shipped','delivered','active'];
+
+        if ($plan === null) {
+            // Any paid card/subscription is fine
+            return $this->subscription_active
+                || $this->nfcCards()->whereIn('status', $eligibleStatuses)->exists();
+        }
+
+        $planMatch = in_array($plan, ['premium','business'], true)
+            ? [$plan]
+            : ['basic','premium','business'];
+
+        // Active subscription matches requested tier
+        if ($this->subscription_active && in_array($this->subscription_plan, $planMatch, true)) {
+            return true;
+        }
+
+        // Has card order matching tier, with verified+ status
+        return $this->nfcCards()
+            ->whereIn('subscription_plan', $planMatch)
+            ->whereIn('status', $eligibleStatuses)
+            ->exists();
     }
 
     /**
@@ -428,9 +617,12 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get quota information for Business account
      * Note: total_account_slots serves as the unified quota for both accounts and cards
-     * If admin assigns 10 slots, business can have max 10 accounts (including employees) and 10 cards total
+     * If admin assigns 10 slots, business can have max 10 accounts (including employees) and 10 cards total.
+     * Uses already-loaded Eloquent relations whenever possible to avoid N+1 DB queries.
+     *
+     * @param  bool  $useLoadedRelations  If true and relations are loaded, count via collection.
      */
-    public function getQuotaInfo(): array
+    public function getQuotaInfo(bool $useLoadedRelations = true): array
     {
         if (!$this->isBusinessAccount()) {
             return [
@@ -441,30 +633,34 @@ class User extends Authenticatable implements MustVerifyEmail
             ];
         }
 
-        // Use total_account_slots as the unified quota
         $totalQuota = $this->total_account_slots ?? 0;
-        
-        // Count employees (not including the business owner)
-        $employeesCount = $this->employees()->count();
-        
-        // Count ordered Business Plan cards (including business owner's card)
-        $orderedCardsCount = NfcCard::where('business_account_id', $this->id)
-            ->where('subscription_plan', 'business')
-            ->count();
 
-        // Total accounts = 1 (business owner) + employees
+        // Employee count — use loaded `employees` relation on collection if available
+        if ($useLoadedRelations && $this->relationLoaded('employees')) {
+            $employeesCount = $this->getRelation('employees')->count();
+        } else {
+            $employeesCount = $this->employees()->count();
+        }
+
+        // Ordered cards count — use loaded `nfcCards` relation filtered when available
+        if ($useLoadedRelations && $this->relationLoaded('nfcCards')) {
+            $orderedCardsCount = $this->getRelation('nfcCards')
+                ->where('subscription_plan', 'business')
+                ->count();
+        } else {
+            $orderedCardsCount = NfcCard::where('business_account_id', $this->id)
+                ->where('subscription_plan', 'business')
+                ->count();
+        }
+
         $totalAccounts = 1 + $employeesCount;
-        
-        // Available quota is the minimum of:
-        // 1. Remaining account slots (total - current accounts)
-        // 2. Remaining card quota (total - ordered cards)
         $availableForAccounts = max(0, $totalQuota - $totalAccounts);
         $availableForCards = max(0, $totalQuota - $orderedCardsCount);
 
         return [
             'total_quota' => $totalQuota,
-            'total_account_slots' => $totalQuota, // For backward compatibility
-            'total_card_quota' => $totalQuota, // For backward compatibility
+            'total_account_slots' => $totalQuota,
+            'total_card_quota' => $totalQuota,
             'employees_count' => $employeesCount,
             'total_accounts' => $totalAccounts,
             'ordered_cards_count' => $orderedCardsCount,

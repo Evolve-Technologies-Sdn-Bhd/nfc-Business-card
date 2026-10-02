@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">Card Templates</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Card Templates</h1>
           <p class="mt-2 text-secondary-600">
             Upload and manage NFC card design templates
           </p>
@@ -206,28 +206,50 @@
             </div>
 
             <form @submit.prevent="uploadTemplate" class="space-y-6">
-              <!-- Plan (single select) -->
+              <!-- Template Name -->
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Plan *</label>
-                <div class="grid grid-cols-2 gap-3">
-                  <label
-                    v-for="plan in planOptions"
-                    :key="plan.value"
-                    class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors"
-                    :class="uploadForm.plan === plan.value ? 'border-primary-500 bg-primary-50' : 'border-secondary-200 hover:border-secondary-300'"
-                    @click="uploadForm.plan = plan.value"
-                  >
-                    <input
-                      type="radio"
-                      :value="plan.value"
-                      v-model="uploadForm.plan"
-                      class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
-                    />
-                    <span class="ml-3">
-                      <span class="block text-sm font-medium text-secondary-900">{{ plan.label }}</span>
-                      <span class="block text-xs text-secondary-500">{{ plan.description }}</span>
-                    </span>
-                  </label>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Template Name *</label>
+                <input
+                  v-model="uploadForm.name"
+                  type="text"
+                  placeholder="e.g. Emerald Executive, Navy Signature"
+                  class="input"
+                  maxlength="80"
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                <textarea
+                  v-model="uploadForm.description"
+                  rows="2"
+                  placeholder="Short description about this template design"
+                  class="input resize-none"
+                  maxlength="200"
+                ></textarea>
+              </div>
+
+              <!-- Category & Plan (2-column grid) -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Category -->
+                <div>
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">Category</label>
+                  <select v-model="uploadForm.category" class="input">
+                    <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
+                      {{ cat.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Plan (single select) -->
+                <div>
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">Plan *</label>
+                  <select v-model="uploadForm.plan" class="input">
+                    <option v-for="plan in planOptions" :key="plan.value" :value="plan.value">
+                      {{ plan.label }} — {{ plan.description }}
+                    </option>
+                  </select>
                 </div>
               </div>
 
@@ -305,7 +327,8 @@
                 <button
                   type="submit"
                   class="btn btn-primary"
-                  :disabled="uploading || !isUploadFormValid"
+                  :disabled="uploading || _uploadSubmitLock || !isUploadFormValid"
+                  :aria-busy="uploading"
                 >
                   <div v-if="uploading" class="spinner mr-2"></div>
                   {{ uploading ? 'Uploading...' : 'Upload & Process' }}
@@ -332,12 +355,140 @@
 
             <form @submit.prevent="saveEdit" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Sort Order</label>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Template Name *</label>
                 <input
-                  v-model.number="editForm.sort_order"
-                  type="number"
+                  v-model="editForm.name"
+                  type="text"
                   class="input"
+                  maxlength="80"
                 />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                <textarea
+                  v-model="editForm.description"
+                  rows="2"
+                  class="input resize-none"
+                  maxlength="200"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">Category</label>
+                  <select v-model="editForm.category" class="input">
+                    <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
+                      {{ cat.label }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">Sort Order</label>
+                  <input
+                    v-model.number="editForm.sort_order"
+                    type="number"
+                    class="input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Plan Types</label>
+                <div class="flex flex-wrap gap-3 p-3 border border-secondary-200 rounded-lg bg-secondary-50">
+                  <label
+                    v-for="plan in planOptions"
+                    :key="plan.value"
+                    class="flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="plan.value"
+                      v-model="editForm.plan_types"
+                      class="h-4 w-4 text-primary-600 border-secondary-300 rounded"
+                    />
+                    <span class="ml-2 text-sm text-secondary-700">{{ plan.label }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Front Image Edit -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-secondary-700">Front Design</label>
+                  <button
+                    v-if="editFrontFile || editForm._removeFront"
+                    type="button"
+                    @click="revertFrontImage"
+                    class="text-xs text-secondary-500 hover:text-red-600"
+                  >
+                    Revert to original
+                  </button>
+                </div>
+                <div
+                  class="border-2 border-dashed border-secondary-300 rounded-lg p-4 text-center hover:border-secondary-400 transition-colors cursor-pointer"
+                  @click="editFrontInput?.click()"
+                  @dragover.prevent
+                  @drop.prevent="handleEditDrop($event, 'front')"
+                >
+                  <input
+                    ref="editFrontInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleEditFileSelect($event, 'front')"
+                  />
+                  <div v-if="editFrontPreview" class="mb-3">
+                    <img :src="editFrontPreview" alt="Front Preview" class="max-h-28 mx-auto rounded" />
+                  </div>
+                  <div v-else-if="editForm.front_image_url && !editForm._removeFront" class="mb-3">
+                    <img :src="getImageUrl(editForm.front_image_url)" alt="Current Front" class="max-h-28 mx-auto rounded opacity-70" />
+                  </div>
+                  <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
+                  <p class="text-sm text-secondary-600">
+                    {{ editFrontFile ? editFrontFile.name : (editForm._removeFront ? '(Image will be removed)' : 'Click or drag to replace front design (leave empty to keep)') }}
+                  </p>
+                  <p class="text-xs text-secondary-400 mt-1">PNG, JPG up to 10MB</p>
+                </div>
+              </div>
+
+              <!-- Back Image Edit -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-secondary-700">Back Design</label>
+                  <button
+                    v-if="editBackFile || editForm._removeBack"
+                    type="button"
+                    @click="revertBackImage"
+                    class="text-xs text-secondary-500 hover:text-red-600"
+                  >
+                    Revert to original
+                  </button>
+                </div>
+                <div
+                  class="border-2 border-dashed border-secondary-300 rounded-lg p-4 text-center hover:border-secondary-400 transition-colors cursor-pointer"
+                  @click="editBackInput?.click()"
+                  @dragover.prevent
+                  @drop.prevent="handleEditDrop($event, 'back')"
+                >
+                  <input
+                    ref="editBackInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleEditFileSelect($event, 'back')"
+                  />
+                  <div v-if="editBackPreview" class="mb-3">
+                    <img :src="editBackPreview" alt="Back Preview" class="max-h-28 mx-auto rounded" />
+                  </div>
+                  <div v-else-if="editForm.back_image_url && !editForm._removeBack" class="mb-3">
+                    <img :src="getImageUrl(editForm.back_image_url)" alt="Current Back" class="max-h-28 mx-auto rounded opacity-70" />
+                  </div>
+                  <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
+                  <p class="text-sm text-secondary-600">
+                    {{ editBackFile ? editBackFile.name : (editForm._removeBack ? '(Image will be removed)' : 'Click or drag to replace back design (leave empty to keep)') }}
+                  </p>
+                </div>
               </div>
 
               <div class="flex items-center gap-4">
@@ -353,7 +504,7 @@
 
               <div class="flex justify-end gap-3 pt-4">
                 <button type="button" @click="showEditModal = false" class="btn btn-outline">Cancel</button>
-                <button type="submit" class="btn btn-primary" :disabled="saving">
+                <button type="submit" class="btn btn-primary" :disabled="saving || !isEditFormValid">
                   <div v-if="saving" class="spinner mr-2"></div>
                   {{ saving ? 'Saving...' : 'Save Changes' }}
                 </button>
@@ -394,6 +545,8 @@
 </template>
 
 <script setup>
+import { markRaw, toRaw } from 'vue';
+
 definePageMeta({
   layout: 'admin-management',
   middleware: 'admin',
@@ -418,12 +571,31 @@ const deleteTarget = ref(null);
 
 // Upload form
 const uploadForm = reactive({
+  name: '',
+  description: '',
+  category: 'business',
   plan: 'business',
   frontFile: null,
   frontPreview: null,
   backFile: null,
   backPreview: null,
 });
+
+// ⚠️ PLAIN OBJECT (not reactive) untuk simpan File objects — 100% bypass Vue Proxy wrap
+// If we use reactive({ frontFile: File }), Vue 3 deep proxy can wrap File even with markRaw
+// → FormData.append("front_image", proxyFile) → [object Object] not binary!
+const __uploadFiles = Object.create(null);
+__uploadFiles.front = null;
+__uploadFiles.back = null;
+
+let _uploadSubmitLock = false;
+let _uploadAbortController = null;
+
+const categoryOptions = [
+  { value: 'business', label: 'Business' },
+  { value: 'personal', label: 'Personal' },
+  { value: 'creative', label: 'Creative' },
+];
 
 // Filter options
 const filters = [
@@ -475,7 +647,7 @@ const processingCount = computed(() => templates.value.filter(t => t.processing_
 const failedCount = computed(() => templates.value.filter(t => t.processing_status === 'failed').length);
 
 const isUploadFormValid = computed(() => {
-  return uploadForm.plan && uploadForm.frontFile;
+  return uploadForm.name.trim() && uploadForm.plan && uploadForm.frontFile;
 });
 
 // Methods
@@ -494,12 +666,31 @@ const loadTemplates = async () => {
   }
 };
 
+// Smart host detection helper (same logic as api.client.js)
+const _isLocalHostname = (h) =>
+  h === "localhost" ||
+  h === "127.0.0.1" ||
+  h === "0.0.0.0" ||
+  h.startsWith("10.") ||
+  h.startsWith("192.168.") ||
+  /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h);
+
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  // Handle relative URLs
-  const apiBase = config.public.apiBase || '';
-  return `${apiBase.replace('/api', '')}${url}`;
+  // Smartly pick base URL for local dev vs production
+  let apiBase = (config.public?.apiBase || config.public?.apiBaseUrl || '').trim();
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (_isLocalHostname(host)) {
+      const scheme = window.location.protocol === "https:" ? "https" : "http";
+      apiBase = `${scheme}://${host}:8000/api`;
+    }
+  }
+  if (!apiBase) {
+    apiBase = "http://localhost:8000/api";
+  }
+  return `${apiBase.replace(/\/api\/?$/, '')}${url.startsWith('/') ? url : '/' + url}`;
 };
 
 const getStatusBadgeClass = (status) => {
@@ -523,11 +714,17 @@ const getPlanBadgeClass = (plan) => {
 };
 
 const openUploadModal = () => {
+  uploadForm.name = '';
+  uploadForm.description = '';
+  uploadForm.category = 'business';
   uploadForm.plan = 'business';
   uploadForm.frontFile = null;
   uploadForm.frontPreview = null;
   uploadForm.backFile = null;
   uploadForm.backPreview = null;
+  // Clear non-reactive File storage too (to avoid accidentally re-uploading old file)
+  __uploadFiles.front = null;
+  __uploadFiles.back = null;
   showUploadModal.value = true;
 };
 
@@ -536,9 +733,11 @@ const handleFileSelect = (event, side) => {
   if (!file) return;
 
   if (side === 'front') {
+    __uploadFiles.front = file;                         // plain object = NO Vue Proxy wrap
     uploadForm.frontFile = file;
     uploadForm.frontPreview = URL.createObjectURL(file);
   } else {
+    __uploadFiles.back = file;
     uploadForm.backFile = file;
     uploadForm.backPreview = URL.createObjectURL(file);
   }
@@ -549,71 +748,238 @@ const handleDrop = (event, side) => {
   if (!file || !file.type.startsWith('image/')) return;
 
   if (side === 'front') {
+    __uploadFiles.front = file;
     uploadForm.frontFile = file;
     uploadForm.frontPreview = URL.createObjectURL(file);
   } else {
+    __uploadFiles.back = file;
     uploadForm.backFile = file;
     uploadForm.backPreview = URL.createObjectURL(file);
   }
 };
 
 const uploadTemplate = async () => {
+  if (_uploadSubmitLock) return;
   if (!isUploadFormValid.value) return;
 
+  if (_uploadAbortController) {
+    try { _uploadAbortController.abort(); } catch (_) {}
+    _uploadAbortController = null;
+  }
+  _uploadSubmitLock = true;
   uploading.value = true;
+
   try {
     const formData = new FormData();
-    // Auto-generate basic metadata so backend validation passes
     const selectedPlan = uploadForm.plan;
-    const planLabel = planOptions.find(p => p.value === selectedPlan)?.label || selectedPlan;
-    formData.append('name', `${planLabel} Template`);
-    formData.append('description', '');
-    formData.append('category', 'business');
+    formData.append('name', (uploadForm.name || '').trim() || `${planOptions.find(p => p.value === selectedPlan)?.label || 'Card'} Template`);
+    formData.append('description', (uploadForm.description || '').trim());
+    formData.append('category', uploadForm.category || 'business');
     formData.append('plan_types[]', selectedPlan);
-    formData.append('front_image', uploadForm.frontFile);
-    if (uploadForm.backFile) {
-      formData.append('back_image', uploadForm.backFile);
+
+    // ✅ Use __uploadFiles.front / back directly (native File, no Vue Proxy)
+    //    Laravel $request->hasFile('front_image') will return TRUE now
+    const frontFile = __uploadFiles.front;
+    if (frontFile && frontFile instanceof File && frontFile.size > 0) {
+      formData.append('front_image', frontFile, frontFile.name || 'front.png');
+    } else if (uploadForm.frontFile instanceof File && uploadForm.frontFile.size > 0) {
+      // Fallback (user programmatically set)
+      formData.append('front_image', uploadForm.frontFile, uploadForm.frontFile.name || 'front.png');
+    }
+    const backFile = __uploadFiles.back;
+    if (backFile && backFile instanceof File && backFile.size > 0) {
+      formData.append('back_image', backFile, backFile.name || 'back.png');
+    } else if (uploadForm.backFile instanceof File && uploadForm.backFile.size > 0) {
+      formData.append('back_image', uploadForm.backFile, uploadForm.backFile.name || 'back.png');
     }
 
+    if (typeof window !== 'undefined' && window.console && console.debug) {
+      const entries = [];
+      for (const [k, v] of formData.entries()) {
+        if (v instanceof File) {
+          entries.push(`  ${k}: File[name=${v.name}, size=${v.size}, type=${v.type}]`);
+        } else {
+          entries.push(`  ${k}: ${String(v)}`);
+        }
+      }
+      console.debug('[uploadTemplate] FormData contents:\n' + entries.join('\n'));
+    }
+
+    _uploadAbortController = new AbortController();
     const response = await $api.post('/admin/card-templates', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      signal: _uploadAbortController.signal,
     });
 
-    if (response.success) {
-      $toast.success('Template uploaded! Processing will begin shortly.');
+    if (response?.success === true) {
+      $toast.success(response.message || 'Template uploaded! Processing will begin shortly.');
       showUploadModal.value = false;
+      resetUploadForm();
       await loadTemplates();
     } else {
-      $toast.error(response.message || 'Failed to upload template');
+      const msg = response?.message || 'Failed to upload template';
+      $toast.error(msg);
+      console.warn('[uploadTemplate] backend returned success=false', response);
     }
   } catch (error) {
-    console.error('Upload error:', error);
-    $toast.error('Failed to upload template');
+    if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') return;
+    console.error('[uploadTemplate] error:', error);
+    const errData = error?.data || error?.response?.data || {};
+    const flattenErrors = (errs) => {
+      if (!errs || typeof errs !== 'object') return '';
+      const out = [];
+      for (const val of Object.values(errs)) {
+        if (Array.isArray(val)) out.push(...val.map(v => String(v)));
+        else if (val && typeof val === 'object') out.push(flattenErrors(val));
+        else out.push(String(val));
+      }
+      return out.filter(Boolean).join('; ');
+    };
+    const validationMsg = flattenErrors(errData.errors);
+    const msg = errData?.message || validationMsg || error?.message || 'Failed to upload template';
+    $toast.error(msg);
   } finally {
     uploading.value = false;
+    _uploadSubmitLock = false;
+    _uploadAbortController = null;
   }
 };
+const resetUploadForm = () => {
+  Object.assign(uploadForm, {
+    name: '',
+    description: '',
+    category: 'business',
+    plan: 'basic',
+    frontFile: null,
+    backFile: null,
+    frontPreview: null,
+    backPreview: null,
+  });
+  __uploadFiles.front = null;
+  __uploadFiles.back = null;
+};
+
+const editFrontFile = ref(null);
+const editFrontPreview = ref(null);
+const editBackFile = ref(null);
+const editBackPreview = ref(null);
+const editFrontInput = ref(null);
+const editBackInput = ref(null);
 
 const openEditModal = (template) => {
   editForm.value = {
     id: template.id,
     name: template.name,
     description: template.description,
-    category: template.category,
+    category: template.category || 'business',
     plan_types: [...(template.plan_types || [])],
     is_active: template.is_active,
     is_hidden: template.is_hidden,
     sort_order: template.sort_order || 0,
+    front_image_url: template.front_image_url,
+    back_image_url: template.back_image_url,
+    thumbnail_url: template.thumbnail_url,
+    _removeFront: false,
+    _removeBack: false,
   };
+  editFrontFile.value = null;
+  editFrontPreview.value = null;
+  editBackFile.value = null;
+  editBackPreview.value = null;
   showEditModal.value = true;
 };
 
+const handleEditFileSelect = (event, side) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (side === 'front') {
+    editFrontFile.value = markRaw(file);
+    editFrontPreview.value = URL.createObjectURL(file);
+    editForm.value._removeFront = false;
+  } else {
+    editBackFile.value = markRaw(file);
+    editBackPreview.value = URL.createObjectURL(file);
+    editForm.value._removeBack = false;
+  }
+};
+
+const handleEditDrop = (event, side) => {
+  const file = event.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  if (side === 'front') {
+    editFrontFile.value = markRaw(file);
+    editFrontPreview.value = URL.createObjectURL(file);
+    editForm.value._removeFront = false;
+  } else {
+    editBackFile.value = markRaw(file);
+    editBackPreview.value = URL.createObjectURL(file);
+    editForm.value._removeBack = false;
+  }
+};
+
+const revertFrontImage = () => {
+  editFrontFile.value = null;
+  editFrontPreview.value = null;
+  editForm.value._removeFront = false;
+};
+
+const revertBackImage = () => {
+  editBackFile.value = null;
+  editBackPreview.value = null;
+  editForm.value._removeBack = false;
+};
+
+const isEditFormValid = computed(() => {
+  return editForm.value
+    && editForm.value.name?.trim()
+    && Array.isArray(editForm.value.plan_types)
+    && editForm.value.plan_types.length > 0;
+});
+
 const saveEdit = async () => {
-  if (!editForm.value) return;
+  if (!editForm.value || !isEditFormValid.value) {
+    $toast.error('Template name and at least one plan type are required');
+    return;
+  }
 
   saving.value = true;
   try {
-    const response = await $api.put(`/admin/card-templates/${editForm.value.id}`, editForm.value);
+    const hasFiles = editFrontFile.value || editBackFile.value;
+    let response;
+
+    if (hasFiles) {
+      const formData = new FormData();
+      formData.append('_method', 'PUT');
+      formData.append('name', editForm.value.name.trim());
+      formData.append('description', (editForm.value.description || '').trim());
+      formData.append('category', editForm.value.category);
+      (editForm.value.plan_types || []).forEach((p, i) => {
+        formData.append(`plan_types[${i}]`, p);
+      });
+      formData.append('is_active', editForm.value.is_active ? 1 : 0);
+      formData.append('is_hidden', editForm.value.is_hidden ? 1 : 0);
+      formData.append('sort_order', editForm.value.sort_order ?? 0);
+      if (editFrontFile.value) {
+        const rawF = toRaw(editFrontFile.value);
+        formData.append('front_image', rawF, rawF.name || 'front.png');
+      }
+      if (editBackFile.value) {
+        const rawB = toRaw(editBackFile.value);
+        formData.append('back_image', rawB, rawB.name || 'back.png');
+      }
+      response = await $api.post(`/admin/card-templates/${editForm.value.id}`, formData);
+    } else {
+      const payload = {
+        name: editForm.value.name.trim(),
+        description: (editForm.value.description || '').trim(),
+        category: editForm.value.category,
+        plan_types: editForm.value.plan_types,
+        is_active: editForm.value.is_active,
+        is_hidden: editForm.value.is_hidden,
+        sort_order: editForm.value.sort_order ?? 0,
+      };
+      response = await $api.put(`/admin/card-templates/${editForm.value.id}`, payload);
+    }
+
     if (response.success) {
       $toast.success('Template updated');
       showEditModal.value = false;
@@ -623,7 +989,8 @@ const saveEdit = async () => {
     }
   } catch (error) {
     console.error('Save error:', error);
-    $toast.error('Failed to update template');
+    const msg = error?.data?.message || error?.response?.data?.message || error?.message || 'Failed to update template';
+    $toast.error(msg);
   } finally {
     saving.value = false;
   }

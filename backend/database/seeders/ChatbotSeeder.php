@@ -5,23 +5,61 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\ChatbotQuestion;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ChatbotSeeder extends Seeder
 {
+    private function isSqlite(): bool
+    {
+        return Schema::getConnection()->getDriverName() === 'sqlite';
+    }
+
+    private function disableForeignKeys(): void
+    {
+        try {
+            if ($this->isSqlite()) {
+                DB::statement('PRAGMA foreign_keys = OFF;');
+            } else {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            }
+        } catch (\Throwable) {
+            // ignore
+        }
+    }
+
+    private function enableForeignKeys(): void
+    {
+        try {
+            if ($this->isSqlite()) {
+                DB::statement('PRAGMA foreign_keys = ON;');
+            } else {
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            }
+        } catch (\Throwable) {
+            // ignore
+        }
+    }
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Disable foreign key checks temporarily
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
-        // Clear existing chatbot data
-        DB::table('chatbot_feedback')->truncate();
-        DB::table('chatbot_questions')->truncate();
-        
-        // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        $this->disableForeignKeys();
+
+        try {
+            if ($this->isSqlite()) {
+                DB::table('chatbot_feedback')->delete();
+                DB::table('chatbot_questions')->delete();
+            } else {
+                DB::table('chatbot_feedback')->truncate();
+                DB::table('chatbot_questions')->truncate();
+            }
+        } catch (\Throwable) {
+            // tables may not have rows yet
+        }
+
+        $this->enableForeignKeys();
 
         $questions = [
             [

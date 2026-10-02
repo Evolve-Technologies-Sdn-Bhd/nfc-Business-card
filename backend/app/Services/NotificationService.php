@@ -143,6 +143,60 @@ class NotificationService
             'icon' => '❌',
             'priority' => 'urgent',
         ],
+        'nfc_card_order_created' => [
+            'title' => 'NFC Card Order Received',
+            'message' => 'Your NFC card order #{nfc_card_id} has been received. Please make payment and upload the payment proof in Card Management.',
+            'icon' => '🛒',
+            'priority' => 'normal',
+        ],
+        'nfc_card_payment_proof_uploaded' => [
+            'title' => 'Payment Proof Submitted',
+            'message' => 'User {user_name} has submitted payment proof for card order #{nfc_card_id}. Please review and verify in the Admin NFC Cards page.',
+            'icon' => '💵',
+            'priority' => 'high',
+        ],
+        'nfc_card_payment_verified' => [
+            'title' => 'Payment Verified! 🎉',
+            'message' => 'Payment for card order #{nfc_card_id} totaling {amount} has been verified by admin. You can NOW start designing your digital profile!',
+            'icon' => '✅',
+            'priority' => 'high',
+        ],
+        'nfc_card_payment_rejected' => [
+            'title' => 'Payment Proof Rejected',
+            'message' => 'Payment proof for card order #{nfc_card_id} was rejected by admin. Reason: {rejection_reason}. Please upload a valid payment proof.',
+            'icon' => '❌',
+            'priority' => 'urgent',
+        ],
+        'nfc_card_processing' => [
+            'title' => 'Order Being Processed',
+            'message' => 'Your card order #{nfc_card_id} is being processed and prepared for shipment. We will notify you once the card has been dispatched.',
+            'icon' => '🏭',
+            'priority' => 'normal',
+        ],
+        'nfc_card_shipped' => [
+            'title' => 'Card Has Shipped! 🚚',
+            'message' => 'Your NFC card #{nfc_card_id} has been shipped via {courier}. Tracking No: {tracking_number}. After physical delivery, please open Card Management and press "I Have Received My Card" to activate.',
+            'icon' => '🚚',
+            'priority' => 'high',
+        ],
+        'nfc_card_delivered' => [
+            'title' => 'Card Confirmed Received',
+            'message' => 'Card order #{order_number} has been confirmed as physically received by the user. Subscription is now active.',
+            'icon' => '🟢',
+            'priority' => 'normal',
+        ],
+        'nfc_card_activated' => [
+            'title' => 'NFC Card Now Active! ✅',
+            'message' => 'Your NFC card #{card_id} has been activated. Your premium subscription is now active for 1 year!',
+            'icon' => '✅',
+            'priority' => 'high',
+        ],
+        'nfc_card_cancelled' => [
+            'title' => 'Order Cancelled',
+            'message' => 'Card order #{nfc_card_id} has been cancelled. Reason: {cancellation_reason}. For any inquiries please contact support.',
+            'icon' => '🚫',
+            'priority' => 'urgent',
+        ],
     ];
 
     /**

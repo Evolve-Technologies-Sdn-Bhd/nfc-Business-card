@@ -2,14 +2,15 @@
   <div
     :style="{
       minHeight: '100vh',
-      background: designSettings.backgroundColor,
+      background: designSettings.bgGradient || designSettings.backgroundColor,
       color: designSettings.textColor,
       position: 'relative',
       overflow: 'hidden',
       fontFamily: designSettings.fontFamily,
+      '--accent': designSettings.accentColor,
     }"
   >
-    <!-- Animations -->
+    <!-- Animations & Global Styles -->
     <component :is="'style'">
       {{
         `
@@ -26,7 +27,15 @@
         @keyframes slideInRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
+        @keyframes auroraShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+        @keyframes drift { 0% { transform: translate(-5%, -5%); } 100% { transform: translate(5%, 5%); } }
+        @keyframes shimmer { 0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.5); } 50% { opacity: 0.95; transform: rotate(180deg) scale(1); } }
+        @keyframes waveShift { 0% { background-position: 0 0; } 100% { background-position: 200px 0; } }
+        @keyframes meshMove { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(5%, -6%) scale(1.08); } 66% { transform: translate(-4%, 4%) scale(0.97); } }
+        .card-section { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-section:hover { transform: translateY(-4px); }
+
         :root {
           --sat: env(safe-area-inset-top, 0px);
           --sab: env(safe-area-inset-bottom, 0px);
@@ -70,71 +79,322 @@
       }}
     </component>
 
-    <!-- Modern Gradient Background -->
+    <!-- ============== DYNAMIC BACKGROUND ANIMATION LAYER ============== -->
     <div
+      v-if="designSettings.bgAnimation !== 'none'"
       :style="{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 0,
-        background: `linear-gradient(135deg, ${designSettings.backgroundColor} 0%, #1a1f3a 50%, #0f1419 100%)`,
-        overflow: 'hidden',
+        top: 0, left: 0, width: '100%', height: '100%',
+        zIndex: 0, pointerEvents: 'none', overflow: 'hidden',
       }"
     >
-      <!-- Animated Gradient Orbs -->
-      <div
-        :style="{
-          position: 'absolute',
-          width: isMobile ? '400px' : '600px',
-          height: isMobile ? '400px' : '600px',
-          background: 'radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%)',
-          borderRadius: '50%',
-          filter: 'blur(40px)',
-          animation: 'float 25s infinite ease-in-out',
-          top: '-200px',
-          left: '-200px',
-        }"
-      />
-      <div
-        :style="{
-          position: 'absolute',
-          width: isMobile ? '350px' : '550px',
-          height: isMobile ? '350px' : '550px',
-          background: 'radial-gradient(circle, rgba(240, 147, 251, 0.12) 0%, transparent 70%)',
-          borderRadius: '50%',
-          filter: 'blur(40px)',
-          animation: 'float 30s infinite ease-in-out',
-          bottom: '-150px',
-          right: '-150px',
-          animationDelay: '10s',
-        }"
-      />
-      <div
-        :style="{
-          position: 'absolute',
-          width: isMobile ? '300px' : '500px',
-          height: isMobile ? '300px' : '500px',
-          background: 'radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, transparent 70%)',
-          borderRadius: '50%',
-          filter: 'blur(40px)',
-          animation: 'float 35s infinite ease-in-out',
-          top: '40%',
-          right: '10%',
-          animationDelay: '5s',
-        }"
-      />
-      <!-- Subtle grid overlay -->
-      <div
-        :style="{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
-          opacity: 0.3,
-        }"
-      />
+      <!-- Floating Particles (Crystal Clear Bokeh) -->
+      <template v-if="designSettings.bgAnimation === 'particles'">
+        <div
+          v-for="i in 46"
+          :key="'p'+i"
+          :style="{
+            position: 'absolute',
+            width: (i % 4 === 0 ? '14px' : i % 3 === 0 ? '10px' : i % 2 === 0 ? '7px' : '5px'),
+            height: (i % 4 === 0 ? '14px' : i % 3 === 0 ? '10px' : i % 2 === 0 ? '7px' : '5px'),
+            borderRadius: '9999px',
+            background: i % 3 === 0
+              ? `radial-gradient(circle at 30% 30%, ${designSettings.accentColor}, ${designSettings.textColor})`
+              : designSettings.textColor,
+            opacity: i % 4 === 0 ? 0.78 : i % 3 === 0 ? 0.55 : i % 2 === 0 ? 0.38 : 0.26,
+            top: ((i * 137) % 100) + '%',
+            left: ((i * 89) % 100) + '%',
+            animation: `particleFloat ${5 + (i % 7)}s ease-in-out infinite`,
+            animationDelay: ((i * 0.21) % 4) + 's',
+            boxShadow: i % 4 === 0
+              ? `0 0 14px ${designSettings.accentColor}aa, 0 0 6px ${designSettings.textColor}88`
+              : `0 0 7px ${designSettings.textColor}66`,
+          }"
+        ></div>
+      </template>
+
+      <!-- Aurora Borealis (Brighter + Multicolor Bands) -->
+      <template v-else-if="designSettings.bgAnimation === 'aurora'">
+        <div
+          :style="{
+            position: 'absolute', inset: '-25%',
+            background: `linear-gradient(115deg, rgba(56,189,248,0.72), rgba(168,85,247,0.68) 22%, rgba(236,72,153,0.6) 45%, rgba(20,184,166,0.62) 68%, rgba(129,140,248,0.7) 90%)`,
+            backgroundSize: '300% 300%',
+            animation: 'auroraShift 14s ease infinite',
+            filter: 'blur(52px)',
+            mixBlendMode: 'screen',
+          }"
+        ></div>
+        <div
+          :style="{
+            position: 'absolute', inset: '-15%',
+            background: `radial-gradient(ellipse at 20% 20%, ${designSettings.accentColor}55 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(236,72,153,0.45) 0%, transparent 50%)`,
+            backgroundSize: '220% 220%',
+            animation: 'auroraShift 22s ease-in-out infinite reverse',
+            filter: 'blur(35px)',
+          }"
+        ></div>
+      </template>
+
+      <!-- Gradient Mesh Blobs (Thicker + Sharper Edges) -->
+      <template v-else-if="designSettings.bgAnimation === 'mesh-gradient'">
+        <div
+          :style="{
+            position: 'absolute',
+            width: '62%', height: '62%',
+            top: '-18%', left: '-14%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.82) 0%, rgba(99,102,241,0.15) 45%, transparent 72%)',
+            animation: 'meshMove 18s ease-in-out infinite',
+            filter: 'blur(22px)',
+            mixBlendMode: 'screen',
+          }"
+        ></div>
+        <div
+          :style="{
+            position: 'absolute',
+            width: '58%', height: '58%',
+            top: '12%', right: '-18%',
+            background: 'radial-gradient(circle, rgba(236,72,153,0.78) 0%, rgba(236,72,153,0.12) 45%, transparent 70%)',
+            animation: 'meshMove 22s ease-in-out infinite reverse',
+            filter: 'blur(22px)',
+            mixBlendMode: 'screen',
+          }"
+        ></div>
+        <div
+          :style="{
+            position: 'absolute',
+            width: '68%', height: '60%',
+            bottom: '-22%', left: '22%',
+            background: 'radial-gradient(circle, rgba(20,184,166,0.78) 0%, rgba(20,184,166,0.15) 45%, transparent 72%)',
+            animation: 'meshMove 20s ease-in-out infinite',
+            animationDelay: '-4s',
+            filter: 'blur(22px)',
+            mixBlendMode: 'screen',
+          }"
+        ></div>
+        <div
+          :style="{
+            position: 'absolute',
+            width: '48%', height: '48%',
+            top: '30%', left: '26%',
+            background: `radial-gradient(circle, ${designSettings.accentColor}88 0%, transparent 60%)`,
+            animation: 'meshMove 26s ease-in-out infinite reverse',
+            animationDelay: '-8s',
+            filter: 'blur(28px)',
+            mixBlendMode: 'screen',
+          }"
+        ></div>
+      </template>
+
+      <!-- Starfield (Crisp White Stars w/ Distinct Sizes) -->
+      <template v-else-if="designSettings.bgAnimation === 'starfield'">
+        <template v-for="i in 90" :key="'s'+i">
+          <div
+            v-if="i % 7 === 0"
+            :style="{
+              position: 'absolute',
+              width: '3px', height: '3px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              top: ((i * 149) % 100) + '%',
+              left: ((i * 71) % 100) + '%',
+              animation: `twinkle ${2 + (i % 4)}s ease-in-out infinite`,
+              animationDelay: ((i * 0.13) % 3) + 's',
+              boxShadow: '0 0 10px rgba(255,255,255,0.95), 0 0 20px rgba(200,220,255,0.6)',
+            }"
+          ></div>
+          <div
+            v-else-if="i % 3 === 0"
+            :style="{
+              position: 'absolute',
+              width: '2px', height: '2px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              top: ((i * 127) % 100) + '%',
+              left: ((i * 89) % 100) + '%',
+              animation: `twinkle ${2.5 + (i % 5)}s ease-in-out infinite`,
+              animationDelay: ((i * 0.17) % 3) + 's',
+              boxShadow: '0 0 6px rgba(255,255,255,0.85)',
+            }"
+          ></div>
+          <div
+            v-else
+            :style="{
+              position: 'absolute',
+              width: '1.3px', height: '1.3px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              top: ((i * 181) % 100) + '%',
+              left: ((i * 101) % 100) + '%',
+              animation: `twinkle ${3 + (i % 5)}s ease-in-out infinite`,
+              animationDelay: ((i * 0.11) % 3) + 's',
+              boxShadow: '0 0 3px rgba(255,255,255,0.7)',
+            }"
+          ></div>
+        </template>
+      </template>
+
+      <!-- Slow Waves (Deeper Path + 3 Layers + Stronger Opacity) -->
+      <template v-else-if="designSettings.bgAnimation === 'slow-waves'">
+        <svg :style="{ position: 'absolute', inset: 0, width: '100%', height: '100%' }" preserveAspectRatio="none" viewBox="0 0 1200 800">
+          <defs>
+            <linearGradient id="wave1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" :stop-color="designSettings.accentColor" stop-opacity="0.38" />
+              <stop offset="60%" :stop-color="designSettings.textColor" stop-opacity="0.14" />
+              <stop offset="100%" :stop-color="designSettings.textColor" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="wave2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" :stop-color="designSettings.textColor" stop-opacity="0.22" />
+              <stop offset="100%" :stop-color="designSettings.textColor" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path d="M0,120 C200,20 400,220 600,140 C800,60 1000,240 1200,160 L1200,800 L0,800 Z" fill="url(#wave1)">
+            <animate attributeName="d" values="
+              M0,120 C200,20 400,220 600,140 C800,60 1000,240 1200,160 L1200,800 L0,800 Z;
+              M0,170 C200,280 400,80 600,190 C800,280 1000,80 1200,180 L1200,800 L0,800 Z;
+              M0,120 C200,20 400,220 600,140 C800,60 1000,240 1200,160 L1200,800 L0,800 Z
+            " dur="11s" repeatCount="indefinite" />
+          </path>
+          <path d="M0,300 C200,200 400,400 600,300 C800,200 1000,400 1200,320 L1200,800 L0,800 Z" fill="url(#wave2)">
+            <animate attributeName="d" values="
+              M0,300 C200,200 400,400 600,300 C800,200 1000,400 1200,320 L1200,800 L0,800 Z;
+              M0,360 C200,450 400,260 600,360 C800,460 1000,260 1200,380 L1200,800 L0,800 Z;
+              M0,300 C200,200 400,400 600,300 C800,200 1000,400 1200,320 L1200,800 L0,800 Z
+            " dur="14s" repeatCount="indefinite" />
+          </path>
+          <path d="M0,520 C200,440 400,600 600,520 C800,440 1000,600 1200,540 L1200,800 L0,800 Z" fill="url(#wave2)" opacity="0.55">
+            <animate attributeName="d" values="
+              M0,520 C200,440 400,600 600,520 C800,440 1000,600 1200,540 L1200,800 L0,800 Z;
+              M0,580 C200,660 400,500 600,590 C800,670 1000,500 1200,610 L1200,800 L0,800 Z;
+              M0,520 C200,440 400,600 600,520 C800,440 1000,600 1200,540 L1200,800 L0,800 Z
+            " dur="17s" repeatCount="indefinite" />
+          </path>
+        </svg>
+      </template>
+
+      <!-- Magic Sparkle (Bigger + More + Accent Glow) -->
+      <template v-else-if="designSettings.bgAnimation === 'sparkle'">
+        <template v-for="i in 34" :key="'sp'+i">
+          <div
+            :style="{
+              position: 'absolute',
+              width: (i % 4 === 0 ? '40px' : i % 3 === 0 ? '30px' : '22px'),
+              height: (i % 4 === 0 ? '40px' : i % 3 === 0 ? '30px' : '22px'),
+              top: ((i * 151) % 100) + '%',
+              left: ((i * 97) % 100) + '%',
+              animation: `shimmer ${2.6 + (i % 5)}s ease-in-out infinite`,
+              animationDelay: ((i * 0.29) % 3.5) + 's',
+            }"
+          >
+            <svg viewBox="0 0 24 24" fill="none" :style="{
+              filter: `drop-shadow(0 0 8px ${designSettings.accentColor}cc) drop-shadow(0 0 3px ${designSettings.textColor}aa)`,
+              width: '100%', height: '100%',
+            }">
+              <path
+                d="M12 1.5 L13.8 9.8 L22.5 12 L13.8 14.2 L12 22.5 L10.2 14.2 L1.5 12 L10.2 9.8 Z"
+                :fill="i % 2 === 0 ? designSettings.accentColor : designSettings.textColor"
+                opacity="0.92"
+              />
+            </svg>
+          </div>
+        </template>
+      </template>
+
+      <!-- Dotted Grid (Sharper + Crisp Larger Dots, Vignette so center is CLEAR) -->
+      <template v-else-if="designSettings.bgAnimation === 'grid-dots'">
+        <div
+          :style="{
+            position: 'absolute', inset: 0,
+            backgroundImage: `radial-gradient(${designSettings.textColor} 1.8px, transparent 1.8px)`,
+            backgroundSize: '28px 28px',
+            opacity: 0.55,
+            maskImage: 'radial-gradient(ellipse 130% 95% at center, black 55%, transparent 92%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 130% 95% at center, black 55%, transparent 92%)',
+          }"
+        ></div>
+        <div
+          :style="{
+            position: 'absolute', inset: 0,
+            backgroundImage: `radial-gradient(${designSettings.accentColor} 1.2px, transparent 1.2px)`,
+            backgroundSize: '56px 56px',
+            backgroundPosition: '14px 14px',
+            opacity: 0.35,
+            maskImage: 'radial-gradient(ellipse 130% 95% at center, black 50%, transparent 92%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 130% 95% at center, black 50%, transparent 92%)',
+          }"
+        ></div>
+      </template>
+      <!-- NEW 9: Fireflies Amber Glow -->
+      <template v-else-if="designSettings.bgAnimation === 'fireflies'">
+        <div v-for="(s,i) in 24" :key="'firefly'+i" class="pointer-events-none absolute rounded-full" :style="{
+          width: (4 + (i%3)*3) + 'px',
+          height: (4 + (i%3)*3) + 'px',
+          left: ((i*37.2) % 100) + '%',
+          top: ((i*53.7) % 100) + '%',
+          background: `radial-gradient(circle, ${hexToRgba('#FDE68A', 1)} 0%, ${hexToRgba('#F59E0B', 0.95)} 50%, transparent 75%)`,
+          boxShadow: `0 0 ${10 + (i%4)*5}px ${hexToRgba('#FBBF24', 0.62)}`,
+          opacity: (0.35 + ((i*7)%55)/100),
+          animation: `fireflyFloat ${9 + (i%4)*2.4}s ease-in-out ${(i%8)*0.45}s infinite alternate, twinkle ${3 + (i%5)*0.5}s ease-in-out ${(i%6)*0.2}s infinite`,
+        }"></div>
+      </template>
+      <!-- NEW 10: Bokeh Dreamy Circles (blue/pink/green/yellow/purple) -->
+      <template v-else-if="designSettings.bgAnimation === 'bokeh'">
+        <div class="pointer-events-none absolute rounded-full blur-[42px]" style="width:56%;height:56%;left:6%;top:12%;background:radial-gradient(circle,rgba(96,165,250,0.62) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[48px]" style="width:62%;height:62%;right:2%;top:22%;background:radial-gradient(circle,rgba(244,114,182,0.58) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[44px]" style="width:54%;height:54%;left:18%;bottom:4%;background:radial-gradient(circle,rgba(52,211,153,0.6) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[50px]" style="width:58%;height:58%;right:10%;bottom:8%;background:radial-gradient(circle,rgba(250,204,21,0.55) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[38px]" style="width:42%;height:42%;left:38%;top:36%;background:radial-gradient(circle,rgba(168,85,247,0.55) 0%,transparent 72%);"></div>
+      </template>
+      <!-- NEW 11: Liquid Metaball Blobs (4 moving gradient ellipses + 4 sizes + keyframes drift) -->
+      <template v-else-if="designSettings.bgAnimation === 'liquid-blobs'">
+        <div class="pointer-events-none absolute blur-[30px]" style="width:42%;height:34%;left:14%;top:14%;border-radius:56% 44% 60% 40%/52% 48% 52% 48%;background:radial-gradient(ellipse,rgba(244,114,182,0.72) 0%,transparent 70%);animation:liquidDriftA 22s ease-in-out infinite;"></div>
+        <div class="pointer-events-none absolute blur-[34px]" style="width:46%;height:38%;right:8%;bottom:10%;border-radius:42% 58% 46% 54%/48% 52% 48% 52%;background:radial-gradient(ellipse,rgba(34,211,238,0.68) 0%,transparent 70%);animation:liquidDriftB 26s ease-in-out infinite;"></div>
+        <div class="pointer-events-none absolute blur-[28px]" style="width:34%;height:28%;right:16%;top:10%;border-radius:50% 50% 42% 58%/56% 44% 56% 44%;background:radial-gradient(ellipse,rgba(168,85,247,0.65) 0%,transparent 70%);animation:liquidDriftA 19s ease-in-out -4s infinite reverse;"></div>
+        <div class="pointer-events-none absolute blur-[32px]" style="width:40%;height:32%;left:10%;bottom:16%;border-radius:48% 52% 54% 46%/44% 56% 44% 56%;background:radial-gradient(ellipse,rgba(250,204,21,0.62) 0%,transparent 70%);animation:liquidDriftB 24s ease-in-out -3s infinite reverse;"></div>
+      </template>
+      <!-- NEW 12: Neon Diagonal Lines (cyan + magenta criss-cross) -->
+      <template v-else-if="designSettings.bgAnimation === 'neon-lines'">
+        <div class="pointer-events-none absolute inset-0 opacity-75" style="background:repeating-linear-gradient(125deg,transparent 0 44px,linear-gradient(90deg,rgba(34,211,238,0.0),rgba(34,211,238,0.45) 50%,rgba(34,211,238,0.0)) 44px 48px),repeating-linear-gradient(55deg,transparent 0 60px,linear-gradient(90deg,rgba(244,114,182,0.0),rgba(244,114,182,0.38) 50%,rgba(244,114,182,0.0)) 60px 64px);"></div>
+        <div class="pointer-events-none absolute inset-0" style="background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.15) 45%,rgba(0,0,0,0.25) 100%);mask-image:radial-gradient(ellipse at center,black 35%,transparent 78%);-webkit-mask-image:radial-gradient(ellipse at center,black 35%,transparent 78%);"></div>
+      </template>
+      <!-- NEW 13: Snow Fall White (42 flakes 3 size tiers + fall keyframe) -->
+      <template v-else-if="designSettings.bgAnimation === 'snow-fall'">
+        <div v-for="(s,i) in 42" :key="'snow'+i" class="pointer-events-none absolute rounded-full bg-white" :style="{
+          width: (2 + (i%3)*2) + 'px',
+          height: (2 + (i%3)*2) + 'px',
+          left: ((i*43.9) % 100) + '%',
+          top: ((i*-13.1 + 500) % 110 - 10) + '%',
+          opacity: (0.45 + ((i*11)%50)/100),
+          boxShadow: ((i%3)===2)?'0 0 6px rgba(255,255,255,0.7)':'none',
+          animation: `snowFall ${10 + (i%5)*3.2}s linear ${(i%9)*0.7}s infinite`,
+        }"></div>
+      </template>
+      <!-- NEW 14: Cosmic Dust Purple + mini star sparkle -->
+      <template v-else-if="designSettings.bgAnimation === 'cosmic-dust'">
+        <div class="pointer-events-none absolute blur-[36px]" style="width:52%;height:52%;left:8%;top:10%;background:radial-gradient(circle,rgba(168,85,247,0.55) 0%,transparent 72%);animation:auroraShift 24s ease-in-out infinite alternate;"></div>
+        <div class="pointer-events-none absolute blur-[40px]" style="width:56%;height:56%;right:0%;top:22%;background:radial-gradient(circle,rgba(236,72,153,0.48) 0%,transparent 72%);animation:auroraShift 28s ease-in-out -3s infinite alternate-reverse;"></div>
+        <div class="pointer-events-none absolute blur-[34px]" style="width:48%;height:48%;left:22%;bottom:2%;background:radial-gradient(circle,rgba(99,102,241,0.55) 0%,transparent 72%);animation:auroraShift 22s ease-in-out -7s infinite alternate;"></div>
+        <div class="pointer-events-none absolute blur-[38px]" style="width:50%;height:50%;right:14%;bottom:6%;background:radial-gradient(circle,rgba(56,189,248,0.5) 0%,transparent 72%);animation:auroraShift 30s ease-in-out -11s infinite alternate-reverse;"></div>
+        <div v-for="(s,i) in 30" :key="'dusttwinkle'+i" class="pointer-events-none absolute rounded-full bg-white" :style="{
+          width: (1.5 + (i%2)) + 'px', height: (1.5 + (i%2)) + 'px',
+          left: ((i*61.3)%100)+'%', top: ((i*29.7)%100)+'%',
+          opacity: (0.4 + ((i*13)%45)/100),
+          animation: `twinkle ${2.6 + (i%4)*0.4}s ease-in-out ${(i%7)*0.25}s infinite`,
+        }"></div>
+      </template>
+      <!-- NEW 15: Confetti Pop Color (rainbow 8 colors + 58 dots + bouncePulse keyframe mix) -->
+      <template v-else-if="designSettings.bgAnimation === 'confetti-pop'">
+        <div v-for="(c,i) in 58" :key="'confetti'+i" class="pointer-events-none absolute" :style="{
+          width: (3 + (i%3)*2.2) + 'px', height: (6 + (i%4)*2) + 'px',
+          left: ((i*31.7)%100) + '%',
+          top: ((i*47.3)%100) + '%',
+          background: ['#EF4444','#F59E0B','#10B981','#22D3EE','#A855F7','#EC4899','#60A5FA','#FBBF24'][i%8],
+          borderRadius: ((i%5)===0)?'50%':((i%3)===1)?'1px':'4px',
+          transform: `rotate(${(i*19)%360}deg)`,
+          opacity: (0.5 + ((i*17)%45)/100),
+          animation: `bouncePulse ${3.6 + (i%6)*0.3}s ease-in-out ${(i%8)*0.2}s infinite`,
+        }"></div>
+      </template>
     </div>
 
     <!-- Back to Home Button -->
@@ -161,7 +421,7 @@
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: isMobile ? '12px' : '15px',
-          color: 'white',
+          color: responsive.textPrimary,
           fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
           fontWeight: 600,
           cursor: 'pointer',
@@ -211,7 +471,7 @@
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           borderRadius: isMobile ? '12px' : '15px',
-          color: 'white',
+          color: responsive.textPrimary,
           fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
           fontWeight: 600,
           cursor: 'pointer',
@@ -237,33 +497,6 @@
       </button>
     </Transition>
 
-    <!-- Preview Mode Banner - Minimal (sits above fixed chrome buttons) -->
-    <Transition name="fade-slide">
-      <div
-        v-if="isPreviewMode"
-        :style="{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1001,
-          textAlign: 'center',
-          background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
-          color: 'white',
-          fontWeight: 600,
-          fontSize: isSmallMobile ? '10px' : '11px',
-          padding: `calc(4px + var(--sat, 0px)) 10px 4px`,
-          letterSpacing: '0.4px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
-        }"
-      >
-        <span class="inline-flex items-center gap-1.5">
-          <Icon name="heroicons:eye" :class="isSmallMobile ? 'w-3 h-3' : 'w-3.5 h-3.5'" aria-hidden="true" />
-          Preview Mode
-        </span>
-      </div>
-    </Transition>
-
     <div
       :style="{
         position: 'relative',
@@ -276,7 +509,7 @@
       <!-- Loading State -->
       <div
         v-if="loading"
-        :style="{ textAlign: 'center', padding: '60px 20px', color: 'white' }"
+        :style="{ textAlign: 'center', padding: '60px 20px', color: responsive.textPrimary }"
       >
         <div :style="{ marginBottom: '20px' }">
           <Icon name="heroicons:arrow-path" class="w-12 h-12 animate-spin text-white/70 mx-auto" aria-hidden="true" />
@@ -297,13 +530,13 @@
         <div :style="{ marginBottom: '20px' }">
           <Icon name="heroicons:document-text" class="w-20 h-20 text-white/60 mx-auto" aria-hidden="true" />
         </div>
-        <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px', color: 'white' }">
+        <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px', color: responsive.textPrimary }">
           No Profile Data Yet
         </h2>
         <p
           :style="{
             fontSize: responsive.bodySize,
-            color: 'rgba(255, 255, 255, 0.8)',
+            color: responsive.textPrimary,
             marginBottom: '30px',
             lineHeight: '1.6',
           }"
@@ -318,7 +551,7 @@
           :style="{
             padding: '15px 30px',
             background: 'linear-gradient(135deg, #667eea, #764ba2)',
-            color: 'white',
+            color: responsive.textPrimary,
             border: 'none',
             borderRadius: '50px',
             fontSize: responsive.bodySize,
@@ -337,7 +570,7 @@
       <!-- Profile Not Found -->
       <div
         v-else-if="profileNotFound"
-        :style="{ textAlign: 'center', padding: '60px 20px', color: 'white' }"
+        :style="{ textAlign: 'center', padding: '60px 20px', color: responsive.textPrimary }"
       >
         <div :style="{ marginBottom: '20px' }">
           <Icon name="heroicons:x-circle" class="w-[72px] h-[72px] text-white/60 mx-auto" aria-hidden="true" />
@@ -348,7 +581,7 @@
         <p
           :style="{
             fontSize: responsive.bodySize,
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: responsive.textMuted,
           }"
         >
           This profile doesn't exist or has been removed.
@@ -362,8 +595,8 @@
           :style="{
             position: 'relative',
             background: responsive.cardBackground,
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
+            backdropFilter: `blur(${responsive.cardBackdropBlur})`,
+            WebkitBackdropFilter: `blur(${responsive.cardBackdropBlur})`,
             border: responsive.cardBorder,
             borderRadius: responsive.borderRadius,
             padding: '0',
@@ -517,7 +750,7 @@
               :style="{
                 fontSize: responsive.nameSize,
                 fontWeight: 800,
-                color: 'white',
+                color: responsive.textPrimary,
                 marginBottom: isSmallMobile ? '18px' : isPhablet ? '22px' : isMobile ? '26px' : isTablet ? '28px' : '30px',
                 letterSpacing: isSmallMobile ? '0.5px' : isPhablet ? '1px' : isMobile ? '1.2px' : '2px',
                 lineHeight: 1.15,
@@ -565,7 +798,7 @@
                   WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
-                  color: '#fff',
+                  color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.3s',
@@ -590,7 +823,7 @@
                   WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3))',
-                  color: '#fff',
+                  color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.4s',
@@ -616,7 +849,7 @@
                   WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3))',
-                  color: '#fff',
+                  color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
                   animationDelay: '0.5s',
@@ -633,7 +866,7 @@
             <p
               v-if="profile.tagline"
               :style="{
-                color: 'rgba(255, 255, 255, 0.8)',
+                color: responsive.textPrimary,
                 fontSize: responsive.bodySize,
                 fontStyle: 'italic',
                 marginTop: isSmallMobile ? '14px' : isPhablet ? '16px' : '20px',
@@ -711,7 +944,7 @@
               WebkitBackdropFilter: 'blur(10px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: isMobile ? '15px' : '20px',
-              color: 'white',
+              color: responsive.textPrimary,
               fontWeight: 600,
               cursor: 'pointer',
               overflow: 'hidden',
@@ -787,7 +1020,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -855,7 +1088,7 @@
                         justifyContent: 'center',
                         fontSize: isMobile ? '24px' : '32px',
                         fontWeight: 800,
-                        color: 'white',
+                        color: responsive.textPrimary,
                         zIndex: 1,
                       }"
                     >
@@ -871,7 +1104,7 @@
                     :style="{
                       fontSize: responsive.h3Size,
                       fontWeight: 800,
-                      color: 'white',
+                      color: responsive.textPrimary,
                       marginBottom: '10px',
                     }"
                   >
@@ -882,7 +1115,7 @@
                   <p
                     v-if="company.registrationNo && isFieldVisible('companyTeam', 'companyRegNo')"
                     :style="{
-                      color: 'rgba(255, 255, 255, 0.6)',
+                      color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       marginBottom: '8px',
                     }"
@@ -909,7 +1142,7 @@
                         background: 'rgba(102, 126, 234, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       🏭 {{ company.industry }}
@@ -924,7 +1157,7 @@
                         background: 'rgba(240, 147, 251, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       📅 Est. {{ company.establishedYear }}
@@ -939,7 +1172,7 @@
                         background: 'rgba(79, 172, 254, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       👥 {{ company.employeeCount }} employees
@@ -950,7 +1183,7 @@
                   <p
                     v-if="company.description && isFieldVisible('companyTeam', 'companyDescription')"
                     :style="{
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: responsive.textMuted,
                       fontSize: responsive.bodySize,
                       lineHeight: '1.6',
                       marginBottom: '12px',
@@ -1010,7 +1243,7 @@
                   :style="{
                     fontSize: responsive.h3Size,
                     fontWeight: 700,
-                    color: 'white',
+                    color: responsive.textPrimary,
                     margin: 0,
                   }"
                 >
@@ -1099,7 +1332,7 @@
                         justifyContent: 'center',
                         fontSize: isMobile ? '20px' : '28px',
                         fontWeight: 800,
-                        color: 'white',
+                        color: responsive.textPrimary,
                         border: '2px solid rgba(10, 14, 39, 0.5)',
                       }"
                     >
@@ -1108,7 +1341,7 @@
                   </div>
                   <h4
                     :style="{
-                      color: 'white',
+                      color: responsive.textPrimary,
                       fontSize: responsive.h4Size,
                       fontWeight: 700,
                       margin: '0 0 6px 0',
@@ -1118,7 +1351,7 @@
                   </h4>
                   <p
                     :style="{
-                      color: 'rgba(255, 255, 255, 0.6)',
+                      color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       margin: 0,
                     }"
@@ -1185,7 +1418,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -1198,7 +1431,7 @@
               <p
                 v-if="profile.bio && isFieldVisible('profileAchievements', 'bio')"
                 :style="{
-                  color: 'rgba(255, 255, 255, 0.8)',
+                  color: responsive.textPrimary,
                   lineHeight: '1.8',
                   whiteSpace: 'normal',
                   overflowWrap: 'break-word',
@@ -1245,7 +1478,7 @@
                   </div>
                   <div
                     :style="{
-                      color: 'rgba(255, 255, 255, 0.6)',
+                      color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
                     }"
@@ -1291,7 +1524,7 @@
                   :style="{
                     fontSize: responsive.h3Size,
                     fontWeight: 700,
-                    color: 'white',
+                    color: responsive.textPrimary,
                     margin: 0,
                   }"
                 >
@@ -1303,7 +1536,7 @@
               <div v-if="profile.education?.length > 0 && isFieldVisible('profileAchievements', 'education')" :style="{ marginBottom: profile.certifications?.length > 0 ? '24px' : '0' }">
                 <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
                   <span :style="{ fontSize: '18px' }">📚</span>
-                  <h4 :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Education</h4>
+                  <h4 :style="{ color: responsive.textPrimary, fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Education</h4>
                 </div>
                 <div :style="{ display: 'grid', gap: '16px', position: 'relative', paddingLeft: isMobile ? '0' : '20px' }">
                   <!-- Timeline line -->
@@ -1326,8 +1559,8 @@
                     <div v-if="!isMobile" :style="{ position: 'absolute', left: '-26px', top: '24px', width: '12px', height: '12px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '50%', border: '2px solid rgba(10, 14, 39, 0.9)' }" />
                     <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }">
                       <div :style="{ flex: 1 }">
-                        <p :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px' }">{{ edu.degree || edu.name }}</p>
-                        <p v-if="edu.institution" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize, display: 'flex', alignItems: 'center', gap: '6px' }">
+                        <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px' }">{{ edu.degree || edu.name }}</p>
+                        <p v-if="edu.institution" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, display: 'flex', alignItems: 'center', gap: '6px' }">
                           <span>🏛️</span> {{ edu.institution }}
                         </p>
                       </div>
@@ -1341,7 +1574,7 @@
               <div v-if="profile.certifications?.length > 0 && isFieldVisible('profileAchievements', 'certifications')">
                 <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
                   <span :style="{ fontSize: '18px' }">📜</span>
-                  <h4 :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Certifications</h4>
+                  <h4 :style="{ color: responsive.textPrimary, fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Certifications</h4>
                 </div>
                 <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }">
                   <div
@@ -1364,9 +1597,9 @@
                       <span :style="{ fontSize: '20px' }">✅</span>
                     </div>
                     <div :style="{ flex: 1 }">
-                      <p :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px' }">{{ cert.name }}</p>
-                      <p v-if="cert.issuer" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize, marginBottom: '4px' }">{{ cert.issuer }}</p>
-                      <span v-if="cert.year" :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: responsive.smallSize }">{{ cert.year }}</span>
+                      <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px' }">{{ cert.name }}</p>
+                      <p v-if="cert.issuer" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px' }">{{ cert.issuer }}</p>
+                      <span v-if="cert.year" :style="{ color: responsive.textSubtle, fontSize: responsive.smallSize }">{{ cert.year }}</span>
                     </div>
                   </div>
                 </div>
@@ -1407,7 +1640,7 @@
                   :style="{
                     fontSize: responsive.h3Size,
                     fontWeight: 700,
-                    color: 'white',
+                    color: responsive.textPrimary,
                     margin: 0,
                   }"
                 >
@@ -1439,7 +1672,7 @@
                       </div>
                       <div :style="{ flex: 1 }">
                         <p :style="{ color: '#ffd700', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)' }">{{ award.title || award.name }}</p>
-                        <p v-if="award.organization" :style="{ color: 'rgba(255, 255, 255, 0.8)', fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }">
+                        <p v-if="award.organization" :style="{ color: responsive.textPrimary, fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }">
                           <span>🏛️</span> {{ award.organization }}
                         </p>
                         <span v-if="award.year" :style="{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(255, 215, 0, 0.2)', borderRadius: '20px', color: '#ffd700', fontSize: responsive.smallSize, fontWeight: 600 }">{{ award.year }}</span>
@@ -1490,7 +1723,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -1556,7 +1789,7 @@
                 </div>
                 <h4
                   :style="{
-                    color: 'white',
+                    color: responsive.textPrimary,
                     fontSize: responsive.bodySize,
                     fontWeight: 600,
                     margin: 0,
@@ -1581,7 +1814,7 @@
                 >
                   <span
                     :style="{
-                      color: 'white',
+                      color: responsive.textPrimary,
                       fontSize: responsive.bodySize,
                       fontWeight: 700,
                     }"
@@ -1606,7 +1839,7 @@
                 :style="{
                   fontSize: responsive.h3Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   marginBottom: '20px',
                 }"
               >
@@ -1631,7 +1864,7 @@
                     v-if="serviceDetails.oldPrice"
                     :style="{
                       fontSize: responsive.bodySize,
-                      color: 'rgba(255, 255, 255, 0.4)',
+                      color: responsive.textSubtle,
                       textDecoration: 'line-through',
                     }"
                   >
@@ -1647,7 +1880,7 @@
                     padding: '8px 16px',
                     background: 'rgba(255, 255, 255, 0.1)',
                     borderRadius: '20px',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: responsive.textPrimary,
                     fontSize: responsive.bodySize,
                   }"
                 >
@@ -1657,7 +1890,7 @@
               
               <!-- Features -->
               <div v-if="serviceDetails.features.length > 0 && isFieldVisible('services', 'serviceFeatures')" :style="{ marginBottom: '20px' }">
-                <h4 :style="{ fontSize: responsive.h4Size, color: 'white', marginBottom: '12px' }">Features:</h4>
+                <h4 :style="{ fontSize: responsive.h4Size, color: responsive.textPrimary, marginBottom: '12px' }">Features:</h4>
                 <ul :style="{ listStyle: 'none', padding: 0, margin: 0 }">
                   <li
                     v-for="(feature, idx) in serviceDetails.features"
@@ -1667,7 +1900,7 @@
                       alignItems: 'center',
                       gap: '10px',
                       padding: '8px 0',
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: responsive.textPrimary,
                       fontSize: responsive.bodySize,
                     }"
                   >
@@ -1711,7 +1944,7 @@
                     background: 'rgba(255, 255, 255, 0.1)',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '25px',
-                    color: 'white',
+                    color: responsive.textPrimary,
                     fontSize: responsive.bodySize,
                     fontWeight: 600,
                     textDecoration: 'none',
@@ -1735,7 +1968,7 @@
                     padding: '12px 24px',
                     background: 'linear-gradient(135deg, #667eea, #764ba2)',
                     borderRadius: '25px',
-                    color: 'white',
+                    color: responsive.textPrimary,
                     fontSize: responsive.bodySize,
                     fontWeight: 600,
                     textDecoration: 'none',
@@ -1790,7 +2023,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -1809,8 +2042,8 @@
                 }"
               >
                 <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }">
-                  <span :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 600 }">{{ skill.name }}</span>
-                  <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize }">{{ skill.level }}%</span>
+                  <span :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 600 }">{{ skill.name }}</span>
+                  <span :style="{ color: responsive.textMuted, fontSize: responsive.smallSize }">{{ skill.level }}%</span>
                 </div>
                 <div :style="{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }">
                   <div
@@ -1866,7 +2099,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -1926,7 +2159,7 @@
                 <div :style="{ flex: 1, minWidth: 0 }">
                   <h4
                     :style="{
-                      color: 'white',
+                      color: responsive.textPrimary,
                       fontSize: responsive.h4Size,
                       fontWeight: 700,
                       margin: isSmallMobile ? '0 0 3px 0' : '0 0 5px 0',
@@ -1940,7 +2173,7 @@
                   </h4>
                   <p
                     :style="{
-                      color: 'rgba(255, 255, 255, 0.6)',
+                      color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       margin: 0,
                       whiteSpace: 'normal',
@@ -1955,7 +2188,7 @@
                 <div
                   v-if="!isMobile"
                   :style="{
-                    color: 'rgba(255, 255, 255, 0.4)',
+                    color: responsive.textSubtle,
                     fontSize: '24px',
                     transition: 'all 0.3s',
                     flexShrink: 0,
@@ -2006,7 +2239,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2025,7 +2258,7 @@
               <h4
                 v-if="address.name && isFieldVisible('location', 'addressName')"
                 :style="{
-                  color: 'white',
+                  color: responsive.textPrimary,
                   fontSize: responsive.h4Size,
                   fontWeight: 700,
                   marginBottom: '15px',
@@ -2036,7 +2269,7 @@
               <p
                 v-if="addressDisplayLines.length > 0"
                 :style="{
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: responsive.textMuted,
                   lineHeight: '1.8',
                   fontSize: responsive.bodySize,
                 }"
@@ -2060,7 +2293,7 @@
                 gap: '10px',
                 padding: isMobile ? '15px' : '18px',
                 background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                color: 'white',
+                color: responsive.textPrimary,
                 textDecoration: 'none',
                 borderRadius: '15px',
                 fontWeight: 700,
@@ -2115,7 +2348,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2151,7 +2384,7 @@
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: isSmallMobile ? '12px' : '15px',
-                  color: 'white',
+                  color: responsive.textPrimary,
                   textDecoration: 'none',
                   fontWeight: 600,
                   fontSize: isMobile
@@ -2222,7 +2455,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2242,8 +2475,8 @@
                   borderRadius: '10px',
                 }"
               >
-                <span :style="{ color: 'white', fontSize: responsive.bodySize, fontWeight: 600 }">{{ hour.day }}</span>
-                <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize }">{{ hour.hours || 'Closed' }}</span>
+                <span :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 600 }">{{ hour.day }}</span>
+                <span :style="{ color: responsive.textMuted, fontSize: responsive.bodySize }">{{ hour.hours || 'Closed' }}</span>
               </div>
             </div>
           </div>
@@ -2287,7 +2520,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2366,7 +2599,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2411,14 +2644,14 @@
                   />
                   <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.9) 0%, transparent 60%)' }" />
                   <!-- Project number badge -->
-                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '36px', height: '36px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '14px' }">
+                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '36px', height: '36px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: responsive.textPrimary, fontWeight: 700, fontSize: '14px' }">
                     {{ String(idx + 1).padStart(2, '0') }}
                   </div>
                 </div>
                 
                 <!-- Content -->
                 <div :style="{ padding: isMobile ? '20px' : '24px' }">
-                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ project.title }}</h3>
+                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ project.title }}</h3>
                   
                   <!-- Project Meta Info -->
                   <div
@@ -2440,7 +2673,7 @@
                         background: 'rgba(255, 255, 255, 0.08)',
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       👤 {{ project.client_name }}
@@ -2455,7 +2688,7 @@
                         background: 'rgba(255, 255, 255, 0.08)',
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       📅 {{ project.date_completed }}
@@ -2470,21 +2703,21 @@
                         background: 'rgba(255, 255, 255, 0.08)',
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: responsive.textPrimary,
                       }"
                     >
                       📍 {{ project.location }}
                     </span>
                   </div>
                   
-                  <p v-if="project.description" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="project.description" />
+                  <p v-if="project.description" :style="{ color: responsive.textMuted, fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="project.description" />
                 
                 <!-- Skills Used -->
                 <div
                   v-if="project.skills_used && project.skills_used.length > 0 && isFieldVisible('portfolio', 'skillsUsed')"
                   :style="{ marginBottom: '15px' }"
 >
-                  <p :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: responsive.smallSize, marginBottom: '8px' }">Skills:</p>
+                  <p :style="{ color: responsive.textSubtle, fontSize: responsive.smallSize, marginBottom: '8px' }">Skills:</p>
                   <div :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap' }">
                     <span
                       v-for="(skill, skillIdx) in project.skills_used"
@@ -2530,7 +2763,7 @@
                         background: 'linear-gradient(135deg, #667eea, #764ba2)',
                         borderRadius: '25px',
                         border: 'none',
-                        color: 'white',
+                        color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         cursor: 'pointer',
@@ -2554,7 +2787,7 @@
                         background: 'rgba(255, 255, 255, 0.08)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         borderRadius: '25px',
-                        color: 'white',
+                        color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         textDecoration: 'none',
@@ -2610,7 +2843,7 @@
                 :style="{
                   fontSize: responsive.h2Size,
                   fontWeight: 700,
-                  color: 'white',
+                  color: responsive.textPrimary,
                   margin: 0,
                 }"
               >
@@ -2653,18 +2886,18 @@
                   />
                   <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.95) 0%, transparent 70%)' }" />
                   <!-- Category badge on image -->
-                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '20px', color: 'white', fontSize: responsive.smallSize, fontWeight: 600 }">{{ post.category }}</span>
+                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '20px', color: responsive.textPrimary, fontSize: responsive.smallSize, fontWeight: 600 }">{{ post.category }}</span>
                 </div>
                 
                 <!-- Content -->
                 <div :style="{ padding: isMobile ? '20px' : '24px' }">
                   <!-- Blog Meta -->
                   <div :style="{ display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }">
-                    <span v-if="post.published_date" :style="{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255, 255, 255, 0.6)', fontSize: responsive.smallSize }">📅 {{ post.published_date }}</span>
-                    <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.smallSize }">⏱️ {{ post.reading_time }}</span>
+                    <span v-if="post.published_date" :style="{ display: 'flex', alignItems: 'center', gap: '6px', color: responsive.textMuted, fontSize: responsive.smallSize }">📅 {{ post.published_date }}</span>
+                    <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: responsive.textMuted, fontSize: responsive.smallSize }">⏱️ {{ post.reading_time }}</span>
                   </div>
                   
-                  <h3 :style="{ color: 'white', fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, whiteSpace: 'normal', overflowWrap: 'break-word' }">{{ post.title }}</h3>
+                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, whiteSpace: 'normal', overflowWrap: 'break-word' }">{{ post.title }}</h3>
                   
                   <!-- Author -->
                   <div
@@ -2679,10 +2912,10 @@
                     <div :style="{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
                       <span :style="{ fontSize: '14px' }">✍️</span>
                     </div>
-                    <span :style="{ color: 'rgba(255, 255, 255, 0.8)', fontSize: responsive.smallSize, fontWeight: 500 }">{{ post.author_name }}</span>
+                    <span :style="{ color: responsive.textPrimary, fontSize: responsive.smallSize, fontWeight: 500 }">{{ post.author_name }}</span>
                   </div>
                   
-                  <p v-if="post.excerpt || post.description" :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="post.excerpt || post.description" />
+                  <p v-if="post.excerpt || post.description" :style="{ color: responsive.textMuted, fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="post.excerpt || post.description" />
                   
                   <!-- Tags -->
                   <div v-if="post.tags && post.tags.length > 0 && isFieldVisible('blog', 'blogTags')" :style="{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }">
@@ -2714,7 +2947,7 @@
                         background: 'linear-gradient(135deg, #f093fb, #f5576c)',
                         border: 'none',
                         borderRadius: '25px',
-                        color: 'white',
+                        color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         cursor: 'pointer',
@@ -2740,7 +2973,7 @@
                         background: 'rgba(255, 255, 255, 0.1)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         borderRadius: '25px',
-                        color: 'white',
+                        color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         textDecoration: 'none',
@@ -2775,7 +3008,7 @@
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }">
               <span :style="{ fontSize: isSmallMobile ? '16px' : '18px' }">⚡</span>
-              <span :style="{ color: 'rgba(255, 255, 255, 0.9)', fontSize: isSmallMobile ? '13px' : '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
+              <span :style="{ color: responsive.textPrimary, fontSize: isSmallMobile ? '13px' : '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
             </div>
             
             <!-- Buttons Grid -->
@@ -2804,7 +3037,7 @@
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)' }">
                   <span :style="{ fontSize: '20px' }">📥</span>
                 </div>
-                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Save Contact</span>
+                <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Save Contact</span>
               </button>
 
               <!-- Contact Form Button -->
@@ -2830,7 +3063,7 @@
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(240, 147, 251, 0.4)' }">
                   <span :style="{ fontSize: '20px' }">✉️</span>
                 </div>
-                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Message</span>
+                <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Message</span>
               </button>
 
               <!-- QR Code Button -->
@@ -2856,7 +3089,7 @@
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)' }">
                   <span :style="{ fontSize: '20px' }">📱</span>
                 </div>
-                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">QR Code</span>
+                <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">QR Code</span>
               </button>
 
               <!-- Social Sharing Button -->
@@ -2882,7 +3115,7 @@
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #11998e, #38ef7d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(56, 239, 125, 0.4)' }">
                   <span :style="{ fontSize: '20px' }">🔗</span>
                 </div>
-                <span :style="{ color: 'white', fontSize: '13px', fontWeight: 600 }">Share</span>
+                <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Share</span>
               </button>
             </div>
 
@@ -2910,7 +3143,7 @@
               @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.3)'; }"
             >
               <span :style="{ fontSize: '18px' }">📅</span>
-              <span :style="{ color: 'white', fontSize: '14px', fontWeight: 600 }">Book Appointment</span>
+              <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 600 }">Book Appointment</span>
             </a>
 
           </div>
@@ -2931,7 +3164,7 @@
         background: 'linear-gradient(135deg, #667eea, #764ba2)',
         border: 'none',
         borderRadius: '50%',
-        color: 'white',
+        color: responsive.textPrimary,
         fontSize: isMobile ? '20px' : '24px',
         cursor: 'pointer',
         boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
@@ -2990,7 +3223,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '18px',
           }"
         >✕</button>
@@ -2998,8 +3231,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px', textAlign: 'center' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }">✉️</div>
-          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
-          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">I'll get back to you as soon as possible</p>
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
+          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">I'll get back to you as soon as possible</p>
         </div>
 
         <!-- Success Message -->
@@ -3021,7 +3254,7 @@
         <!-- Form -->
         <form v-else @submit.prevent="submitContactForm" :style="{ display: 'grid', gap: '16px' }">
           <div>
-            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Your Name</label>
+            <label :style="{ display: 'block', color: responsive.textPrimary, fontSize: '14px', marginBottom: '6px' }">Your Name</label>
             <input
               v-model="contactForm.name"
               type="text"
@@ -3032,7 +3265,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3040,7 +3273,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Email Address</label>
+            <label :style="{ display: 'block', color: responsive.textPrimary, fontSize: '14px', marginBottom: '6px' }">Email Address</label>
             <input
               v-model="contactForm.email"
               type="email"
@@ -3051,7 +3284,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3059,7 +3292,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Phone (Optional)</label>
+            <label :style="{ display: 'block', color: responsive.textPrimary, fontSize: '14px', marginBottom: '6px' }">Phone (Optional)</label>
             <input
               v-model="contactForm.phone"
               type="tel"
@@ -3069,7 +3302,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3077,7 +3310,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '6px' }">Message</label>
+            <label :style="{ display: 'block', color: responsive.textPrimary, fontSize: '14px', marginBottom: '6px' }">Message</label>
             <textarea
               v-model="contactForm.message"
               required
@@ -3088,7 +3321,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 outline: 'none',
                 resize: 'vertical',
@@ -3105,7 +3338,7 @@
               background: contactFormSubmitting ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #f093fb, #f5576c)',
               border: 'none',
               borderRadius: '12px',
-              color: 'white',
+              color: responsive.textPrimary,
               fontSize: '16px',
               fontWeight: 600,
               cursor: contactFormSubmitting ? 'not-allowed' : 'pointer',
@@ -3162,7 +3395,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '18px',
           }"
         >✕</button>
@@ -3170,8 +3403,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }">📱</div>
-          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
-          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">Share this profile instantly</p>
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
+          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share this profile instantly</p>
         </div>
 
         <!-- QR Code -->
@@ -3193,8 +3426,8 @@
 
         <!-- Profile Info -->
         <div :style="{ marginBottom: '16px' }">
-          <p :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">{{ profile.name }}</p>
-          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">{{ profile.position }}</p>
+          <p :style="{ color: responsive.textPrimary, fontSize: '18px', fontWeight: 600 }">{{ profile.name }}</p>
+          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">{{ profile.position }}</p>
         </div>
 
         <!-- Copy Link Button -->
@@ -3206,7 +3439,7 @@
             background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
             border: 'none',
             borderRadius: '12px',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '15px',
             fontWeight: 600,
             cursor: 'pointer',
@@ -3265,7 +3498,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '18px',
           }"
         >✕</button>
@@ -3273,8 +3506,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }">🔗</div>
-          <h3 :style="{ color: 'white', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
-          <p :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }">Share on your favorite platform</p>
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
+          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share on your favorite platform</p>
         </div>
 
         <!-- Social Buttons Grid -->
@@ -3286,7 +3519,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#1877f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📘</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Facebook</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Facebook</span>
           </a>
           <!-- Twitter/X -->
           <a
@@ -3295,7 +3528,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#000000', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">🐦</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">X</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">X</span>
           </a>
           <!-- LinkedIn -->
           <a
@@ -3304,7 +3537,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#0a66c2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💼</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">LinkedIn</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">LinkedIn</span>
           </a>
           <!-- WhatsApp -->
           <a
@@ -3313,7 +3546,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#25d366', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">WhatsApp</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">WhatsApp</span>
           </a>
           <!-- Telegram -->
           <a
@@ -3322,7 +3555,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#0088cc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">✈️</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Telegram</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Telegram</span>
           </a>
           <!-- Email -->
           <a
@@ -3330,7 +3563,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#ea4335', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📧</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Email</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Email</span>
           </a>
           <!-- SMS -->
           <a
@@ -3338,7 +3571,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#34c759', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">SMS</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">SMS</span>
           </a>
           <!-- Copy Link -->
           <button
@@ -3346,7 +3579,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
           >
             <div :style="{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📋</div>
-            <span :style="{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }">Copy</span>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Copy</span>
           </button>
         </div>
       </div>
@@ -3397,7 +3630,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '20px',
             transition: 'all 0.3s',
           }"
@@ -3420,7 +3653,7 @@
           }">
             {{ selectedService.icon || '🚀' }}
           </div>
-          <h3 :style="{ color: 'white', fontSize: '28px', fontWeight: 700, marginBottom: '8px' }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '8px' }">
             {{ selectedService.name }}
           </h3>
           <div v-if="selectedService.category" :style="{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }">
@@ -3464,7 +3697,7 @@
             </span>
             <span v-if="selectedService.oldPrice" :style="{ 
               fontSize: '18px', 
-              color: 'rgba(255, 255, 255, 0.4)', 
+              color: responsive.textSubtle, 
               textDecoration: 'line-through',
             }">
               {{ selectedService.oldPrice }}
@@ -3474,12 +3707,12 @@
 
         <!-- Description -->
         <div v-if="selectedService.description" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:document-text" class="w-4 h-4" aria-hidden="true" />
             Description
           </h4>
           <p :style="{ 
-            color: 'rgba(255, 255, 255, 0.75)', 
+            color: responsive.textMuted, 
             fontSize: '15px', 
             lineHeight: '1.7',
             padding: '16px',
@@ -3490,7 +3723,7 @@
 
         <!-- Features -->
         <div v-if="selectedService.features && selectedService.features.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             ✨ Key Features
           </h4>
           <div :style="{ display: 'grid', gap: '10px' }">
@@ -3507,7 +3740,7 @@
               }"
             >
               <span :style="{ color: '#00ff88', fontSize: '16px' }">✓</span>
-              <span :style="{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '14px' }">
+              <span :style="{ color: responsive.textPrimary, fontSize: '14px' }">
                 {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
               </span>
             </div>
@@ -3516,7 +3749,7 @@
 
         <!-- Tags -->
         <div v-if="selectedService.tags && selectedService.tags.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             🏷️ Keywords
           </h4>
           <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
@@ -3539,7 +3772,7 @@
 
         <!-- Gallery -->
         <div v-if="selectedService.gallery && selectedService.gallery.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             🖼️ Gallery
           </h4>
           <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }">
@@ -3569,7 +3802,7 @@
 
         <!-- Video -->
         <div v-if="selectedService.video" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             🎬 Promo Video
           </h4>
           <a 
@@ -3588,7 +3821,7 @@
             }"
           >
             <span :style="{ fontSize: '24px' }">▶️</span>
-            <span :style="{ color: 'white', fontSize: '14px', fontWeight: 500 }">Watch Video</span>
+            <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 500 }">Watch Video</span>
           </a>
         </div>
 
@@ -3610,7 +3843,7 @@
               background: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: '14px',
-              color: 'white',
+              color: responsive.textPrimary,
               fontSize: '15px',
               fontWeight: 600,
               textDecoration: 'none',
@@ -3637,7 +3870,7 @@
               padding: '16px 24px',
               background: 'linear-gradient(135deg, #667eea, #764ba2)',
               borderRadius: '14px',
-              color: 'white',
+              color: responsive.textPrimary,
               fontSize: '15px',
               fontWeight: 600,
               textDecoration: 'none',
@@ -3697,7 +3930,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '20px',
             zIndex: 10,
             transition: 'all 0.3s',
@@ -3731,7 +3964,7 @@
         <!-- Content -->
         <div :style="{ padding: isMobile ? '24px' : '32px', marginTop: selectedProject.cover_image ? '-60px' : 0, position: 'relative', zIndex: 2 }">
           <!-- Title -->
-          <h3 :style="{ color: 'white', fontSize: '28px', fontWeight: 700, marginBottom: '16px' }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '16px' }">
             {{ selectedProject.title }}
           </h3>
 
@@ -3740,25 +3973,25 @@
             <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.4)', borderRadius: '20px', color: '#a8b3ff', fontSize: '13px' }">
               {{ selectedProject.category }}
             </span>
-            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textPrimary, fontSize: '13px' }">
               👤 {{ selectedProject.client_name }}
             </span>
-            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textPrimary, fontSize: '13px' }">
               📅 {{ selectedProject.date_completed }}
             </span>
-            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px' }">
+            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textPrimary, fontSize: '13px' }">
               📍 {{ selectedProject.location }}
             </span>
           </div>
 
           <!-- Description -->
           <div v-if="selectedProject.description" :style="{ marginBottom: '24px' }">
-            <p :style="{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '15px', lineHeight: '1.8' }" v-html="selectedProject.description"></p>
+            <p :style="{ color: responsive.textMuted, fontSize: '15px', lineHeight: '1.8' }" v-html="selectedProject.description"></p>
           </div>
 
           <!-- Gallery -->
           <div v-if="selectedProject.gallery && selectedProject.gallery.length > 0" :style="{ marginBottom: '24px' }">
-            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
               🖼️ Project Gallery
             </h4>
             <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }">
@@ -3792,7 +4025,7 @@
 
           <!-- Skills/Tags -->
           <div v-if="(selectedProject.skills_used && selectedProject.skills_used.length > 0) || (selectedProject.tags && selectedProject.tags.length > 0)" :style="{ marginBottom: '24px' }">
-            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
+            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
               🏷️ Skills & Tags
             </h4>
             <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
@@ -3825,7 +4058,7 @@
                 padding: '16px 24px',
                 background: 'linear-gradient(135deg, #667eea, #764ba2)',
                 borderRadius: '14px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -3850,7 +4083,7 @@
                 background: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '14px',
-                color: 'white',
+                color: responsive.textPrimary,
                 fontSize: '15px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -3906,7 +4139,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: responsive.textPrimary,
             fontSize: '20px',
             zIndex: 10,
             transition: 'all 0.3s',
@@ -3972,16 +4205,16 @@
              <span v-if="selectedBlog.category" :style="{ padding: '6px 14px', background: 'rgba(240, 147, 251, 0.15)', border: '1px solid rgba(240, 147, 251, 0.3)', borderRadius: '20px', color: '#f0a3fb', fontSize: '13px', fontWeight: 600 }">
               {{ selectedBlog.category }}
              </span>
-             <span v-if="selectedBlog.published_date" :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+             <span v-if="selectedBlog.published_date" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
                📅 {{ selectedBlog.published_date }}
              </span>
-             <span v-if="selectedBlog.reading_time" :style="{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+             <span v-if="selectedBlog.reading_time" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
                ⏱️ {{ selectedBlog.reading_time }}
              </span>
            </div>
 
           <!-- Title -->
-          <h3 :style="{ color: 'white', fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3 }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3 }">
             {{ selectedBlog.title }}
           </h3>
 
@@ -3991,8 +4224,8 @@
                   ✍️
               </div>
               <div>
-                  <div :style="{ color: 'white', fontWeight: 600, fontSize: '15px' }">{{ selectedBlog.author_name }}</div>
-                  <div :style="{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '13px' }">Author</div>
+                  <div :style="{ color: responsive.textPrimary, fontWeight: 600, fontSize: '15px' }">{{ selectedBlog.author_name }}</div>
+                  <div :style="{ color: responsive.textSubtle, fontSize: '13px' }">Author</div>
               </div>
           </div>
 
@@ -4000,7 +4233,7 @@
           <div
             v-if="selectedBlog.content || selectedBlog.description"
             :style="{
-                color: 'rgba(255, 255, 255, 0.85)',
+                color: responsive.textPrimary,
                 fontSize: responsive.bodySize,
                 lineHeight: '1.8',
                 marginBottom: '32px',
@@ -4012,14 +4245,14 @@
 
           <!-- Tags -->
           <div v-if="selectedBlog.tags && selectedBlog.tags.length > 0" :style="{ marginBottom: '32px' }">
-            <h4 :style="{ color: 'white', fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
+            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
               🏷️ Tags
             </h4>
             <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
               <span
                 v-for="(tag, idx) in selectedBlog.tags"
                 :key="'tag-' + idx"
-                :style="{ padding: '6px 14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px' }"
+                :style="{ padding: '6px 14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', color: responsive.textMuted, fontSize: '13px' }"
               >#{{ typeof tag === 'object' ? (tag.tag || tag.name) : tag }}</span>
             </div>
           </div>
@@ -4036,7 +4269,7 @@
                   padding: '14px 32px',
                   background: 'linear-gradient(135deg, #f093fb, #f5576c)',
                   borderRadius: '30px',
-                  color: 'white',
+                  color: responsive.textPrimary,
                   fontSize: '16px',
                   fontWeight: 600,
                   textDecoration: 'none',
@@ -4083,6 +4316,17 @@ const isPreviewMode = ref(false);
 let scrollTimeout = null;
 let resizeDebounce = null;
 
+// Color helpers (shared between computed + template)
+const hexToRgba = (hex, alpha = 1) => {
+  let h = (hex || '').replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (h.length !== 6) h = 'FFFFFF';
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 // Responsive breakpoints - granular tiers for all device sizes
 const isSmallMobile = computed(() => windowWidth.value < 375);      // iPhone SE 1/2/3, very small phones
 const isMobile = computed(() => windowWidth.value < 640);            // All phones
@@ -4119,6 +4363,126 @@ const responsive = computed(() => {
   const sl = isSmallLaptop.value;
   const ld = isLargeDesktop.value;
 
+  const cardStyleId = designSettings.cardStyle || 'minimal';
+
+  const hexToRgba = (hex, alpha = 1) => {
+    let h = (hex || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    if (h.length !== 6) h = 'FFFFFF';
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  const textColorRaw = designSettings.textColor || '#FFFFFF';
+  const eff = (alpha) => hexToRgba(textColorRaw.startsWith('#') ? textColorRaw : '#FFFFFF', alpha);
+  const effColorShadow = `0 0 36px ${hexToRgba(designSettings.cardEffectColor || designSettings.accentColor || '#22D3EE', 0.35)}`;
+
+  // Card style presets (mirrors CARD_STYLE_MAP + drives responsive fields)
+  const cardPresets = {
+    minimal: {
+      cardBackground: 'rgba(255, 255, 255, 0.92)',
+      cardBorder: '1px solid rgba(0, 0, 0, 0.06)',
+      cardShadow: '0 6px 24px rgba(15, 23, 42, 0.06), 0 1px 0 rgba(255,255,255,0.8)',
+      cardHoverShadow: '0 12px 40px rgba(15, 23, 42, 0.1)',
+      borderRadius: sm ? '18px' : mob ? '22px' : tab ? '26px' : '28px',
+      cardRadius: sm ? '14px' : mob ? '18px' : tab ? '24px' : '26px',
+      backdropBlur: '6px',
+    },
+    glass: {
+      cardBackground: 'rgba(255, 255, 255, 0.06)',
+      cardBorder: '1px solid rgba(255, 255, 255, 0.16)',
+      cardShadow: '0 12px 48px rgba(0, 0, 0, 0.28), 0 1px 0 rgba(255, 255, 255, 0.06)',
+      cardHoverShadow: '0 18px 60px rgba(0, 0, 0, 0.35)',
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '34px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '32px',
+      backdropBlur: '22px',
+    },
+    neumorph: {
+      cardBackground: 'linear-gradient(145deg, #e8ecf3, #ffffff)',
+      cardBorder: '1px solid rgba(255,255,255,0.5)',
+      cardShadow: '14px 14px 30px rgba(163,177,198,0.24), -14px -14px 30px rgba(255,255,255,0.95)',
+      cardHoverShadow: '18px 18px 36px rgba(163,177,198,0.32), -18px -18px 36px rgba(255,255,255,1)',
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '34px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '32px',
+      backdropBlur: '0px',
+    },
+    'frosted-bordered': {
+      cardBackground: 'rgba(255, 255, 255, 0.04)',
+      cardBorder: '3px solid rgba(255, 255, 255, 0.32)',
+      cardShadow: '0 16px 48px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255,255,255,0.05)',
+      cardHoverShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+      borderRadius: sm ? '24px' : mob ? '28px' : tab ? '32px' : '36px',
+      cardRadius: sm ? '20px' : mob ? '24px' : tab ? '30px' : '34px',
+      backdropBlur: '24px',
+    },
+    'neon-outline': {
+      cardBackground: 'rgba(6, 10, 24, 0.35)',
+      cardBorder: '1px solid rgba(34, 211, 238, 0.55)',
+      cardShadow: '0 0 0 1px rgba(34, 211, 238, 0.12), 0 10px 40px rgba(34, 211, 238, 0.22), 0 0 60px rgba(34,211,238,0.1)',
+      cardHoverShadow: '0 0 0 1px rgba(34, 211, 238, 0.2), 0 16px 50px rgba(34, 211, 238, 0.32), 0 0 80px rgba(34,211,238,0.18)',
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '34px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '32px',
+      backdropBlur: '14px',
+    },
+    'mica-blur': {
+      cardBackground: `linear-gradient(180deg, ${hexToRgba('#FFFFFF', 0.2)} 0%, ${hexToRgba('#FFFFFF', 0.08)} 50%, ${hexToRgba('#FFFFFF', 0.04)} 100%)`,
+      cardBorder: `1px solid ${eff(0.28)}`,
+      cardShadow: `0 22px 55px rgba(15, 23, 42, 0.38), inset 0 1px 0 ${eff(0.42)}`,
+      cardHoverShadow: `0 32px 70px rgba(15, 23, 42, 0.44), ${effColorShadow}`,
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '32px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '30px',
+      backdropBlur: '28px',
+      filterSaturate: 'saturate(160%)',
+    },
+    'liquid-chrome': {
+      cardBackground: `linear-gradient(135deg, ${hexToRgba('#FFFFFF', 0.58)} 0%, ${hexToRgba('#E2E8F0', 0.3)} 35%, ${hexToRgba('#FFFFFF', 0.48)} 55%, ${hexToRgba('#94A3B8', 0.26)} 80%, ${hexToRgba('#FFFFFF', 0.52)} 100%)`,
+      cardBorder: `1px solid ${eff(0.52)}`,
+      cardShadow: `0 22px 46px rgba(15, 23, 42, 0.32), inset 0 0 0 1px ${eff(0.42)}, inset 0 1px 0 rgba(255,255,255,0.55)`,
+      cardHoverShadow: `0 32px 60px rgba(15, 23, 42, 0.38), ${effColorShadow}`,
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '28px' : '30px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '26px' : '28px',
+      backdropBlur: '22px',
+    },
+    'aurora-tint': {
+      cardBackground: `linear-gradient(140deg, ${hexToRgba('#38BDF8', 0.35)} 0%, ${eff(0.3)} 42%, ${hexToRgba('#EC4899', 0.34)} 100%)`,
+      cardBorder: `1px solid ${eff(0.42)}`,
+      cardShadow: `0 26px 60px rgba(168, 85, 247, 0.26), inset 0 1px 0 rgba(255,255,255,0.3)`,
+      cardHoverShadow: `0 36px 72px rgba(236, 72, 153, 0.3), ${effColorShadow}`,
+      borderRadius: sm ? '24px' : mob ? '28px' : tab ? '32px' : '34px',
+      cardRadius: sm ? '20px' : mob ? '24px' : tab ? '30px' : '32px',
+      backdropBlur: '20px',
+    },
+    'cyber-lines': {
+      cardBackground: `linear-gradient(135deg, ${hexToRgba('#0B0F19', 0.9)} 0%, ${hexToRgba('#0B0F19', 0.6)} 100%)`,
+      cardBorder: `1.5px solid transparent; background-origin: padding-box, border-box; background-clip: padding-box, border-box; background-image: linear-gradient(135deg, ${hexToRgba('#0B0F19', 0.9)}, ${hexToRgba('#0B0F19', 0.55)}), linear-gradient(135deg, ${designSettings.cardEffectColor ?? '#22D3EE'} 0%, ${hexToRgba('#A855F7', 0.85)} 45%, ${hexToRgba('#F472B6', 0.85)} 100%);`,
+      cardShadow: `0 22px 46px rgba(34, 211, 238, 0.22), 0 0 0 1px ${eff(0.12)}`,
+      cardHoverShadow: `0 32px 64px rgba(34, 211, 238, 0.32), 0 0 28px ${eff(0.45)}`,
+      borderRadius: sm ? '20px' : mob ? '24px' : tab ? '28px' : '30px',
+      cardRadius: sm ? '16px' : mob ? '20px' : tab ? '26px' : '28px',
+      backdropBlur: '16px',
+    },
+    'dot-matrix-frame': {
+      cardBackground: `${hexToRgba(designSettings.backgroundColor ?? '#FFFFFF', 0.9)}`,
+      cardBorder: `2px dotted ${eff(0.9)}`,
+      cardShadow: `0 16px 40px ${eff(0.18)}, inset 0 0 0 3px ${hexToRgba(designSettings.backgroundColor ?? '#FFFFFF', 0.92)}`,
+      cardHoverShadow: `0 26px 56px ${eff(0.28)}`,
+      borderRadius: sm ? '20px' : mob ? '24px' : tab ? '28px' : '30px',
+      cardRadius: sm ? '16px' : mob ? '20px' : tab ? '26px' : '28px',
+      backdropBlur: '10px',
+    },
+    'velvet-matte': {
+      cardBackground: `linear-gradient(160deg, ${hexToRgba('#111827', 0.9)} 0%, ${hexToRgba('#1E293B', 0.82)} 100%)`,
+      cardBorder: `1px solid ${eff(0.28)}`,
+      cardShadow: `0 26px 56px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06)`,
+      cardHoverShadow: `0 36px 72px rgba(0, 0, 0, 0.48), ${effColorShadow}`,
+      borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '32px',
+      cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '30px',
+      backdropBlur: '20px',
+    },
+  };
+  const cs = cardPresets[cardStyleId] || cardPresets.minimal;
+
   return {
     // Container - always have horizontal breathing room on mobile
     containerPadding: sm
@@ -4136,7 +4500,9 @@ const responsive = computed(() => {
 
     // Profile image - scales gracefully
     profileSize: sm ? "112px" : ph ? "128px" : mob ? "148px" : tab ? "180px" : "208px",
-    profileBorder: "4px solid rgba(255, 255, 255, 0.15)",
+    profileBorder: cardStyleId === 'minimal' || cardStyleId === 'neumorph'
+      ? "4px solid #ffffff"
+      : "4px solid rgba(255, 255, 255, 0.15)",
 
     // Typography - fluid modular scale
     nameSize: sm ? "26px" : ph ? "30px" : mob ? "34px" : tab ? "46px" : ld ? "60px" : "54px",
@@ -4146,14 +4512,19 @@ const responsive = computed(() => {
     bodySize: sm ? "14px" : mob ? "15px" : "16px",
     smallSize: sm ? "12px" : mob ? "13px" : "14px",
 
-    // Card styling - Glassmorphism
+    // Text colors - respect Text Color picker (Colors section)
+    textPrimary: textColorRaw,
+    textMuted: hexToRgba(textColorRaw.startsWith('#') ? textColorRaw : '#FFFFFF', 0.72),
+    textSubtle: hexToRgba(textColorRaw.startsWith('#') ? textColorRaw : '#FFFFFF', 0.52),
+
+    // Card styling - driven by cardStyle preset
     cardPadding: sm ? "14px" : ph ? "16px" : mob ? "18px" : tab ? "30px" : "38px",
     cardMarginBottom: sm ? "18px" : mob ? "22px" : tab ? "28px" : "32px",
-    cardBackground: "rgba(255, 255, 255, 0.03)",
-    cardBorder: "1px solid rgba(255, 255, 255, 0.08)",
-    cardShadow:
-      "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
-    cardHoverShadow: "0 12px 48px rgba(102, 126, 234, 0.15)",
+    cardBackground: cs.cardBackground,
+    cardBorder: cs.cardBorder,
+    cardShadow: cs.cardShadow,
+    cardHoverShadow: cs.cardHoverShadow,
+    cardBackdropBlur: cs.backdropBlur,
 
     // Quick actions
     actionPadding: sm ? "12px 10px" : ph ? "14px 12px" : mob ? "16px 14px" : "20px",
@@ -4180,8 +4551,8 @@ const responsive = computed(() => {
     contactIconSize: sm ? "22px" : ph ? "26px" : mob ? "28px" : "32px",
 
     // Borders and radius - Softer edges, never fully sharp on mobile
-    borderRadius: sm ? "20px" : mob ? "22px" : tab ? "26px" : "30px",
-    cardRadius: sm ? "14px" : mob ? "18px" : tab ? "24px" : "28px",
+    borderRadius: cs.borderRadius,
+    cardRadius: cs.cardRadius,
     smallRadius: sm ? "10px" : mob ? "12px" : "16px",
 
     // Badge styling
@@ -4229,10 +4600,25 @@ const currentThemeConfig = ref(null);
 const designSettings = reactive({
   backgroundColor: '#0a0e27',
   textColor: '#ffffff',
+  accentColor: '#667eea',
+  bgGradient: null,
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
   theme: 'default',
   buttonStyle: 'solid',
+  cardStyle: 'minimal',
+  bgAnimation: 'none',
 });
+
+// Card style library (matches ProfileBuilder DESIGN_LIBRARY)
+const CARD_STYLE_MAP = {
+  minimal: 'bg-white/90 backdrop-blur-sm rounded-2xl border border-white/60',
+  glass: 'bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl',
+  neumorph: 'bg-gray-100 rounded-3xl shadow-[12px_12px_24px_rgba(0,0,0,0.06),-12px_-12px_24px_rgba(255,255,255,0.9)]',
+  'frosted-bordered': 'bg-white/5 backdrop-blur-xl rounded-3xl border-[3px] border-white/40',
+  'neon-outline': 'bg-black/20 backdrop-blur-md rounded-3xl border border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.3)]',
+};
+const computedCardClass = computed(() => CARD_STYLE_MAP[designSettings.cardStyle] || CARD_STYLE_MAP.minimal);
+provide('cardStyleClass', computedCardClass);
 
 // ==================== A. SECTION LAYOUT CONFIGURATION ====================
 // Section Layout from API - now uses granular section IDs matching Layout Designer
@@ -4335,7 +4721,23 @@ const hasContactData = computed(() => {
 });
 
 const hasLocationData = computed(() => {
-  return !!(address.value.name || address.value.street || address.value.cityState);
+  const hasNewFormat = !!(address.value.line1 || address.value.line2 || address.value.line3);
+  const hasLegacyFormat = !!(address.value.name || address.value.street || address.value.cityState);
+  // Dedupe: if new 3-line format is identical in content to legacy combined, avoid double counting
+  if (hasNewFormat && hasLegacyFormat) {
+    const newFlat = [address.value.line1, address.value.line2, address.value.line3]
+      .filter(Boolean).join(", ").toLowerCase().replace(/\s+/g, " ");
+    const legacyFlat = [address.value.street, address.value.area, address.value.postalCode, address.value.cityState, address.value.country]
+      .filter(Boolean).join(", ").toLowerCase().replace(/\s+/g, " ");
+    // If either is empty string after join, treat as duplicate-companion
+    if (!newFlat || !legacyFlat) return true;
+    // Treat as single source if they look the same (avoid "both blocks both valid" scenario)
+    const intersection = newFlat.length && legacyFlat.length &&
+      (newFlat.includes(legacyFlat) || legacyFlat.includes(newFlat) ||
+        legacyFlat.substring(0, 40) === newFlat.substring(0, 40));
+    return true;
+  }
+  return hasNewFormat || hasLegacyFormat;
 });
 
 const hasSocialData = computed(() => {
@@ -4407,9 +4809,10 @@ const address = ref({
 });
 
 // Build display lines: new 3-line format first, fallback to legacy separate fields
+// Also deduplicate - if legacy content is the same as new content, only show one copy
 const addressDisplayLines = computed(() => {
   const newFormat = [address.value.line1, address.value.line2, address.value.line3].filter(Boolean);
-  if (newFormat.length > 0) return newFormat;
+
   // Legacy fallback
   const legacy = [];
   if (address.value.street) legacy.push(address.value.street);
@@ -4420,7 +4823,26 @@ const addressDisplayLines = computed(() => {
   ].filter(Boolean).join(" ");
   if (line3Legacy) legacy.push(line3Legacy);
   if (address.value.country) legacy.push(address.value.country);
-  return legacy;
+
+  if (newFormat.length === 0) return legacy;
+
+  // If both exist: check if legacy lines are actually duplicates of newFormat
+  // (happens when loadProfile auto-composes legacy from new format in PremiumProfileBuilder load)
+  const newFlat = newFormat.join(", ").toLowerCase().replace(/\s+/g, " ");
+  const legacyFlat = legacy.join(", ").toLowerCase().replace(/\s+/g, " ");
+
+  if (legacy.length > 0) {
+    // If first 60 chars match or one is substring of another → treat as same source
+    const similar =
+      (newFlat.length > 10 && legacyFlat.length > 10 &&
+        (newFlat.substring(0, 60) === legacyFlat.substring(0, 60) ||
+         newFlat.includes(legacyFlat) || legacyFlat.includes(newFlat)));
+    if (similar) {
+      return newFormat; // Only return new format (avoid duplicate display)
+    }
+  }
+
+  return newFormat;
 });
 
 // ==================== C. QUICK ACTIONS (dynamically generated) ====================
@@ -4745,13 +5167,44 @@ const loadPreviewData = (data) => {
   address.value.line1 = data.address1 || "";
   address.value.line2 = data.address2 || "";
   address.value.line3 = data.address3 || "";
+
   // Legacy separate address fields (for fallback display)
-  address.value.name = data.addressName || "";
-  address.value.street = data.addressStreet || data.address || "";
-  address.value.area = data.addressArea || "";
-  address.value.cityState = data.addressCityState || "";
-  address.value.country = data.addressCountry || "";
-  address.value.postalCode = data.postalCode || "";
+  // Only populate legacy if 3-line format is empty AND vice-versa - avoid duplicate display
+  const hasNewFormat = !!(address.value.line1 || address.value.line2 || address.value.line3);
+  // Also auto-compose legacy fields from new format for backward compatibility (in case other code reads them)
+  if (hasNewFormat) {
+    const newAll = [address.value.line1, address.value.line2, address.value.line3].filter(Boolean);
+    // Split the combined lines reasonably so legacy readers still get something without dupe display
+    if (!data.addressStreet && !data.addressName && newAll.length > 0) {
+      address.value.street = newAll[0];
+      if (newAll[1]) address.value.area = newAll[1];
+      if (newAll[2]) {
+        // Try to detect postal + city pattern in last line
+        const last = newAll[2];
+        const m = last.match(/^(\d{4,6})\s+(.+)$/);
+        if (m) {
+          address.value.postalCode = m[1];
+          address.value.cityState = m[2];
+        } else {
+          address.value.cityState = last;
+        }
+      }
+    } else {
+      address.value.name = data.addressName || "";
+      address.value.street = data.addressStreet || (data.address ? data.address : "");
+      address.value.area = data.addressArea || "";
+      address.value.cityState = data.addressCityState || "";
+      address.value.country = data.addressCountry || "";
+      address.value.postalCode = data.postalCode || "";
+    }
+  } else {
+    address.value.name = data.addressName || "";
+    address.value.street = data.addressStreet || (data.address ? data.address : "");
+    address.value.area = data.addressArea || "";
+    address.value.cityState = data.addressCityState || "";
+    address.value.country = data.addressCountry || "";
+    address.value.postalCode = data.postalCode || "";
+  }
   address.value.mapUrl = data.addressMapUrl || data.mapUrl || "";
 
   // ============ CONTACT METHODS ============
@@ -4763,13 +5216,27 @@ const loadPreviewData = (data) => {
   contactMethods.value[2].href = (data.whatsappNumber || data.whatsapp) ? `https://wa.me/${(data.whatsappNumber || data.whatsapp).replace(/[^0-9]/g, '')}` : "";
   contactMethods.value[3].subtitle = data.websiteUrl || data.website || "";
   contactMethods.value[3].href = data.websiteUrl || data.website || "";
-  
+  // Reset index 4 by default first (to avoid stale values)
+  contactMethods.value[4].subtitle = "";
+  contactMethods.value[4].href = "";
+  contactMethods.value[4].label = "";
+
   // Contact Address for "Get In Touch" (uses profile contact address, NOT company location)
-  const contactAddressPreview = data.address || '';
-  if (contactAddressPreview) {
-    contactMethods.value[4].subtitle = contactAddressPreview;
-    contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddressPreview)}`;
-    contactMethods.value[4].label = "Contact Address";
+  // DEDUP: Only show contact address if it is DIFFERENT from Our Location section
+  const contactAddressRaw = data.address || '';
+  if (contactAddressRaw) {
+    const locationFlat = ([address.value.line1, address.value.line2, address.value.line3,
+      address.value.street, address.value.area, address.value.postalCode, address.value.cityState, address.value.country])
+      .filter(Boolean).join(", ").toLowerCase().replace(/\s+/g, " ");
+    const contactFlat = contactAddressRaw.toLowerCase().replace(/\s+/g, " ").trim();
+    const isDuplicate = contactFlat.length > 10 && locationFlat.length > 10 &&
+      (contactFlat === locationFlat || locationFlat.includes(contactFlat) || contactFlat.includes(locationFlat) ||
+        contactFlat.substring(0, 50) === locationFlat.substring(0, 50));
+    if (!isDuplicate) {
+      contactMethods.value[4].subtitle = contactAddressRaw;
+      contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddressRaw)}`;
+      contactMethods.value[4].label = "Contact Address";
+    }
   }
 
   // ============ STATS ============
@@ -4907,6 +5374,18 @@ const loadPreviewData = (data) => {
   if (data.textColor) {
     designSettings.textColor = data.textColor;
   }
+  if (data.accentColor || data.accent_color) {
+    designSettings.accentColor = data.accentColor || data.accent_color;
+  }
+  if (data.bgGradient || data.bg_gradient) {
+    designSettings.bgGradient = data.bgGradient || data.bg_gradient;
+  }
+  if (data.cardStyle || data.card_style) {
+    designSettings.cardStyle = data.cardStyle || data.card_style;
+  }
+  if (data.bgAnimation || data.bg_animation) {
+    designSettings.bgAnimation = data.bgAnimation || data.bg_animation;
+  }
   if (data.font) {
     const fontMap = {
       'inter': 'Inter, sans-serif',
@@ -4914,6 +5393,8 @@ const loadPreviewData = (data) => {
       'playfair': 'Playfair Display, serif',
       'poppins': 'Poppins, sans-serif',
       'montserrat': 'Montserrat, sans-serif',
+      'lora': 'Lora, serif',
+      'nunito': 'Nunito, sans-serif',
     };
     designSettings.fontFamily = fontMap[data.font] || data.font;
   }
@@ -5030,8 +5511,23 @@ const getPlatformColor = (platform) => {
 const loadProfileData = async () => {
   loading.value = true;
   try {
-    // Get NFC card ID from route params or query
-    const nfcCardId = route.params.id || route.query.nfc_card_id || route.query.id;
+    // Get NFC card identifier from route params or query
+    // Nuxt 3 allows multi-segment capture in the single `[id]` catch-all param
+    //   Pattern A (legacy single):      /profile/NFC-C65EU            → id = "NFC-C65EU"
+    //   Pattern B (short pretty 2-seg): /profile/nicole-tan/1         → id = "nicole-tan/1"
+    //   Pattern C (long pretty 3-seg):  /profile/nicole-tan/1/userid-87 → id = "nicole-tan/1/userid-87"
+    // Backend resolves the encoded form using "__" as separator so we map
+    // every "/" in the route param to "__" before talking to the API layer.
+    let rawId = route.params.id || route.query.nfc_card_id || route.query.id;
+    if (typeof rawId === 'string' && rawId.includes('/')) {
+      const segs = rawId.split('/').filter(Boolean);
+      if (segs.length === 2 || segs.length === 3) {
+        rawId = segs.join('__');
+      } else if (segs.length === 1) {
+        rawId = segs[0];
+      }
+    }
+    const nfcCardId = rawId;
 
     if (!nfcCardId) {
       console.error("No NFC card ID provided");
@@ -5130,13 +5626,39 @@ const loadProfileData = async () => {
       address.value.line1 = data.address_1 || data.address1 || "";
       address.value.line2 = data.address_2 || data.address2 || "";
       address.value.line3 = data.address_3 || data.address3 || "";
-      // Legacy separate address fields
-      address.value.name = data.address_name || "";
-      address.value.street = data.address_street || data.address || "";
-      address.value.area = data.address_area || "";
-      address.value.cityState = data.address_city_state || "";
-      address.value.country = data.address_country || "";
-      address.value.postalCode = data.postal_code || "";
+
+      // Legacy separate address fields - AVOID duplicate display if new 3-line format is present
+      const hasLiveNewFormat = !!(address.value.line1 || address.value.line2 || address.value.line3);
+      if (hasLiveNewFormat) {
+        const newAllLive = [address.value.line1, address.value.line2, address.value.line3].filter(Boolean);
+        if (!data.address_street && !data.address_name && newAllLive.length > 0) {
+          address.value.street = newAllLive[0];
+          if (newAllLive[1]) address.value.area = newAllLive[1];
+          if (newAllLive[2]) {
+            const m2 = newAllLive[2].match(/^(\d{4,6})\s+(.+)$/);
+            if (m2) {
+              address.value.postalCode = m2[1];
+              address.value.cityState = m2[2];
+            } else {
+              address.value.cityState = newAllLive[2];
+            }
+          }
+        } else {
+          address.value.name = data.address_name || "";
+          address.value.street = data.address_street || (data.address ? data.address : "");
+          address.value.area = data.address_area || "";
+          address.value.cityState = data.address_city_state || "";
+          address.value.country = data.address_country || "";
+          address.value.postalCode = data.postal_code || "";
+        }
+      } else {
+        address.value.name = data.address_name || "";
+        address.value.street = data.address_street || (data.address ? data.address : "");
+        address.value.area = data.address_area || "";
+        address.value.cityState = data.address_city_state || "";
+        address.value.country = data.address_country || "";
+        address.value.postalCode = data.postal_code || "";
+      }
       address.value.mapUrl = data.address_map_url || data.map_url || "";
 
       // Stats
@@ -5213,15 +5735,27 @@ const loadProfileData = async () => {
         contactMethods.value[3].href = websiteUrl;
         contactMethods.value[3].label = data.website_label || "Website";
       }
+      // Reset contact address index to avoid stale values
+      contactMethods.value[4].subtitle = "";
+      contactMethods.value[4].href = "";
+      contactMethods.value[4].label = "";
 
       // Contact Address - use profile contact address for "Get In Touch" section
-      // This is separate from location address (Company & Team → Location & Address)
+      // DEDUP: Only show if DIFFERENT from Our Location section (avoid double display)
       const contactAddress = data.address || '';
-      
       if (contactAddress) {
-        contactMethods.value[4].subtitle = contactAddress;
-        contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddress)}`;
-        contactMethods.value[4].label = "Contact Address";
+        const liveLocationFlat = ([address.value.line1, address.value.line2, address.value.line3,
+          address.value.street, address.value.area, address.value.postalCode, address.value.cityState, address.value.country])
+          .filter(Boolean).join(", ").toLowerCase().replace(/\s+/g, " ");
+        const liveContactFlat = contactAddress.toLowerCase().replace(/\s+/g, " ").trim();
+        const isLiveDuplicate = liveContactFlat.length > 10 && liveLocationFlat.length > 10 &&
+          (liveContactFlat === liveLocationFlat || liveLocationFlat.includes(liveContactFlat) || liveContactFlat.includes(liveLocationFlat) ||
+            liveContactFlat.substring(0, 50) === liveLocationFlat.substring(0, 50));
+        if (!isLiveDuplicate) {
+          contactMethods.value[4].subtitle = contactAddress;
+          contactMethods.value[4].href = `https://maps.google.com/?q=${encodeURIComponent(contactAddress)}`;
+          contactMethods.value[4].label = "Contact Address";
+        }
       }
 
       // Social Links - now from socialLinks relationship (social_links table)
@@ -5431,6 +5965,9 @@ const applyDesignConfig = (designConfig) => {
       if (theme.backgroundColor) {
         designSettings.backgroundColor = theme.backgroundColor;
       }
+      if (theme.textColor) designSettings.textColor = theme.textColor;
+      if (theme.accentColor) designSettings.accentColor = theme.accentColor;
+      if (theme.bgGradient) designSettings.bgGradient = theme.bgGradient;
     }
 
     // Apply Font
@@ -5474,6 +6011,18 @@ const applyDirectDesignFields = (data) => {
   if (data.text_color) {
     designSettings.textColor = data.text_color;
   }
+  if (data.accent_color || data.accentColor) {
+    designSettings.accentColor = data.accent_color || data.accentColor;
+  }
+  if (data.bg_gradient || data.bgGradient) {
+    designSettings.bgGradient = data.bg_gradient || data.bgGradient;
+  }
+  if (data.card_style || data.cardStyle) {
+    designSettings.cardStyle = data.card_style || data.cardStyle;
+  }
+  if (data.bg_animation || data.bgAnimation) {
+    designSettings.bgAnimation = data.bg_animation || data.bgAnimation;
+  }
   if (data.font) {
     // Map font ID to font family
     const fontMap = {
@@ -5482,6 +6031,8 @@ const applyDirectDesignFields = (data) => {
       'playfair': 'Playfair Display, serif',
       'poppins': 'Poppins, sans-serif',
       'montserrat': 'Montserrat, sans-serif',
+      'lora': 'Lora, serif',
+      'nunito': 'Nunito, sans-serif',
     };
     designSettings.fontFamily = fontMap[data.font] || data.font;
   }
@@ -5864,5 +6415,34 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* No scoped styles needed - all styles are inline */
+/* Fireflies float drift slow alternate (x + y drift combo) */
+@keyframes fireflyFloat {
+  0%   { transform: translate3d(0,0,0) scale(1); }
+  50%  { transform: translate3d(14px,-22px,0) scale(1.1); }
+  100% { transform: translate3d(-10px,12px,0) scale(0.95); }
+}
+/* Liquid Metaball blob drift A (x + y + scale vary) */
+@keyframes liquidDriftA {
+  0%,100% { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  33%     { transform: translate3d(18px,-26px,0) scale(1.08) rotate(12deg); }
+  66%     { transform: translate3d(-14px,14px,0) scale(0.94) rotate(-10deg); }
+}
+/* Liquid Metaball blob drift B (mirror shape) */
+@keyframes liquidDriftB {
+  0%,100% { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  33%     { transform: translate3d(-22px,18px,0) scale(1.06) rotate(-14deg); }
+  66%     { transform: translate3d(12px,-16px,0) scale(0.96) rotate(8deg); }
+}
+/* Snow Fall vertical infinite + tiny wobble x */
+@keyframes snowFall {
+  0%   { transform: translate3d(-4px,-10vh,0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { transform: translate3d(14px,115vh,0) rotate(180deg); opacity: 0; }
+}
+/* Confetti bouncePulse small scale */
+@keyframes bouncePulse {
+  0%,100% { transform: rotate(45deg) scale(1); }
+  50%     { transform: rotate(135deg) scale(1.25); }
+}
 </style>

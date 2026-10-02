@@ -3,7 +3,7 @@
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-secondary-900">Feedback Management</h1>
+      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Feedback Management</h1>
       <p class="mt-2 text-secondary-600">
         View and manage user feedback and reports
       </p>
@@ -194,7 +194,7 @@
                         getStatusBadgeClass(feedback.status),
                       ]"
                     >
-                      {{ feedback.status }}
+                      {{ getStatusLabel(feedback.status) }}
                     </span>
 
                     <!-- Unread Badge -->
@@ -680,6 +680,25 @@ const getStatusBadgeClass = (status) => {
     resolved: 'bg-green-100 text-green-800',
   };
   return classes[status] || 'bg-gray-100 text-gray-800';
+};
+
+const getStatusLabel = (status) => {
+  const labels = {
+    pending: 'Pending',
+    in_progress: 'In Progress',
+    resolved: 'Resolved',
+    new: 'New',
+    open: 'Open',
+    closed: 'Closed',
+  };
+  const label = labels[status];
+  if (label) return label;
+  // Fallback: convert snake_case to Title Case
+  return String(status || 'Unknown')
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim() || 'Unknown';
 };
 
 const formatDate = (date) => {

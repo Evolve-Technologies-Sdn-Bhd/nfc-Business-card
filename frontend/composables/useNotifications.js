@@ -70,15 +70,17 @@ export const useNotifications = () => {
       const response = await $api.post("/notifications/mark-all-read");
 
       if (response.success) {
-        // Update local state
         notifications.value.forEach((n) => {
           n.is_read = true;
           n.read_at = new Date().toISOString();
         });
         unreadCount.value = 0;
+        return { ok: true, message: response.message || "All notifications marked as read" };
       }
+      return { ok: false, message: response?.message || "Failed to mark all as read" };
     } catch (error) {
       console.error("Error marking all as read:", error);
+      return { ok: false, message: error?.message || "Network error while marking all as read" };
     }
   };
 

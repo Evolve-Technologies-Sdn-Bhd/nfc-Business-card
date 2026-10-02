@@ -1,15 +1,185 @@
 <template>
   <div>
-    <!-- Header -->
+    <!-- Page Header with Title & Breadcrumb Context -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-secondary-900">Profile Builder Management</h1>
-      <p class="mt-1 text-sm text-secondary-600">
-        Manage design options and input fields across different subscription plans
-      </p>
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
+            <Icon name="heroicons:sparkles" class="w-3 h-3 inline mr-1" />
+            Admin Module
+          </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900 tracking-tight">Profile Builder Design</h1>
+          <p class="mt-2 text-sm text-secondary-600 max-w-2xl leading-relaxed">
+            Configure plan entitlements, field visibility, and design system options across all three subscription tiers.
+            Every change here instantly reflects in your users' Profile Builder experience.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="card p-5 bg-gradient-to-br from-white to-blue-50/30 border-blue-100">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center">
+            <Icon name="heroicons:rectangle-stack" class="w-6 h-6 text-blue-600" />
+          </div>
+          <span class="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-md">Sections</span>
+        </div>
+        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalSections }}</div>
+        <div class="text-xs text-secondary-500">Active profile sections</div>
+      </div>
+
+      <div class="card p-5 bg-gradient-to-br from-white to-purple-50/30 border-purple-100">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center">
+            <Icon name="heroicons:queue-list" class="w-6 h-6 text-purple-600" />
+          </div>
+          <span class="text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded-md">Fields</span>
+        </div>
+        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalFields }}</div>
+        <div class="text-xs text-secondary-500">Configurable input fields</div>
+      </div>
+
+      <div class="card p-5 bg-gradient-to-br from-white to-pink-50/30 border-pink-100">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-pink-500/10 flex items-center justify-center">
+            <Icon name="heroicons:paint-brush" class="w-6 h-6 text-pink-600" />
+          </div>
+          <span class="text-xs font-semibold text-pink-700 bg-pink-100 px-2 py-1 rounded-md">Designs</span>
+        </div>
+        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalDesignOptions }}</div>
+        <div class="text-xs text-secondary-500">Themes, fonts & styles</div>
+      </div>
+
+      <div class="card p-5 bg-gradient-to-br from-white to-amber-50/30 border-amber-100">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center">
+            <Icon name="heroicons:rocket-launch" class="w-6 h-6 text-amber-600" />
+          </div>
+          <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-md">Features</span>
+        </div>
+        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalFeatures }}</div>
+        <div class="text-xs text-secondary-500">Feature toggles available</div>
+      </div>
+    </div>
+
+    <!-- Plan Entitlement Snapshot -->
+    <div class="card mb-6 p-5 bg-gradient-to-r from-secondary-50/50 to-white">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-bold text-secondary-900">
+            Plan Entitlement Snapshot
+          </h3>
+          <p class="text-xs text-secondary-500 mt-0.5">Real-time breakdown of items enabled features across each tier</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div v-for="stat in planStatsList" :key="stat.id"
+             :class="[
+               'p-4 rounded-xl border-2 transition-all',
+               stat.id === 'basic' ? 'border-blue-200 bg-blue-50/40' :
+               stat.id === 'premium' ? 'border-purple-200 bg-purple-50/40' :
+               'border-amber-200 bg-amber-50/40'
+             ]">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2.5">
+              <div :class="[
+                'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm',
+                stat.id === 'basic' ? 'bg-blue-500' :
+                stat.id === 'premium' ? 'bg-purple-500' :
+                'bg-amber-500'
+              ]">
+                <Icon :name="stat.id === 'business' ? 'heroicons:building-office' : stat.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-4 h-4" />
+              </div>
+              <span class="font-bold text-secondary-900">{{ stat.name }}</span>
+            </div>
+            <div :class="[
+              'text-sm font-bold px-2.5 py-1 rounded-md',
+              stat.id === 'basic' ? 'bg-blue-500 text-white' :
+              stat.id === 'premium' ? 'bg-purple-500 text-white' :
+              'bg-amber-500 text-white'
+            ]">
+              {{ stat.percentage }}%
+            </div>
+          </div>
+          <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden mb-3 border border-white">
+            <div
+              :class="[
+                'h-full rounded-full transition-all duration-700',
+                stat.id === 'basic' ? 'bg-blue-500' :
+                stat.id === 'premium' ? 'bg-purple-500' :
+                'bg-amber-500'
+              ]"
+              :style="{ width: stat.percentage + '%' }"
+            ></div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+              <div class="text-xs font-bold text-secondary-900">{{ stat.fieldsCount }}</div>
+              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Fields</div>
+            </div>
+            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+              <div class="text-xs font-bold text-secondary-900">{{ stat.designsCount }}</div>
+              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Designs</div>
+            </div>
+            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+              <div class="text-xs font-bold text-secondary-900">{{ stat.featuresCount }}</div>
+              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Features</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Navigation Pills -->
+    <div class="mb-6">
+      <div class="overflow-x-auto rounded-xl scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-transparent">
+        <div class="flex gap-2 p-1.5 bg-secondary-100/70 rounded-xl w-fit min-w-max">
+          <button
+            @click="activeView = 'assignments'"
+            :class="[
+              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              activeView === 'assignments'
+                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
+                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
+            ]"
+          >
+            <Icon name="heroicons:clipboard-document-check" class="w-4 h-4 flex-shrink-0" />
+            Plan Assignments
+          </button>
+          <button
+            @click="activeView = 'sections'"
+            :class="[
+              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              activeView === 'sections'
+                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
+                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
+            ]"
+          >
+            <Icon name="heroicons:rectangle-stack" class="w-4 h-4 flex-shrink-0" />
+            Field Sections
+          </button>
+          <button
+            @click="activeView = 'catalog'"
+            :class="[
+              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              activeView === 'catalog'
+                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
+                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
+            ]"
+          >
+            <Icon name="heroicons:squares-2x2" class="w-4 h-4 flex-shrink-0" />
+            Design Catalog
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Plan Accordions -->
-    <div class="card mb-6">
+    <div v-show="activeView === 'assignments'" class="card mb-6 p-5">
       <div class="flex items-center justify-between mb-4 pb-4 border-b border-secondary-200">
         <div>
           <h2 class="text-xl font-bold text-secondary-900 flex items-center">
@@ -343,7 +513,7 @@
     </div>
 
     <!-- Section Management -->
-    <div class="card mb-6">
+    <div v-show="activeView === 'sections'" class="card mb-6 p-5">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
         <div>
@@ -386,76 +556,96 @@
       </div>
 
       <!-- Sections Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div
           v-for="(section, index) in generalSections"
           :key="section.id || section.key"
           :class="[
-            'relative rounded-xl overflow-hidden transition-all duration-200 group',
+            'relative rounded-xl overflow-hidden transition-all duration-300 group',
             'bg-gradient-to-br from-white to-secondary-50',
-            'border-2 hover:shadow-lg',
-            section.is_active !== false ? 'border-secondary-200 hover:border-primary-400' : 'border-secondary-200 opacity-60'
+            'border-2 hover:shadow-xl hover:-translate-y-1',
+            section.is_active !== false ? 'border-secondary-200 hover:border-primary-400 hover:shadow-primary-100/40' : 'border-secondary-200 opacity-70 grayscale-[40%]'
           ]"
         >
+          <!-- Accent Border -->
+          <div :class="[
+            'absolute top-0 left-0 right-0 h-1',
+            index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-500' :
+            index % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-purple-500' :
+            index % 4 === 2 ? 'bg-gradient-to-r from-amber-400 to-amber-500' :
+            'bg-gradient-to-r from-emerald-400 to-emerald-500'
+          ]"></div>
+
           <!-- Status Badge -->
-          <div class="absolute top-2 right-2 z-10">
+          <div class="absolute top-3 right-3 z-10 flex gap-1.5">
             <span
               v-if="section.is_active === false"
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary-200 text-secondary-600"
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-secondary-200 text-secondary-600 border border-secondary-300"
             >
-              Inactive
+              <Icon name="heroicons:eye-slash" class="w-3 h-3" />
+              Hidden
             </span>
           </div>
 
           <!-- Card Content -->
-          <div class="p-4">
+          <div class="p-5 pt-6 pb-6 flex flex-col">
             <!-- Header -->
-            <div class="flex items-start gap-3 mb-3">
+            <div class="flex items-start gap-3 mb-4">
               <div 
                 :class="[
-                  'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
+                  'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm',
                   'bg-gradient-to-br',
-                  index % 4 === 0 ? 'from-blue-100 to-blue-200' :
-                  index % 4 === 1 ? 'from-purple-100 to-purple-200' :
-                  index % 4 === 2 ? 'from-amber-100 to-amber-200' :
-                  'from-emerald-100 to-emerald-200'
+                  index % 4 === 0 ? 'from-blue-100 to-blue-200 text-blue-600' :
+                  index % 4 === 1 ? 'from-purple-100 to-purple-200 text-purple-600' :
+                  index % 4 === 2 ? 'from-amber-100 to-amber-200 text-amber-600' :
+                  'from-emerald-100 to-emerald-200 text-emerald-600'
                 ]"
               >
                 <Icon 
                   :name="section.icon || 'heroicons:document-text'" 
-                  :class="[
-                    'w-6 h-6',
-                    index % 4 === 0 ? 'text-blue-600' :
-                    index % 4 === 1 ? 'text-purple-600' :
-                    index % 4 === 2 ? 'text-amber-600' :
-                    'text-emerald-600'
-                  ]"
+                  class="w-6 h-6"
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-secondary-900 truncate">{{ section.name }}</h3>
-                <code class="text-xs text-secondary-400 bg-secondary-100 px-1.5 py-0.5 rounded font-mono">{{ section.key }}</code>
+                <h3 class="font-bold text-secondary-900 truncate text-base group-hover:text-primary-700 transition-colors">{{ section.name }}</h3>
+                <code class="text-[11px] text-secondary-400 bg-secondary-100/70 px-1.5 py-0.5 rounded font-mono mt-1 inline-block border border-secondary-200/50">{{ section.key }}</code>
               </div>
             </div>
 
             <!-- Stats -->
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center justify-between mb-4 px-3 py-2.5 bg-white/60 rounded-lg border border-secondary-100">
               <div class="flex items-center gap-1.5 text-xs text-secondary-600">
-                <Icon name="heroicons:queue-list" class="w-3.5 h-3.5" />
-                <span class="font-medium">{{ (fields[section.key] || []).length }}</span>
-                <span>fields</span>
+                <Icon name="heroicons:queue-list" class="w-3.5 h-3.5 text-secondary-500" />
+                <span class="font-bold text-secondary-900 text-sm">{{ (fields[section.key] || []).length }}</span>
+                <span class="text-secondary-500">fields</span>
               </div>
               <div class="flex items-center gap-1.5 text-xs text-secondary-600">
-                <span>#{{ section.display_order || index + 1 }}</span>
+                <Icon name="heroicons:hashtag" class="w-3.5 h-3.5 text-secondary-500" />
+                <span class="font-bold text-secondary-900">{{ section.display_order || index + 1 }}</span>
+              </div>
+            </div>
+
+            <!-- Plan Progress -->
+            <div class="mb-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[11px] font-bold text-secondary-500 uppercase tracking-wider">Plan Coverage</span>
+                <span class="text-[11px] font-bold text-secondary-700">{{ getSectionPlans(section.key).length }}/3 plans</span>
+              </div>
+              <div class="w-full h-1.5 bg-secondary-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500"
+                  :style="{ width: Math.round((getSectionPlans(section.key).length / 3) * 100) + '%' }"
+                ></div>
               </div>
             </div>
 
             <!-- Plan Badges (Auto-calculated from fields) -->
-            <div class="flex flex-wrap gap-1 mb-3">
+            <div class="flex flex-wrap gap-1.5 mb-3">
               <span
                 v-if="getSectionPlans(section.key).length === 0 || getSectionPlans(section.key).length === 3"
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-700"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-success-50 text-success-700 border border-success-200"
               >
+                <Icon name="heroicons:check-circle-solid" class="w-3 h-3" />
                 All Plans
               </span>
               <template v-else>
@@ -463,37 +653,44 @@
                   v-for="plan in getSectionPlans(section.key)"
                   :key="plan"
                   :class="[
-                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                    plan === 'basic' ? 'bg-blue-100 text-blue-700' :
-                    plan === 'premium' ? 'bg-purple-100 text-purple-700' :
-                    'bg-amber-100 text-amber-700'
+                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border',
+                    plan === 'basic' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    plan === 'premium' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                    'bg-amber-50 text-amber-700 border-amber-200'
                   ]"
                 >
+                  <div :class="[
+                    'w-1.5 h-1.5 rounded-full',
+                    plan === 'basic' ? 'bg-blue-500' :
+                    plan === 'premium' ? 'bg-purple-500' :
+                    'bg-amber-500'
+                  ]"></div>
                   {{ plan.charAt(0).toUpperCase() + plan.slice(1) }}
                 </span>
               </template>
             </div>
 
-            <!-- Description -->
-            <p v-if="section.description" class="text-xs text-secondary-500 line-clamp-2 mb-3">
+            <!-- Description (equal height with spacer) -->
+            <p v-if="section.description" class="text-xs text-secondary-500 line-clamp-2 mb-4 leading-relaxed flex-1">
               {{ section.description }}
             </p>
+            <div v-else class="mb-4 flex-1 min-h-[2.5rem]"></div>
 
-            <!-- Actions -->
-            <div class="flex items-center gap-2 pt-3 border-t border-secondary-200">
+            <!-- Actions (pinned to bottom) -->
+            <div class="flex items-center gap-2 pt-3 border-t border-secondary-200 mt-auto">
               <button
                 @click="openSectionModal('edit', section)"
-                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all border border-primary-100 hover:border-primary-200 group/edit"
               >
-                <Icon name="heroicons:pencil" class="w-3.5 h-3.5" />
+                <Icon name="heroicons:pencil" class="w-3.5 h-3.5 group-hover/edit:scale-110 transition-transform" />
                 Edit
               </button>
               <button
                 @click="confirmDeleteSection(section)"
-                class="p-1.5 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
+                class="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-all border border-transparent hover:border-error-200 group/del"
                 title="Delete Section"
               >
-                <Icon name="heroicons:trash" class="w-4 h-4" />
+                <Icon name="heroicons:trash" class="w-4 h-4 group-hover/del:scale-110 transition-transform" />
               </button>
             </div>
           </div>
@@ -502,47 +699,55 @@
         <!-- Add New Section Card -->
         <button
           @click="openSectionModal('add')"
-          class="relative rounded-xl border-2 border-dashed border-secondary-300 hover:border-primary-400 bg-secondary-50 hover:bg-primary-50 transition-all duration-200 min-h-[200px] flex flex-col items-center justify-center gap-3 group"
+          class="relative rounded-xl border-2 border-dashed border-secondary-300 hover:border-primary-400 bg-gradient-to-br from-secondary-50/50 to-white hover:bg-primary-50/30 transition-all duration-300 min-h-[300px] flex flex-col items-center justify-center gap-4 group cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-100/30"
         >
-          <div class="w-12 h-12 rounded-xl bg-white border-2 border-secondary-200 group-hover:border-primary-300 flex items-center justify-center transition-colors">
-            <Icon name="heroicons:plus" class="w-6 h-6 text-secondary-400 group-hover:text-primary-600" />
+          <div class="w-16 h-16 rounded-2xl bg-white border-2 border-dashed border-secondary-300 group-hover:border-primary-400 group-hover:bg-primary-50 flex items-center justify-center transition-all group-hover:scale-110">
+            <Icon name="heroicons:plus" class="w-8 h-8 text-secondary-400 group-hover:text-primary-600 transition-colors" />
           </div>
-          <div class="text-center">
-            <p class="text-sm font-medium text-secondary-600 group-hover:text-primary-700">Add New Section</p>
-            <p class="text-xs text-secondary-400">Click to create</p>
+          <div class="text-center px-4">
+            <p class="text-sm font-bold text-secondary-700 group-hover:text-primary-700 transition-colors mb-1">Create New Section</p>
+            <p class="text-xs text-secondary-400 group-hover:text-secondary-500">Add a custom profile category</p>
           </div>
         </button>
 
         <!-- Empty State (when no sections at all) -->
         <div
           v-if="generalSections.length === 0 && !sectionsLoading"
-          class="col-span-full text-center py-16 bg-secondary-50 rounded-xl border-2 border-dashed border-secondary-200"
+          class="col-span-full text-center py-20 bg-gradient-to-br from-secondary-50 to-white rounded-2xl border-2 border-dashed border-secondary-200"
         >
-          <Icon name="heroicons:folder-open" class="w-16 h-16 text-secondary-300 mx-auto mb-4" />
-          <h3 class="text-lg font-medium text-secondary-700 mb-2">No Sections Yet</h3>
-          <p class="text-sm text-secondary-500 mb-4">Get started by creating your first section</p>
+          <div class="w-24 h-24 bg-primary-50/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <Icon name="heroicons:folder-open" class="w-12 h-12 text-primary-400" />
+          </div>
+          <h3 class="text-xl font-bold text-secondary-800 mb-2">Welcome to Profile Sections</h3>
+          <p class="text-sm text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
+            Organize your user profile into logical sections like Personal Info, Company, Services, and more. 
+            Each section can contain multiple fields and be restricted by subscription plan.
+          </p>
           <button
             @click="openSectionModal('add')"
-            class="btn btn-primary"
+            class="btn btn-primary px-6 py-2.5 text-sm font-bold"
           >
             <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
-            Create First Section
+            Create Your First Section
           </button>
         </div>
       </div>
     </div>
 
     <!-- Apply Designs Header -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-secondary-900">Apply Designs & Functions to Plans</h2>
-      <p class="text-sm text-secondary-600 mt-1">Select which designs and functions to apply to each plan</p>
+    <div v-show="activeView === 'catalog'" class="mb-6">
+      <h2 class="text-2xl font-bold text-secondary-900 tracking-tight">Design & Field Catalog</h2>
+      <p class="text-sm text-secondary-600 mt-1">Master catalog: view, edit, and manage every configurable option across the system. Use the plan filter to quickly audit what each tier gets.</p>
     </div>
 
     <!-- Main Content Card -->
-    <div class="card">
+    <div v-show="activeView === 'catalog'" class="card">
       <!-- Tabs Navigation -->
       <div class="border-b border-secondary-200">
-        <nav class="-mb-px flex overflow-x-auto px-6" aria-label="Tabs">
+        <nav 
+          class="-mb-px flex gap-1 overflow-x-auto overflow-y-hidden px-6 scroll-smooth [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-secondary-200 [&::-webkit-scrollbar-thumb]:rounded-full" 
+          aria-label="Tabs"
+        >
           <button
             v-for="tab in allTabs"
             :key="tab.id"
@@ -551,15 +756,15 @@
               currentTab === tab.id
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'group inline-flex items-center py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap'
+              'group inline-flex items-center py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors flex-shrink-0'
             ]"
           >
-            <Icon :name="tab.icon" class="w-4 h-4 mr-1.5" />
+            <Icon :name="tab.icon" class="w-4 h-4 mr-1.5 flex-shrink-0" />
             {{ tab.name }}
             <span 
               :class="[
                 currentTab === tab.id ? 'bg-primary-100 text-primary-600' : 'bg-secondary-100 text-secondary-600',
-                'ml-2 py-0.5 px-2 rounded-full text-xs font-medium'
+                'ml-2 py-0.5 px-2 rounded-full text-xs font-medium flex-shrink-0'
               ]"
             >
               {{ getFilteredOptionCount(tab.id) }}
@@ -570,22 +775,95 @@
 
       <div class="card-body">
         <!-- Action Bar -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
-          <div class="flex items-center gap-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <!-- Plan Filter Chips -->
+            <div class="flex items-center gap-1.5 bg-secondary-50 p-1.5 rounded-xl">
+              <span class="text-xs font-semibold text-secondary-600 px-2">Plan:</span>
+              <button
+                @click="selectedPlanFilter = null"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all',
+                  selectedPlanFilter === null
+                    ? 'bg-white text-secondary-900 shadow-sm shadow-secondary-200'
+                    : 'text-secondary-500 hover:text-secondary-700 hover:bg-white/50'
+                ]"
+              >
+                All
+              </button>
+              <button
+                @click="selectedPlanFilter = 'basic'"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  selectedPlanFilter === 'basic'
+                    ? 'bg-blue-500 text-white shadow-sm shadow-blue-200'
+                    : 'text-secondary-500 hover:text-blue-700 hover:bg-blue-50'
+                ]"
+              >
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'basic' ? 'bg-white' : 'bg-blue-500'"></div>
+                Basic
+              </button>
+              <button
+                @click="selectedPlanFilter = 'premium'"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  selectedPlanFilter === 'premium'
+                    ? 'bg-purple-500 text-white shadow-sm shadow-purple-200'
+                    : 'text-secondary-500 hover:text-purple-700 hover:bg-purple-50'
+                ]"
+              >
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'premium' ? 'bg-white' : 'bg-purple-500'"></div>
+                Premium
+              </button>
+              <button
+                @click="selectedPlanFilter = 'business'"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  selectedPlanFilter === 'business'
+                    ? 'bg-amber-500 text-white shadow-sm shadow-amber-200'
+                    : 'text-secondary-500 hover:text-amber-700 hover:bg-amber-50'
+                ]"
+              >
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'business' ? 'bg-white' : 'bg-amber-500'"></div>
+                Business
+              </button>
+            </div>
+
             <span class="text-sm font-medium text-secondary-900">
-              {{ getFilteredOptions.length }} {{ currentTabName }}{{ getFilteredOptions.length !== 1 ? 's' : '' }}
+              {{ isFieldTab ? filteredFieldsTable.length : getFilteredOptions.length }} {{ currentTabName }}{{ (isFieldTab ? filteredFieldsTable.length : getFilteredOptions.length) !== 1 ? 's' : '' }}
             </span>
-            <span v-if="selectedPlanFilter" class="text-xs text-secondary-500">
-              • Showing {{ selectedPlanFilter.toUpperCase() }} plan options
+            <span v-if="selectedPlanFilter" class="text-xs text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">
+              Showing for {{ selectedPlanFilter.charAt(0).toUpperCase() + selectedPlanFilter.slice(1) }}
             </span>
           </div>
-          <button
-            @click="openAddModal"
-            class="btn btn-primary"
-          >
-            <Icon name="heroicons:plus" class="h-4 w-4 mr-1.5" />
-            Add {{ currentTabName }}
-          </button>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <!-- Search Input (Fields Only) -->
+            <div v-if="isFieldTab" class="relative">
+              <Icon name="heroicons:magnifying-glass" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" />
+              <input
+                v-model="fieldsSearchQuery"
+                type="text"
+                placeholder="Search fields..."
+                class="w-full sm:w-64 pl-9 pr-9 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+              />
+              <button
+                v-if="fieldsSearchQuery"
+                @click="fieldsSearchQuery = ''"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+              >
+                <Icon name="heroicons:x-mark" class="w-4 h-4" />
+              </button>
+            </div>
+
+            <button
+              @click="openAddModal"
+              class="btn btn-primary"
+            >
+              <Icon name="heroicons:plus" class="h-4 w-4 mr-1.5" />
+              Add {{ currentTabName }}
+            </button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -595,15 +873,27 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="getFilteredOptions.length === 0" class="text-center py-16">
-          <Icon name="heroicons:inbox" class="w-16 h-16 text-secondary-300 mx-auto mb-4" />
-          <p class="text-base font-medium text-secondary-900 mb-1">
-            {{ selectedPlanFilter ? `No options for ${selectedPlanFilter.toUpperCase()} plan` : 'No options yet' }}
+        <div v-else-if="(isFieldTab ? filteredFieldsTable.length : getFilteredOptions.length) === 0" class="text-center py-16">
+          <div class="w-20 h-20 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <Icon name="heroicons:inbox" class="w-10 h-10 text-secondary-300" />
+          </div>
+          <p class="text-base font-semibold text-secondary-900 mb-1">
+            {{ selectedPlanFilter ? `No ${currentTabName.toLowerCase()} for ${selectedPlanFilter.charAt(0).toUpperCase() + selectedPlanFilter.slice(1)} plan` : fieldsSearchQuery ? 'No matching fields found' : `No ${currentTabName.toLowerCase()} yet` }}
           </p>
-          <p class="text-sm text-secondary-500 mb-6">
-            {{ selectedPlanFilter ? 'Try selecting a different plan or add new options' : `Get started by creating your first ${currentTabName.toLowerCase()}` }}
+          <p class="text-sm text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
+            {{ selectedPlanFilter ? 'Try selecting a different plan or adjust your search criteria' : fieldsSearchQuery ? 'Clear the search box or try different keywords' : `Get started by creating your first ${currentTabName.toLowerCase()} below` }}
           </p>
+          <div v-if="fieldsSearchQuery" class="mb-4">
+            <button
+              @click="fieldsSearchQuery = ''"
+              class="px-4 py-2 text-sm font-medium text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors"
+            >
+              <Icon name="heroicons:x-mark" class="w-4 h-4 inline mr-1.5" />
+              Clear Search
+            </button>
+          </div>
           <button
+            v-if="!fieldsSearchQuery"
             @click="openAddModal"
             class="btn btn-primary"
           >
@@ -613,132 +903,137 @@
         </div>
 
         <!-- Fields Table View -->
-        <div v-else-if="isFieldTab" class="overflow-hidden">
-          <div class="overflow-x-auto">
+        <div v-else-if="isFieldTab" class="overflow-hidden rounded-xl border border-secondary-200">
+          <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
             <table class="min-w-full divide-y divide-secondary-200">
-              <thead>
-                <tr class="bg-secondary-50">
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+              <thead class="sticky top-0 z-10">
+                <tr class="bg-gradient-to-r from-secondary-50 to-white">
+                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Field
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Type
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Group
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Order
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider w-[280px]">
+                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider w-[280px]">
                     Plan Availability
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-secondary-100">
-                <tr v-for="field in getFilteredOptions" :key="field.id" class="hover:bg-secondary-50 transition-colors">
+                <tr v-for="field in filteredFieldsTable" :key="field.id" class="hover:bg-primary-50/30 transition-colors group">
                   <td class="px-4 py-4">
-                    <div class="text-sm font-semibold text-secondary-900">{{ field.label }}</div>
-                    <div class="text-xs text-secondary-500 font-mono mt-0.5">{{ field.field_key }}</div>
-                    <div v-if="field.placeholder" class="text-xs text-secondary-400 italic mt-1">
+                    <div class="text-sm font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ field.label }}</div>
+                    <div class="text-xs text-secondary-500 font-mono mt-0.5 flex items-center gap-1">
+                      <Icon name="heroicons:hashtag" class="w-3 h-3 opacity-50" />
+                      {{ field.field_key }}
+                    </div>
+                    <div v-if="field.placeholder" class="text-xs text-secondary-400 italic mt-1 pl-4 border-l-2 border-secondary-200">
                       "{{ field.placeholder }}"
                     </div>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                      <Icon name="heroicons:rectangle-group" class="w-3 h-3" />
                       {{ field.field_type }}
                     </span>
                   </td>
                   <td class="px-4 py-4">
                     <div v-if="field.field_group" class="flex items-center gap-1.5">
                       <Icon v-if="field.field_group_icon" :name="field.field_group_icon" class="w-4 h-4 text-indigo-500" />
-                      <span class="text-xs font-medium text-secondary-700">{{ field.field_group }}</span>
+                      <span class="text-xs font-medium text-secondary-700 bg-indigo-50 px-2 py-1 rounded-md">{{ field.field_group }}</span>
+                      <span v-if="field.group_order" class="text-[10px] text-secondary-400">#{{ field.group_order }}</span>
                     </div>
-                    <span v-else class="text-xs text-secondary-400 italic">No group</span>
+                    <span v-else class="text-xs text-secondary-400 italic">— Ungrouped —</span>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap text-center">
                     <input
                       v-model.number="field.display_order"
                       type="number"
-                      class="w-16 px-2 py-1.5 text-sm text-center border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      class="w-16 px-2 py-1.5 text-sm text-center border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                       @change="updateField(field)"
                     />
                   </td>
                   <td class="px-4 py-4">
-                    <div class="flex items-center justify-center gap-2">
+                    <div class="flex items-center justify-center gap-1.5">
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-semibold border-2',
+                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
                           isAvailableForPlan(field, 'basic')
-                            ? 'bg-blue-50 text-blue-700 border-blue-300'
-                            : 'bg-secondary-50 text-secondary-400 border-secondary-200'
+                            ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm shadow-blue-100'
+                            : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
-                        Basic
+                        B
                       </div>
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-semibold border-2',
+                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
                           isAvailableForPlan(field, 'premium')
-                            ? 'bg-purple-50 text-purple-700 border-purple-300'
-                            : 'bg-secondary-50 text-secondary-400 border-secondary-200'
+                            ? 'bg-purple-50 text-purple-700 border-purple-300 shadow-sm shadow-purple-100'
+                            : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
-                        Premium
+                        P
                       </div>
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-semibold border-2',
+                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
                           isAvailableForPlan(field, 'business')
-                            ? 'bg-amber-50 text-amber-700 border-amber-300'
-                            : 'bg-secondary-50 text-secondary-400 border-secondary-200'
+                            ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm shadow-amber-100'
+                            : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
-                        Business
+                        Bz
                       </div>
                     </div>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <label class="flex items-center cursor-pointer" title="Required">
+                    <div class="flex items-center justify-center gap-3">
+                      <label class="flex items-center cursor-pointer group/req" title="Required field">
                         <input
                           type="checkbox"
                           v-model="field.is_required"
                           class="w-4 h-4 rounded border-secondary-300 text-error-600 focus:ring-error-500"
                           @change="updateField(field)"
                         />
-                        <span class="ml-1 text-xs text-secondary-600">Req</span>
+                        <span :class="['ml-1.5 text-xs font-medium transition-colors', field.is_required ? 'text-error-700' : 'text-secondary-500 group-hover/req:text-error-600']">Req</span>
                       </label>
-                      <label class="flex items-center cursor-pointer" title="Visible">
+                      <label class="flex items-center cursor-pointer group/vis" title="Visible in profile">
                         <input
                           type="checkbox"
                           v-model="field.is_visible"
                           class="w-4 h-4 rounded border-secondary-300 text-success-600 focus:ring-success-500"
                           @change="updateField(field)"
                         />
-                        <span class="ml-1 text-xs text-secondary-600">Vis</span>
+                        <span :class="['ml-1.5 text-xs font-medium transition-colors', field.is_visible ? 'text-success-700' : 'text-secondary-500 group-hover/vis:text-success-600']">Vis</span>
                       </label>
                     </div>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
-                    <div class="flex items-center justify-center gap-2">
+                    <div class="flex items-center justify-center gap-1">
                       <button
                         @click="openEditModal(field)"
-                        class="p-1.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded transition-colors"
-                        title="Edit"
+                        class="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all"
+                        title="Edit field"
                       >
                         <Icon name="heroicons:pencil" class="w-4 h-4" />
                       </button>
                       <button
                         @click="confirmDelete(field)"
-                        class="p-1.5 text-error-600 hover:text-error-700 hover:bg-error-50 rounded transition-colors"
-                        title="Delete"
+                        class="p-2 text-error-600 hover:text-error-700 hover:bg-error-50 rounded-lg transition-all"
+                        title="Delete field"
                       >
                         <Icon name="heroicons:trash" class="w-4 h-4" />
                       </button>
@@ -748,197 +1043,250 @@
               </tbody>
             </table>
           </div>
+          <!-- Table Footer Summary -->
+          <div class="px-4 py-3 bg-secondary-50 border-t border-secondary-200 flex items-center justify-between">
+            <span class="text-xs font-medium text-secondary-600">
+              Showing <span class="font-bold text-secondary-900">{{ filteredFieldsTable.length }}</span> of <span class="font-bold text-secondary-900">{{ getFilteredOptions.length }}</span> fields
+            </span>
+            <div class="flex items-center gap-3 text-xs text-secondary-500">
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Basic</span>
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-purple-500"></div> Premium</span>
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Business</span>
+            </div>
+          </div>
         </div>
 
         <!-- Design Options Grid View -->
-        <div v-else class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div v-else class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
           <div
             v-for="option in getFilteredOptions"
             :key="option.id"
             :class="[
-              'group relative bg-white border-2 rounded-xl overflow-hidden transition-all duration-200',
+              'group relative bg-white border-2 rounded-xl overflow-hidden transition-all duration-300',
               option.is_active 
-                ? 'border-secondary-200 hover:border-primary-300 hover:shadow-lg' 
-                : 'border-secondary-200 opacity-60'
+                ? 'border-secondary-200 hover:border-primary-400 hover:shadow-xl hover:-translate-y-1 hover:shadow-primary-100/50' 
+                : 'border-secondary-200 opacity-70 grayscale-[30%]'
             ]"
           >
             <!-- Plan Availability Header -->
-            <div class="bg-secondary-50 px-4 py-2 border-b border-secondary-200">
+            <div :class="[
+              'px-4 py-2.5 border-b transition-all',
+              option.is_active ? 'bg-gradient-to-r from-secondary-50 to-white' : 'bg-secondary-100'
+            ]">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
-                  <div 
-                    :class="[
-                      'w-2 h-2 rounded-full',
-                      isAvailableForPlan(option, 'basic') ? 'bg-blue-500' : 'bg-secondary-300'
-                    ]"
-                    title="Basic"
-                  ></div>
-                  <div 
-                    :class="[
-                      'w-2 h-2 rounded-full',
-                      isAvailableForPlan(option, 'premium') ? 'bg-purple-500' : 'bg-secondary-300'
-                    ]"
-                    title="Premium"
-                  ></div>
-                  <div 
-                    :class="[
-                      'w-2 h-2 rounded-full',
-                      isAvailableForPlan(option, 'business') ? 'bg-amber-500' : 'bg-secondary-300'
-                    ]"
-                    title="Business"
-                  ></div>
-                  <span class="text-xs text-secondary-500 ml-1">
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1">
+                    <div 
+                      :class="[
+                        'w-2.5 h-2.5 rounded-full transition-all',
+                        isAvailableForPlan(option, 'basic') ? 'bg-blue-500 shadow-sm shadow-blue-200' : 'bg-secondary-300'
+                      ]"
+                      title="Basic plan"
+                    ></div>
+                    <div 
+                      :class="[
+                        'w-2.5 h-2.5 rounded-full transition-all',
+                        isAvailableForPlan(option, 'premium') ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-secondary-300'
+                      ]"
+                      title="Premium plan"
+                    ></div>
+                    <div 
+                      :class="[
+                        'w-2.5 h-2.5 rounded-full transition-all',
+                        isAvailableForPlan(option, 'business') ? 'bg-amber-500 shadow-sm shadow-amber-200' : 'bg-secondary-300'
+                      ]"
+                      title="Business plan"
+                    ></div>
+                  </div>
+                  <span class="text-xs font-medium text-secondary-500">
                     {{ getPlanNames(option).join(' + ') || 'All Plans' }}
                   </span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1.5">
                   <span
                     v-if="option.is_default"
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary-100 text-primary-700"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-primary-100 text-primary-700 border border-primary-200"
                   >
-                    <Icon name="heroicons:star-solid" class="w-3 h-3 mr-1" />
+                    <Icon name="heroicons:star-solid" class="w-3 h-3" />
                     Default
                   </span>
                   <span
                     :class="[
-                      'inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold',
+                      'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold border',
                       option.is_active 
-                        ? 'bg-success-100 text-success-700' 
-                        : 'bg-secondary-200 text-secondary-600'
+                        ? 'bg-success-50 text-success-700 border-success-200' 
+                        : 'bg-secondary-100 text-secondary-600 border-secondary-200'
                     ]"
                   >
-                    {{ option.is_active ? 'Active' : 'Inactive' }}
+                    <Icon :name="option.is_active ? 'heroicons:check-circle-solid' : 'heroicons:eye-slash'" class="w-3 h-3" />
+                    {{ option.is_active ? 'Active' : 'Hidden' }}
                   </span>
                 </div>
               </div>
             </div>
 
             <!-- Content -->
-            <div class="p-4">
+            <div class="p-5">
               <!-- Preview Section -->
-              <div class="mb-4 p-3 bg-secondary-50 rounded-lg">
+              <div class="mb-4 p-4 bg-gradient-to-br from-secondary-50/80 to-white rounded-xl border border-secondary-100 shadow-inner group-hover:shadow-md transition-all">
                 <!-- Theme Preview -->
-                <div v-if="currentTab === 'theme'" :class="['w-full h-20 rounded-lg shadow-sm', option.config?.preview]"></div>
+                <div v-if="currentTab === 'theme'" :class="['w-full h-24 rounded-lg shadow-sm group-hover:scale-[1.02] transition-transform origin-center', option.config?.preview]"></div>
                 
                 <!-- Font Preview -->
-                <div v-else-if="currentTab === 'font'" class="text-center">
-                  <p :style="{ fontFamily: option.config?.family }" class="text-lg font-medium text-secondary-900">
-                    The quick brown fox
+                <div v-else-if="currentTab === 'font'" class="text-center py-2">
+                  <p :style="{ fontFamily: option.config?.family }" class="text-xl font-bold text-secondary-900 mb-1 leading-tight">
+                    Quick Brown Fox
+                  </p>
+                  <p :style="{ fontFamily: option.config?.family }" class="text-xs text-secondary-500 italic">
+                    0123456789 • Aa Bb Cc
                   </p>
                 </div>
                 
                 <!-- Button Style Preview -->
-                <button
-                  v-else-if="currentTab === 'button_style'"
-                  :class="['w-full py-2 px-4 text-sm font-medium', option.config?.class]"
-                  disabled
-                >
-                  {{ option.name }}
-                </button>
+                <div v-else-if="currentTab === 'button_style'" class="flex justify-center py-1">
+                  <button
+                    :class="['w-auto min-w-[180px] py-2.5 px-6 text-sm font-bold shadow-sm', option.config?.class]"
+                    disabled
+                  >
+                    <Icon name="heroicons:bolt" class="w-4 h-4 inline mr-1.5" />
+                    {{ option.name }}
+                  </button>
+                </div>
                 
                 <!-- Profile Style Preview -->
-                <div v-else-if="currentTab === 'profile_style'" class="flex justify-center">
-                  <div class="w-16 h-16 bg-gradient-to-br from-secondary-300 to-secondary-400 rounded-full"></div>
+                <div v-else-if="currentTab === 'profile_style'" class="flex justify-center py-2">
+                  <div class="w-20 h-20 bg-gradient-to-br from-secondary-200 via-secondary-300 to-secondary-400 rounded-full shadow-md group-hover:scale-110 transition-transform"></div>
                 </div>
                 
                 <!-- Color Scheme Preview -->
                 <div v-else-if="currentTab === 'color_scheme'">
-                  <div class="flex gap-2 mb-2">
+                  <div class="flex gap-2.5 mb-3">
                     <div 
                       :style="{ backgroundColor: option.config?.primary || '#000000' }" 
-                      class="flex-1 h-10 rounded-md shadow-sm"
+                      class="flex-1 h-14 rounded-xl shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform"
                     ></div>
                     <div 
                       :style="{ backgroundColor: option.config?.secondary || '#666666' }" 
-                      class="flex-1 h-10 rounded-md shadow-sm"
+                      class="flex-1 h-14 rounded-xl shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform"
                     ></div>
                     <div 
                       :style="{ backgroundColor: option.config?.accent || '#0066FF' }" 
-                      class="flex-1 h-10 rounded-md shadow-sm"
+                      class="flex-1 h-14 rounded-xl shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform"
                     ></div>
                   </div>
-                  <div class="flex gap-2 text-xs text-center text-secondary-600">
-                    <span class="flex-1">Primary</span>
-                    <span class="flex-1">Secondary</span>
-                    <span class="flex-1">Accent</span>
+                  <div class="flex gap-2.5 text-[10px] font-semibold text-center text-secondary-600 font-mono">
+                    <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.primary || '—' }}</span>
+                    <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.secondary || '—' }}</span>
+                    <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.accent || '—' }}</span>
                   </div>
                 </div>
                 
                 <!-- Layout Preview -->
-                <div v-else-if="currentTab === 'layout'">
-                  <div class="h-12 bg-white rounded border-2 border-dashed border-secondary-300 flex items-center justify-center">
-                    <div class="text-xs text-secondary-600">
-                      {{ option.config?.alignment }} • {{ option.config?.maxWidth }}
+                <div v-else-if="currentTab === 'layout'" class="py-1">
+                  <div :class="[
+                    'h-16 bg-white rounded-xl border-2 border-dashed border-secondary-300 flex items-center justify-center relative',
+                    option.config?.alignment === 'left' ? 'justify-start pl-4' :
+                    option.config?.alignment === 'right' ? 'justify-end pr-4' :
+                    'justify-center'
+                  ]">
+                    <div class="flex flex-col gap-1.5 w-2/3" :class="[
+                      option.config?.alignment === 'left' ? 'items-start' :
+                      option.config?.alignment === 'right' ? 'items-end' :
+                      'items-center'
+                    ]">
+                      <div class="h-2 w-3/4 bg-secondary-300 rounded-full"></div>
+                      <div class="h-2 w-1/2 bg-secondary-200 rounded-full"></div>
                     </div>
+                  </div>
+                  <div class="mt-2 text-center text-[10px] font-semibold text-secondary-500 uppercase tracking-wider">
+                    {{ option.config?.alignment }} • {{ option.config?.maxWidth || 'default' }}
                   </div>
                 </div>
                 
                 <!-- Tab Control Preview -->
-                <div v-else-if="currentTab === 'tab_control'" class="flex flex-wrap gap-1 justify-center">
+                <div v-else-if="currentTab === 'tab_control'" class="flex flex-wrap gap-1.5 justify-center py-2">
                   <span 
-                    v-for="tab in (option.config?.tabs || [])" 
+                    v-for="(tab, idx) in (option.config?.tabs || [])" 
                     :key="tab"
-                    class="px-2 py-0.5 text-xs font-medium bg-white border border-secondary-300 rounded"
+                    :class="[
+                      'px-3 py-1.5 text-xs font-bold rounded-md transition-all',
+                      idx === 0 
+                        ? 'bg-primary-500 text-white shadow-sm shadow-primary-200' 
+                        : 'bg-white border border-secondary-200 text-secondary-700 hover:bg-secondary-50'
+                    ]"
                   >
                     {{ tab }}
                   </span>
                 </div>
                 
                 <!-- Feature Toggle Preview -->
-                <div v-else-if="currentTab === 'feature_toggle'" class="flex items-center justify-center">
-                  <Icon 
-                    :name="option.config?.enabled ? 'heroicons:check-circle-solid' : 'heroicons:x-circle-solid'" 
-                    :class="option.config?.enabled ? 'text-success-600' : 'text-error-600'"
-                    class="w-8 h-8"
-                  />
+                <div v-else-if="currentTab === 'feature_toggle'" class="flex flex-col items-center justify-center py-2 gap-2">
+                  <div :class="[
+                    'w-16 h-8 rounded-full p-1 transition-all relative',
+                    option.config?.enabled ? 'bg-success-500' : 'bg-secondary-300'
+                  ]">
+                    <div :class="[
+                      'absolute w-6 h-6 bg-white rounded-full shadow-md transition-all top-1',
+                      option.config?.enabled ? 'right-1' : 'left-1'
+                    ]"></div>
+                  </div>
+                  <span :class="[
+                    'text-xs font-bold uppercase tracking-wider',
+                    option.config?.enabled ? 'text-success-700' : 'text-secondary-500'
+                  ]">
+                    {{ option.config?.enabled ? 'Enabled' : 'Disabled' }} by default
+                  </span>
                 </div>
               </div>
 
               <!-- Info -->
-              <div class="mb-3">
-                <h3 class="text-sm font-semibold text-secondary-900 mb-1">{{ option.name }}</h3>
-                <p v-if="option.description" class="text-xs text-secondary-600 line-clamp-2">
+              <div class="mb-4">
+                <h3 class="text-sm font-bold text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
+                  {{ option.name }}
+                  <Icon v-if="option.is_default" name="heroicons:star-solid" class="w-3.5 h-3.5 text-amber-500" />
+                </h3>
+                <p v-if="option.description" class="text-xs text-secondary-600 line-clamp-2 leading-relaxed">
                   {{ option.description }}
                 </p>
-                <code class="text-xs text-secondary-500 bg-secondary-100 px-1.5 py-0.5 rounded font-mono mt-2 inline-block">
+                <code class="text-[11px] text-secondary-500 bg-secondary-50 px-2 py-1 rounded font-mono mt-2 inline-block border border-secondary-100">
                   {{ option.option_id }}
                 </code>
               </div>
 
               <!-- Actions -->
-              <div class="flex items-center gap-2 pt-3 border-t border-secondary-200">
+              <div class="flex items-center gap-1.5 pt-4 border-t border-secondary-100">
                 <button
                   v-if="!option.is_default"
                   @click="setAsDefault(option)"
-                  class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
+                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-bold text-secondary-700 bg-white border border-secondary-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all group/star"
                   title="Set as default"
                 >
-                  <Icon name="heroicons:star" class="w-3 h-3" />
+                  <Icon name="heroicons:star" class="w-3.5 h-3.5 group-hover/star:text-amber-500" />
                 </button>
                 <button
                   @click="toggleActive(option)"
                   :class="[
-                    'flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium border rounded-lg',
+                    'flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-bold border rounded-lg transition-all',
                     option.is_active
-                      ? 'text-error-700 bg-white border-error-300 hover:bg-error-50'
-                      : 'text-success-700 bg-white border-success-300 hover:bg-success-50'
+                      ? 'text-error-700 bg-white border-error-200 hover:bg-error-50'
+                      : 'text-success-700 bg-white border-success-200 hover:bg-success-50'
                   ]"
                 >
-                  <Icon :name="option.is_active ? 'heroicons:eye-slash' : 'heroicons:eye'" class="w-3 h-3" />
+                  <Icon :name="option.is_active ? 'heroicons:eye-slash' : 'heroicons:eye'" class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="openEditModal(option)"
-                  class="p-1.5 text-primary-600 hover:bg-primary-50 border border-secondary-300 rounded-lg"
-                  title="Edit"
+                  class="p-2 text-primary-600 hover:bg-primary-50 border border-secondary-200 hover:border-primary-300 rounded-lg transition-all"
+                  title="Edit option"
                 >
-                  <Icon name="heroicons:pencil" class="w-3 h-3" />
+                  <Icon name="heroicons:pencil" class="w-4 h-4" />
                 </button>
                 <button
                   @click="confirmDelete(option)"
-                  class="p-1.5 text-error-600 hover:bg-error-50 border border-error-300 rounded-lg"
-                  title="Delete"
+                  class="p-2 text-error-600 hover:bg-error-50 border border-secondary-200 hover:border-error-300 rounded-lg transition-all"
+                  title="Delete option"
                 >
-                  <Icon name="heroicons:trash" class="w-3 h-3" />
+                  <Icon name="heroicons:trash" class="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1478,99 +1826,272 @@
               leave-from="opacity-100 translate-y-0 sm:scale-100"
               leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+              <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-5xl">
                 <!-- Modal Header -->
-                <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200">
+                <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
                   <DialogTitle as="h3" class="text-lg font-semibold text-secondary-900">
                     {{ sectionModalMode === 'add' ? 'Add New' : 'Edit' }} Section
                   </DialogTitle>
+                  <div class="flex items-center gap-2 text-xs text-secondary-500">
+                    <span class="px-2 py-1 bg-secondary-100 rounded font-medium">{{ sectionFormData.key || 'new-section' }}</span>
+                  </div>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="px-6 py-6">
-                  <div class="space-y-5 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Section Key <span class="text-error-600">*</span></label>
-                        <input
-                          v-model="sectionFormData.key"
-                          type="text"
-                          :disabled="sectionModalMode === 'edit'"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
-                          placeholder="e.g., profile, company, services"
-                        />
-                      </div>
+                  <div class="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
+                    <!-- ════════════════ SECTION SETTINGS ════════════════ -->
+                    <div>
+                      <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-400 mb-3">Section Settings</h4>
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Section Key <span class="text-error-600">*</span></label>
+                          <input
+                            v-model="sectionFormData.key"
+                            type="text"
+                            :disabled="sectionModalMode === 'edit'"
+                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
+                            placeholder="e.g., profile, company, services"
+                          />
+                        </div>
 
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Section Name <span class="text-error-600">*</span></label>
-                        <input
-                          v-model="sectionFormData.name"
-                          type="text"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                          placeholder="e.g., Profile, Company, Services"
-                        />
-                      </div>
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Section Name <span class="text-error-600">*</span></label>
+                          <input
+                            v-model="sectionFormData.name"
+                            type="text"
+                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            placeholder="e.g., Profile, Company, Services"
+                          />
+                        </div>
 
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Icon</label>
-                        <input
-                          v-model="sectionFormData.icon"
-                          type="text"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                          placeholder="e.g., heroicons:user"
-                        />
-                      </div>
+                        <!-- ICON PICKER -->
+                        <div class="relative">
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Icon</label>
+                          <button
+                            type="button"
+                            @click="showIconPicker = !showIconPicker"
+                            class="w-full flex items-center gap-3 px-3 py-2 text-sm border border-secondary-300 rounded-lg hover:border-primary-400 hover:bg-primary-50/30 focus:ring-2 focus:ring-primary-500 transition-all bg-white text-left"
+                          >
+                            <div class="w-8 h-8 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center flex-shrink-0">
+                              <Icon :name="sectionFormData.icon" class="w-4 h-4 text-primary-600" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="text-secondary-900 font-medium truncate">{{ sectionFormData.icon }}</div>
+                              <div class="text-xs text-secondary-400">Click to pick an icon</div>
+                            </div>
+                            <Icon :name="showIconPicker ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-4 h-4 text-secondary-400 flex-shrink-0" />
+                          </button>
 
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Description</label>
-                        <textarea
-                          v-model="sectionFormData.description"
-                          rows="2"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
-                          placeholder="Brief description..."
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Display Order</label>
-                        <input
-                          v-model.number="sectionFormData.display_order"
-                          type="number"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                          min="0"
-                          placeholder="0"
-                        />
-                      </div>
-
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Has Fields</label>
-                        <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
-                          <input v-model="sectionFormData.has_fields" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                          <span class="ml-2 text-sm text-secondary-900">Yes</span>
-                        </label>
-                      </div>
-
-                      <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Is Active</label>
-                        <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
-                          <input v-model="sectionFormData.is_active" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                          <span class="ml-2 text-sm text-secondary-900">Yes</span>
-                        </label>
-                      </div>
-
-                      <!-- Available Plans Info -->
-                      <div class="col-span-2">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <div class="flex items-start gap-2">
-                            <Icon name="heroicons:information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                              <p class="text-sm font-medium text-blue-800">Plan Availability</p>
-                              <p class="text-xs text-blue-600 mt-1">
-                                Section plans are automatically calculated based on the fields' plan settings. 
-                                Configure plan availability in the "Plan Assignments" section below.
-                              </p>
+                          <!-- Icon Picker Popover -->
+                          <div
+                            v-if="showIconPicker"
+                            class="absolute z-50 left-0 right-0 top-full mt-2 bg-white border border-secondary-200 rounded-xl shadow-2xl p-3 animate-in fade-in slide-in-from-top-2"
+                          >
+                            <div class="mb-3">
+                              <div class="relative">
+                                <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-400" />
+                                <input
+                                  v-model="sectionIconSearch"
+                                  type="text"
+                                  placeholder="Search icons..."
+                                  class="w-full pl-9 pr-3 py-2 text-sm border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                />
+                              </div>
+                            </div>
+                            <div class="grid grid-cols-8 gap-1.5 max-h-60 overflow-y-auto p-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-secondary-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                              <button
+                                v-for="iconName in filteredSectionIconChoices"
+                                :key="iconName"
+                                type="button"
+                                @click="selectSectionIcon(iconName)"
+                                :class="[
+                                  'aspect-square rounded-lg border flex items-center justify-center transition-all hover:-translate-y-0.5',
+                                  sectionFormData.icon === iconName
+                                    ? 'bg-primary-50 border-primary-500 ring-2 ring-primary-200 shadow-inner'
+                                    : 'bg-white border-secondary-200 hover:border-primary-300 hover:bg-primary-50/40'
+                                ]"
+                                :title="iconName"
+                              >
+                                <Icon :name="iconName" :class="['w-5 h-5', sectionFormData.icon === iconName ? 'text-primary-600' : 'text-secondary-600']" />
+                              </button>
+                            </div>
+                            <div v-if="filteredSectionIconChoices.length === 0" class="py-6 text-center text-sm text-secondary-400 italic">
+                              No icons match &quot;{{ sectionIconSearch }}&quot;
                             </div>
                           </div>
+                        </div>
+
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Description</label>
+                          <textarea
+                            v-model="sectionFormData.description"
+                            rows="2"
+                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
+                            placeholder="Brief description..."
+                          ></textarea>
+                        </div>
+
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Display Order</label>
+                          <input
+                            v-model.number="sectionFormData.display_order"
+                            type="number"
+                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            min="0"
+                            placeholder="0"
+                          />
+                        </div>
+
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Has Fields</label>
+                          <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
+                            <input v-model="sectionFormData.has_fields" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
+                            <span class="ml-2 text-sm text-secondary-900">Yes</span>
+                          </label>
+                        </div>
+
+                        <div>
+                          <label class="block text-sm font-medium text-secondary-900 mb-2">Is Active</label>
+                          <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
+                            <input v-model="sectionFormData.is_active" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
+                            <span class="ml-2 text-sm text-secondary-900">Yes</span>
+                          </label>
+                        </div>
+
+                        <!-- Available Plans Info -->
+                        <div class="col-span-2">
+                          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-start gap-2">
+                              <Icon name="heroicons:information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p class="text-sm font-medium text-blue-800">Plan Availability</p>
+                                <p class="text-xs text-blue-600 mt-1">
+                                  Section plans are automatically calculated based on the fields' plan settings.
+                                  Configure plan availability in the "Plan Assignments" section below.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-px bg-gradient-to-r from-transparent via-secondary-200 to-transparent -mx-2"></div>
+
+                    <!-- ════════════════ SECTION FIELDS ════════════════ -->
+                    <div>
+                      <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                          <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-400">Section Fields</h4>
+                          <span class="text-xs px-2 py-0.5 bg-secondary-100 text-secondary-600 rounded-full font-bold">
+                            {{ (fields[sectionFormData.key] || []).length }} fields
+                          </span>
+                        </div>
+                        <button
+                          v-if="sectionFormData.has_fields && sectionFormData.key"
+                          type="button"
+                          @click="openAddFieldFromSection"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                        >
+                          <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
+                          Add Field
+                        </button>
+                      </div>
+
+                      <!-- Empty states -->
+                      <div v-if="!sectionFormData.key" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
+                        <Icon name="heroicons:pencil-square" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
+                        <p class="text-sm text-secondary-400 font-medium">Fill in Section Key first</p>
+                        <p class="text-xs text-secondary-400 mt-0.5">Fields are saved per section key</p>
+                      </div>
+                      <div v-else-if="!sectionFormData.has_fields" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
+                        <Icon name="heroicons:cube" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
+                        <p class="text-sm text-secondary-400 font-medium">This section has no fields enabled</p>
+                        <p class="text-xs text-secondary-400 mt-0.5">Tick "Has Fields" above to manage fields here</p>
+                      </div>
+
+                      <!-- Fields list -->
+                      <div v-else class="border border-secondary-200 rounded-xl overflow-hidden divide-y divide-secondary-100 bg-white">
+                        <div
+                          v-for="(field, fIdx) in (fields[sectionFormData.key] || [])"
+                          :key="field.id || field.option_id"
+                          class="group flex items-center gap-3 px-3 py-2.5 hover:bg-secondary-50/70 transition-colors"
+                        >
+                          <div class="w-6 text-center flex-shrink-0">
+                            <span class="text-[10px] font-bold text-secondary-400">#{{ fIdx + 1 }}</span>
+                          </div>
+                          <div class="w-8 h-8 rounded-lg bg-secondary-50 border border-secondary-200 flex items-center justify-center flex-shrink-0">
+                            <Icon name="heroicons:bars-3" class="w-4 h-4 text-secondary-400" />
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                              <span class="text-sm font-semibold text-secondary-900 truncate">{{ field.label }}</span>
+                              <span v-if="field.required || field.is_required" class="text-[10px] px-1.5 py-0.5 rounded bg-error-50 text-error-700 font-bold border border-error-200">
+                                Required
+                              </span>
+                              <span v-if="!field.is_active && field.is_active !== undefined" class="text-[10px] px-1.5 py-0.5 rounded bg-secondary-100 text-secondary-500 font-bold">
+                                Inactive
+                              </span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                              <span class="text-[11px] px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 font-medium border border-primary-100">
+                                {{ field.type || field.input_type || 'text' }}
+                              </span>
+                              <span class="text-[11px] text-secondary-400 font-mono truncate">key: {{ field.key || field.name }}</span>
+                            </div>
+                          </div>
+                          <!-- Plan chips -->
+                          <div class="hidden md:flex items-center gap-1 flex-shrink-0">
+                            <template v-for="plan in plans" :key="plan.id">
+                              <span
+                                v-if="(field.available_plans && field.available_plans.includes(plan.id)) || (field.plan_assignments && field.plan_assignments.includes(plan.id)) || (plan.id === 'basic')"
+                                :class="[
+                                  'text-[10px] px-1.5 py-0.5 rounded-full font-bold',
+                                  plan.color === 'amber' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                  plan.color === 'purple' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                                  'bg-blue-50 text-blue-700 border border-blue-200'
+                                ]"
+                              >
+                                {{ plan.name.charAt(0) }}
+                              </span>
+                            </template>
+                          </div>
+                          <div class="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              @click="openEditFieldFromSection(field)"
+                              class="w-8 h-8 rounded-lg flex items-center justify-center text-secondary-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                              title="Edit field"
+                            >
+                              <Icon name="heroicons:pencil" class="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              @click="deleteFieldFromSection(field, fIdx)"
+                              class="w-8 h-8 rounded-lg flex items-center justify-center text-secondary-500 hover:text-error-600 hover:bg-error-50 transition-colors"
+                              title="Delete field"
+                            >
+                              <Icon name="heroicons:trash" class="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div v-if="(fields[sectionFormData.key] || []).length === 0" class="p-8 text-center">
+                          <div class="w-14 h-14 mx-auto rounded-2xl bg-secondary-50 border-2 border-dashed border-secondary-200 flex items-center justify-center mb-3">
+                            <Icon name="heroicons:queue-list" class="w-7 h-7 text-secondary-300" />
+                          </div>
+                          <p class="text-sm font-semibold text-secondary-600 mb-1">No fields yet</p>
+                          <p class="text-xs text-secondary-400 mb-4">Add the first input field to this section</p>
+                          <button
+                            type="button"
+                            @click="openAddFieldFromSection"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                          >
+                            <Icon name="heroicons:plus" class="w-4 h-4" />
+                            Add First Field
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1735,12 +2256,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
 const config = useRuntimeConfig();
+const { $toast } = useNuxtApp();
 
 // State
 const currentTab = ref('theme');
@@ -1754,6 +2276,8 @@ const showModal = ref(false);
 const modalMode = ref('add');
 const editingOption = ref(null);
 const expandedPlans = ref([]);
+const fieldsSearchQuery = ref('');
+const activeView = ref('assignments'); // assignments | sections | catalog
 
 // Business User Customization
 const businessViewTab = ref('defaults');
@@ -1783,6 +2307,87 @@ const filteredBusinessUsers = computed(() => {
   return businessUsers.value.filter(user => 
     user.name?.toLowerCase().includes(search) || 
     user.email?.toLowerCase().includes(search)
+  );
+});
+
+// ========================================
+// 📊 OVERVIEW STATISTICS COMPUTED
+// ========================================
+const totalSections = computed(() => generalSections.value.length);
+const totalFields = computed(() => Object.values(fields.value).flat().length);
+const totalDesignOptions = computed(() => {
+  const designTabs = ['theme', 'font', 'button_style', 'color_scheme', 'layout'];
+  return designTabs.reduce((sum, tab) => sum + (options.value[tab]?.length || 0), 0);
+});
+const totalFeatures = computed(() => filteredOptionsFeatureToggles.value.length);
+
+// Plan breakdown for fields
+const fieldPlanBreakdown = computed(() => {
+  const allFields = Object.values(fields.value).flat();
+  return {
+    basic: allFields.filter(f => isAvailableForPlan(f, 'basic')).length,
+    premium: allFields.filter(f => isAvailableForPlan(f, 'premium')).length,
+    business: allFields.filter(f => isAvailableForPlan(f, 'business')).length,
+    total: allFields.length,
+  };
+});
+
+// Plan breakdown for design options
+const designPlanBreakdown = computed(() => {
+  const designTabs = ['theme', 'font', 'button_style', 'color_scheme', 'layout'];
+  const allDesigns = designTabs.flatMap(tab => options.value[tab] || []);
+  return {
+    basic: allDesigns.filter(o => isAvailableForPlan(o, 'basic')).length,
+    premium: allDesigns.filter(o => isAvailableForPlan(o, 'premium')).length,
+    business: allDesigns.filter(o => isAvailableForPlan(o, 'business')).length,
+    total: allDesigns.length,
+  };
+});
+
+// Plan breakdown stats: KEYED OBJECT — used in matrix / plan-by-plan access: planStats.basic.features etc
+const planStats = computed(() => {
+  const totalPossible = totalFields.value + totalDesignOptions.value + totalFeatures.value;
+  const keyed = {};
+  plans.forEach(plan => {
+    const sectionsCount = availableSections.value.filter(section => {
+      const planList = getSectionPlans(section.key);
+      return planList.includes(plan.id);
+    }).length;
+    const fieldsCount = fieldPlanBreakdown.value[plan.id];
+    const designsCount = designPlanBreakdown.value[plan.id];
+    const featuresCount = filteredOptionsFeatureToggles.value.filter(f => isAvailableForPlan(f, plan.id)).length;
+    const total = fieldsCount + designsCount + featuresCount;
+    keyed[plan.id] = {
+      ...plan,
+      sections: sectionsCount,
+      fields: fieldsCount,
+      designs: designsCount,
+      features: featuresCount,
+      fieldsCount,
+      designsCount,
+      featuresCount,
+      sectionsCount,
+      total,
+      percentage: totalPossible > 0 ? Math.round((total / totalPossible) * 100) : 0,
+    };
+  });
+  return keyed;
+});
+
+// Plan breakdown stats: PURE ARRAY — safe for v-for iteration with :key="stat.id"
+const planStatsList = computed(() => plans.map(plan => planStats.value[plan.id]).filter(Boolean));
+
+// Filtered fields table with search
+const filteredFieldsTable = computed(() => {
+  const opts = getFilteredOptions.value;
+  if (!fieldsSearchQuery.value) return opts;
+  const q = fieldsSearchQuery.value.toLowerCase();
+  return opts.filter(f => 
+    f.label?.toLowerCase().includes(q) ||
+    f.field_key?.toLowerCase().includes(q) ||
+    f.field_type?.toLowerCase().includes(q) ||
+    f.placeholder?.toLowerCase().includes(q) ||
+    f.field_group?.toLowerCase().includes(q)
   );
 });
 
@@ -1822,6 +2427,77 @@ const sectionFormData = ref({
   is_active: true,
   available_plans: ['basic', 'premium', 'business']
 });
+
+const showIconPicker = ref(false);
+const sectionIconSearch = ref('');
+const sectionIconChoices = [
+  'heroicons:user', 'heroicons:user-circle', 'heroicons:user-group', 'heroicons:users',
+  'heroicons:identification', 'heroicons:building-office', 'heroicons:building-office-2',
+  'heroicons:rocket-launch', 'heroicons:briefcase', 'heroicons:sparkles', 'heroicons:star', 'heroicons:star-solid',
+  'heroicons:link', 'heroicons:at-symbol', 'heroicons:phone', 'heroicons:envelope',
+  'heroicons:map-pin', 'heroicons:calendar', 'heroicons:clock', 'heroicons:document-text', 'heroicons:document',
+  'heroicons:queue-list', 'heroicons:clipboard-document-check', 'heroicons:clipboard-document-list',
+  'heroicons:pencil', 'heroicons:pencil-square', 'heroicons:paint-brush', 'heroicons:swatch', 'heroicons:photo',
+  'heroicons:video-camera', 'heroicons:musical-note', 'heroicons:heart', 'heroicons:hand-thumb-up',
+  'heroicons:chat-bubble-left', 'heroicons:chat-bubble-left-right',
+  'heroicons:book-open', 'heroicons:academic-cap', 'heroicons:trophy', 'heroicons:shield-check',
+  'heroicons:gift', 'heroicons:credit-card', 'heroicons:wallet', 'heroicons:shopping-cart', 'heroicons:shopping-bag',
+  'heroicons:tag', 'heroicons:fire', 'heroicons:light-bulb', 'heroicons:beaker',
+  'heroicons:cog', 'heroicons:cog-6-tooth', 'heroicons:code-bracket', 'heroicons:command-line', 'heroicons:bolt',
+  'heroicons:device-phone-mobile', 'heroicons:computer-desktop', 'heroicons:camera',
+  'heroicons:folder', 'heroicons:folder-open', 'heroicons:archive-box',
+  'heroicons:magnifying-glass', 'heroicons:bell', 'heroicons:paper-airplane',
+  'heroicons:bookmark', 'heroicons:pin', 'heroicons:cube', 'heroicons:rss',
+  'heroicons:language', 'heroicons:cursor-arrow-rays', 'heroicons:squares-2x2', 'heroicons:squares-plus',
+  'heroicons:rectangle-stack', 'heroicons:rectangle-group', 'heroicons:hashtag', 'heroicons:bars-3',
+  'heroicons:currency-dollar', 'heroicons:check-circle', 'heroicons:check-circle-solid',
+  'heroicons:information-circle', 'heroicons:arrow-path', 'heroicons:plus', 'heroicons:inbox'
+];
+
+const filteredSectionIconChoices = computed(() => {
+  const q = sectionIconSearch.value.trim().toLowerCase();
+  if (!q) return sectionIconChoices;
+  return sectionIconChoices.filter(n => n.toLowerCase().includes(q));
+});
+
+const selectSectionIcon = (iconName) => {
+  sectionFormData.value.icon = iconName;
+  showIconPicker.value = false;
+  sectionIconSearch.value = '';
+};
+
+const openAddFieldFromSection = () => {
+  const sKey = sectionFormData.value.key;
+  if (!sKey) {
+    $toast.error('Please enter Section Key first before adding fields');
+    return;
+  }
+  currentTab.value = `field_${sKey}`;
+  nextTick(() => {
+    openAddModal();
+  });
+};
+
+const openEditFieldFromSection = (field) => {
+  const sKey = sectionFormData.value.key || field.tab || (field.option_id ? field.option_id.split('__')[0] : null);
+  if (sKey) currentTab.value = `field_${sKey}`;
+  nextTick(() => {
+    openEditModal(field);
+  });
+};
+
+const deleteFieldFromSection = async (field) => {
+  const sKey = sectionFormData.value.key || field.tab;
+  const originalTab = currentTab.value;
+  if (sKey) currentTab.value = `field_${sKey}`;
+  try {
+    await confirmDelete(field);
+  } finally {
+    if (sKey && originalTab && !originalTab.startsWith('field_')) {
+      // restore original if needed; typically fetchData reloads context so leave
+    }
+  }
+};
 
 // ========================================
 // 🆕 DYNAMIC SECTIONS - Loaded from API
@@ -2019,6 +2695,8 @@ const openSectionModal = (mode, section = null) => {
 // Close Section Modal
 const closeSectionModal = () => {
   showSectionModal.value = false;
+  showIconPicker.value = false;
+  sectionIconSearch.value = '';
   editingSection.value = null;
   sectionFormData.value = {
     key: '',
@@ -2037,14 +2715,14 @@ const closeSectionModal = () => {
 const saveSection = async () => {
   // Validation
   if (!sectionFormData.value.key || !sectionFormData.value.name) {
-    alert('Please fill in Section Key and Name');
+    $toast.error('Please fill in Section Key and Name');
     return;
   }
   
   // Validate key format (lowercase, no spaces)
   const keyRegex = /^[a-z][a-z0-9_]*$/;
   if (!keyRegex.test(sectionFormData.value.key)) {
-    alert('Section Key must be lowercase, start with a letter, and contain only letters, numbers, and underscores');
+    $toast.error('Section Key must be lowercase, start with a letter, and contain only letters, numbers, and underscores');
     return;
   }
   
@@ -2077,7 +2755,7 @@ const saveSection = async () => {
     const result = await response.json();
     console.log('✅ Section saved:', result);
     
-    alert(`Section ${isEdit ? 'updated' : 'created'} successfully!`);
+    $toast.success(`Section ${isEdit ? 'updated' : 'created'} successfully`);
     closeSectionModal();
     
     // Reload sections and data
@@ -2085,7 +2763,7 @@ const saveSection = async () => {
     await fetchData();
   } catch (error) {
     console.error('❌ Error saving section:', error);
-    alert(`Failed to save section: ${error.message}`);
+    $toast.error(`Failed to save section: ${error.message}`);
   } finally {
     saving.value = false;
   }
@@ -2122,14 +2800,14 @@ const confirmDeleteSection = async (section) => {
     }
     
     console.log('✅ Section deleted successfully');
-    alert('Section deleted successfully!');
+    $toast.success('Section deleted successfully');
     
     // Reload sections and data
     await loadSections();
     await fetchData();
   } catch (error) {
     console.error('❌ Error deleting section:', error);
-    alert(`Failed to delete section: ${error.message}`);
+    $toast.error(`Failed to delete section: ${error.message}`);
   }
 };
 
@@ -2412,7 +3090,7 @@ const toggleOptionForPlan = async (item, planId, checked, skipRefresh = false) =
     }
   } catch (error) {
     console.error('Error toggling option for plan:', error);
-    alert('Failed to update');
+    $toast.error('Failed to update plan assignment');
   }
 };
 
@@ -2521,7 +3199,7 @@ const toggleDesignTypeForPlan = async (planId, designType, checked) => {
     console.log(`✅ Successfully toggled all ${typeOptions.length} ${designType} options`);
   } catch (error) {
     console.error('❌ Error in toggleDesignTypeForPlan:', error);
-    alert(`Failed to update: ${error.message}`);
+    $toast.error(`Failed to update options: ${error.message}`);
   }
 };
 
@@ -2607,7 +3285,7 @@ const toggleSectionForPlan = async (planId, tabId, checked) => {
     console.log(`✅ Successfully toggled all ${tabFields.length} fields`);
   } catch (error) {
     console.error('❌ Error in toggleSectionForPlan:', error);
-    alert(`Failed to update section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
+    $toast.error(`Failed to update section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
   }
 };
 
@@ -2676,7 +3354,7 @@ const toggleDesignSectionForPlan = async (planId, subItems, checked) => {
     console.log(`✅ Successfully toggled all ${allOptions.length} design options`);
   } catch (error) {
     console.error('❌ Error in toggleDesignSectionForPlan:', error);
-    alert(`Failed to update design section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
+    $toast.error(`Failed to update design section: ${error.message || 'Unknown error'}. Please try again or refresh the page.`);
   }
 };
 
@@ -2724,17 +3402,17 @@ const closeModal = () => {
 const saveOption = async () => {
   if (isFieldTab.value) {
     if (!formData.value.field_key || !formData.value.label) {
-      alert('Please fill in all required fields');
+      $toast.error('Please fill in all required fields');
       return;
     }
   } else {
     if (!formData.value.name) {
-      alert('Please enter a name');
+      $toast.error('Please enter a display name');
       return;
     }
 
     if (modalMode.value === 'add' && !formData.value.option_id) {
-      alert('Please enter an option ID');
+      $toast.error('Please enter an option ID');
       return;
     }
 
@@ -2775,10 +3453,10 @@ const saveOption = async () => {
 
     await fetchData();
     closeModal();
-    alert(`${isFieldTab.value ? 'Field' : 'Option'} ${modalMode.value === 'add' ? 'added' : 'updated'} successfully`);
+    $toast.success(`${isFieldTab.value ? 'Field' : 'Option'} ${modalMode.value === 'add' ? 'added' : 'updated'} successfully`);
   } catch (error) {
     console.error('Error saving:', error);
-    alert(error.message);
+    $toast.error(error.message);
   } finally {
     saving.value = false;
   }
@@ -2802,9 +3480,10 @@ const toggleActive = async (option) => {
     }
 
     await fetchOptions();
+    $toast.success(`Option ${option.is_active ? 'hidden' : 'activated'}`);
   } catch (error) {
     console.error('Error toggling status:', error);
-    alert(error.message);
+    $toast.error(error.message);
   }
 };
 
@@ -2826,17 +3505,17 @@ const setAsDefault = async (option) => {
     }
 
     await fetchOptions();
-    alert('Default option updated successfully');
+    $toast.success(`${option.name} is now the default ${currentTabName.value.toLowerCase()}`);
   } catch (error) {
     console.error('Error setting default:', error);
-    alert(error.message);
+    $toast.error(error.message);
   }
 };
 
 const confirmDelete = async (option) => {
   const displayName = isFieldTab.value ? option.label : option.name;
   
-  if (!confirm(`Are you sure you want to delete "${displayName}"?`)) {
+  if (!confirm(`Are you sure you want to delete "${displayName}"?\n\nThis action cannot be undone.`)) {
     return;
   }
 
@@ -2858,10 +3537,10 @@ const confirmDelete = async (option) => {
     }
 
     await fetchData();
-    alert(`${isFieldTab.value ? 'Field' : 'Option'} deleted successfully`);
+    $toast.success(`${isFieldTab.value ? 'Field' : 'Option'} deleted successfully`);
   } catch (error) {
     console.error('Error deleting:', error);
-    alert(error.message);
+    $toast.error(error.message);
   }
 };
 
@@ -2913,9 +3592,10 @@ const updateField = async (field) => {
 
     await fetchFields();
     console.log(`✅ Successfully updated field: ${field.label}`);
+    $toast.success(`${field.label} updated successfully`);
   } catch (error) {
     console.error('❌ Error updating field:', field.label, error);
-    alert(`Failed to update ${field.label}: ${error.message}`);
+    $toast.error(`Failed to update ${field.label}: ${error.message}`);
     throw error;
   }
 };
@@ -2952,7 +3632,7 @@ const loadBusinessUsers = async () => {
     businessUsers.value = data.data || [];
   } catch (error) {
     console.error('❌ Error loading business users:', error);
-    alert(`Failed to load business users: ${error.message}`);
+    $toast.error(`Failed to load business users: ${error.message}`);
   } finally {
     businessUsersLoading.value = false;
   }
@@ -2994,7 +3674,6 @@ const openBusinessUserModal = async (user) => {
     const assignment = data.data.assignment || {};
     console.log('📊 User assignment data:', assignment);
     
-    // 判断是否是空的自定义设置（use_custom=true 但没有保存具体项）
     const isEmptyCustom = assignment.use_custom && 
       (!assignment.enabled_fields || assignment.enabled_fields.length === 0) &&
       (!assignment.enabled_design_options || assignment.enabled_design_options.length === 0) &&
@@ -3004,10 +3683,8 @@ const openBusinessUserModal = async (user) => {
       console.log('🔔 Detected empty custom settings, using defaults as starting point');
     }
     
-    // 修复自定义模式不显示已保存记录的问题
     businessUserFormData.value = {
       use_custom: assignment.use_custom || false,
-      // 当use_custom=true但是空记录时，使用默认值作为起点，否则使用用户的设置
       enabled_fields: isEmptyCustom ? [...(data.data.defaults?.fields || [])] :
         (assignment.use_custom ? (assignment.enabled_fields || []) : [...(data.data.defaults?.fields || [])]),
       enabled_design_options: isEmptyCustom ? [...(data.data.defaults?.design_options || [])] :
@@ -3028,7 +3705,7 @@ const openBusinessUserModal = async (user) => {
     showBusinessUserModal.value = true;
   } catch (error) {
     console.error('❌ Error loading user assignment:', error);
-    alert(`Failed to load user data: ${error.message}`);
+    $toast.error(`Failed to load user data: ${error.message}`);
   } finally {
     businessUsersLoading.value = false;
   }
@@ -3139,10 +3816,10 @@ const saveBusinessUserAssignment = async () => {
     
     await loadBusinessUsers();
     closeBusinessUserModal();
-    alert('Settings saved successfully');
+    $toast.success('Settings saved successfully');
   } catch (error) {
     console.error('Error saving:', error);
-    alert('Failed to save settings');
+    $toast.error('Failed to save settings');
   } finally {
     savingBusinessUser.value = false;
   }
@@ -3160,9 +3837,10 @@ const resetBusinessUserToDefault = async () => {
     
     await loadBusinessUsers();
     closeBusinessUserModal();
-    alert('Reset to default settings');
+    $toast.success('Reset to default settings');
   } catch (error) {
     console.error('Error resetting:', error);
+    $toast.error('Failed to reset settings');
   } finally {
     savingBusinessUser.value = false;
   }

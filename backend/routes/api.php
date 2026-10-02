@@ -38,6 +38,50 @@ use App\Http\Controllers\Api\Admin\ProfileBuilderSectionController;
 use App\Http\Controllers\Api\CardTemplateController;
 use App\Http\Controllers\Api\AdminExportController;
 
+// ============== API ROOT ROUTES (Diagnosis / Onboarding) ==============
+
+/**
+ * API "is it alive?" route. The prior 404 `Cannot GET /` from the screenshot
+ * happened because the API server has no GET /api handler defined. This
+ * replaces that empty 404 with a friendly status JSON.
+ *
+ *   Localhost example: http://localhost:3001/api     (shows OK status)
+ *   Production:       https://nfcgo.clbgroups.com/api
+ */
+Route::get('/', function () {
+    return response()->json([
+        'success' => true,
+        'service' => 'nfcgo-api',
+        'name'    => 'NFC Business Card Backend',
+        'version' => '1.0.0',
+        'timestamp' => now()->toIso8601String(),
+        'env'     => app()->environment(),
+        'available_routes' => [
+            'health_check'        => '/health',
+            'api_test'            => '/api/test',
+            'auth'                => ['POST /api/register', 'POST /api/login'],
+            'public_profile'      => 'GET /api/nfc-cards/{card}/landing-page',
+            'nfc_hardware_tap'    => 'POST /api/nfc/tap/{nfcId}',
+            'docs_notice'         => 'Append /api to all endpoints above.',
+        ],
+    ]);
+});
+
+/**
+ * Fallback for unknown API routes — return consistent JSON 404 envelope
+ * instead of the generic "{message:Not Found,statusCode:404}" that users
+ * mistook for a "profile bug". Keeps response shape the same across the app.
+ */
+Route::fallback(function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'API endpoint not found',
+        'service' => 'nfcgo-api',
+        'available_routes_hint' => 'Try GET /api or GET /api/test',
+        'timestamp' => now()->toIso8601String(),
+    ], 404);
+});
+
 // Test endpoint
 Route::get('/test', function () {
     return response()->json([
@@ -132,6 +176,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/nfc-cards/{nfcCard}/activate', [NfcCardController::class, 'activate']);
     Route::post('/nfc-cards/{nfcCard}/deactivate', [NfcCardController::class, 'deactivate']);
     Route::get('/nfc-cards/{nfcCard}/analytics', [NfcCardController::class, 'analytics']);
+    Route::post('/nfc-cards/{nfcCard}/upload-payment-proof', [NfcCardController::class, 'uploadPaymentProof']);
+    Route::post('/nfc-cards/{nfcCard}/confirm-received', [NfcCardController::class, 'confirmReceived']);
 
     // Landing Page update (protected - only card owner can update)
     Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
@@ -274,6 +320,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile Builder (User - get sections and fields by plan)
     Route::get('/profile-builder-sections', [ProfileBuilderFieldController::class, 'getSections']);
     Route::get('/profile-builder-fields', [ProfileBuilderFieldController::class, 'index']);
+
+    // ─── PERFORMANCE: Batch init endpoint for Profile Builder page load ──────
+    // Merges sections + fields + design options into a single HTTP roundtrip.
+    // Saves 2x full Laravel request bootstrap + TLS/HTTP handshake overhead
+    // versus calling the 3 individual endpoints above separately.
+    Route::get('/profile-builder-init', [\App\Http\Controllers\Api\ProfileBuilderInitController::class, 'index']);
 });
 
 // Public legal documents routes
@@ -328,6 +380,14 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
     Route::put('/nfc-cards/{cardId}', [AdminController::class, 'updateNfcCard']);
     Route::delete('/nfc-cards/{cardId}', [AdminController::class, 'deleteNfcCard']);
 
+    // Admin NFC Card Order Flow actions
+    Route::post('/nfc-cards/{cardId}/verify-payment', [AdminController::class, 'verifyNfcCardPayment']);
+    Route::post('/nfc-cards/{cardId}/reject-payment', [AdminController::class, 'rejectNfcCardPayment']);
+    Route::post('/nfc-cards/{cardId}/mark-processing', [AdminController::class, 'markNfcCardProcessing']);
+    Route::post('/nfc-cards/{cardId}/mark-shipped', [AdminController::class, 'markNfcCardShipped']);
+    Route::post('/nfc-cards/{cardId}/mark-delivered', [AdminController::class, 'markNfcCardDelivered']);
+    Route::post('/nfc-cards/{cardId}/cancel', [AdminController::class, 'cancelNfcCard']);
+
     // Legal documents management
     Route::put('/legal/documents/{type}', [LegalDocumentController::class, 'update']);
     Route::get('/legal/pdf/{type}/status', [LegalDocumentController::class, 'checkPdfStatus']);
@@ -344,6 +404,8 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::post('/announcement', [AdminNotificationController::class, 'sendAnnouncement']);
         Route::post('/send-to-users', [AdminNotificationController::class, 'sendToUsers']);
         Route::post('/system-message', [AdminNotificationController::class, 'sendSystemMessage']);
+        Route::post('/approve', [AdminNotificationController::class, 'approveOrder']);
+        Route::post('/mark-all-read', [AdminNotificationController::class, 'markAllAsRead']);
         Route::post('/{id}/approve', [AdminNotificationController::class, 'approveOrder']);
         Route::post('/{id}/reject', [AdminNotificationController::class, 'rejectOrder']);
         Route::delete('/{id}', [AdminNotificationController::class, 'destroy']);
@@ -459,7 +521,28 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::get('/', [AdminController::class, 'auditLogsIndex']);
         Route::get('/export-csv', [AdminController::class, 'auditLogsExportCsv']);
     });
+
+    // ✅ Admin System Settings
+    Route::prefix('system-settings')->group(function () {
+        Route::get('/general', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getGeneralSettings']);
+        Route::post('/general', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'saveGeneralSettings']);
+        Route::get('/payment', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getPaymentSettings']);
+        Route::post('/payment', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'savePaymentSettings']);
+        Route::get('/email', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getEmailSettings']);
+        Route::post('/email', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'saveEmailSettings']);
+        Route::post('/email/test', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'sendTestEmail']);
+        // Brand assets (Logo / Favicon)
+        Route::prefix('brand')->group(function () {
+            Route::post('/upload-logo', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'uploadLogo']);
+            Route::post('/remove-logo', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'removeLogo']);
+            Route::post('/upload-favicon', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'uploadFavicon']);
+            Route::post('/remove-favicon', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'removeFavicon']);
+        });
+    });
 });
+
+// Public brand info (app name, logo, favicon) for login/home pages
+Route::get('/system-settings/brand/public', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'publicBrandInfo']);
 
 // Public endpoint for viewing current plan prices
 Route::get('/plan-prices/public', [PlanPriceController::class, 'publicPrices']);

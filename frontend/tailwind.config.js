@@ -99,6 +99,21 @@ module.exports = {
         "slide-in-left": "slideInLeft 0.3s ease-in-out",
         "bounce-in": "bounceIn 0.6s ease-in-out",
         "pulse-slow": "pulse 3s infinite",
+        "nfc-fan-l-1": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
+        "nfc-fan-l-2": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.28s infinite",
+        "nfc-fan-l-3": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.56s infinite",
+        "nfc-fan-r-1": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
+        "nfc-fan-r-2": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.28s infinite",
+        "nfc-fan-r-3": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.56s infinite",
+        "nfc-chip-3d": "nfcChip3D 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
+        "nfc-chip-3d-lg": "nfcChip3DLg 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+        "nfc-text-shimmer": "nfcTextShimmer 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+        "nfc-fade-up": "nfcFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "nfc-accent-line": "nfcAccentLine 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+        "dot-bounce-1": "dotBounce 1.4s ease-in-out infinite",
+        "dot-bounce-2": "dotBounce 1.4s ease-in-out 0.16s infinite",
+        "dot-bounce-3": "dotBounce 1.4s ease-in-out 0.32s infinite",
+        "card-skeleton-scan": "cardSkeletonScan 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite",
       },
       keyframes: {
         fadeIn: {
@@ -126,6 +141,108 @@ module.exports = {
           "50%": { transform: "scale(1.05)" },
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        nfcFanWaveLeft: {
+          "0%": {
+            transform: "translateX(14%) scale(0.86)",
+            opacity: "0",
+          },
+          "32%": {
+            opacity: "0.92",
+          },
+          "100%": {
+            transform: "translateX(-22%) scale(1.08)",
+            opacity: "0",
+          },
+        },
+        nfcFanWaveRight: {
+          "0%": {
+            transform: "translateX(-14%) scale(0.86)",
+            opacity: "0",
+          },
+          "32%": {
+            opacity: "0.92",
+          },
+          "100%": {
+            transform: "translateX(22%) scale(1.08)",
+            opacity: "0",
+          },
+        },
+        nfcChip3D: {
+          "0%, 100%": {
+            transform: "translateY(0) scale(1)",
+          },
+          "50%": {
+            transform: "translateY(-1.5px) scale(1.025)",
+          },
+        },
+        nfcChip3DLg: {
+          "0%, 100%": {
+            transform: "perspective(600px) rotateX(3.5deg) rotateY(-4deg) translateY(0) scale(1)",
+            filter:
+              "drop-shadow(0 8px 20px color-mix(in srgb, var(--theme-primary-800,#2c344e) 22%, transparent)) drop-shadow(0 2px 4px color-mix(in srgb, var(--theme-accent,#5d8c87) 28%, transparent))",
+          },
+          "50%": {
+            transform: "perspective(600px) rotateX(3.5deg) rotateY(-4deg) translateY(-3px) scale(1.03)",
+            filter:
+              "drop-shadow(0 16px 32px color-mix(in srgb, var(--theme-primary-800,#2c344e) 28%, transparent)) drop-shadow(0 4px 9px color-mix(in srgb, var(--theme-accent,#5d8c87) 40%, transparent))",
+          },
+        },
+        nfcTextShimmer: {
+          "0%, 100%": {
+            backgroundPosition: "-120% 0",
+          },
+          "50%": {
+            backgroundPosition: "120% 0",
+          },
+        },
+        nfcFadeUp: {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(14px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        nfcAccentLine: {
+          "0%, 100%": {
+            transform: "scaleX(0.25)",
+            opacity: "0.45",
+            transformOrigin: "center",
+          },
+          "50%": {
+            transform: "scaleX(1)",
+            opacity: "1",
+            transformOrigin: "center",
+          },
+        },
+        dotBounce: {
+          "0%, 80%, 100%": {
+            transform: "scale(0.55)",
+            opacity: "0.45",
+          },
+          "40%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+        },
+        cardSkeletonScan: {
+          "0%": {
+            transform: "translateX(-120%)",
+            opacity: "0",
+          },
+          "12%": {
+            opacity: "1",
+          },
+          "88%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateX(120%)",
+            opacity: "0",
+          },
         },
       },
       boxShadow: {

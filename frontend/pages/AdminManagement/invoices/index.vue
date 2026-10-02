@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
             Invoice Management
           </h1>
           <p class="mt-2 text-secondary-600">Manage all customer invoices</p>

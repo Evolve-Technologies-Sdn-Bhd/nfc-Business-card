@@ -21,7 +21,7 @@
             <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
             Back
           </NuxtLink>
-          <h2 class="text-3xl font-bold text-secondary-900">
+          <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900">
             Create your account
           </h2>
         </div>

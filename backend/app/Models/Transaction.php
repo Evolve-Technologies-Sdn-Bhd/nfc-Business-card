@@ -17,6 +17,7 @@ class Transaction extends Model
         'transaction_id',
         'user_id',
         'payment_method_id',
+        'nfc_card_id',
         'type',
         'payment_rail',
         'provider',
@@ -105,6 +106,14 @@ class Transaction extends Model
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /**
+     * Get the NFC card associated with this transaction
+     */
+    public function nfcCard(): ?BelongsTo
+    {
+        return $this->belongsTo(NfcCard::class);
     }
 
     /**

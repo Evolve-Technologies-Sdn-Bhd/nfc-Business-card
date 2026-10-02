@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\LandingPage;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\ActivityLog;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class NfcCardController extends Controller
@@ -19,29 +23,72 @@ class NfcCardController extends Controller
     {
         $this->notificationService = $notificationService;
     }
+
+    /**
+     * Helper — create activity_logs entry for user-initiated NFC card flows.
+     * Wrapped in try/catch since audit log is non-critical side effect.
+     */
+    protected function recordUserNfcCardActivity(
+        $user,
+        string $actionType,
+        string $description,
+        string $entityType = 'nfc_card',
+        ?int $entityId = null,
+        array $metadata = []
+    ): void {
+        try {
+            $defaults = [
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'user_id' => $user?->id,
+                'business_account_id' => $user?->isBusinessAccount() ? $user?->id : ($user?->business_account_id ?? null),
+                'action_type' => $actionType,
+                'action_description' => $description,
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'metadata' => count($metadata) ? json_encode($metadata) : null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            ActivityLog::create($defaults);
+        } catch (\Throwable $e) {
+            // Non-critical: never break main API response because of audit log.
+            report($e);
+        }
+    }
     public function index(Request $request)
     {
         $user = $request->user();
         \Log::info('NFC Cards index called', ['user_id' => $user?->id, 'user_email' => $user?->email]);
 
-        // Check if user has premium subscription
-        if (!$user->hasPremiumSubscription()) {
-            \Log::warning('User does not have premium subscription', ['user_id' => $user?->id]);
+        $plan = $user->subscription_plan;
+        $subActive = (bool) $user->subscription_active;
+        $hasActiveAccess = in_array($plan, ['basic', 'premium', 'business'], true) && $subActive;
+        if (!$hasActiveAccess) {
+            $hasActiveAccess = $user->nfcCards()
+                ->whereIn('status', ['payment_verified','processing','shipped','delivered','active','pending_payment','awaiting_payment_verification'])
+                ->exists();
+        }
+
+        if (!$hasActiveAccess) {
+            \Log::warning('User does not have active card access', ['user_id' => $user?->id]);
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Premium subscription',
+                'message' => 'This feature requires an active Premium subscription or NFC card order',
                 'upgrade_required' => true
             ], 403);
         }
+
+        $eagerUser = 'user:id,first_name,last_name,email,job_title,name_slug';
 
         // If user is Business Admin, get all cards under the business account
         if ($user->isBusinessAccount()) {
             // Get cards for business admin and all employees
             $nfcCards = NfcCard::where('business_account_id', $user->id)
-                ->with(['nfcTag', 'user:id,first_name,last_name,email,job_title'])
+                ->with(['nfcTag', $eagerUser, 'transaction', 'cardTemplate'])
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
+
             \Log::info('Business Admin NFC cards retrieved', [
                 'user_id' => $user->id,
                 'count' => $nfcCards->count(),
@@ -49,8 +96,17 @@ class NfcCardController extends Controller
             ]);
         } else {
             // Regular user or employee - only get their own cards
-            $nfcCards = $user->nfcCards()->with('nfcTag')->orderBy('created_at', 'desc')->get();
+            $nfcCards = $user->nfcCards()
+                ->with(['nfcTag', $eagerUser, 'transaction', 'cardTemplate'])
+                ->orderBy('created_at', 'desc')
+                ->get();
             \Log::info('NFC cards retrieved', ['user_id' => $user->id, 'count' => $nfcCards->count()]);
+        }
+
+        // Bulk hydrate name-slug clash counts for all card owners (1 query instead of N+1)
+        $relatedUsers = $nfcCards->pluck('user')->filter();
+        if ($relatedUsers->isNotEmpty()) {
+            \App\Models\User::hydrateNameSlugClashCounts($relatedUsers);
         }
 
         return response()->json([
@@ -74,16 +130,17 @@ class NfcCardController extends Controller
             ], 403);
         }
 
-        // Check if user has premium subscription
-        if (!$user->hasPremiumSubscription()) {
+        $hasActiveAccess = $user->hasPremiumSubscription() || $nfcCard->canAccessProfileBuilder();
+
+        if (!$hasActiveAccess) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Premium subscription',
+                'message' => 'This feature requires a Premium subscription or payment verification',
                 'upgrade_required' => true
             ], 403);
         }
 
-        $nfcCard->load('nfcTag', 'analytics', 'user:id,first_name,last_name,email,job_title');
+        $nfcCard->load(['nfcTag', 'analytics', 'user:id,first_name,last_name,email,job_title', 'transaction', 'cancelledBy']);
 
         return response()->json([
             'success' => true,
@@ -94,15 +151,6 @@ class NfcCardController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-
-        // Check if user has premium subscription
-        if (!$user->hasPremiumSubscription()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This feature requires a Premium subscription',
-                'upgrade_required' => true
-            ], 403);
-        }
 
         // For Business plan, check quota before allowing card order
         if ($request->subscription_plan === 'business') {
@@ -139,6 +187,11 @@ class NfcCardController extends Controller
             'payment_method' => 'nullable|string|max:100',
             'shipping_address' => 'nullable|string',
             'notes' => 'nullable|string',
+            'card_template_id' => 'nullable|exists:card_templates,id',
+            'is_custom_design' => 'nullable|boolean',
+            'custom_design_front' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'custom_design_back' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'design_notes' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
@@ -161,40 +214,136 @@ class NfcCardController extends Controller
         // Generate unique NFC card ID (this would typically be done by admin)
         $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
 
+        $defaultStatus = 'pending_payment';
+        $plan = $request->subscription_plan;
+
+        // Free plan - activate immediately
+        if ($plan === 'free') {
+            $defaultStatus = 'active';
+        }
+
+        // Handle custom design file uploads
+        $customFrontUrl = null;
+        $customBackUrl = null;
+        $isCustomDesign = (bool) $request->input('is_custom_design', false);
+
+        if ($isCustomDesign) {
+            if ($request->hasFile('custom_design_front')) {
+                $frontFile = $request->file('custom_design_front');
+                $frontFileName = 'card-designs/' . $nfcCardId . '-front-' . time() . '.' . $frontFile->extension();
+                $frontFile->storeAs('public', $frontFileName);
+                $customFrontUrl = Storage::url($frontFileName);
+            }
+            if ($request->hasFile('custom_design_back')) {
+                $backFile = $request->file('custom_design_back');
+                $backFileName = 'card-designs/' . $nfcCardId . '-back-' . time() . '.' . $backFile->extension();
+                $backFile->storeAs('public', $backFileName);
+                $customBackUrl = Storage::url($backFileName);
+            }
+        }
+
+        $cardTemplateId = $request->input('card_template_id');
+        if ($isCustomDesign) {
+            $cardTemplateId = null;
+        }
+
         $nfcCard = NfcCard::create([
             'user_id' => $user->id,
             'business_account_id' => $businessAccountId,
             'nfc_card_id' => $nfcCardId,
+            'card_template_id' => $cardTemplateId,
             'card_owner' => $request->card_owner,
             'billing_address' => $request->billing_address,
             'contact_number' => $request->contact_number,
             'purchase_date' => now(),
-            'subscription_plan' => $request->subscription_plan,
+            'subscription_plan' => $plan,
             'purchase_amount' => $request->purchase_amount,
-            'payment_method' => $request->payment_method,
+            'payment_method' => $request->payment_method ?? 'manual_bank_transfer',
             'shipping_address' => $request->shipping_address,
             'notes' => $request->notes,
+            'is_custom_design' => $isCustomDesign,
+            'custom_design_front_url' => $customFrontUrl,
+            'custom_design_back_url' => $customBackUrl,
+            'design_notes' => $request->input('design_notes'),
+            'status' => $defaultStatus,
         ]);
 
-        // Update user's subscription details
-        $user->update([
-            'subscription_plan' => $request->subscription_plan,
-            'subscription_start_date' => now(),
-            'subscription_end_date' => now()->addYear(),
-            'subscription_active' => true,
-        ]);
+        // For free plan - activate subscription immediately
+        if ($plan === 'free') {
+            $user->update([
+                'subscription_plan' => $plan,
+                'subscription_start_date' => now(),
+                'subscription_end_date' => now()->addYear(),
+                'subscription_active' => true,
+            ]);
 
-        // Send NFC card purchased notification
-        $this->notificationService->create($user, 'nfc_card_purchased', [
-            'card_id' => $nfcCardId,
-            'amount' => '$' . number_format($request->purchase_amount, 2),
-            'plan' => ucfirst($request->subscription_plan),
-        ]);
+            $this->notificationService->create($user, 'nfc_card_purchased', [
+                'card_id' => $nfcCardId,
+                'amount' => '$' . number_format($request->purchase_amount, 2),
+                'plan' => ucfirst($plan),
+            ]);
+        } else {
+            // Paid plan - create placeholder Transaction manual bank transfer (pending)
+            $transactionId = 'TXN-' . strtoupper(Str::random(16));
+
+            $transaction = Transaction::create([
+                'transaction_id' => $transactionId,
+                'user_id' => $user->id,
+                'nfc_card_id' => $nfcCard->id,
+                'type' => 'purchase',
+                'payment_rail' => 'manual_bank_transfer',
+                'provider' => 'manual',
+                'amount' => $request->purchase_amount,
+                'currency' => config('app.currency', 'MYR'),
+                'fee' => 0,
+                'net_amount' => $request->purchase_amount,
+                'status' => 'pending',
+                'description' => 'NFC Card ' . strtoupper($plan) . ' Order #' . $nfcCardId,
+            ]);
+
+            // Link transaction back to NfcCard
+            $nfcCard->update(['transaction_id' => $transaction->id]);
+
+            $this->notificationService->create($user, 'nfc_card_order_created', [
+                'nfc_card_id' => $nfcCardId,
+                'amount' => 'RM' . number_format($request->purchase_amount, 2),
+                'plan' => ucfirst($plan),
+                'transaction_id' => $transactionId,
+                'action_url' => '/UserDashboard/CardManagement',
+                'action_text' => 'View Order',
+            ]);
+        }
+
+        // Activity log — order created
+        $this->recordUserNfcCardActivity(
+            $user,
+            'nfc_card_order_created',
+            $plan === 'free'
+                ? 'Free NFC card created for ' . $user->email
+                : 'NFC Card ' . strtoupper($plan) . ' order submitted by ' . $user->email,
+            'nfc_card',
+            $nfcCard->id,
+            [
+                'plan' => $plan,
+                'purchase_amount' => (float) $request->purchase_amount,
+                'transaction_id' => isset($transaction) ? $transaction->transaction_id : null,
+                'business_account_id' => $businessAccountId,
+                'card_id' => $nfcCardId,
+                'card_owner' => $request->card_owner,
+                'card_template_id' => $cardTemplateId,
+                'is_custom_design' => $isCustomDesign,
+                'custom_design_front_url' => $customFrontUrl,
+                'custom_design_back_url' => $customBackUrl,
+                'has_design_notes' => !empty($request->input('design_notes')),
+            ]
+        );
 
         return response()->json([
             'success' => true,
-            'nfc_card' => $nfcCard,
-            'message' => 'NFC card order created successfully'
+            'nfc_card' => $nfcCard->load(['transaction', 'cardTemplate']),
+            'message' => $plan === 'free'
+                ? 'NFC card created successfully'
+                : 'NFC card order created successfully. Please complete payment and upload proof.',
         ], 201);
     }
 
@@ -246,16 +395,18 @@ class NfcCardController extends Controller
 
     public function activate(Request $request, NfcCard $nfcCard)
     {
+        $user = $request->user();
         // Check ownership
-        if ($nfcCard->user_id !== $request->user()->id) {
+        if ($nfcCard->user_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has premium subscription
-        if (!$request->user()->hasPremiumSubscription()) {
+        // Check if user has access: premium sub OR card is in verified+ state
+        $hasAccess = $user->hasPremiumSubscription() || $nfcCard->canAccessProfileBuilder();
+        if (!$hasAccess) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Premium subscription',
+                'message' => 'This feature requires a Premium subscription or payment verification',
                 'upgrade_required' => true
             ], 403);
         }
@@ -283,8 +434,10 @@ class NfcCardController extends Controller
             ]
         );
 
-        // Update card status
-        $nfcCard->update(['status' => 'active']);
+        // Update card status only if not already active/delivered
+        if (!$nfcCard->isActive()) {
+            $nfcCard->update(['status' => 'active']);
+        }
 
         // Send NFC card activated notification
         $this->notificationService->create($request->user(), 'nfc_card_activated', [
@@ -302,16 +455,17 @@ class NfcCardController extends Controller
 
     public function deactivate(Request $request, NfcCard $nfcCard)
     {
+        $user = $request->user();
         // Check ownership
-        if ($nfcCard->user_id !== $request->user()->id) {
+        if ($nfcCard->user_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has premium subscription
-        if (!$request->user()->hasPremiumSubscription()) {
+        $hasAccess = $user->hasPremiumSubscription() || $nfcCard->canAccessProfileBuilder();
+        if (!$hasAccess) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Premium subscription',
+                'message' => 'This feature requires a Premium subscription or payment verification',
                 'upgrade_required' => true
             ], 403);
         }
@@ -331,16 +485,17 @@ class NfcCardController extends Controller
 
     public function analytics(Request $request, NfcCard $nfcCard)
     {
+        $user = $request->user();
         // Check ownership
-        if ($nfcCard->user_id !== $request->user()->id) {
+        if ($nfcCard->user_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Check if user has premium subscription
-        if (!$request->user()->hasPremiumSubscription()) {
+        $hasAccess = $user->hasPremiumSubscription() || $nfcCard->canAccessProfileBuilder();
+        if (!$hasAccess) {
             return response()->json([
                 'success' => false,
-                'message' => 'This feature requires a Premium subscription',
+                'message' => 'This feature requires a Premium subscription or payment verification',
                 'upgrade_required' => true
             ], 403);
         }
@@ -362,6 +517,215 @@ class NfcCardController extends Controller
                 'nfc_card' => $nfcCard->load('nfcTag')
             ]
         ]);
+    }
+
+    public function uploadPaymentProof(Request $request, NfcCard $nfcCard)
+    {
+        $user = $request->user();
+
+        if ($nfcCard->user_id !== $user->id && !($user->isBusinessAccount() && $nfcCard->business_account_id === $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to update this card order'
+            ], 403);
+        }
+
+        if (!in_array($nfcCard->status, ['pending_payment', 'awaiting_payment_verification'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment proof can only be uploaded for orders that have not yet been verified'
+            ], 422);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'reference_code' => 'nullable|string|max:100',
+            'bank_name' => 'nullable|string|max:100',
+            'payment_date' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $file = $request->file('payment_proof');
+        $fileName = 'payment-proofs/' . $nfcCard->nfc_card_id . '-' . time() . '.' . $file->extension();
+        $filePath = $file->storeAs('public', $fileName);
+        $proofUrl = Storage::url($fileName);
+
+        $transaction = $nfcCard->transaction;
+
+        if (!$transaction) {
+            $transactionId = 'TXN-' . strtoupper(Str::random(16));
+            $transaction = Transaction::create([
+                'transaction_id' => $transactionId,
+                'user_id' => $nfcCard->user_id,
+                'nfc_card_id' => $nfcCard->id,
+                'type' => 'purchase',
+                'payment_rail' => 'manual_bank_transfer',
+                'provider' => 'manual',
+                'amount' => $nfcCard->purchase_amount,
+                'currency' => config('app.currency', 'MYR'),
+                'fee' => 0,
+                'net_amount' => $nfcCard->purchase_amount,
+                'status' => 'pending',
+                'description' => 'Payment for NFC Card Order #' . $nfcCard->nfc_card_id,
+            ]);
+            $nfcCard->update(['transaction_id' => $transaction->id]);
+        }
+
+        $transaction->update([
+            'payment_proof_url' => $proofUrl,
+            'payment_proof_uploaded_at' => now(),
+            'bank_name' => $request->bank_name ?? $transaction->bank_name,
+            'bank_reference_code' => $request->reference_code ?? $transaction->bank_reference_code,
+            'status' => 'pending',
+        ]);
+
+        $nfcCard->update([
+            'status' => 'awaiting_payment_verification',
+        ]);
+
+        // Notify user
+        $this->notificationService->create($user, 'system_message', [
+            'system_message' => 'Payment proof for order #' . $nfcCard->nfc_card_id . ' has been submitted. Awaiting admin verification.',
+            'icon' => '💵',
+            'priority' => 'normal',
+        ]);
+
+        // Notify all admins
+        $adminUserIds = User::where('is_admin', true)->pluck('id')->toArray();
+        if (!empty($adminUserIds)) {
+            $this->notificationService->createForMultiple($adminUserIds, 'nfc_card_payment_proof_uploaded', [
+                'nfc_card_id' => $nfcCard->nfc_card_id,
+                'user_name' => $user->full_name ?? $user->name ?? $user->email,
+                'user_email' => $user->email,
+                'payment_proof_url' => $proofUrl,
+                'reference_code' => $request->reference_code ?? '',
+                'action_url' => '/AdminManagement/nfc-cards',
+                'action_text' => 'Verify Payment',
+            ]);
+        }
+
+        // Activity log — payment proof uploaded
+        $this->recordUserNfcCardActivity(
+            $user,
+            'nfc_card_payment_proof_uploaded',
+            'Payment proof for card order #' . $nfcCard->nfc_card_id . ' uploaded by ' . $user->email,
+            'nfc_card',
+            $nfcCard->id,
+            [
+                'proof_filename' => $fileName,
+                'proof_url' => $proofUrl,
+                'file_size_bytes' => $file->getSize(),
+                'bank_name' => $request->bank_name ?? null,
+                'reference_code' => $request->reference_code ?? null,
+                'payment_date' => $request->payment_date ?? null,
+                'transaction_id' => $transaction->transaction_id ?? null,
+                'card_id' => $nfcCard->nfc_card_id,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment proof submitted successfully. Please wait for admin verification.',
+            'nfc_card' => $nfcCard->load('transaction'),
+        ], 200);
+    }
+
+    public function confirmReceived(Request $request, NfcCard $nfcCard)
+    {
+        $user = $request->user();
+
+        if ($nfcCard->user_id !== $user->id && !($user->isBusinessAccount() && $nfcCard->business_account_id === $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to update this card'
+            ], 403);
+        }
+
+        // Validate status: shipped (normal flow) OR delivered (admin override not yet activated)
+        if (!$nfcCard->canUserConfirmAndActivate()) {
+            $statusLabel = method_exists($nfcCard, 'statusLabels') ? (collect($nfcCard->statusLabels())->get($nfcCard->status, $nfcCard->status)) : $nfcCard->status;
+            return response()->json([
+                'success' => false,
+                'message' => 'This card status (' . $statusLabel . ') cannot be activated. Only Shipped OR Delivered (Not Activated) statuses are allowed.',
+            ], 422);
+        }
+
+        $oldStatus = $nfcCard->status; // "shipped" ATAU "delivered"
+
+        $nfcCard->update([
+            'status' => 'active',        // User confirm → terus AKTIF, tak perlu step activate berasingan
+            'user_received_confirmed_at' => $nfcCard->user_received_confirmed_at ?? now(),
+            'delivered_date' => $nfcCard->delivered_date ?? now(),
+        ]);
+
+        // Activate subscription if not already active
+        if (!$user->subscription_active || $user->subscription_plan !== $nfcCard->subscription_plan) {
+            $user->update([
+                'subscription_plan' => $nfcCard->subscription_plan,
+                'subscription_start_date' => now(),
+                'subscription_end_date' => now()->addYear(),
+                'subscription_active' => true,
+            ]);
+        }
+
+        // Mark transaction as succeeded if exists
+        if ($nfcCard->transaction && $nfcCard->transaction->status !== 'succeeded') {
+            $nfcCard->transaction->update([
+                'status' => 'succeeded',
+                'verified_at' => $nfcCard->transaction->verified_at ?? now(),
+            ]);
+        }
+
+        $this->notificationService->create($user, 'nfc_card_activated', [
+            'card_id' => $nfcCard->nfc_card_id,
+            'action_url' => '/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder',
+            'action_text' => 'Design Profile Now',
+        ]);
+
+        $this->notificationService->create($user, 'subscription_upgrade', [
+            'plan' => ucfirst($nfcCard->subscription_plan),
+        ]);
+
+        // Notify admins
+        $adminUserIds = User::where('is_admin', true)->pluck('id')->toArray();
+        if (!empty($adminUserIds)) {
+            $this->notificationService->createForMultiple($adminUserIds, 'nfc_card_delivered', [
+                'order_number' => $nfcCard->nfc_card_id,
+                'card_id' => $nfcCard->nfc_card_id,
+                'user_name' => $user->full_name ?? $user->name ?? $user->email,
+                'user_email' => $user->email,
+                'message' => 'User has confirmed receipt of card #' . $nfcCard->nfc_card_id,
+            ]);
+        }
+
+        // Activity log — user confirmed receipt
+        $this->recordUserNfcCardActivity(
+            $user,
+            'nfc_card_user_confirmed_receipt',
+            'User ' . $user->email . ' confirmed receipt of physical card #' . $nfcCard->nfc_card_id,
+            'nfc_card',
+            $nfcCard->id,
+            [
+                'card_id' => $nfcCard->nfc_card_id,
+                'confirmed_at' => now()->toIso8601String(),
+                'subscription_plan' => $nfcCard->subscription_plan,
+                'subscription_end_date' => $user->subscription_end_date,
+                'transaction_id' => $nfcCard->transaction->transaction_id ?? null,
+                'delivered_date' => $nfcCard->delivered_date,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card receipt confirmed. Your subscription is now active!',
+            'nfc_card' => $nfcCard->fresh('transaction'),
+        ], 200);
     }
 
     public function subscriptionStatus(Request $request)

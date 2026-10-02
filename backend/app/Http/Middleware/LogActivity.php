@@ -68,12 +68,21 @@ class LogActivity
                     'admin_context' => $isAdmin,
                 ]
             );
-            ActivityLog::logActivity(
-                $user,
-                $actionMapping['type'],
-                $actionMapping['description'],
-                $options
-            );
+            try {
+                ActivityLog::logActivity(
+                    $user,
+                    $actionMapping['type'],
+                    $actionMapping['description'],
+                    $options
+                );
+            } catch (\Throwable $e) {
+                // Audit log must NEVER break the actual user-visible response.
+                // Even if activity storage fails (e.g. CHECK constraint, disk full,
+                // enum/column mismatch, DB lock timeout etc.), the real API response
+                // for the controller action must still reach the client unmodified.
+                // Log the failure via standard error channels so operators can fix it.
+                report($e);
+            }
         }
 
         return $response;

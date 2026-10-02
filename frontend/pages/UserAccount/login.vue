@@ -21,7 +21,7 @@
             <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
             Back
           </NuxtLink>
-          <h2 class="text-3xl font-bold text-secondary-900">Welcome back</h2>
+          <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900">Welcome back</h2>
         </div>
         <p class="mt-2 text-sm text-secondary-600">
           Don't have an account?
@@ -154,13 +154,19 @@
             :disabled="loading"
             class="btn btn-primary w-full"
           >
-            <div v-if="loading" class="spinner mr-2"></div>
+            <NFCGoWaveLoader
+              v-if="loading"
+              variant="dotPulse"
+              size="xs"
+              :showText="false"
+              inline
+            />
             <Icon
               v-else
               name="heroicons:arrow-right-on-rectangle"
               class="h-5 w-5 mr-2"
             />
-            {{ loading ? "Signing in..." : "Sign in" }}
+            <span class="ml-2">{{ loading ? "Signing in..." : "Sign in" }}</span>
           </button>
         </form>
 

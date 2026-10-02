@@ -262,6 +262,41 @@ class AdminNotificationController extends Controller
     }
 
     /**
+     * Mark ALL unread notifications as read (Admin)
+     */
+    public function markAllAsRead(Request $request)
+    {
+        $action = $request->input('scope', 'displayed');
+        $count = 0;
+
+        if ($action === 'displayed') {
+            $ids = $request->input('ids', []);
+            if (filled($ids)) {
+                Notification::whereIn('id', $ids)
+                    ->where('is_read', false)
+                    ->update([
+                        'is_read' => true,
+                        'read_at' => now(),
+                    ]);
+                $count = Notification::whereIn('id', $ids)->where('is_read', true)->count();
+            }
+        }
+
+        // Always mark ALL UNREAD in system — admin "read all" = acknowledge entire queue
+        Notification::where('is_read', false)->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+        $count = Notification::where('is_read', true)->whereDate('read_at', now()->toDateString())->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read',
+            'marked_count' => $count,
+        ]);
+    }
+
+    /**
      * Delete notification (Admin)
      */
     public function destroy($id)

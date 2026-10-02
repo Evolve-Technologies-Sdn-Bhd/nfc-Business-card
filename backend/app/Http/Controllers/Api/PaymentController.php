@@ -373,7 +373,7 @@ class PaymentController extends Controller
             $user = auth()->user();
             $transaction = Transaction::where('transaction_id', $transactionId)
                 ->where('user_id', $user->id)
-                ->where('payment_rail', 'manual_bank')
+                ->whereIn('payment_rail', ['manual_bank', 'manual_bank_transfer'])
                 ->firstOrFail();
 
             // Upload file
@@ -384,6 +384,16 @@ class PaymentController extends Controller
 
             // Update transaction
             $transaction = $this->paymentService->uploadPaymentProof($transaction, $fileUrl);
+
+            // Auto sync linked NFC Card order
+            if ($transaction->nfc_card_id) {
+                $nfcCard = \App\Models\NfcCard::find($transaction->nfc_card_id);
+                if ($nfcCard && in_array($nfcCard->status, ['pending_payment', 'awaiting_payment_verification'])) {
+                    $nfcCard->update([
+                        'status' => 'awaiting_payment_verification',
+                    ]);
+                }
+            }
 
             Log::info('Payment proof uploaded', [
                 'transaction_id' => $transaction->transaction_id,

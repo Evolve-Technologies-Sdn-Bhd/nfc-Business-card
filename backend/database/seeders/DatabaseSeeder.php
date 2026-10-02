@@ -22,10 +22,10 @@ class DatabaseSeeder extends Seeder
 
         if ($isProduction) {
             $this->command->warn('⚠️  ENVIRONMENT: PRODUCTION');
-            $this->command->warn('   Mock/test data akan DILANGKAUTI.');
+            $this->command->warn('   Mock/test data will be SKIPPED.');
         } else {
             $this->command->warn('ℹ️  ENVIRONMENT: LOCAL / STAGING');
-            $this->command->warn('   Semua data termasuk mock akan di-seed.');
+            $this->command->warn('   All data including mock data will be seeded.');
         }
 
         $this->command->newLine();
@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
         if (ProfileBuilderSection::count() === 0) {
             $this->call(ProfileBuilderSectionsSeeder::class);
         } else {
-            $this->command->info('✅ ProfileBuilderSections sudah wujud — skip seeder.');
+            $this->command->info('✅ ProfileBuilderSections already exists — skip seeder.');
         }
 
         $this->call(ProfileBuilderFieldsSeeder::class);
@@ -58,7 +58,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CardTemplateSeeder::class);
 
         $this->command->newLine();
-        $this->command->info('🎉 Database seeding selesai!');
+        $this->command->info('🎉 Database seeding completed!');
 
         if (! $isProduction) {
             $this->command->info('Test user: john@example.com / password');
@@ -67,7 +67,7 @@ class DatabaseSeeder extends Seeder
 
     private function seedDevelopmentUser(): void
     {
-        $this->command->info('🔹 Membangunkan test user dan NFC card sample...');
+        $this->command->info('🔹 Creating test user and sample NFC card...');
 
         $user = User::firstOrCreate(
             ['email' => 'john@example.com'],

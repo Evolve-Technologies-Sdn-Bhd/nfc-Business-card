@@ -3,7 +3,7 @@
   <div>
     <!-- Header Section -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-secondary-900">
+      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
         Account Settings
       </h1>
       <p class="mt-2 text-secondary-600">
@@ -351,139 +351,150 @@
               </div>
             </div>
 
-            <!-- Subscription Management Card -->
-            <div
-              class="card"
-            >
+            <!-- Subscription Info Card (moved to Billing tab) -->
+            <div class="card border-primary-100 bg-primary-50/50">
+              <div class="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                    <Icon name="heroicons:credit-card" class="h-6 w-6 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 class="text-base font-semibold text-secondary-900 mb-1">
+                      Subscription & Billing management has been moved
+                    </h3>
+                    <p class="text-sm text-secondary-600 leading-relaxed">
+                      Current plan:
+                      <span class="font-semibold text-secondary-900">{{ getSubscriptionDisplayName(user?.subscription_plan) }}</span>
+                      <span v-if="user?.subscription_expires_at && user?.subscription_plan !== 'free'" class="ml-2">
+                        · Expires: {{ formatDate(user.subscription_expires_at) }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  @click="activeTab = 'billing'"
+                  class="btn btn-primary btn-sm md:btn-md"
+                >
+                  <Icon name="heroicons:arrow-right" class="h-4 w-4 mr-2" />
+                  Open Billing & Subscription
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences Tab -->
+          <div v-if="activeTab === 'preferences'" class="space-y-6">
+            <!-- Theme Selector Card -->
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
-                  Subscription
+                  Interface Theme
                 </h2>
                 <p class="text-sm text-secondary-600">
-                  Manage your subscription and billing
+                  Choose a color theme most comfortable for your eyes
                 </p>
               </div>
               <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                  <div>
-                    <div class="flex items-center gap-3 mb-2">
-                      <h3 class="text-lg font-medium text-secondary-900">
-                        {{ getSubscriptionDisplayName(user?.subscription_plan) }}
-                      </h3>
-                      <span 
-                        :class="getSubscriptionBadgeClass(user?.subscription_plan)"
-                        class="px-2 py-1 text-xs font-medium rounded-full"
-                      >
-                        {{ user?.subscription_plan?.toUpperCase() || 'FREE' }}
-                      </span>
-                    </div>
-                    <p class="text-sm text-secondary-600">
-                      {{ getSubscriptionDescription(user?.subscription_plan) }}
-                    </p>
-                    <div class="mt-2 text-xs text-secondary-500">
-                      <p v-if="user?.subscription_expires_at">
-                        <Icon name="heroicons:calendar" class="h-3 w-3 inline mr-1" />
-                        {{ user?.subscription_plan === 'free' ? 'No expiration' : `Expires: ${formatDate(user.subscription_expires_at)}` }}
-                      </p>
-                      <p v-if="user?.subscription_plan !== 'free' && user?.subscription_status">
-                        <Icon name="heroicons:information-circle" class="h-3 w-3 inline mr-1" />
-                        Status: {{ user.subscription_status }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-2xl font-bold text-secondary-900">
-                      {{ getSubscriptionPrice(user?.subscription_plan) }}
-                      <span class="text-sm font-normal text-secondary-500">/month</span>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Subscription Features -->
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 class="text-sm font-medium text-secondary-900 mb-3">Current Plan Features</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div 
-                      v-for="feature in getSubscriptionFeatures(user?.subscription_plan)" 
-                      :key="feature"
-                      class="flex items-center text-sm text-secondary-700"
-                    >
-                      <Icon name="heroicons:check" class="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      {{ feature }}
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Available Plans (if user is on free plan) -->
-                <div v-if="user?.subscription_plan === 'free' && planPrices.length > 1" class="mb-6">
-                  <h4 class="text-sm font-medium text-secondary-900 mb-3">Available Plans</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div 
-                      v-for="plan in planPrices.filter(p => p.plan_type !== 'free')" 
-                      :key="plan.id"
-                      class="p-4 border border-secondary-200 rounded-lg hover:border-primary-300 transition-colors"
-                    >
-                      <div class="flex items-center justify-between mb-2">
-                        <h5 class="font-medium text-secondary-900 capitalize">{{ plan.plan_type }}</h5>
-                        <span class="text-lg font-bold text-primary-600">
-                          {{ plan.currency === 'MYR' ? 'RM' : plan.currency }} {{ plan.price }}
-                          <span class="text-sm font-normal text-secondary-500">/month</span>
-                        </span>
-                      </div>
-                      <p class="text-sm text-secondary-600 mb-3">{{ plan.description }}</p>
-                      <div class="space-y-1">
-                        <div 
-                          v-for="feature in plan.features?.slice(0, 3)" 
-                          :key="feature"
-                          class="flex items-center text-xs text-secondary-600"
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <button
+                    v-for="t in availableThemes"
+                    :key="t.key"
+                    type="button"
+                    @click="setTheme(t.key); saveLocalPref('theme', t.key);"
+                    :class="[
+                      'relative p-4 rounded-xl border-2 text-left transition-all duration-200 group',
+                      currentTheme === t.key
+                        ? 'border-primary-500 bg-primary-50/70 shadow-md'
+                        : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
+                    ]"
+                  >
+                    <div class="flex items-start justify-between mb-3">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-lg border border-secondary-200 flex items-center justify-center shadow-sm"
+                          :style="{ backgroundColor: t.previewColor + '1A' }"
                         >
-                          <Icon name="heroicons:check" class="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
-                          {{ feature }}
+                          <Icon :name="t.icon" class="h-5 w-5" :style="{ color: t.previewColor }" />
                         </div>
-                        <div v-if="plan.features?.length > 3" class="text-xs text-secondary-500">
-                          +{{ plan.features.length - 3 }} more features
+                        <div>
+                          <h4 class="text-sm font-semibold text-secondary-900">{{ t.name }}</h4>
+                          <div class="flex gap-1 mt-1">
+                            <span class="w-3 h-3 rounded-full border border-secondary-200" :style="{ backgroundColor: t.previewColor }"></span>
+                          </div>
                         </div>
                       </div>
+                      <div
+                        v-if="currentTheme === t.key"
+                        class="w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center shadow flex-shrink-0"
+                      >
+                        <Icon name="heroicons:check" class="h-4 w-4" />
+                      </div>
                     </div>
+                    <p class="text-xs text-secondary-600 leading-relaxed min-h-[32px]">
+                      {{ t.description }}
+                    </p>
+                  </button>
+                </div>
+                <div v-if="availableThemes.length === 0" class="text-center py-8 text-secondary-500 text-sm">
+                  Unable to load theme list.
+                </div>
+              </div>
+            </div>
+
+            <!-- Language & Region Card -->
+            <div class="card">
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <h2 class="text-lg font-semibold text-secondary-900">
+                  Language & Region
+                </h2>
+                <p class="text-sm text-secondary-600">
+                  Set your preferred interface language and timezone
+                </p>
+              </div>
+              <div class="p-6 space-y-5">
+                <div class="form-group">
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                    Interface Language
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
+                    <button
+                      v-for="lang in languageOptions"
+                      :key="lang.code"
+                      type="button"
+                      @click="uiLanguage = lang.code; saveLocalPref('language', lang.code); showSuccess(`Language changed to ${lang.label}`);"
+                      :class="[
+                        'p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center justify-between',
+                        uiLanguage === lang.code
+                          ? 'border-primary-500 bg-primary-50/70'
+                          : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
+                      ]"
+                    >
+                      <span class="font-medium text-secondary-900 text-sm">{{ lang.label }}</span>
+                      <Icon v-if="uiLanguage === lang.code" name="heroicons:check" class="h-5 w-5 text-primary-600" />
+                    </button>
                   </div>
                 </div>
 
-                <div class="flex flex-wrap gap-3">
-                  <button
-                    v-if="user?.subscription_plan === 'free'"
-                    @click="upgradePlan"
-                    class="btn btn-primary"
+                <div class="form-group">
+                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                    Timezone
+                  </label>
+                  <select
+                    v-model="uiTimezone"
+                    @change="saveLocalPref('timezone', uiTimezone)"
+                    class="input input-bordered w-full max-w-xl"
                   >
-                    <Icon
-                      name="heroicons:arrow-trending-up"
-                      class="h-4 w-4 mr-2"
-                    />
-                    Upgrade to Business Plan
-                  </button>
-                  <button 
-                    v-else 
-                    @click="manageBilling" 
-                    class="btn btn-outline"
-                  >
-                    <Icon name="heroicons:credit-card" class="h-4 w-4 mr-2" />
-                    Manage Billing
-                  </button>
-                  <button
-                    v-if="user?.subscription_plan !== 'free'"
-                    @click="viewInvoices"
-                    class="btn btn-outline"
-                  >
-                    <Icon name="heroicons:document-text" class="h-4 w-4 mr-2" />
-                    View Invoices
-                  </button>
-                  <button
-                    v-if="user?.subscription_plan !== 'free'"
-                    @click="cancelSubscription"
-                    class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50"
-                  >
-                    <Icon name="heroicons:x-circle" class="h-4 w-4 mr-2" />
-                    Cancel Subscription
-                  </button>
+                    <option
+                      v-for="tz in timezoneOptions"
+                      :key="tz.value"
+                      :value="tz.value"
+                    >
+                      {{ tz.label }}
+                    </option>
+                  </select>
+                  <p class="text-xs text-secondary-500 mt-2">
+                    Timezone is used to display analytics dates and times, invoices, and activity logs.
+                  </p>
                 </div>
               </div>
             </div>
@@ -596,53 +607,68 @@
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="text-lg font-semibold text-secondary-900">
-                  Two-Factor Authentication
+                  Two-Factor Authentication (2FA)
                 </h2>
                 <p class="text-sm text-secondary-600">
                   Add an extra layer of security to your account
                 </p>
               </div>
               <div class="p-6">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
-                        SMS Authentication
-                      </h3>
-                      <p class="text-sm text-secondary-600">
-                        Receive verification codes via SMS
+                <div class="space-y-5">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-sm font-medium text-secondary-900">
+                          Authenticator App (TOTP)
+                        </h3>
+                        <span
+                          v-if="user?.two_factor_enabled"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        >
+                          Active
+                        </span>
+                        <span
+                          v-else
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                        >
+                          Inactive
+                        </span>
+                      </div>
+                      <p class="text-sm text-secondary-600 leading-relaxed">
+                        Add an extra layer of security — every login requires a 6-digit code from an Authenticator app (Google Authenticator, Authy, 1Password, Bitwarden, etc.)
                       </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="securitySettings.two_factor_sms"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateSecuritySetting('two_factor_sms')"
-                        />
-                      </label>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
-                        Email Notifications
-                      </h3>
-                      <p class="text-sm text-secondary-600">
-                        Get notified of login attempts
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="securitySettings.login_notifications"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateSecuritySetting('login_notifications')"
-                        />
-                      </label>
-                    </div>
+
+                  <div class="flex flex-wrap items-center gap-3 pt-1">
+                    <button
+                      v-if="!user?.two_factor_enabled"
+                      @click="setup2FA()"
+                      :disabled="twoFactor.loading"
+                      class="btn btn-primary disabled:opacity-60"
+                    >
+                      <Icon name="heroicons:shield-check" class="h-4 w-4 mr-2" />
+                      <span v-if="twoFactor.loading" class="loading loading-spinner loading-xs mr-2"></span>
+                      Enable 2FA
+                    </button>
+                    <template v-else>
+                      <button
+                        @click="twoFactor.showDisable = true; twoFactor.passwordInput = ''; twoFactor.recoveryCodeInput = '';"
+                        :disabled="twoFactor.loading"
+                        class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-60"
+                      >
+                        <Icon name="heroicons:shield-exclamation" class="h-4 w-4 mr-1" />
+                        Disable 2FA
+                      </button>
+                      <button
+                        @click="regenerateRecoveryCodes()"
+                        :disabled="twoFactor.loading"
+                        class="btn btn-outline btn-sm disabled:opacity-60"
+                      >
+                        <Icon name="heroicons:arrow-path" class="h-4 w-4 mr-1" />
+                        Regenerate Recovery Codes
+                      </button>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -819,10 +845,10 @@
                   Active Sessions
                 </h2>
                 <p class="text-sm text-secondary-600">
-                  Manage your active login sessions
+                  Manage your active login sessions across all devices
                 </p>
               </div>
-              <div class="p-6">
+              <div class="p-6 space-y-0">
                 <div class="space-y-4">
                   <div
                     v-for="session in activeSessions"
@@ -834,17 +860,17 @@
                         class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4"
                       >
                         <Icon
-                          :name="getDeviceIcon(session.device_type)"
+                          :name="sessionDeviceIcon(session)"
                           class="h-5 w-5 text-blue-600"
                         />
                       </div>
                       <div>
                         <p class="text-sm font-medium text-secondary-900">
-                          {{ session.device_name }}
+                          {{ session.name || (session.device + (session.browser ? ' · ' + session.browser : '')) }}
                         </p>
                         <p class="text-xs text-secondary-600">
-                          {{ session.location }} •
-                          {{ formatDate(session.last_activity) }}
+                          {{ session.ip_address || 'Unknown IP' }} •
+                          {{ formatDate(session.last_seen_at) }}
                         </p>
                       </div>
                     </div>
@@ -853,17 +879,35 @@
                         v-if="session.is_current"
                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                       >
-                        Current
+                        Current Session
                       </span>
                       <button
                         v-else
                         @click="revokeSession(session.id)"
-                        class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                        :disabled="revokingSessionId === session.id"
+                        class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-50"
                       >
-                        Revoke
+                        <span v-if="revokingSessionId === session.id" class="loading loading-spinner loading-xs mr-1"></span>
+                        End Session
                       </button>
                     </div>
                   </div>
+                </div>
+
+                <div class="border-t border-secondary-200 mt-6 pt-5 flex items-center justify-between">
+                  <div class="text-sm text-secondary-600 flex items-center">
+                    <span v-if="loadingSessions" class="loading loading-spinner loading-xs mr-2"></span>
+                    <span>{{ loadingSessions ? 'Loading sessions...' : `${activeSessions.length} active sessions` }}</span>
+                  </div>
+                  <button
+                    @click="logoutEverywhere()"
+                    :disabled="loadingLogoutEverywhere"
+                    class="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                  >
+                    <span v-if="loadingLogoutEverywhere" class="loading loading-spinner loading-xs mr-2"></span>
+                    <Icon v-else name="heroicons:arrow-left-on-rectangle" class="h-4 w-4 mr-2" />
+                    Logout All Devices
+                  </button>
                 </div>
               </div>
             </div>
@@ -1089,6 +1133,296 @@
             </div>
           </div>
 
+          <!-- Billing & Subscription Tab -->
+          <div v-if="activeTab === 'billing'" class="space-y-6">
+            <!-- Subscription Management Card (moved from Account tab) -->
+            <div class="card">
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 class="text-lg font-semibold text-secondary-900">
+                      Current Subscription Plan
+                    </h2>
+                    <p class="text-sm text-secondary-600">
+                      Manage your NFCGo Business Card subscription
+                    </p>
+                  </div>
+                  <button
+                    @click="activeTab = 'account'"
+                    class="btn btn-outline btn-sm"
+                  >
+                    <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-2" />
+                    Back to Account
+                  </button>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-3 flex-wrap">
+                      <h3 class="text-xl font-semibold text-secondary-900">
+                        {{ getSubscriptionDisplayName(user?.subscription_plan) }}
+                      </h3>
+                      <span 
+                        :class="getSubscriptionBadgeClass(user?.subscription_plan)"
+                        class="px-2.5 py-1 text-xs font-semibold rounded-full"
+                      >
+                        {{ user?.subscription_plan?.toUpperCase() || 'FREE' }}
+                      </span>
+                    </div>
+                    <p class="text-sm text-secondary-600 mb-4 leading-relaxed">
+                      {{ getSubscriptionDescription(user?.subscription_plan) }}
+                    </p>
+                    <div class="text-sm text-secondary-600 space-y-1.5">
+                      <p v-if="user?.subscription_expires_at" class="flex items-center gap-2">
+                        <Icon name="heroicons:calendar-days" class="h-4 w-4 text-secondary-400" />
+                        <template v-if="user?.subscription_plan === 'free'">
+                          No expiry date for free plan
+                        </template>
+                        <template v-else>
+                          Subscription expiry date:
+                          <strong class="text-secondary-900">{{ formatDate(user.subscription_expires_at) }}</strong>
+                        </template>
+                      </p>
+                      <p v-if="user?.subscription_plan !== 'free' && user?.subscription_status" class="flex items-center gap-2">
+                        <Icon name="heroicons:information-circle" class="h-4 w-4 text-secondary-400" />
+                        Payment status:
+                        <span class="font-semibold text-secondary-900 capitalize">{{ user.subscription_status }}</span>
+                      </p>
+                      <p v-if="user?.latestSubscription?.next_billing_date && user?.subscription_plan !== 'free'" class="flex items-center gap-2">
+                        <Icon name="heroicons:arrow-path" class="h-4 w-4 text-secondary-400" />
+                        Next automatic bill:
+                        <strong class="text-secondary-900">{{ formatDate(user.latestSubscription.next_billing_date) }}</strong>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="md:text-right bg-secondary-50 rounded-xl border border-secondary-200 p-5 min-w-[240px]">
+                    <p class="text-xs font-medium uppercase tracking-wider text-secondary-500 mb-2">
+                      Monthly Rate
+                    </p>
+                    <p class="text-4xl font-bold text-secondary-900 leading-none mb-2">
+                      {{ getSubscriptionPrice(user?.subscription_plan) }}
+                      <span class="text-base font-normal text-secondary-500 ml-1">/mo</span>
+                    </p>
+                    <p class="text-xs text-secondary-500">
+                      {{ user?.subscription_plan === 'free' ? "You haven't been charged — free plan" : 'Charged automatically every month' }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Subscription Features -->
+                <div class="mb-8 p-5 bg-gradient-to-br from-secondary-50 to-white rounded-xl border border-secondary-200">
+                  <h4 class="text-sm font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+                    <Icon name="heroicons:check-circle" class="h-5 w-5 text-green-600" />
+                    Current Plan Features
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
+                    <div 
+                      v-for="feature in getSubscriptionFeatures(user?.subscription_plan)" 
+                      :key="feature"
+                      class="flex items-start text-sm text-secondary-700"
+                    >
+                      <Icon name="heroicons:check" class="h-4 w-4 text-green-500 mr-2.5 flex-shrink-0 mt-0.5" />
+                      <span>{{ feature }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Available Plans (if user is on free plan) -->
+                <div v-if="user?.subscription_plan === 'free' && planPrices.length > 1" class="mb-8">
+                  <h4 class="text-sm font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-amber-500" />
+                    Available Plans to Upgrade
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      v-for="plan in planPrices.filter(p => p.plan_type !== 'free')" 
+                      :key="plan.id"
+                      class="p-5 border border-secondary-200 rounded-xl hover:border-primary-300 hover:shadow-sm transition-all"
+                    >
+                      <div class="flex items-start justify-between mb-3">
+                        <div>
+                          <h5 class="text-base font-bold text-secondary-900 capitalize mb-1">{{ plan.plan_type }}</h5>
+                          <p class="text-sm text-secondary-600">{{ plan.description }}</p>
+                        </div>
+                        <span class="text-lg font-bold text-primary-600 whitespace-nowrap ml-3">
+                          {{ plan.currency === 'MYR' ? 'RM' : plan.currency }} {{ plan.price }}
+                          <span class="text-xs font-normal text-secondary-500">/mo</span>
+                        </span>
+                      </div>
+                      <div class="space-y-1.5 mb-4 pt-2 border-t border-secondary-100">
+                        <div 
+                          v-for="feature in plan.features?.slice(0, 4)" 
+                          :key="feature"
+                          class="flex items-start text-xs text-secondary-600"
+                        >
+                          <Icon name="heroicons:check" class="h-3.5 w-3.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                          {{ feature }}
+                        </div>
+                        <div v-if="plan.features?.length > 4" class="text-xs text-secondary-500 pl-5">
+                          +{{ plan.features.length - 4 }} more additional features
+                        </div>
+                      </div>
+                      <button
+                        @click="upgradePlan"
+                        class="btn btn-primary btn-sm w-full"
+                      >
+                        <Icon name="heroicons:arrow-trending-up" class="h-4 w-4 mr-2" />
+                        Choose This Plan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-secondary-200">
+                  <button
+                    v-if="user?.subscription_plan === 'free'"
+                    @click="upgradePlan"
+                    class="btn btn-primary"
+                  >
+                    <Icon name="heroicons:arrow-trending-up" class="h-4 w-4 mr-2" />
+                    Upgrade to Business Plan
+                  </button>
+                  <button 
+                    v-else 
+                    @click="manageBilling" 
+                    class="btn btn-outline"
+                  >
+                    <Icon name="heroicons:credit-card" class="h-4 w-4 mr-2" />
+                    Manage Billing
+                  </button>
+                  <button
+                    v-if="user?.subscription_plan !== 'free'"
+                    @click="viewInvoices"
+                    class="btn btn-outline"
+                  >
+                    <Icon name="heroicons:document-text" class="h-4 w-4 mr-2" />
+                    View Invoices
+                  </button>
+                  <button
+                    v-if="user?.subscription_plan !== 'free'"
+                    @click="cancelSubscription"
+                    class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    <Icon name="heroicons:x-circle" class="h-4 w-4 mr-2" />
+                    Cancel Subscription
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoices & Payment History Placeholder -->
+            <div class="card">
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 class="text-lg font-semibold text-secondary-900">
+                      Billing & Invoice History
+                    </h2>
+                    <p class="text-sm text-secondary-600">
+                      All your subscription payment receipts and invoices
+                    </p>
+                  </div>
+                  <button class="btn btn-outline btn-sm" disabled>
+                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
+                    Download All
+                  </button>
+                </div>
+              </div>
+              <div class="p-0 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-secondary-50 border-b border-secondary-200">
+                      <tr>
+                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Date</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Receipt No.</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Description</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Amount</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Status</th>
+                        <th class="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-200">
+                      <tr class="hover:bg-secondary-50/50">
+                        <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-mono text-secondary-600">No records</td>
+                        <td class="px-6 py-4 text-secondary-600">
+                          <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-secondary-100 text-secondary-600">
+                            <Icon name="heroicons:information-circle" class="h-3.5 w-3.5" />
+                            Invoice history will appear after your first payment
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                            No Transactions
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                          <button class="btn btn-outline btn-xs" disabled>
+                            <Icon name="heroicons:document-text" class="h-3.5 w-3.5 mr-1" />
+                            PDF
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Methods Placeholder -->
+            <div class="card">
+              <div class="px-6 py-4 border-b border-secondary-200">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 class="text-lg font-semibold text-secondary-900">
+                      Payment Methods
+                    </h2>
+                    <p class="text-sm text-secondary-600">
+                      Payment methods are stored for automatic subscription charging
+                    </p>
+                  </div>
+                  <button class="btn btn-outline btn-sm" disabled>
+                    <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
+                    Add New Method
+                  </button>
+                </div>
+              </div>
+              <div class="p-6 space-y-4">
+                <div class="p-4 rounded-xl border border-secondary-200 bg-secondary-50/50 flex items-center justify-between flex-wrap gap-3">
+                  <div class="flex items-center gap-4">
+                    <div class="w-14 h-9 rounded-md bg-white border border-secondary-200 flex items-center justify-center shadow-sm">
+                      <Icon name="heroicons:banknotes" class="h-6 w-6 text-secondary-400" />
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <h4 class="text-sm font-semibold text-secondary-900">FPX Online Banking</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <Icon name="heroicons:check" class="h-3 w-3 mr-1" />
+                          Default
+                        </span>
+                      </div>
+                      <p class="text-xs text-secondary-500">
+                        Supported: Maybank2u, CIMB Clicks, Public Bank, RHB, Hong Leong & 20+ other banks
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="btn btn-outline btn-xs" disabled>
+                      <Icon name="heroicons:pencil" class="h-3.5 w-3.5 mr-1" />
+                      Update
+                    </button>
+                    <button class="btn btn-outline btn-xs text-red-600 border-red-300 hover:bg-red-50" disabled>
+                      <Icon name="heroicons:trash" class="h-3.5 w-3.5 mr-1" />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Danger Zone Tab -->
           <div v-if="activeTab === 'danger'" class="space-y-6">
             <!-- Export Data Card -->
@@ -1165,6 +1499,254 @@
           </div>
         </div>
       </div>
+
+    <!-- ================== MODAL SETUP 2FA ================== -->
+    <div
+      v-if="twoFactor.showSetup"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mr-4">
+            <Icon name="heroicons:shield-check" class="h-6 w-6 text-teal-600" />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-secondary-900">
+              Enable Two-Factor Authentication (2FA)
+            </h3>
+            <p class="text-sm text-secondary-600">
+              Complete the 3 steps below to enable 2FA
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 1: Scan QR Code -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold">1</span>
+            <h4 class="text-sm font-semibold text-secondary-900">Scan QR Code with Authenticator App</h4>
+          </div>
+
+          <div class="bg-secondary-50 rounded-xl p-5 flex flex-col items-center border border-secondary-200">
+            <iframe
+              v-if="twoFactor.qrData"
+              :src="'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=1&data=' + encodeURIComponent(twoFactor.qrData)"
+              width="220"
+              height="220"
+              frameborder="0"
+              class="rounded-lg border-2 border-white shadow-sm"
+            ></iframe>
+
+            <div v-else class="w-[220px] h-[220px] rounded-lg border-2 border-dashed border-secondary-300 flex items-center justify-center">
+              <span class="loading loading-spinner text-teal-600"></span>
+            </div>
+
+            <div class="mt-4 w-full">
+              <div class="flex items-center justify-between mb-1.5">
+                <p class="text-xs font-medium text-secondary-700">Secret Key (if you can't scan QR):</p>
+                <button
+                  type="button"
+                  @click="copyText(twoFactor.secret, 'Secret 2FA')"
+                  class="btn btn-outline btn-xs py-0.5 h-7"
+                >
+                  <Icon name="heroicons:clipboard" class="h-3.5 w-3.5 mr-1" />
+                  Copy
+                </button>
+              </div>
+              <code class="block w-full p-2.5 bg-white border border-secondary-200 rounded-lg font-mono text-xs text-secondary-800 break-all text-center select-all">
+                {{ twoFactor.secret || '—' }}
+              </code>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Enter OTP -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold">2</span>
+            <h4 class="text-sm font-semibold text-secondary-900">Enter 6 Digit OTP Code</h4>
+          </div>
+          <p class="text-xs text-secondary-600 mb-2.5">
+            Open your Authenticator app, select the NFCGo account, then type the 6-digit code displayed:
+          </p>
+          <input
+            type="text"
+            inputmode="numeric"
+            v-model="twoFactor.otpInput"
+            @input="twoFactor.otpInput = twoFactor.otpInput.replace(/[^0-9]/g, '').slice(0, 6)"
+            maxlength="6"
+            placeholder="••••••"
+            class="input input-bordered w-full text-center text-2xl font-bold tracking-[0.5em] h-14 font-mono"
+          />
+        </div>
+
+        <!-- STEP 3: Save Recovery Codes -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold">3</span>
+            <h4 class="text-sm font-semibold text-secondary-900">Save Recovery Codes (IMPORTANT!)</h4>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div class="flex gap-3">
+              <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h5 class="text-sm font-semibold text-amber-900 mb-1">Save in a SAFE place</h5>
+                <p class="text-xs text-amber-800 leading-relaxed">
+                  The 8 recovery codes below can be used <strong>ONE TIME ONLY</strong> if you lose access to your phone / Authenticator app.
+                  Do not share with anyone. If lost, you won't be able to log into your account.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <div
+              v-for="(code, idx) in twoFactor.recoveryCodes"
+              :key="idx"
+              class="p-2.5 bg-secondary-50 border border-secondary-200 rounded-lg font-mono text-sm text-secondary-800 text-center select-all"
+            >
+              {{ code }}
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-4">
+            <button
+              type="button"
+              @click="copyText(twoFactor.recoveryCodes.join('\n'), 'All Recovery Codes')"
+              class="btn btn-outline btn-sm flex-1"
+            >
+              <Icon name="heroicons:clipboard" class="h-4 w-4 mr-2" />
+              Copy All
+            </button>
+            <button
+              type="button"
+              @click="downloadRecoveryCodes()"
+              class="btn btn-outline btn-sm flex-1"
+            >
+              <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
+              Download .txt
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex gap-3 justify-end pt-2 border-t border-secondary-200">
+          <button
+            type="button"
+            @click="close2FASetup()"
+            :disabled="twoFactor.loading"
+            class="btn btn-outline disabled:opacity-50"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            @click="confirm2FA()"
+            :disabled="!/^[0-9]{6}$/.test(twoFactor.otpInput) || twoFactor.loading"
+            class="btn btn-primary disabled:opacity-50"
+          >
+            <span v-if="twoFactor.loading" class="loading loading-spinner loading-xs mr-2"></span>
+            Save & Enable
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== END MODAL SETUP 2FA ================== -->
+
+    <!-- ================== MODAL NYAHAKTIF 2FA ================== -->
+    <div
+      v-if="twoFactor.showDisable"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+            <Icon name="heroicons:shield-exclamation" class="h-6 w-6 text-red-600" />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-secondary-900">
+              Disable 2FA
+            </h3>
+            <p class="text-sm text-secondary-600">
+              Verify your identity to continue
+            </p>
+          </div>
+        </div>
+
+        <p class="text-sm text-secondary-700 mb-5 leading-relaxed">
+          Enter your <strong>current password</strong> OR <strong>one recovery code</strong>
+          to confirm you want to disable 2FA on this account.
+        </p>
+
+        <!-- Option 1: Current Password -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            Option 1 — Current Password
+          </label>
+          <div class="relative">
+            <input
+              :type="showCurrentPassword ? 'text' : 'password'"
+              v-model="twoFactor.passwordInput"
+              placeholder="Enter current password"
+              class="input input-bordered w-full pr-10"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
+              @click="showCurrentPassword = !showCurrentPassword"
+              tabindex="-1"
+            >
+              <Icon v-if="!showCurrentPassword" name="heroicons:eye" class="h-5 w-5" />
+              <Icon v-else name="heroicons:eye-slash" class="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center my-4">
+          <span class="inline-block px-3 py-1 text-xs font-semibold text-secondary-500 bg-secondary-100 rounded-full uppercase tracking-wider">
+            Or
+          </span>
+        </div>
+
+        <!-- Option 2: Recovery Code -->
+        <div class="mb-8">
+          <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            Option 2 — Recovery Code
+          </label>
+          <input
+            type="text"
+            v-model="twoFactor.recoveryCodeInput"
+            placeholder="AAAA-BBBB"
+            class="input input-bordered w-full font-mono uppercase tracking-widest text-center"
+            maxlength="9"
+          />
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex gap-3 justify-end pt-4 border-t border-secondary-200">
+          <button
+            type="button"
+            @click="twoFactor.showDisable = false; twoFactor.passwordInput = ''; twoFactor.recoveryCodeInput = '';"
+            :disabled="twoFactor.loading"
+            class="btn btn-outline disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click="disable2FA()"
+            :disabled="!twoFactor.passwordInput && !twoFactor.recoveryCodeInput || twoFactor.loading"
+            class="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            <span v-if="twoFactor.loading" class="loading loading-spinner loading-xs mr-2"></span>
+            Confirm Disable
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== END MODAL NYAHAKTIF 2FA ================== -->
 
     <!-- Delete Account Confirmation Modal -->
     <div
@@ -1254,7 +1836,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
 
 // Meta
 definePageMeta({
@@ -1262,10 +1844,59 @@ definePageMeta({
   middleware: ["auth"],
 });
 
+// Composables
+const theme = useTheme();
+const {
+  currentTheme,
+  setTheme,
+  getThemes,
+  getCurrentThemeInfo,
+  initTheme,
+} = theme;
+const availableThemes = typeof getThemes === 'function' ? getThemes() : [];
+const currentThemeInfo = computed(() => {
+  try { return getCurrentThemeInfo ? getCurrentThemeInfo() : null; } catch { return null; }
+});
+
 // Store
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+
+// ---------------- Preferences State ---------------- //
+const PREFS_STORAGE_PREFIX = 'nfcgo-user-prefs:';
+const uiLanguage = ref('en');
+const uiTimezone = ref('Asia/Kuala_Lumpur');
+const loadingPrefs = ref(false);
+
+const loadLocalPrefs = () => {
+  if (!process.client) return;
+  try {
+    const lang = localStorage.getItem(`${PREFS_STORAGE_PREFIX}language`);
+    const tz = localStorage.getItem(`${PREFS_STORAGE_PREFIX}timezone`);
+    if (lang) uiLanguage.value = lang;
+    if (tz) uiTimezone.value = tz;
+  } catch {}
+};
+const saveLocalPref = (key, value) => {
+  if (!process.client) return;
+  try { localStorage.setItem(`${PREFS_STORAGE_PREFIX}${key}`, value); } catch {}
+};
+
+const languageOptions = [
+  { code: 'ms', label: 'Bahasa Melayu', flag: '🇲🇾' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+];
+const timezoneOptions = [
+  { value: 'Asia/Kuala_Lumpur', label: '(GMT+8) Kuala Lumpur, Singapore' },
+  { value: 'Asia/Jakarta', label: '(GMT+7) Jakarta, Indonesia' },
+  { value: 'Asia/Bangkok', label: '(GMT+7) Bangkok, Thailand' },
+  { value: 'Asia/Hong_Kong', label: '(GMT+8) Hong Kong' },
+  { value: 'Asia/Tokyo', label: '(GMT+9) Tokyo, Japan' },
+  { value: 'Europe/London', label: '(GMT+0) London, UK' },
+  { value: 'America/New_York', label: '(GMT-5) New York, USA' },
+  { value: 'Australia/Sydney', label: '(GMT+11) Sydney, Australia' },
+];
 
 // Reactive data
 const activeTab = ref("account"); // Default to account tab
@@ -1415,9 +2046,11 @@ const errorMessage = ref("");
 // Settings tabs (removed separate profile tab, integrated with account)
 const settingsTabs = [
   { id: "account", label: "Account", icon: "heroicons:user-circle" },
+  { id: "preferences", label: "Preferences", icon: "heroicons:adjustments-horizontal" },
   { id: "security", label: "Security", icon: "heroicons:shield-check" },
   { id: "privacy", label: "Privacy", icon: "heroicons:eye-slash" },
   { id: "notifications", label: "Notifications", icon: "heroicons:bell" },
+  { id: "billing", label: "Billing & Subscription", icon: "heroicons:credit-card" },
   {
     id: "danger",
     label: "Danger Zone",
@@ -1675,14 +2308,14 @@ const revokeSession = async (sessionId) => {
     const { $api } = useNuxtApp();
     const resp = await $api.delete(`/user/sessions/${sessionId}`);
     if (resp?.success) {
-      showSuccess(resp.message || 'Sesi telah dilog keluar.');
+      showSuccess(resp.message || 'Session has been logged out.');
       activeSessions.value = activeSessions.value.filter(s => s.id !== sessionId);
     } else {
-      showError(resp?.message || 'Gagal membatalkan sesi.');
+      showError(resp?.message || 'Failed to revoke session.');
     }
   } catch (e) {
     console.error('Revoke session failed', e);
-    showError(e.data?.message || e.message || 'Gagal membatalkan sesi.');
+    showError(e.data?.message || e.message || 'Failed to revoke session.');
   } finally {
     revokingSessionId.value = null;
   }
@@ -1690,21 +2323,21 @@ const revokeSession = async (sessionId) => {
 
 const logoutEverywhere = async () => {
   if (loadingLogoutEverywhere.value) return;
-  if (!confirm('Log keluar dari SEMUA peranti? Anda perlu login semula pada peranti ini.')) return;
+  if (!confirm('Log out from ALL devices? You will need to log in again on this device.')) return;
   loadingLogoutEverywhere.value = true;
   try {
     const { $api } = useNuxtApp();
     const resp = await $api.post('/user/logout-everywhere');
     if (resp?.success) {
-      showSuccess('Anda telah log keluar dari semua peranti.');
+      showSuccess('You have been logged out from all devices.');
       await authStore.logout();
       await navigateTo('/UserAccount/login');
     } else {
-      showError(resp?.message || 'Gagal.');
+      showError(resp?.message || 'Failed.');
     }
   } catch (e) {
     console.error('logoutEverywhere failed', e);
-    showError(e.data?.message || 'Gagal logout semua peranti.');
+    showError(e.data?.message || 'Failed to logout all devices.');
   } finally {
     loadingLogoutEverywhere.value = false;
   }
@@ -1724,11 +2357,11 @@ const setup2FA = async () => {
       twoFactor.value.showSetup = true;
       twoFactor.value.showDisable = false;
     } else {
-      showError(resp?.message || 'Gagal setup 2FA.');
+      showError(resp?.message || 'Failed to setup 2FA.');
     }
   } catch (e) {
     console.error('setup2FA failed', e);
-    showError(e.data?.message || 'Gagal menjana setup 2FA.');
+    showError(e.data?.message || 'Failed to generate 2FA setup.');
   } finally {
     twoFactor.value.loading = false;
   }
@@ -1742,7 +2375,7 @@ const close2FASetup = () => {
 
 const confirm2FA = async () => {
   if (!/^[0-9]{6}$/.test(twoFactor.value.otpInput)) {
-    showError('Masukkan 6 digit kod OTP dari Authenticator app anda.');
+    showError('Enter the 6-digit OTP code from your Authenticator app.');
     return;
   }
   twoFactor.value.loading = true;
@@ -1756,17 +2389,17 @@ const confirm2FA = async () => {
         user.value.two_factor_enabled = true;
       }
       // Keep modal open a moment longer so user sees success + copies recovery codes
-      showSuccess('2FA berjaya diaktifkan. Simpan recovery codes di tempat selamat.');
+      showSuccess('2FA successfully enabled. Save recovery codes in a safe place.');
       setTimeout(() => {
         twoFactor.value.showSetup = false;
         twoFactor.value.otpInput = '';
       }, 1500);
     } else {
-      showError(resp?.message || 'Kod OTP tidak tepat.');
+      showError(resp?.message || 'Incorrect OTP code.');
     }
   } catch (e) {
     console.error('confirm2FA failed', e);
-    showError(e.data?.message || 'Gagal aktifkan 2FA. Cuba lagi.');
+    showError(e.data?.message || 'Failed to enable 2FA. Please try again.');
   } finally {
     twoFactor.value.loading = false;
   }
@@ -1775,15 +2408,15 @@ const confirm2FA = async () => {
 const copyText = (text, label) => {
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
-      showSuccess(`${label} disalin ke clipboard.`);
+      showSuccess(`${label} copied to clipboard.`);
     }).catch(() => {
       // Fallback
       fallbackCopy(text);
-      showSuccess(`${label} disalin ke clipboard.`);
+      showSuccess(`${label} copied to clipboard.`);
     });
   } else {
     fallbackCopy(text);
-    showSuccess(`${label} disalin ke clipboard.`);
+    showSuccess(`${label} copied to clipboard.`);
   }
 };
 
@@ -1804,11 +2437,11 @@ const downloadRecoveryCodes = () => {
   const codes = twoFactor.value.recoveryCodes || [];
   const lines = [
     'NFCGo Business Card — 2FA Recovery Codes',
-    `Dijana: ${new Date().toLocaleString()}`,
+    `Generated: ${new Date().toLocaleString()}`,
     '',
     ...codes.map((c, i) => `${String(i + 1).padStart(2, '0')}. ${c}`),
     '',
-    'GUNAKAN SATU SAHAJA BILA PERLU. SETIAP CODE SEKALI GUNA.',
+    'USE ONE ONLY WHEN NEEDED. EACH CODE IS FOR ONE-TIME USE.',
   ];
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -1826,7 +2459,7 @@ const downloadRecoveryCodes = () => {
 const disable2FA = async () => {
   const needPassword = !twoFactor.value.passwordInput && !twoFactor.value.recoveryCodeInput;
   if (needPassword && !twoFactor.value.passwordInput) {
-    showError('Masukkan kata laluan anda untuk sahkan nyahaktif 2FA.');
+    showError('Enter your password to confirm disabling 2FA.');
     return;
   }
   twoFactor.value.loading = true;
@@ -1841,20 +2474,20 @@ const disable2FA = async () => {
       twoFactor.value.showDisable = false;
       twoFactor.value.passwordInput = '';
       twoFactor.value.recoveryCodeInput = '';
-      showSuccess(resp.message || '2FA berjaya dinyahaktifkan.');
+      showSuccess(resp.message || '2FA successfully disabled.');
     } else {
-      showError(resp?.message || 'Gagal nyahaktifkan 2FA.');
+      showError(resp?.message || 'Failed to disable 2FA.');
     }
   } catch (e) {
     console.error('disable2FA failed', e);
-    showError(e.data?.message || 'Gagal nyahaktifkan 2FA.');
+    showError(e.data?.message || 'Failed to disable 2FA.');
   } finally {
     twoFactor.value.loading = false;
   }
 };
 
 const regenerateRecoveryCodes = async () => {
-  if (!confirm('Regenerate 8 recovery codes baru? Semua recovery codes sedia ada akan batal serta-merta.')) return;
+  if (!confirm('Regenerate 8 new recovery codes? All existing recovery codes will be revoked immediately.')) return;
   twoFactor.value.loading = true;
   try {
     const { $api } = useNuxtApp();
@@ -1862,13 +2495,13 @@ const regenerateRecoveryCodes = async () => {
     if (resp?.success) {
       twoFactor.value.recoveryCodes = resp.recovery_codes || [];
       twoFactor.value.recoveryCodesShown = true;
-      showSuccess(resp.message || 'Recovery codes baharu dijana.');
+      showSuccess(resp.message || 'New recovery codes generated.');
     } else {
-      showError(resp?.message || 'Gagal jana recovery codes.');
+      showError(resp?.message || 'Failed to generate recovery codes.');
     }
   } catch (e) {
     console.error('regenerateRecoveryCodes failed', e);
-    showError(e.data?.message || 'Gagal jana recovery codes.');
+    showError(e.data?.message || 'Failed to generate recovery codes.');
   } finally {
     twoFactor.value.loading = false;
   }
@@ -1876,7 +2509,7 @@ const regenerateRecoveryCodes = async () => {
 
 const changePassword = async () => {
   if (passwordForm.value.new_password !== passwordForm.value.confirm_password) {
-    showError("Kata laluan baharu tidak sepadan.");
+    showError("New passwords do not match.");
     return;
   }
 
@@ -1896,13 +2529,13 @@ const changePassword = async () => {
         new_password: "",
         confirm_password: "",
       };
-      showSuccess(response.message || "Kata laluan berjaya dikemaskini.");
+      showSuccess(response.message || "Password updated successfully.");
     } else {
-      showError(response?.message || "Gagal menukar kata laluan.");
+      showError(response?.message || "Failed to change password.");
     }
   } catch (error) {
     console.error("Error changing password:", error);
-    showError(error?.data?.message || error?.message || "Gagal menukar kata laluan.");
+    showError(error?.data?.message || error?.message || "Failed to change password.");
   } finally {
     changingPassword.value = false;
   }
@@ -2031,25 +2664,48 @@ const loadPlanPrices = async () => {
   }
 };
 
-// Profile URL helpers — prefer normalized phone number, fall back to legacy nfc_card_id
-const normalizePhoneNumber = (raw) => {
-  if (!raw) return '';
-  return String(raw).replace(/\D/g, '');
-};
-
-const getProfileUrlIdentifier = (card) => {
+const getCardPublicUrl = (card, opts = {}) => {
   if (!card) return '';
-  const normalizedPhone = normalizePhoneNumber(card.contact_number || card.normalized_contact_number || '');
-  if (normalizedPhone && normalizedPhone.length >= 9) {
-    return normalizedPhone;
+  const { preview = false, suffix = '' } = opts;
+  let base = '';
+
+  if (typeof card.public_url === 'string' && card.public_url.startsWith('/profile/')) {
+    base = card.public_url;
   }
-  return card.nfc_card_id || (`Card #${card.id}`);
+  if (!base) {
+    const authUser = authStore.user || {};
+    const userSlug = authUser.name_slug;
+    const cardsSource =
+      (typeof userNfcCards !== 'undefined' && userNfcCards && userNfcCards.value) ? userNfcCards.value :
+      (typeof nfcCards !== 'undefined' && nfcCards && nfcCards.value) ? nfcCards.value :
+      null;
+    const localCardNumber = cardsSource && cardsSource.length > 0
+      ? cardsSource
+          .slice()
+          .sort((a, b) => (new Date(a.created_at || a.createdAt || 0) - new Date(b.created_at || b.createdAt || 0)) || ((a.id ?? 0) - (b.id ?? 0)))
+          .findIndex(c => c.id === card.id) + 1
+      : null;
+    if (userSlug && (localCardNumber || card.card_number)) {
+      base = `/profile/${userSlug}/${localCardNumber || card.card_number}`;
+      if (authUser.id != null && authUser.has_name_slug_clash === true) {
+        base += '/userid-' + authUser.id;
+      }
+    }
+  }
+  if (!base) {
+    base = `/profile/${card.nfc_card_id || card.id}`;
+  }
+
+  const qs = [];
+  if (preview) qs.push('preview=true');
+  if (suffix) qs.push(suffix.replace(/^\?/, ''));
+  const qsStr = qs.length ? '?' + qs.join('&') : '';
+  return base + qsStr;
 };
 
-const getCardDisplayLiveUrl = (card) => `${baseUrl.value}/profile/${getProfileUrlIdentifier(card)}`;
-const getCardDisplayPreviewUrl = (card) => `${getCardDisplayLiveUrl(card)}?preview=true`;
+const getCardDisplayLiveUrl = (card) => `${baseUrl.value}${getCardPublicUrl(card)}`;
+const getCardDisplayPreviewUrl = (card) => `${baseUrl.value}${getCardPublicUrl(card, { preview: true })}`;
 
-// Profile URL management functions
 const copyProfileUrl = async (card, isPreview = false) => {
   const url = isPreview ? getCardDisplayPreviewUrl(card) : getCardDisplayLiveUrl(card);
   try {
@@ -2459,6 +3115,12 @@ const confirmUnlinkAccount = async (provider) => {
 
 // Lifecycle
 onMounted(async () => {
+  // Initialize theme & preferences FIRST (before any rendering flashes)
+  try {
+    if (typeof initTheme === 'function') initTheme();
+  } catch (e) { console.warn('Theme init failed:', e); }
+  loadLocalPrefs();
+
   // Initialize form with user data
   if (user.value) {
     personalInfoForm.value = {

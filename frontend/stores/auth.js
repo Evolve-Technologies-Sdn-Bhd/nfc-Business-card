@@ -31,6 +31,71 @@ export const useAuthStore = defineStore("auth", {
     isAuthenticated: false,
   }),
 
+  getters: {
+    hasAnyPhysicalNfcCard() {
+      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      return Array.isArray(cards) && cards.length > 0;
+    },
+
+    eligibleBuilderStatuses() {
+      return ['payment_verified','processing','shipped','delivered','active'];
+    },
+
+    hasAccessPaidBuilderCards() {
+      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      if (!Array.isArray(cards) || cards.length === 0) return false;
+      const ok = this.eligibleBuilderStatuses;
+      return cards.some(card => ok.includes(String(card.status || '').toLowerCase()));
+    },
+
+    /**
+     * User boleh access Premium/Basic/Business Profile Builder JIKA:
+     *  - subscription_active === true AND plan match, ATAU
+     *  - mempunyai sekurang-kurangnya 1 NfcCard dengan status >= payment_verified DAN plan match
+     */
+    canAccessPaidProfileBuilder() {
+      return (plan = null) => {
+        const ok = this.eligibleBuilderStatuses;
+        if (this.user?.subscription_active === true) {
+          if (plan === null) return true;
+          const userPlan = String(this.user.subscription_plan || 'free').toLowerCase();
+          const matchPlan = ['premium','business'].includes(plan) ? [plan] : ['basic','premium','business'];
+          if (matchPlan.includes(userPlan)) return true;
+        }
+        const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+        if (Array.isArray(cards) && cards.length > 0) {
+          if (plan === null) return cards.some(c => ok.includes(String(c.status || '')));
+          const matchPlan = ['premium','business'].includes(plan) ? [plan] : ['basic','premium','business'];
+          return cards.some(c =>
+            ok.includes(String(c.status || '')) &&
+            matchPlan.includes(String(c.subscription_plan || '').toLowerCase())
+          );
+        }
+        return false;
+      };
+    },
+
+    /**
+     * Resolve PLAN yang akan digunakan untuk navigation + Profile Builder path selection.
+     * Priority:
+     *   1. Jika user ADA subscription active → guna user.subscription_plan
+     *   2. Jika user TAKDE sub active tapi ADA NfcCard status eligible → guna plan kad pertama yang eligible
+     *   3. Fallback user.subscription_plan atau "free"
+     */
+    resolvedSubscriptionPlan() {
+      if (this.user?.subscription_active === true) {
+        return String(this.user.subscription_plan || 'free').toLowerCase();
+      }
+      const ok = this.eligibleBuilderStatuses;
+      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      if (Array.isArray(cards) && cards.length > 0) {
+        const eligible = cards.find(c => ok.includes(String(c.status || '')));
+        if (eligible?.subscription_plan) return String(eligible.subscription_plan).toLowerCase();
+      }
+      return String(this.user?.subscription_plan || 'free').toLowerCase();
+    },
+  },
+
   actions: {
     /**
      * Login user
@@ -218,38 +283,16 @@ export const useAuthStore = defineStore("auth", {
      */
     getRedirectPathByPlan() {
       if (!this.user) {
-        return "/UserDashboard/CardManagement";
+        return "/UserDashboard/";
       }
 
-      // Admin users go to admin panel - NFC Card Management
+      // Admin users go to admin dashboard
       if (this.isAdmin()) {
-        return "/AdminManagement/nfc-cards";
+        return "/AdminManagement/";
       }
 
-      // Get user's plan (check subscription_plan first, then fall back to plan)
-      const userPlan = this.user.subscription_plan || this.user.plan || "free";
-
-      // Route based on plan
-      switch (userPlan.toLowerCase()) {
-        case "free":
-          // Free users - show basic dashboard
-          return "/UserDashboard/CardManagement";
-
-        case "basic":
-          // Basic users - card management
-          return "/UserDashboard/CardManagement";
-
-        case "premium":
-          // Premium users - advanced features
-          return "/UserDashboard/CardManagement";
-
-        case "business":
-          // Business users - business plan specific pages
-          return "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement";
-
-        default:
-          return "/UserDashboard/CardManagement";
-      }
+      // All regular users (Free, Basic, Premium, Business) go to their main dashboard first
+      return "/UserDashboard/";
     },
 
     /**
@@ -263,10 +306,9 @@ export const useAuthStore = defineStore("auth", {
       const tokenCookie = useCookie("auth-token");
       tokenCookie.value = null;
 
-      // Only navigate if on client side
-      if (process.client) {
-        navigateTo("/UserAccount/login");
-      }
+      // NOTE: Navigation handled by route middleware (auth/admin) — avoid
+      // double navigateTo calls that cause transition race conditions and
+      // "insertBefore null" runtime DOM errors.
     },
 
     /**

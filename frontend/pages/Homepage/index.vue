@@ -2875,9 +2875,9 @@ onMounted(() => {
       return;
     }
     if (authStore.isAdmin()) {
-      navigateTo("/AdminManagement/nfc-cards");
+      navigateTo("/AdminManagement/");
     } else {
-      navigateTo("/UserDashboard");
+      navigateTo("/UserDashboard/");
     }
   }
 });

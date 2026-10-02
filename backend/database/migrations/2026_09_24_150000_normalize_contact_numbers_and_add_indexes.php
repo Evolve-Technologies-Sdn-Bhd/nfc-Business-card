@@ -7,6 +7,107 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    private function isSqlite(): bool
+    {
+        return Schema::getConnection()->getDriverName() === 'sqlite';
+    }
+
+    private function getExistingIndexNames(string $table): \Illuminate\Support\Collection
+    {
+        try {
+            if ($this->isSqlite()) {
+                $rows = DB::select(
+                    "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name = ?",
+                    [$table]
+                );
+                return collect($rows)->map(fn ($r) => $r->name ?? null)
+                    ->filter(fn ($n) => is_string($n))
+                    ->map(fn ($n) => strtolower($n))
+                    ->flip();
+            }
+            return collect(Schema::getIndexListing($table))
+                ->pluck('name')
+                ->filter(fn ($name) => is_string($name) || is_int($name))
+                ->map(fn ($n) => strtolower((string) $n))
+                ->flip();
+        } catch (\Throwable) {
+            return collect();
+        }
+    }
+
+    private function hasIndex(string $table, string $indexName): bool
+    {
+        return $this->getExistingIndexNames($table)->has(strtolower($indexName));
+    }
+
+    private function safeCreateIndex(string $table, $columns, string $indexName): void
+    {
+        if ($this->hasIndex($table, $indexName)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($columns, $indexName) {
+                $t->index($columns, $indexName);
+            });
+        } catch (\Throwable) {
+            // ignore
+        }
+    }
+
+    private function safeDropIndex(string $table, string $indexName): void
+    {
+        if (!$this->hasIndex($table, $indexName)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($indexName) {
+                $t->dropIndex($indexName);
+            });
+        } catch (\Throwable) {
+            // ignore
+        }
+    }
+
+    private function normalizeColumnPhp(string $table, string $column, string $primaryKey = 'id'): void
+    {
+        DB::table($table)
+            ->whereNotNull($column)
+            ->where($column, '<>', '')
+            ->select([$primaryKey, $column])
+            ->chunkById(100, function ($rows) use ($table, $column, $primaryKey) {
+                foreach ($rows as $row) {
+                    $raw = $row->{$column};
+                    if ($raw === null || $raw === '') {
+                        continue;
+                    }
+                    $normalized = preg_replace('/[^0-9]/', '', (string) $raw);
+                    if ($normalized !== (string) $raw) {
+                        DB::table($table)
+                            ->where($primaryKey, $row->{$primaryKey})
+                            ->update([$column => $normalized]);
+                    }
+                }
+            }, $primaryKey);
+    }
+
+    private function normalizeColumnSql(string $table, string $column): void
+    {
+        DB::statement("
+            UPDATE {$table}
+            SET {$column} = REGEXP_REPLACE(COALESCE({$column}, ''), '[^0-9]', '')
+            WHERE {$column} IS NOT NULL AND {$column} <> ''
+        ");
+    }
+
+    private function normalizeColumn(string $table, string $column, string $primaryKey = 'id'): void
+    {
+        if ($this->isSqlite()) {
+            $this->normalizeColumnPhp($table, $column, $primaryKey);
+        } else {
+            $this->normalizeColumnSql($table, $column);
+        }
+    }
+
     /**
      * Run the migrations.
      *
@@ -16,68 +117,23 @@ return new class extends Migration
     public function up(): void
     {
         // -------- Normalize existing contact_number values in nfc_cards --------
-        DB::statement("
-            UPDATE nfc_cards
-            SET contact_number = REGEXP_REPLACE(COALESCE(contact_number, ''), '[^0-9]', '')
-            WHERE contact_number IS NOT NULL AND contact_number <> ''
-        ");
+        $this->normalizeColumn('nfc_cards', 'contact_number');
 
         // -------- Normalize phone numbers in users (for reference consistency) --------
-        DB::statement("
-            UPDATE users
-            SET phone = REGEXP_REPLACE(COALESCE(phone, ''), '[^0-9]', '')
-            WHERE phone IS NOT NULL AND phone <> ''
-        ");
+        $this->normalizeColumn('users', 'phone');
 
         // -------- Normalize phone numbers in landing_pages (for reference consistency) --------
-        DB::statement("
-            UPDATE landing_pages
-            SET phone = REGEXP_REPLACE(COALESCE(phone, ''), '[^0-9]', '')
-            WHERE phone IS NOT NULL AND phone <> ''
-        ");
-        DB::statement("
-            UPDATE landing_pages
-            SET phone_number = REGEXP_REPLACE(COALESCE(phone_number, ''), '[^0-9]', '')
-            WHERE phone_number IS NOT NULL AND phone_number <> ''
-        ");
-        DB::statement("
-            UPDATE landing_pages
-            SET whatsapp_number = REGEXP_REPLACE(COALESCE(whatsapp_number, ''), '[^0-9]', '')
-            WHERE whatsapp_number IS NOT NULL AND whatsapp_number <> ''
-        ");
-        DB::statement("
-            UPDATE landing_pages
-            SET company_whatsapp = REGEXP_REPLACE(COALESCE(company_whatsapp, ''), '[^0-9]', '')
-            WHERE company_whatsapp IS NOT NULL AND company_whatsapp <> ''
-        ");
+        $this->normalizeColumn('landing_pages', 'phone');
+        $this->normalizeColumn('landing_pages', 'phone_number');
+        $this->normalizeColumn('landing_pages', 'whatsapp_number');
+        $this->normalizeColumn('landing_pages', 'company_whatsapp');
 
         // -------- Add performance indexes for nfc_cards --------
-        Schema::table('nfc_cards', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('nfc_cards');
-            $existingIndexNames = array_keys($indexes);
-
-            // Simple index on contact_number for fast phone-based lookups
-            if (!in_array('nfc_cards_contact_number_index', $existingIndexNames)) {
-                $table->index('contact_number', 'nfc_cards_contact_number_index');
-            }
-
-            // Composite index on (status, contact_number) for the conflict-resolution ordering
-            if (!in_array('nfc_cards_status_contact_number_index', $existingIndexNames)) {
-                $table->index(['status', 'contact_number'], 'nfc_cards_status_contact_number_index');
-            }
-        });
+        $this->safeCreateIndex('nfc_cards', 'contact_number', 'nfc_cards_contact_number_index');
+        $this->safeCreateIndex('nfc_cards', ['status', 'contact_number'], 'nfc_cards_status_contact_number_index');
 
         // -------- Optional: index users.phone for quick cross-reference lookups --------
-        Schema::table('users', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('users');
-            $existingIndexNames = array_keys($indexes);
-
-            if (!in_array('users_phone_index', $existingIndexNames)) {
-                $table->index('phone', 'users_phone_index');
-            }
-        });
+        $this->safeCreateIndex('users', 'phone', 'users_phone_index');
     }
 
     /**
@@ -88,27 +144,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('nfc_cards', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('nfc_cards');
-            $existingIndexNames = array_keys($indexes);
-
-            if (in_array('nfc_cards_status_contact_number_index', $existingIndexNames)) {
-                $table->dropIndex('nfc_cards_status_contact_number_index');
-            }
-            if (in_array('nfc_cards_contact_number_index', $existingIndexNames)) {
-                $table->dropIndex('nfc_cards_contact_number_index');
-            }
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('users');
-            $existingIndexNames = array_keys($indexes);
-
-            if (in_array('users_phone_index', $existingIndexNames)) {
-                $table->dropIndex('users_phone_index');
-            }
-        });
+        $this->safeDropIndex('nfc_cards', 'nfc_cards_status_contact_number_index');
+        $this->safeDropIndex('nfc_cards', 'nfc_cards_contact_number_index');
+        $this->safeDropIndex('users', 'users_phone_index');
     }
 };

@@ -1639,7 +1639,16 @@ const popularPlatforms = [
   },
 ];
 
-// Helper function to get full image URL
+// Smart host detection helper (same logic as api.client.js)
+const _isLocalHostname = (h) =>
+  h === "localhost" ||
+  h === "127.0.0.1" ||
+  h === "0.0.0.0" ||
+  h.startsWith("10.") ||
+  h.startsWith("192.168.") ||
+  /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h);
+
+// Helper function to get full image URL with smart host detection
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
 
@@ -1648,12 +1657,23 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-  // Get config
+  // Smartly pick base URL based on current runtime host so local dev
+  // always hits the local Laravel server (port 8000) for images, not production.
   const config = useRuntimeConfig();
-  const apiBase = config.public.apiBaseUrl || "http://localhost:8000/api";
+  let apiBase = (config.public?.apiBaseUrl || "").trim();
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (_isLocalHostname(host)) {
+      const scheme = window.location.protocol === "https:" ? "https" : "http";
+      apiBase = `${scheme}://${host}:8000/api`;
+    }
+  }
+  if (!apiBase) {
+    apiBase = "http://localhost:8000/api";
+  }
 
   // Remove /api from the end to get base URL
-  const baseUrl = apiBase.replace("/api", "");
+  const baseUrl = apiBase.replace(/\/api\/?$/, "");
 
   // Ensure the path starts with /
   const path = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;

@@ -670,17 +670,9 @@ class ProfileController extends Controller
     {
         try {
             $user = $request->user();
-            
-            Log::info('getBusinessTeamMembers called', [
-                'user_id' => $user->id,
-                'subscription_plan' => $user->subscription_plan,
-                'parent_business_id' => $user->parent_business_id,
-                'isBusinessAccount' => $user->isBusinessAccount(),
-            ]);
-            
+
             // Only Business Account owners can see their employees
             if (!$user->isBusinessAccount()) {
-                Log::info('User is not a Business Account owner');
                 return response()->json([
                     'success' => true,
                     'message' => 'Only Business Account owners can view employees',
@@ -688,30 +680,31 @@ class ProfileController extends Controller
                     'total' => 0,
                 ]);
             }
-            
-            // Get all employees under current user's business account
-            // Same as QuotaController::getEmployees
+
+            // Eager-load subscriptions + latestSubscription on employees so accessors
+            // don't hit the DB per-row; also load nfcCards.user so card public_url
+            // accessor uses the loaded relation (no lazy user fetch per card).
             $employees = $user->employees()
-                ->with(['nfcCards.landingPage'])
+                ->with([
+                    'nfcCards.landingPage',
+                    'nfcCards.user',
+                    'latestSubscription',
+                ])
                 ->get();
-            
-            Log::info('Employees found', [
-                'count' => $employees->count(),
-                'employee_ids' => $employees->pluck('id')->toArray(),
-            ]);
-            
+
+            // Bulk hydrate name slug clash counts (1 query instead of N per employee)
+            User::hydrateNameSlugClashCounts($employees);
+
             $teamMembers = [];
-            
+
             foreach ($employees as $employee) {
-                // If employee has NFC cards, show each card
                 if ($employee->nfcCards->count() > 0) {
                     foreach ($employee->nfcCards as $card) {
-                        $landingPage = $card->landingPage;
-                        // Use landing page data if available, otherwise use employee data
+                        $landingPage = $card->getRelation('landingPage') ?? null;
                         $name = ($landingPage && $landingPage->name) ? $landingPage->name : $employee->full_name;
                         $role = ($landingPage && $landingPage->title) ? $landingPage->title : ($employee->job_title ?? 'Team Member');
                         $profileImage = ($landingPage && $landingPage->profile_image) ? $landingPage->profile_image : null;
-                        
+
                         $normalizedPhone = NfcCard::normalizePhoneNumber($card->contact_number ?? '');
                         $urlIdentifier = !empty($normalizedPhone) ? $normalizedPhone : $card->nfc_card_id;
 
@@ -726,13 +719,12 @@ class ProfileController extends Controller
                             'nfc_card_id' => $card->nfc_card_id,
                             'contact_number' => $card->contact_number,
                             'normalized_contact_number' => $normalizedPhone,
-                            'landing_page_url' => url('/profile/' . $urlIdentifier),
+                            'landing_page_url' => url($card->public_url),
                             'landing_page_url_legacy' => url('/profile/' . $card->nfc_card_id),
                             'is_admin' => $employee->isBusinessAccount(),
                         ];
                     }
                 } else {
-                    // Employee without NFC card - still show them
                     $teamMembers[] = [
                         'id' => $employee->id,
                         'user_id' => $employee->id,
@@ -747,21 +739,15 @@ class ProfileController extends Controller
                     ];
                 }
             }
-            
-            Log::info('Team members result', [
-                'count' => count($teamMembers),
-                'names' => array_column($teamMembers, 'name'),
-            ]);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $teamMembers,
                 'total' => count($teamMembers),
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Failed to get business team members', ['error' => $e->getMessage()]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get team members: ' . $e->getMessage()

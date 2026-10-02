@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-secondary-900">
+          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
             Business Plan User Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -155,17 +155,17 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Business Account
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Email
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   <div class="flex flex-col">
                     <span>Employees</span>
@@ -175,22 +175,22 @@
                   </div>
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Quota
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Cards
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
                 >
                   Actions
                 </th>
@@ -202,7 +202,7 @@
                 :key="user.id"
                 class="hover:bg-secondary-50"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0">
                       <div
@@ -224,15 +224,15 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-secondary-900">{{ user.email }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-secondary-900">
                     {{ user.employees_count || 0 }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-secondary-900">
                     <span class="font-semibold">{{
                       user.quota_info?.available_quota || 0
@@ -242,14 +242,14 @@
                     >
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
                   >
                     {{ user.cards_count || 0 }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
@@ -261,7 +261,7 @@
                     {{ user.subscription_active ? "Active" : "Inactive" }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <button
                       @click="viewDetails(user)"

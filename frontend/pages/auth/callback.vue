@@ -146,21 +146,31 @@ onMounted(async () => {
         const isNewUserFromBackend = user.is_new_user === true;
         const isNewUserFromUrl = route.query.is_new_user === 'true';
         
-        // User is new if either flag is true
-        const isNewUser = isNewUserFromBackend || isNewUserFromUrl;
+        // Determine if user already has a valid plan/subscription (onboarding effectively done)
+        const hasValidPlan =
+          user.subscription_plan &&
+          ["free", "basic", "premium", "business"].includes(
+            String(user.subscription_plan).toLowerCase()
+          );
+        const alreadySetup = user.subscription_active === true || hasValidPlan;
+
+        // User is considered truly new (needs onboarding) ONLY if marked new AND not already setup
+        const isNewUserRequiringOnboarding =
+          (isNewUserFromBackend || isNewUserFromUrl) && !alreadySetup;
         
-        console.log('🔍 Final is new user decision:', isNewUser);
+        console.log('🔍 Final is new user requiring onboarding decision:', isNewUserRequiringOnboarding);
         
-        if (isNewUser) {
-          // New user - redirect to Plan Selection
+        if (isNewUserRequiringOnboarding) {
+          // Truly new user with no plan yet - redirect to Plan Selection
           console.log('➡️ Redirecting to Plan Selection...');
           $toast.success('Welcome to NFCGo! Let\'s choose your plan.');
           await router.push('/UserDashboard/PlanSelection');
         } else {
-          // Existing user - redirect to CardManagement
-          console.log('➡️ Redirecting to CardManagement...');
+          // Existing user or user already has valid plan/subscription - go to appropriate dashboard
+          console.log('➡️ Redirecting to dashboard via getRedirectPathByPlan()...');
           $toast.success('Successfully signed in!');
-          await router.push('/UserDashboard/CardManagement');
+          const redirectPath = authStore.getRedirectPathByPlan();
+          await router.push(redirectPath);
         }
       } else {
         throw new Error('Failed to authenticate');
