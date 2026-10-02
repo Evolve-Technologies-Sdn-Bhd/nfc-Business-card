@@ -46,10 +46,13 @@
           >
             <!-- Color Preview Swatch -->
             <div
-              class="flex-shrink-0 w-8 h-8 rounded-lg shadow-sm flex items-center justify-center text-base transition-transform duration-200 group-hover:scale-105 ring-1 ring-black/5"
+              class="flex-shrink-0 w-8 h-8 rounded-lg shadow-sm flex items-center justify-center text-white transition-transform duration-200 group-hover:scale-105 ring-1 ring-black/5"
               :style="{ backgroundColor: theme.previewColor }"
             >
-              <span class="drop-shadow-sm">{{ theme.icon }}</span>
+              <Icon
+                :name="theme.icon"
+                class="h-4 w-4 drop-shadow-sm"
+              />
             </div>
 
             <!-- Theme Info -->

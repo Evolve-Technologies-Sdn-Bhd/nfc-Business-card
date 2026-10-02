@@ -1469,139 +1469,147 @@
 
 /* ============================================================
    NFCGo FAN-WAVE WiFi ANIMATIONS
-   Half-arc wave animates outwards like WiFi signal pulse
+   Half-arc wave animates outwards like WiFi signal pulse.
+   Horizontal stagger positions (gap between layers) are NOW set
+   statically via inline style on each SVG in NFCGoWaveLoader.vue:
+     Left inner  = 0,  mid = -6px,  outer = -13px
+     Right inner = 0,  mid = +6px,  outer = +13px  (after scaleX(-1) mirror, this gives outward visual gap)
+   These keyframes ONLY pulse opacity + scale (no translateX jitter).
    ============================================================ */
 
 @keyframes nfcFanL1 {
   0%, 100% {
-    opacity: 0.18;
-    transform: translateX(0) scale(0.86);
+    opacity: 0.22;
+    transform: scale(0.82);
   }
   22% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: scale(1);
   }
   50% {
-    opacity: 0.55;
-    transform: translateX(-2px) scale(0.96);
+    opacity: 0.58;
+    transform: scale(0.95);
   }
   80% {
-    opacity: 0.32;
-    transform: translateX(0) scale(0.9);
+    opacity: 0.3;
+    transform: scale(0.88);
   }
 }
 @keyframes nfcFanL2 {
   0%, 100% {
-    opacity: 0.14;
-    transform: translateX(0) scale(0.82);
+    opacity: 0.17;
+    transform: scale(0.79);
   }
   16% {
-    opacity: 0.4;
-    transform: translateX(0) scale(0.88);
+    opacity: 0.42;
+    transform: scale(0.86);
   }
   34% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: scale(1);
   }
   62% {
-    opacity: 0.58;
-    transform: translateX(-3px) scale(0.95);
+    opacity: 0.6;
+    transform: scale(0.94);
   }
   86% {
-    opacity: 0.28;
-    transform: translateX(0) scale(0.88);
+    opacity: 0.26;
+    transform: scale(0.86);
   }
 }
 @keyframes nfcFanL3 {
   0%, 100% {
-    opacity: 0.1;
-    transform: translateX(0) scale(0.78);
+    opacity: 0.12;
+    transform: scale(0.75);
   }
   10% {
-    opacity: 0.22;
-    transform: translateX(0) scale(0.82);
+    opacity: 0.24;
+    transform: scale(0.8);
   }
   28% {
-    opacity: 0.5;
-    transform: translateX(0) scale(0.9);
+    opacity: 0.52;
+    transform: scale(0.88);
   }
   46% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: scale(1);
   }
   72% {
-    opacity: 0.6;
-    transform: translateX(-4px) scale(0.94);
+    opacity: 0.62;
+    transform: scale(0.93);
   }
   90% {
-    opacity: 0.24;
-    transform: translateX(0) scale(0.84);
+    opacity: 0.26;
+    transform: scale(0.82);
   }
 }
+
+/* RIGHT side: pre-mirrored with scaleX(-1) inline, so keyframes ONLY
+   animate opacity + scale. Stagger is handled by inline style translateX. */
 @keyframes nfcFanR1 {
   0%, 100% {
-    opacity: 0.18;
-    transform: scaleX(-1) scale(0.86);
+    opacity: 0.22;
+    transform: scaleX(-1) scale(0.82);
   }
   22% {
     opacity: 1;
     transform: scaleX(-1) scale(1);
   }
   50% {
-    opacity: 0.55;
-    transform: scaleX(-1) translateX(2px) scale(0.96);
+    opacity: 0.58;
+    transform: scaleX(-1) scale(0.95);
   }
   80% {
-    opacity: 0.32;
-    transform: scaleX(-1) scale(0.9);
+    opacity: 0.3;
+    transform: scaleX(-1) scale(0.88);
   }
 }
 @keyframes nfcFanR2 {
   0%, 100% {
-    opacity: 0.14;
-    transform: scaleX(-1) scale(0.82);
+    opacity: 0.17;
+    transform: scaleX(-1) scale(0.79);
   }
   16% {
-    opacity: 0.4;
-    transform: scaleX(-1) scale(0.88);
+    opacity: 0.42;
+    transform: scaleX(-1) scale(0.86);
   }
   34% {
     opacity: 1;
     transform: scaleX(-1) scale(1);
   }
   62% {
-    opacity: 0.58;
-    transform: scaleX(-1) translateX(3px) scale(0.95);
+    opacity: 0.6;
+    transform: scaleX(-1) scale(0.94);
   }
   86% {
-    opacity: 0.28;
-    transform: scaleX(-1) scale(0.88);
+    opacity: 0.26;
+    transform: scaleX(-1) scale(0.86);
   }
 }
 @keyframes nfcFanR3 {
   0%, 100% {
-    opacity: 0.1;
-    transform: scaleX(-1) scale(0.78);
+    opacity: 0.12;
+    transform: scaleX(-1) scale(0.75);
   }
   10% {
-    opacity: 0.22;
-    transform: scaleX(-1) scale(0.82);
+    opacity: 0.24;
+    transform: scaleX(-1) scale(0.8);
   }
   28% {
-    opacity: 0.5;
-    transform: scaleX(-1) scale(0.9);
+    opacity: 0.52;
+    transform: scaleX(-1) scale(0.88);
   }
   46% {
     opacity: 1;
     transform: scaleX(-1) scale(1);
   }
   72% {
-    opacity: 0.6;
-    transform: scaleX(-1) translateX(4px) scale(0.94);
+    opacity: 0.62;
+    transform: scaleX(-1) scale(0.93);
   }
   90% {
-    opacity: 0.24;
-    transform: scaleX(-1) scale(0.84);
+    opacity: 0.26;
+    transform: scaleX(-1) scale(0.82);
   }
 }
 @keyframes nfcChip3d {

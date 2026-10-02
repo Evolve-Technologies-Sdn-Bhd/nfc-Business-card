@@ -11,7 +11,7 @@ const themes = {
   zoraPro: {
     name: 'Zora Pro',
     description: 'Matte Deep Navy + Matte Teal. Mature-eyes friendly, premium professional tone.',
-    icon: 'heroicons:squares-2x2',
+    icon: 'heroicons:square-3-stack-3d',
     colors: {
       // Primary — Matte Deep Navy (non-glare, non-neon)
       primary50: '#F4F6FA',
@@ -72,7 +72,7 @@ const themes = {
   landingPage: {
     name: 'Corporate Blue',
     description: 'Original blue theme for brand landing consistency',
-    icon: 'heroicons:building-office-2',
+    icon: 'heroicons:building-office',
     colors: {
       primary50: '#EFF6FF',
       primary100: '#DBEAFE',

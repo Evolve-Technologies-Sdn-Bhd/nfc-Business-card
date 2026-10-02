@@ -11,27 +11,24 @@
         <div class="flex flex-col h-full">
           <!-- Logo -->
           <div
-            class="flex items-center justify-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
+            class="flex items-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
           >
-            <NuxtLink to="/" class="flex items-center w-full justify-center">
+            <NuxtLink to="/" class="flex items-center w-full">
               <template v-if="brandSettings.system_logo_url">
                 <img
                   :src="brandSettings.system_logo_url + '?v=' + brandVersion"
                   :alt="brandSettings.app_name || 'NFCGo'"
-                  class="h-8 max-h-8 max-w-[120px] object-contain"
+                  class="h-12 max-h-12 max-w-[160px] object-contain flex-shrink-0"
                 />
+                <span class="ml-3 text-lg font-bold text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
               </template>
               <template v-else>
                 <Icon
                   name="heroicons:identification"
-                  class="h-8 w-8 text-primary-600"
+                  class="h-9 w-9 text-primary-600 flex-shrink-0"
                 />
-                <span class="ml-2 text-xl font-bold text-secondary-900">{{ brandSettings.app_name || 'NFCGo' }}</span>
+                <span class="ml-3 text-lg font-bold text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
               </template>
-              <span
-                class="ml-2 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full"
-                >Admin</span
-              >
             </NuxtLink>
           </div>
 
