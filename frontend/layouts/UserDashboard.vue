@@ -98,33 +98,37 @@
             </div>
           </nav>
 
-          <!-- Upgrade Banner - Fixed at bottom (hide only for Business users) -->
+          <!-- Upgrade Banner - Bottom of sidebar (only non-Business users).
+               Flex-shrink + explicit sizing so it never overlaps scrollable nav. -->
           <div
             v-if="authStore.user?.subscription_plan !== 'business'"
-            class="p-4 border-t border-secondary-200"
+            class="p-4 border-t border-secondary-200 flex-shrink-0 bg-white"
           >
             <div
-              class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-4 text-white"
+              class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-4 text-white shadow-sm"
             >
-              <div class="flex items-center">
-                <Icon
-                  name="heroicons:star"
-                  class="h-6 w-6 text-yellow-300 flex-shrink-0"
-                />
-                <div class="ml-3 flex-1">
-                  <p class="text-sm font-medium">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 mt-0.5">
+                  <Icon
+                    name="heroicons:star"
+                    class="h-5 w-5 text-yellow-300"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold leading-snug truncate">
                     {{ authStore.user?.subscription_plan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
                   </p>
-                  <p class="text-xs text-primary-100">
-                    {{ authStore.user?.subscription_plan === 'premium' ? 'Unlock business features' : 'Unlock premium features' }}
+                  <p class="text-xs text-primary-100 mt-0.5 leading-relaxed">
+                    {{ authStore.user?.subscription_plan === 'premium' ? 'Team seats + advanced analytics' : 'Unlock the full Profile Builder' }}
                   </p>
                 </div>
               </div>
               <button
                 @click="navigateTo('/UserDashboard/PlanSelection')"
-                class="mt-3 w-full bg-white text-primary-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-primary-50 transition-colors"
+                class="mt-3.5 w-full bg-white text-primary-600 py-2 px-4 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors shadow-sm whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5"
               >
-                Upgrade Now
+                <Icon name="heroicons:arrow-up-trending-up" class="h-3.5 w-3.5 flex-shrink-0" />
+                <span class="truncate">Upgrade Now</span>
               </button>
             </div>
           </div>

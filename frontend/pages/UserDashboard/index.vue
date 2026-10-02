@@ -55,19 +55,19 @@
           :key="action.label"
           :to="action.href"
           :class="[
-            'group card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+            'group card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col h-full',
             action.disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : '',
           ]"
         >
-          <div :class="['inline-flex p-2.5 rounded-xl', action.iconBg]">
+          <div :class="['inline-flex p-2.5 rounded-xl flex-shrink-0 w-fit', action.iconBg]">
             <Icon :name="action.icon" :class="['h-5 w-5', action.iconText]" />
           </div>
-          <div class="mt-4">
-            <h3 class="text-sm font-semibold text-secondary-900">{{ action.label }}</h3>
-            <p class="mt-1 text-xs text-secondary-500">{{ action.description }}</p>
+          <div class="mt-4 flex-1 flex flex-col">
+            <h3 class="text-sm font-semibold text-secondary-900 leading-snug">{{ action.label }}</h3>
+            <p class="mt-1 text-xs text-secondary-500 leading-relaxed">{{ action.description }}</p>
           </div>
-          <div v-if="action.disabled" class="mt-3">
-            <span class="text-[0.65rem font-medium text-secondary-500">{{ action.disabledMessage }}</span>
+          <div v-if="action.disabled" class="mt-3 pt-3 border-t border-secondary-100">
+            <span class="text-[11px] leading-relaxed font-medium text-secondary-500 block">{{ action.disabledMessage }}</span>
           </div>
         </NuxtLink>
       </div>
@@ -100,13 +100,25 @@
             <p class="mt-1 text-base font-semibold text-secondary-900">{{ builderAccessStatus }}</p>
           </div>
         </div>
-        <div v-if="resolvedPlan !== 'business'" class="mt-6 pt-6 border-t border-secondary-100">
+        <div v-if="resolvedPlan !== 'business'" class="mt-6 pt-6 border-t border-secondary-100 flex items-center justify-between">
+          <div class="max-w-[62%]">
+            <p class="text-sm font-semibold text-secondary-900">
+              {{ resolvedPlan === 'premium' ? 'Need more features?' : 'Ready to unlock more?'}}
+            </p>
+            <p class="mt-0.5 text-xs text-secondary-500 leading-relaxed">
+              {{ resolvedPlan === 'premium'
+                ? 'Upgrade to Business for team seats and full analytics.'
+                : 'Upgrade to Premium for Profile Builder, custom branding, and unlimited taps.' }}
+            </p>
+          </div>
           <NuxtLink
             to="/UserDashboard/PlanSelection"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm hover:shadow whitespace-nowrap flex-shrink-0"
           >
             <Icon name="heroicons:arrow-up-trending-up" class="h-4 w-4" />
-            {{ resolvedPlan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium'}}
+            <span class="truncate max-w-[180px]">
+              {{ resolvedPlan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
+            </span>
           </NuxtLink>
         </div>
       </div>

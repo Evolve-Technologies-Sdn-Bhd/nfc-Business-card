@@ -25,51 +25,63 @@
           class="nfc-fan-group"
           :class="sizes[size].fanLeft"
         >
-          <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (push LEFT -13px) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-l-3"
-            :class="sizes[size].fanSvg3"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '-13px' }"
-            fill="none"
+          <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (-13px left) -->
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(-13px)"
           >
-            <path
-              :d="sizes[size].fanPath3"
-              :stroke="sizes[size].strokeGold"
-              :stroke-width="sizes[size].strokeW3"
-              stroke-linecap="round"
-            />
-          </svg>
-          <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance (push LEFT -6px) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-l-2"
-            :class="sizes[size].fanSvg2"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '-6px' }"
-            fill="none"
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-l-3"
+              :class="sizes[size].fanSvg3"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath3"
+                :stroke="sizes[size].strokeGold"
+                :stroke-width="sizes[size].strokeW3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance (-6px left) -->
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(-6px)"
           >
-            <path
-              :d="sizes[size].fanPath2"
-              :stroke="sizes[size].strokeTeal"
-              :stroke-width="sizes[size].strokeW2"
-              stroke-linecap="round"
-            />
-          </svg>
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-l-2"
+              :class="sizes[size].fanSvg2"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath2"
+                :stroke="sizes[size].strokeTeal"
+                :stroke-width="sizes[size].strokeW2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
           <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip (0 offset) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-l-1"
-            :class="sizes[size].fanSvg1"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '0px' }"
-            fill="none"
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(0px)"
           >
-            <path
-              :d="sizes[size].fanPath1"
-              :stroke="sizes[size].strokeNavy"
-              :stroke-width="sizes[size].strokeW1"
-              stroke-linecap="round"
-            />
-          </svg>
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-l-1"
+              :class="sizes[size].fanSvg1"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath1"
+                :stroke="sizes[size].strokeNavy"
+                :stroke-width="sizes[size].strokeW1"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
         </div>
 
         <!-- ============== CENTER: 3D BEVELLED NFC CHIP ============== -->
@@ -91,51 +103,63 @@
           class="nfc-fan-group"
           :class="sizes[size].fanRight"
         >
-          <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (push RIGHT +13px) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-r-3"
-            :class="sizes[size].fanSvg3"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '13px' }"
-            fill="none"
+          <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (+13px right) -->
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(13px)"
           >
-            <path
-              :d="sizes[size].fanPath3"
-              :stroke="sizes[size].strokeGold"
-              :stroke-width="sizes[size].strokeW3"
-              stroke-linecap="round"
-            />
-          </svg>
-          <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance (push RIGHT +6px) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-r-2"
-            :class="sizes[size].fanSvg2"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '6px' }"
-            fill="none"
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-r-3"
+              :class="sizes[size].fanSvg3"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath3"
+                :stroke="sizes[size].strokeGold"
+                :stroke-width="sizes[size].strokeW3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance (+6px right) -->
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(6px)"
           >
-            <path
-              :d="sizes[size].fanPath2"
-              :stroke="sizes[size].strokeTeal"
-              :stroke-width="sizes[size].strokeW2"
-              stroke-linecap="round"
-            />
-          </svg>
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-r-2"
+              :class="sizes[size].fanSvg2"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath2"
+                :stroke="sizes[size].strokeTeal"
+                :stroke-width="sizes[size].strokeW2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
           <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip (0 offset) -->
-          <svg
-            class="nfc-fan-svg animate-nfc-fan-r-1"
-            :class="sizes[size].fanSvg1"
-            :viewBox="sizes[size].fanViewBox"
-            :style="{ marginLeft: '0px' }"
-            fill="none"
+          <div
+            class="absolute inset-0 w-full h-full pointer-events-none"
+            style="transform: translateX(0px)"
           >
-            <path
-              :d="sizes[size].fanPath1"
-              :stroke="sizes[size].strokeNavy"
-              :stroke-width="sizes[size].strokeW1"
-              stroke-linecap="round"
-            />
-          </svg>
+            <svg
+              class="nfc-fan-svg animate-nfc-fan-r-1"
+              :class="sizes[size].fanSvg1"
+              :viewBox="sizes[size].fanViewBox"
+              fill="none"
+            >
+              <path
+                :d="sizes[size].fanPath1"
+                :stroke="sizes[size].strokeNavy"
+                :stroke-width="sizes[size].strokeW1"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -342,7 +366,9 @@ const VB = '0 0 100 100';
 const R1 = 16, R2 = 28, R3 = 40;
 const RAD = (deg) => (deg * Math.PI) / 180;
 // Draw a pure open arc from (50 - r·cosθ, 50 - r·sinθ) to (50 - r·cosθ, 50 + r·sinθ)
-// using large-arc=1, sweep=1, sweep angle strictly above/below horizontal axis.
+// Using small-arc counter-clockwise so the curve passes through the LEFT side
+// of the circle (farthest from center chip), with the opening facing +x
+// (directly toward the chip). This avoids any chord/vertical line on the right.
 const fanPath = (r, sweepDeg = 58) => {
   const theta = RAD(sweepDeg);
   const cx = 50;
@@ -350,10 +376,9 @@ const fanPath = (r, sweepDeg = 58) => {
   const x = cx - r * Math.cos(theta);
   const y1 = cy - r * Math.sin(theta);
   const y2 = cy + r * Math.sin(theta);
-  // large-arc-flag = 1 (arc covers >180° total between y1 and y2)
-  // sweep-flag     = 1 (arc goes from y1 -> y2 clockwise around the circle,
-  //                     meaning the opening faces +x toward the center chip)
-  return `M ${x.toFixed(3)} ${y1.toFixed(3)} A ${r} ${r} 0 1 1 ${x.toFixed(3)} ${y2.toFixed(3)}`;
+  // large-arc-flag = 0 (angle between y1 & y2 through LEFT side = 2θ < 180°)
+  // sweep-flag     = 0 (counter-clockwise from y1 → y2 through the left arc)
+  return `M ${x.toFixed(3)} ${y1.toFixed(3)} A ${r} ${r} 0 0 0 ${x.toFixed(3)} ${y2.toFixed(3)}`;
 };
 const FANPATH_1 = fanPath(R1, 56);
 const FANPATH_2 = fanPath(R2, 57);

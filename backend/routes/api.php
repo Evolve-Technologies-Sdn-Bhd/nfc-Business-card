@@ -128,16 +128,16 @@ Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verif
 // ✅ OAuth Routes (Public - No Auth Required)
 Route::prefix('auth')->group(function () {
     // Email check for OAuth conflict detection (public, rate-limited)
-    Route::get('check-email', [AuthController::class, 'checkEmail'])->middleware('throttle:30,1');
+    Route::get('check-email', [AuthController::class, 'checkEmail'])->middleware('throttle:30,1')->name('oauth.check-email');
 
     // Social OAuth routes (Google & Apple)
-    Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect']);
-    Route::get('{provider}/callback', [SocialAuthController::class, 'callback']);
+    Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('oauth.redirect');
+    Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])->name('oauth.callback');
 
     // Password Reset Routes
-    Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
-    Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
-    Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken']);
+    Route::post('password-reset-request', [PasswordResetController::class, 'requestReset'])->name('oauth.password-reset-request');
+    Route::post('password-reset', [PasswordResetController::class, 'resetPassword'])->name('oauth.password-reset');
+    Route::get('verify-reset-token/{token}', [PasswordResetController::class, 'verifyToken'])->name('oauth.verify-reset-token');
 });
 
 // Protected routes

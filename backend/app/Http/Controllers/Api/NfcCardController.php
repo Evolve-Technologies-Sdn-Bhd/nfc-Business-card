@@ -11,8 +11,10 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 class NfcCardController extends Controller
@@ -521,119 +523,227 @@ class NfcCardController extends Controller
 
     public function uploadPaymentProof(Request $request, NfcCard $nfcCard)
     {
-        $user = $request->user();
+        try {
+            $user = $request->user();
 
-        if ($nfcCard->user_id !== $user->id && !($user->isBusinessAccount() && $nfcCard->business_account_id === $user->id)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized to update this card order'
-            ], 403);
-        }
+            if ($nfcCard->user_id !== $user->id && !($user->isBusinessAccount() && $nfcCard->business_account_id === $user->id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to update this card order'
+                ], 403);
+            }
 
-        if (!in_array($nfcCard->status, ['pending_payment', 'awaiting_payment_verification'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment proof can only be uploaded for orders that have not yet been verified'
-            ], 422);
-        }
+            if (!in_array($nfcCard->status, ['pending_payment', 'awaiting_payment_verification'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment proof can only be uploaded for orders that have not yet been verified'
+                ], 422);
+            }
 
-        $validator = Validator::make($request->all(), [
-            'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'reference_code' => 'nullable|string|max:100',
-            'bank_name' => 'nullable|string|max:100',
-            'payment_date' => 'nullable|date',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $file = $request->file('payment_proof');
-        $fileName = 'payment-proofs/' . $nfcCard->nfc_card_id . '-' . time() . '.' . $file->extension();
-        $filePath = $file->storeAs('public', $fileName);
-        $proofUrl = Storage::url($fileName);
-
-        $transaction = $nfcCard->transaction;
-
-        if (!$transaction) {
-            $transactionId = 'TXN-' . strtoupper(Str::random(16));
-            $transaction = Transaction::create([
-                'transaction_id' => $transactionId,
-                'user_id' => $nfcCard->user_id,
-                'nfc_card_id' => $nfcCard->id,
-                'type' => 'purchase',
-                'payment_rail' => 'manual_bank_transfer',
-                'provider' => 'manual',
-                'amount' => $nfcCard->purchase_amount,
-                'currency' => config('app.currency', 'MYR'),
-                'fee' => 0,
-                'net_amount' => $nfcCard->purchase_amount,
-                'status' => 'pending',
-                'description' => 'Payment for NFC Card Order #' . $nfcCard->nfc_card_id,
+            $validator = Validator::make($request->all(), [
+                'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'reference_code' => 'nullable|string|max:100',
+                'bank_name' => 'nullable|string|max:100',
+                'payment_date' => 'nullable|date',
             ]);
-            $nfcCard->update(['transaction_id' => $transaction->id]);
-        }
 
-        $transaction->update([
-            'payment_proof_url' => $proofUrl,
-            'payment_proof_uploaded_at' => now(),
-            'bank_name' => $request->bank_name ?? $transaction->bank_name,
-            'bank_reference_code' => $request->reference_code ?? $transaction->bank_reference_code,
-            'status' => 'pending',
-        ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please check your inputs and try again.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        $nfcCard->update([
-            'status' => 'awaiting_payment_verification',
-        ]);
+            $file = $request->file('payment_proof');
+            if (!$file || !$file->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment proof file is invalid or corrupted. Please re-upload.'
+                ], 422);
+            }
 
-        // Notify user
-        $this->notificationService->create($user, 'system_message', [
-            'system_message' => 'Payment proof for order #' . $nfcCard->nfc_card_id . ' has been submitted. Awaiting admin verification.',
-            'icon' => '💵',
-            'priority' => 'normal',
-        ]);
+            // ── Generate base URL from current request (fixes localhost:8000 ghost) ──
+            $scheme = $request->getScheme();
+            $host = $request->getHost();
+            $port = $request->getPort();
+            $portSuffix = in_array((int)$port, [80, 443], true) ? '' : ':' . $port;
+            $baseUrl = rtrim($scheme . '://' . $host . $portSuffix, '/');
+            $fallbackUrl = rtrim(Config::get('app.url'), '/');
+            if (empty($baseUrl) || str_contains($baseUrl, 'localhost') || str_contains($baseUrl, '127.0.0.1')) {
+                $baseUrl = $fallbackUrl;
+            }
 
-        // Notify all admins
-        $adminUserIds = User::where('is_admin', true)->pluck('id')->toArray();
-        if (!empty($adminUserIds)) {
-            $this->notificationService->createForMultiple($adminUserIds, 'nfc_card_payment_proof_uploaded', [
-                'nfc_card_id' => $nfcCard->nfc_card_id,
-                'user_name' => $user->full_name ?? $user->name ?? $user->email,
-                'user_email' => $user->email,
-                'payment_proof_url' => $proofUrl,
-                'reference_code' => $request->reference_code ?? '',
-                'action_url' => '/AdminManagement/nfc-cards',
-                'action_text' => 'Verify Payment',
-            ]);
-        }
+            // ── Store proof ──
+            $ext = $file->getClientOriginalExtension() ?: $file->extension() ?: 'pdf';
+            $fileName = 'payment-proofs/' . $nfcCard->nfc_card_id . '-' . time() . '.' . $ext;
+            $storedPath = $file->storeAs('public', $fileName);
+            if (!$storedPath) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to save payment proof file to storage. Please try again.'
+                ], 500);
+            }
+            $rawProofUrl = Storage::disk('public')->url($fileName);
+            // Correct localhost / wrong scheme ghost URLs (matches system settings logic)
+            if ($rawProofUrl && (str_contains($rawProofUrl, 'localhost:8000') || stripos($rawProofUrl, 'http://') === 0 && stripos($baseUrl, 'https://') === 0)) {
+                $path = preg_replace('#^https?://[^/]+#', '', $rawProofUrl);
+                if ($path) {
+                    $rawProofUrl = rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+                }
+            }
+            $proofUrl = $rawProofUrl;
 
-        // Activity log — payment proof uploaded
-        $this->recordUserNfcCardActivity(
-            $user,
-            'nfc_card_payment_proof_uploaded',
-            'Payment proof for card order #' . $nfcCard->nfc_card_id . ' uploaded by ' . $user->email,
-            'nfc_card',
-            $nfcCard->id,
-            [
-                'proof_filename' => $fileName,
+            // ── Resolve a safe amount (never pass NULL to decimal column) ──
+            $amount = $nfcCard->purchase_amount;
+            if ($amount === null || $amount === '') {
+                $planFallback = [
+                    'free' => 0,
+                    'basic' => 29.00,
+                    'premium' => 59.00,
+                    'business' => 149.00,
+                ];
+                $p = strtolower((string)($nfcCard->subscription_plan ?? 'premium'));
+                $amount = $planFallback[$p] ?? 59.00;
+            }
+            $amountNumeric = is_numeric($amount) ? (float)$amount : (float)filter_var((string)$amount, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+            if (!is_finite($amountNumeric) || $amountNumeric < 0) {
+                $amountNumeric = 0;
+            }
+            $amountNumeric = round($amountNumeric, 2);
+            $currency = config('app.currency', 'MYR');
+
+            // ── Atomic: transaction record + nfc_card status update ──
+            DB::beginTransaction();
+            try {
+                $transaction = $nfcCard->transaction;
+
+                if (!$transaction) {
+                    $transactionId = 'TXN-' . strtoupper(Str::random(16));
+                    $transaction = Transaction::create([
+                        'transaction_id' => $transactionId,
+                        'user_id' => $nfcCard->user_id,
+                        'nfc_card_id' => $nfcCard->id,
+                        'type' => 'purchase',
+                        'payment_rail' => 'manual_bank_transfer',
+                        'provider' => 'manual',
+                        'amount' => $amountNumeric,
+                        'currency' => $currency,
+                        'fee' => 0,
+                        'net_amount' => $amountNumeric,
+                        'status' => 'pending',
+                        'description' => 'Payment for NFC Card Order #' . $nfcCard->nfc_card_id,
+                    ]);
+                    // Safe update — skip if column missing (migration not applied yet on older DBs)
+                    try {
+                        DB::statement(
+                            "UPDATE nfc_cards SET transaction_id = ? WHERE id = ?",
+                            [$transaction->id, $nfcCard->id]
+                        );
+                        $nfcCard->setRelation('transaction', $transaction->fresh());
+                    } catch (\Throwable $e) {
+                        // Ignore — transaction_id column might not exist in legacy tables
+                        report($e);
+                    }
+                }
+
+                $transaction->update([
+                    'payment_proof_url' => $proofUrl,
+                    'payment_proof_uploaded_at' => now(),
+                    'bank_name' => $request->input('bank_name') ?? $transaction->bank_name,
+                    'bank_reference_code' => $request->input('reference_code') ?? $transaction->bank_reference_code,
+                    'status' => 'pending',
+                ]);
+
+                $nfcCard->update([
+                    'status' => 'awaiting_payment_verification',
+                ]);
+                DB::commit();
+            } catch (\Throwable $dbEx) {
+                DB::rollBack();
+                // Clean up orphan uploaded proof file so we don't leave garbage
+                try { Storage::disk('public')->delete($fileName); } catch (\Throwable $_) {}
+                throw $dbEx;
+            }
+
+            // Reload fresh relationships
+            $nfcCard->load(['transaction']);
+
+            // Notify user
+            try {
+                $this->notificationService->create($user, 'system_message', [
+                    'system_message' => 'Payment proof for order #' . $nfcCard->nfc_card_id . ' has been submitted. Awaiting admin verification.',
+                    'icon' => '💵',
+                    'priority' => 'normal',
+                ]);
+            } catch (\Throwable $e) { report($e); }
+
+            // Notify all admins
+            try {
+                $adminUserIds = User::where('is_admin', true)->pluck('id')->toArray();
+                if (!empty($adminUserIds)) {
+                    $this->notificationService->createForMultiple($adminUserIds, 'nfc_card_payment_proof_uploaded', [
+                        'nfc_card_id' => $nfcCard->nfc_card_id,
+                        'user_name' => $user->full_name ?? $user->name ?? $user->email,
+                        'user_email' => $user->email,
+                        'payment_proof_url' => $proofUrl,
+                        'reference_code' => $request->input('reference_code') ?? '',
+                        'action_url' => '/AdminManagement/nfc-cards',
+                        'action_text' => 'Verify Payment',
+                    ]);
+                }
+            } catch (\Throwable $e) { report($e); }
+
+            // Activity log — payment proof uploaded
+            try {
+                $this->recordUserNfcCardActivity(
+                    $user,
+                    'nfc_card_payment_proof_uploaded',
+                    'Payment proof for card order #' . $nfcCard->nfc_card_id . ' uploaded by ' . $user->email,
+                    'nfc_card',
+                    $nfcCard->id,
+                    [
+                        'proof_filename' => $fileName,
+                        'proof_url' => $proofUrl,
+                        'file_size_bytes' => $file->getSize() ?? null,
+                        'bank_name' => $request->input('bank_name') ?? null,
+                        'reference_code' => $request->input('reference_code') ?? null,
+                        'payment_date' => $request->input('payment_date') ?? null,
+                        'transaction_id' => $transaction->transaction_id ?? null,
+                        'card_id' => $nfcCard->nfc_card_id,
+                    ]
+                );
+            } catch (\Throwable $e) { report($e); }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment proof submitted successfully. Please wait for admin verification.',
+                'nfc_card' => $nfcCard,
                 'proof_url' => $proofUrl,
-                'file_size_bytes' => $file->getSize(),
-                'bank_name' => $request->bank_name ?? null,
-                'reference_code' => $request->reference_code ?? null,
-                'payment_date' => $request->payment_date ?? null,
-                'transaction_id' => $transaction->transaction_id ?? null,
-                'card_id' => $nfcCard->nfc_card_id,
-            ]
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment proof submitted successfully. Please wait for admin verification.',
-            'nfc_card' => $nfcCard->load('transaction'),
-        ], 200);
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json([
+                'success' => false,
+                'message' => $ve->getMessage() ?: 'Validation failed.',
+                'errors' => $ve->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            report($e);
+            $friendly = 'Server error. Please try again later.';
+            $detail = $e->getMessage();
+            if (stripos($detail, 'no such column') !== false || stripos($detail, 'unknown column') !== false) {
+                $friendly = 'System configuration out of date — please run php artisan migrate on the server or contact support.';
+            } elseif (stripos($detail, 'SQLSTATE') !== false || stripos($detail, 'database') !== false) {
+                $friendly = 'Database error. Please try again or contact support if the issue persists.';
+            } elseif (stripos($detail, 'disk') !== false || stripos($detail, 'storage') !== false || stripos($detail, 'mkdir') !== false || stripos($detail, 'permission') !== false) {
+                $friendly = 'Storage permission error — please ensure storage folder is writable or run php artisan storage:link.';
+            }
+            return response()->json([
+                'success' => false,
+                'message' => $friendly,
+                'debug_message' => app()->environment('local', 'staging') ? $detail : null,
+            ], 500);
+        }
     }
 
     public function confirmReceived(Request $request, NfcCard $nfcCard)
