@@ -4491,6 +4491,30 @@ const responsive = computed(() => {
   };
   const cs = cardPresets[cardStyleId] || cardPresets.minimal;
 
+  // === FORCE SOLID-COLOR CONTAINERS (gradient reserved ONLY for root page background) ===
+  {
+    const hx = (textColorRaw || '#FFFFFF').replace('#', '');
+    const hex6 = hx.length === 3 ? hx.split('').map(c => c + c).join('') : hx.padEnd(6, '0');
+    const r = parseInt(hex6.substring(0, 2), 16);
+    const g = parseInt(hex6.substring(2, 4), 16);
+    const b = parseInt(hex6.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    const isDarkTheme = luminance > 0.55;
+    // Solid flat background — no blur, no gradient, full opacity
+    cs.cardBackground = isDarkTheme ? '#111827' : '#FFFFFF';
+    cs.backdropBlur = '0px';
+    // Neutral 1px solid border — no gradient, no dots, no multi-layer
+    cs.cardBorder = isDarkTheme ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.06)';
+    // Clean elevation shadow — no neon/aurora color shimmer
+    cs.cardShadow = isDarkTheme
+      ? '0 10px 30px rgba(0,0,0,0.35)'
+      : '0 8px 24px rgba(15,23,42,0.08)';
+    cs.cardHoverShadow = isDarkTheme
+      ? '0 16px 40px rgba(0,0,0,0.42)'
+      : '0 12px 32px rgba(15,23,42,0.12)';
+    if (cs.filterSaturate) delete cs.filterSaturate;
+  }
+
   return {
     // Container - always have horizontal breathing room on mobile
     containerPadding: sm
