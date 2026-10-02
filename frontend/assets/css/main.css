@@ -315,6 +315,18 @@
   /* Stroke gradients for each arc layer (SVG fills use CSS vars via currentColor) */
   .nfc-fan-svg {
     @apply block overflow-visible;
+    display: block;
+    overflow: visible;
+    /* Explicit no-fill so even if path's fill attr is dropped by mistake,
+       we never render a filled shape or a "closed" polygon. */
+    fill: none !important;
+  }
+  .nfc-fan-svg path {
+    /* round caps + round joins eliminate any spiky miter artifacts
+       that might look like a thin vertical stem on scaled pulse. */
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    fill: none !important;
   }
 
   /* ============================================================
@@ -1702,6 +1714,21 @@
   0%, 80%, 100% { transform: scale(0.55); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
 }
+
+/* ====== FAN LAYER POSITIONING (horizontal gap) ======
+ *  Applied on WRAPPER divs around the SVG. Wrapper div has no keyframes
+ *  of its own, so translateX() is NEVER overwritten. Inner SVG still
+ *  animates scale()/scaleX(-1) via keyframes — they're on different
+ *  DOM nodes → no conflict, no jitter.
+ *  Gap ~ 8-9px relative to the 100-wide viewbox so layers are OBVIOUS.
+ */
+.nfc-fan-wrap  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.nfc-fan-left-a  { transform: translateX(0px);   }   /* LEFT  inner (navy)  — right at chip */
+.nfc-fan-left-b  { transform: translateX(-10px); }   /* LEFT  middle (teal) — push out */
+.nfc-fan-left-c  { transform: translateX(-20px); }   /* LEFT  outer  (gold) — far out */
+.nfc-fan-right-a { transform: translateX(0px);   }   /* RIGHT inner (navy)  — right at chip */
+.nfc-fan-right-b { transform: translateX(10px);  }   /* RIGHT middle (teal) — push out */
+.nfc-fan-right-c { transform: translateX(20px);  }   /* RIGHT outer  (gold) — far out */
 
 .animate-nfc-fan-l-1 { animation: nfcFanL1 1.8s ease-in-out infinite; }
 .animate-nfc-fan-l-2 { animation: nfcFanL2 1.8s ease-in-out infinite; }

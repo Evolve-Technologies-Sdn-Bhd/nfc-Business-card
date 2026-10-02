@@ -25,11 +25,8 @@
           class="nfc-fan-group"
           :class="sizes[size].fanLeft"
         >
-          <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (-13px left) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(-13px)"
-          >
+          <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
+          <div class="nfc-fan-wrap nfc-fan-left-c">
             <svg
               class="nfc-fan-svg animate-nfc-fan-l-3"
               :class="sizes[size].fanSvg3"
@@ -44,11 +41,8 @@
               />
             </svg>
           </div>
-          <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance (-6px left) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(-6px)"
-          >
+          <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
+          <div class="nfc-fan-wrap nfc-fan-left-b">
             <svg
               class="nfc-fan-svg animate-nfc-fan-l-2"
               :class="sizes[size].fanSvg2"
@@ -63,11 +57,8 @@
               />
             </svg>
           </div>
-          <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip (0 offset) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(0px)"
-          >
+          <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
+          <div class="nfc-fan-wrap nfc-fan-left-a">
             <svg
               class="nfc-fan-svg animate-nfc-fan-l-1"
               :class="sizes[size].fanSvg1"
@@ -103,11 +94,8 @@
           class="nfc-fan-group"
           :class="sizes[size].fanRight"
         >
-          <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip (+13px right) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(13px)"
-          >
+          <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
+          <div class="nfc-fan-wrap nfc-fan-right-c">
             <svg
               class="nfc-fan-svg animate-nfc-fan-r-3"
               :class="sizes[size].fanSvg3"
@@ -122,11 +110,8 @@
               />
             </svg>
           </div>
-          <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance (+6px right) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(6px)"
-          >
+          <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
+          <div class="nfc-fan-wrap nfc-fan-right-b">
             <svg
               class="nfc-fan-svg animate-nfc-fan-r-2"
               :class="sizes[size].fanSvg2"
@@ -141,11 +126,8 @@
               />
             </svg>
           </div>
-          <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip (0 offset) -->
-          <div
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            style="transform: translateX(0px)"
-          >
+          <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
+          <div class="nfc-fan-wrap nfc-fan-right-a">
             <svg
               class="nfc-fan-svg animate-nfc-fan-r-1"
               :class="sizes[size].fanSvg1"
@@ -355,34 +337,50 @@ const NAVY = 'var(--theme-primary-600, #3d496a)';
 const TEAL = 'var(--theme-accent, #5d8c87)';
 const GOLD = 'var(--theme-accent-secondary, #b8956a)';
 
-// Common SVG fan geometry.
-// Viewbox 100x100, center (50,50).
-// LEFT-side OPEN half-arcs (opening toward the RIGHT / center chip).
-// These are WIFI-SIGNAL style arcs — a single curved stroke from upper-left
-// sweeping around to lower-left WITHOUT any vertical connecting line.
-// Radius set: inner=16, middle=28, outer=40
-// Sweep angle 58° above & below horizontal → 236° of pure arc (no chord)
+// Common SVG fan geometry (VIEWBOX 100x100, center 50,50).
+// Build LEFT-side OPEN WiFi-signal half-arc using a CUBIC BEZIER CURVE.
+// NO SVG `A` command at all — so impossible for a "chord line" or
+// vertical stem to appear regardless of arc flags.
+// Curve shape (opening toward +x / center chip):
+//     S (top opening)              E (bottom opening)
+//       \                          /
+//        ------- M (apex) --------
+//                 ^
+//                 (farthest LEFT, on horizontal centerline)
 const VB = '0 0 100 100';
-const R1 = 16, R2 = 28, R3 = 40;
-const RAD = (deg) => (deg * Math.PI) / 180;
-// Draw a pure open arc from (50 - r·cosθ, 50 - r·sinθ) to (50 - r·cosθ, 50 + r·sinθ)
-// Using small-arc counter-clockwise so the curve passes through the LEFT side
-// of the circle (farthest from center chip), with the opening facing +x
-// (directly toward the chip). This avoids any chord/vertical line on the right.
-const fanPath = (r, sweepDeg = 58) => {
-  const theta = RAD(sweepDeg);
-  const cx = 50;
-  const cy = 50;
-  const x = cx - r * Math.cos(theta);
-  const y1 = cy - r * Math.sin(theta);
-  const y2 = cy + r * Math.sin(theta);
-  // large-arc-flag = 0 (angle between y1 & y2 through LEFT side = 2θ < 180°)
-  // sweep-flag     = 0 (counter-clockwise from y1 → y2 through the left arc)
-  return `M ${x.toFixed(3)} ${y1.toFixed(3)} A ${r} ${r} 0 0 0 ${x.toFixed(3)} ${y2.toFixed(3)}`;
+const cx = 50;
+const cy = 50;
+// Build one pure bezier open-arc (bell-shape) with apex at (-depth, cy)
+// and opening endpoints vertically separated by (span) on the x-axis.
+// depth = how far LEFT the apex sits from center
+// span  = horizontal offset of opening (where arc "opens" toward chip)
+// spread= vertical distance (±spread) from centerline for endpoints
+const bezFanPath = (depth, span, spread) => {
+  // Endpoints (opening toward +x / chip, on the right side of curve)
+  const Sx = cx - span;
+  const Sy = cy - spread;
+  const Ex = cx - span;
+  const Ey = cy + spread;
+  // Apex — farthest LEFT from center
+  const Mx = cx - depth;
+  const My = cy;
+  // Control points — placed at 55% along line S->M and M->E for smooth bell
+  const k = 0.55;
+  const C1x = Sx + k * (Mx - Sx);
+  const C1y = Sy + k * (My - Sy);
+  const C2x = Mx + k * (Ex - Mx);
+  const C2y = My + k * (Ey - My);
+  const f = (v) => v.toFixed(3);
+  return `M ${f(Sx)} ${f(Sy)} C ${f(C1x)} ${f(C1y)}, ${f(C2x)} ${f(C2y)}, ${f(Ex)} ${f(Ey)}`;
 };
-const FANPATH_1 = fanPath(R1, 56);
-const FANPATH_2 = fanPath(R2, 57);
-const FANPATH_3 = fanPath(R3, 58);
+// Three layers — consistent depths (apex position), spans (opening x),
+// spreads (vertical end separation) so each layer looks like a nested
+// WiFi-signal arc without touching or overlapping.
+// depth=radius,  span=radius*0.45 (opens on the right side, near chip)
+// spread=radius*sin(55°) to match intended ~110° total fan sweep
+const FANPATH_1 = bezFanPath(16, 16 * 0.46, 16 * 0.81); // inner (navy)  — apex at x=34
+const FANPATH_2 = bezFanPath(29, 29 * 0.46, 29 * 0.81); // middle (teal) — apex at x=21
+const FANPATH_3 = bezFanPath(42, 42 * 0.46, 42 * 0.81); // outer (gold) — apex at x=8
 
 // Wave variant — Size map (HALF-WAVE fan style)
 // Horizontal gap between arc layers (via margin so it doesn't clash with
