@@ -23,6 +23,49 @@ class AdminSystemSettingsController extends Controller
     }
 
     /**
+     * Get the correct base URL (scheme + host) from the current request.
+     * Falls back to APP_URL only when no request context is available (CLI).
+     */
+    private function getBaseUrl(): string
+    {
+        $request = request();
+        if ($request && $request->getSchemeAndHttpHost()) {
+            return rtrim($request->getSchemeAndHttpHost(), '/');
+        }
+        return rtrim(Config::get('app.url'), '/');
+    }
+
+    /**
+     * Correct a stored asset URL if it references localhost or wrong scheme.
+     * Ensures URLs always match the current request's domain and protocol.
+     */
+    private function correctAssetUrl(string $url): string
+    {
+        if (empty($url)) {
+            return $url;
+        }
+
+        $base = $this->getBaseUrl();
+
+        // If the URL already matches the current base, return as-is
+        if (str_starts_with($url, $base . '/')) {
+            return $url;
+        }
+
+        // Extract the path portion: everything from /storage/... onwards
+        $path = null;
+        if (preg_match('#(/storage/.+)$#', $url, $matches)) {
+            $path = $matches[1];
+        }
+
+        if ($path) {
+            return $base . $path;
+        }
+
+        return $url;
+    }
+
+    /**
      * Get general system settings
      */
     public function getGeneralSettings()
@@ -47,6 +90,13 @@ class AdminSystemSettingsController extends Controller
             $saved = Cache::get($this->cachePrefix . 'general', []);
             $brand = Cache::get($this->cachePrefix . 'brand', []);
             $data = array_merge($defaults, $saved, $brand);
+
+            // Correct brand asset URLs for current request context
+            foreach (['system_logo_url', 'system_logo_public_url', 'system_favicon_url', 'system_favicon_public_url'] as $key) {
+                if (!empty($data[$key])) {
+                    $data[$key] = $this->correctAssetUrl($data[$key]);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -497,14 +547,14 @@ class AdminSystemSettingsController extends Controller
             $url = Storage::disk('public')->url($path);
 
             // Determine a "public reachable URL" that definitely works
-            // from the SPA origin. filesystems.public.url defaults to
-            // APP_URL + '/storage'. If APP_URL is an API-only port (e.g.
-            // localhost:8000 on a Windows dev box where SPA runs on 3000),
-            // the SPA <img> can still fetch it because same host, but we
-            // also guarantee it via a path-absolute URL.
-            $absoluteRoot = rtrim(Config::get('app.url'), '/');
+            // from the SPA origin. Use the current request's scheme+host
+            // so URLs are always correct regardless of APP_URL value.
+            $absoluteRoot = $this->getBaseUrl();
             $publicPath = '/storage/' . ltrim($path, '/');
             $publicFallbackUrl = $absoluteRoot . $publicPath;
+
+            // Also correct the Storage-generated URL in case APP_URL in filesystems config is stale
+            $url = $this->correctAssetUrl($url);
 
             // Remove old logo if exists
             $brand = Cache::get($this->cachePrefix . 'brand', []);
@@ -741,9 +791,12 @@ class AdminSystemSettingsController extends Controller
             }
 
             $url = Storage::disk('public')->url($path);
-            $absoluteRoot = rtrim(Config::get('app.url'), '/');
+            $absoluteRoot = $this->getBaseUrl();
             $publicPath = '/storage/' . ltrim($path, '/');
             $publicFallbackUrl = $absoluteRoot . $publicPath;
+
+            // Correct the Storage-generated URL in case APP_URL in filesystems config is stale
+            $url = $this->correctAssetUrl($url);
 
             // Remove old favicon if exists
             $brand = Cache::get($this->cachePrefix . 'brand', []);
@@ -816,6 +869,7 @@ class AdminSystemSettingsController extends Controller
             }
 
             unset($brand['system_favicon_url']);
+            unset($brand['system_favicon_public_url']);
             unset($brand['system_favicon_path']);
             Cache::forever($this->cachePrefix . 'brand', $brand);
 
@@ -852,6 +906,13 @@ class AdminSystemSettingsController extends Controller
             $general = Cache::get($this->cachePrefix . 'general', []);
             $brand = Cache::get($this->cachePrefix . 'brand', []);
             $data = array_merge($defaults, array_intersect_key($general, ['app_name' => true]), $brand);
+
+            // Correct brand asset URLs for current request context
+            foreach (['system_logo_url', 'system_logo_public_url', 'system_favicon_url', 'system_favicon_public_url'] as $key) {
+                if (!empty($data[$key])) {
+                    $data[$key] = $this->correctAssetUrl($data[$key]);
+                }
+            }
 
             return response()->json([
                 'success' => true,
