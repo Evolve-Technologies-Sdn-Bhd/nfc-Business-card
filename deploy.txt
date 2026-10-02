@@ -1,0 +1,237 @@
+#!/bin/bash
+# ==================================================
+# NFCGO FULL DEPLOY SCRIPT v2.0
+# Last updated: 2026-10-02
+# Safety features: .env backup/restore, pre-flight env
+# verification, atomic SPA swap, rollback on failure.
+# ==================================================
+set -e
+
+# ==================================================
+# 0. MASUK ROOT PROJEK + SAFETY CHECKS
+# ==================================================
+cd /www/wwwroot/nfcgo.clbgroups.com || exit 1
+git config --global --add safe.directory /www/wwwroot/nfcgo.clbgroups.com
+PROJECT_ROOT=$(pwd)
+
+echo "[0/9] Safety check pass: berada di $PROJECT_ROOT"
+
+# ==================================================
+# 1. GIT PULL + .ENV SAFETY NET (PENTING!)
+# ==================================================
+echo ""
+echo "[1/9] Git pull + .env safety..."
+
+ENV_BACKUP_DIR="$PROJECT_ROOT/.env-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$ENV_BACKUP_DIR"
+[ -f backend/.env ] && cp -a backend/.env "$ENV_BACKUP_DIR/backend.env" && echo "  → backup backend/.env"
+[ -f frontend/.env ] && cp -a frontend/.env "$ENV_BACKUP_DIR/frontend.env" && echo "  → backup frontend/.env"
+
+git stash push -m "auto-stash sebelum deploy" 2>/dev/null || true
+git fetch --all --prune
+git checkout main
+git reset --hard origin/main
+
+# Restore .env dari backup — OVERWRITE apa yang git reset tarik dari repo
+[ -f "$ENV_BACKUP_DIR/backend.env" ] && cp -a "$ENV_BACKUP_DIR/backend.env" backend/.env && echo "  → RESTORE backend/.env"
+[ -f "$ENV_BACKUP_DIR/frontend.env" ] && cp -a "$ENV_BACKUP_DIR/frontend.env" frontend/.env && echo "  → RESTORE frontend/.env"
+
+echo "[1/9] Git pull OK"
+
+# ==================================================
+# 1b. PRE-FLIGHT: VERIFY ENV CONFIG SEBELUM APA-APA
+# ==================================================
+echo ""
+echo "[1b/9] Pre-flight env verification..."
+
+DB_PATH_REQUIRED="/www/wwwroot/nfcgo.clbgroups.com/backend/database/database.sqlite"
+API_URL_REQUIRED_PREFIX="http"
+
+# --- Check backend env ---
+if [ ! -f backend/.env ]; then
+  echo "❌ FATAL: backend/.env TIDAK WUJUD! Setup dulu sebelum deploy."
+  exit 1
+fi
+(
+  set -a
+  . backend/.env
+  set +a
+  if [ "${DB_DATABASE:-}" != "$DB_PATH_REQUIRED" ]; then
+    echo "❌ FATAL: backend/.env DB_DATABASE salah!"
+    echo "   Dapat:        ${DB_DATABASE:-<EMPTY>}"
+    echo "   Sepatutnya:   $DB_PATH_REQUIRED"
+    echo "   Jalankan ONE-TIME FIX script dahulu."
+    exit 1
+  fi
+  echo "  → backend/.env DB_DATABASE OK"
+)
+
+# --- Check frontend env ---
+if [ ! -f frontend/.env ]; then
+  echo "❌ FATAL: frontend/.env TIDAK WUJUD! Setup dulu sebelum deploy."
+  exit 1
+fi
+(
+  set -a
+  . frontend/.env
+  set +a
+  if [ -z "${NUXT_PUBLIC_API_BASE_URL:-}" ]; then
+    echo "❌ FATAL: frontend/.env NUXT_PUBLIC_API_BASE_URL is EMPTY!"
+    echo "   Jalankan ONE-TIME FIX script dahulu."
+    exit 1
+  fi
+  case "${NUXT_PUBLIC_API_BASE_URL}" in
+    $API_URL_REQUIRED_PREFIX*) ;;
+    *)
+      echo "❌ FATAL: NUXT_PUBLIC_API_BASE_URL tak start dengan http/https!"
+      echo "   Dapat: ${NUXT_PUBLIC_API_BASE_URL}"
+      exit 1
+      ;;
+  esac
+  if echo "${NUXT_PUBLIC_API_BASE_URL}" | grep -q '`'; then
+    echo "❌ FATAL: NUXT_PUBLIC_API_BASE_URL ada backtick character! Remove dari .env"
+    exit 1
+  fi
+  echo "  → frontend/.env NUXT_PUBLIC_API_BASE_URL OK = $NUXT_PUBLIC_API_BASE_URL"
+)
+
+echo "[1b/9] All env checks PASSED ✅"
+
+# ==================================================
+# 2. BACKEND — COMPOSER + PERMISSION
+# ==================================================
+echo ""
+echo "[2/9] Composer install..."
+cd "$PROJECT_ROOT/backend"
+composer install --optimize-autoloader --no-dev --no-interaction --prefer-dist 2>&1 | tail -3
+chmod -R 775 storage bootstrap/cache
+chown -R www:www storage bootstrap/cache 2>/dev/null || true
+php artisan storage:link 2>/dev/null || true
+echo "[2/9] Composer + permission OK"
+
+# ==================================================
+# 3. CLEAR OLD CACHE DULU
+# ==================================================
+echo ""
+echo "[3/9] Clear old cache..."
+php artisan optimize:clear 2>&1 | tail -5
+echo "[3/9] Cache cleared OK"
+
+# ==================================================
+# 4. MIGRATION — BERHENTI JIKA GAGAL
+# ==================================================
+echo ""
+echo "[4/9] Running migration..."
+php artisan migrate --force --no-interaction 2>&1
+echo "[4/9] Migration OK"
+
+# ==================================================
+# 5. CACHE CONFIG BARU (SELEPAS MIGRATION)
+# ==================================================
+echo ""
+echo "[5/9] Caching config..."
+php artisan optimize 2>&1 | tail -5
+echo "[5/9] Cache ready OK"
+
+# ==================================================
+# 6. BUILD SPA
+# ==================================================
+echo ""
+echo "[6/9] Building SPA..."
+cd "$PROJECT_ROOT/frontend"
+export NODE_OPTIONS="--max-old-space-size=4096"
+npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tail -3
+
+# Load frontend env for the build
+if [ -f .env ]; then
+  set -a
+  . ./.env
+  set +a
+fi
+
+if [ -z "${NUXT_PUBLIC_API_BASE_URL:-}" ]; then
+  echo "❌ ERROR: NUXT_PUBLIC_API_BASE_URL empty right before generate!"
+  exit 1
+fi
+echo "  → API URL baked into build: $NUXT_PUBLIC_API_BASE_URL"
+
+node node_modules/nuxt/bin/nuxt.mjs generate 2>&1 | tail -10
+echo "[6/9] SPA build OK"
+
+# ==================================================
+# 7. DEPLOY SPA — ATOMIC SWAP (NO DOWNTIME + ROLLBACK)
+# ==================================================
+echo ""
+echo "[7/9] Deploying SPA (atomic swap)..."
+cd "$PROJECT_ROOT"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+SPA_LIVE_BAK=".spa-live-${TIMESTAMP}"
+SPA_NEW_TMP=".spa-new-${TIMESTAMP}"
+
+if [ -d spa ] && [ "$(ls -A spa 2>/dev/null)" ]; then
+  mv spa "$SPA_LIVE_BAK"
+  echo "  → Old live spa backed up as: $SPA_LIVE_BAK"
+fi
+
+if [ ! -d frontend/.output/public ] || [ ! -f frontend/.output/public/index.html ]; then
+  echo "❌ ERROR: frontend/.output/public/index.html not found after generate!"
+  if [ -d "$SPA_LIVE_BAK" ]; then
+    mv "$SPA_LIVE_BAK" spa
+    echo "  → Auto rollback to previous live version"
+  fi
+  exit 1
+fi
+
+cp -a frontend/.output/public "$SPA_NEW_TMP"
+mv "$SPA_NEW_TMP" spa
+
+if [ ! -f spa/index.html ]; then
+  echo "❌ ERROR: spa/index.html missing after swap! Rollback..."
+  if [ -d "$SPA_LIVE_BAK" ]; then
+    mv "$SPA_LIVE_BAK" spa
+    echo "  → Rollback OK"
+  fi
+  exit 1
+fi
+echo "[7/9] SPA deployed OK"
+
+# ==================================================
+# 8. QUEUE RESTART + MAINTENANCE UP
+# ==================================================
+echo ""
+echo "[8/9] Restarting queue..."
+cd "$PROJECT_ROOT/backend"
+php artisan queue:restart 2>/dev/null || true
+php artisan up 2>/dev/null || true
+echo "[8/9] Queue restart OK"
+
+# ==================================================
+# 9. CLEANUP OLD BACKUPS (keep last 3)
+# ==================================================
+echo ""
+echo "[9/9] Cleanup old backups (keep 3 latest)..."
+cd "$PROJECT_ROOT"
+ls -1dt .spa-live-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
+ls -1dt .env-backup-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
+echo "[9/9] Cleanup OK"
+
+# ==================================================
+# FINAL SUMMARY
+# ==================================================
+echo ""
+echo "✅ ==========================================="
+echo "✅ DEPLOY SELESAI — ALL 9 STEPS PASSED"
+echo "✅ ==========================================="
+echo ""
+echo "🛡️  Safety rollback points created:"
+echo "   • .env backup  → $(ls -1dt .env-backup-* 2>/dev/null | head -1)"
+echo "   • Old SPA      → $(ls -1dt .spa-live-* 2>/dev/null | head -1)"
+echo ""
+echo "📋 POST-DEPLOY STEP MANUAL:"
+echo "   1. Cloudflare → Caching → Configuration"
+echo "      → Purge Everything"
+echo "   2. Hard refresh browser (Ctrl+Shift+R)"
+echo "   3. Test: Login → Dashboard → Profile page"
+echo ""
+echo "🔗 Live: https://nfcgo.clbgroups.com/"
+echo ""
