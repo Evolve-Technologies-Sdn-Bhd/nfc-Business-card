@@ -15,7 +15,7 @@ class AdminUserSeeder extends Seeder
         $createdCount = 0;
         $skippedCount = 0;
 
-        // ========== SUPER ADMIN ==========
+        // ========== SUPER ADMIN (default short domain) ==========
         $superAdmin = User::firstOrCreate(
             ['email' => 'admin@nfcgo.com'],
             [
@@ -37,6 +37,32 @@ class AdminUserSeeder extends Seeder
         if ($superAdmin->wasRecentlyCreated) {
             $createdCount++;
             $this->createAdminCardAndLanding($superAdmin);
+        } else {
+            $skippedCount++;
+        }
+
+        // ========== SUPER ADMIN (production subdomain alias) ==========
+        $prodSuperAdmin = User::firstOrCreate(
+            ['email' => 'admin@nfcgo.clbgroups.com'],
+            [
+                'first_name' => 'Super',
+                'last_name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'company' => 'NFCGo',
+                'job_title' => 'Super Administrator',
+                'subscription_plan' => 'business',
+                'subscription_start_date' => now(),
+                'subscription_end_date' => now()->addYear(),
+                'subscription_active' => true,
+                'is_admin' => true,
+                'admin_role' => 'super_admin',
+                'admin_permissions' => ['user_management', 'nfc_management', 'analytics', 'system_admin'],
+            ]
+        );
+
+        if ($prodSuperAdmin->wasRecentlyCreated) {
+            $createdCount++;
+            $this->createAdminCardAndLanding($prodSuperAdmin);
         } else {
             $skippedCount++;
         }
@@ -69,6 +95,7 @@ class AdminUserSeeder extends Seeder
 
         $this->command->info("✅ Admin users: {$createdCount} created, {$skippedCount} already exists (skipped).");
         $this->command->info('   Super Admin: admin@nfcgo.com / admin123');
+        $this->command->info('   Super Admin (Production): admin@nfcgo.clbgroups.com / admin123');
         $this->command->info('   Regular Admin: admin2@nfcgo.com / admin123');
     }
 

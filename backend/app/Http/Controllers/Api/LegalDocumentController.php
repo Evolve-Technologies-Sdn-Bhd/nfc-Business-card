@@ -15,12 +15,21 @@ class LegalDocumentController extends Controller
      */
     public function index()
     {
-        $documents = LegalDocument::with('updater:id,first_name,last_name')->get();
+        try {
+            $documents = LegalDocument::with('updater:id,first_name,last_name')->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $documents
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $documents
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Failed to load legal documents: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load documents',
+                'data' => []
+            ], 500);
+        }
     }
 
     /**
@@ -62,7 +71,7 @@ class LegalDocumentController extends Controller
         }
 
         // Validate type
-        if (!in_array($type, ['terms_of_service', 'privacy_policy'])) {
+        if (!in_array($type, ['terms_of_service', 'privacy_policy', 'refund_policy', 'acceptable_use'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid document type'
