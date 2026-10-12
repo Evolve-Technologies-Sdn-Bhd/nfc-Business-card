@@ -2998,8 +2998,7 @@
           </div>
 
           <!-- Action Buttons Section -->
-          <!-- Hide entire Quick Actions section when admin has not assigned any features -->
-          <div v-if="availableFeatures && availableFeatures.length > 0" :style="{ 
+          <div v-if="hasQuickActions" :style="{ 
             background: 'rgba(255, 255, 255, 0.03)',
             borderRadius: isSmallMobile ? '16px' : '20px',
             padding: isSmallMobile ? '12px' : isMobile ? '16px' : '20px',
@@ -3019,7 +3018,7 @@
             </div>
             
             <!-- Buttons Grid -->
-            <div :style="{ display: 'grid', gridTemplateColumns: isSmallMobile && availableFeatures.length > 4 ? '1fr' : 'repeat(2, 1fr)', gap: isSmallMobile ? '10px' : '12px' }">
+            <div :style="{ display: 'grid', gridTemplateColumns: isSmallMobile && quickActionCount > 4 ? '1fr' : 'repeat(2, 1fr)', gap: isSmallMobile ? '10px' : '12px' }">
               
               <!-- vCard Button -->
               <button
@@ -5138,19 +5137,21 @@ const closePortfolioModal = () => {
   selectedProject.value = null;
 };
 
-// Check if a feature is enabled
-// A feature is enabled if the user has not explicitly disabled it (features[featureKey] !== false).
-// When availableFeatures is populated (admin-assigned), the feature must also be in that list.
+// Check if a feature is enabled based on the user's toggle setting.
+// Backend does not persist available_features, so we rely solely on the user's
+// feature toggles (features[featureKey] !== false means enabled).
 const isFeatureEnabled = (featureKey) => {
-  const isAssigned = availableFeatures.value.length === 0 || availableFeatures.value.includes(featureKey);
   const isEnabled = features.value[featureKey] !== false;
-  const result = isAssigned && isEnabled;
-
   if (typeof window !== 'undefined') {
-    console.log(`🔍 isFeatureEnabled("${featureKey}"): assigned=${isAssigned}, enabled=${isEnabled}, result=${result}`);
+    console.log(`🔍 isFeatureEnabled("${featureKey}"): enabled=${isEnabled}`);
   }
-  return result;
+  return isEnabled;
 };
+
+// Whether the Quick Actions section should be shown (any quick-action feature enabled)
+const quickActionKeys = ['vcard_download', 'contact_form', 'qr_code', 'social_sharing', 'booking_integration'];
+const hasQuickActions = computed(() => quickActionKeys.some(key => isFeatureEnabled(key)));
+const quickActionCount = computed(() => quickActionKeys.filter(key => isFeatureEnabled(key)).length);
 
 // Load preview data from localStorage (matches BusinessProfileBuilder.vue profileData structure)
 const loadPreviewData = (data) => {
