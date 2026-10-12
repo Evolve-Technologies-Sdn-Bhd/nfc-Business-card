@@ -2217,6 +2217,8 @@ const profileData = reactive({
   serviceName: "",            // Service Name
   serviceIcon: "🚀",          // Service Icon (emoji)
   serviceCategory: "",        // Category / Type (select)
+  serviceLinkType: "Description & Features", // Card Click Action (select)
+  serviceUrl: "",             // Service URL / Direct Link (url)
   serviceImage: null,         // Service Image
   serviceVideo: "",           // Promo Video (url)
   serviceDescription: "",     // Full Service Description (richtext)
@@ -2825,7 +2827,7 @@ const landingPageSectionsConfig = [
       { id: 'team', name: 'Team', icon: 'heroicons:user-group', apiSource: 'company', fieldKeys: ['teamMembers'] },
     ]
   },
-  { id: 'services', name: 'Services', icon: 'heroicons:rocket-launch', description: 'Services and expertise', apiSource: 'services', fieldKeys: ['serviceName', 'serviceDescription', 'serviceImage', 'serviceFeatures', 'servicePrice', 'serviceOldPrice', 'serviceDuration', 'serviceTags', 'serviceBrochure', 'bookingUrl'] },
+  { id: 'services', name: 'Services', icon: 'heroicons:rocket-launch', description: 'Services and expertise', apiSource: 'services', fieldKeys: ['serviceName', 'serviceLinkType', 'serviceUrl', 'serviceDescription', 'serviceImage', 'serviceFeatures', 'servicePrice', 'serviceOldPrice', 'serviceDuration', 'serviceTags', 'serviceBrochure', 'bookingUrl'] },
   { id: 'portfolio', name: 'Portfolio', icon: 'heroicons:folder', description: 'Projects and work samples', apiSource: 'portfolio', fieldKeys: ['portfolioTitle', 'portfolioDescription', 'portfolioCoverImage', 'portfolioGallery', 'projectUrl', 'dateCompleted', 'clientName', 'location', 'skillsUsed', 'pdfDownload'] },
   { id: 'blog', name: 'Blog', icon: 'heroicons:newspaper', description: 'Blog posts and articles', apiSource: 'blog', fieldKeys: ['blogTitle', 'blogCoverImage', 'blogCategory', 'blogTags', 'authorName', 'readingTime', 'blogContent', 'externalLink'] },
   { id: 'contact', name: 'Contact', icon: 'heroicons:phone', description: 'Phone, email, WhatsApp', apiSource: 'links', fieldKeys: ['phone', 'whatsapp'] },
@@ -3665,7 +3667,17 @@ const getGroupedCompanyFields = () => {
   const filtered = companyFields.value.filter(f => !COMPANY_ADDRESS_EXCLUDED_FIELDS.includes(f.field_key));
   return getGroupedFields(filtered);
 };
-const getGroupedServicesFields = () => getGroupedFields(servicesFields.value);
+const getGroupedServicesFields = () => {
+  const isDirectLink = profileData.serviceLinkType === "Direct Link";
+  const filtered = servicesFields.value.filter(f => {
+    if (isDirectLink) {
+      return !['serviceDescription', 'serviceFeatures', 'serviceTags'].includes(f.field_key);
+    } else {
+      return f.field_key !== 'serviceUrl';
+    }
+  });
+  return getGroupedFields(filtered);
+};
 const getGroupedLinksFields = () => getGroupedFields(linksFields.value);
 const getGroupedPortfolioFields = () => getGroupedFields(portfolioFields.value);
 const getGroupedBlogFields = () => getGroupedFields(blogFields.value);
@@ -3971,6 +3983,8 @@ const addService = async () => {
     name: profileData.serviceName,
     icon: profileData.serviceIcon || "🚀",
     category: profileData.serviceCategory,
+    link_type: profileData.serviceLinkType || "Description & Features",
+    url: profileData.serviceUrl,
     image: profileData.serviceImage,
     video: profileData.serviceVideo,
     description: profileData.serviceDescription,
@@ -4054,6 +4068,8 @@ const editService = (index) => {
     profileData.serviceName = service.name || "";
     profileData.serviceIcon = service.icon || "🚀";
     profileData.serviceCategory = service.category || "";
+    profileData.serviceLinkType = service.link_type || service.serviceLinkType || "Description & Features";
+    profileData.serviceUrl = service.url || service.serviceUrl || "";
     profileData.serviceImage = service.image || null;
     profileData.serviceVideo = service.video || "";
     profileData.serviceDescription = service.description || "";
@@ -4073,6 +4089,8 @@ const clearServiceForm = () => {
   profileData.serviceName = "";
   profileData.serviceIcon = "🚀";
   profileData.serviceCategory = "";
+  profileData.serviceLinkType = "Description & Features";
+  profileData.serviceUrl = "";
   profileData.serviceImage = null;
   profileData.serviceVideo = "";
   profileData.serviceDescription = "";
@@ -4290,6 +4308,8 @@ const saveProfile = async () => {
         name: profileData.serviceName,
         icon: profileData.serviceIcon || "🚀",
         category: profileData.serviceCategory,
+        link_type: profileData.serviceLinkType || "Description & Features",
+        url: profileData.serviceUrl,
         image: profileData.serviceImage,
         video: profileData.serviceVideo,
         description: profileData.serviceDescription,

@@ -83,6 +83,8 @@ class ProfileBuilderFieldsSeeder extends Seeder
         $fields = [
             ['tab' => 'services', 'field_key' => 'serviceName', 'field_type' => 'text', 'label' => 'Service Name', 'display_order' => 300, 'available_plans' => ['premium', 'business']],
             ['tab' => 'services', 'field_key' => 'serviceCategory', 'field_type' => 'select', 'label' => 'Category / Type', 'display_order' => 305, 'available_plans' => ['premium', 'business']],
+            ['tab' => 'services', 'field_key' => 'serviceLinkType', 'field_type' => 'select', 'label' => 'Card Click Action', 'display_order' => 306, 'available_plans' => ['premium', 'business'], 'config' => ['options' => ['Description & Features', 'Direct Link']], 'help_text' => 'Open details modal, or redirect to a URL when clicked'],
+            ['tab' => 'services', 'field_key' => 'serviceUrl', 'field_type' => 'url', 'label' => 'Service URL (Direct Link)', 'display_order' => 307, 'available_plans' => ['premium', 'business'], 'placeholder' => 'https://...', 'help_text' => 'Shown only when "Direct Link" is selected'],
             ['tab' => 'services', 'field_key' => 'serviceImage', 'field_type' => 'image', 'label' => 'Service Image', 'display_order' => 310, 'available_plans' => ['premium', 'business']],
             ['tab' => 'services', 'field_key' => 'serviceVideo', 'field_type' => 'url', 'label' => 'Promo Video', 'display_order' => 315, 'available_plans' => ['business']],
             ['tab' => 'services', 'field_key' => 'serviceDescription', 'field_type' => 'richtext', 'label' => 'Full Service Description', 'display_order' => 320, 'available_plans' => ['premium', 'business']],

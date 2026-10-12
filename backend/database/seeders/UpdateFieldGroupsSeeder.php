@@ -35,7 +35,7 @@ class UpdateFieldGroupsSeeder extends Seeder
 
         // Services tab groups
         $servicesGroups = [
-            ['keys' => ['serviceName', 'serviceCategory', 'serviceDuration'], 'group' => 'Service Information', 'icon' => 'heroicons:rocket-launch', 'order' => 1],
+            ['keys' => ['serviceName', 'serviceCategory', 'serviceLinkType', 'serviceUrl', 'serviceDuration'], 'group' => 'Service Information', 'icon' => 'heroicons:rocket-launch', 'order' => 1],
             ['keys' => ['serviceImage', 'serviceVideo', 'serviceBrochure'], 'group' => 'Media & Files', 'icon' => 'heroicons:photo', 'order' => 2],
             ['keys' => ['serviceDescription', 'serviceFeatures', 'serviceTags'], 'group' => 'Description & Features', 'icon' => 'heroicons:document-text', 'order' => 3],
             ['keys' => ['servicePrice', 'serviceOldPrice', 'bookingUrl'], 'group' => 'Pricing & Booking', 'icon' => 'heroicons:currency-dollar', 'order' => 4],

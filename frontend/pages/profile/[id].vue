@@ -1752,7 +1752,7 @@
                 @mouseleave="!isMobile && (activeService = null)"
                 @touchstart="activeService = idx"
                 @touchend="setTimeout(() => (activeService = null), 2000)"
-                @click="openServiceModal(service)"
+                @click="handleServiceClick(service)"
                 :style="{
                   position: 'relative',
                   background: 'rgba(255, 255, 255, 0.05)',
@@ -1826,8 +1826,7 @@
                       fontSize: responsive.bodySize,
                       fontWeight: 700,
                     }"
-                    >Explore →</span
-                  >
+                    >{{ service.linkType === 'Direct Link' && service.url ? 'Visit →' : 'Explore →' }}</span>
                 </div>
               </div>
             </div>
@@ -5084,6 +5083,15 @@ const openServiceModal = (service) => {
   showServiceModal.value = true;
 };
 
+// Handle service card click: direct link opens URL, otherwise opens details modal
+const handleServiceClick = (service) => {
+  if (service.linkType === 'Direct Link' && service.url) {
+    window.open(service.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  openServiceModal(service);
+};
+
 // Close service detail modal
 const closeServiceModal = () => {
   showServiceModal.value = false;
@@ -5131,27 +5139,13 @@ const closePortfolioModal = () => {
 };
 
 // Check if a feature is enabled
-// A feature is enabled only if:
-// 1. Admin has assigned it (in availableFeatures)
-// 2. User has enabled it (not explicitly set to false)
+// A feature is enabled if the user has not explicitly disabled it (features[featureKey] !== false).
+// When availableFeatures is populated (admin-assigned), the feature must also be in that list.
 const isFeatureEnabled = (featureKey) => {
-  // If availableFeatures array exists but is empty, it means admin didn't assign any features
-  // In this case, nothing should be enabled
-  if (availableFeatures.value.length === 0) {
-    console.log(`🚫 Feature "${featureKey}" disabled: No features assigned by admin`);
-    return false;
-  }
-  
-  // Check if admin has assigned this feature
-  const isAssigned = availableFeatures.value.includes(featureKey);
-  
-  // Check if user has enabled it
+  const isAssigned = availableFeatures.value.length === 0 || availableFeatures.value.includes(featureKey);
   const isEnabled = features.value[featureKey] !== false;
-  
-  // Both conditions must be met
   const result = isAssigned && isEnabled;
-  
-  // Debug logging
+
   if (typeof window !== 'undefined') {
     console.log(`🔍 isFeatureEnabled("${featureKey}"): assigned=${isAssigned}, enabled=${isEnabled}, result=${result}`);
   }
@@ -5301,6 +5295,8 @@ const loadPreviewData = (data) => {
         name: service.name || service.service_name || service.serviceName,
         icon: service.icon || "🚀",
         category: service.category || service.service_category || service.serviceCategory || "",
+        linkType: service.link_type || service.serviceLinkType || service.service_link_type || "Description & Features",
+        url: service.url || service.serviceUrl || service.service_url || "",
         duration: service.duration || service.service_duration || service.serviceDuration || "",
         description: service.description || service.service_description || service.serviceDescription || "",
         features: service.features || service.service_features || service.serviceFeatures || [],
@@ -5728,6 +5724,8 @@ const loadProfileData = async () => {
           name: service.name || service.service_name || service.serviceName,
           icon: service.icon || "🚀",
           category: service.category || service.service_category || service.serviceCategory || "",
+          linkType: service.link_type || service.serviceLinkType || service.service_link_type || "Description & Features",
+          url: service.url || service.serviceUrl || service.service_url || "",
           duration: service.duration || service.service_duration || service.serviceDuration || "",
           description: service.description || service.service_description || service.serviceDescription || "",
           features: service.features || service.service_features || service.serviceFeatures || [],
@@ -5944,20 +5942,25 @@ const loadProfileData = async () => {
       }
 
       // ==================== C. LOAD FEATURE SETTINGS ====================
-      // Load available features (assigned by admin)
-      if (data.available_features && Array.isArray(data.available_features)) {
-        availableFeatures.value = data.available_features;
-        console.log('🔐 Available features (from API):', availableFeatures.value);
-      } else {
-        // If no available_features from API, set to empty array (meaning admin didn't assign any features)
-        availableFeatures.value = [];
-        console.log('🚫 No features assigned by admin (API)');
-      }
-      
+      // Load user feature toggles first (needed to derive availableFeatures below)
       if (data.features && typeof data.features === 'object') {
         features.value = { ...features.value, ...data.features };
         console.log('✨ Features loaded:', features.value);
       }
+
+      // Load available features (assigned by admin)
+      // Backend does not persist available_features, so derive it from the user's
+      // feature toggles. Any feature the user has a setting for is "available".
+      const knownFeatureKeys = ['contact_form', 'vcard_download', 'qr_code', 'remove_branding', 'booking_integration', 'social_sharing'];
+      if (data.available_features && Array.isArray(data.available_features) && data.available_features.length > 0) {
+        availableFeatures.value = data.available_features;
+        console.log('🔐 Available features (from API):', availableFeatures.value);
+      } else {
+        const derivedFromFeatures = Object.keys(features.value).filter(k => knownFeatureKeys.includes(k));
+        availableFeatures.value = derivedFromFeatures.length > 0 ? derivedFromFeatures : knownFeatureKeys;
+        console.log('🔐 Available features (derived):', availableFeatures.value);
+      }
+
       if (data.feature_order && Array.isArray(data.feature_order)) {
         featureOrder.value = data.feature_order;
         console.log('✨ Feature order loaded:', featureOrder.value);
@@ -6196,29 +6199,47 @@ const resetCardTilt = () => {
   }
 };
 
-const saveContact = () => {
-  const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${profile.value.name}
-N:${profile.value.name.split(" ").reverse().join(";")};;;
-ORG:${company.value.name}
-TITLE:${profile.value.position}
-TEL;TYPE=CELL:${contactMethods.value[0].subtitle}
-EMAIL:${contactMethods.value[1].subtitle}
-URL:${contactMethods.value[3].href}
-ADR;TYPE=WORK:;;${address.value.street}, ${address.value.area};${
-    address.value.cityState
-  };;${address.value.country}
-NOTE:${profile.value.qualification} - ${company.value.department}
-END:VCARD`;
+const escapeVCard = (value) => {
+  if (value == null) return '';
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+};
 
-  const blob = new Blob([vCard], { type: "text/vcard" });
+const saveContact = () => {
+  const name = profile.value.name || '';
+  const nameParts = name.split(' ').filter(Boolean);
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+  const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : name;
+
+  const lines = ['BEGIN:VCARD', 'VERSION:3.0'];
+
+  if (name) lines.push(`FN:${escapeVCard(name)}`);
+  if (lastName || firstName) lines.push(`N:${escapeVCard(lastName)};${escapeVCard(firstName)};;;`);
+  if (company.value.name) lines.push(`ORG:${escapeVCard(company.value.name)}`);
+  if (profile.value.position) lines.push(`TITLE:${escapeVCard(profile.value.position)}`);
+  if (contactMethods.value[0]?.subtitle) lines.push(`TEL;TYPE=CELL:${escapeVCard(contactMethods.value[0].subtitle)}`);
+  if (contactMethods.value[1]?.subtitle) lines.push(`EMAIL:${escapeVCard(contactMethods.value[1].subtitle)}`);
+  if (contactMethods.value[3]?.href) lines.push(`URL:${escapeVCard(contactMethods.value[3].href)}`);
+
+  const addrParts = [address.value.street, address.value.area].filter(Boolean).join(', ');
+  if (addrParts || address.value.cityState || address.value.country) {
+    lines.push(`ADR;TYPE=WORK:;;${escapeVCard(addrParts)};${escapeVCard(address.value.cityState || '')};;${escapeVCard(address.value.country || '')}`);
+  }
+
+  const noteParts = [profile.value.qualification, company.value.department].filter(Boolean);
+  if (noteParts.length > 0) lines.push(`NOTE:${escapeVCard(noteParts.join(' - '))}`);
+
+  lines.push('END:VCARD');
+
+  const vCard = lines.join('\n');
+  const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
-  link.download = `${profile.value.name
-    .toLowerCase()
-    .replace(/\s/g, "-")}-contact.vcf`;
+  link.download = `${(name || 'contact').toLowerCase().replace(/\s+/g, '-')}-contact.vcf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
