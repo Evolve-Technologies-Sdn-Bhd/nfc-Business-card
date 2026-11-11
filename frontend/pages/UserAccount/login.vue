@@ -7,11 +7,21 @@
       <!-- Header -->
       <div class="text-center">
         <NuxtLink to="/" class="inline-flex items-center">
-          <Icon
-            name="heroicons:identification"
-            class="h-12 w-12 text-primary-600"
+          <img
+            v-if="systemBrand.system_logo_url"
+            :src="systemBrand.system_logo_url + (systemBrand.system_logo_url.includes('?') ? '&' : '?') + 'v=' + (systemBrand.brandVersion || 1)"
+            :alt="systemBrand.app_name || 'NFCGo'"
+            class="h-12 max-w-[200px] object-contain"
           />
-          <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
+          <template v-else>
+            <Icon
+              name="heroicons:identification"
+              class="h-12 w-12 text-primary-600"
+            />
+            <span class="ml-3 text-2xl font-bold text-secondary-900">
+              {{ systemBrand.app_name || 'NFCGo' }}
+            </span>
+          </template>
         </NuxtLink>
         <div class="mt-6 relative">
           <NuxtLink
@@ -295,9 +305,16 @@ definePageMeta({
   middleware: ['business-plan-guard']
 })
 
+const systemBrand = useState("systemBrand", () => ({
+  app_name: "NFCGo",
+  system_logo_url: "",
+  system_favicon_url: "",
+  brandVersion: 0,
+}));
+
 // Meta tags
 useHead({
-  title: "Login - NFCGo",
+  title: computed(() => `Login - ${systemBrand.value.app_name || "NFCGo"}`),
   meta: [
     {
       name: "description",

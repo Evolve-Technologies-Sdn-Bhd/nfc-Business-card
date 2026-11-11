@@ -86,7 +86,7 @@ export default defineNuxtConfig({
 
   vite: {
     vue: {
-      customElement: true,
+      customElement: false,
     },
     optimizeDeps: {
       include: ["vue", "vue-router"],

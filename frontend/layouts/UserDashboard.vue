@@ -1,20 +1,6 @@
 <!-- layouts/UserDashboard.vue -->
 <template>
   <div class="min-h-screen bg-secondary-50">
-    <!-- Global Route Loading Indicator -->
-    <Transition
-      enter-active-class="transition-opacity duration-150"
-      leave-active-class="transition-opacity duration-150"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="isPageLoading"
-        class="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-[100] animate-pulse"
-        style="box-shadow: 0 0 10px rgba(37, 99, 235, 0.5)"
-      ></div>
-    </Transition>
-
     <!-- Desktop Layout Container -->
     <div class="flex h-screen overflow-hidden">
       <!-- Sidebar -->
@@ -25,16 +11,26 @@
         <div class="flex flex-col h-full">
           <!-- Logo -->
           <div
-            class="flex items-center justify-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
+            class="flex items-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
           >
-            <NuxtLink to="/" class="flex items-center">
-              <Icon
-                name="heroicons:id-card"
-                class="h-8 w-8 text-primary-600"
+            <NuxtLink
+              to="/"
+              class="flex w-full min-w-0 items-center gap-3"
+            >
+              <img
+                v-if="systemBrand.system_logo_url"
+                :src="systemBrand.system_logo_url + (systemBrand.system_logo_url.includes('?') ? '&' : '?') + 'v=' + (systemBrand.brandVersion || 1)"
+                :alt="systemBrand.app_name || 'NFCGo'"
+                class="h-8 w-auto max-w-[100px] shrink-0 object-contain"
               />
-              <span class="ml-2 text-xl font-bold text-secondary-900"
-                >NFCGo</span
-              >
+              <Icon
+                v-else
+                name="heroicons:id-card"
+                class="h-8 w-8 shrink-0 text-primary-600"
+              />
+              <span class="truncate text-xl font-bold text-secondary-900">
+                {{ systemBrand.app_name || 'NFCGo' }}
+              </span>
             </NuxtLink>
           </div>
 
@@ -469,29 +465,26 @@ import { routeNavigationInProgress } from "~/plugins/router.client.js";
 // Stores
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
+const systemBrand = useState("systemBrand", () => ({
+  app_name: "NFCGo",
+  system_logo_url: "",
+  system_favicon_url: "",
+  brandVersion: 0,
+}));
+
 const route = useRoute();
 
 // Mount guard to prevent post-unmount updates and teleport races
 const isMounted = ref(false);
 
-// Page loading state
-const isPageLoading = ref(false);
-
-// Watch for route changes using route watcher instead of router guards
+// Close transient menus when navigating between dashboard pages.
 watch(
   () => route.path,
   (newPath, oldPath) => {
-    if (!isMounted.value) return;
-    if (newPath !== oldPath) {
-      isPageLoading.value = true;
-      showNotifications.value = false;
-      showProfileMenu.value = false;
-      // Reset loading state after a short delay
-      setTimeout(() => {
-        if (!isMounted.value) return;
-        isPageLoading.value = false;
-      }, 300);
-    }
+    if (!isMounted.value || newPath === oldPath) return;
+
+    showNotifications.value = false;
+    showProfileMenu.value = false;
   }
 );
 
