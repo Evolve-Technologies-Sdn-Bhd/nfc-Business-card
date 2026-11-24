@@ -1,0 +1,1268 @@
+/* ============================================================================
+   NFCGo - shared auth shell stylesheet
+   Single source of truth for the Ink & Brass authentication experience used by
+   /UserAccount/login and /UserAccount/register. Classes are ".lg-" prefixed and
+   are consumed by both pages via:  <style scoped src="../../assets/css/auth.css">
+   ============================================================================ */
+
+/* ============================================================
+   NFCGo LOGIN — "Ink & Brass" split-screen
+   Reuses global tokens (ink-surface, eyebrow-brass, btn-brass,
+   chip-ink, brass-grad, nfc-mock) defined in assets/css/main.css.
+   ============================================================ */
+
+.lg-auth-root {
+  min-height: 100vh;
+  background: var(--paper);
+  overflow-x: hidden;
+}
+
+.lg-auth-split {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------------- Brand panel ---------------- */
+.lg-ink-side {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem 1.35rem 1.9rem;
+}
+
+.lg-ink-glow {
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 120%;
+  pointer-events: none;
+  background:
+    radial-gradient(26rem 26rem at 14% 4%, color-mix(in srgb, var(--brass) 22%, transparent), transparent 62%),
+    radial-gradient(24rem 24rem at 90% 22%, color-mix(in srgb, var(--theme-accent, #5d8c87) 24%, transparent), transparent 62%);
+  filter: blur(10px);
+}
+
+.lg-ink-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.lg-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lg-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lg-explore-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.lg-explore-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: color-mix(in srgb, var(--brass) 55%, transparent);
+  color: #fff;
+}
+
+.lg-hero-title {
+  margin-top: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.07;
+  font-size: clamp(1.95rem, 1.5rem + 2.6vw, 3.05rem);
+  color: #ffffff;
+}
+
+.lg-hero-lead {
+  margin-top: 0.85rem;
+  max-width: 30rem;
+  font-size: var(--text-body-lg);
+  line-height: 1.65;
+  color: rgba(238, 241, 246, 0.72);
+}
+
+/* Card mockup + floating chips */
+.lg-card-stage {
+  position: relative;
+  display: none;
+  justify-content: center;
+  padding: 1.4rem 0 0.6rem;
+}
+
+.lg-mock {
+  width: min(100%, 22rem);
+  transform: rotate(-3deg);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lg-mock:hover {
+  transform: rotate(0deg) translateY(-6px);
+}
+
+.lg-mock-sub {
+  margin-top: 0.3rem;
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.2em;
+  color: var(--brass-200, #e8d9b8);
+}
+
+.lg-ripple {
+  top: 50%;
+  left: 50%;
+  width: 18rem;
+  height: 18rem;
+  margin: -9rem 0 0 -9rem;
+}
+
+.lg-chip {
+  position: absolute;
+  z-index: 3;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+}
+
+.lg-chip-ico {
+  width: 1rem;
+  height: 1rem;
+  color: var(--brass, #c2a068);
+}
+
+.lg-chip-1 {
+  top: 12%;
+  left: -2%;
+}
+
+.lg-chip-2 {
+  bottom: 16%;
+  right: -2%;
+}
+
+/* Trust ticks */
+.lg-ticks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.35rem;
+}
+
+.lg-ticks span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: var(--text-body-sm);
+  color: rgba(238, 241, 246, 0.7);
+}
+
+.lg-tick-ico {
+  width: 1rem;
+  height: 1rem;
+  color: var(--brass, #c2a068);
+}
+
+/* Explore CTA */
+.lg-explore {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lg-explore-label {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.lg-explore-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lg-explore-text {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--brass-200, #e8d9b8);
+  text-underline-offset: 3px;
+}
+
+.lg-explore-text:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+/* ---------------- Auth panel ---------------- */
+.lg-form-side {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 1.1rem 2.75rem;
+  background: var(--paper);
+}
+
+.lg-form-wrap {
+  width: 100%;
+  max-width: 25.5rem;
+}
+
+/* The sign-up form runs two columns, so it needs a wider canvas than the
+   single-column login card to keep each input a comfortable width. */
+.lg-form-wrap--wide {
+  max-width: 46rem;
+}
+
+.lg-brand-mobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.15rem;
+}
+
+.lg-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid
+    color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 55%, transparent);
+  border-radius: 1.25rem;
+  padding: 1.7rem 1.35rem;
+  box-shadow:
+    0 26px 60px -36px rgba(20, 29, 43, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+.lg-card-head {
+  margin-bottom: 1.35rem;
+}
+
+.lg-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brass-600, #a9854d);
+}
+
+.lg-kicker::before {
+  content: "";
+  width: 1.5rem;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--brass, #c2a068), transparent);
+}
+
+.lg-title {
+  margin-top: 0.6rem;
+  font-size: clamp(1.6rem, 1.35rem + 0.9vw, 1.95rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--theme-secondary-900, #1c1a15);
+}
+
+.lg-subtitle {
+  margin-top: 0.4rem;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+/* Banners */
+.lg-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.9rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid transparent;
+}
+
+.lg-banner-ico {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.lg-banner-title {
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+}
+
+.lg-banner-text {
+  margin-top: 0.15rem;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+
+.lg-banner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  text-underline-offset: 3px;
+}
+
+.lg-banner-link:hover {
+  text-decoration: underline;
+}
+
+.lg-banner--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+.lg-banner--success .lg-banner-ico {
+  color: #16a34a;
+}
+
+.lg-banner--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+.lg-banner--warning .lg-banner-ico {
+  color: #d97706;
+}
+.lg-banner--warning .lg-banner-link {
+  color: #b45309;
+}
+
+/* Form */
+.lg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+
+.lg-field {
+  width: 100%;
+}
+
+.lg-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.01em;
+  color: var(--theme-secondary-800, #2e2a24);
+}
+
+.lg-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lg-label-row .lg-label {
+  margin-bottom: 0.4rem;
+}
+
+.lg-inline-link {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--theme-primary-600, #3d496a);
+  transition: color 0.2s ease;
+}
+
+.lg-inline-link:hover {
+  color: var(--theme-accent, #5d8c87);
+}
+
+.lg-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lg-control-ico {
+  position: absolute;
+  left: 0.9rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--theme-secondary-400, #a8a190);
+  pointer-events: none;
+  transition: color 0.18s ease;
+}
+
+.lg-control:focus-within .lg-control-ico {
+  color: var(--theme-primary-600, #3d496a);
+}
+
+.lg-input {
+  width: 100%;
+  padding: 0.8rem 0.95rem 0.8rem 2.65rem;
+  font-size: var(--text-body-lg);
+  color: var(--theme-secondary-900, #1c1a15);
+  background: #ffffff;
+  border: 1px solid
+    color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 78%, transparent);
+  border-radius: 0.8rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.lg-input::placeholder {
+  color: var(--theme-secondary-400, #a8a190);
+}
+
+.lg-input:hover:not(:disabled):not(:focus) {
+  border-color: color-mix(in srgb, var(--theme-secondary-400, #a8a190) 80%, transparent);
+}
+
+.lg-input:focus {
+  border-color: var(--theme-primary-500, #4f5d82);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 14%, transparent);
+}
+
+.lg-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--theme-secondary-50, #fafaf7);
+}
+
+.lg-input--pw {
+  padding-right: 3rem;
+}
+
+.lg-input--error {
+  border-color: #fca5a5;
+}
+
+.lg-input--error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
+}
+
+.lg-control-trail {
+  position: absolute;
+  right: 0.9rem;
+  display: inline-flex;
+}
+
+.lg-toggle {
+  position: absolute;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  color: var(--theme-secondary-500, #7f7763);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.lg-toggle:hover {
+  background: var(--theme-secondary-100, #f4f2ec);
+  color: var(--theme-secondary-800, #2e2a24);
+}
+
+.lg-toggle:focus-visible {
+  outline: 2px solid var(--theme-primary-500, #4f5d82);
+  outline-offset: 2px;
+}
+
+.lg-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: #dc2626;
+}
+
+.lg-error-ico {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+}
+
+.lg-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: var(--text-body);
+  color: var(--theme-secondary-700, #454037);
+  cursor: pointer;
+  user-select: none;
+}
+
+.lg-checkbox {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.35rem;
+  border: 1.5px solid
+    color-mix(in srgb, var(--theme-secondary-400, #a8a190) 80%, transparent);
+  accent-color: var(--theme-primary-600, #3d496a);
+  cursor: pointer;
+}
+
+.lg-checkbox:focus-visible {
+  outline: 2px solid var(--theme-primary-500, #4f5d82);
+  outline-offset: 2px;
+}
+
+.lg-submit {
+  width: 100%;
+  gap: 0.55rem;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  font-size: var(--text-body);
+  white-space: nowrap;
+}
+
+.lg-submit:focus-visible {
+  outline: 2px solid var(--brass-600, #a9854d);
+  outline-offset: 3px;
+}
+
+/* Notice */
+.lg-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 0.8rem;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: #b45309;
+}
+
+.lg-notice-ico {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: #d97706;
+}
+
+/* Divider + OAuth */
+.lg-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.4rem 0 1rem;
+}
+
+.lg-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 70%, transparent);
+}
+
+.lg-divider span {
+  position: relative;
+  padding: 0 0.75rem;
+  background: #ffffff;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-oauth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.lg-oauth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.72rem 1rem;
+  border-radius: 0.8rem;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  color: var(--theme-secondary-800, #2e2a24);
+  background: #ffffff;
+  border: 1px solid
+    color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 78%, transparent);
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.lg-oauth-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--theme-primary-400, #6f7ea0) 70%, transparent);
+  background: var(--theme-secondary-50, #fafaf7);
+  transform: translateY(-1px);
+}
+
+.lg-oauth-btn:focus-visible {
+  outline: 2px solid var(--theme-primary-500, #4f5d82);
+  outline-offset: 2px;
+}
+
+.lg-oauth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lg-register {
+  margin-top: 1.4rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 85%, transparent);
+  text-align: center;
+  font-size: var(--text-body);
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+.lg-register a {
+  font-weight: 700;
+  color: var(--theme-primary-600, #3d496a);
+  transition: color 0.2s ease;
+}
+
+.lg-register a:hover {
+  color: var(--theme-accent, #5d8c87);
+}
+
+/* Trust strip */
+.lg-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.25rem;
+  margin-top: 1.1rem;
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-trust span,
+.lg-trust-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+}
+
+.lg-trust-link {
+  transition: color 0.2s ease;
+}
+
+.lg-trust-link:hover {
+  color: var(--theme-primary-600, #3d496a);
+}
+
+/* Spinner */
+.lg-spin {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--theme-primary-500, #4f5d82) 25%, transparent);
+  border-top-color: var(--theme-primary-500, #4f5d82);
+  animation: lgspin 0.7s linear infinite;
+}
+
+.lg-spin--light {
+  border-color: rgba(27, 20, 7, 0.25);
+  border-top-color: #1b1407;
+}
+
+@keyframes lgspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- 2FA modal ---------------- */
+.lg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(6, 9, 13, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.lg-modal {
+  width: 100%;
+  max-width: 24rem;
+  background: #ffffff;
+  border-radius: 1.25rem;
+  padding: 1.85rem 1.5rem;
+  box-shadow: 0 40px 80px -30px rgba(6, 9, 13, 0.6);
+}
+
+.lg-modal-head {
+  text-align: center;
+  margin-bottom: 1.4rem;
+}
+
+.lg-modal-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 999px;
+  margin-bottom: 0.9rem;
+  color: var(--brass-600, #a9854d);
+  background: color-mix(in srgb, var(--brass, #c2a068) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brass, #c2a068) 34%, transparent);
+}
+
+.lg-modal-title {
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+  color: var(--theme-secondary-900, #1c1a15);
+}
+
+.lg-modal-text {
+  margin-top: 0.35rem;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+.lg-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.lg-otp {
+  display: block;
+  width: 12rem;
+  margin: 0 auto;
+  padding: 0.7rem 1rem;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: var(--theme-secondary-900, #1c1a15);
+  background: #ffffff;
+  border: 1px solid
+    color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 78%, transparent);
+  border-radius: 0.8rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.lg-otp:focus {
+  border-color: var(--theme-primary-500, #4f5d82);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 14%, transparent);
+}
+
+.lg-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (min-width: 640px) {
+  .lg-ink-side {
+    padding: 2rem 2.5rem 2.4rem;
+  }
+
+  .lg-form-side {
+    padding: 2.25rem 1.5rem 3.25rem;
+  }
+
+  .lg-card {
+    padding: 2.25rem 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg-auth-split {
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .lg-ink-side {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 3rem 3.5rem;
+  }
+
+  .lg-card-stage,
+  .lg-explore {
+    display: flex;
+  }
+
+  .lg-brand-mobile {
+    display: none;
+  }
+
+  .lg-form-side {
+    height: 100%;
+    overflow-y: auto;
+    padding: 2.75rem 2rem;
+  }
+}
+
+/* ---------------- Mobile: compact brand strip, form first ----------------
+   On phones the stacked brand panel is intentionally compressed into a short
+   "hero strip" (logo + one short brand line) so the authentication card is
+   reachable immediately — the form stays the primary focus and the page does
+   not turn into a long scroll.                                     ---------- */
+@media (max-width: 639px) {
+  .lg-ink-side {
+    padding: 1rem 1.15rem 1.1rem;
+  }
+
+  .lg-ink-inner {
+    gap: 0.8rem;
+  }
+
+  .lg-hero-title {
+    margin-top: 0.5rem;
+    font-size: clamp(1.45rem, 1.1rem + 3.4vw, 1.8rem);
+    line-height: 1.13;
+  }
+
+  .lg-hero-lead {
+    margin-top: 0.45rem;
+    font-size: var(--text-body);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* Keep the mobile composition uncluttered — the trust signals already
+     appear under the form, and the card mockup is desktop-only. */
+  .lg-ticks {
+    display: none;
+  }
+
+  .lg-form-side {
+    align-items: flex-start;
+    padding: 1.05rem 1rem 2.25rem;
+  }
+
+  .lg-brand-mobile {
+    margin-bottom: 0.85rem;
+  }
+
+  .lg-card {
+    padding: 1.4rem 1.1rem;
+    border-radius: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-mock,
+  .lg-ripple,
+  .lg-spin {
+    transition: none;
+    animation: none;
+  }
+  .lg-ripple {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   Registration-specific additions
+   The shell above is shared with /UserAccount/login; only the pieces the
+   sign-up form needs on top of it live below.
+   ========================================================================= */
+
+/* ---- Two-up first/last name row ---- */
+.lg-name-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+/* ---- Two-column sign-up form ----
+   Pairs fields that read naturally side by side (first/last name, password +
+   confirmation, company + job title) to keep the sign-up form from becoming a
+   long vertical scroll. Email, consent rows, the submit button and the trial
+   note stay full width. Below 640px the form falls back to a single column. */
+@media (min-width: 640px) {
+  .lg-form--two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 1.05rem 1rem;
+  }
+
+  .lg-form--two-col > * {
+    min-width: 0;
+  }
+
+  .lg-form--two-col > .lg-name-grid,
+  .lg-form--two-col > .lg-field--full,
+  .lg-form--two-col > .lg-check-row,
+  .lg-form--two-col > .lg-error,
+  .lg-form--two-col > .lg-submit,
+  .lg-form--two-col > .lg-pill {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- Password strength meter ---- */
+.lg-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.lg-strength-bars {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.lg-strength-seg {
+  flex: 1;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--theme-secondary-200, #e7e3d8);
+  transition: background 0.2s ease;
+}
+
+.lg-strength-seg.is-on.is-weak {
+  background: #ef4444;
+}
+
+.lg-strength-seg.is-on.is-fair {
+  background: #f59e0b;
+}
+
+.lg-strength-seg.is-on.is-good {
+  background: var(--brass, #c2a068);
+}
+
+.lg-strength-seg.is-on.is-strong {
+  background: #16a34a;
+}
+
+.lg-strength-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-caption);
+}
+
+.lg-strength-text {
+  font-weight: 600;
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+.lg-strength-text.is-weak {
+  color: #dc2626;
+}
+
+.lg-strength-text.is-fair {
+  color: #b45309;
+}
+
+.lg-strength-text.is-good {
+  color: var(--brass-600, #a9854d);
+}
+
+.lg-strength-text.is-strong {
+  color: #15803d;
+}
+
+.lg-strength-count {
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+/* ---- Password requirement checklist ---- */
+.lg-reqs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.75rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lg-req {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--text-caption);
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-req--ok {
+  color: #15803d;
+}
+
+.lg-req-ico {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ---- Trailing control group (match icon + visibility toggle) ---- */
+.lg-trail-group {
+  position: absolute;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.lg-trail-group .lg-toggle {
+  position: static;
+}
+
+.lg-input--pw-wide {
+  padding-right: 4.3rem;
+}
+
+.lg-match-ico {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+}
+
+.lg-match-ico.is-ok {
+  color: #16a34a;
+}
+
+.lg-match-ico.is-bad {
+  color: #ef4444;
+}
+
+/* ---- Consent rows ---- */
+.lg-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.lg-check-row .lg-checkbox {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.lg-check-label {
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--theme-secondary-700, #454037);
+}
+
+.lg-link-btn {
+  font-weight: 600;
+  color: var(--theme-primary-600, #3d496a);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.lg-link-btn:hover {
+  color: var(--theme-accent, #5d8c87);
+}
+
+.lg-link-btn:focus-visible {
+  outline: 2px solid var(--theme-primary-500, #4f5d82);
+  outline-offset: 2px;
+  border-radius: 0.2rem;
+}
+
+/* ---- Inline info pill (trial note) ---- */
+.lg-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.85rem;
+  font-size: var(--text-caption);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--theme-secondary-700, #454037);
+  background: color-mix(in srgb, var(--brass, #c2a068) 12%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--brass, #c2a068) 40%, transparent);
+  border-radius: 0.75rem;
+}
+
+.lg-pill-ico {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--brass-600, #a9854d);
+}
+
+/* ---- Wide modal variant (legal documents) ---- */
+.lg-modal--wide {
+  display: flex;
+  flex-direction: column;
+  max-width: 46rem;
+  max-height: 88vh;
+  padding: 0;
+  overflow: hidden;
+}
+
+.lg-modal-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--theme-secondary-200, #e7e3d8) 85%, transparent);
+}
+
+.lg-modal-bar .lg-modal-title {
+  font-size: var(--text-h5);
+}
+
+.lg-modal-meta {
+  margin-top: 0.2rem;
+  font-size: var(--text-caption);
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.6rem;
+  color: var(--theme-secondary-500, #7f7763);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.lg-modal-close:hover {
+  background: var(--theme-secondary-100, #f4f2ec);
+  color: var(--theme-secondary-900, #1c1a15);
+}
+
+.lg-modal-close:focus-visible {
+  outline: 2px solid var(--theme-primary-500, #4f5d82);
+  outline-offset: 2px;
+}
+
+.lg-modal-body {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 1.4rem;
+  overflow: hidden;
+}
+
+.lg-modal-foot {
+  padding: 1rem 1.4rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--theme-secondary-200, #e7e3d8) 85%, transparent);
+}
+
+/* ---- Success mark ---- */
+.lg-modal-mark--success {
+  color: #15803d;
+  background: color-mix(in srgb, #16a34a 14%, transparent);
+  border-color: color-mix(in srgb, #16a34a 34%, transparent);
+}
+
+/* ---- 2FA setup extras ---- */
+.lg-qr {
+  padding: 1.25rem;
+  text-align: center;
+  background: var(--theme-secondary-50, #fafaf7);
+  border: 1px solid
+    color-mix(in srgb, var(--theme-secondary-200, #e7e3d8) 85%, transparent);
+  border-radius: 1rem;
+}
+
+.lg-qr-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 8rem;
+  height: 8rem;
+  margin: 0 auto;
+  color: var(--theme-secondary-400, #a8a190);
+  background: #ffffff;
+  border: 2px dashed
+    color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 90%, transparent);
+  border-radius: 0.85rem;
+}
+
+.lg-qr-hint {
+  margin-top: 0.85rem;
+  font-size: var(--text-body-sm);
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+.lg-qr-apps {
+  margin-top: 0.3rem;
+  font-size: var(--text-caption);
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-manual {
+  margin-top: 0.7rem;
+  padding: 0.6rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-body-sm);
+  letter-spacing: 0.12em;
+  color: var(--theme-secondary-800, #2e2a24);
+  background: var(--theme-secondary-50, #fafaf7);
+  border-radius: 0.6rem;
+}
+
+.lg-centered {
+  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 479px) {
+  .lg-name-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

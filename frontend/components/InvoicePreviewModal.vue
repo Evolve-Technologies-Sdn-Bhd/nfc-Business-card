@@ -9,7 +9,7 @@
         <!-- Header -->
         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
+            <h3 class="modal-title leading-6 text-gray-900" id="modal-title">
               Invoice {{ invoice?.invoice_number }}
             </h3>
             <button @click="close" class="text-gray-400 hover:text-gray-500">
@@ -20,14 +20,14 @@
           </div>
 
           <!-- Invoice details -->
-          <div v-if="invoice" class="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div v-if="invoice" class="grid grid-cols-2 gap-4 mb-6 text-body">
             <div>
               <p class="text-gray-600">Date:</p>
               <p class="font-medium">{{ formatDate(invoice.created_at) }}</p>
             </div>
             <div>
               <p class="text-gray-600">Status:</p>
-              <span :class="getStatusBadgeClass(invoice.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <span :class="getStatusBadgeClass(invoice.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge">
                 {{ getStatusLabel(invoice.status) }}
               </span>
             </div>
@@ -60,7 +60,7 @@
           <button
             @click="handleDownload"
             :disabled="downloading"
-            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-button text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto disabled:opacity-50"
           >
             <svg v-if="downloading" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -70,13 +70,13 @@
           </button>
           <button
             @click="handlePrint"
-            class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
+            class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto"
           >
             Print
           </button>
           <button
             @click="close"
-            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm"
+            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto"
           >
             Close
           </button>

@@ -1,69 +1,79 @@
 <!-- pages/index.vue -->
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100">
-    <!-- Navigation - STICKY HEADER -->
+  <div class="min-h-screen bg-[color:var(--paper)]">
+    <!-- Navigation - STICKY HEADER (ink glass) -->
     <nav
-      class="fixed top-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20 shadow-sm"
+      class="fixed top-0 left-0 right-0 z-50 bg-[color:var(--ink-950)]/85 backdrop-blur-xl border-b border-white/10"
     >
       <div class="container">
-        <div class="flex items-center justify-between md:justify-start md:gap-8 h-16">
-          <div class="flex items-center">
-            <Icon
-              name="heroicons:identification"
-              class="h-8 w-8 text-primary-600"
-            />
-            <span class="ml-2 text-xl font-bold text-secondary-900">NFCGo</span>
-          </div>
-          <div class="hidden md:flex items-center space-x-8">
+        <div
+          class="flex h-16 items-center justify-between gap-4 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-8"
+        >
+          <!-- Brand -->
+          <NuxtLink
+            to="/"
+            class="flex shrink-0 items-center md:justify-self-start"
+            aria-label="NFCGo home"
+          >
+            <NFCGoLogo variant="dark" />
+          </NuxtLink>
+
+          <!-- Primary navigation (desktop) -->
+          <nav
+            class="hidden items-center justify-center gap-x-8 md:flex lg:gap-x-10"
+            aria-label="Primary"
+          >
             <a
               href="#features"
               @click="smoothScroll('#features')"
-              class="nav-link"
+              class="nav-ink-link"
               >Features</a
             >
             <a
               href="#how-it-works"
               @click="smoothScroll('#how-it-works')"
-              class="nav-link"
+              class="nav-ink-link"
               >How it Works</a
-            >
-            <a
-              href="#who-uses"
-              @click="smoothScroll('#who-uses')"
-              class="nav-link"
-              >Who Uses</a
             >
             <a
               href="#product-gallery"
               @click="smoothScroll('#product-gallery')"
-              class="nav-link"
-              >Product Gallery</a
-            >
-            <a
-              href="#testimonials"
-              @click="smoothScroll('#testimonials')"
-              class="nav-link"
-              >Testimonials</a
+              class="nav-ink-link"
+              >Cards</a
             >
             <a
               href="#pricing"
               @click="smoothScroll('#pricing')"
-              class="nav-link"
+              class="nav-ink-link"
               >Pricing</a
             >
-            <NuxtLink to="/UserAccount/login" class="btn btn-ghost"
+            <a
+              href="#faq"
+              @click="smoothScroll('#faq')"
+              class="nav-ink-link"
+              >FAQ</a
+            >
+          </nav>
+
+          <!-- Account actions (desktop) -->
+          <div
+            class="hidden items-center justify-end gap-3 md:flex md:justify-self-end"
+          >
+            <NuxtLink to="/UserAccount/login" class="nav-ink-ghost"
               >Login</NuxtLink
             >
-            <NuxtLink to="/UserAccount/register" class="btn btn-primary"
+            <NuxtLink to="/UserAccount/register" class="btn-brass"
               >Get Started</NuxtLink
             >
-            <!-- Theme Switcher -->
-            <ThemeSwitcher />
           </div>
-          <div class="md:hidden">
+
+          <!-- Mobile menu trigger -->
+          <div class="flex justify-end md:hidden">
             <button
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="p-2 rounded-md text-secondary-600 hover:text-primary-600"
+              class="rounded-md p-2 text-white/75 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+              :aria-expanded="mobileMenuOpen"
+              aria-label="Toggle navigation menu"
             >
               <Icon name="heroicons:bars-3" class="h-6 w-6" />
             </button>
@@ -74,51 +84,45 @@
       <!-- Mobile Menu -->
       <div
         v-if="mobileMenuOpen"
-        class="md:hidden bg-white/95 backdrop-blur-md border-t border-white/20"
+        class="md:hidden bg-[color:var(--ink-950)]/95 backdrop-blur-md border-t border-white/10"
       >
-        <div class="px-2 pt-2 pb-3 space-y-1">
+        <div class="px-4 pt-3 pb-4 space-y-1">
           <a
             href="#features"
             @click="smoothScroll('#features')"
-            class="block px-3 py-2 nav-link"
+            class="nav-m-ink-link"
             >Features</a
           >
           <a
             href="#how-it-works"
             @click="smoothScroll('#how-it-works')"
-            class="block px-3 py-2 nav-link"
+            class="nav-m-ink-link"
             >How it Works</a
-          >
-          <a
-            href="#who-uses"
-            @click="smoothScroll('#who-uses')"
-            class="block px-3 py-2 nav-link"
-            >Who Uses</a
           >
           <a
             href="#product-gallery"
             @click="smoothScroll('#product-gallery')"
-            class="block px-3 py-2 nav-link"
-            >Product Gallery</a
-          >
-          <a
-            href="#testimonials"
-            @click="smoothScroll('#testimonials')"
-            class="block px-3 py-2 nav-link"
-            >Testimonials</a
+            class="nav-m-ink-link"
+            >Cards</a
           >
           <a
             href="#pricing"
             @click="smoothScroll('#pricing')"
-            class="block px-3 py-2 nav-link"
+            class="nav-m-ink-link"
             >Pricing</a
           >
-          <NuxtLink to="/UserAccount/login" class="block px-3 py-2 nav-link"
+          <a
+            href="#faq"
+            @click="smoothScroll('#faq')"
+            class="nav-m-ink-link"
+            >FAQ</a
+          >
+          <NuxtLink to="/UserAccount/login" class="nav-m-ink-link"
             >Login</NuxtLink
           >
           <NuxtLink
             to="/UserAccount/register"
-            class="block px-3 py-2 text-primary-600 font-medium"
+            class="block mt-2 px-4 py-2.5 rounded-lg btn-brass text-center"
             >Get Started</NuxtLink
           >
         </div>
@@ -139,28 +143,28 @@
         class="fixed top-20 left-0 right-0 z-40 px-4"
       >
         <div class="max-w-3xl mx-auto">
-          <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl shadow-lg p-6">
+          <div class="bg-success-50 border border-success-200 rounded-2xl shadow-lg p-6">
             <div class="flex items-start gap-4">
               <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <Icon name="heroicons:check-circle" class="h-7 w-7 text-green-600" />
+                <div class="w-12 h-12 bg-success-100 rounded-full flex items-center justify-center">
+                  <Icon name="heroicons:check-circle" class="h-7 w-7 text-success-600" />
                 </div>
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-green-800 mb-1">
+                <h3 class="text-lg font-semibold text-success-800 mb-1">
                   Business Plan Request Submitted!
                 </h3>
-                <p class="text-green-700 mb-3">
+                <p class="text-success-700 mb-3">
                   Thank you for your interest in our Business plan. Our sales team will review your request and contact you within 1-2 business days via email or phone.
                 </p>
-                <div class="flex items-center gap-2 text-sm text-green-600">
+                <div class="flex items-center gap-2 text-sm text-success-600">
                   <Icon name="heroicons:clock" class="h-4 w-4" />
                   <span>Expected response time: 1-2 business days</span>
                 </div>
               </div>
               <button
                 @click="dismissBusinessRequestSuccess"
-                class="flex-shrink-0 p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+                class="flex-shrink-0 p-1 text-success-500 hover:text-success-700 hover:bg-success-100 rounded-lg transition-colors"
               >
                 <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
@@ -184,35 +188,35 @@
         class="fixed top-20 left-0 right-0 z-40 px-4"
       >
         <div class="max-w-3xl mx-auto">
-          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-lg p-6">
+          <div class="bg-warning-50 border border-warning-200 rounded-2xl shadow-lg p-6">
             <div class="flex items-start gap-4">
               <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <Icon name="heroicons:clock" class="h-7 w-7 text-amber-600" />
+                <div class="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center">
+                  <Icon name="heroicons:clock" class="h-7 w-7 text-warning-600" />
                 </div>
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-amber-800 mb-1">
+                <h3 class="text-lg font-semibold text-warning-800 mb-1">
                   Business Plan - Account Pending
                 </h3>
-                <p class="text-amber-700 mb-3">
+                <p class="text-warning-700 mb-3">
                   Your Business plan request has been submitted. Our team will create your account and contact you within 24 hours.
                   <strong>You cannot login or register</strong> until your account is created by our admin team.
                 </p>
-                <div v-if="businessPlanEmail" class="flex items-center gap-2 text-sm text-amber-600 mb-3">
+                <div v-if="businessPlanEmail" class="flex items-center gap-2 text-sm text-warning-600 mb-3">
                   <Icon name="heroicons:envelope" class="h-4 w-4" />
                   <span>We'll contact you at: {{ businessPlanEmail }}</span>
                 </div>
                 <div class="flex items-center gap-4">
                   <button
                     @click="showBusinessPlanPending = false"
-                    class="text-sm text-amber-600 hover:text-amber-800 font-medium"
+                    class="text-sm text-warning-600 hover:text-warning-800 font-medium"
                   >
                     Dismiss
                   </button>
                   <button
                     @click="clearBusinessPlanRestriction"
-                    class="text-sm text-amber-700 hover:text-amber-900 underline"
+                    class="text-sm text-warning-700 hover:text-warning-900 underline"
                   >
                     Clear & Login Anyway
                   </button>
@@ -220,7 +224,7 @@
               </div>
               <button
                 @click="showBusinessPlanPending = false"
-                class="flex-shrink-0 p-1 text-amber-500 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-colors"
+                class="flex-shrink-0 p-1 text-warning-500 hover:text-warning-700 hover:bg-warning-100 rounded-lg transition-colors"
               >
                 <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
@@ -230,164 +234,221 @@
       </div>
     </Transition>
 
-    <!-- Hero Section -->
-    <section class="section relative overflow-hidden pt-24">
-      <div class="container">
-        <div class="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
-          <div class="mb-8 lg:mb-0 animate-fade-in-up">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-900 mb-6 leading-tight">
-              Your Digital Business Card,
-              <span class="text-gradient">One Tap Away</span>
+    <!-- Hero Section (ink, product-led) -->
+    <section class="relative overflow-hidden ink-surface ink-grid pt-32 pb-20 lg:pt-40 lg:pb-28">
+      <div class="container relative">
+        <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 items-center">
+          <div class="mb-16 lg:mb-0">
+            <span class="eyebrow-brass animate-fade-in-up">
+              <span class="dot"></span>
+              Smart NFC Business Card
+            </span>
+            <h1 class="showcase-display mt-7 mb-6 text-white animate-fade-in-up">
+              Your digital business card,
+              <span class="brass-grad">one tap away</span>
             </h1>
-            <p class="text-xl text-secondary-600 mb-8 leading-relaxed">
-              Create smart NFC business cards that instantly share your professional profile.
-              Modern networking made simple with just a tap.
+            <p class="lead-ink max-w-xl mb-9 text-lg animate-fade-in-up">
+              Create a smart NFC business card that instantly shares your
+              professional profile. Tap the card and your contact, portfolio and
+              social links open right on their phone — no app required.
             </p>
             <div class="flex flex-col sm:flex-row gap-4">
-              <NuxtLink to="/UserAccount/register" class="btn btn-primary btn-lg">
+              <NuxtLink to="/UserAccount/register" class="btn-brass btn-lg">
                 <Icon name="heroicons:rocket-launch" class="h-5 w-5 mr-2" />
                 Start Free Trial
               </NuxtLink>
-              <button @click="showDemo = true" class="btn btn-outline btn-lg">
+              <button
+                @click="smoothScroll('#how-it-works')"
+                class="btn-ghost-light btn-lg"
+              >
                 <Icon name="heroicons:play" class="h-5 w-5 mr-2" />
-                Watch Demo
+                See How It Works
               </button>
             </div>
-            <div class="mt-8 flex flex-wrap items-center gap-6">
-              <div class="flex items-center">
-                <Icon name="heroicons:check-circle" class="h-5 w-5 text-success-600 mr-2" />
-                <span class="text-sm text-secondary-600">No app required</span>
+            <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <div class="lp-tick">
+                <Icon
+                  name="heroicons:check-circle"
+                  class="h-5 w-5 text-[color:var(--brass)]"
+                />
+                <span class="text-sm text-white/70">No app required</span>
               </div>
-              <div class="flex items-center">
-                <Icon name="heroicons:check-circle" class="h-5 w-5 text-success-600 mr-2" />
-                <span class="text-sm text-secondary-600">Works on all phones</span>
+              <div class="lp-tick">
+                <Icon
+                  name="heroicons:check-circle"
+                  class="h-5 w-5 text-[color:var(--brass)]"
+                />
+                <span class="text-sm text-white/70">Works on all phones</span>
               </div>
-              <div class="flex items-center">
-                <Icon name="heroicons:check-circle" class="h-5 w-5 text-success-600 mr-2" />
-                <span class="text-sm text-secondary-600">Instant setup</span>
+              <div class="lp-tick">
+                <Icon
+                  name="heroicons:check-circle"
+                  class="h-5 w-5 text-[color:var(--brass)]"
+                />
+                <span class="text-sm text-white/70">Instant setup</span>
               </div>
             </div>
           </div>
-          <div class="relative animate-fade-in">
-            <div
-                class="nfc-card w-64 h-40 mx-auto lg:w-80 lg:h-48 p-6 flex flex-col justify-between shadow-2xl transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100 border border-white/40 relative overflow-hidden">
-                <!-- Iridescent/Holographic sheen overlay -->
-                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-70 pointer-events-none mix-blend-overlay"></div>
-                <!-- Shimmer effect -->
-                <div class="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-30 group-hover:animate-shine" />
-                
-                <div class="flex items-start justify-between relative z-10">
-                    <div class="flex flex-col">
-                        <!-- Simulated Gold Logo - Retained as requested -->
-                        <span class="text-3xl font-black tracking-tighter bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent leading-none drop-shadow-sm">CLB</span>
-                        <span class="text-[0.6rem] font-bold tracking-widest text-amber-600 uppercase mt-1">CLB GROUP</span>
-                    </div>
-                    <div>
-                        <Icon name="heroicons:wifi" class="h-8 w-8 text-gray-500/50 animate-pulse" />
-                    </div>
-                </div>
-                
-                <!-- Spacer -->
-                <div class="relative z-0"></div>
 
-                <div class="relative z-10 flex justify-between items-end">
+          <!-- Hero product: CSS 3D NFC card -->
+          <div class="hero-stage">
+            <div class="hero-halo"></div>
+
+            <div class="hero-chip hero-chip-1 chip-ink">
+              <Icon name="heroicons:bolt" class="h-4 w-4 text-[color:var(--brass)]" />
+              Opens in 1 tap
+            </div>
+            <div class="hero-chip hero-chip-2 chip-ink">
+              <Icon
+                name="heroicons:device-phone-mobile"
+                class="h-4 w-4 text-[color:var(--brass)]"
+              />
+              Works on iOS &amp; Android
+            </div>
+            <div class="hero-chip hero-chip-3 chip-ink">
+              <Icon
+                name="heroicons:user-plus"
+                class="h-4 w-4 text-[color:var(--brass)]"
+              />
+              Saved to Contacts
+            </div>
+
+            <span class="tap-ripple hero-ripple"></span>
+
+            <div class="hero-card-wrap">
+              <div
+                class="nfc-mock hero-card"
+                :data-flipped="heroFlipped ? 'true' : 'false'"
+              >
+                <!-- Front -->
+                <div class="nfc-mock__face nfc-face-ink">
+                  <div class="nfc-mock__sheen"></div>
+                  <div class="relative z-10 flex items-start justify-between">
+                    <div class="flex flex-col">
+                      <span
+                        class="text-2xl font-black tracking-tighter brass-grad leading-none"
+                        >NFCGo</span
+                      >
+                      <span
+                        class="mt-[0.3rem] text-[length:var(--text-micro)] font-bold tracking-[0.2em] text-[color:var(--brass-200)]"
+                        >SMART DIGITAL IDENTITY</span
+                      >
+                    </div>
+                    <Icon name="heroicons:wifi" class="h-7 w-7 text-white/60" />
+                  </div>
+                  <div class="nfc-mock__chip relative z-10"></div>
+                  <div class="relative z-10 flex justify-between items-end">
                     <div>
-                        <h3 class="text-gray-900 text-xl font-bold tracking-wide">John Doe</h3>
-                        <p class="text-gray-600 text-sm font-medium">Senior Developer</p>
+                      <h3 class="nfc-mock__name text-white">Your Name</h3>
+                      <p class="nfc-mock__role text-white">Job Title</p>
                     </div>
-                    <!-- QR Code -->
-                    <div class="bg-white/80 p-1 rounded-sm backdrop-blur-sm">
-                        <Icon name="heroicons:qr-code" class="h-8 w-8 text-gray-900" />
+                    <div class="nfc-mock__qr">
+                      <Icon name="heroicons:qr-code" class="h-8 w-8" />
                     </div>
+                  </div>
                 </div>
+                <!-- Back -->
+                <div class="nfc-mock__face nfc-mock__face--back nfc-face-ink">
+                  <div class="nfc-mock__sheen"></div>
+                  <div class="relative z-10 flex items-center justify-between">
+                    <span
+                      class="text-xs font-bold tracking-[0.2em] uppercase text-[color:var(--brass-200)]"
+                      >Tap to connect</span
+                    >
+                    <span class="nfc-mock__kwave">
+                      <Icon name="heroicons:wifi" class="h-6 w-6" />
+                    </span>
+                  </div>
+                  <div class="relative z-10 flex items-center gap-4">
+                    <div class="nfc-mock__qr">
+                      <Icon name="heroicons:qr-code" class="h-10 w-10" />
+                    </div>
+                    <p class="text-white/65 text-xs leading-relaxed">
+                      Scan or tap with any<br />NFC-enabled smartphone
+                    </p>
+                  </div>
+                  <span
+                    class="relative z-10 text-[0.6rem] tracking-[0.18em] uppercase text-white/60"
+                    >nfcgo · smart digital identity</span
+                  >
+                </div>
+              </div>
             </div>
-            <!-- Floating elements -->
-            <div
-                class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full opacity-20 animate-pulse-slow">
-            </div>
-            <div
-                class="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse-slow">
-            </div>
+          </div>
+        </div>
+
+        <!-- Hero stat strip (glass on ink) -->
+        <div
+          class="mt-16 lg:mt-24 grid grid-cols-2 lg:grid-cols-4 overflow-hidden rounded-2xl border border-white/12 bg-white/5 backdrop-blur-sm"
+        >
+          <div class="hero-stat p-6 text-center border-b border-r border-white/10 lg:border-b-0">
+            <div class="hero-stat__num">1</div>
+            <div class="hero-stat__lbl">Tap to share</div>
+          </div>
+          <div class="hero-stat p-6 text-center border-b border-white/10 lg:border-b-0 lg:border-r">
+            <div class="hero-stat__num">&lt;3s</div>
+            <div class="hero-stat__lbl">To connect</div>
+          </div>
+          <div class="hero-stat p-6 text-center border-r border-white/10">
+            <div class="hero-stat__num">0</div>
+            <div class="hero-stat__lbl">Apps to install</div>
+          </div>
+          <div class="hero-stat p-6 text-center">
+            <div class="hero-stat__num">100%</div>
+            <div class="hero-stat__lbl">Paperless</div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Trust marquee band -->
+    <section
+      class="ink-surface-2 lp-marquee-mask overflow-hidden border-y border-white/10 py-5"
+    >
+      <div class="lp-marquee">
+        <div v-for="n in 2" :key="`mq-row-${n}`" class="flex items-center">
+          <span
+            v-for="label in marqueeLabels"
+            :key="`mq-${n}-${label}`"
+            class="marquee-item-ink"
+            >{{ label }}</span
+          >
+        </div>
+      </div>
+    </section>
+
     <!-- Features Section -->
-    <section id="features" class="section bg-white">
+    <section id="features" class="section bg-[color:var(--paper)]">
       <div class="container">
-        <div class="text-center mb-16">
-          <h2
-            class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4 animate-fade-in-up"
-          >
-            Everything You Need for Modern Networking
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker">Capabilities</span>
+          <h2 class="lp-h2 mt-4 mb-4">
+            Everything you need for modern networking
           </h2>
-          <p
-            class="text-xl text-secondary-600 max-w-2xl mx-auto animate-fade-in-up"
-          >
+          <p class="lp-lead">
             Powerful features designed to make your professional networking
             effortless and memorable.
           </p>
         </div>
 
-        <!-- Auto-Sliding Feature Rows -->
-        <div class="space-y-8 overflow-hidden">
-          <!-- Top Row -->
-          <div class="relative">
-            <div 
-              class="flex transition-transform duration-700 ease-in-out"
-              :class="{ 'duration-0': !featureTopIsTransitioning }"
-              :style="{ transform: `translateX(-${featureTopCurrentSlide * (featureMobileMode ? 100 : 100/3)}%)` }"
+        <!-- Auto-sliding feature row (seamless loop) -->
+        <div class="overflow-hidden">
+          <div
+            class="flex transition-transform duration-700 ease-in-out"
+            :class="{ 'duration-0': !featureTopIsTransitioning }"
+            :style="{ transform: `translateX(-${featureTopCurrentSlide * (featureMobileMode ? 100 : 100/3)}%)` }"
+          >
+            <div
+              v-for="(feature, index) in featuresRow1"
+              :key="`feature-${index}`"
+              class="flex-shrink-0 w-full md:w-1/3 px-4"
             >
-              <div
-                v-for="(feature, index) in featuresRow1"
-                :key="`row1-${index}`"
-                class="flex-shrink-0 w-full md:w-1/3 px-4"
-              >
-                <div class="h-full bg-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 group border border-secondary-100/50">
-                  <div
-                    class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
-                    :class="feature.bgClass"
-                  >
-                    <Icon :name="feature.icon" class="h-8 w-8" :class="feature.textClass" />
-                  </div>
-                  <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-                    {{ feature.title }}
-                  </h3>
-                  <p class="text-secondary-600 leading-relaxed">
-                    {{ feature.description }}
-                  </p>
+              <div class="feature-card group">
+                <div class="feature-card__ico">
+                  <Icon :name="feature.icon" class="h-6 w-6" />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Row -->
-          <div class="relative">
-            <div 
-              class="flex transition-transform duration-700 ease-in-out"
-              :class="{ 'duration-0': !featureBottomIsTransitioning }"
-              :style="{ transform: `translateX(-${featureBottomCurrentSlide * (featureMobileMode ? 100 : 100/3)}%)` }"
-            >
-              <div
-                v-for="(feature, index) in featuresRow2"
-                :key="`row2-${index}`"
-                class="flex-shrink-0 w-full md:w-1/3 px-4"
-              >
-                <div class="h-full bg-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 group border border-secondary-100/50">
-                  <div
-                    class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300"
-                    :class="feature.bgClass"
-                  >
-                    <Icon :name="feature.icon" class="h-8 w-8" :class="feature.textClass" />
-                  </div>
-                  <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-                    {{ feature.title }}
-                  </h3>
-                  <p class="text-secondary-600 leading-relaxed">
-                    {{ feature.description }}
-                  </p>
-                </div>
+                <h3 class="feature-card__title">{{ feature.title }}</h3>
+                <p class="feature-card__desc">{{ feature.description }}</p>
               </div>
             </div>
           </div>
@@ -396,45 +457,174 @@
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="section bg-secondary-50">
-      <div class="container">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            How It Works
-          </h2>
-          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+    <section
+      id="how-it-works"
+      class="section ink-surface ink-grid relative overflow-hidden"
+    >
+      <div class="container relative">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker on-ink">Simple Process</span>
+          <h2 class="lp-h2 on-ink mt-4 mb-4">How it works</h2>
+          <p class="lp-lead lead-ink">
             Get started in minutes with our simple 4-step process.
           </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div
             v-for="(step, index) in steps"
             :key="step.title"
-            class="text-center"
+            class="step-ink"
+            data-reveal
           >
-            <div class="relative mb-6">
-              <a 
-                href="https://youtu.be/PER3f8EIGjs" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="block w-20 h-20 mx-auto relative z-10"
-              >
-                <div
-                  class="w-full h-full bg-primary-600 rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 cursor-pointer hover:scale-110 hover:shadow-xl"
-                >
-                  <span class="text-2xl font-bold text-white">{{
-                    index + 1
-                  }}</span>
-                </div>
-              </a>
-              <div
-                v-if="index < steps.length - 1"
-                class="hidden md:block absolute top-10 left-1/2 w-full h-0.5 bg-primary-200 transform translate-x-10"
-              ></div>
+            <div class="step-ink__top">
+              <span class="step-ink__num">{{
+                String(index + 1).padStart(2, '0')
+              }}</span>
+              <span class="step-ink__ico">
+                <Icon :name="step.icon" class="h-6 w-6" />
+              </span>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 mb-3">
-              {{ step.title }}
-            </h3>
+            <h3 class="step-ink__title">{{ step.title }}</h3>
+            <p class="step-ink__desc">{{ step.desc }}</p>
+          </div>
+        </div>
+        <div class="mt-14" data-reveal>
+          <a
+            href="https://youtu.be/PER3f8EIGjs"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-ghost-light btn-lg"
+          >
+            <Icon name="heroicons:play-circle" class="h-5 w-5 mr-2" />
+            Watch the 60-second demo
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Digital Identity Section -->
+    <section id="digital-identity" class="section bg-[color:var(--paper)]">
+      <div class="container">
+        <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+          <!-- Copy -->
+          <div data-reveal>
+            <span class="lp-kicker">Your Digital Identity</span>
+            <h2 class="lp-h2 mt-4 mb-4">
+              More than a card — it's your whole profile
+            </h2>
+            <p class="lp-lead mb-8">
+              Every NFCGo card links to a live digital business card. Your photo,
+              role, contact details, social links and portfolio live in one clean
+              page that updates instantly — no reprinting, ever.
+            </p>
+            <ul class="space-y-5 mb-10">
+              <li class="flex items-start gap-3">
+                <span class="lp-prof-bullet">
+                  <Icon name="heroicons:user-circle" class="h-4 w-4" />
+                </span>
+                <div>
+                  <p class="font-semibold text-secondary-900">
+                    Photo, name and role
+                  </p>
+                  <p class="text-sm text-secondary-600">
+                    Present yourself exactly how you want to be seen.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="lp-prof-bullet">
+                  <Icon name="heroicons:link" class="h-4 w-4" />
+                </span>
+                <div>
+                  <p class="font-semibold text-secondary-900">
+                    All your links in one place
+                  </p>
+                  <p class="text-sm text-secondary-600">
+                    Website, social profiles, portfolio and booking links.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="lp-prof-bullet">
+                  <Icon name="heroicons:arrow-path" class="h-4 w-4" />
+                </span>
+                <div>
+                  <p class="font-semibold text-secondary-900">
+                    Update anytime, instantly
+                  </p>
+                  <p class="text-sm text-secondary-600">
+                    Change your details and every tap shows the latest version.
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <NuxtLink to="/UserAccount/register" class="btn-brass btn-lg">
+                <Icon name="heroicons:rocket-launch" class="h-5 w-5 mr-2" />
+                Create your profile
+              </NuxtLink>
+              <button
+                @click="smoothScroll('#product-gallery')"
+                class="btn-outline-ink btn-lg"
+              >
+                Explore card designs
+              </button>
+            </div>
+          </div>
+
+          <!-- Phone mockup (design demonstration) -->
+          <div class="relative mt-14 lg:mt-0" data-reveal>
+            <div class="lp-glow"></div>
+            <div class="lp-phone mx-auto">
+              <div class="lp-phone-notch"></div>
+              <div class="lp-phone-screen">
+                <div class="lp-prof-hero">
+                  <div class="lp-prof-avatar">YN</div>
+                  <div class="lp-prof-name">Your Name</div>
+                  <div class="lp-prof-role">Product Designer · NFCGo</div>
+                  <div class="lp-prof-socials">
+                    <span class="lp-prof-social">
+                      <Icon name="heroicons:globe-alt" class="h-4 w-4" />
+                    </span>
+                    <span class="lp-prof-social">
+                      <Icon name="heroicons:user-group" class="h-4 w-4" />
+                    </span>
+                    <span class="lp-prof-social">
+                      <Icon name="heroicons:envelope" class="h-4 w-4" />
+                    </span>
+                  </div>
+                  <div class="lp-prof-actions">
+                    <span class="lp-prof-action lp-prof-action-primary">
+                      <Icon name="heroicons:user-plus" class="h-4 w-4" />
+                      Save Contact
+                    </span>
+                    <span class="lp-prof-action">
+                      <Icon
+                        name="heroicons:chat-bubble-left-right"
+                        class="h-4 w-4"
+                      />
+                      WhatsApp
+                    </span>
+                  </div>
+                </div>
+                <div class="lp-prof-links">
+                  <div
+                    v-for="l in profileLinks"
+                    :key="l.label"
+                    class="lp-prof-link"
+                  >
+                    <span class="lp-prof-link-ico">
+                      <Icon :name="l.icon" class="h-4 w-4" />
+                    </span>
+                    <span class="lp-prof-link-label">{{ l.label }}</span>
+                    <Icon
+                      name="heroicons:chevron-right"
+                      class="h-4 w-4 text-secondary-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -443,23 +633,23 @@
     <!-- Who Uses Section -->
     <section id="who-uses" class="section bg-white">
       <div class="container">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            Who Uses NFC Business Cards?
-          </h2>
-          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker">Built For Everyone</span>
+          <h2 class="lp-h2 mt-4 mb-4">Who uses NFC business cards?</h2>
+          <p class="lp-lead">
             From entrepreneurs to business teams, discover how professionals
             across industries are revolutionizing their networking.
           </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div
-            class="card p-8 hover:shadow-xl transition-all duration-300 group"
+            class="use-card group"
+            data-reveal
           >
             <div
-              class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+              class="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
             >
-              <Icon name="heroicons:briefcase" class="h-8 w-8 text-blue-600" />
+              <Icon name="heroicons:briefcase" class="h-8 w-8 text-primary-600" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Salespeople
@@ -487,14 +677,15 @@
           </div>
 
           <div
-            class="card p-8 hover:shadow-xl transition-all duration-300 group"
+            class="use-card group"
+            data-reveal
           >
             <div
-              class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+              class="w-16 h-16 bg-gradient-to-br from-[#e4efed] to-[#cfe2df] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
             >
               <Icon
                 name="heroicons:rocket-launch"
-                class="h-8 w-8 text-purple-600"
+                class="h-8 w-8 text-[#4b7a75]"
               />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
@@ -523,14 +714,15 @@
           </div>
 
           <div
-            class="card p-8 hover:shadow-xl transition-all duration-300 group"
+            class="use-card group"
+            data-reveal
           >
             <div
-              class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+              class="w-16 h-16 bg-gradient-to-br from-success-100 to-success-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
             >
               <Icon
                 name="heroicons:building-office"
-                class="h-8 w-8 text-green-600"
+                class="h-8 w-8 text-success-600"
               />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
@@ -566,14 +758,15 @@
           </div>
 
           <div
-            class="card p-8 hover:shadow-xl transition-all duration-300 group"
+            class="use-card group"
+            data-reveal
           >
             <div
-              class="w-16 h-16 bg-gradient-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+              class="w-16 h-16 bg-gradient-to-br from-[#f3ebdd] to-[#e6d6bd] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
             >
               <Icon
                 name="heroicons:paint-brush"
-                class="h-8 w-8 text-pink-600"
+                class="h-8 w-8 text-[#a17e4f]"
               />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
@@ -602,12 +795,13 @@
           </div>
 
           <div
-            class="card p-8 hover:shadow-xl transition-all duration-300 group"
+            class="use-card group"
+            data-reveal
           >
             <div
-              class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+              class="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
             >
-              <Icon name="heroicons:users" class="h-8 w-8 text-orange-600" />
+              <Icon name="heroicons:users" class="h-8 w-8 text-primary-600" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Event Networkers
@@ -635,9 +829,12 @@
           </div>
 
           <!-- Real Estate Agents -->
-          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
-            <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Icon name="heroicons:home-modern" class="h-8 w-8 text-cyan-600" />
+          <div
+            class="use-card group"
+            data-reveal
+          >
+            <div class="w-16 h-16 bg-gradient-to-br from-[#e4efed] to-[#cfe2df] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:home-modern" class="h-8 w-8 text-[#4b7a75]" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Real Estate Agents
@@ -662,9 +859,12 @@
           </div>
 
           <!-- Consultants & Coaches -->
-          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
-            <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Icon name="heroicons:presentation-chart-line" class="h-8 w-8 text-indigo-600" />
+          <div
+            class="use-card group"
+            data-reveal
+          >
+            <div class="w-16 h-16 bg-gradient-to-br from-[#f3ebdd] to-[#e6d6bd] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:presentation-chart-line" class="h-8 w-8 text-[#a17e4f]" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Consultants & Coaches
@@ -689,9 +889,12 @@
           </div>
 
           <!-- Recruiters & HR -->
-          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
-            <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Icon name="heroicons:user-group" class="h-8 w-8 text-rose-600" />
+          <div
+            class="use-card group"
+            data-reveal
+          >
+            <div class="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:user-group" class="h-8 w-8 text-primary-600" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Recruiters & HR
@@ -716,9 +919,12 @@
           </div>
 
           <!-- Financial Advisors -->
-          <div class="card p-8 hover:shadow-xl transition-all duration-300 group">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Icon name="heroicons:banknotes" class="h-8 w-8 text-emerald-600" />
+          <div
+            class="use-card group"
+            data-reveal
+          >
+            <div class="w-16 h-16 bg-gradient-to-br from-success-100 to-success-200 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Icon name="heroicons:banknotes" class="h-8 w-8 text-success-600" />
             </div>
             <h3 class="text-xl font-semibold text-secondary-900 mb-3">
               Financial Advisors
@@ -745,221 +951,159 @@
       </div>
     </section>
 
-    <!-- Product Gallery Section -->
+    <!-- Product Gallery Section (ink, product-led) -->
     <section
       id="product-gallery"
-      class="section bg-gradient-to-br from-secondary-50 to-primary-50"
+      class="section ink-surface ink-grid relative overflow-hidden"
     >
-      <div class="container">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            Design Your Perfect Card
-          </h2>
-          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+      <div class="container relative">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker on-ink">Materials &amp; Design</span>
+          <h2 class="lp-h2 on-ink mt-4 mb-4">Design your perfect card</h2>
+          <p class="lp-lead lead-ink">
             Choose from premium materials and stunning designs that reflect your
-            personal brand.
+            personal brand. Hover any card to see the back.
           </p>
         </div>
 
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-secondary-900 text-center mb-8">
-            Premium Card Materials
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="group cursor-pointer">
-              <div
-                class="relative overflow-hidden rounded-2xl bg-white shadow-lg group-hover:shadow-2xl transition-all duration-300"
-              >
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-blue-400 to-blue-600 p-8 flex items-center justify-center"
-                >
-                  <div
-                    class="bg-white/20 backdrop-blur-sm rounded-xl p-6 text-center"
-                  >
-                    <Icon
-                      name="heroicons:credit-card"
-                      class="h-16 w-16 text-white mx-auto mb-3"
-                    />
-                    <p class="text-white font-semibold">PVC Card</p>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h4 class="text-xl font-semibold text-secondary-900 mb-2">
-                    Classic PVC
-                  </h4>
-                  <p class="text-secondary-600 mb-4">
-                    Durable, affordable, and perfect for everyday professional
-                    use.
-                  </p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm text-secondary-500"
-                      >Starting from RM29</span
-                    >
-                    <span class="text-primary-600 font-medium"
-                      >Most Popular</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="group cursor-pointer">
-              <div
-                class="relative overflow-hidden rounded-2xl bg-white shadow-lg group-hover:shadow-2xl transition-all duration-300"
-              >
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-gray-700 to-gray-900 p-8 flex items-center justify-center"
-                >
-                  <div
-                    class="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center"
-                  >
-                    <Icon
-                      name="heroicons:square-3-stack-3d"
-                      class="h-16 w-16 text-gray-300 mx-auto mb-3"
-                    />
-                    <p class="text-gray-300 font-semibold">Metal Card</p>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h4 class="text-xl font-semibold text-secondary-900 mb-2">
-                    Premium Metal
-                  </h4>
-                  <p class="text-secondary-600 mb-4">
-                    Luxurious feel with laser engraving. Make an unforgettable
-                    impression.
-                  </p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm text-secondary-500"
-                      >Starting from RM89</span
-                    >
-                    <span class="text-yellow-600 font-medium">Premium</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="group cursor-pointer">
-              <div
-                class="relative overflow-hidden rounded-2xl bg-white shadow-lg group-hover:shadow-2xl transition-all duration-300"
-              >
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-yellow-600 to-yellow-800 p-8 flex items-center justify-center"
-                >
-                  <div
-                    class="bg-white/20 backdrop-blur-sm rounded-xl p-6 text-center"
-                  >
-                    <Icon
-                      name="heroicons:globe-asia-australia"
-                      class="h-16 w-16 text-white mx-auto mb-3"
-                    />
-                    <p class="text-white font-semibold">Bamboo Card</p>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h4 class="text-xl font-semibold text-secondary-900 mb-2">
-                    Eco Bamboo
-                  </h4>
-                  <p class="text-secondary-600 mb-4">
-                    Sustainable choice with unique wood grain. Perfect for
-                    eco-conscious brands.
-                  </p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm text-secondary-500"
-                      >Starting from RM59</span
-                    >
-                    <span class="text-green-600 font-medium">Eco-Friendly</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-secondary-900 text-center mb-8">
-            Design Inspirations
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-              <h4 class="text-xl font-semibold text-secondary-900 mb-4">
-                Personal Designs
-              </h4>
-              <div class="grid grid-cols-2 gap-4">
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Minimalist</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Creative</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Professional</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-orange-400 to-red-400 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Bold</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-              <h4 class="text-xl font-semibold text-secondary-900 mb-4">
-                Corporate Designs
-              </h4>
-              <div class="grid grid-cols-2 gap-4">
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Executive</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-indigo-700 to-indigo-900 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Tech</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-teal-700 to-teal-900 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Finance</span>
-                </div>
-                <div
-                  class="aspect-[16/10] bg-gradient-to-br from-rose-700 to-rose-900 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-semibold">Healthcare</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="bg-gradient-to-r from-primary-600 to-primary-500 rounded-2xl p-8 md:p-12 text-center"
-        >
-          <div class="max-w-2xl mx-auto">
+        <div class="mb-20">
+          <h3 class="gallery-sub">Premium card materials</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div
-              class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6"
+              v-for="m in cardMaterials"
+              :key="m.name"
+              class="material-item group cursor-pointer"
+              data-reveal
             >
-              <Icon name="heroicons:cube" class="h-10 w-10 text-white" />
+              <div class="material-stage">
+                <div class="nfc-mock material-card">
+                  <!-- Front -->
+                  <div class="nfc-mock__face" :class="m.face">
+                    <div class="nfc-mock__sheen"></div>
+                    <div class="relative z-10 flex items-center justify-between">
+                      <span class="nfc-mock__brand" :class="m.accent"
+                        >NFCGo</span
+                      >
+                      <Icon
+                        name="heroicons:wifi"
+                        class="h-4 w-4 nfc-mock__kwave"
+                        :class="m.accent"
+                      />
+                    </div>
+                    <div class="nfc-mock__chip relative z-10"></div>
+                    <div class="relative z-10 flex justify-between items-end">
+                      <div>
+                        <div class="nfc-mock__name" :class="m.accent">
+                          {{ m.sampleName }}
+                        </div>
+                        <div class="nfc-mock__role" :class="m.sub">
+                          {{ m.sampleRole }}
+                        </div>
+                      </div>
+                      <div class="nfc-mock__qr">
+                        <Icon name="heroicons:qr-code" class="h-5 w-5" />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Back -->
+                  <div
+                    class="nfc-mock__face nfc-mock__face--back"
+                    :class="m.face"
+                  >
+                    <div class="nfc-mock__sheen"></div>
+                    <div class="relative z-10 flex items-center justify-between">
+                      <span class="nfc-mock__brand" :class="m.accent"
+                        >{{ m.name }}</span
+                      >
+                      <span class="nfc-mock__kwave" :class="m.accent">
+                        <Icon name="heroicons:wifi" class="h-5 w-5" />
+                      </span>
+                    </div>
+                    <div class="relative z-10 flex items-center gap-4">
+                      <div class="nfc-mock__qr">
+                        <Icon name="heroicons:qr-code" class="h-10 w-10" />
+                      </div>
+                      <div :class="m.sub" class="text-xs leading-relaxed">
+                        Tap or scan to open<br />a live digital profile
+                      </div>
+                    </div>
+                    <span class="relative z-10 text-[0.6rem] tracking-[0.18em] uppercase" :class="m.accent"
+                      >embedded nfc · no battery</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6">
+                <div class="flex items-start justify-between gap-3">
+                  <h4 class="text-xl font-semibold text-white">{{ m.name }}</h4>
+                  <span class="material-badge" :class="m.badgeClass">{{
+                    m.badge
+                  }}</span>
+                </div>
+                <p class="text-white/60 mt-2 mb-3">{{ m.tagline }}</p>
+                <span class="text-sm font-semibold text-[color:var(--brass)]"
+                  >Starting from {{ m.price }}</span
+                >
+              </div>
             </div>
-            <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
-              Interactive Card Builder Coming Soon
-            </h3>
-            <p class="text-xl text-primary-100 mb-6">
-              Design your perfect NFC business card with our 3D configurator.
-              Choose materials, colors, layouts, and see real-time previews.
-            </p>
-            <button
-              class="btn bg-white text-primary-600 hover:bg-primary-50 btn-lg"
+          </div>
+        </div>
+
+        <div class="mb-20">
+          <h3 class="gallery-sub">Design inspirations</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <div
+              v-for="d in cardDesigns"
+              :key="d.label"
+              class="group"
+              data-reveal
             >
-              <Icon name="heroicons:bell" class="h-5 w-5 mr-2" />
-              Get Notified When It's Ready
-            </button>
+              <div class="lp-design" :class="d.face">
+                <div class="flex items-center justify-between">
+                  <span class="lp-design-brand">NFCGo</span>
+                  <span class="lp-design-qr">
+                    <Icon name="heroicons:qr-code" class="h-3 w-3" />
+                  </span>
+                </div>
+                <div>
+                  <div class="lp-design-name">Your Name</div>
+                  <div class="lp-design-role">Job Title</div>
+                </div>
+              </div>
+              <p class="mt-3 text-center text-sm font-medium text-white/65">
+                {{ d.label }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lp-cta rounded-3xl p-8 md:p-12">
+          <div class="lp-cta-grid"></div>
+          <div class="relative max-w-2xl">
+            <span class="eyebrow-brass mb-6">
+              <span class="dot"></span>
+              Custom &amp; bulk
+            </span>
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
+              Need a custom design or bulk order?
+            </h3>
+            <p class="text-lg text-white/70 mb-8">
+              We help teams print branded NFC cards with your logo, colours and
+              layout — plus volume pricing for company-wide rollouts.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <NuxtLink to="/UserAccount/register" class="btn-brass btn-lg">
+                <Icon name="heroicons:rocket-launch" class="h-5 w-5 mr-2" />
+                Start Free Trial
+              </NuxtLink>
+              <button @click="openContactModal" class="btn-ghost-light btn-lg">
+                <Icon
+                  name="heroicons:chat-bubble-left-right"
+                  class="h-5 w-5 mr-2"
+                />
+                Talk to Our Team
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -967,184 +1111,125 @@
 
 
 
-    <!-- Testimonials Section - Auto-Sliding Carousel -->
-    <section id="testimonials" class="section bg-white">
+    <!-- Why Choose NFCGo Section (honest product capabilities) -->
+    <section id="why-choose" class="section bg-white">
       <div class="container">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            What Our Customers Say
-          </h2>
-          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
-            Join thousands of professionals who have transformed their
-            networking with NFCGo
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker">Why NFCGo</span>
+          <h2 class="lp-h2 mt-4 mb-4">Why teams choose NFCGo</h2>
+          <p class="lp-lead">
+            A digital business card platform built around one-tap sharing and
+            real-time insight into your connections.
           </p>
         </div>
 
-        <!-- Auto-Sliding Carousel -->
-        <div 
-          class="relative mb-16"
-          @mouseenter="pauseCarousel"
-          @mouseleave="resumeCarousel"
-        >
-          <!-- Carousel Container with overflow hidden -->
-          <div class="overflow-hidden">
-            <!-- Slides Wrapper -->
-            <div 
-              class="flex"
-              :class="[isTransitioning ? 'transition-transform duration-700 ease-in-out' : '']"
-              :style="{ transform: `translateX(-${carouselPosition}%)` }"
-            >
-              <!-- Testimonial Cards -->
-              <div
-                v-for="(testimonial, index) in extendedTestimonials"
-                :key="`testimonial-${index}`"
-                class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
-              >
-                <div class="card p-6 hover:shadow-xl transition-all duration-300 relative h-full bg-white rounded-xl">
-                  <div class="absolute top-6 right-6 opacity-10">
-                    <Icon
-                      name="heroicons:chat-bubble-bottom-center-text"
-                      class="h-16 w-16 text-primary-600"
-                    />
-                  </div>
-                  <div class="flex items-center mb-4">
-                    <Icon
-                      v-for="i in 5"
-                      :key="i"
-                      name="heroicons:star"
-                      class="h-5 w-5 text-yellow-500 fill-current"
-                    />
-                  </div>
-                  <p class="text-secondary-600 mb-6 italic leading-relaxed min-h-[100px]">
-                    "{{ testimonial.text }}"
-                  </p>
-                  <div class="flex items-center">
-                    <img
-                      :src="testimonial.avatar"
-                      :alt="testimonial.name"
-                      class="w-12 h-12 rounded-full object-cover mr-4"
-                    />
-                    <div>
-                      <h4 class="font-semibold text-secondary-900">
-                        {{ testimonial.name }}
-                      </h4>
-                      <p class="text-sm text-secondary-500">{{ testimonial.role }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            class="why-card"
+            data-reveal
+          >
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:user-circle" class="h-6 w-6 text-primary-600" />
             </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">Digital Profile</h3>
+            <p class="text-secondary-600">
+              Keep your contact details, links, and portfolio in one profile you can update at any time.
+            </p>
           </div>
 
-          <!-- Navigation Arrows -->
-          <button
-            @click="prevTestimonial"
-            class="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-white shadow-lg hover:shadow-xl hover:bg-secondary-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400"
-            aria-label="Previous testimonial"
+          <div
+            class="why-card"
+            data-reveal
           >
-            <Icon name="heroicons:chevron-left" class="h-5 w-5 md:h-6 md:w-6 text-secondary-600" />
-          </button>
-          <button
-            @click="nextTestimonial"
-            class="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-white shadow-lg hover:shadow-xl hover:bg-secondary-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400"
-            aria-label="Next testimonial"
-          >
-            <Icon name="heroicons:chevron-right" class="h-5 w-5 md:h-6 md:w-6 text-secondary-600" />
-          </button>
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:bolt" class="h-6 w-6 text-primary-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">One-Tap Sharing</h3>
+            <p class="text-secondary-600">
+              Share your profile instantly by tapping an NFC card or scanning a QR code.
+            </p>
+          </div>
 
-          <!-- Navigation Dots -->
-          <div class="flex justify-center mt-8 gap-2">
-            <button
-              v-for="(_, index) in testimonials"
-              :key="`dot-${index}`"
-              @click="goToTestimonial(index)"
-              class="w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
-              :class="[
-                currentTestimonial === index
-                  ? 'bg-primary-600 w-8'
-                  : 'bg-secondary-300 hover:bg-secondary-400'
-              ]"
-              :aria-label="`Go to testimonial ${index + 1}`"
-            />
+          <div
+            class="why-card"
+            data-reveal
+          >
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:chart-bar" class="h-6 w-6 text-primary-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">Real-Time Analytics</h3>
+            <p class="text-secondary-600">
+              See taps, views, and link clicks as they happen from your dashboard.
+            </p>
+          </div>
+
+          <div
+            class="why-card"
+            data-reveal
+          >
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:rectangle-stack" class="h-6 w-6 text-primary-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">Multiple Cards Per Account</h3>
+            <p class="text-secondary-600">
+              Manage several cards and profiles from a single account as your needs grow.
+            </p>
+          </div>
+
+          <div
+            class="why-card"
+            data-reveal
+          >
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:device-phone-mobile" class="h-6 w-6 text-primary-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">No App Required</h3>
+            <p class="text-secondary-600">
+              Your profile opens in the recipient's browser — nothing to install.
+            </p>
+          </div>
+
+          <div
+            class="why-card"
+            data-reveal
+          >
+            <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+              <Icon name="heroicons:paint-brush" class="h-6 w-6 text-primary-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 mb-2">Customizable Templates</h3>
+            <p class="text-secondary-600">
+              Match your profile to your personal or company brand with ready-made templates.
+            </p>
           </div>
         </div>
 
-        <div
-          class="bg-gradient-to-r from-secondary-50 to-primary-50 rounded-2xl p-8 md:p-12 overflow-hidden"
-        >
-          <h3 class="text-xl font-semibold text-secondary-900 text-center mb-8">
-            Trusted by Leading Companies
-          </h3>
-          <div class="relative">
-            <div
-              class="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-secondary-50 to-transparent z-10"
-            ></div>
-            <div
-              class="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-primary-50 to-transparent z-10"
-            ></div>
-            <div class="overflow-hidden">
-              <div class="flex animate-scroll-x">
-                <div class="flex items-center space-x-12 px-6">
-                  <div
-                    v-for="brand in brandLogos"
-                    :key="`${brand.name}-1`"
-                    class="flex-shrink-0 w-32 h-16 flex items-center justify-center"
-                  >
-                    <div
-                      class="text-secondary-400 hover:text-secondary-600 transition-colors duration-300"
-                    >
-                      <Icon :name="brand.icon" class="h-8 w-auto" />
-                      <span class="sr-only">{{ brand.name }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-center space-x-12 px-6">
-                  <div
-                    v-for="brand in brandLogos"
-                    :key="`${brand.name}-2`"
-                    class="flex-shrink-0 w-32 h-16 flex items-center justify-center"
-                  >
-                    <div
-                      class="text-secondary-400 hover:text-secondary-600 transition-colors duration-300"
-                    >
-                      <Icon :name="brand.icon" class="h-8 w-auto" />
-                      <span class="sr-only">{{ brand.name }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <div class="flex items-center justify-center gap-3 bg-[color:var(--paper-2)] rounded-xl p-5">
+            <Icon name="heroicons:check-circle" class="h-6 w-6 text-success-600 flex-shrink-0" />
+            <span class="text-secondary-700 font-medium">Works on iPhone and Android</span>
           </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-            <div class="text-center">
-              <p class="text-3xl font-bold text-primary-600 mb-1">10K+</p>
-              <p class="text-sm text-secondary-600">Active Users</p>
-            </div>
-            <div class="text-center">
-              <p class="text-3xl font-bold text-primary-600 mb-1">500+</p>
-              <p class="text-sm text-secondary-600">Companies</p>
-            </div>
-            <div class="text-center">
-              <p class="text-3xl font-bold text-primary-600 mb-1">98%</p>
-              <p class="text-sm text-secondary-600">Satisfaction Rate</p>
-            </div>
-            <div class="text-center">
-              <p class="text-3xl font-bold text-primary-600 mb-1">2M+</p>
-              <p class="text-sm text-secondary-600">Cards Tapped</p>
-            </div>
+          <div class="flex items-center justify-center gap-3 bg-[color:var(--paper-2)] rounded-xl p-5">
+            <Icon name="heroicons:check-circle" class="h-6 w-6 text-success-600 flex-shrink-0" />
+            <span class="text-secondary-700 font-medium">No app required</span>
+          </div>
+          <div class="flex items-center justify-center gap-3 bg-[color:var(--paper-2)] rounded-xl p-5">
+            <Icon name="heroicons:check-circle" class="h-6 w-6 text-success-600 flex-shrink-0" />
+            <span class="text-secondary-700 font-medium">Card activation in minutes</span>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="section bg-white">
-      <div class="container">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            Simple, Flexible Pricing
-          </h2>
-          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+    <section
+      id="pricing"
+      class="section ink-surface ink-grid relative overflow-hidden"
+    >
+      <div class="container relative">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker on-ink">Pricing</span>
+          <h2 class="lp-h2 on-ink mt-4 mb-4">Simple, flexible pricing</h2>
+          <p class="lp-lead lead-ink">
             Choose the plan that fits your networking needs. Start free and
             upgrade as you grow.
           </p>
@@ -1152,172 +1237,122 @@
         <div
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
         >
-          <div
-            class="card p-6 text-center relative transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg flex flex-col h-full"
-          >
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Free</h3>
-            <div class="mb-6">
-              <div class="text-3xl font-bold text-green-600 mb-2">Free</div>
-              <p class="text-sm text-secondary-500">
-                Perfect for getting started
-              </p>
-            </div>
-            <ul class="space-y-2 mb-6 text-left text-sm">
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">1 Digital Profile</span>
+          <!-- Free -->
+          <div class="price-card" data-reveal>
+            <h3 class="price-card__name">Free</h3>
+            <div class="price-card__amount">RM0</div>
+            <p class="price-card__desc">Perfect for getting started</p>
+            <ul class="price-card__list">
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>1 Digital Profile</span>
               </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Basic Templates</span>
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>Basic Templates</span>
               </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Contact Information</span>
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>Contact Information</span>
               </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Social Media Links</span>
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>Social Media Links</span>
               </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">QR Code Backup</span>
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>QR Code Backup</span>
               </li>
-              <li class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">Basic Analytics</span>
+              <li>
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>Basic Analytics</span>
               </li>
             </ul>
-            <div class="mt-auto">
-              <NuxtLink
-                to="/UserAccount/register"
-                class="btn w-full transition-all duration-300 bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl"
-              >
+            <div class="price-card__cta">
+              <NuxtLink to="/UserAccount/register" class="btn-ghost-light w-full">
                 Get Started Free
               </NuxtLink>
             </div>
           </div>
 
-          <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
-          >
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Basic</h3>
-            <div class="mb-6">
-              <div class="text-2xl font-bold text-secondary-900 mb-2">
-                {{ loadingPrices ? 'Loading...' : (basicPlan?.currency + ' ' + basicPlan?.price) || 'Contact for Pricing' }}
-              </div>
-              <p class="text-sm text-secondary-500">
-                {{ basicPlan?.description || 'For individual professionals' }}
-              </p>
+          <!-- Basic -->
+          <div class="price-card" data-reveal>
+            <h3 class="price-card__name">Basic</h3>
+            <div class="price-card__amount">
+              {{ loadingPrices ? 'Loading...' : (basicPlan?.currency + ' ' + basicPlan?.price) || 'Contact for Pricing' }}
             </div>
-            <ul class="space-y-2 mb-6 text-left text-sm">
-              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">{{ feature }}</span>
+            <p class="price-card__desc">
+              {{ basicPlan?.description || 'For individual professionals' }}
+            </p>
+            <ul class="price-card__list">
+              <li v-for="feature in basicPlan?.features" :key="feature">
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>{{ feature }}</span>
               </li>
             </ul>
-            <div class="mt-auto">
-              <NuxtLink
-                to="/UserAccount/register"
-                class="btn w-full transition-all duration-300 btn-outline hover:shadow-md"
-              >
+            <div class="price-card__cta">
+              <NuxtLink to="/UserAccount/register" class="btn-ghost-light w-full">
                 Start Free Trial
               </NuxtLink>
             </div>
           </div>
 
-          <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
-          >
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Premium</h3>
-            <div class="mb-6">
-              <div class="text-2xl font-bold text-secondary-900 mb-2">
-                {{ loadingPrices ? 'Loading...' : (premiumPlan?.currency + ' ' + premiumPlan?.price) || 'Contact for Pricing' }}
-              </div>
-              <p class="text-sm text-secondary-500">{{ premiumPlan?.description || 'For growing businesses' }}</p>
+          <!-- Premium -->
+          <div class="price-card price-card--pop" data-reveal>
+            <span class="price-card__badge">Most Popular</span>
+            <h3 class="price-card__name">Premium</h3>
+            <div class="price-card__amount">
+              {{ loadingPrices ? 'Loading...' : (premiumPlan?.currency + ' ' + premiumPlan?.price) || 'Contact for Pricing' }}
             </div>
-            <ul class="space-y-2 mb-6 text-left text-sm">
-              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">{{ feature }}</span>
+            <p class="price-card__desc">
+              {{ premiumPlan?.description || 'For growing businesses' }}
+            </p>
+            <ul class="price-card__list">
+              <li v-for="feature in premiumPlan?.features" :key="feature">
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>{{ feature }}</span>
               </li>
             </ul>
-            <div class="mt-auto">
-              <NuxtLink
-                to="/UserAccount/register"
-                class="btn w-full transition-all duration-300 btn-outline shadow-lg hover:shadow-xl"
-              >
+            <div class="price-card__cta">
+              <NuxtLink to="/UserAccount/register" class="btn-brass w-full">
                 Start Free Trial
               </NuxtLink>
             </div>
           </div>
 
-          <div
-            class="card p-6 text-center relative transition-all duration-300 hover:shadow-lg flex flex-col h-full"
-          >
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Business</h3>
-            <div class="mb-6">
-              <div class="text-2xl font-bold text-secondary-900 mb-2">
-                {{ loadingPrices ? 'Loading...' : (businessPlan?.currency + ' ' + businessPlan?.price) || 'Contact for Pricing' }}
-              </div>
-              <p class="text-sm text-secondary-500">{{ businessPlan?.description || 'For large organizations' }}</p>
+          <!-- Business -->
+          <div class="price-card" data-reveal>
+            <h3 class="price-card__name">Business</h3>
+            <div class="price-card__amount">
+              {{ loadingPrices ? 'Loading...' : (businessPlan?.currency + ' ' + businessPlan?.price) || 'Contact for Pricing' }}
             </div>
-            <ul class="space-y-2 mb-6 text-left text-sm">
-              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-start">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-600 mr-2 mt-0.5 flex-shrink-0"
-                />
-                <span class="text-secondary-600">{{ feature }}</span>
+            <p class="price-card__desc">
+              {{ businessPlan?.description || 'For large organizations' }}
+            </p>
+            <ul class="price-card__list">
+              <li v-for="feature in businessPlan?.features" :key="feature">
+                <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+                <span>{{ feature }}</span>
               </li>
             </ul>
-            <div class="mt-auto">
-              <button
-                @click="contactSupport"
-                class="btn w-full transition-all duration-300 btn-outline hover:shadow-md"
-              >
+            <div class="price-card__cta">
+              <button @click="contactSupport" class="btn-ghost-light w-full">
                 Contact Sales
               </button>
             </div>
           </div>
         </div>
 
-        <div class="text-center mt-12">
-          <p class="text-secondary-600 mb-4">
+        <div class="mt-12" data-reveal>
+          <p class="text-white/55">
             All paid plans include 14-day free trial • No credit card required •
             Cancel anytime
           </p>
-          <div
-            class="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
-            <p class="text-sm text-secondary-500">Need a custom solution?</p>
+          <div class="mt-3 flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+            <p class="text-sm text-white/65">Need a custom solution?</p>
             <button
               @click="contactSupport"
-              class="text-primary-600 hover:text-primary-700 font-medium text-sm underline"
+              class="text-[color:var(--brass)] hover:text-[color:var(--brass-200)] font-medium text-sm underline"
             >
               Contact our support team
             </button>
@@ -1326,34 +1361,115 @@
       </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section
+      v-if="faqLoading || faqItems.length > 0"
+      id="faq"
+      class="section bg-[color:var(--paper)]"
+    >
+      <div class="container">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker">FAQ</span>
+          <h2 class="lp-h2 mt-4 mb-4">Frequently asked questions</h2>
+          <p class="lp-lead">
+            Answers to common questions about NFCGo — cards, shipping,
+            activation and your digital profile.
+          </p>
+        </div>
+
+        <div v-if="faqLoading" class="text-center py-8">
+          <div
+            class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[color:var(--brass)]"
+          ></div>
+        </div>
+
+        <div v-else class="max-w-3xl faq-list" data-reveal>
+          <div
+            v-for="(item, index) in faqItems"
+            :key="item.id"
+            class="faq-item"
+            :class="openFaqIndex === index ? 'faq-item--open' : ''"
+          >
+            <button
+              @click="toggleFaq(index)"
+              class="faq-item__head focus:outline-none"
+              :aria-expanded="openFaqIndex === index ? 'true' : 'false'"
+              :aria-controls="`faq-answer-${item.id}`"
+            >
+              <span class="faq-item__q">{{ item.question }}</span>
+              <span class="faq-item__icon">
+                <Icon name="heroicons:plus" class="h-4 w-4" />
+              </span>
+            </button>
+            <div
+              v-show="openFaqIndex === index"
+              :id="`faq-answer-${item.id}`"
+              class="faq-item__body"
+            >
+              {{ item.answer }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shipping & Activation Section -->
+    <section id="shipping" class="section bg-white">
+      <div class="container">
+        <div class="max-w-2xl mb-14" data-reveal>
+          <span class="lp-kicker">How It Ships</span>
+          <h2 class="lp-h2 mt-4 mb-4">From order to first tap</h2>
+          <p class="lp-lead">
+            A simple flow to get your NFC card in hand and your profile ready to
+            share.
+          </p>
+        </div>
+
+        <div class="ship-track">
+          <div
+            v-for="(step, i) in shippingSteps"
+            :key="step.title"
+            class="ship-step"
+            data-reveal
+          >
+            <div class="ship-step__marker">
+              <Icon :name="step.icon" class="h-6 w-6" />
+            </div>
+            <span class="ship-step__index">{{ String(i + 1).padStart(2, '0') }}</span>
+            <h3 class="ship-step__title">{{ step.title }}</h3>
+            <p class="ship-step__desc">{{ step.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA Section -->
-    <section class="section bg-gradient-to-r from-primary-600 to-primary-500">
-      <div class="container text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-          Ready to Transform Your Networking?
+    <section class="lp-cta section">
+      <div class="lp-cta-grid"></div>
+      <div class="container relative text-center">
+        <span class="eyebrow-brass"><span class="dot"></span> Start today</span>
+        <h2 class="text-3xl md:text-5xl font-extrabold text-white mt-6 mb-4 tracking-tight" data-reveal>
+          Ready to transform your networking?
         </h2>
-        <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of professionals who are already networking smarter
-          with NFC business cards.
+        <p class="text-lg md:text-xl text-white/70 mb-8 max-w-2xl mx-auto" data-reveal>
+          Create your smart business card in minutes — no app, no printing, no
+          waste. Just tap and connect.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <NuxtLink
-            to="/UserAccount/register"
-            class="btn bg-white text-primary-600 hover:bg-primary-50 btn-lg shadow-lg hover:shadow-xl transition-all duration-300"
-          >
+          <NuxtLink to="/UserAccount/register" class="btn-brass btn-lg">
             <Icon name="heroicons:rocket-launch" class="h-5 w-5 mr-2" />
             Start Your Free Trial
           </NuxtLink>
           <button
-            @click="showDemo = true"
-            class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 btn-lg transition-all duration-300"
+            @click="smoothScroll('#how-it-works')"
+            class="btn-ghost-light btn-lg"
           >
             <Icon name="heroicons:play" class="h-5 w-5 mr-2" />
-            Watch Demo
+            See How It Works
           </button>
         </div>
         <div
-          class="flex flex-wrap items-center justify-center gap-8 text-primary-100"
+          class="flex flex-wrap items-center justify-center gap-8 text-white/65"
         >
           <div class="flex items-center">
             <Icon name="heroicons:check-circle" class="h-5 w-5 mr-2" />
@@ -1372,18 +1488,14 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-secondary-900 text-white py-12">
+    <footer class="footer-ink">
       <div class="container">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div class="flex items-center mb-4">
-              <Icon
-                name="heroicons:identification"
-                class="h-8 w-8 text-primary-400"
-              />
-              <span class="ml-2 text-xl font-bold">NFCGo</span>
+              <NFCGoLogo variant="dark" />
             </div>
-            <p class="text-secondary-400 mb-4">
+            <p class="text-white/55 mb-4">
               The future of professional networking is here. Connect smarter
               with NFC technology.
             </p>
@@ -1392,171 +1504,108 @@
                 href="https://clbgroups.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-secondary-400 hover:text-white transition-colors"
+                class="text-white/50 hover:text-[color:var(--brass)] transition-colors"
               >
                 <Icon name="heroicons:globe-alt" class="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                class="text-secondary-400 hover:text-white transition-colors"
-              >
-                <Icon name="heroicons:envelope" class="h-5 w-5" />
               </a>
               <a
                 href="https://www.facebook.com/profile.php?id=61568045614509"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-secondary-400 hover:text-white transition-colors"
+                class="text-white/50 hover:text-[color:var(--brass)] transition-colors"
               >
                 <Icon name="bi:facebook" class="h-5 w-5" />
               </a>
             </div>
           </div>
           <div>
-            <h4 class="font-semibold mb-4">Product</h4>
+            <h4 class="footer-ink__head">Product</h4>
             <ul class="space-y-2">
               <li>
                 <a
                   href="#features"
                   @click="smoothScroll('#features')"
-                  class="text-secondary-400 hover:text-white transition-colors"
+                  class="footer-ink__link"
                   >Features</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#product-gallery"
+                  @click="smoothScroll('#product-gallery')"
+                  class="footer-ink__link"
+                  >Cards</a
                 >
               </li>
               <li>
                 <a
                   href="#pricing"
                   @click="smoothScroll('#pricing')"
-                  class="text-secondary-400 hover:text-white transition-colors"
+                  class="footer-ink__link"
                   >Pricing</a
                 >
               </li>
-              <li>
-                <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >Templates</a
-                >
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >Analytics</a
-                >
-              </li>
             </ul>
           </div>
           <div>
-            <h4 class="font-semibold mb-4">Support</h4>
+            <h4 class="footer-ink__head">Support</h4>
             <ul class="space-y-2">
               <li>
                 <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >Help Center</a
+                  href="#faq"
+                  @click="smoothScroll('#faq')"
+                  class="footer-ink__link"
+                  >FAQ</a
                 >
               </li>
               <li>
                 <a
-                  href="#"
-                  @click.prevent="openContactModal"
-                  class="text-secondary-400 hover:text-white transition-colors cursor-pointer"
-                  >Contact Us</a
+                  href="#shipping"
+                  @click="smoothScroll('#shipping')"
+                  class="footer-ink__link"
+                  >Shipping</a
                 >
               </li>
               <li>
-                <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >API Docs</a
-                >
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >Status</a
+                <button @click="openContactModal" class="footer-ink__link"
+                  >Contact Us</button
                 >
               </li>
             </ul>
           </div>
           <div>
-            <h4 class="font-semibold mb-4">Company</h4>
+            <h4 class="footer-ink__head">Company</h4>
             <ul class="space-y-2">
               <li>
                 <a
                   href="https://clbgroups.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-secondary-400 hover:text-white transition-colors"
+                  class="footer-ink__link"
                   >About</a
                 >
               </li>
               <li>
-                <a
-                  href="#"
-                  class="text-secondary-400 hover:text-white transition-colors"
-                  >Blog</a
-                >
-              </li>
-              <li>
-                <button
-                  @click="openLegalModal('privacy')"
-                  class="text-secondary-400 hover:text-white transition-colors"
+                <button @click="openLegalModal('privacy')" class="footer-ink__link"
                   >Privacy</button
                 >
               </li>
               <li>
-                <button
-                  @click="openLegalModal('terms')"
-                  class="text-secondary-400 hover:text-white transition-colors"
+                <button @click="openLegalModal('terms')" class="footer-ink__link"
                   >Terms</button
                 >
               </li>
             </ul>
           </div>
         </div>
-        <div class="border-t border-secondary-800 mt-12 pt-8 text-center">
-          <p class="text-secondary-400">
+        <div class="footer-ink__bottom">
+          <p>
             @Copyright CLB SDN BHD – 2025 -RFID Label Supplier , 
             RFID Solution and Stick Printing I All Rights Reserved
           </p>
         </div>
       </div>
     </footer>
-
-    <!-- Demo Modal -->
-    <div
-      v-if="showDemo"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    >
-      <div class="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-2xl font-bold text-secondary-900">Product Demo</h3>
-          <button
-            @click="showDemo = false"
-            class="p-2 hover:bg-secondary-100 rounded-lg transition-colors"
-          >
-            <Icon name="heroicons:x-mark" class="h-6 w-6 text-secondary-600" />
-          </button>
-        </div>
-        <div
-          class="aspect-video bg-secondary-100 rounded-lg flex items-center justify-center"
-        >
-          <div class="text-center">
-            <Icon
-              name="heroicons:play"
-              class="h-16 w-16 text-secondary-400 mx-auto mb-4"
-            />
-            <p class="text-secondary-600">Demo video coming soon...</p>
-            <p class="text-sm text-secondary-500 mt-2">
-              Experience the future of networking
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Contact Us Modal -->
     <div
@@ -1566,17 +1615,17 @@
     >
       <div class="contact-modal-content bg-white rounded-2xl shadow-2xl w-full max-w-[700px] max-h-[90vh] overflow-hidden animate-modal-appear">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
+        <div class="flex items-center justify-between p-6 border-b border-secondary-200 bg-gradient-to-r from-primary-50 to-secondary-50">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Contact Us</h2>
-            <p class="text-sm text-gray-600 mt-1">We'd love to hear from you!</p>
+            <h2 class="text-2xl font-bold text-secondary-900">Contact Us</h2>
+            <p class="text-sm text-secondary-600 mt-1">We'd love to hear from you!</p>
           </div>
           <button
             @click="closeContactModal"
             class="p-2 rounded-full hover:bg-white/80 transition-colors"
             aria-label="Close modal"
           >
-            <Icon name="heroicons:x-mark" class="h-6 w-6 text-gray-600" />
+            <Icon name="heroicons:x-mark" class="h-6 w-6 text-secondary-600" />
           </button>
         </div>
         
@@ -1704,21 +1753,21 @@
                 <span class="text-xs text-secondary-500">Was this helpful?</span>
                 <button
                   @click="submitFeedback(message, true)"
-                  class="p-1 hover:bg-green-100 rounded transition-colors"
+                  class="p-1 hover:bg-success-100 rounded transition-colors"
                   title="Helpful"
                 >
-                  <Icon name="heroicons:hand-thumb-up" class="h-4 w-4 text-green-600" />
+                  <Icon name="heroicons:hand-thumb-up" class="h-4 w-4 text-success-600" />
                 </button>
                 <button
                   @click="submitFeedback(message, false)"
-                  class="p-1 hover:bg-red-100 rounded transition-colors"
+                  class="p-1 hover:bg-error-100 rounded transition-colors"
                   title="Not helpful"
                 >
-                  <Icon name="heroicons:hand-thumb-down" class="h-4 w-4 text-red-600" />
+                  <Icon name="heroicons:hand-thumb-down" class="h-4 w-4 text-error-600" />
                 </button>
               </div>
               <div v-else-if="message.sender === 'ai' && message.feedbackGiven" class="ml-2 mt-1">
-                <span class="text-xs text-green-600">✓ Thanks for your feedback!</span>
+                <span class="text-xs text-success-600">✓ Thanks for your feedback!</span>
               </div>
             </div>
           </div>
@@ -1891,7 +1940,7 @@
       >
         <!-- Modal Header -->
         <div
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl"
+          class="bg-gradient-to-r from-[#5d8c87] to-primary-700 p-6 rounded-t-2xl"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center">
@@ -1905,7 +1954,7 @@
                 <h3 class="text-2xl font-bold text-white">
                   Business Plan Request
                 </h3>
-                <p class="text-indigo-100 text-sm mt-1">
+                <p class="text-primary-100 text-sm mt-1">
                   Tell us about your organization
                 </p>
               </div>
@@ -1931,7 +1980,7 @@
               type="text"
               required
               placeholder="Enter your company name"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             />
           </div>
 
@@ -1945,7 +1994,7 @@
               required
               rows="3"
               placeholder="Enter your company address"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             ></textarea>
           </div>
 
@@ -1960,7 +2009,7 @@
               required
               min="1"
               placeholder="e.g., 50"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             />
             <p class="text-xs text-secondary-500 mt-2">
               How many NFC cards do you need for your team?
@@ -1977,7 +2026,7 @@
               type="text"
               required
               placeholder="Full name"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             />
           </div>
 
@@ -1991,7 +2040,7 @@
               type="tel"
               required
               placeholder="+60 12-345 6789"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             />
           </div>
 
@@ -2005,7 +2054,7 @@
               type="email"
               required
               placeholder="your@company.com"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             />
           </div>
 
@@ -2018,7 +2067,7 @@
               v-model="businessForm.notes"
               rows="3"
               placeholder="Any special requirements or questions?"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             ></textarea>
           </div>
 
@@ -2034,7 +2083,7 @@
             <button
               type="submit"
               :disabled="submittingBusinessRequest"
-              class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              class="flex-1 py-3 px-4 bg-gradient-to-r from-[#5d8c87] to-primary-700 text-white rounded-xl font-medium hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <div v-if="submittingBusinessRequest" class="flex items-center">
                 <div
@@ -2062,17 +2111,17 @@
     >
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-modal-appear">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
+        <div class="flex items-center justify-between p-4 border-b border-secondary-200 bg-gradient-to-r from-primary-50 to-secondary-50">
           <div class="flex-1 min-w-0">
-            <h2 class="text-xl font-bold text-gray-900 truncate">
+            <h2 class="text-xl font-bold text-secondary-900 truncate">
               {{ legalModalType === 'privacy' ? 'Privacy Policy' : 'Terms of Service' }}
             </h2>
-            <div v-if="legalDocInfo && !loadingLegalDoc" class="flex items-center gap-3 mt-1 text-sm text-gray-600">
+            <div v-if="legalDocInfo && !loadingLegalDoc" class="flex items-center gap-3 mt-1 text-sm text-secondary-600">
               <span class="truncate max-w-[200px]" :title="legalDocInfo.filename">
                 <Icon name="heroicons:document" class="h-4 w-4 inline mr-1" />
                 {{ legalDocInfo.filename }}
               </span>
-              <span class="text-gray-400">•</span>
+              <span class="text-secondary-400">•</span>
               <span>{{ formatFileSize(legalDocInfo.size) }}</span>
             </div>
           </div>
@@ -2081,31 +2130,31 @@
             class="p-2 rounded-full hover:bg-white/80 transition-colors ml-4"
             aria-label="Close modal"
           >
-            <Icon name="heroicons:x-mark" class="h-6 w-6 text-gray-600" />
+            <Icon name="heroicons:x-mark" class="h-6 w-6 text-secondary-600" />
           </button>
         </div>
         
         <!-- Modal Body -->
         <div class="flex-1 overflow-hidden relative">
           <!-- Loading State -->
-          <div v-if="loadingLegalDoc" class="absolute inset-0 flex items-center justify-center bg-gray-50">
+          <div v-if="loadingLegalDoc" class="absolute inset-0 flex items-center justify-center bg-secondary-50">
             <div class="text-center">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-              <p class="text-gray-600">Loading document...</p>
+              <p class="text-secondary-600">Loading document...</p>
             </div>
           </div>
           
           <!-- Error State -->
-          <div v-else-if="legalDocError" class="absolute inset-0 flex items-center justify-center bg-gray-50 p-8">
+          <div v-else-if="legalDocError" class="absolute inset-0 flex items-center justify-center bg-secondary-50 p-8">
             <div class="text-center">
               <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Icon name="heroicons:exclamation-triangle" class="h-8 w-8 text-red-600" />
               </div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Not Available</h3>
-              <p class="text-gray-600 mb-4">{{ legalDocError }}</p>
+              <h3 class="text-lg font-semibold text-secondary-900 mb-2">Document Not Available</h3>
+              <p class="text-secondary-600 mb-4">{{ legalDocError }}</p>
               <button
                 @click="closeLegalModal"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                class="px-4 py-2 bg-secondary-100 text-secondary-700 rounded-lg hover:bg-secondary-200 transition-colors"
               >
                 Close
               </button>
@@ -2130,35 +2179,85 @@
 </template>
 
 <script setup>
-import { watch, onMounted, onBeforeUnmount, computed } from 'vue';
+import { watch, onMounted, computed } from 'vue';
 
-useHead({
+const config = useRuntimeConfig();
+const canonicalUrl = `${config.public.appUrl}/Homepage`;
+
+useSeoMeta({
   title: "NFCGo - Smart Digital Business Cards with NFC Technology",
-  meta: [
+  description:
+    "Create smart NFC business cards that instantly share your professional profile. Modern networking made simple with just a tap.",
+  keywords: [
+    "NFC business card",
+    "digital business card",
+    "smart networking",
+    "professional networking",
+    "NFC technology",
+  ],
+  ogTitle: "NFCGo - Smart Digital Business Cards",
+  ogDescription:
+    "Create smart NFC business cards that instantly share your professional profile. Modern networking made simple with just a tap.",
+  ogType: "website",
+  ogUrl: canonicalUrl,
+  twitterCard: "summary_large_image",
+});
+
+// Canonical URL + structured data (Organization / WebSite)
+useHead({
+  link: [{ rel: "canonical", href: canonicalUrl }],
+  script: [
     {
-      name: "description",
-      content:
-        "Create smart NFC business cards that instantly share your professional profile. Modern networking made simple with just a tap.",
+      type: "application/ld+json",
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            name: "NFCGo",
+            url: config.public.appUrl,
+            sameAs: [
+              "https://clbgroups.com/",
+              "https://www.facebook.com/profile.php?id=61568045614509",
+            ],
+          },
+          {
+            "@type": "WebSite",
+            name: "NFCGo",
+            url: config.public.appUrl,
+          },
+        ],
+      }),
     },
-    {
-      name: "keywords",
-      content:
-        "NFC business card, digital business card, smart networking, professional networking, NFC technology",
-    },
-    { property: "og:title", content: "NFCGo - Smart Digital Business Cards" },
-    {
-      property: "og:description",
-      content:
-        "Create smart NFC business cards that instantly share your professional profile. Modern networking made simple with just a tap.",
-    },
-    { property: "og:type", content: "website" },
   ],
 });
 
 const authStore = useAuthStore();
 const { $api, $toast } = useNuxtApp();
 const mobileMenuOpen = ref(false);
-const showDemo = ref(false);
+
+// Hero card 3D flip (front/back preview) — auto-cycles every 15s
+const heroFlipped = ref(false);
+const HERO_FLIP_INTERVAL = 15000;
+let heroFlipTimer = null;
+
+// Landing page: trust marquee labels + scroll-reveal observer handle
+const marqueeLabels = [
+  "Instant Sharing",
+  "Real-Time Analytics",
+  "Works on iPhone & Android",
+  "No App Required",
+  "Custom Templates",
+  "Eco-Friendly",
+  "QR Backup",
+  "Team Ready",
+];
+let revealObserver = null;
+
+// FAQ (built from the public chatbot questions endpoint)
+const faqItems = ref([]);
+const faqLoading = ref(true);
+const openFaqIndex = ref(null);
 
 // Plan prices from API
 const { planPrices, loading: loadingPrices, loadPrices } = usePlanPrices();
@@ -2239,188 +2338,136 @@ const businessForm = reactive({
 });
 
 const steps = [
-  { title: "Ensure phone have NFC function" },
-  { title: "Tap card on phone" },
-  { title: "Digital profile instantly opens" },
   {
-    title:
-      "Save contact, view portfolio, connect on LinkedIn, interact with profile",
+    title: "Choose your card",
+    desc: "Pick a material and finish that suits your brand — PVC, metal or bamboo.",
+    icon: "heroicons:rectangle-stack",
+  },
+  {
+    title: "Set up your profile",
+    desc: "Add your photo, role, contact details and links from your dashboard.",
+    icon: "heroicons:user-circle",
+  },
+  {
+    title: "Activate with one tap",
+    desc: "Tap the card on your phone to link it to your live digital profile.",
+    icon: "heroicons:bolt",
+  },
+  {
+    title: "Share anywhere",
+    desc: "One tap opens your profile — they save your contact, you keep the lead.",
+    icon: "heroicons:share",
   },
 ];
 
-const testimonials = [
+// Landing page: order-to-first-tap shipping flow
+const shippingSteps = [
   {
-    id: 1,
-    text: "NFCGo transformed how I network at conferences. I've made more meaningful connections in the last month than in the entire previous year. The analytics feature is a game-changer!",
-    name: "Sarah Chen",
-    role: "Marketing Director, TechCorp",
-    avatar:
-      "https://ui-avatars.com/api/?name=Sarah+Chen&background=6366f1&color=fff",
+    title: "Place Your Order",
+    desc: "Choose your card and complete checkout.",
+    icon: "heroicons:shopping-cart",
   },
   {
-    id: 2,
-    text: "As a freelance designer, NFCGo helps me showcase my portfolio instantly. Clients love the professional touch, and I've seen a 40% increase in follow-up rates.",
-    name: "David Miller",
-    role: "Creative Director, Studio M",
-    avatar:
-      "https://ui-avatars.com/api/?name=David+Miller&background=10b981&color=fff",
+    title: "Get It Delivered",
+    desc: "Your card is shipped to the address you provide.",
+    icon: "heroicons:truck",
   },
   {
-    id: 3,
-    text: "Our sales team's productivity skyrocketed after switching to NFCGo. The lead capture feature alone paid for the investment within the first week!",
-    name: "Jennifer Wong",
-    role: "Sales Manager, GlobalTech",
-    avatar:
-      "https://ui-avatars.com/api/?name=Jennifer+Wong&background=f59e0b&color=fff",
+    title: "Activate It",
+    desc: "Tap the card on your phone or log in to activate it.",
+    icon: "heroicons:device-phone-mobile",
   },
   {
-    id: 4,
-    text: "The bamboo cards perfectly align with our eco-friendly brand values. Clients are always impressed, and it starts conversations about sustainability.",
-    name: "Michael Green",
-    role: "CEO, EcoSolutions",
-    avatar:
-      "https://ui-avatars.com/api/?name=Michael+Green&background=059669&color=fff",
-  },
-  {
-    id: 5,
-    text: "Managing 50+ employee profiles is a breeze with NFCGo. The team UserDashboard gives us insights we never had before. Highly recommend for enterprises!",
-    name: "Lisa Anderson",
-    role: "HR Director, FinanceHub",
-    avatar:
-      "https://ui-avatars.com/api/?name=Lisa+Anderson&background=ec4899&color=fff",
-  },
-  {
-    id: 6,
-    text: "I love how I can update my profile instantly without reprinting cards. The metal card quality is exceptional - it's become a conversation starter itself!",
-    name: "Robert Kim",
-    role: "Startup Founder",
-    avatar:
-      "https://ui-avatars.com/api/?name=Robert+Kim&background=8b5cf6&color=fff",
+    title: "Link or Build Your Profile",
+    desc: "Add your details, then share your card with one tap.",
+    icon: "heroicons:share",
   },
 ];
 
-// Testimonial Carousel State & Logic
-const currentTestimonial = ref(0);
-let carouselTimer = null;
-const CAROUSEL_INTERVAL = 4000; // 4 seconds between slides
-const isTransitioning = ref(true); // Control transition class
-
-// Extended testimonials for seamless loop
-// Add clones: [Last3, ...Originals, First3] to allow infinite sliding both ways if needed
-// For simple forward infinite loop, we just need [ ...Originals, ...First3 ]
-const extendedTestimonials = computed(() => {
-  return [...testimonials, ...testimonials.slice(0, 3)];
-});
-
-// Calculate carousel position (33.333% per card on desktop)
-const carouselPosition = computed(() => {
-  return currentTestimonial.value * 33.333;
-});
-
-// Go to specific testimonial
-const goToTestimonial = (index) => {
-  isTransitioning.value = true;
-  currentTestimonial.value = index;
-  resetCarouselTimer();
-};
-
-// Next testimonial with seamless loop
-const nextTestimonial = () => {
-  if (!isTransitioning.value) isTransitioning.value = true;
-  
-  // If we are at the last real item, slide to the first clone
-  if (currentTestimonial.value >= testimonials.length) {
-    // Should verify if we are already dealing with reset logic
-    return;
-  }
-  
-  currentTestimonial.value++;
-  
-  // If we reached the clone of the first item (index == length)
-  if (currentTestimonial.value === testimonials.length) {
-    // Wait for transition to finish, then snap back to 0
-    setTimeout(() => {
-      isTransitioning.value = false; // Disable transition
-      currentTestimonial.value = 0;  // Snap to real 0
-      
-      // Re-enable transition after a small tick
-      setTimeout(() => {
-        isTransitioning.value = true;
-      }, 50);
-    }, 700); // Match CSS transition duration
-  }
-  
-  resetCarouselTimer();
-};
-
-// Previous testimonial
-const prevTestimonial = () => {
-  isTransitioning.value = true;
-  if (currentTestimonial.value <= 0) {
-    // For simple implementation, just loop back to end (with rewind effect)
-    // or implement similar clone logic for reverse direction if critical
-    currentTestimonial.value = testimonials.length - 1;
-  } else {
-    currentTestimonial.value--;
-  }
-  resetCarouselTimer();
-};
-
-// Start auto-sliding
-const startCarousel = () => {
-  stopCarousel();
-  carouselTimer = setInterval(() => {
-    nextTestimonial();
-  }, CAROUSEL_INTERVAL);
-};
-
-// Stop auto-sliding
-const stopCarousel = () => {
-  if (carouselTimer) {
-    clearInterval(carouselTimer);
-    carouselTimer = null;
-  }
-};
-
-// Pause on hover
-const pauseCarousel = () => {
-  stopCarousel();
-};
-
-// Resume after hover
-const resumeCarousel = () => {
-  startCarousel();
-};
-
-// Reset timer after manual navigation
-const resetCarouselTimer = () => {
-  stopCarousel();
-  startCarousel();
-};
-
-// Start carousel on mount
-onMounted(() => {
-  startCarousel();
-});
-
-// Cleanup on unmount
-onBeforeUnmount(() => {
-  stopCarousel();
-});
-
-
-const brandLogos = [
-  { name: "Microsoft", icon: "simple-icons:microsoft" },
-  { name: "Google", icon: "simple-icons:google" },
-  { name: "Amazon", icon: "simple-icons:amazon" },
-  { name: "Apple", icon: "simple-icons:apple" },
-  { name: "Meta", icon: "simple-icons:meta" },
-  { name: "Tesla", icon: "simple-icons:tesla" },
-  { name: "Spotify", icon: "simple-icons:spotify" },
-  { name: "Adobe", icon: "simple-icons:adobe" },
-  { name: "Slack", icon: "simple-icons:slack" },
-  { name: "Zoom", icon: "simple-icons:zoom" },
+// Landing page: digital profile preview (design demonstration on a phone mockup)
+const profileLinks = [
+  { label: "Website", icon: "heroicons:globe-alt" },
+  { label: "Portfolio", icon: "heroicons:briefcase" },
+  { label: "LinkedIn Profile", icon: "heroicons:user-group" },
+  { label: "Book a Meeting", icon: "heroicons:calendar-days" },
 ];
+
+// Landing page: card material showcase (rendered as pure-CSS card mockups)
+const cardMaterials = [
+  {
+    name: "Classic PVC",
+    tagline:
+      "Durable, affordable and perfect for everyday professional use.",
+    price: "RM29",
+    badge: "Most Popular",
+    badgeClass: "text-[#e8d9b8]",
+    face: "lp-face-pvc",
+    accent: "text-secondary-900",
+    sub: "text-secondary-500",
+    sampleName: "Your Name",
+    sampleRole: "Job Title",
+  },
+  {
+    name: "Premium Metal",
+    tagline:
+      "Luxurious brushed metal with laser engraving. Unforgettable in hand.",
+    price: "RM89",
+    badge: "Premium",
+    badgeClass: "text-[#c2a068]",
+    face: "lp-face-metal",
+    accent: "text-white",
+    sub: "text-white/60",
+    sampleName: "Your Name",
+    sampleRole: "Job Title",
+  },
+  {
+    name: "Eco Bamboo",
+    tagline:
+      "Sustainable wood-grain finish. Perfect for eco-conscious brands.",
+    price: "RM59",
+    badge: "Eco-Friendly",
+    badgeClass: "text-[#9db98f]",
+    face: "lp-face-bamboo",
+    accent: "text-secondary-900",
+    sub: "text-secondary-600",
+    sampleName: "Your Name",
+    sampleRole: "Job Title",
+  },
+];
+
+// Landing page: ready-made design presets (rendered as pure-CSS card faces)
+const cardDesigns = [
+  { label: "Minimalist", face: "lp-design-minimal" },
+  { label: "Creative", face: "lp-design-creative" },
+  { label: "Professional", face: "lp-design-professional" },
+  { label: "Bold", face: "lp-design-bold" },
+  { label: "Executive", face: "lp-design-executive" },
+  { label: "Tech", face: "lp-design-tech" },
+  { label: "Finance", face: "lp-design-finance" },
+  { label: "Healthcare", face: "lp-design-healthcare" },
+];
+
+// FAQ logic (uses the existing public chatbot questions endpoint)
+const loadFaq = async () => {
+  try {
+    const response = await $api.get('/chatbot/questions');
+    if (response?.success && Array.isArray(response?.data)) {
+      faqItems.value = response.data;
+    }
+  } catch (error) {
+    // Degrade silently — render nothing if the request fails
+    faqItems.value = [];
+  } finally {
+    faqLoading.value = false;
+    // The FAQ block only exists after this response lands — re-arm reveal for it.
+    nextTick(setupReveal);
+  }
+};
+
+// Toggle a single FAQ item open/closed (one open at a time)
+const toggleFaq = (index) => {
+  openFaqIndex.value = openFaqIndex.value === index ? null : index;
+};
 
 const smoothScroll = (target) => {
   const element = document.querySelector(target);
@@ -2542,71 +2589,37 @@ const submitBusinessRequest = async () => {
   submittingBusinessRequest.value = true;
 
   try {
-    // Prepare email content
-    const subject = `Business Plan Request - ${businessForm.company_name}`;
-    const body = `
-Business Plan Request Details:
+    const response = await $api.post("/business-inquiries", {
+      company_name: businessForm.company_name,
+      company_address: businessForm.company_address,
+      quota: businessForm.quota,
+      contact_person: businessForm.contact_person,
+      phone: businessForm.phone,
+      email: businessForm.email,
+      notes: businessForm.notes,
+      source: "homepage",
+    });
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-COMPANY INFORMATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Company Name: ${businessForm.company_name}
-Company Address: ${businessForm.company_address}
-Number of NFC Cards Needed: ${businessForm.quota} cards
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CONTACT INFORMATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Contact Person: ${businessForm.contact_person}
-Email: ${businessForm.email}
-Phone: ${businessForm.phone}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-USER ACCOUNT DETAILS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-User: ${authStore.user?.first_name || "Guest"} ${
-      authStore.user?.last_name || "User"
+    if (!response?.success) {
+      throw new Error(response?.message || "Failed to submit enquiry");
     }
-User Email: ${authStore.user?.email || businessForm.email}
-Submitted: ${new Date().toLocaleString()}
-${
-  businessForm.notes
-    ? `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nADDITIONAL NOTES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${businessForm.notes}`
-    : ""
-}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Please contact this customer within 24 hours.
-This is an automated request from NFCGo platform.
-`;
-
-    // Create Gmail compose URL
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-      "genn.chong@clbgroups.com"
-    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    // Open Gmail in new tab
-    window.open(gmailUrl, "_blank");
-
-    // Show success message
     $toast.success(
-      "Opening Gmail... Please send the email to complete your Business Plan request."
+      "Your Business Plan enquiry has been received. Our team will contact you soon."
     );
 
-    // Close modal and show success alert after a short delay
+    closeBusinessModal();
+    // Show inline success alert since already on Homepage
+    showBusinessRequestSuccess.value = true;
+    // Auto-dismiss after 15 seconds
     setTimeout(() => {
-      closeBusinessModal();
-      // Show inline success alert since already on Homepage
-      showBusinessRequestSuccess.value = true;
-      // Auto-dismiss after 15 seconds
-      setTimeout(() => {
-        dismissBusinessRequestSuccess();
-      }, 15000);
-    }, 2000);
+      dismissBusinessRequestSuccess();
+    }, 15000);
   } catch (error) {
     console.error("Business plan request error:", error);
     $toast.error(
-      "Failed to open email client. Please contact genn.chong@clbgroups.com directly."
+      error?.response?.data?.message ||
+        "Failed to submit your enquiry. Please try again or contact support."
     );
   } finally {
     submittingBusinessRequest.value = false;
@@ -2836,13 +2849,59 @@ const handleClickOutside = (e) => {
   }
 };
 
+// Scroll reveal — toggles .is-revealed on [data-reveal] elements as they enter view.
+// Idempotent & re-armable: safe to call again whenever new content mounts
+// (e.g. the FAQ list that renders only after its API response arrives).
+const setupReveal = () => {
+  if (typeof window === "undefined") return;
+  const nodes = document.querySelectorAll("[data-reveal]:not(.is-revealed)");
+  if (!nodes.length) return;
+
+  const reduceMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    nodes.forEach((el) => el.classList.add("is-revealed"));
+    return;
+  }
+
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-revealed");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+  }
+
+  nodes.forEach((el) => revealObserver.observe(el));
+};
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleEscKey);
+
+  // Reveal landing page sections on scroll
+  setupReveal();
+
+  // Auto-flip the hero card between front and back
+  const reduceMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduceMotion) {
+    heroFlipTimer = window.setInterval(() => {
+      heroFlipped.value = !heroFlipped.value;
+    }, HERO_FLIP_INTERVAL);
+  }
   
-  // Load prices and questions
+  // Load prices, questions and FAQ
   loadPrices();
   loadPopularQuestions();
+  loadFaq();
 
   // Check for business request success query parameter
   const route = useRoute();
@@ -2885,12 +2944,18 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
   document.removeEventListener("keydown", handleEscKey);
+  if (revealObserver) {
+    revealObserver.disconnect();
+    revealObserver = null;
+  }
+  if (heroFlipTimer) {
+    window.clearInterval(heroFlipTimer);
+    heroFlipTimer = null;
+  }
 });
-// Feature Auto-Slide Logic
+// Feature Auto-Slide Logic (single seamless row)
 const featureTopCurrentSlide = ref(0);
-const featureBottomCurrentSlide = ref(0);
 const featureTopIsTransitioning = ref(true);
-const featureBottomIsTransitioning = ref(true);
 const featureMobileMode = ref(false);
 let featureSlideInterval;
 
@@ -2899,114 +2964,86 @@ const featuresList = [
     title: 'Works Instantly',
     description: 'No app needed',
     icon: 'heroicons:bolt',
-    bgClass: 'bg-gradient-to-br from-blue-100 to-blue-200',
-    textClass: 'text-blue-600'
+    bgClass: 'bg-gradient-to-br from-primary-100 to-primary-200',
+    textClass: 'text-primary-600'
   },
   {
     title: 'Customizable Profiles',
     description: 'Customizable and ready template for content and card',
     icon: 'heroicons:paint-brush',
-    bgClass: 'bg-gradient-to-br from-purple-100 to-purple-200',
-    textClass: 'text-purple-600'
+    bgClass: 'bg-gradient-to-br from-[#e4efed] to-[#cfe2df]',
+    textClass: 'text-[#4b7a75]'
   },
   {
     title: 'Seamless Linking',
     description: 'Link to WhatsApp, LinkedIn, website, and other social media apps',
     icon: 'heroicons:wifi',
-    bgClass: 'bg-gradient-to-br from-green-100 to-green-200',
-    textClass: 'text-green-600'
+    bgClass: 'bg-gradient-to-br from-success-100 to-success-200',
+    textClass: 'text-success-600'
   },
   {
     title: 'Analytics',
     description: 'Track taps and engagement',
     icon: 'heroicons:chart-bar',
-    bgClass: 'bg-gradient-to-br from-orange-100 to-orange-200',
-    textClass: 'text-orange-600'
+    bgClass: 'bg-gradient-to-br from-primary-100 to-primary-200',
+    textClass: 'text-primary-600'
   },
   {
     title: 'Centralized Connection Management',
     description: 'Organize every connection in one dashboard. Add notes, set reminders, and never lose a lead.',
     icon: 'heroicons:users',
-    bgClass: 'bg-gradient-to-br from-indigo-100 to-indigo-200',
-    textClass: 'text-indigo-600'
+    bgClass: 'bg-gradient-to-br from-[#f3ebdd] to-[#e6d6bd]',
+    textClass: 'text-[#a17e4f]'
   },
   {
     title: 'Eco-Friendly',
     description: 'Eliminate paper waste. One digital card lasts forever.',
     icon: 'heroicons:globe-americas',
-    bgClass: 'bg-gradient-to-br from-teal-100 to-teal-200',
-    textClass: 'text-teal-600'
+    bgClass: 'bg-gradient-to-br from-[#e4efed] to-[#cfe2df]',
+    textClass: 'text-[#4b7a75]'
   },
   {
     title: 'QR Code Backup',
     description: 'Built-in QR code for non-NFC devices. Universal compatibility guaranteed.',
     icon: 'heroicons:qr-code',
-    bgClass: 'bg-gradient-to-br from-slate-100 to-slate-200',
-    textClass: 'text-slate-600'
+    bgClass: 'bg-gradient-to-br from-secondary-100 to-secondary-200',
+    textClass: 'text-secondary-600'
   },
   {
     title: 'Privacy Controls',
     description: 'Choose what to share and when. Disable temporarily without replacing the card.',
     icon: 'heroicons:shield-check',
-    bgClass: 'bg-gradient-to-br from-rose-100 to-rose-200',
-    textClass: 'text-rose-600'
+    bgClass: 'bg-gradient-to-br from-primary-100 to-primary-200',
+    textClass: 'text-primary-600'
   },
   {
     title: 'Video Introduction',
     description: 'Add a personal video message. Memorable first impressions every time.',
     icon: 'heroicons:video-camera',
-    bgClass: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-200',
-    textClass: 'text-fuchsia-600'
+    bgClass: 'bg-gradient-to-br from-[#f3ebdd] to-[#e6d6bd]',
+    textClass: 'text-[#a17e4f]'
   }
 ];
 
-// Double the features to create seamless loop
+// Double the list so the horizontal loop is seamless
 const featuresRow1 = computed(() => [...featuresList, ...featuresList]);
-// For row 2, we start from index 3 (offset), and also double to ensure enough items
-const featuresRow2 = computed(() => {
-  const rotated = [...featuresList.slice(3), ...featuresList.slice(0, 3)];
-  return [...rotated, ...rotated];
-});
 
 const startFeatureSlideShow = () => {
-  // Initialize start positions
-  // Top row starts at index 9 (end of first set) to slide right (decrement)
-  featureTopCurrentSlide.value = featuresList.length; 
-  // Bottom row starts at 0 to slide left (increment)
-  featureBottomCurrentSlide.value = 0;
+  // Start at the end of the first set and slide right for an endless loop
+  featureTopCurrentSlide.value = featuresList.length;
 
   featureSlideInterval = setInterval(() => {
-    // Enable transitions
     featureTopIsTransitioning.value = true;
-    featureBottomIsTransitioning.value = true;
-
-    // Slide Top Row Right (Decrement)
     featureTopCurrentSlide.value--;
 
-    // Slide Bottom Row Left (Increment)
-    featureBottomCurrentSlide.value++;
-
-    // Check bounds and snap back
-    // For Top Row (Right Slide): When we reach 0, we are identical to index 9.
-    // We allow the transition to 0 to finish, then snap back to 9.
-    const topReset = featureTopCurrentSlide.value <= 0;
-    
-    // For Bottom Row (Left Slide): When we reach length, we are identical to index 0.
-    const bottomReset = featureBottomCurrentSlide.value >= featuresList.length;
-
-    if (topReset || bottomReset) {
+    // When we reach 0 the row is identical to the start — snap back invisibly
+    if (featureTopCurrentSlide.value <= 0) {
       setTimeout(() => {
-        if (topReset) {
-          featureTopIsTransitioning.value = false;
-          featureTopCurrentSlide.value = featuresList.length;
-        }
-        if (bottomReset) {
-          featureBottomIsTransitioning.value = false;
-          featureBottomCurrentSlide.value = 0;
-        }
-      }, 700); // Match CSS duration
+        featureTopIsTransitioning.value = false;
+        featureTopCurrentSlide.value = featuresList.length;
+      }, 700); // Match CSS transition duration
     }
-  }, 3500); // 3-4 seconds per slide
+  }, 3500); // 3.5s per slide
 };
 
 const checkFeatureMobile = () => {
@@ -3064,5 +3101,1264 @@ onUnmounted(() => {
 /* Smooth transitions for modal elements */
 .contact-modal-content {
   transition: all 0.3s ease-out;
+}
+
+/* ============================================================
+   LANDING PAGE — PREMIUM DESIGN LAYER
+   Hand-written, scoped to the public homepage only.
+   Palette follows the app theme tokens (navy / teal / gold).
+   ============================================================ */
+
+/* ---- Display typography ---- */
+.lp-display {
+  font-size: clamp(2.35rem, 5vw, 4.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  color: var(--theme-secondary-900, #1c1a15);
+}
+.lp-grad {
+  background-image: linear-gradient(
+    100deg,
+    var(--theme-primary-600, #3d496a),
+    var(--theme-accent, #5d8c87) 58%,
+    var(--theme-accent-secondary, #b8956a)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lp-grad-accent {
+  font-style: italic;
+  background-image: linear-gradient(
+    100deg,
+    var(--theme-accent, #5d8c87),
+    var(--theme-primary-600, #3d496a)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lp-h2 {
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  color: var(--theme-secondary-900, #1c1a15);
+}
+.lp-lead {
+  font-size: 1.075rem;
+  line-height: 1.65;
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+/* ---- Eyebrow / kicker chips ---- */
+.lp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--theme-primary-700, #323b56);
+  background: color-mix(in srgb, #ffffff 74%, var(--theme-primary-50, #f4f6fa));
+  border: 1px solid color-mix(in srgb, var(--theme-primary-200, #c9d0de) 72%, transparent);
+  backdrop-filter: blur(8px);
+}
+.lp-eyebrow-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--theme-accent, #5d8c87);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent, #5d8c87) 22%, transparent);
+}
+.lp-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--theme-accent, #5d8c87);
+}
+.lp-kicker::before {
+  content: "";
+  width: 1.75rem;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--theme-accent, #5d8c87), transparent);
+}
+
+/* ---- Ambient hero background ---- */
+.lp-hero-mesh {
+  position: absolute;
+  inset: -18% -12% auto -12%;
+  height: 125%;
+  pointer-events: none;
+  background:
+    radial-gradient(42rem 42rem at 12% 6%, color-mix(in srgb, var(--theme-accent, #5d8c87) 20%, transparent), transparent 62%),
+    radial-gradient(36rem 36rem at 88% 10%, color-mix(in srgb, var(--theme-primary-400, #6f7ea0) 22%, transparent), transparent 60%),
+    radial-gradient(34rem 34rem at 72% 92%, color-mix(in srgb, var(--theme-accent-secondary, #b8956a) 16%, transparent), transparent 62%);
+  filter: blur(6px);
+}
+.lp-hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 32%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 32%, transparent) 1px, transparent 1px);
+  background-size: 58px 58px;
+  -webkit-mask-image: radial-gradient(62% 55% at 50% 28%, #000 0%, transparent 76%);
+  mask-image: radial-gradient(62% 55% at 50% 28%, #000 0%, transparent 76%);
+}
+
+/* ---- Navigation ---- */
+.lp-nav-link {
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--theme-secondary-600, #5c5548);
+  transition: color 0.2s ease;
+}
+.lp-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--theme-primary-600, #3d496a), var(--theme-accent, #5d8c87));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lp-nav-link:hover {
+  color: var(--theme-primary-700, #323b56);
+}
+.lp-nav-link:hover::after {
+  transform: scaleX(1);
+}
+/* ---- Hero product card ---- */
+.lp-card-3d {
+  transform: perspective(1000px) rotateX(7deg) rotateY(-11deg);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.lp-card-3d:hover {
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.02);
+}
+.lp-glow {
+  position: absolute;
+  inset: -16% -12%;
+  z-index: 0;
+  border-radius: 999px;
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--theme-accent, #5d8c87) 32%, transparent), transparent 70%);
+  filter: blur(30px);
+}
+.lp-mini-chip {
+  position: absolute;
+  top: 1.35rem;
+  left: 50%;
+  width: 2.1rem;
+  height: 1.6rem;
+  transform: translateX(-50%);
+  border-radius: 22%;
+  background: linear-gradient(160deg, #f4d79b 0%, #d9a94f 45%, #b8956a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.35);
+  opacity: 0.9;
+}
+.lp-mini-chip::before,
+.lp-mini-chip::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  border-radius: 1px;
+  background: rgba(0, 0, 0, 0.28);
+}
+.lp-mini-chip::before {
+  top: 22%;
+  height: 12%;
+}
+.lp-mini-chip::after {
+  bottom: 18%;
+  height: 34%;
+}
+.lp-pulse {
+  animation: lpPulse 2.4s ease-in-out infinite;
+}
+@keyframes lpPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+/* ---- Product gallery: pure-CSS card mockups ---- */
+.lp-mini-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transform: rotate(-2deg);
+  box-shadow:
+    0 22px 44px -24px rgba(35, 41, 59, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
+}
+.lp-mini-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.4) 50%, transparent 62%);
+  opacity: 0.55;
+}
+.group:hover .lp-mini-card {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: 0 30px 55px -26px rgba(35, 41, 59, 0.7);
+}
+.lp-mini-card-top,
+.lp-mini-card-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lp-mini-card-bottom {
+  align-items: flex-end;
+}
+.lp-mini-card-brand {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.lp-mini-card-chip {
+  position: relative;
+  z-index: 1;
+  width: 2rem;
+  height: 1.45rem;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #fde68a, #d4a13c 45%, #b8860b);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.lp-mini-card-chip::before {
+  content: "";
+  position: absolute;
+  inset: 4px 7px;
+  border-left: 1px solid rgba(0, 0, 0, 0.25);
+  border-right: 1px solid rgba(0, 0, 0, 0.25);
+}
+.lp-mini-card-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.lp-mini-card-role {
+  margin-top: 2px;
+  font-size: 0.7rem;
+}
+.lp-mini-card-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1c1a15;
+}
+.lp-face-pvc {
+  background: linear-gradient(135deg, #ffffff, #eef1f6 55%, #dde3ec);
+}
+.lp-face-metal {
+  background:
+    repeating-linear-gradient(112deg, rgba(255, 255, 255, 0.1) 0 2px, rgba(255, 255, 255, 0) 2px 4px),
+    linear-gradient(135deg, #3a4152, #20252f 50%, #14181f);
+}
+.lp-face-bamboo {
+  background:
+    repeating-linear-gradient(95deg, rgba(120, 72, 32, 0.14) 0 3px, rgba(120, 72, 32, 0) 3px 7px),
+    linear-gradient(135deg, #e9d3ad, #d8b483 55%, #c19a63);
+}
+
+/* ---- Product gallery: design presets ---- */
+.lp-design {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 30px -20px rgba(35, 41, 59, 0.55);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.group:hover .lp-design {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 40px -22px rgba(35, 41, 59, 0.65);
+}
+.lp-design-brand {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.lp-design-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1c1a15;
+}
+.lp-design-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.lp-design-role {
+  font-size: 0.58rem;
+  opacity: 0.75;
+}
+.lp-design-minimal { background: linear-gradient(135deg, #ffffff, #eef1f6); color: #1c1a15; }
+.lp-design-creative { background: linear-gradient(135deg, #a78bfa, #f0abfc); color: #ffffff; }
+.lp-design-professional { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: #ffffff; }
+.lp-design-bold { background: linear-gradient(135deg, #f97316, #dc2626); color: #ffffff; }
+.lp-design-executive { background: linear-gradient(135deg, #111827, #374151); color: #ffffff; }
+.lp-design-tech { background: linear-gradient(135deg, #312e81, #0ea5e9); color: #ffffff; }
+.lp-design-finance { background: linear-gradient(135deg, #134e4a, #0f766e); color: #ffffff; }
+.lp-design-healthcare { background: linear-gradient(135deg, #881337, #be185d); color: #ffffff; }
+
+/* ---- Digital profile phone mockup ---- */
+.lp-prof-bullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  color: var(--theme-accent, #5d8c87);
+  background: color-mix(in srgb, var(--theme-accent, #5d8c87) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-accent, #5d8c87) 26%, transparent);
+}
+.lp-phone {
+  position: relative;
+  z-index: 1;
+  width: min(300px, 82vw);
+  padding: 0.65rem;
+  border-radius: 2.4rem;
+  background: linear-gradient(160deg, #2b3040, #14171f);
+  box-shadow:
+    0 40px 80px -34px rgba(20, 23, 31, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.lp-phone-notch {
+  position: absolute;
+  top: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5.5rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: #0d0f14;
+  z-index: 3;
+}
+.lp-phone-screen {
+  border-radius: 1.9rem;
+  background: #ffffff;
+  padding: 1.5rem 1.1rem 1.1rem;
+  overflow: hidden;
+}
+.lp-prof-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.1rem 1rem 1.25rem;
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--theme-accent, #5d8c87) 26%, transparent), transparent 70%),
+    linear-gradient(150deg, var(--theme-primary-800, #2a3248), var(--theme-primary-900, #23293b));
+}
+.lp-prof-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #ffffff;
+  background: linear-gradient(150deg, var(--theme-accent, #5d8c87), var(--theme-primary-600, #3d496a));
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+}
+.lp-prof-name {
+  margin-top: 0.7rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.lp-prof-role {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+.lp-prof-socials {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+.lp-prof-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.lp-prof-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.95rem;
+  width: 100%;
+}
+.lp-prof-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.lp-prof-action-primary {
+  background: linear-gradient(130deg, var(--theme-accent, #5d8c87), var(--theme-primary-600, #3d496a));
+  border-color: transparent;
+}
+.lp-prof-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.lp-prof-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.75rem;
+  background: var(--theme-secondary-50, #fafaf7);
+  border: 1px solid var(--theme-secondary-200, #e6e2d8);
+}
+.lp-prof-link-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.5rem;
+  color: var(--theme-accent, #5d8c87);
+  background: color-mix(in srgb, var(--theme-accent, #5d8c87) 12%, transparent);
+}
+.lp-prof-link-label {
+  flex: 1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--theme-secondary-800, #2e2a24);
+}
+
+/* ---- Floating pills ---- */
+.lp-float-pill {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--theme-secondary-800, #2e2a24);
+  background: color-mix(in srgb, #ffffff 84%, var(--theme-secondary-50, #fafaf7));
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 88%, transparent);
+  box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--theme-secondary-800, #2e2a24) 55%, transparent);
+  backdrop-filter: blur(8px);
+}
+@keyframes lpFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-11px); }
+}
+.lp-float-1 { top: 4%; left: -8%; animation: lpFloat 6.5s ease-in-out infinite; }
+.lp-float-2 { bottom: 16%; right: -9%; animation: lpFloat 7.5s ease-in-out 0.6s infinite; }
+.lp-float-3 { bottom: -5%; left: 4%; animation: lpFloat 8.5s ease-in-out 1.1s infinite; }
+
+/* Hide floating pills on small screens to avoid clipping */
+@media (max-width: 640px) {
+  .lp-float-pill {
+    display: none;
+  }
+}
+
+/* ---- Trust ticks ---- */
+.lp-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* ---- Marquee band ---- */
+.lp-marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.lp-marquee {
+  display: flex;
+  width: max-content;
+  animation: lpMarquee 36s linear infinite;
+}
+.lp-marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes lpMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.lp-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--theme-secondary-500, #7f7763);
+}
+.lp-marquee-item::after {
+  content: "";
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--theme-accent, #5d8c87);
+  opacity: 0.65;
+}
+
+/* ---- Stat strip cell ---- */
+.lp-stat {
+  background: color-mix(in srgb, #ffffff 82%, var(--theme-secondary-50, #fafaf7));
+  transition: background 0.3s ease;
+}
+.lp-stat:hover {
+  background: #ffffff;
+}
+
+/* ---- Featured pricing ring ---- */
+.lp-price-pop {
+  position: relative;
+}
+.lp-price-pop::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(140deg, var(--theme-accent, #5d8c87), var(--theme-primary-500, #4f5d82) 50%, var(--theme-accent-secondary, #b8956a));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- Premium CTA ---- */
+.lp-cta {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(58% 130% at 12% 0%, color-mix(in srgb, var(--theme-accent, #5d8c87) 58%, transparent), transparent 62%),
+    linear-gradient(120deg, var(--theme-primary-700, #323b56), var(--theme-primary-900, #23293b));
+}
+.lp-cta-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.25;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 0%, #000, transparent 78%);
+  mask-image: radial-gradient(70% 80% at 50% 0%, #000, transparent 78%);
+}
+
+/* ---- Scroll reveal ---- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .lp-marquee,
+  .lp-float-1,
+  .lp-float-2,
+  .lp-float-3,
+  .lp-pulse {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   SHOWCASE SECTION LAYER — Ink & Brass primitives
+   Additive only; reuses the theme tokens + ink/brass tokens
+   defined in assets/css/main.css.
+   ============================================================ */
+
+/* ---- Nav (ink glass) ---- */
+.nav-ink-link {
+  position: relative;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-compact);
+  color: rgba(255, 255, 255, 0.78);
+  transition: color 0.2s ease;
+}
+.nav-ink-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 1px;
+  background: var(--brass, #c2a068);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-ink-link:hover {
+  color: #fff;
+}
+.nav-ink-link:hover::after {
+  transform: scaleX(1);
+}
+.nav-ink-ghost {
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.2s ease;
+}
+.nav-ink-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.nav-m-ink-link {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.55rem;
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-medium);
+  color: rgba(255, 255, 255, 0.85);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.nav-m-ink-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+/* ---- Hero product stage ---- */
+.hero-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  perspective: 1400px;
+  padding: 1rem 0;
+}
+.hero-halo {
+  position: absolute;
+  inset: -6% -6%;
+  z-index: 0;
+  border-radius: 999px;
+  background: radial-gradient(
+    46% 46% at 50% 46%,
+    color-mix(in srgb, var(--brass, #c2a068) 26%, transparent),
+    transparent 70%
+  );
+  filter: blur(46px);
+  pointer-events: none;
+}
+.hero-card-wrap {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 27rem);
+  transform: rotate(-3deg);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero-card-wrap:hover {
+  transform: rotate(0deg) translateY(-6px);
+}
+.hero-card {
+  border-radius: 1.1rem;
+  box-shadow:
+    0 44px 74px -32px rgba(0, 0, 0, 0.82),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.hero-chip {
+  position: absolute;
+  z-index: 3;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.hero-chip-1 {
+  top: 5%;
+  left: -4%;
+}
+.hero-chip-2 {
+  top: 45%;
+  right: -6%;
+}
+.hero-chip-3 {
+  bottom: 15%;
+  left: -2%;
+}
+@media (max-width: 480px) {
+  .hero-chip {
+    display: none;
+  }
+}
+.hero-ripple {
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 20rem;
+  height: 20rem;
+  margin: -10rem 0 0 -10rem;
+}
+.hero-stat {
+  transition: background 0.3s ease;
+}
+.hero-stat:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.hero-stat__num {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.hero-stat__lbl {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ---- Trust marquee (on ink) ---- */
+.marquee-item-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.6);
+}
+.marquee-item-ink::after {
+  content: "";
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--brass, #c2a068);
+  opacity: 0.7;
+}
+
+/* ---- Feature card (paper) ---- */
+.feature-card {
+  position: relative;
+  height: 100%;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-300, #cdc7b9) 55%, transparent);
+  border-radius: 1.1rem;
+  padding: 1.75rem 1.6rem;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.5);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 50%, transparent);
+}
+.feature-card__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 0.85rem;
+  margin-bottom: 1.1rem;
+  color: #1b1407;
+  background: linear-gradient(140deg, var(--brass-200, #e8d9b8), var(--brass, #c2a068));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.feature-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--theme-secondary-900, #1c1a15);
+  margin-bottom: 0.5rem;
+}
+.feature-card__desc {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+/* ---- Step (on ink) ---- */
+.step-ink {
+  position: relative;
+  border-radius: 1.1rem;
+  padding: 1.5rem 1.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    background 0.35s ease;
+}
+.step-ink:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
+  background: rgba(255, 255, 255, 0.06);
+}
+.step-ink__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.step-ink__num {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.18);
+}
+.step-ink__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.75rem;
+  color: var(--brass, #c2a068);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.step-ink__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.step-ink__desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---- Use card (paper, who uses) ---- */
+.use-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 80%, transparent);
+  border-radius: 1.1rem;
+  padding: 2rem;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.use-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
+}
+
+/* ---- Gallery sub-heading (on ink) ---- */
+.gallery-sub {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin-bottom: 1.75rem;
+}
+
+/* ---- Material showcase ---- */
+.material-item {
+  display: flex;
+  flex-direction: column;
+}
+.material-stage {
+  perspective: 1200px;
+}
+.material-item:hover .material-card {
+  transform: rotateY(180deg) translateY(-4px);
+}
+.material-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  opacity: 0.92;
+}
+
+/* ---- Why card (paper) ---- */
+.why-card {
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 80%, transparent);
+  border-radius: 1.1rem;
+  padding: 1.75rem;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.why-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
+}
+
+/* ---- Price card (on ink) ---- */
+.price-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.25rem;
+  padding: 1.9rem 1.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    background 0.35s ease;
+}
+.price-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 40%, transparent);
+  background: rgba(255, 255, 255, 0.06);
+}
+.price-card--pop {
+  background: linear-gradient(
+    170deg,
+    color-mix(in srgb, var(--brass, #c2a068) 14%, transparent),
+    rgba(255, 255, 255, 0.03) 55%
+  );
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 55%, transparent);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.75);
+}
+.price-card__badge {
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #1b1407;
+  background: linear-gradient(120deg, var(--brass-200, #e8d9b8), var(--brass, #c2a068));
+}
+.price-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.price-card__amount {
+  margin: 0.6rem 0 0.35rem;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.price-card__desc {
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1.4rem;
+}
+.price-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.75rem;
+  flex: 1;
+}
+.price-card__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+.price-card__tick {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--brass, #c2a068);
+}
+.price-card__cta {
+  margin-top: auto;
+}
+
+/* ---- FAQ accordion (paper) ---- */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.faq-item {
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 85%, transparent);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.faq-item--open {
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 50%, transparent);
+  box-shadow: 0 22px 44px -32px rgba(20, 29, 43, 0.5);
+}
+.faq-item__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  padding: 1.15rem 1.4rem;
+}
+.faq-item__q {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--theme-secondary-900, #1c1a15);
+}
+.faq-item__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  color: #1b1407;
+  background: linear-gradient(140deg, var(--brass-200, #e8d9b8), var(--brass, #c2a068));
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.faq-item--open .faq-item__icon {
+  transform: rotate(135deg);
+}
+.faq-item__body {
+  padding: 0 1.4rem 1.3rem;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--theme-secondary-600, #5c5548);
+}
+
+/* ---- Shipping track (paper) ---- */
+.ship-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+.ship-step {
+  position: relative;
+  padding: 1.6rem 1.4rem;
+  border-radius: 1.1rem;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 85%, transparent);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.ship-step:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
+}
+.ship-step__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.9rem;
+  margin-bottom: 1rem;
+  color: #1b1407;
+  background: linear-gradient(140deg, var(--brass-200, #e8d9b8), var(--brass, #c2a068));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.ship-step__index {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--brass-600, #a9854d);
+  margin-bottom: 0.35rem;
+}
+.ship-step__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--theme-secondary-900, #1c1a15);
+  margin-bottom: 0.4rem;
+}
+.ship-step__desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--theme-secondary-600, #5c5548);
+}
+@media (min-width: 768px) {
+  .ship-track {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .ship-track::before {
+    content: "";
+    position: absolute;
+    top: 2.6rem;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--brass, #c2a068) 45%, transparent),
+      transparent
+    );
+  }
+  .ship-step__marker {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* ---- Footer (ink) ---- */
+.footer-ink {
+  position: relative;
+  padding: 3.5rem 0 2rem;
+  color: #fff;
+  background: var(--ink-950, #06090d);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.footer-ink__head {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass, #c2a068);
+  margin-bottom: 1rem;
+}
+.footer-ink__link {
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.2s ease;
+}
+.footer-ink__link:hover {
+  color: #fff;
+}
+.footer-ink__bottom {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---- Outline button for paper surfaces ---- */
+.btn-outline-ink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  color: var(--theme-secondary-900, #1c1a15);
+  border: 1px solid color-mix(in srgb, var(--theme-secondary-900, #1c1a15) 25%, transparent);
+  background: transparent;
+  transition: all 0.2s ease;
+}
+.btn-outline-ink:hover {
+  background: var(--theme-secondary-900, #1c1a15);
+  border-color: var(--theme-secondary-900, #1c1a15);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card-wrap,
+  .material-card,
+  .faq-item__icon {
+    transition: none;
+  }
 }
 </style>

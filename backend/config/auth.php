@@ -20,6 +20,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email Verification Enforcement
+    |--------------------------------------------------------------------------
+    |
+    | New accounts have this many days after registration to verify their
+    | email address before protected product routes start rejecting requests.
+    | Accounts that existed before enforcement was introduced are grandfathered
+    | in (email_verified_at backfilled) and must never be blocked.
+    |
+    */
+
+    'verification_grace_days' => (int) env('EMAIL_VERIFICATION_GRACE_DAYS', 7),
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
     |

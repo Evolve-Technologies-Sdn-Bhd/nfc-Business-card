@@ -2,7 +2,7 @@
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+      <h1 class="page-title">
         Employee Activity Log
       </h1>
       <p class="mt-2 text-secondary-600">
@@ -23,10 +23,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label">
               Total Activities
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value">
               {{ statistics.total_logs }}
             </p>
           </div>
@@ -41,10 +41,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label">
               Activities Today
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value">
               {{ statistics.today_count }}
             </p>
           </div>
@@ -59,10 +59,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label">
               Most Active Employee
             </p>
-            <p class="text-lg font-semibold text-secondary-900">
+            <p class="stat-value">
               {{ statistics.most_active_employee?.name || "N/A" }}
             </p>
           </div>
@@ -77,10 +77,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label">
               Most Common Action
             </p>
-            <p class="text-lg font-semibold text-secondary-900">
+            <p class="stat-value">
               {{ statistics.most_common_action?.type || "N/A" }}
             </p>
           </div>
@@ -93,7 +93,7 @@
       <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Employee</label
             >
             <select
@@ -113,7 +113,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Action Type</label
             >
             <select
@@ -133,7 +133,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Start Date</label
             >
             <input
@@ -145,7 +145,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >End Date</label
             >
             <input
@@ -157,7 +157,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Search</label
             >
             <input
@@ -189,32 +189,32 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   Date & Time
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   Employee
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   Action
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   Description
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   IP Address
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left table-head"
                 >
                   Details
                 </th>
@@ -227,26 +227,26 @@
                 class="hover:bg-secondary-50"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-secondary-900">
+                  <div class="table-cell font-medium text-secondary-900">
                     {{ formatDate(log.created_at) }}
                   </div>
-                  <div class="text-xs text-secondary-500">
+                  <div class="text-caption text-secondary-500">
                     {{ formatTime(log.created_at) }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center gap-2">
                     <div>
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="table-cell font-medium text-secondary-900">
                         {{ log.user?.name }}
                       </div>
-                      <div class="text-xs text-secondary-500">
+                      <div class="text-caption text-secondary-500">
                         {{ log.user?.email }}
                       </div>
                     </div>
                     <span 
                       v-if="isAdminUser(log.user)"
-                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-blue-100 text-blue-800 border border-blue-200"
                     >
                       Admin
                     </span>
@@ -255,7 +255,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-2 py-1 text-badge rounded-full',
                       getActionClass(log.action_type),
                     ]"
                   >
@@ -263,16 +263,16 @@
                   </span>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-secondary-900 max-w-xs truncate">
+                  <div class="table-cell text-secondary-900 max-w-xs truncate">
                     {{ log.action_description }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-secondary-900">
+                  <div class="table-cell text-secondary-900">
                     {{ log.ip_address }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-6 py-4 whitespace-nowrap table-cell font-medium">
                   <button
                     @click="viewDetails(log)"
                     class="text-primary-600 hover:text-primary-900"
@@ -287,10 +287,10 @@
 
         <div v-else class="text-center py-12 text-secondary-500">
           <div class="text-6xl mb-4 opacity-50">📋</div>
-          <h3 class="text-lg font-medium text-secondary-900 mb-2">
+          <h3 class="card-title mb-2">
             No Activity Logs Found
           </h3>
-          <p class="text-sm">
+          <p class="text-body">
             There are no employee activities matching your filters.
           </p>
         </div>
@@ -317,7 +317,7 @@
     >
       <div class="card max-w-4xl w-full" @click.stop>
         <div class="card-header flex items-center justify-between">
-          <h2 class="text-xl font-bold text-secondary-900">Activity Details</h2>
+          <h2 class="modal-title">Activity Details</h2>
           <button
             @click="closeDetailsModal"
             class="text-secondary-400 hover:text-secondary-600"
@@ -328,25 +328,25 @@
 
         <div v-if="selectedLog" class="card-body space-y-6">
           <div class="bg-secondary-50 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title mb-4">
               Basic Information
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   Employee
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedLog.user?.name }} ({{ selectedLog.user?.email }})
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   Action Type
                 </p>
                 <span
                   :class="[
-                    'px-2 py-1 text-xs font-medium rounded-full',
+                    'px-2 py-1 text-badge rounded-full',
                     getActionClass(selectedLog.action_type),
                   ]"
                 >
@@ -354,26 +354,26 @@
                 </span>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   Date & Time
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ formatFullDate(selectedLog.created_at) }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   IP Address
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedLog.ip_address }}
                 </p>
               </div>
               <div class="md:col-span-2">
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   User Agent
                 </p>
-                <p class="text-xs text-secondary-900 font-mono break-all">
+                <p class="text-caption text-secondary-900 font-mono break-all">
                   {{ selectedLog.user_agent }}
                 </p>
               </div>
@@ -381,10 +381,10 @@
           </div>
 
           <div class="bg-secondary-50 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title mb-4">
               Description
             </h3>
-            <p class="text-sm text-secondary-900">
+            <p class="text-body text-secondary-900">
               {{ selectedLog.action_description }}
             </p>
           </div>
@@ -393,23 +393,23 @@
             v-if="selectedLog.entity_type"
             class="bg-secondary-50 rounded-lg p-4"
           >
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title mb-4">
               Entity Information
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   Entity Type
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedLog.entity_type }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-label text-secondary-500 mb-1">
                   Entity ID
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedLog.entity_id }}
                 </p>
               </div>
@@ -420,11 +420,11 @@
             v-if="selectedLog.change_summary"
             class="bg-secondary-50 rounded-lg p-4"
           >
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title mb-4">
               Changes Made
             </h3>
             <div
-              class="text-sm text-secondary-900"
+              class="text-body text-secondary-900"
               v-html="selectedLog.change_summary"
             ></div>
           </div>
@@ -433,11 +433,11 @@
             v-if="selectedLog.metadata"
             class="bg-secondary-50 rounded-lg p-4"
           >
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title mb-4">
               Additional Metadata
             </h3>
             <pre
-              class="text-xs font-mono text-secondary-900 bg-white rounded p-3 overflow-x-auto"
+              class="text-caption font-mono text-secondary-900 bg-white rounded p-3 overflow-x-auto"
               >{{ JSON.stringify(selectedLog.metadata, null, 2) }}</pre
             >
           </div>

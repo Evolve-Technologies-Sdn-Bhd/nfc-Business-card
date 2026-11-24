@@ -2,7 +2,7 @@
 <template>
   <div>
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Analytics</h1>
+      <h1 class="page-title text-secondary-900">Analytics</h1>
       <p class="mt-2 text-secondary-600">
         Comprehensive overview of platform performance and usage
       </p>
@@ -18,10 +18,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               {{ stat.name }}
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ stat.value }}
             </p>
           </div>
@@ -34,7 +34,7 @@
       <!-- User Statistics -->
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             User Statistics
           </h3>
         </div>
@@ -45,29 +45,29 @@
           <div v-else-if="stats?.users" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-primary-600">
+                <p class="stat-value text-primary-600">
                   {{ stats.users.total }}
                 </p>
-                <p class="text-sm text-secondary-600">Total Users</p>
+                <p class="stat-label text-secondary-600">Total Users</p>
               </div>
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-success-600">
+                <p class="stat-value text-success-600">
                   {{ stats.users.active }}
                 </p>
-                <p class="text-sm text-secondary-600">Active Subscriptions</p>
+                <p class="stat-label text-secondary-600">Active Subscriptions</p>
               </div>
             </div>
             <div class="text-center p-4 bg-secondary-50 rounded-lg">
-              <p class="text-2xl font-bold text-warning-600">
+              <p class="stat-value text-warning-600">
                 {{ stats.users.admin }}
               </p>
-              <p class="text-sm text-secondary-600">Admin Users</p>
+              <p class="stat-label text-secondary-600">Admin Users</p>
             </div>
             <div class="text-center p-4 bg-secondary-50 rounded-lg">
-              <p class="text-2xl font-bold text-info-600">
+              <p class="stat-value text-info-600">
                 {{ stats.users.new_this_month }}
               </p>
-              <p class="text-sm text-secondary-600">New This Month</p>
+              <p class="stat-label text-secondary-600">New This Month</p>
             </div>
           </div>
           <div v-else class="text-center py-8 text-secondary-500">
@@ -79,7 +79,7 @@
       <!-- Subscription Breakdown -->
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Subscription Breakdown
           </h3>
         </div>
@@ -98,11 +98,11 @@
                   :class="['w-3 h-3 rounded-full mr-3', getPlanColor(plan)]"
                 ></div>
                 <span
-                  class="text-sm font-medium text-secondary-900 capitalize"
+                  class="text-body font-medium text-secondary-900 capitalize"
                   >{{ plan }}</span
                 >
               </div>
-              <span class="text-sm font-semibold text-secondary-900">{{
+              <span class="text-body font-semibold text-secondary-900">{{
                 count
               }}</span>
             </div>
@@ -119,7 +119,7 @@
       <!-- NFC Card Statistics -->
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             NFC Card Statistics
           </h3>
         </div>
@@ -130,30 +130,30 @@
           <div v-else-if="stats?.nfc_cards" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-primary-600">
+                <p class="stat-value text-primary-600">
                   {{ stats.nfc_cards.total }}
                 </p>
-                <p class="text-sm text-secondary-600">Total Cards</p>
+                <p class="stat-label text-secondary-600">Total Cards</p>
               </div>
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-success-600">
+                <p class="stat-value text-success-600">
                   {{ stats.nfc_cards.active }}
                 </p>
-                <p class="text-sm text-secondary-600">Active Cards</p>
+                <p class="stat-label text-secondary-600">Active Cards</p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-warning-600">
+                <p class="stat-value text-warning-600">
                   {{ stats.nfc_cards.pending }}
                 </p>
-                <p class="text-sm text-secondary-600">Pending</p>
+                <p class="stat-label text-secondary-600">Pending</p>
               </div>
               <div class="text-center p-4 bg-secondary-50 rounded-lg">
-                <p class="text-2xl font-bold text-info-600">
+                <p class="stat-value text-info-600">
                   {{ stats.nfc_cards.shipped }}
                 </p>
-                <p class="text-sm text-secondary-600">Shipped</p>
+                <p class="stat-label text-secondary-600">Shipped</p>
               </div>
             </div>
           </div>
@@ -166,7 +166,7 @@
       <!-- Analytics Overview -->
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Analytics Overview
           </h3>
         </div>
@@ -176,29 +176,29 @@
           </div>
           <div v-else-if="stats?.analytics" class="space-y-4">
             <div class="text-center p-4 bg-secondary-50 rounded-lg">
-              <p class="text-2xl font-bold text-primary-600">
+              <p class="stat-value text-primary-600">
                 {{ stats.analytics.total_tracks }}
               </p>
-              <p class="text-sm text-secondary-600">Total Analytics Events</p>
+              <p class="stat-label text-secondary-600">Total Analytics Events</p>
             </div>
             <div class="grid grid-cols-3 gap-4">
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-lg font-bold text-blue-600">
+                <p class="text-h5 text-blue-600">
                   {{ stats.analytics.profile_views }}
                 </p>
-                <p class="text-xs text-secondary-600">Profile Views</p>
+                <p class="text-caption text-secondary-600">Profile Views</p>
               </div>
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-lg font-bold text-green-600">
+                <p class="text-h5 text-green-600">
                   {{ stats.analytics.nfc_taps }}
                 </p>
-                <p class="text-xs text-secondary-600">NFC Taps</p>
+                <p class="text-caption text-secondary-600">NFC Taps</p>
               </div>
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-lg font-bold text-purple-600">
+                <p class="text-h5 text-purple-600">
                   {{ stats.analytics.link_clicks }}
                 </p>
-                <p class="text-xs text-secondary-600">Link Clicks</p>
+                <p class="text-caption text-secondary-600">Link Clicks</p>
               </div>
             </div>
           </div>
@@ -213,7 +213,7 @@
     <div class="mt-8">
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Storage & System Information
           </h3>
         </div>
@@ -230,10 +230,10 @@
                 name="heroicons:server"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Total Storage Used
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{ stats.storage.total_used?.formatted || "0 B" }}
               </p>
             </div>
@@ -242,10 +242,10 @@
                 name="heroicons:photo"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Profile Images
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{ stats.storage.profiles || 0 }}
               </p>
             </div>
@@ -254,10 +254,10 @@
                 name="heroicons:building-office"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Company Logos
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{ stats.storage.logos || 0 }}
               </p>
             </div>
@@ -273,7 +273,7 @@
     <div class="mt-8">
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Recent System Activity
           </h3>
         </div>
@@ -301,17 +301,17 @@
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm text-secondary-900 leading-snug font-medium">
+                <p class="text-body text-secondary-900 leading-snug font-medium">
                   {{ getActivityTitle(activity) }}
                 </p>
                 <p
                   v-if="getActivityContext(activity)"
-                  class="text-xs text-secondary-500 mt-1 truncate"
+                  class="text-caption text-secondary-500 mt-1 truncate"
                   :title="getActivityContext(activity)"
                 >
                   {{ getActivityContext(activity) }}
                 </p>
-                <p class="text-xs text-secondary-400 mt-1">
+                <p class="text-caption text-secondary-400 mt-1">
                   {{ formatTimeAgo(activity.created_at) }}
                 </p>
               </div>
@@ -332,7 +332,7 @@
     <div class="mt-8">
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">Data Export</h3>
+          <h3 class="card-title text-secondary-900">Data Export</h3>
         </div>
         <div class="card-body">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

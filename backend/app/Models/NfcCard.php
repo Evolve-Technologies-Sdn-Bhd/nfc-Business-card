@@ -17,6 +17,7 @@ class NfcCard extends Model
         'card_id',
         'card_number',
         'nfc_card_id',
+        'activation_code',
         'transaction_id',
         'card_template_id',
         'slug',
@@ -68,6 +69,9 @@ class NfcCard extends Model
             if (empty($nfcCard->attributes['card_id'])) {
                 $nfcCard->card_id = 'CARD-' . strtoupper(Str::random(8));
             }
+            if (empty($nfcCard->attributes['activation_code'])) {
+                $nfcCard->attributes['activation_code'] = self::generateActivationCode();
+            }
             if (empty($nfcCard->attributes['card_number']) && !empty($nfcCard->user_id)) {
                 $max = (int) self::where('user_id', $nfcCard->user_id)
                     ->whereNotNull('card_number')
@@ -75,6 +79,32 @@ class NfcCard extends Model
                 $nfcCard->attributes['card_number'] = $max + 1;
             }
         });
+    }
+
+    /**
+     * Generate a unique, human-friendly activation code.
+     *
+     * Alphabet deliberately excludes ambiguous characters 0 / O / 1 / I so the
+     * code can be read from a printed card without confusion. Retries until the
+     * generated code is not already taken by another card.
+     */
+    public static function generateActivationCode(int $length = 10): string
+    {
+        $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $alphabetLength = strlen($alphabet);
+
+        for ($attempt = 0; $attempt < 25; $attempt++) {
+            $code = '';
+            for ($i = 0; $i < $length; $i++) {
+                $code .= $alphabet[random_int(0, $alphabetLength - 1)];
+            }
+            if (!self::where('activation_code', $code)->exists()) {
+                return $code;
+            }
+        }
+
+        // Extremely unlikely fallback — append a unique-ish suffix.
+        return substr($code, 0, max(1, $length - 4)) . strtoupper(substr((string) now()->getTimestampMs(), -4));
     }
 
     public function user()

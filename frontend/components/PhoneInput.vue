@@ -16,7 +16,7 @@
         :disabled="disabled"
       >
         <span class="text-xl mr-1">{{ selectedCountry.flag }}</span>
-        <span class="text-sm font-medium text-gray-700">{{ selectedCountry.dialCode }}</span>
+        <span class="text-button text-gray-700">{{ selectedCountry.dialCode }}</span>
         <Icon name="heroicons:chevron-down" class="h-4 w-4 text-secondary-400 ml-auto" />
       </button>
 
@@ -41,7 +41,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search country..."
-              class="w-full pl-9 pr-3 py-2 text-sm border border-secondary-200 rounded-md focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+              class="w-full pl-9 pr-3 py-2 text-input border border-secondary-200 rounded-md focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
               @keydown.escape="closeDropdown"
             />
           </div>
@@ -57,10 +57,10 @@
               :class="{ 'bg-primary-50': country.code === selectedCountry.code }"
             >
               <span class="text-xl">{{ country.flag }}</span>
-              <span class="flex-1 text-sm text-secondary-700">{{ country.name }}</span>
-              <span class="text-xs text-secondary-500">{{ country.dialCode }}</span>
+              <span class="flex-1 text-body text-secondary-700">{{ country.name }}</span>
+              <span class="text-caption text-secondary-500">{{ country.dialCode }}</span>
             </button>
-            <div v-if="filteredCountries.length === 0" class="p-4 text-center text-sm text-secondary-500">
+            <div v-if="filteredCountries.length === 0" class="p-4 text-center text-body text-secondary-500">
               No countries found
             </div>
           </div>
@@ -77,7 +77,7 @@
       :maxlength="maxLength"
       :required="required"
       :disabled="disabled"
-      class="flex-1 px-3 py-2 text-sm bg-transparent border-none rounded-r-lg focus:outline-none w-full"
+      class="flex-1 px-3 py-2 text-input bg-transparent border-none rounded-r-lg focus:outline-none w-full"
       @input="handleInput"
       @blur="handleBlur"
     />

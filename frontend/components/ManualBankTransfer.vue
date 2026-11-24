@@ -1,31 +1,31 @@
 <template>
   <div class="manual-bank-transfer">
-    <h3 class="text-xl font-semibold mb-4">Manual Bank Transfer</h3>
+    <h3 class="modal-title mb-4">Manual Bank Transfer</h3>
 
     <!-- Payment Summary -->
     <div class="bg-gray-50 rounded-lg p-4 mb-6">
       <div class="flex justify-between items-center mb-2">
         <span class="text-gray-600">Amount to Transfer:</span>
-        <span class="font-semibold text-lg">RM {{ amount.toFixed(2) }}</span>
+        <span class="stat-value">RM {{ amount.toFixed(2) }}</span>
       </div>
-      <p class="text-sm text-gray-600 mt-2">No processing fees for manual bank transfer</p>
+      <p class="text-body text-gray-600 mt-2">No processing fees for manual bank transfer</p>
     </div>
 
     <!-- Bank Details (After initiating) -->
     <div v-if="bankDetails" class="mb-6">
       <!-- Reference Code (Most Important) -->
       <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 mb-4">
-        <p class="text-sm font-medium text-blue-900 mb-2">Payment Reference Code</p>
+        <p class="text-navigation text-blue-900 mb-2">Payment Reference Code</p>
         <div class="flex items-center justify-between bg-white rounded-lg p-3">
-          <code class="text-xl font-bold text-blue-600">{{ bankDetails.reference_code }}</code>
+          <code class="stat-value text-blue-600">{{ bankDetails.reference_code }}</code>
           <button
             @click="copyToClipboard(bankDetails.reference_code)"
-            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-button"
           >
             Copy
           </button>
         </div>
-        <p class="text-xs text-blue-700 mt-2">
+        <p class="text-caption text-blue-700 mt-2">
           ⚠️ IMPORTANT: Include this reference code in your bank transfer
         </p>
       </div>
@@ -34,23 +34,23 @@
       <div class="space-y-3 mb-6">
         <div v-for="bank in bankDetails.banks" :key="bank.name" class="border rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-semibold text-gray-800">{{ bank.name }}</h4>
+            <h4 class="card-title text-gray-800">{{ bank.name }}</h4>
             <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
             </svg>
           </div>
           <div class="space-y-2">
             <div>
-              <p class="text-xs text-gray-600">Account Name</p>
+              <p class="text-caption text-gray-600">Account Name</p>
               <p class="font-medium">{{ bankDetails.account_name }}</p>
             </div>
             <div>
-              <p class="text-xs text-gray-600">Account Number</p>
+              <p class="text-caption text-gray-600">Account Number</p>
               <div class="flex items-center justify-between">
                 <code class="font-medium">{{ bank.account_number }}</code>
                 <button
                   @click="copyToClipboard(bank.account_number)"
-                  class="text-xs text-blue-600 hover:text-blue-700"
+                  class="text-button text-blue-600 hover:text-blue-700"
                 >
                   Copy
                 </button>
@@ -62,13 +62,13 @@
 
       <!-- Instructions -->
       <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-        <h4 class="font-semibold text-yellow-900 mb-2 flex items-center">
+        <h4 class="card-title text-yellow-900 mb-2 flex items-center">
           <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
           </svg>
           Transfer Instructions
         </h4>
-        <ol class="text-sm text-yellow-800 list-decimal list-inside space-y-1">
+        <ol class="text-body text-yellow-800 list-decimal list-inside space-y-1">
           <li>Transfer exactly RM {{ amount.toFixed(2) }} to one of the accounts above</li>
           <li>Include the reference code <strong>{{ bankDetails.reference_code }}</strong> in the transfer remarks</li>
           <li>Save your transaction receipt</li>
@@ -79,14 +79,14 @@
 
       <!-- Upload Payment Proof -->
       <div class="border-2 border-dashed rounded-lg p-6 mb-4">
-        <h4 class="font-semibold mb-3">Upload Payment Receipt</h4>
+        <h4 class="card-title mb-3">Upload Payment Receipt</h4>
         
         <!-- Preview -->
         <div v-if="proofPreview" class="mb-4">
           <img :src="proofPreview" alt="Receipt preview" class="max-w-sm rounded-lg border" />
           <button
             @click="removeProof"
-            class="mt-2 text-sm text-red-600 hover:text-red-700"
+            class="mt-2 text-button text-red-600 hover:text-red-700"
           >
             Remove
           </button>
@@ -110,7 +110,7 @@
           >
             Choose File
           </button>
-          <p class="text-xs text-gray-600 mt-2">
+          <p class="text-caption text-gray-600 mt-2">
             Accepted formats: JPG, PNG, PDF (max 5MB)
           </p>
         </div>
@@ -126,14 +126,14 @@
         <button
           @click="$emit('back')"
           type="button"
-          class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors text-button"
         >
           Back
         </button>
         <button
           @click="uploadProof"
           :disabled="!proofFile || uploading"
-          class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-button"
         >
           <span v-if="!uploading">Submit Receipt</span>
           <span v-else class="flex items-center justify-center">
@@ -150,7 +150,7 @@
     <!-- Initial Generate Reference Button -->
     <div v-else>
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-        <p class="text-sm text-blue-700">
+        <p class="text-body text-blue-700">
           Click below to generate your unique payment reference code and view bank account details.
         </p>
       </div>
@@ -164,14 +164,14 @@
         <button
           @click="$emit('back')"
           type="button"
-          class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors text-button"
         >
           Back
         </button>
         <button
           @click="generateReference"
-          :disabled="processing"
-          class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          :disabled="processing || disabled"
+          class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-button"
         >
           <span v-if="!processing">Generate Reference Code</span>
           <span v-else class="flex items-center justify-center">
@@ -204,6 +204,10 @@ const props = defineProps({
   metadata: {
     type: Object,
     default: () => ({})
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -221,6 +225,11 @@ const proofPreview = ref(null)
 const fileInput = ref(null)
 
 const generateReference = async () => {
+  if (props.disabled) {
+    error.value = 'Please complete the required details above before continuing.'
+    return
+  }
+
   processing.value = true
   error.value = null
 

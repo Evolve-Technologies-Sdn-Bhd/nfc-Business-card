@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Audit Log
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -43,11 +43,11 @@
             </div>
           </div>
           <div class="ml-5 flex-1">
-            <p class="text-sm font-medium text-secondary-600">Total All Logs</p>
-            <p class="text-2xl font-bold text-secondary-900 mt-1">
+            <p class="stat-label text-secondary-600">Total All Logs</p>
+            <p class="stat-value text-secondary-900 mt-1">
               {{ loading ? '—' : formatNumber(meta.total || logs.length) }}
             </p>
-            <p v-if="meta.from && meta.to && !loading" class="text-xs text-secondary-500 mt-1">
+            <p v-if="meta.from && meta.to && !loading" class="text-helper mt-1">
               Showing {{ meta.from }}–{{ meta.to }} of {{ meta.total }}
             </p>
           </div>
@@ -62,11 +62,11 @@
             </div>
           </div>
           <div class="ml-5">
-            <p class="text-sm font-medium text-secondary-600">Today</p>
-            <p class="text-2xl font-bold text-secondary-900 mt-1">
+            <p class="stat-label text-secondary-600">Today</p>
+            <p class="stat-value text-secondary-900 mt-1">
               {{ loading ? '—' : formatNumber(stats.today) }}
             </p>
-            <p class="text-xs text-secondary-500 mt-1">Activity for {{ formatDateDMY(new Date()) }}</p>
+            <p class="text-helper mt-1">Activity for {{ formatDateDMY(new Date()) }}</p>
           </div>
         </div>
       </div>
@@ -79,11 +79,11 @@
             </div>
           </div>
           <div class="ml-5">
-            <p class="text-sm font-medium text-secondary-600">Last 7 Days</p>
-            <p class="text-2xl font-bold text-secondary-900 mt-1">
+            <p class="stat-label text-secondary-600">Last 7 Days</p>
+            <p class="stat-value text-secondary-900 mt-1">
               {{ loading ? '—' : formatNumber(stats.last7Days) }}
             </p>
-            <p class="text-xs text-secondary-500 mt-1">Recent activity trend</p>
+            <p class="text-helper mt-1">Recent activity trend</p>
           </div>
         </div>
       </div>
@@ -96,11 +96,11 @@
             </div>
           </div>
           <div class="ml-5">
-            <p class="text-sm font-medium text-secondary-600">Admin Actions</p>
-            <p class="text-2xl font-bold text-secondary-900 mt-1">
+            <p class="stat-label text-secondary-600">Admin Actions</p>
+            <p class="stat-value text-secondary-900 mt-1">
               {{ loading ? '—' : formatNumber(stats.adminActions) }}
             </p>
-            <p class="text-xs text-secondary-500 mt-1">
+            <p class="text-helper mt-1">
               {{ loading ? '—' : (meta.total ? `${Math.round((stats.adminActions / Math.max(meta.total, 1)) * 100)}% of total` : 'N/A') }}
             </p>
           </div>
@@ -114,7 +114,7 @@
         <div class="flex flex-wrap items-end gap-4">
           <!-- 1. Keyword Search (Description / Metadata) -->
           <div class="flex-1 min-w-[240px]">
-            <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            <label class="block text-label text-secondary-700 mb-1.5">
               Keyword Search
             </label>
             <div class="relative">
@@ -135,7 +135,7 @@
 
           <!-- 2. Action Type Dropdown -->
           <div class="min-w-[200px]">
-            <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            <label class="block text-label text-secondary-700 mb-1.5">
               Action Type
             </label>
             <select
@@ -155,7 +155,7 @@
 
           <!-- 3. Date From -->
           <div class="min-w-[160px]">
-            <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            <label class="block text-label text-secondary-700 mb-1.5">
               Date From
             </label>
             <input
@@ -167,7 +167,7 @@
 
           <!-- 4. Date To -->
           <div class="min-w-[160px]">
-            <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            <label class="block text-label text-secondary-700 mb-1.5">
               Date To
             </label>
             <input
@@ -179,7 +179,7 @@
 
           <!-- 5. Actor Search (Nama / Email Admin/User) -->
           <div class="min-w-[220px]">
-            <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+            <label class="block text-label text-secondary-700 mb-1.5">
               Actor Name / Email
             </label>
             <div class="relative">
@@ -201,7 +201,7 @@
 
         <!-- Filter Action Buttons Row -->
         <div class="mt-5 pt-5 border-t border-secondary-200 flex flex-wrap justify-between items-center gap-3">
-          <div class="text-xs text-secondary-500 flex items-center gap-2">
+          <div class="text-helper flex items-center gap-2">
             <Icon name="heroicons:information-circle" class="h-4 w-4" />
             <span>Tip: Press Enter on search to apply filters immediately</span>
           </div>
@@ -234,37 +234,37 @@
           <thead class="bg-secondary-50">
             <tr>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
               >
                 Time
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
               >
                 Actor
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
               >
                 Type
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500"
+                class="px-3 sm:px-6 py-3.5 text-left table-head"
               >
                 Description
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
               >
                 Entity
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
               >
                 IP & HTTP
               </th>
               <th
-                class="px-3 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-secondary-500 whitespace-nowrap"
+                class="px-3 sm:px-6 py-3.5 text-right table-head whitespace-nowrap"
               >
                 Actions
               </th>
@@ -281,10 +281,10 @@
             >
               <!-- Timestamp -->
               <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
-                <div class="text-sm font-medium text-secondary-900">
+                <div class="table-cell font-medium text-secondary-900">
                   {{ formatTime(log.created_at) }}
                 </div>
-                <div class="text-xs text-secondary-500 mt-0.5">
+                <div class="text-caption text-secondary-500 mt-0.5">
                   {{ formatDateDMY(log.created_at) }}
                 </div>
               </td>
@@ -303,14 +303,14 @@
                     <Icon v-else name="heroicons:users" class="h-5 w-5 text-secondary-400" />
                   </div>
                   <div class="min-w-0">
-                    <div class="text-sm font-semibold text-secondary-900 truncate max-w-[180px]">
+                    <div class="table-cell font-semibold text-secondary-900 truncate max-w-[180px]">
                       {{ log.user?.full_name || log.user?.name || 'System' }}
                     </div>
-                    <div class="text-xs text-secondary-500 truncate max-w-[180px]">
+                    <div class="text-caption text-secondary-500 truncate max-w-[180px]">
                       {{ log.user?.email || log.metadata?.admin_context || 'N/A' }}
                     </div>
                     <div v-if="log.metadata?.admin_context" class="flex items-center gap-1 mt-1">
-                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-800">
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-badge uppercase tracking-wider bg-violet-100 text-violet-800">
                         Admin
                       </span>
                     </div>
@@ -322,7 +322,7 @@
               <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
                 <span
                   :class="getActionBadgeClass(log.action_type)"
-                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-badge"
                 >
                   <Icon :name="getActionIcon(log.action_type)" class="h-3.5 w-3.5 mr-1" />
                   {{ formatActionType(log.action_type) }}
@@ -331,11 +331,11 @@
 
               <!-- Description -->
               <td class="px-3 sm:px-6 py-4 align-top min-w-[260px]">
-                <div class="text-sm text-secondary-800 leading-snug">
+                <div class="table-cell text-secondary-800 leading-snug">
                   {{ log.description || 'No description' }}
                 </div>
                 <div v-if="log.metadata?.new_values && typeof log.metadata.new_values === 'object' && Object.keys(log.metadata.new_values).length > 0" class="mt-2.5">
-                  <div class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  <div class="inline-flex items-center gap-1 text-badge px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
                     <Icon name="heroicons:pencil-square" class="h-3 w-3" />
                     <span>{{ Object.keys(log.metadata.new_values).length }} fields updated</span>
                   </div>
@@ -347,17 +347,17 @@
                 <div v-if="log.entity_type || log.entity_id">
                   <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary-100 border border-secondary-200">
                     <Icon name="heroicons:cube" class="h-3.5 w-3.5 text-secondary-500" />
-                    <span class="text-xs font-medium text-secondary-700 capitalize">
+                    <span class="text-caption font-medium text-secondary-700 capitalize">
                       {{ log.entity_type || 'unknown' }}
                     </span>
                   </div>
                   <div v-if="log.entity_id" class="mt-1.5">
-                    <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-secondary-50 text-secondary-600 border border-secondary-200">
+                    <span class="text-table-body font-mono px-1.5 py-0.5 rounded bg-secondary-50 text-secondary-600 border border-secondary-200">
                       #{{ log.entity_id }}
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-xs text-secondary-400 italic">—</span>
+                <span v-else class="text-caption text-secondary-400 italic">—</span>
               </td>
 
               <!-- IP Address + HTTP Method -->
@@ -365,7 +365,7 @@
                 <div v-if="log.ip_address || log.metadata?.http_method" class="space-y-1">
                   <div v-if="log.ip_address" class="flex items-center gap-1.5">
                     <Icon name="heroicons:globe-alt" class="h-3.5 w-3.5 text-secondary-400" />
-                    <span class="text-xs font-mono text-secondary-700 bg-secondary-50 px-1.5 py-0.5 rounded border border-secondary-200">
+                    <span class="text-caption font-mono text-secondary-700 bg-secondary-50 px-1.5 py-0.5 rounded border border-secondary-200">
                       {{ log.ip_address }}
                     </span>
                   </div>
@@ -373,16 +373,16 @@
                     <Icon name="heroicons:link" class="h-3.5 w-3.5 text-secondary-400" />
                     <span
                       :class="getHttpMethodBadgeClass(log.metadata.http_method)"
-                      class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      class="text-badge uppercase tracking-wider px-1.5 py-0.5 rounded"
                     >
                       {{ log.metadata.http_method }}
                     </span>
-                    <span v-if="log.metadata?.response_status" class="text-[11px] text-secondary-500 font-mono">
+                    <span v-if="log.metadata?.response_status" class="text-table-body text-secondary-500 font-mono">
                       {{ log.metadata.response_status }}
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-xs text-secondary-400 italic">—</span>
+                <span v-else class="text-caption text-secondary-400 italic">—</span>
               </td>
 
               <!-- Action Button: View Detail -->
@@ -404,7 +404,7 @@
               <td colspan="7" class="px-3 sm:px-6 py-16 text-center">
                 <div class="flex flex-col items-center justify-center gap-3">
                   <span class="loading loading-spinner text-primary-600 w-10 h-10"></span>
-                  <p class="text-sm font-medium text-secondary-600">Loading audit log data...</p>
+                  <p class="text-body text-secondary-600">Loading audit log data...</p>
                 </div>
               </td>
             </tr>
@@ -419,8 +419,8 @@
                     <Icon name="heroicons:document-text" class="h-8 w-8 text-secondary-400" />
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-secondary-800 mb-1.5">No Activity Records</h3>
-                    <p class="text-sm text-secondary-500 leading-relaxed">
+                    <h3 class="card-title text-secondary-800 mb-1.5">No Activity Records</h3>
+                    <p class="text-body text-secondary-500 leading-relaxed">
                       No activity logs match the current filters. Try resetting filters or changing search keywords.
                     </p>
                   </div>
@@ -443,7 +443,7 @@
         v-if="!loading && meta.last_page && meta.last_page > 1"
         class="px-6 py-4 border-t border-secondary-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
-        <div class="text-sm text-secondary-600">
+        <div class="text-body text-secondary-600">
           Showing
           <span class="font-semibold text-secondary-900">{{ meta.from || 0 }}</span>
           to
@@ -464,7 +464,7 @@
 
           <div class="flex items-center gap-1">
             <template v-for="page in pageNumbers" :key="page">
-              <span v-if="page === '...'" class="px-2.5 py-1 text-xs font-medium text-secondary-400">
+              <span v-if="page === '...'" class="px-2.5 py-1 text-caption font-medium text-secondary-400">
                 ···
               </span>
               <button
@@ -472,7 +472,7 @@
                 @click="changePage(page)"
                 :disabled="loading"
                 :class="[
-                  'px-3 py-1.5 rounded-md text-sm font-semibold transition-colors min-w-[34px]',
+                  'px-3 py-1.5 rounded-md text-button transition-colors min-w-[34px]',
                   page === meta.current_page
                     ? 'bg-primary-600 text-white shadow-sm'
                     : 'text-secondary-600 hover:bg-secondary-100'
@@ -508,14 +508,14 @@
               <Icon name="heroicons:document-text" class="h-6 w-6 text-primary-700" />
             </div>
             <div>
-              <h3 class="text-lg font-bold text-secondary-900 mb-0.5">
+              <h3 class="modal-title text-secondary-900 mb-0.5">
                 Activity Details {{ detailModal.log?.id ? `#${detailModal.log.id}` : '' }}
               </h3>
-              <p class="text-sm text-secondary-500 flex items-center gap-2 flex-wrap">
+              <p class="text-body text-secondary-500 flex items-center gap-2 flex-wrap">
                 <span
                   v-if="detailModal.log?.action_type"
                   :class="getActionBadgeClass(detailModal.log.action_type)"
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-badge"
                 >
                   {{ formatActionType(detailModal.log.action_type) }}
                 </span>
@@ -543,46 +543,46 @@
           <!-- Summary Info Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-xs font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Actor</p>
-              <p class="text-sm font-semibold text-secondary-900">
+              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Actor</p>
+              <p class="text-body font-semibold text-secondary-900">
                 {{ detailModal.log.user?.full_name || detailModal.log.user?.name || 'NFCGo System' }}
               </p>
-              <p class="text-xs text-secondary-600 mt-0.5">
+              <p class="text-caption text-secondary-600 mt-0.5">
                 {{ detailModal.log.user?.email || detailModal.log.metadata?.admin_context || 'No email' }}
               </p>
-              <p v-if="detailModal.log.user?.id" class="text-[11px] text-secondary-500 mt-1">
+              <p v-if="detailModal.log.user?.id" class="text-micro text-secondary-500 mt-1">
                 User ID: <span class="font-mono">{{ detailModal.log.user.id }}</span>
               </p>
             </div>
             <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-xs font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Device & Location</p>
-              <p v-if="detailModal.log.ip_address" class="text-sm font-mono text-secondary-800">
+              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Device & Location</p>
+              <p v-if="detailModal.log.ip_address" class="text-body font-mono text-secondary-800">
                 IP: {{ detailModal.log.ip_address }}
               </p>
-              <p v-if="detailModal.log.metadata?.http_method" class="text-sm text-secondary-700 mt-1">
+              <p v-if="detailModal.log.metadata?.http_method" class="text-body text-secondary-700 mt-1">
                 HTTP:
-                <span :class="getHttpMethodBadgeClass(detailModal.log.metadata.http_method)" class="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded">
+                <span :class="getHttpMethodBadgeClass(detailModal.log.metadata.http_method)" class="text-badge uppercase px-1.5 py-0.5 rounded">
                   {{ detailModal.log.metadata.http_method }}
                 </span>
-                <span v-if="detailModal.log.metadata?.response_status" class="ml-1 text-xs font-mono text-secondary-600">
+                <span v-if="detailModal.log.metadata?.response_status" class="ml-1 text-caption font-mono text-secondary-600">
                   ({{ detailModal.log.metadata.response_status }})
                 </span>
               </p>
-              <p v-if="detailModal.log.metadata?.route_uri" class="text-xs text-secondary-600 mt-1 break-all">
+              <p v-if="detailModal.log.metadata?.route_uri" class="text-caption text-secondary-600 mt-1 break-all">
                 Route: <span class="font-mono">{{ detailModal.log.metadata.route_uri }}</span>
               </p>
             </div>
             <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-xs font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Target Entity</p>
-              <p v-if="detailModal.log.entity_type" class="text-sm font-semibold text-secondary-900 capitalize">
+              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Target Entity</p>
+              <p v-if="detailModal.log.entity_type" class="text-body font-semibold text-secondary-900 capitalize">
                 {{ detailModal.log.entity_type }}
-                <span v-if="detailModal.log.entity_id" class="ml-1 text-xs font-mono font-normal text-secondary-600">#{{ detailModal.log.entity_id }}</span>
+                <span v-if="detailModal.log.entity_id" class="ml-1 text-caption font-mono font-normal text-secondary-600">#{{ detailModal.log.entity_id }}</span>
               </p>
-              <p v-else class="text-sm text-secondary-500 italic">No specific entity</p>
+              <p v-else class="text-body text-secondary-500 italic">No specific entity</p>
             </div>
             <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-xs font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Description</p>
-              <p class="text-sm text-secondary-800 leading-snug">
+              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Description</p>
+              <p class="text-body text-secondary-800 leading-snug">
                 {{ detailModal.log.description || 'No description' }}
               </p>
             </div>
@@ -590,45 +590,45 @@
 
           <!-- Old Values Section -->
           <div v-if="detailModal.log.metadata?.old_values && typeof detailModal.log.metadata.old_values === 'object' && Object.keys(detailModal.log.metadata.old_values).length > 0">
-            <h4 class="text-sm font-bold text-secondary-800 mb-2.5 flex items-center gap-2">
+            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
               <Icon name="heroicons:archive-box-arrow-down" class="h-4 w-4 text-orange-500" />
               Old Values
             </h4>
             <div class="bg-orange-50 border border-orange-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-xs font-mono text-orange-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.old_values) }}</pre>
+              <pre class="p-4 text-caption font-mono text-orange-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.old_values) }}</pre>
             </div>
           </div>
 
           <!-- New Values Section -->
           <div v-if="detailModal.log.metadata?.new_values && typeof detailModal.log.metadata.new_values === 'object' && Object.keys(detailModal.log.metadata.new_values).length > 0">
-            <h4 class="text-sm font-bold text-secondary-800 mb-2.5 flex items-center gap-2">
+            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
               <Icon name="heroicons:sparkles" class="h-4 w-4 text-green-600" />
               New Values
             </h4>
             <div class="bg-green-50 border border-green-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-xs font-mono text-green-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.new_values) }}</pre>
+              <pre class="p-4 text-caption font-mono text-green-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.new_values) }}</pre>
             </div>
           </div>
 
           <!-- Full Metadata Section -->
           <div v-if="hasExtraMetadata">
-            <h4 class="text-sm font-bold text-secondary-800 mb-2.5 flex items-center gap-2">
+            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
               <Icon name="heroicons:code-bracket-square" class="h-4 w-4 text-secondary-600" />
               Full Metadata (JSON)
             </h4>
             <div class="bg-secondary-900 rounded-xl overflow-hidden">
-              <pre class="p-4 text-xs font-mono text-secondary-100 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata) }}</pre>
+              <pre class="p-4 text-caption font-mono text-secondary-100 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata) }}</pre>
             </div>
           </div>
 
           <!-- User Agent -->
           <div v-if="detailModal.log.user_agent">
-            <h4 class="text-sm font-bold text-secondary-800 mb-2.5 flex items-center gap-2">
+            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
               <Icon name="heroicons:command-line" class="h-4 w-4 text-secondary-600" />
               User Agent
             </h4>
             <div class="bg-secondary-50 border border-secondary-200 rounded-xl p-4">
-              <p class="text-xs font-mono text-secondary-700 break-all leading-relaxed">
+              <p class="text-caption font-mono text-secondary-700 break-all leading-relaxed">
                 {{ detailModal.log.user_agent }}
               </p>
             </div>

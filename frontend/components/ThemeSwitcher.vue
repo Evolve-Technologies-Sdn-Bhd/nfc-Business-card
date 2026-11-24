@@ -25,7 +25,7 @@
       >
         <!-- Header -->
         <div class="px-4 py-3 bg-gradient-to-r from-secondary-50 to-white border-b border-secondary-100">
-          <h3 class="text-sm font-semibold text-secondary-900 flex items-center gap-2">
+          <h3 class="card-title text-secondary-900 flex items-center gap-2">
             <Icon name="heroicons:swatch" class="h-4 w-4 text-primary-500" />
             Appearance
           </h3>
@@ -57,8 +57,8 @@
 
             <!-- Theme Info -->
             <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-secondary-900 block">{{ theme.name }}</span>
-              <span class="text-xs text-secondary-500 truncate block">{{ theme.description }}</span>
+              <span class="text-navigation text-secondary-900 block">{{ theme.name }}</span>
+              <span class="text-helper truncate block">{{ theme.description }}</span>
             </div>
 
             <!-- Checkmark for active theme -->
@@ -72,7 +72,7 @@
 
         <!-- Footer -->
         <div class="px-4 py-2 bg-secondary-50/50 border-t border-secondary-100">
-          <p class="text-xs text-secondary-400 text-center flex items-center justify-center gap-1">
+          <p class="text-helper text-center flex items-center justify-center gap-1">
             <Icon name="heroicons:check-circle" class="h-3 w-3" />
             Saved automatically
           </p>

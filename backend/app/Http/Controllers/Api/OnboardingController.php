@@ -8,6 +8,7 @@ use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\LandingPage;
 use App\Services\FileUploadService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,10 +18,12 @@ use Illuminate\Support\Str;
 class OnboardingController extends Controller
 {
     protected $fileUploadService;
+    protected PaymentService $paymentService;
 
-    public function __construct(FileUploadService $fileUploadService)
+    public function __construct(FileUploadService $fileUploadService, PaymentService $paymentService)
     {
         $this->fileUploadService = $fileUploadService;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -285,7 +288,12 @@ class OnboardingController extends Controller
     }
 
     /**
-     * Process payment and create order
+     * Process payment and create order.
+     *
+     * This endpoint no longer simulates a successful payment. It hands off to the
+     * real Fiuu payment initiation path and returns a genuine gateway redirect URL.
+     * The order/card are created in a PRE-payment state and are only marked as paid
+     * by the trusted gateway webhook.
      */
     public function processPayment(Request $request)
     {
@@ -313,49 +321,67 @@ class OnboardingController extends Controller
 
         $user = $request->user();
 
-        try {
-            DB::beginTransaction();
+        // Get plan details
+        $plan = $user->subscription_plan;
+        $planPrices = [
+            'basic' => 9,
+            'premium' => 19,
+            'business' => 49
+        ];
+        $planPrice = $planPrices[$plan] ?? 0;
+        $cardPrice = 15; // Fixed card price
+        $shippingCost = 5; // Fixed shipping cost
+        $total = $planPrice + $cardPrice + $shippingCost;
 
-            // Get plan details
-            $plan = $user->subscription_plan;
-            $planPrices = [
-                'basic' => 9,
-                'premium' => 19,
-                'business' => 49
-            ];
-            $planPrice = $planPrices[$plan] ?? 0;
-            $cardPrice = 15; // Fixed card price
-            $shippingCost = 5; // Fixed shipping cost
-            $total = $planPrice + $cardPrice + $shippingCost;
-
-            // Determine business_account_id for Business plan orders
-            $businessAccountId = null;
-            if ($plan === 'business') {
-                if ($user->isBusinessAccount()) {
-                    $businessAccountId = $user->id;
-                } elseif ($user->isBusinessEmployee()) {
-                    $businessAccountId = $user->parent_business_id;
-                }
-                
-                // Check quota for Business plan
-                $businessAccount = $businessAccountId ? User::find($businessAccountId) : null;
-                if ($businessAccount) {
-                    $quotaInfo = $businessAccount->getQuotaInfo();
-                    if ($quotaInfo['available_card_quota'] <= 0) {
-                        DB::rollback();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Card quota exceeded. Please contact admin to increase quota.',
-                            'quota_info' => $quotaInfo
-                        ], 403);
-                    }
-                }
+        // Determine business_account_id for Business plan orders
+        $businessAccountId = null;
+        if ($plan === 'business') {
+            if ($user->isBusinessAccount()) {
+                $businessAccountId = $user->id;
+            } elseif ($user->isBusinessEmployee()) {
+                $businessAccountId = $user->parent_business_id;
             }
 
-            // Create NFC card order
+            // Check quota for Business plan
+            $businessAccount = $businessAccountId ? User::find($businessAccountId) : null;
+            if ($businessAccount) {
+                $quotaInfo = $businessAccount->getQuotaInfo();
+                if ($quotaInfo['available_card_quota'] <= 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Card quota exceeded. Please contact admin to increase quota.',
+                        'quota_info' => $quotaInfo
+                    ], 403);
+                }
+            }
+        }
+
+        // Gateway availability gate — never claim success when the gateway is not configured.
+        $provider = config('payment.default_provider', 'fiuu');
+        $providerConfig = config("payment.providers.{$provider}", []);
+        $gatewayConfigured = !empty($providerConfig['enabled'])
+            && !empty($providerConfig['merchant_id'])
+            && !empty($providerConfig['verify_key']);
+
+        if (!$gatewayConfigured) {
+            Log::warning('Onboarding payment attempted but gateway is not configured', [
+                'user_id' => $user->id,
+                'provider' => $provider,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Online payment is currently unavailable. Please try again later or contact support.',
+            ], 503);
+        }
+
+        try {
+            // Create the NFC card order in the pre-payment state. It is NOT activated
+            // here — only the trusted gateway webhook may mark it as paid.
             $nfcCard = NfcCard::create([
                 'user_id' => $user->id,
                 'business_account_id' => $businessAccountId,
+                'nfc_card_id' => 'NFC-' . strtoupper(Str::random(12)),
                 'card_owner' => $request->card_info['name'],
                 'billing_address' => json_encode($request->billing_address),
                 'contact_number' => $request->card_info['contact_number'],
@@ -364,53 +390,51 @@ class OnboardingController extends Controller
                 'purchase_amount' => $total,
                 'payment_method' => $request->payment_method,
                 'shipping_address' => $request->card_info['address'],
-                'status' => 'inactive', // Will be activated when admin encodes the physical NFC card
-                'notes' => 'Order created during onboarding',
+                'status' => 'pending_payment',
+                'notes' => 'Order created during onboarding (awaiting online payment)',
             ]);
 
-            // Create payment record (you might want to create a separate payments table)
-            $paymentInfo = [
-                'payment_method' => $request->payment_method,
+            // Hand off to the real payment initiation path. This creates the
+            // Transaction + Order and returns a genuine gateway redirect URL.
+            $transaction = $this->paymentService->processCardPayment($user, [
                 'amount' => $total,
-                'status' => 'completed', // Mock payment success
-                'transaction_id' => 'MOCK_' . Str::random(16),
-                'billing_address' => $request->billing_address,
-                'processed_at' => now()->toISOString(),
-            ];
-
-            // Store payment information
-            $user->update([
-                'settings' => array_merge($user->settings ?? [], [
-                    'payment_info' => $paymentInfo,
-                    'order_id' => $nfcCard->id
-                ])
+                'currency' => 'MYR',
+                'payment_rail' => 'card',
+                'description' => 'NFC Card ' . strtoupper($plan) . ' order',
+                'metadata' => [
+                    'plan' => $plan,
+                    'card_type' => 'Standard',
+                    'shipping_cost' => $shippingCost,
+                    'billing_address' => $request->billing_address,
+                    'card_info' => $request->card_info,
+                    'source' => 'onboarding',
+                ],
             ]);
 
-            // Update card status to active
-            $nfcCard->update(['status' => 'active']);
+            // Link the card <-> transaction so fulfilment can reuse this card.
+            $transaction->update(['nfc_card_id' => $nfcCard->id]);
+            $nfcCard->update(['transaction_id' => $transaction->id]);
 
-            // Update user subscription
-            $user->update([
-                'subscription_active' => true,
-                'has_physical_card' => true,
-            ]);
-
-            DB::commit();
+            $order = $transaction->order;
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment processed successfully',
+                'message' => 'Payment initiated. Please complete the payment on the gateway.',
                 'data' => [
                     'order_id' => $nfcCard->id,
+                    'order_number' => $order?->order_number,
                     'total_amount' => $total,
-                    'payment_status' => 'completed',
-                    'card_status' => 'active',
+                    'payment_status' => 'pending', // NOT 'completed' — awaiting gateway confirmation
+                    'card_status' => 'pending_payment',
+                    'transaction_id' => $transaction->transaction_id,
+                    'redirect_url' => $transaction->metadata['redirect_url'] ?? null,
+                    'payment_url' => $transaction->metadata['payment_url'] ?? null,
+                    'payment_form_data' => $transaction->metadata['payment_form_data'] ?? null,
                     'estimated_delivery' => now()->addDays(7)->format('Y-m-d'),
                 ]
-            ]);
+            ], 201);
 
         } catch (\Exception $e) {
-            DB::rollback();
             Log::error('Payment processing failed', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage()

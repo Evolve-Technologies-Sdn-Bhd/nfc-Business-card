@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Plan Price Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -51,17 +51,17 @@
         <!-- Plan Header -->
         <div class="p-6" :class="getPlanHeaderClass(plan.plan_type)">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xl font-bold text-white capitalize">
+            <h3 class="card-title text-white capitalize">
               {{ plan.plan_type }} Plan
             </h3>
-            <span v-if="plan.is_active" class="px-3 py-1 bg-white bg-opacity-20 text-white text-xs font-medium rounded-full">
+            <span v-if="plan.is_active" class="px-3 py-1 bg-white bg-opacity-20 text-white text-badge rounded-full">
               Active
             </span>
-            <span v-else class="px-3 py-1 bg-secondary-500 text-white text-xs font-medium rounded-full">
+            <span v-else class="px-3 py-1 bg-secondary-500 text-white text-badge rounded-full">
               Inactive
             </span>
           </div>
-          <p class="text-white text-opacity-90 text-sm">
+          <p class="text-white text-opacity-90 text-body">
             {{ plan.description || 'NFC Card Plan' }}
           </p>
         </div>
@@ -69,7 +69,7 @@
         <!-- Price Input -->
         <div class="p-6">
           <div class="mb-6">
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Price ({{ plan.currency }})
             </label>
             <div class="relative">
@@ -86,7 +86,7 @@
                 :class="{ 'border-warning-400 bg-warning-50': isChanged(plan) }"
               />
             </div>
-            <p v-if="isChanged(plan)" class="mt-2 text-xs text-warning-600 flex items-center">
+            <p v-if="isChanged(plan)" class="mt-2 text-caption text-warning-600 flex items-center">
               <Icon name="heroicons:exclamation-triangle" class="h-4 w-4 mr-1" />
               Unsaved changes
             </p>
@@ -94,21 +94,21 @@
 
           <!-- Description -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Description
             </label>
             <textarea
               v-model="plan.description"
               @input="markAsChanged(plan)"
               rows="2"
-              class="input w-full text-sm"
+              class="input w-full text-input"
               :class="{ 'border-warning-400 bg-warning-50': isChanged(plan) }"
             ></textarea>
           </div>
 
           <!-- Features -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Features
             </label>
             <div class="space-y-2">
@@ -118,7 +118,7 @@
                   v-model="plan.features[index]"
                   @input="markAsChanged(plan)"
                   type="text"
-                  class="input flex-1 text-sm py-1"
+                  class="input flex-1 text-input py-1"
                   :class="{ 'border-warning-400 bg-warning-50': isChanged(plan) }"
                 />
                 <button
@@ -132,7 +132,7 @@
             </div>
             <button
               @click="addFeature(plan)"
-              class="mt-2 text-sm text-primary-600 hover:text-primary-700 flex items-center"
+              class="mt-2 text-button text-primary-600 hover:text-primary-700 flex items-center"
             >
               <Icon name="heroicons:plus-circle" class="h-5 w-5 mr-1" />
               Add Feature
@@ -141,7 +141,7 @@
 
           <!-- Status Toggle -->
           <div class="flex items-center justify-between pt-4 border-t border-secondary-200">
-            <span class="text-sm font-medium text-secondary-700">Active Status</span>
+            <span class="text-body text-secondary-700">Active Status</span>
             <button
               @click="toggleStatus(plan)"
               :class="plan.is_active ? 'bg-success-500' : 'bg-secondary-300'"
@@ -167,7 +167,7 @@
 
         <!-- Last Updated -->
         <div class="px-6 py-3 bg-secondary-50 border-t border-secondary-200">
-          <p class="text-xs text-secondary-500">
+          <p class="text-caption text-secondary-500">
             Last updated: {{ formatDate(plan.updated_at) }}
           </p>
         </div>
@@ -180,14 +180,14 @@
         <div class="flex items-start">
           <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-warning-600 mr-3 flex-shrink-0 mt-0.5" />
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-warning-900 mb-2">
+            <h3 class="card-title text-warning-900 mb-2">
               Unsaved Changes
             </h3>
-            <p class="text-sm text-warning-800 mb-4">
+            <p class="text-body text-warning-800 mb-4">
               You have unsaved changes in {{ changedPlans.length }} plan(s). Click "Save All Changes" to apply them.
             </p>
             <div class="space-y-1">
-              <div v-for="plan in changedPlans" :key="plan.id" class="text-sm text-warning-800">
+              <div v-for="plan in changedPlans" :key="plan.id" class="text-body text-warning-800">
                 • <strong class="capitalize">{{ plan.plan_type }}</strong>: 
                 <span v-if="plan.originalPrice !== plan.price">
                   Price changed from {{ plan.currency }} {{ plan.originalPrice }} to {{ plan.currency }} {{ plan.price }}
@@ -209,10 +209,10 @@
         <div class="flex items-start">
           <Icon name="heroicons:information-circle" class="h-6 w-6 text-info-600 mr-3 flex-shrink-0" />
           <div>
-            <h3 class="text-sm font-semibold text-info-900 mb-2">
+            <h3 class="card-title text-info-900 mb-2">
               Important Notes
             </h3>
-            <ul class="text-sm text-info-800 space-y-1 list-disc list-inside">
+            <ul class="text-body text-info-800 space-y-1 list-disc list-inside">
               <li>Price changes will affect new orders immediately after saving</li>
               <li>Existing users will keep their current plan prices</li>
               <li>Inactive plans will not be shown to users during checkout</li>

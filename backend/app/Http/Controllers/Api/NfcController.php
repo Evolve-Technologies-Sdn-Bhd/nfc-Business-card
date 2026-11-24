@@ -242,7 +242,13 @@ class NfcController extends Controller
     private function resolveProfileForTap($user, $nfcCard)
     {
         if ($nfcCard && $nfcCard->landingPage) {
-            return $nfcCard->landingPage;
+            $landingPage = $nfcCard->landingPage;
+            // Do not expose a profile whose landing page is unpublished. The tap
+            // is still recorded above; only the profile payload is withheld.
+            if (!$landingPage->is_active) {
+                return null;
+            }
+            return $landingPage;
         }
 
         if ($nfcCard) {
@@ -254,6 +260,9 @@ class NfcController extends Controller
                     'is_active' => true,
                 ]
             );
+            if (!$landingPage->is_active) {
+                return null;
+            }
             return $landingPage;
         }
 

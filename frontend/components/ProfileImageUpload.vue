@@ -54,9 +54,9 @@
       </div>
 
       <div class="flex-1">
-        <p class="text-sm font-medium text-gray-700">{{ label }}</p>
-        <p class="text-xs text-gray-500">{{ helpText }}</p>
-        <p v-if="error" class="text-xs text-red-500 mt-1">{{ error }}</p>
+        <p class="text-label text-gray-700">{{ label }}</p>
+        <p class="text-helper">{{ helpText }}</p>
+        <p v-if="error" class="text-error mt-1">{{ error }}</p>
       </div>
     </div>
 
@@ -68,7 +68,7 @@
           :style="{ width: `${uploadProgress}%` }"
         ></div>
       </div>
-      <p class="text-xs text-gray-600 mt-1">
+      <p class="text-caption text-gray-600 mt-1">
         Uploading... {{ uploadProgress }}%
       </p>
     </div>

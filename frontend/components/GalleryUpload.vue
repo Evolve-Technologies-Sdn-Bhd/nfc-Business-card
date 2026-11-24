@@ -36,7 +36,7 @@
         <!-- Type Badge -->
         <div
           v-if="item.type === 'video'"
-          class="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs"
+          class="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-caption"
         >
           <Icon name="heroicons:play" class="w-3 h-3 inline" />
           Video
@@ -49,7 +49,7 @@
         class="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors"
       >
         <Icon name="heroicons:plus" class="w-8 h-8 text-gray-400" />
-        <span class="text-xs text-gray-500 mt-1">Add Media</span>
+        <span class="text-caption text-gray-500 mt-1">Add Media</span>
         <input
           type="file"
           multiple
@@ -61,7 +61,7 @@
     </div>
     
     <!-- Info Bar -->
-    <div class="flex items-center justify-between text-xs text-gray-500">
+    <div class="flex items-center justify-between text-caption text-gray-500">
       <span>
         {{ items.length }} / {{ maxItems || '∞' }} items
       </span>
@@ -72,7 +72,7 @@
     </div>
     
     <!-- Help Text -->
-    <p class="text-xs text-gray-500">
+    <p class="text-caption text-gray-500">
       Drag to reorder. {{ allowVideos ? 'Images and videos' : 'Images only' }} supported.
       Max {{ maxFileSize }}MB per file.
     </p>

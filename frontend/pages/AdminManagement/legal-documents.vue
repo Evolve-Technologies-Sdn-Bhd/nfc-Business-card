@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Legal Documents Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -25,7 +25,7 @@
               activeTab === 'terms'
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+              'whitespace-nowrap py-4 px-1 border-b-2 text-navigation',
             ]"
           >
             Terms of Service
@@ -36,7 +36,7 @@
               activeTab === 'privacy'
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+              'whitespace-nowrap py-4 px-1 border-b-2 text-navigation',
             ]"
           >
             Privacy Policy
@@ -52,7 +52,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  class="block text-label text-secondary-700 mb-1"
                 >
                   Version *
                 </label>
@@ -70,13 +70,13 @@
                   @change="validateTermsVersion"
                   required
                 />
-                <p v-if="versionErrors.terms" class="text-xs text-red-500 mt-1">
+                <p v-if="versionErrors.terms" class="text-error mt-1">
                   {{ versionErrors.terms }}
                 </p>
               </div>
               <div>
                 <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  class="block text-label text-secondary-700 mb-1"
                 >
                   Effective Date
                 </label>
@@ -90,17 +90,17 @@
             </div>
 
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p class="text-sm text-amber-800">
+              <p class="text-body text-amber-800">
                 <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
               </p>
             </div>
 
             <!-- PDF Upload Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+              <h3 class="card-title text-secondary-900 mb-3">
                 PDF Document Upload
               </h3>
-              <p class="text-sm text-secondary-600 mb-4">
+              <p class="text-body text-secondary-600 mb-4">
                 Upload a PDF file containing the Terms of Service document. This PDF will be displayed to users who access the Terms of Service.
               </p>
 
@@ -109,7 +109,7 @@
                 class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
               >
                 <div
-                  class="flex items-center space-x-2 text-sm text-green-700"
+                  class="flex items-center space-x-2 text-body text-green-700"
                 >
                   <Icon
                     name="heroicons:document-check"
@@ -131,7 +131,7 @@
                 </button>
               </div>
 
-              <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
+              <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
                 <Icon
                   name="heroicons:exclamation-triangle"
                   class="h-5 w-5 inline mr-1 text-yellow-600"
@@ -157,12 +157,12 @@
                   <span v-if="uploadingTermsPdf" class="animate-spin">⏳</span>
                   {{ uploadingTermsPdf ? 'Uploading...' : 'Choose PDF File' }}
                 </button>
-                <span class="text-xs text-secondary-500">Max 10MB</span>
+                <span class="text-helper">Max 10MB</span>
               </div>
             </div>
 
             <!-- Last Updated Info -->
-            <div v-if="termsData.updated_at" class="text-sm text-secondary-600">
+            <div v-if="termsData.updated_at" class="text-body text-secondary-600">
               <p>
                 Last updated: {{ formatDate(termsData.updated_at) }}
                 <span v-if="termsData.updater">
@@ -206,7 +206,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  class="block text-label text-secondary-700 mb-1"
                 >
                   Version *
                 </label>
@@ -224,13 +224,13 @@
                   @change="validatePrivacyVersion"
                   required
                 />
-                <p v-if="versionErrors.privacy" class="text-xs text-red-500 mt-1">
+                <p v-if="versionErrors.privacy" class="text-error mt-1">
                   {{ versionErrors.privacy }}
                 </p>
               </div>
               <div>
                 <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
+                  class="block text-label text-secondary-700 mb-1"
                 >
                   Effective Date
                 </label>
@@ -244,17 +244,17 @@
             </div>
 
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p class="text-sm text-amber-800">
+              <p class="text-body text-amber-800">
                 <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
               </p>
             </div>
 
             <!-- PDF Upload Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+              <h3 class="card-title text-secondary-900 mb-3">
                 PDF Document Upload
               </h3>
-              <p class="text-sm text-secondary-600 mb-4">
+              <p class="text-body text-secondary-600 mb-4">
                 Upload a PDF file containing the Privacy Policy document. This PDF will be displayed to users who access the Privacy Policy.
               </p>
 
@@ -263,7 +263,7 @@
                 class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
               >
                 <div
-                  class="flex items-center space-x-2 text-sm text-green-700"
+                  class="flex items-center space-x-2 text-body text-green-700"
                 >
                   <Icon
                     name="heroicons:document-check"
@@ -285,7 +285,7 @@
                 </button>
               </div>
 
-              <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
+              <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
                 <Icon
                   name="heroicons:exclamation-triangle"
                   class="h-5 w-5 inline mr-1 text-yellow-600"
@@ -311,14 +311,14 @@
                   <span v-if="uploadingPrivacyPdf" class="animate-spin">⏳</span>
                   {{ uploadingPrivacyPdf ? 'Uploading...' : 'Choose PDF File' }}
                 </button>
-                <span class="text-xs text-secondary-500">Max 10MB</span>
+                <span class="text-helper">Max 10MB</span>
               </div>
             </div>
 
             <!-- Last Updated Info -->
             <div
               v-if="privacyData.updated_at"
-              class="text-sm text-secondary-600"
+              class="text-body text-secondary-600"
             >
               <p>
                 Last updated: {{ formatDate(privacyData.updated_at) }}
@@ -369,7 +369,7 @@
         <div
           class="flex items-center justify-between p-6 border-b border-secondary-200"
         >
-          <h3 class="text-xl font-bold text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             {{
               previewType === "terms" ? "Terms of Service" : "Privacy Policy"
             }}

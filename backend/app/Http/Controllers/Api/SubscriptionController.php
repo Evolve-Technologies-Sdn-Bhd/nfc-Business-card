@@ -202,7 +202,7 @@ class SubscriptionController extends Controller
             // Update user subscription plan
             $user->update([
                 'subscription_plan' => $planType,
-                'subscription_status' => 'active',
+                'subscription_active' => true,
             ]);
 
             Log::info('Subscription created', [
@@ -274,7 +274,7 @@ class SubscriptionController extends Controller
             if ($immediate) {
                 // Cancel immediately
                 $subscription->cancel($request->reason);
-                $user->update(['subscription_status' => 'cancelled']);
+                $user->update(['subscription_active' => false]);
             } else {
                 // Cancel at end of billing period
                 $subscription->update([
@@ -332,7 +332,7 @@ class SubscriptionController extends Controller
             }
 
             $subscription->reactivate();
-            $user->update(['subscription_status' => 'active']);
+            $user->update(['subscription_active' => true]);
 
             Log::info('Subscription reactivated', [
                 'subscription_id' => $subscription->subscription_id,

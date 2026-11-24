@@ -6,7 +6,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-14 sm:h-16">
           <div>
-            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">
+            <h1 class="page-title text-gray-900">
               Profile Preview - Example
             </h1>
           </div>
@@ -55,7 +55,7 @@
                     </h2>
                     <p
                       :style="{ color: exampleProfile.textColor }"
-                      class="text-sm sm:text-base mt-1 sm:mt-2 opacity-80"
+                      class="text-body mt-1 sm:mt-2 opacity-80"
                     >
                       {{ exampleProfile.position }}
                     </p>
@@ -65,13 +65,13 @@
                   <div class="space-y-2 sm:space-y-3 mb-4">
                     <a
                       :href="'tel:' + exampleProfile.contactNumber"
-                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-sm sm:text-base transition-all hover:bg-gray-800"
+                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-button transition-all hover:bg-gray-800"
                     >
                       📞 {{ exampleProfile.contactNumber }}
                     </a>
                     <a
                       :href="'mailto:' + exampleProfile.email"
-                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-sm sm:text-base transition-all hover:bg-gray-800"
+                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-button transition-all hover:bg-gray-800"
                     >
                       ✉️ {{ exampleProfile.email }}
                     </a>
@@ -79,7 +79,7 @@
                       v-if="exampleProfile.website"
                       :href="exampleProfile.website"
                       target="_blank"
-                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-sm sm:text-base transition-all hover:bg-gray-800"
+                      class="block w-full text-center py-2.5 sm:py-3 px-5 sm:px-6 bg-black text-white rounded-full text-button transition-all hover:bg-gray-800"
                     >
                       🌐 Visit Website
                     </a>
@@ -89,7 +89,7 @@
                   <div v-if="exampleProfile.address" class="text-center mb-4">
                     <p
                       :style="{ color: exampleProfile.textColor }"
-                      class="text-xs sm:text-sm opacity-70"
+                      class="text-caption opacity-70"
                     >
                       📍 {{ exampleProfile.address }}
                     </p>
@@ -99,13 +99,13 @@
                   <div class="mt-6 sm:mt-8 text-center">
                     <p
                       :style="{ color: exampleProfile.textColor }"
-                      class="text-xs opacity-60"
+                      class="text-caption opacity-60"
                     >
                       Powered by
                     </p>
                     <p
                       :style="{ color: exampleProfile.textColor }"
-                      class="text-sm font-semibold"
+                      class="text-body font-semibold"
                     >
                       NFC GO
                     </p>

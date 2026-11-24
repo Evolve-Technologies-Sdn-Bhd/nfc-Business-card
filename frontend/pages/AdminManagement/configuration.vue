@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             System Configuration
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -27,7 +27,7 @@
               activeMainTab === tab.id
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
+              'whitespace-nowrap py-4 px-1 border-b-2 text-navigation flex items-center gap-2',
             ]"
           >
             <Icon :name="tab.icon" class="h-4 w-4" />
@@ -42,17 +42,17 @@
           <div class="space-y-8">
             <!-- Brand Identity: Logo & Favicon -->
             <div>
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+              <h3 class="card-title text-secondary-900 mb-4 flex items-center gap-2">
                 <Icon name="heroicons:swatch" class="h-5 w-5 text-primary-600" />
                 Brand Identity
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- System Logo -->
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     System Logo
                   </label>
-                  <p class="text-xs text-secondary-500 mb-4">
+                  <p class="text-helper mb-4">
                     Recommended: PNG/SVG transparent, 512x512px, max 2MB. Shown in sidebar and login page.
                   </p>
                   <div
@@ -107,10 +107,10 @@
 
                 <!-- System Favicon -->
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     System Favicon
                   </label>
-                  <p class="text-xs text-secondary-500 mb-4">
+                  <p class="text-helper mb-4">
                     Recommended: ICO/PNG, 64x64px or 32x32px, max 500KB. Shown in browser tab.
                   </p>
                   <div
@@ -167,12 +167,12 @@
 
             <!-- App Information -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+              <h3 class="card-title text-secondary-900 mb-4">
                 Application Information
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     App Name *
                   </label>
                   <input
@@ -184,7 +184,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     App URL
                   </label>
                   <input
@@ -195,7 +195,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Support Email
                   </label>
                   <input
@@ -206,7 +206,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Support Phone
                   </label>
                   <input
@@ -221,12 +221,12 @@
 
             <!-- Company Information -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+              <h3 class="card-title text-secondary-900 mb-4">
                 Company Information
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Company Name
                   </label>
                   <input
@@ -237,7 +237,7 @@
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Company Address
                   </label>
                   <textarea
@@ -248,7 +248,7 @@
                   ></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Registration No.
                   </label>
                   <input
@@ -259,7 +259,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Tax ID / SST No.
                   </label>
                   <input
@@ -274,12 +274,12 @@
 
             <!-- System Defaults -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+              <h3 class="card-title text-secondary-900 mb-4">
                 System Defaults
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Default Currency
                   </label>
                   <select v-model="generalSettings.default_currency" class="input">
@@ -289,7 +289,7 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Default Language
                   </label>
                   <select v-model="generalSettings.default_language" class="input">
@@ -299,7 +299,7 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Default Timezone
                   </label>
                   <select v-model="generalSettings.default_timezone" class="input">
@@ -341,10 +341,10 @@
       <div v-show="activeMainTab === 'pricing'" class="p-6">
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-secondary-900">
+            <h3 class="card-title text-secondary-900">
               Subscription Plan Pricing
             </h3>
-            <p class="text-sm text-secondary-600 mt-1">
+            <p class="text-body text-secondary-600 mt-1">
               Manage pricing for Basic, Premium, and Business NFC card plans
             </p>
           </div>
@@ -386,24 +386,24 @@
           >
             <div class="p-6" :class="getPlanHeaderClass(plan.plan_type)">
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-xl font-bold text-white capitalize">
+                <h3 class="card-title text-white capitalize">
                   {{ plan.plan_type }} Plan
                 </h3>
-                <span v-if="plan.is_active" class="px-3 py-1 bg-white bg-opacity-20 text-white text-xs font-medium rounded-full">
+                <span v-if="plan.is_active" class="px-3 py-1 bg-white bg-opacity-20 text-white text-badge rounded-full">
                   Active
                 </span>
-                <span v-else class="px-3 py-1 bg-secondary-500 text-white text-xs font-medium rounded-full">
+                <span v-else class="px-3 py-1 bg-secondary-500 text-white text-badge rounded-full">
                   Inactive
                 </span>
               </div>
-              <p class="text-white text-opacity-90 text-sm">
+              <p class="text-white text-opacity-90 text-body">
                 {{ plan.description || 'NFC Card Plan' }}
               </p>
             </div>
 
             <div class="p-6">
               <div class="mb-6">
-                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                <label class="block text-label text-secondary-700 mb-2">
                   Price ({{ plan.currency }})
                 </label>
                 <div class="relative">
@@ -420,27 +420,27 @@
                     :class="{ 'border-warning-400 bg-warning-50': isPlanChanged(plan) }"
                   />
                 </div>
-                <p v-if="isPlanChanged(plan)" class="mt-2 text-xs text-warning-600 flex items-center">
+                <p v-if="isPlanChanged(plan)" class="mt-2 text-caption text-warning-600 flex items-center">
                   <Icon name="heroicons:exclamation-triangle" class="h-4 w-4 mr-1" />
                   Unsaved changes
                 </p>
               </div>
 
               <div class="mb-6">
-                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                <label class="block text-label text-secondary-700 mb-2">
                   Description
                 </label>
                 <textarea
                   v-model="plan.description"
                   @input="markPlanAsChanged(plan)"
                   rows="2"
-                  class="input w-full text-sm"
+                  class="input w-full text-input"
                   :class="{ 'border-warning-400 bg-warning-50': isPlanChanged(plan) }"
                 ></textarea>
               </div>
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                <label class="block text-label text-secondary-700 mb-2">
                   Features
                 </label>
                 <div class="space-y-2">
@@ -450,7 +450,7 @@
                       v-model="plan.features[index]"
                       @input="markPlanAsChanged(plan)"
                       type="text"
-                      class="input flex-1 text-sm py-1"
+                      class="input flex-1 text-input py-1"
                       :class="{ 'border-warning-400 bg-warning-50': isPlanChanged(plan) }"
                     />
                     <button
@@ -464,7 +464,7 @@
                 </div>
                 <button
                   @click="addPlanFeature(plan)"
-                  class="mt-2 text-sm text-primary-600 hover:text-primary-700 flex items-center"
+                  class="mt-2 text-button text-primary-600 hover:text-primary-700 flex items-center"
                 >
                   <Icon name="heroicons:plus-circle" class="h-5 w-5 mr-1" />
                   Add Feature
@@ -472,7 +472,7 @@
               </div>
 
               <div class="flex items-center justify-between pt-4 border-t border-secondary-200">
-                <span class="text-sm font-medium text-secondary-700">Active Status</span>
+                <span class="text-body text-secondary-700">Active Status</span>
                 <button
                   @click="togglePlanStatus(plan)"
                   :class="plan.is_active ? 'bg-success-500' : 'bg-secondary-300'"
@@ -496,7 +496,7 @@
             </div>
 
             <div class="px-6 py-3 bg-secondary-50 border-t border-secondary-200">
-              <p class="text-xs text-secondary-500">
+              <p class="text-caption text-secondary-500">
                 Last updated: {{ formatPlanDate(plan.updated_at) }}
               </p>
             </div>
@@ -509,14 +509,14 @@
             <div class="flex items-start">
               <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-warning-600 mr-3 flex-shrink-0 mt-0.5" />
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-warning-900 mb-2">
+                <h3 class="card-title text-warning-900 mb-2">
                   Unsaved Changes
                 </h3>
-                <p class="text-sm text-warning-800 mb-4">
+                <p class="text-body text-warning-800 mb-4">
                   You have unsaved changes in {{ changedPlansList.length }} plan(s). Click "Save All Changes" to apply them.
                 </p>
                 <div class="space-y-1">
-                  <div v-for="plan in changedPlansList" :key="plan.id" class="text-sm text-warning-800">
+                  <div v-for="plan in changedPlansList" :key="plan.id" class="text-body text-warning-800">
                     • <strong class="capitalize">{{ plan.plan_type }}</strong>:
                     <span v-if="plan.originalPrice !== plan.price">
                       Price changed from {{ plan.currency }} {{ plan.originalPrice }} to {{ plan.currency }} {{ plan.price }}
@@ -538,10 +538,10 @@
             <div class="flex items-start">
               <Icon name="heroicons:information-circle" class="h-6 w-6 text-info-600 mr-3 flex-shrink-0" />
               <div>
-                <h3 class="text-sm font-semibold text-info-900 mb-2">
+                <h3 class="card-title text-info-900 mb-2">
                   Important Notes
                 </h3>
-                <ul class="text-sm text-info-800 space-y-1 list-disc list-inside">
+                <ul class="text-body text-info-800 space-y-1 list-disc list-inside">
                   <li>Price changes will affect new orders immediately after saving</li>
                   <li>Existing users will keep their current plan prices</li>
                   <li>Inactive plans will not be shown to users during checkout</li>
@@ -562,7 +562,7 @@
                 activeLegalTab === 'terms'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-                'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                'whitespace-nowrap py-3 px-1 border-b-2 text-navigation',
               ]"
             >
               Terms of Service
@@ -573,7 +573,7 @@
                 activeLegalTab === 'privacy'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-                'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                'whitespace-nowrap py-3 px-1 border-b-2 text-navigation',
               ]"
             >
               Privacy Policy
@@ -587,7 +587,7 @@
             <div class="space-y-6">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Version *
                   </label>
                   <input
@@ -604,12 +604,12 @@
                     @change="validateTermsVersion"
                     required
                   />
-                  <p v-if="versionErrors.terms" class="text-xs text-red-500 mt-1">
+                  <p v-if="versionErrors.terms" class="text-error mt-1">
                     {{ versionErrors.terms }}
                   </p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Effective Date
                   </label>
                   <input
@@ -622,16 +622,16 @@
               </div>
 
               <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p class="text-sm text-amber-800">
+                <p class="text-body text-amber-800">
                   <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
                 </p>
               </div>
 
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+                <h3 class="card-title text-secondary-900 mb-3">
                   PDF Document Upload
                 </h3>
-                <p class="text-sm text-secondary-600 mb-4">
+                <p class="text-body text-secondary-600 mb-4">
                   Upload a PDF file containing the Terms of Service document. This PDF will be displayed to users who access the Terms of Service.
                 </p>
 
@@ -639,7 +639,7 @@
                   v-if="termsPdfStatus.exists"
                   class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
                 >
-                  <div class="flex items-center space-x-2 text-sm text-green-700">
+                  <div class="flex items-center space-x-2 text-body text-green-700">
                     <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
                     <span>{{ getLegalDisplayFileName(termsPdfStatus.fileInfo?.original_filename) }} ({{
                       formatLegalFileSize(termsPdfStatus.fileInfo?.size)
@@ -655,7 +655,7 @@
                   </button>
                 </div>
 
-                <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
                   <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-yellow-600" />
                   No PDF uploaded yet. Please upload a PDF file below.
                 </div>
@@ -678,11 +678,11 @@
                     <span v-if="uploadingTermsPdf" class="animate-spin">⏳</span>
                     {{ uploadingTermsPdf ? 'Uploading...' : 'Choose PDF File' }}
                   </button>
-                  <span class="text-xs text-secondary-500">Max 10MB</span>
+                  <span class="text-helper">Max 10MB</span>
                 </div>
               </div>
 
-              <div v-if="termsData.updated_at" class="text-sm text-secondary-600">
+              <div v-if="termsData.updated_at" class="text-body text-secondary-600">
                 <p>
                   Last updated: {{ formatLegalDate(termsData.updated_at) }}
                   <span v-if="termsData.updater">
@@ -723,7 +723,7 @@
             <div class="space-y-6">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Version *
                   </label>
                   <input
@@ -740,12 +740,12 @@
                     @change="validatePrivacyVersion"
                     required
                   />
-                  <p v-if="versionErrors.privacy" class="text-xs text-red-500 mt-1">
+                  <p v-if="versionErrors.privacy" class="text-error mt-1">
                     {{ versionErrors.privacy }}
                   </p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Effective Date
                   </label>
                   <input
@@ -758,16 +758,16 @@
               </div>
 
               <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p class="text-sm text-amber-800">
+                <p class="text-body text-amber-800">
                   <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
                 </p>
               </div>
 
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="text-sm font-semibold text-secondary-900 mb-3">
+                <h3 class="card-title text-secondary-900 mb-3">
                   PDF Document Upload
                 </h3>
-                <p class="text-sm text-secondary-600 mb-4">
+                <p class="text-body text-secondary-600 mb-4">
                   Upload a PDF file containing the Privacy Policy document. This PDF will be displayed to users who access the Privacy Policy.
                 </p>
 
@@ -775,7 +775,7 @@
                   v-if="privacyPdfStatus.exists"
                   class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
                 >
-                  <div class="flex items-center space-x-2 text-sm text-green-700">
+                  <div class="flex items-center space-x-2 text-body text-green-700">
                     <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
                     <span>{{ getLegalDisplayFileName(privacyPdfStatus.fileInfo?.original_filename) }} ({{
                       formatLegalFileSize(privacyPdfStatus.fileInfo?.size)
@@ -791,7 +791,7 @@
                   </button>
                 </div>
 
-                <div v-else class="mb-4 text-sm text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
                   <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-yellow-600" />
                   No PDF uploaded yet. Please upload a PDF file below.
                 </div>
@@ -814,11 +814,11 @@
                     <span v-if="uploadingPrivacyPdf" class="animate-spin">⏳</span>
                     {{ uploadingPrivacyPdf ? 'Uploading...' : 'Choose PDF File' }}
                   </button>
-                  <span class="text-xs text-secondary-500">Max 10MB</span>
+                  <span class="text-helper">Max 10MB</span>
                 </div>
               </div>
 
-              <div v-if="privacyData.updated_at" class="text-sm text-secondary-600">
+              <div v-if="privacyData.updated_at" class="text-body text-secondary-600">
                 <p>
                   Last updated: {{ formatLegalDate(privacyData.updated_at) }}
                   <span v-if="privacyData.updater">
@@ -860,13 +860,13 @@
           <div class="space-y-8">
             <!-- Fiuu Payment Gateway -->
             <div>
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+              <h3 class="card-title text-secondary-900 mb-4 flex items-center gap-2">
                 <Icon name="heroicons:credit-card" class="h-5 w-5 text-primary-600" />
                 Fiuu Payment Gateway (formerly Razer Merchant Services)
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Merchant ID
                   </label>
                   <input
@@ -877,7 +877,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Verify Key
                   </label>
                   <input
@@ -888,7 +888,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Secret Key
                   </label>
                   <input
@@ -906,12 +906,12 @@
                         type="checkbox"
                         class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                       />
-                      <span class="text-sm font-medium text-secondary-700">Enable Fiuu Payment</span>
+                      <span class="text-label text-secondary-700">Enable Fiuu Payment</span>
                     </label>
                   </div>
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Environment
                   </label>
                   <select v-model="paymentSettings.fiuu_environment" class="input max-w-xs">
@@ -924,13 +924,13 @@
 
             <!-- Bank Transfer -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+              <h3 class="card-title text-secondary-900 mb-4 flex items-center gap-2">
                 <Icon name="heroicons:building-library" class="h-5 w-5 text-primary-600" />
                 Manual Bank Transfer
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Bank Name
                   </label>
                   <input
@@ -941,7 +941,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Account Holder Name
                   </label>
                   <input
@@ -952,7 +952,7 @@
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Account Number
                   </label>
                   <input
@@ -969,7 +969,7 @@
                       type="checkbox"
                       class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                     />
-                    <span class="text-sm font-medium text-secondary-700">Enable Manual Bank Transfer</span>
+                    <span class="text-label text-secondary-700">Enable Manual Bank Transfer</span>
                   </label>
                 </div>
               </div>
@@ -977,7 +977,7 @@
 
             <!-- E-Wallet -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+              <h3 class="card-title text-secondary-900 mb-4 flex items-center gap-2">
                 <Icon name="heroicons:wallet" class="h-5 w-5 text-primary-600" />
                 E-Wallet Payment
               </h3>
@@ -989,8 +989,8 @@
                     class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                   />
                   <div>
-                    <p class="text-sm font-semibold text-secondary-900">Touch 'n Go</p>
-                    <p class="text-xs text-secondary-500">eWallet</p>
+                    <p class="text-label text-secondary-900">Touch 'n Go</p>
+                    <p class="text-caption text-secondary-500">eWallet</p>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-4 card cursor-pointer hover:bg-secondary-50 transition-colors" :class="paymentSettings.ewallet_grabpay ? 'border-primary-500 bg-primary-50' : ''">
@@ -1000,8 +1000,8 @@
                     class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                   />
                   <div>
-                    <p class="text-sm font-semibold text-secondary-900">GrabPay</p>
-                    <p class="text-xs text-secondary-500">eWallet</p>
+                    <p class="text-label text-secondary-900">GrabPay</p>
+                    <p class="text-caption text-secondary-500">eWallet</p>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-4 card cursor-pointer hover:bg-secondary-50 transition-colors" :class="paymentSettings.ewallet_shopeepay ? 'border-primary-500 bg-primary-50' : ''">
@@ -1011,8 +1011,8 @@
                     class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                   />
                   <div>
-                    <p class="text-sm font-semibold text-secondary-900">ShopeePay</p>
-                    <p class="text-xs text-secondary-500">eWallet</p>
+                    <p class="text-label text-secondary-900">ShopeePay</p>
+                    <p class="text-caption text-secondary-500">eWallet</p>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-4 card cursor-pointer hover:bg-secondary-50 transition-colors" :class="paymentSettings.ewallet_duitnow ? 'border-primary-500 bg-primary-50' : ''">
@@ -1022,8 +1022,8 @@
                     class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
                   />
                   <div>
-                    <p class="text-sm font-semibold text-secondary-900">DuitNow</p>
-                    <p class="text-xs text-secondary-500">QR Payment</p>
+                    <p class="text-label text-secondary-900">DuitNow</p>
+                    <p class="text-caption text-secondary-500">QR Payment</p>
                   </div>
                 </label>
               </div>
@@ -1051,13 +1051,13 @@
           <div class="space-y-8">
             <!-- SMTP Configuration -->
             <div>
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+              <h3 class="card-title text-secondary-900 mb-4 flex items-center gap-2">
                 <Icon name="heroicons:envelope" class="h-5 w-5 text-primary-600" />
                 SMTP Configuration
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     SMTP Host
                   </label>
                   <input
@@ -1068,7 +1068,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     SMTP Port
                   </label>
                   <input
@@ -1079,7 +1079,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     SMTP Username
                   </label>
                   <input
@@ -1090,7 +1090,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     SMTP Password
                   </label>
                   <input
@@ -1101,7 +1101,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Encryption
                   </label>
                   <select v-model="emailSettings.smtp_encryption" class="input">
@@ -1111,7 +1111,7 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Mailer
                   </label>
                   <select v-model="emailSettings.mailer" class="input">
@@ -1125,12 +1125,12 @@
 
             <!-- From Address -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+              <h3 class="card-title text-secondary-900 mb-4">
                 Email "From" Address
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     From Name
                   </label>
                   <input
@@ -1141,7 +1141,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     From Email
                   </label>
                   <input
@@ -1156,12 +1156,12 @@
 
             <!-- Test Email -->
             <div class="pt-4 border-t border-secondary-200">
-              <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+              <h3 class="card-title text-secondary-900 mb-4">
                 Test Configuration
               </h3>
               <div class="flex items-end gap-4">
                 <div class="flex-1">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Send Test Email To
                   </label>
                   <input
@@ -1212,7 +1212,7 @@
         @click.stop
       >
         <div class="flex items-center justify-between p-6 border-b border-secondary-200">
-          <h3 class="text-xl font-bold text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             {{
               legalPreviewType === "terms" ? "Terms of Service" : "Privacy Policy"
             }}

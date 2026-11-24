@@ -12,8 +12,8 @@
       <NFCGoWaveLoader
         variant="wave"
         size="lg"
+        theme="light"
         :showText="true"
-        labelText="NFCGo"
         hintText="Memuatkan dashboard..."
       />
     </div>
@@ -23,7 +23,7 @@
          ============================================== -->
     <div v-else>
       <div class="mb-8">
-        <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Admin Dashboard</h1>
+        <h1 class="page-title text-secondary-900">Admin Dashboard</h1>
         <p class="mt-2 text-secondary-600">
           Monitor and manage your NFC business card platform
         </p>
@@ -39,16 +39,16 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               {{ stat.name }}
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ stat.value }}
             </p>
           </div>
         </div>
         <div class="mt-4">
-          <div class="flex items-center text-sm">
+          <div class="flex items-center text-body">
             <Icon
               :name="
                 stat.trend === 'up'
@@ -78,10 +78,10 @@
       <!-- Recent Users -->
       <div class="card">
         <div class="card-header flex flex-wrap items-center justify-between gap-2 w-full">
-          <h3 class="text-lg font-medium text-secondary-900 whitespace-nowrap">Recent Users</h3>
+          <h3 class="card-title text-secondary-900 whitespace-nowrap">Recent Users</h3>
           <NuxtLink
             to="/AdminManagement/users"
-            class="text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
+            class="text-body text-primary-600 hover:text-primary-500 whitespace-nowrap"
           >
             View all
           </NuxtLink>
@@ -109,17 +109,17 @@
                 class="h-10 w-10 rounded-full object-cover"
               />
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-secondary-900 truncate">
+                <p class="text-body font-medium text-secondary-900 truncate">
                   {{ user.full_name }}
                 </p>
-                <p class="text-xs text-secondary-500 truncate">
+                <p class="text-caption text-secondary-500 truncate">
                   {{ user.email }}
                 </p>
               </div>
               <div class="flex items-center space-x-2">
                 <span
                   :class="[
-                    'px-2 py-1 text-xs font-medium rounded-full',
+                    'px-2 py-1 text-badge rounded-full',
                     getSubscriptionBadgeClass(user.subscription_plan),
                   ]"
                 >
@@ -127,7 +127,7 @@
                 </span>
                 <span
                   v-if="user.is_admin"
-                  class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full"
+                  class="px-2 py-1 text-badge bg-red-100 text-red-800 rounded-full"
                 >
                   Admin
                 </span>
@@ -147,12 +147,12 @@
       <!-- Recent Activity -->
       <div class="card">
         <div class="card-header flex flex-wrap items-center justify-between gap-2 w-full">
-          <h3 class="text-lg font-medium text-secondary-900 whitespace-nowrap">
+          <h3 class="card-title text-secondary-900 whitespace-nowrap">
             Recent Activity
           </h3>
           <NuxtLink
             to="/AdminManagement/SystemAuditLog"
-            class="text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
+            class="text-body text-primary-600 hover:text-primary-500 whitespace-nowrap"
           >
             View all
           </NuxtLink>
@@ -188,17 +188,17 @@
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-secondary-900 leading-snug">
+                <p class="text-body font-medium text-secondary-900 leading-snug">
                   {{ getActivityTitle(activity) }}
                 </p>
                 <p
                   v-if="getActivityContext(activity)"
-                  class="text-xs text-secondary-500 mt-1 truncate"
+                  class="text-caption text-secondary-500 mt-1 truncate"
                   :title="getActivityContext(activity)"
                 >
                   {{ getActivityContext(activity) }}
                 </p>
-                <p class="text-xs text-secondary-400 mt-1">
+                <p class="text-caption text-secondary-400 mt-1">
                   {{ formatTimeAgo(activity.created_at) }}
                 </p>
               </div>
@@ -219,7 +219,7 @@
     <div class="mt-8">
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Subscription Breakdown
           </h3>
         </div>
@@ -243,13 +243,13 @@
               :key="plan.subscription_plan"
               class="text-center p-4 rounded-lg bg-secondary-50"
             >
-              <h4 class="text-lg font-semibold text-secondary-900">
+              <h4 class="card-title text-secondary-900">
                 {{ String(plan.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
               </h4>
-              <p class="text-3xl font-bold text-primary-600">
+              <p class="stat-value text-primary-600">
                 {{ plan.count }}
               </p>
-              <p class="text-sm text-secondary-500">users</p>
+              <p class="stat-label text-secondary-500">users</p>
             </div>
           </div>
           <div v-else class="text-center py-8 text-secondary-500">
@@ -263,7 +263,7 @@
     <div class="mt-8">
       <div class="card">
         <div class="card-header">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             System Information
           </h3>
         </div>
@@ -287,10 +287,10 @@
                 name="heroicons:server"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Storage Used
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{
                   dashboard.system_stats.total_storage_used?.formatted || "0 B"
                 }}
@@ -301,10 +301,10 @@
                 name="heroicons:signal"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Active Sessions
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{ dashboard.system_stats.active_sessions || 0 }}
               </p>
             </div>
@@ -313,10 +313,10 @@
                 name="heroicons:clock"
                 class="h-8 w-8 mx-auto text-primary-500 mb-2"
               />
-              <h4 class="text-sm font-medium text-secondary-900">
+              <h4 class="text-body font-medium text-secondary-900">
                 Last Backup
               </h4>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="text-h5 text-secondary-900">
                 {{ formatDate(dashboard.system_stats.last_backup) }}
               </p>
             </div>

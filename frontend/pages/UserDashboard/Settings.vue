@@ -3,7 +3,7 @@
   <div>
     <!-- Header Section -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+      <h1 class="page-title text-secondary-900">
         Account Settings
       </h1>
       <p class="mt-2 text-secondary-600">
@@ -46,10 +46,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Personal Information
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Update your personal details
                 </p>
               </div>
@@ -67,7 +67,7 @@
                           />
                         </div>
                         <div class="flex-1">
-                          <label class="block text-sm font-medium text-secondary-700 mb-2">
+                          <label class="block text-label text-secondary-700 mb-2">
                             Account Picture
                           </label>
                           <div class="flex items-center space-x-3">
@@ -96,7 +96,7 @@
                               Remove
                             </button>
                           </div>
-                          <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF or WebP. Max 5MB</p>
+                          <p class="text-helper text-gray-500 mt-1">JPG, PNG, GIF or WebP. Max 5MB</p>
                         </div>
                       </div>
                     </div>
@@ -104,7 +104,7 @@
                     <!-- First Name -->
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >First Name *</label
                       >
                       <input
@@ -119,7 +119,7 @@
                     <!-- Last Name -->
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >Last Name *</label
                       >
                       <input
@@ -134,7 +134,7 @@
                     <!-- Email -->
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >Email Address *</label
                       >
                       <input
@@ -149,7 +149,7 @@
                     <!-- Phone -->
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >Phone Number</label
                       >
                       <input
@@ -188,10 +188,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Profile URLs
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Your NFC card profile URLs
                 </p>
               </div>
@@ -204,18 +204,18 @@
                   >
                     <div class="flex-1">
                       <div class="flex items-center gap-3 mb-2">
-                        <h3 class="text-sm font-medium text-secondary-900">
+                        <h3 class="text-label text-secondary-900">
                           {{ card.nfc_card_id || `Card #${card.id}` }}
                         </h3>
                         <span 
                           :class="card.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                          class="px-2 py-1 text-xs font-medium rounded-full"
+                          class="px-2 py-1 text-badge rounded-full"
                         >
                           {{ card.status }}
                         </span>
                         <span 
                           :class="card.has_landing_page ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'"
-                          class="px-2 py-1 text-xs font-medium rounded-full"
+                          class="px-2 py-1 text-badge rounded-full"
                         >
                           {{ card.has_landing_page ? 'Profile Ready' : 'Profile Needed' }}
                         </span>
@@ -223,20 +223,20 @@
                       <div class="space-y-1 mb-2">
                         <div class="flex items-center gap-2">
                           <Icon name="heroicons:link" class="h-4 w-4 text-gray-400" />
-                          <span class="text-xs text-gray-500">Live URL:</span>
-                          <code class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          <span class="text-caption text-gray-500">Live URL:</span>
+                          <code class="text-body text-blue-600 bg-blue-50 px-2 py-1 rounded">
                             {{ getCardDisplayLiveUrl(card) }}
                           </code>
                         </div>
                         <div class="flex items-center gap-2">
                           <Icon name="heroicons:eye" class="h-4 w-4 text-gray-400" />
-                          <span class="text-xs text-gray-500">Preview URL:</span>
-                          <code class="text-sm text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                          <span class="text-caption text-gray-500">Preview URL:</span>
+                          <code class="text-body text-purple-600 bg-purple-50 px-2 py-1 rounded">
                             {{ getCardDisplayPreviewUrl(card) }}
                           </code>
                         </div>
                       </div>
-                      <p v-if="!card.has_landing_page" class="text-xs text-yellow-600">
+                      <p v-if="!card.has_landing_page" class="text-caption text-yellow-600">
                         <Icon name="heroicons:exclamation-triangle" class="h-3 w-3 inline mr-1" />
                         This card needs a profile to display content
                       </p>
@@ -277,7 +277,7 @@
                 </div>
                 <div v-else class="text-center py-8">
                   <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p class="text-sm text-gray-500 mb-4">No NFC cards found</p>
+                  <p class="text-body text-gray-500 mb-4">No NFC cards found</p>
                   <button
                     @click="navigateTo('/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement')"
                     class="btn btn-primary btn-sm"
@@ -294,10 +294,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Account Information
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   View and manage your account details
                 </p>
               </div>
@@ -305,11 +305,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Account Status</label
                     >
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-green-100 text-green-800"
                     >
                       <Icon
                         name="heroicons:check-circle"
@@ -320,30 +320,30 @@
                   </div>
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Subscription Plan</label
                     >
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-blue-100 text-blue-800"
                     >
                       {{ user?.subscription_plan || "Free" }}
                     </span>
                   </div>
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Member Since</label
                     >
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       {{ formatDate(user?.created_at) }}
                     </p>
                   </div>
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Last Login</label
                     >
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       {{ formatDate(user?.last_login_at) }}
                     </p>
                   </div>
@@ -359,10 +359,10 @@
                     <Icon name="heroicons:credit-card" class="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
-                    <h3 class="text-base font-semibold text-secondary-900 mb-1">
+                    <h3 class="card-title text-secondary-900 mb-1">
                       Subscription & Billing management has been moved
                     </h3>
-                    <p class="text-sm text-secondary-600 leading-relaxed">
+                    <p class="card-subtitle text-secondary-600 leading-relaxed">
                       Current plan:
                       <span class="font-semibold text-secondary-900">{{ getSubscriptionDisplayName(user?.subscription_plan) }}</span>
                       <span v-if="user?.subscription_expires_at && user?.subscription_plan !== 'free'" class="ml-2">
@@ -387,10 +387,10 @@
             <!-- Theme Selector Card -->
             <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Interface Theme
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Choose a color theme most comfortable for your eyes
                 </p>
               </div>
@@ -417,7 +417,7 @@
                           <Icon :name="t.icon" class="h-5 w-5" :style="{ color: t.previewColor }" />
                         </div>
                         <div>
-                          <h4 class="text-sm font-semibold text-secondary-900">{{ t.name }}</h4>
+                          <h4 class="text-label text-secondary-900">{{ t.name }}</h4>
                           <div class="flex gap-1 mt-1">
                             <span class="w-3 h-3 rounded-full border border-secondary-200" :style="{ backgroundColor: t.previewColor }"></span>
                           </div>
@@ -430,12 +430,12 @@
                         <Icon name="heroicons:check" class="h-4 w-4" />
                       </div>
                     </div>
-                    <p class="text-xs text-secondary-600 leading-relaxed min-h-[32px]">
+                    <p class="text-caption text-secondary-600 leading-relaxed min-h-[32px]">
                       {{ t.description }}
                     </p>
                   </button>
                 </div>
-                <div v-if="availableThemes.length === 0" class="text-center py-8 text-secondary-500 text-sm">
+                <div v-if="availableThemes.length === 0" class="text-center py-8 text-secondary-500 text-body">
                   Unable to load theme list.
                 </div>
               </div>
@@ -444,16 +444,16 @@
             <!-- Language & Region Card -->
             <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Language & Region
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Set your preferred interface language and timezone
                 </p>
               </div>
               <div class="p-6 space-y-5">
                 <div class="form-group">
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Interface Language
                   </label>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
@@ -469,14 +469,14 @@
                           : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
                       ]"
                     >
-                      <span class="font-medium text-secondary-900 text-sm">{{ lang.label }}</span>
+                      <span class="font-medium text-secondary-900 text-body">{{ lang.label }}</span>
                       <Icon v-if="uiLanguage === lang.code" name="heroicons:check" class="h-5 w-5 text-primary-600" />
                     </button>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Timezone
                   </label>
                   <select
@@ -492,7 +492,7 @@
                       {{ tz.label }}
                     </option>
                   </select>
-                  <p class="text-xs text-secondary-500 mt-2">
+                  <p class="text-helper text-secondary-500 mt-2">
                     Timezone is used to display analytics dates and times, invoices, and activity logs.
                   </p>
                 </div>
@@ -507,10 +507,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Change Password
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Update your account password
                 </p>
               </div>
@@ -519,7 +519,7 @@
                   <div class="space-y-4">
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >Current Password</label
                       >
                       <div class="relative">
@@ -541,7 +541,7 @@
                     </div>
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >New Password</label
                       >
                       <div class="relative">
@@ -563,7 +563,7 @@
                     </div>
                     <div>
                       <label
-                        class="block text-sm font-medium text-secondary-700 mb-2"
+                        class="block text-label text-secondary-700 mb-2"
                         >Confirm New Password</label
                       >
                       <div class="relative">
@@ -606,10 +606,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Two-Factor Authentication (2FA)
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Add an extra layer of security to your account
                 </p>
               </div>
@@ -618,23 +618,23 @@
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <div class="flex items-center gap-3 mb-2">
-                        <h3 class="text-sm font-medium text-secondary-900">
+                        <h3 class="text-label text-secondary-900">
                           Authenticator App (TOTP)
                         </h3>
                         <span
                           v-if="user?.two_factor_enabled"
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-green-100 text-green-800"
                         >
                           Active
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-gray-100 text-gray-800"
                         >
                           Inactive
                         </span>
                       </div>
-                      <p class="text-sm text-secondary-600 leading-relaxed">
+                      <p class="card-subtitle text-secondary-600 leading-relaxed">
                         Add an extra layer of security — every login requires a 6-digit code from an Authenticator app (Google Authenticator, Authy, 1Password, Bitwarden, etc.)
                       </p>
                     </div>
@@ -677,10 +677,10 @@
             <!-- Linked Accounts Card -->
             <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Linked Accounts
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Connect third-party accounts for easier sign-in
                 </p>
               </div>
@@ -693,11 +693,11 @@
                         <Icon name="logos:google-icon" class="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium text-secondary-900">Google</h3>
-                        <p v-if="linkedAccounts.google" class="text-sm text-green-600">
+                        <h3 class="text-label text-secondary-900">Google</h3>
+                        <p v-if="linkedAccounts.google" class="text-body text-green-600">
                           Connected as {{ linkedAccounts.google.email }}
                         </p>
-                        <p v-else class="text-sm text-secondary-500">
+                        <p v-else class="text-body text-secondary-500">
                           Not connected
                         </p>
                       </div>
@@ -729,11 +729,11 @@
                         <Icon name="logos:apple" class="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium text-secondary-900">Apple</h3>
-                        <p v-if="linkedAccounts.apple" class="text-sm text-green-600">
+                        <h3 class="text-label text-secondary-900">Apple</h3>
+                        <p v-if="linkedAccounts.apple" class="text-body text-green-600">
                           Connected as {{ linkedAccounts.apple.email || 'Private Email' }}
                         </p>
-                        <p v-else class="text-sm text-secondary-500">
+                        <p v-else class="text-body text-secondary-500">
                           Not connected
                         </p>
                       </div>
@@ -763,7 +763,7 @@
                 <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <div class="flex items-start">
                     <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                    <p class="text-sm text-blue-700">
+                    <p class="text-body text-blue-700">
                       Linking accounts allows you to sign in with either your password or the linked provider. 
                       You must verify your password before linking a new account.
                     </p>
@@ -779,7 +779,7 @@
                   <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon :name="linkAccountProvider === 'google' ? 'logos:google-icon' : 'logos:apple'" class="h-8 w-8" />
                   </div>
-                  <h3 class="text-xl font-bold text-secondary-900 mb-2">
+                  <h3 class="modal-title text-secondary-900 mb-2">
                     Link {{ linkAccountProvider === 'google' ? 'Google' : 'Apple' }} Account
                   </h3>
                   <p class="text-secondary-600">
@@ -789,7 +789,7 @@
 
                 <form @submit.prevent="linkAccount">
                   <div class="mb-4">
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                    <label class="block text-label text-secondary-700 mb-2">
                       Current Password
                     </label>
                     <div class="relative">
@@ -809,7 +809,7 @@
                         <Icon :name="showLinkAccountPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
                       </button>
                     </div>
-                    <p v-if="linkAccountError" class="text-sm text-red-600 mt-1">
+                    <p v-if="linkAccountError" class="text-error text-red-600 mt-1">
                       {{ linkAccountError }}
                     </p>
                   </div>
@@ -841,10 +841,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Active Sessions
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Manage your active login sessions across all devices
                 </p>
               </div>
@@ -865,10 +865,10 @@
                         />
                       </div>
                       <div>
-                        <p class="text-sm font-medium text-secondary-900">
+                        <p class="text-body font-medium text-secondary-900">
                           {{ session.name || (session.device + (session.browser ? ' · ' + session.browser : '')) }}
                         </p>
-                        <p class="text-xs text-secondary-600">
+                        <p class="text-helper text-secondary-600">
                           {{ session.ip_address || 'Unknown IP' }} •
                           {{ formatDate(session.last_seen_at) }}
                         </p>
@@ -877,7 +877,7 @@
                     <div class="flex items-center space-x-2">
                       <span
                         v-if="session.is_current"
-                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-green-100 text-green-800"
                       >
                         Current Session
                       </span>
@@ -895,7 +895,7 @@
                 </div>
 
                 <div class="border-t border-secondary-200 mt-6 pt-5 flex items-center justify-between">
-                  <div class="text-sm text-secondary-600 flex items-center">
+                  <div class="text-body text-secondary-600 flex items-center">
                     <span v-if="loadingSessions" class="loading loading-spinner loading-xs mr-2"></span>
                     <span>{{ loadingSessions ? 'Loading sessions...' : `${activeSessions.length} active sessions` }}</span>
                   </div>
@@ -920,10 +920,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Profile Visibility
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Control who can see your profile
                 </p>
               </div>
@@ -931,10 +931,10 @@
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Public Profile
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Make your profile visible to everyone
                       </p>
                     </div>
@@ -951,10 +951,10 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Show in Search
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Allow search engines to index your profile
                       </p>
                     </div>
@@ -978,10 +978,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Analytics & Tracking
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Manage data collection preferences
                 </p>
               </div>
@@ -989,10 +989,10 @@
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Profile Analytics
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Track profile views and interactions
                       </p>
                     </div>
@@ -1009,10 +1009,10 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Location Tracking
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Track visitor locations for analytics
                       </p>
                     </div>
@@ -1039,10 +1039,10 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Email Notifications
                 </h2>
-                <p class="text-sm text-secondary-600">
+                <p class="card-subtitle text-secondary-600">
                   Choose what email notifications you receive
                 </p>
               </div>
@@ -1050,10 +1050,10 @@
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Profile Views
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Get notified when someone views your profile
                       </p>
                     </div>
@@ -1070,10 +1070,10 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         NFC Taps
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Get notified when someone taps your NFC card
                       </p>
                     </div>
@@ -1090,10 +1090,10 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Weekly Reports
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Receive weekly analytics summaries
                       </p>
                     </div>
@@ -1110,10 +1110,10 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-secondary-900">
+                      <h3 class="text-label text-secondary-900">
                         Product Updates
                       </h3>
-                      <p class="text-sm text-secondary-600">
+                      <p class="card-subtitle text-secondary-600">
                         Get notified about new features and updates
                       </p>
                     </div>
@@ -1140,10 +1140,10 @@
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <h2 class="text-lg font-semibold text-secondary-900">
+                    <h2 class="card-title text-secondary-900">
                       Current Subscription Plan
                     </h2>
-                    <p class="text-sm text-secondary-600">
+                    <p class="card-subtitle text-secondary-600">
                       Manage your NFCGo Business Card subscription
                     </p>
                   </div>
@@ -1160,20 +1160,20 @@
                 <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-3 flex-wrap">
-                      <h3 class="text-xl font-semibold text-secondary-900">
+                      <h3 class="card-title text-secondary-900">
                         {{ getSubscriptionDisplayName(user?.subscription_plan) }}
                       </h3>
                       <span 
                         :class="getSubscriptionBadgeClass(user?.subscription_plan)"
-                        class="px-2.5 py-1 text-xs font-semibold rounded-full"
+                        class="px-2.5 py-1 text-badge rounded-full"
                       >
                         {{ user?.subscription_plan?.toUpperCase() || 'FREE' }}
                       </span>
                     </div>
-                    <p class="text-sm text-secondary-600 mb-4 leading-relaxed">
+                    <p class="card-subtitle text-secondary-600 mb-4 leading-relaxed">
                       {{ getSubscriptionDescription(user?.subscription_plan) }}
                     </p>
-                    <div class="text-sm text-secondary-600 space-y-1.5">
+                    <div class="card-subtitle text-secondary-600 space-y-1.5">
                       <p v-if="user?.subscription_expires_at" class="flex items-center gap-2">
                         <Icon name="heroicons:calendar-days" class="h-4 w-4 text-secondary-400" />
                         <template v-if="user?.subscription_plan === 'free'">
@@ -1197,14 +1197,14 @@
                     </div>
                   </div>
                   <div class="md:text-right bg-secondary-50 rounded-xl border border-secondary-200 p-5 min-w-[240px]">
-                    <p class="text-xs font-medium uppercase tracking-wider text-secondary-500 mb-2">
+                    <p class="stat-label mb-2">
                       Monthly Rate
                     </p>
-                    <p class="text-4xl font-bold text-secondary-900 leading-none mb-2">
+                    <p class="stat-value text-secondary-900 leading-none mb-2">
                       {{ getSubscriptionPrice(user?.subscription_plan) }}
-                      <span class="text-base font-normal text-secondary-500 ml-1">/mo</span>
+                      <span class="text-body font-normal text-secondary-500 ml-1">/mo</span>
                     </p>
-                    <p class="text-xs text-secondary-500">
+                    <p class="text-helper text-secondary-500">
                       {{ user?.subscription_plan === 'free' ? "You haven't been charged — free plan" : 'Charged automatically every month' }}
                     </p>
                   </div>
@@ -1212,7 +1212,7 @@
 
                 <!-- Subscription Features -->
                 <div class="mb-8 p-5 bg-gradient-to-br from-secondary-50 to-white rounded-xl border border-secondary-200">
-                  <h4 class="text-sm font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+                  <h4 class="text-label text-secondary-900 mb-4 flex items-center gap-2">
                     <Icon name="heroicons:check-circle" class="h-5 w-5 text-green-600" />
                     Current Plan Features
                   </h4>
@@ -1220,7 +1220,7 @@
                     <div 
                       v-for="feature in getSubscriptionFeatures(user?.subscription_plan)" 
                       :key="feature"
-                      class="flex items-start text-sm text-secondary-700"
+                      class="flex items-start text-body text-secondary-700"
                     >
                       <Icon name="heroicons:check" class="h-4 w-4 text-green-500 mr-2.5 flex-shrink-0 mt-0.5" />
                       <span>{{ feature }}</span>
@@ -1230,7 +1230,7 @@
 
                 <!-- Available Plans (if user is on free plan) -->
                 <div v-if="user?.subscription_plan === 'free' && planPrices.length > 1" class="mb-8">
-                  <h4 class="text-sm font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+                  <h4 class="text-label text-secondary-900 mb-4 flex items-center gap-2">
                     <Icon name="heroicons:sparkles" class="h-5 w-5 text-amber-500" />
                     Available Plans to Upgrade
                   </h4>
@@ -1242,24 +1242,24 @@
                     >
                       <div class="flex items-start justify-between mb-3">
                         <div>
-                          <h5 class="text-base font-bold text-secondary-900 capitalize mb-1">{{ plan.plan_type }}</h5>
-                          <p class="text-sm text-secondary-600">{{ plan.description }}</p>
+                          <h5 class="card-title text-secondary-900 capitalize mb-1">{{ plan.plan_type }}</h5>
+                          <p class="card-subtitle text-secondary-600">{{ plan.description }}</p>
                         </div>
-                        <span class="text-lg font-bold text-primary-600 whitespace-nowrap ml-3">
+                        <span class="card-title text-primary-600 whitespace-nowrap ml-3">
                           {{ plan.currency === 'MYR' ? 'RM' : plan.currency }} {{ plan.price }}
-                          <span class="text-xs font-normal text-secondary-500">/mo</span>
+                          <span class="text-caption font-normal text-secondary-500">/mo</span>
                         </span>
                       </div>
                       <div class="space-y-1.5 mb-4 pt-2 border-t border-secondary-100">
                         <div 
                           v-for="feature in plan.features?.slice(0, 4)" 
                           :key="feature"
-                          class="flex items-start text-xs text-secondary-600"
+                          class="flex items-start text-caption text-secondary-600"
                         >
                           <Icon name="heroicons:check" class="h-3.5 w-3.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
                           {{ feature }}
                         </div>
-                        <div v-if="plan.features?.length > 4" class="text-xs text-secondary-500 pl-5">
+                        <div v-if="plan.features?.length > 4" class="text-helper text-secondary-500 pl-5">
                           +{{ plan.features.length - 4 }} more additional features
                         </div>
                       </div>
@@ -1316,10 +1316,10 @@
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <h2 class="text-lg font-semibold text-secondary-900">
+                    <h2 class="card-title text-secondary-900">
                       Billing & Invoice History
                     </h2>
-                    <p class="text-sm text-secondary-600">
+                    <p class="card-subtitle text-secondary-600">
                       All your subscription payment receipts and invoices
                     </p>
                   </div>
@@ -1331,15 +1331,15 @@
               </div>
               <div class="p-0 overflow-hidden">
                 <div class="overflow-x-auto">
-                  <table class="w-full text-sm">
+                  <table class="w-full text-body">
                     <thead class="bg-secondary-50 border-b border-secondary-200">
                       <tr>
-                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Date</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Receipt No.</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Description</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Amount</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Status</th>
-                        <th class="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-500">Action</th>
+                        <th class="text-left px-6 py-3 table-head text-secondary-500">Date</th>
+                        <th class="text-left px-6 py-3 table-head text-secondary-500">Receipt No.</th>
+                        <th class="text-left px-6 py-3 table-head text-secondary-500">Description</th>
+                        <th class="text-left px-6 py-3 table-head text-secondary-500">Amount</th>
+                        <th class="text-left px-6 py-3 table-head text-secondary-500">Status</th>
+                        <th class="text-right px-6 py-3 table-head text-secondary-500">Action</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-secondary-200">
@@ -1347,14 +1347,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
                         <td class="px-6 py-4 whitespace-nowrap font-mono text-secondary-600">No records</td>
                         <td class="px-6 py-4 text-secondary-600">
-                          <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-secondary-100 text-secondary-600">
+                          <span class="inline-flex items-center gap-1.5 text-badge px-2 py-1 rounded-full bg-secondary-100 text-secondary-600">
                             <Icon name="heroicons:information-circle" class="h-3.5 w-3.5" />
                             Invoice history will appear after your first payment
                           </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-gray-100 text-gray-700">
                             No Transactions
                           </span>
                         </td>
@@ -1376,10 +1376,10 @@
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <h2 class="text-lg font-semibold text-secondary-900">
+                    <h2 class="card-title text-secondary-900">
                       Payment Methods
                     </h2>
-                    <p class="text-sm text-secondary-600">
+                    <p class="card-subtitle text-secondary-600">
                       Payment methods are stored for automatic subscription charging
                     </p>
                   </div>
@@ -1397,13 +1397,13 @@
                     </div>
                     <div>
                       <div class="flex items-center gap-2 mb-0.5">
-                        <h4 class="text-sm font-semibold text-secondary-900">FPX Online Banking</h4>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <h4 class="text-label text-secondary-900">FPX Online Banking</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-badge bg-green-100 text-green-800">
                           <Icon name="heroicons:check" class="h-3 w-3 mr-1" />
                           Default
                         </span>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper text-secondary-500">
                         Supported: Maybank2u, CIMB Clicks, Public Bank, RHB, Hong Leong & 20+ other banks
                       </p>
                     </div>
@@ -1430,13 +1430,13 @@
               class="card"
             >
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="text-lg font-semibold text-secondary-900">
+                <h2 class="card-title text-secondary-900">
                   Export Data
                 </h2>
-                <p class="text-sm text-secondary-600">Download all your data</p>
+                <p class="card-subtitle text-secondary-600">Download all your data</p>
               </div>
               <div class="p-6">
-                <p class="text-sm text-secondary-600 mb-4">
+                <p class="card-subtitle text-secondary-600 mb-4">
                   Export all your profile data, analytics, and settings in JSON
                   format.
                 </p>
@@ -1462,10 +1462,10 @@
             <!-- Delete Account Card -->
             <div class="bg-white rounded-lg shadow-sm border border-red-200">
               <div class="px-6 py-4 border-b border-red-200">
-                <h2 class="text-lg font-semibold text-red-900">
+                <h2 class="card-title text-red-900">
                   Delete Account
                 </h2>
-                <p class="text-sm text-red-600">
+                <p class="text-body text-red-600">
                   Permanently delete your account and all data
                 </p>
               </div>
@@ -1479,8 +1479,8 @@
                       class="h-5 w-5 text-red-400 mr-3 mt-0.5"
                     />
                     <div>
-                      <h3 class="text-sm font-medium text-red-800">Warning</h3>
-                      <p class="text-sm text-red-700 mt-1">
+                      <h3 class="text-label text-red-800">Warning</h3>
+                      <p class="text-body text-red-700 mt-1">
                         This action cannot be undone. All your data, profiles,
                         and NFC tags will be permanently deleted.
                       </p>
@@ -1511,10 +1511,10 @@
             <Icon name="heroicons:shield-check" class="h-6 w-6 text-teal-600" />
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-secondary-900">
+            <h3 class="modal-title text-secondary-900">
               Enable Two-Factor Authentication (2FA)
             </h3>
-            <p class="text-sm text-secondary-600">
+            <p class="card-subtitle text-secondary-600">
               Complete the 3 steps below to enable 2FA
             </p>
           </div>
@@ -1523,8 +1523,8 @@
         <!-- STEP 1: Scan QR Code -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold">1</span>
-            <h4 class="text-sm font-semibold text-secondary-900">Scan QR Code with Authenticator App</h4>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-badge">1</span>
+            <h4 class="text-label text-secondary-900">Scan QR Code with Authenticator App</h4>
           </div>
 
           <div class="bg-secondary-50 rounded-xl p-5 flex flex-col items-center border border-secondary-200">
@@ -1543,7 +1543,7 @@
 
             <div class="mt-4 w-full">
               <div class="flex items-center justify-between mb-1.5">
-                <p class="text-xs font-medium text-secondary-700">Secret Key (if you can't scan QR):</p>
+                <p class="text-label text-secondary-700">Secret Key (if you can't scan QR):</p>
                 <button
                   type="button"
                   @click="copyText(twoFactor.secret, 'Secret 2FA')"
@@ -1553,7 +1553,7 @@
                   Copy
                 </button>
               </div>
-              <code class="block w-full p-2.5 bg-white border border-secondary-200 rounded-lg font-mono text-xs text-secondary-800 break-all text-center select-all">
+              <code class="block w-full p-2.5 bg-white border border-secondary-200 rounded-lg font-mono text-caption text-secondary-800 break-all text-center select-all">
                 {{ twoFactor.secret || '—' }}
               </code>
             </div>
@@ -1563,10 +1563,10 @@
         <!-- STEP 2: Enter OTP -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold">2</span>
-            <h4 class="text-sm font-semibold text-secondary-900">Enter 6 Digit OTP Code</h4>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-badge">2</span>
+            <h4 class="text-label text-secondary-900">Enter 6 Digit OTP Code</h4>
           </div>
-          <p class="text-xs text-secondary-600 mb-2.5">
+          <p class="text-helper text-secondary-600 mb-2.5">
             Open your Authenticator app, select the NFCGo account, then type the 6-digit code displayed:
           </p>
           <input
@@ -1576,23 +1576,23 @@
             @input="twoFactor.otpInput = twoFactor.otpInput.replace(/[^0-9]/g, '').slice(0, 6)"
             maxlength="6"
             placeholder="••••••"
-            class="input input-bordered w-full text-center text-2xl font-bold tracking-[0.5em] h-14 font-mono"
+            class="input input-bordered w-full text-center text-h3 tracking-[0.5em] h-14 font-mono"
           />
         </div>
 
         <!-- STEP 3: Save Recovery Codes -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold">3</span>
-            <h4 class="text-sm font-semibold text-secondary-900">Save Recovery Codes (IMPORTANT!)</h4>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-badge">3</span>
+            <h4 class="text-label text-secondary-900">Save Recovery Codes (IMPORTANT!)</h4>
           </div>
 
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div class="flex gap-3">
               <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h5 class="text-sm font-semibold text-amber-900 mb-1">Save in a SAFE place</h5>
-                <p class="text-xs text-amber-800 leading-relaxed">
+                <h5 class="text-label text-amber-900 mb-1">Save in a SAFE place</h5>
+                <p class="text-caption text-amber-800 leading-relaxed">
                   The 8 recovery codes below can be used <strong>ONE TIME ONLY</strong> if you lose access to your phone / Authenticator app.
                   Do not share with anyone. If lost, you won't be able to log into your account.
                 </p>
@@ -1604,7 +1604,7 @@
             <div
               v-for="(code, idx) in twoFactor.recoveryCodes"
               :key="idx"
-              class="p-2.5 bg-secondary-50 border border-secondary-200 rounded-lg font-mono text-sm text-secondary-800 text-center select-all"
+              class="p-2.5 bg-secondary-50 border border-secondary-200 rounded-lg font-mono text-body text-secondary-800 text-center select-all"
             >
               {{ code }}
             </div>
@@ -1665,23 +1665,23 @@
             <Icon name="heroicons:shield-exclamation" class="h-6 w-6 text-red-600" />
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-secondary-900">
+            <h3 class="modal-title text-secondary-900">
               Disable 2FA
             </h3>
-            <p class="text-sm text-secondary-600">
+            <p class="card-subtitle text-secondary-600">
               Verify your identity to continue
             </p>
           </div>
         </div>
 
-        <p class="text-sm text-secondary-700 mb-5 leading-relaxed">
+        <p class="text-body text-secondary-700 mb-5 leading-relaxed">
           Enter your <strong>current password</strong> OR <strong>one recovery code</strong>
           to confirm you want to disable 2FA on this account.
         </p>
 
         <!-- Option 1: Current Password -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+          <label class="block text-label text-secondary-700 mb-1.5">
             Option 1 — Current Password
           </label>
           <div class="relative">
@@ -1705,14 +1705,14 @@
         </div>
 
         <div class="text-center my-4">
-          <span class="inline-block px-3 py-1 text-xs font-semibold text-secondary-500 bg-secondary-100 rounded-full uppercase tracking-wider">
+          <span class="inline-block px-3 py-1 text-badge text-secondary-500 bg-secondary-100 rounded-full uppercase tracking-wider">
             Or
           </span>
         </div>
 
         <!-- Option 2: Recovery Code -->
         <div class="mb-8">
-          <label class="block text-sm font-medium text-secondary-700 mb-1.5">
+          <label class="block text-label text-secondary-700 mb-1.5">
             Option 2 — Recovery Code
           </label>
           <input
@@ -1764,17 +1764,17 @@
             />
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-secondary-900">
+            <h3 class="modal-title text-secondary-900">
               Delete Account
             </h3>
-            <p class="text-sm text-secondary-600">
+            <p class="card-subtitle text-secondary-600">
               This action cannot be undone
             </p>
           </div>
         </div>
 
         <div class="mb-6">
-          <p class="text-sm text-secondary-700 mb-4">
+          <p class="text-body text-secondary-700 mb-4">
             To confirm deletion, please type <strong>DELETE</strong> in the
             field below:
           </p>
@@ -1818,7 +1818,7 @@
           name="heroicons:check-circle"
           class="h-5 w-5 text-green-600 mr-3"
         />
-        <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
+        <p class="text-body font-medium text-green-800">{{ successMessage }}</p>
       </div>
     </div>
 
@@ -1829,7 +1829,7 @@
     >
       <div class="flex items-center">
         <Icon name="heroicons:x-circle" class="h-5 w-5 text-red-600 mr-3" />
-        <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
+        <p class="text-body font-medium text-red-800">{{ errorMessage }}</p>
       </div>
     </div>
   </div>

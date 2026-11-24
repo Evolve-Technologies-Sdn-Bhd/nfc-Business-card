@@ -652,36 +652,7 @@
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
             }"
           >
-            <div
-              :style="{
-                width: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
-                height: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
-                border: '2px solid #2563eb',
-                borderRadius: isSmallMobile ? '4px' : '5px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }"
-            >
-              <svg :width="isSmallMobile ? '10' : isMobile ? '12' : '14'" :height="isSmallMobile ? '10' : isMobile ? '12' : '14'" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="16" rx="2"/>
-                <circle cx="9" cy="10" r="2"/>
-                <path d="M15 8h2"/>
-                <path d="M15 12h2"/>
-                <path d="M7 16h10"/>
-              </svg>
-            </div>
-            <span
-              :style="{
-                color: '#2563eb',
-                fontSize: isSmallMobile ? '11px' : isMobile ? '13px' : '15px',
-                fontWeight: 700,
-                letterSpacing: '0.3px',
-                lineHeight: 1,
-              }"
-            >
-              NFCGo
-            </span>
+            <NFCGoLogo variant="light" :size="isSmallMobile ? 'xs' : 'sm'" />
           </div>
 
           <!-- Hero Content - tiered responsive padding -->
@@ -5084,6 +5055,7 @@ const openServiceModal = (service) => {
 
 // Handle service card click: direct link opens URL, otherwise opens details modal
 const handleServiceClick = (service) => {
+  activeService.value = null;
   if (service.linkType === 'Direct Link' && service.url) {
     window.open(service.url, '_blank', 'noopener,noreferrer');
     return;

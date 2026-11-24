@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NFCGo Loading Animation</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Outfit,system-ui,sans-serif}
+.nfg-ring{stroke-dasharray:176;animation:nfgDraw 2s cubic-bezier(.65,0,.35,1) infinite}
+.nfg-bar{stroke-dasharray:28;animation:nfgDraw2 2s cubic-bezier(.65,0,.35,1) infinite}
+.nfg-w1{animation:nfgPulse 2s ease-in-out infinite .5s}
+.nfg-w2{animation:nfgPulse 2s ease-in-out infinite .75s}
+.nfg-track{animation:nfgSlide 2s ease-in-out infinite}
+@keyframes nfgDraw{0%{stroke-dashoffset:176}45%,70%{stroke-dashoffset:0}100%{stroke-dashoffset:-176}}
+@keyframes nfgDraw2{0%,25%{stroke-dashoffset:28}55%,75%{stroke-dashoffset:0}100%{stroke-dashoffset:-28}}
+@keyframes nfgPulse{0%,100%{opacity:.12}40%{opacity:1}}
+@keyframes nfgSlide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+@media (prefers-reduced-motion:reduce){.nfg-ring,.nfg-bar,.nfg-w1,.nfg-w2,.nfg-track{animation:none}}
+</style>
+</helmet>
+<div style="width: 880px; height: 640px; background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px">
+<svg viewBox="0 0 120 120" width="180" height="180" role="img" aria-label="Loading"><defs><linearGradient id="gldL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7E2A1"></stop><stop offset="0.5" stop-color="#D4AF37"></stop><stop offset="1" stop-color="#9C7420"></stop></linearGradient></defs><path d="M84 62 A32 32 0 1 1 72.57 37.49" fill="none" stroke="#1E1A0E" stroke-width="10" stroke-linecap="round"></path><path class="nfg-ring" d="M84 62 A32 32 0 1 1 72.57 37.49" fill="none" stroke="url(#gldL)" stroke-width="10" stroke-linecap="round"></path><path class="nfg-bar" d="M84 62 H58" fill="none" stroke="url(#gldL)" stroke-width="10" stroke-linecap="round"></path><path class="nfg-w1" d="M85.94 28.06 A48 48 0 0 1 98.36 49.58" fill="none" stroke="url(#gldL)" stroke-width="8" stroke-linecap="round"></path><path class="nfg-w2" d="M95.84 18.16 A62 62 0 0 1 111.89 45.95" fill="none" stroke="url(#gldL)" stroke-width="8" stroke-linecap="round"></path></svg>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px">
+<div style="font-weight: 600; font-size: 40px; letter-spacing: -1px; color: #F6F1E4">NFC<span style="color: #D4AF37">Go</span></div>
+<div style="width: 160px; height: 3px; border-radius: 3px; background: #1E1A0E; overflow: hidden"><div class="nfg-track" style="width: 40%; height: 100%; border-radius: 3px; background: #D4AF37"></div></div>
+<p style="margin: 0; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #9C927A">Connecting</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":880,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

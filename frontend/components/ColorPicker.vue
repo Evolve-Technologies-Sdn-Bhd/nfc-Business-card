@@ -14,7 +14,7 @@
       placeholder="#000000"
       maxlength="7"
       pattern="^#[0-9A-Fa-f]{6}$"
-      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm uppercase focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg font-mono text-input uppercase focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     />
   </div>
 </template>

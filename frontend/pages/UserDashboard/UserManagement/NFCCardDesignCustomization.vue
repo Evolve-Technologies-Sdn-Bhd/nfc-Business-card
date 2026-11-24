@@ -12,13 +12,13 @@
                 name="heroicons:identification"
                 class="h-8 w-8 text-primary-600"
               />
-              <span class="ml-2 text-xl font-bold text-secondary-900"
+              <span class="ml-2 text-h5 text-secondary-900"
                 >NFCGo</span
               >
             </NuxtLink>
           </div>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-secondary-600">Step 2 of 3</span>
+            <span class="text-body text-secondary-600">Step 2 of 3</span>
             <div class="flex space-x-1">
               <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
               <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
@@ -32,10 +32,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-secondary-900 mb-4">
+        <h1 class="page-title mb-4">
           Customize Your NFC Card
         </h1>
-        <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+        <p class="text-body-lg text-secondary-600 max-w-2xl mx-auto">
           Choose from our professional templates or upload your own design. Your
           card will be 54mm x 90mm (standard business card size).
         </p>
@@ -46,21 +46,21 @@
         <div class="space-y-8">
           <!-- Card Information Form -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title mb-6">
               Card Information
             </h2>
 
             <form @submit.prevent="saveCardInfo" class="space-y-6">
               <!-- Basic Information -->
               <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-secondary-800">
+                <h3 class="card-title text-secondary-800">
                   Basic Information
                 </h3>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Name *</label
                     >
                     <input
@@ -73,7 +73,7 @@
                   </div>
                   <div>
                     <label
-                      class="block text-sm font-medium text-secondary-700 mb-1"
+                      class="block text-label text-secondary-700 mb-1"
                       >Position *</label
                     >
                     <input
@@ -88,7 +88,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Contact Number *</label
                   >
                   <input
@@ -102,7 +102,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Email Address *</label
                   >
                   <input
@@ -116,7 +116,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Website</label
                   >
                   <input
@@ -129,7 +129,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Address *</label
                   >
                   <textarea
@@ -143,7 +143,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Company Logo (Optional)</label
                   >
                   <div
@@ -154,7 +154,7 @@
                         name="heroicons:building-office"
                         class="mx-auto h-12 w-12 text-secondary-400"
                       />
-                      <div class="flex text-sm text-secondary-600">
+                      <div class="flex text-body text-secondary-600">
                         <label
                           class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                         >
@@ -168,7 +168,7 @@
                         </label>
                         <p class="pl-1">or drag and drop</p>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper">
                         PNG, JPG, GIF up to 10MB
                       </p>
                     </div>
@@ -185,13 +185,13 @@
 
               <!-- Premium Plan Additional Information -->
               <div v-if="isPremiumPlan" class="space-y-4">
-                <h3 class="text-lg font-semibold text-secondary-800">
+                <h3 class="card-title text-secondary-800">
                   Back Side Information (Premium)
                 </h3>
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Company Background</label
                   >
                   <textarea
@@ -204,7 +204,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Services Offered</label
                   >
                   <textarea
@@ -217,7 +217,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
+                    class="block text-label text-secondary-700 mb-1"
                     >Social Media Links</label
                   >
                   <div class="space-y-2">
@@ -251,7 +251,7 @@
 
               <button
                 type="submit"
-                class="w-full py-3 px-4 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+                class="w-full py-3 px-4 bg-primary-600 text-white rounded-xl text-button hover:bg-primary-700 transition-colors"
               >
                 Save Card Information
               </button>
@@ -271,13 +271,13 @@
         <div class="space-y-8">
           <!-- Design Options -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title mb-6">
               Card Design
             </h2>
 
             <!-- Design Method Selection -->
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-secondary-800 mb-4">
+              <h3 class="card-title text-secondary-800 mb-4">
                 Choose Design Method
               </h3>
               <div class="grid grid-cols-2 gap-4">
@@ -294,7 +294,7 @@
                     name="heroicons:squares-2x2"
                     class="h-8 w-8 mx-auto mb-2 text-primary-600"
                   />
-                  <p class="text-sm font-medium">Use Template</p>
+                  <p class="text-button">Use Template</p>
                 </button>
                 <button
                   @click="designMethod = 'custom'"
@@ -309,14 +309,14 @@
                     name="heroicons:arrow-up-tray"
                     class="h-8 w-8 mx-auto mb-2 text-primary-600"
                   />
-                  <p class="text-sm font-medium">Upload Design</p>
+                  <p class="text-button">Upload Design</p>
                 </button>
               </div>
             </div>
 
             <!-- Template Selection -->
             <div v-if="designMethod === 'template'" class="space-y-6">
-              <h3 class="text-lg font-semibold text-secondary-800">
+              <h3 class="card-title text-secondary-800">
                 Choose Template
               </h3>
 
@@ -333,10 +333,10 @@
                   name="heroicons:exclamation-circle"
                   class="h-12 w-12 text-red-400 mx-auto mb-2"
                 />
-                <p class="text-sm text-red-600">{{ templatesError }}</p>
+                <p class="text-error">{{ templatesError }}</p>
                 <button
                   @click="fetchTemplates"
-                  class="mt-2 text-sm text-primary-600 hover:underline"
+                  class="mt-2 text-navigation text-primary-600 hover:underline"
                 >
                   Try again
                 </button>
@@ -351,10 +351,10 @@
                   name="heroicons:photo"
                   class="h-12 w-12 text-secondary-300 mx-auto mb-2"
                 />
-                <p class="text-sm text-secondary-500">
+                <p class="text-helper">
                   No templates available for your {{ currentPlanName }} plan.
                 </p>
-                <p class="text-xs text-secondary-400 mt-1">
+                <p class="text-helper mt-1">
                   Contact support if you believe this is an error.
                 </p>
               </div>
@@ -393,7 +393,7 @@
                       />
                     </div>
                   </div>
-                  <p class="text-sm font-medium text-center">
+                  <p class="text-label text-center">
                     {{ template.name }}
                   </p>
                   <Icon
@@ -407,14 +407,14 @@
 
             <!-- Custom Design Upload -->
             <div v-if="designMethod === 'custom'" class="space-y-6">
-              <h3 class="text-lg font-semibold text-secondary-800">
+              <h3 class="card-title text-secondary-800">
                 Upload Your Design
               </h3>
 
               <div class="space-y-4">
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Front Side *</label
                   >
                   <div
@@ -425,7 +425,7 @@
                         name="heroicons:document-arrow-up"
                         class="mx-auto h-12 w-12 text-secondary-400"
                       />
-                      <div class="flex text-sm text-secondary-600">
+                      <div class="flex text-body text-secondary-600">
                         <label
                           class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                         >
@@ -438,7 +438,7 @@
                           />
                         </label>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper">
                         PNG, JPG, PDF. Size: 90mm x 54mm
                       </p>
                     </div>
@@ -454,7 +454,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Back Side *</label
                   >
                   <div
@@ -465,7 +465,7 @@
                         name="heroicons:document-arrow-up"
                         class="mx-auto h-12 w-12 text-secondary-400"
                       />
-                      <div class="flex text-sm text-secondary-600">
+                      <div class="flex text-body text-secondary-600">
                         <label
                           class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                         >
@@ -478,7 +478,7 @@
                           />
                         </label>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper">
                         PNG, JPG, PDF. Size: 90mm x 54mm
                       </p>
                     </div>
@@ -497,7 +497,7 @@
 
           <!-- Card Preview -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title mb-6">
               Card Preview
             </h2>
 
@@ -510,7 +510,7 @@
                     class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-lg transform rotate-y-0 transition-transform duration-500"
                     :class="{ 'rotate-y-180': showBack }"
                   >
-                    <div class="absolute inset-0 p-3 text-white text-xs">
+                    <div class="absolute inset-0 p-3 text-white text-caption">
                       <div class="flex items-center justify-between h-full">
                         <div>
                           <div class="font-bold">
@@ -538,11 +538,11 @@
                     class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-lg transform rotate-y-180 transition-transform duration-500"
                     :class="{ 'rotate-y-0': showBack }"
                   >
-                    <div class="absolute inset-0 p-3 text-white text-xs">
+                    <div class="absolute inset-0 p-3 text-white text-caption">
                       <div class="h-full flex flex-col justify-between">
                         <div>
                           <div class="font-bold mb-1">Services</div>
-                          <div class="opacity-80 text-xs">
+                          <div class="opacity-80 text-caption">
                             {{ cardInfo.services || "Services" }}
                           </div>
                         </div>
@@ -558,7 +558,7 @@
                 <button
                   v-if="isPremiumPlan"
                   @click="showBack = !showBack"
-                  class="mt-4 w-full py-2 px-4 bg-secondary-100 text-secondary-700 rounded-lg text-sm font-medium hover:bg-secondary-200 transition-colors"
+                  class="mt-4 w-full py-2 px-4 bg-secondary-100 text-secondary-700 rounded-lg text-button hover:bg-secondary-200 transition-colors"
                 >
                   {{ showBack ? "Show Front" : "Show Back" }}
                 </button>
@@ -566,8 +566,8 @@
             </div>
 
             <div class="mt-6 text-center">
-              <p class="text-sm text-secondary-600">Card Size: 90mm x 54mm</p>
-              <p class="text-xs text-secondary-500">
+              <p class="text-body text-secondary-600">Card Size: 90mm x 54mm</p>
+              <p class="text-helper">
                 Standard business card dimensions
               </p>
             </div>
@@ -579,7 +579,7 @@
       <div class="flex justify-between items-center mt-12">
         <button
           @click="goBack"
-          class="px-6 py-3 border border-secondary-300 text-secondary-700 rounded-xl font-medium hover:bg-secondary-50 transition-colors"
+          class="px-6 py-3 border border-secondary-300 text-secondary-700 rounded-xl text-button hover:bg-secondary-50 transition-colors"
         >
           <Icon name="heroicons:arrow-left" class="h-5 w-5 inline mr-2" />
           Back
@@ -587,7 +587,7 @@
         <button
           @click="proceedToPayment"
           :disabled="!isFormValid"
-          class="px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-3 bg-primary-600 text-white rounded-xl text-button hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Proceed to Payment
           <Icon name="heroicons:arrow-right" class="h-5 w-5 inline ml-2" />

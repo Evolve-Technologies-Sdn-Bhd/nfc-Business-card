@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Card Templates</h1>
+          <h1 class="page-title text-secondary-900">Card Templates</h1>
           <p class="mt-2 text-secondary-600">
             Upload and manage NFC card design templates
           </p>
@@ -25,7 +25,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Status</label>
+            <label class="block text-label text-secondary-700 mb-2">Status</label>
             <select v-model="currentFilter" class="input">
               <option v-for="filter in filters" :key="filter.value" :value="filter.value">
                 {{ filter.label }}
@@ -34,7 +34,7 @@
           </div>
           <!-- Plan Filter -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Plan</label>
+            <label class="block text-label text-secondary-700 mb-2">Plan</label>
             <select v-model="planFilter" class="input">
               <option value="">All Plans</option>
               <option value="basic">Basic</option>
@@ -44,21 +44,21 @@
           </div>
           <!-- Stats Summary -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Summary</label>
+            <label class="block text-label text-secondary-700 mb-2">Summary</label>
             <div class="flex items-center gap-4 h-[42px]">
-              <span class="text-sm">
+              <span class="text-body">
                 <span class="font-semibold text-secondary-900">{{ templates.length }}</span>
                 <span class="text-secondary-500"> total</span>
               </span>
-              <span class="text-sm text-green-600">
+              <span class="text-body text-green-600">
                 <Icon name="heroicons:check-circle" class="h-4 w-4 inline" />
                 {{ activeCount }}
               </span>
-              <span class="text-sm text-yellow-600">
+              <span class="text-body text-yellow-600">
                 <Icon name="heroicons:clock" class="h-4 w-4 inline" />
                 {{ processingCount }}
               </span>
-              <span class="text-sm text-red-600">
+              <span class="text-body text-red-600">
                 <Icon name="heroicons:x-circle" class="h-4 w-4 inline" />
                 {{ failedCount }}
               </span>
@@ -69,7 +69,7 @@
           <button @click="clearFilters" class="btn btn-outline btn-sm">
             Clear Filters
           </button>
-          <div class="text-sm text-secondary-500">
+          <div class="text-body text-secondary-500">
             {{ filteredTemplates.length }} templates found
           </div>
         </div>
@@ -112,7 +112,7 @@
 
               <!-- Hidden Badge -->
               <div v-if="template.is_hidden" class="absolute top-2 right-2">
-                <span class="px-2 py-1 text-xs font-medium rounded-full bg-secondary-800 text-white">
+                <span class="px-2 py-1 text-badge rounded-full bg-secondary-800 text-white">
                   Hidden
                 </span>
               </div>
@@ -154,7 +154,7 @@
             <!-- Template Info -->
             <div class="p-4">
               <h3 class="font-semibold text-secondary-900 truncate">{{ template.name }}</h3>
-              <p class="text-sm text-secondary-500 mt-1 truncate">{{ template.description || 'No description' }}</p>
+              <p class="card-subtitle mt-1 truncate">{{ template.description || 'No description' }}</p>
               
               <!-- Plan Types -->
               <div class="flex flex-wrap gap-1 mt-3">
@@ -169,7 +169,7 @@
 
               <!-- Error Message -->
               <div v-if="template.processing_status === 'failed' && template.processing_error" class="mt-2">
-                <p class="text-xs text-red-600 truncate" :title="template.processing_error">
+                <p class="text-error truncate" :title="template.processing_error">
                   Error: {{ template.processing_error }}
                 </p>
               </div>
@@ -180,8 +180,8 @@
         <!-- Empty State -->
         <div v-else class="text-center py-12">
           <Icon name="heroicons:photo" class="h-16 w-16 text-secondary-300 mx-auto mb-4" />
-          <h3 class="text-lg font-medium text-secondary-900 mb-2">No templates found</h3>
-          <p class="text-secondary-500 mb-4">
+          <h3 class="card-title text-secondary-900 mb-2">No templates found</h3>
+          <p class="text-body text-secondary-500 mb-4">
             {{ currentFilter === 'all' && !planFilter ? 'Upload your first card template to get started.' : 'No templates match the current filters.' }}
           </p>
           <button v-if="currentFilter === 'all' && !planFilter" @click="openUploadModal" class="btn btn-primary">
@@ -199,7 +199,7 @@
           <div class="fixed inset-0 bg-black/50" @click="showUploadModal = false"></div>
           <div class="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6">
             <div class="flex items-center justify-between mb-6">
-              <h3 class="text-xl font-bold text-secondary-900">Upload New Template</h3>
+              <h3 class="modal-title text-secondary-900">Upload New Template</h3>
               <button @click="showUploadModal = false" class="text-secondary-400 hover:text-secondary-600">
                 <Icon name="heroicons:x-mark" class="h-6 w-6" />
               </button>
@@ -208,7 +208,7 @@
             <form @submit.prevent="uploadTemplate" class="space-y-6">
               <!-- Template Name -->
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Template Name *</label>
+                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
                 <input
                   v-model="uploadForm.name"
                   type="text"
@@ -220,7 +220,7 @@
 
               <!-- Description -->
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                <label class="block text-label text-secondary-700 mb-2">Description</label>
                 <textarea
                   v-model="uploadForm.description"
                   rows="2"
@@ -234,7 +234,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Category -->
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">Category</label>
+                  <label class="block text-label text-secondary-700 mb-2">Category</label>
                   <select v-model="uploadForm.category" class="input">
                     <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
                       {{ cat.label }}
@@ -244,7 +244,7 @@
 
                 <!-- Plan (single select) -->
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">Plan *</label>
+                  <label class="block text-label text-secondary-700 mb-2">Plan *</label>
                   <select v-model="uploadForm.plan" class="input">
                     <option v-for="plan in planOptions" :key="plan.value" :value="plan.value">
                       {{ plan.label }} — {{ plan.description }}
@@ -255,7 +255,7 @@
 
               <!-- Front Image Upload -->
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Front Design *</label>
+                <label class="block text-label text-secondary-700 mb-2">Front Design *</label>
                 <div
                   class="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-secondary-400 transition-colors cursor-pointer"
                   @click="$refs.frontInput.click()"
@@ -273,16 +273,16 @@
                     <img :src="uploadForm.frontPreview" alt="Front Preview" class="max-h-32 mx-auto rounded" />
                   </div>
                   <Icon v-else name="heroicons:photo" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     {{ uploadForm.frontFile ? uploadForm.frontFile.name : 'Click or drag to upload front design' }}
                   </p>
-                  <p class="text-xs text-secondary-400 mt-1">PNG, JPG up to 10MB. Recommended: 1050x630px (5:3 ratio)</p>
+                  <p class="text-helper mt-1">PNG, JPG up to 10MB. Recommended: 1050x630px (5:3 ratio)</p>
                 </div>
               </div>
 
               <!-- Back Image Upload (Optional) -->
               <div v-if="uploadForm.plan !== 'basic'">
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Back Design (Optional)</label>
+                <label class="block text-label text-secondary-700 mb-2">Back Design (Optional)</label>
                 <div
                   class="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-secondary-400 transition-colors cursor-pointer"
                   @click="$refs.backInput.click()"
@@ -300,7 +300,7 @@
                     <img :src="uploadForm.backPreview" alt="Back Preview" class="max-h-32 mx-auto rounded" />
                   </div>
                   <Icon v-else name="heroicons:photo" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     {{ uploadForm.backFile ? uploadForm.backFile.name : 'Click or drag to upload back design' }}
                   </p>
                 </div>
@@ -311,7 +311,7 @@
                 <div class="flex">
                   <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <div class="ml-3">
-                    <p class="text-sm text-green-800">
+                    <p class="text-body text-green-800">
                       Images will be uploaded to Cloudinary CDN for fast, worldwide delivery. 
                       Your template will be available immediately after upload.
                     </p>
@@ -347,7 +347,7 @@
           <div class="fixed inset-0 bg-black/50" @click="showEditModal = false"></div>
           <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
             <div class="flex items-center justify-between mb-6">
-              <h3 class="text-xl font-bold text-secondary-900">Edit Template</h3>
+              <h3 class="modal-title text-secondary-900">Edit Template</h3>
               <button @click="showEditModal = false" class="text-secondary-400 hover:text-secondary-600">
                 <Icon name="heroicons:x-mark" class="h-6 w-6" />
               </button>
@@ -355,7 +355,7 @@
 
             <form @submit.prevent="saveEdit" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Template Name *</label>
+                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
                 <input
                   v-model="editForm.name"
                   type="text"
@@ -365,7 +365,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                <label class="block text-label text-secondary-700 mb-2">Description</label>
                 <textarea
                   v-model="editForm.description"
                   rows="2"
@@ -376,7 +376,7 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">Category</label>
+                  <label class="block text-label text-secondary-700 mb-2">Category</label>
                   <select v-model="editForm.category" class="input">
                     <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
                       {{ cat.label }}
@@ -384,7 +384,7 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">Sort Order</label>
+                  <label class="block text-label text-secondary-700 mb-2">Sort Order</label>
                   <input
                     v-model.number="editForm.sort_order"
                     type="number"
@@ -394,7 +394,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">Plan Types</label>
+                <label class="block text-label text-secondary-700 mb-2">Plan Types</label>
                 <div class="flex flex-wrap gap-3 p-3 border border-secondary-200 rounded-lg bg-secondary-50">
                   <label
                     v-for="plan in planOptions"
@@ -407,7 +407,7 @@
                       v-model="editForm.plan_types"
                       class="h-4 w-4 text-primary-600 border-secondary-300 rounded"
                     />
-                    <span class="ml-2 text-sm text-secondary-700">{{ plan.label }}</span>
+                    <span class="ml-2 text-body text-secondary-700">{{ plan.label }}</span>
                   </label>
                 </div>
               </div>
@@ -415,12 +415,12 @@
               <!-- Front Image Edit -->
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <label class="block text-sm font-medium text-secondary-700">Front Design</label>
+                  <label class="block text-label text-secondary-700">Front Design</label>
                   <button
                     v-if="editFrontFile || editForm._removeFront"
                     type="button"
                     @click="revertFrontImage"
-                    class="text-xs text-secondary-500 hover:text-red-600"
+                    class="text-caption text-secondary-500 hover:text-red-600"
                   >
                     Revert to original
                   </button>
@@ -445,22 +445,22 @@
                     <img :src="getImageUrl(editForm.front_image_url)" alt="Current Front" class="max-h-28 mx-auto rounded opacity-70" />
                   </div>
                   <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     {{ editFrontFile ? editFrontFile.name : (editForm._removeFront ? '(Image will be removed)' : 'Click or drag to replace front design (leave empty to keep)') }}
                   </p>
-                  <p class="text-xs text-secondary-400 mt-1">PNG, JPG up to 10MB</p>
+                  <p class="text-helper mt-1">PNG, JPG up to 10MB</p>
                 </div>
               </div>
 
               <!-- Back Image Edit -->
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <label class="block text-sm font-medium text-secondary-700">Back Design</label>
+                  <label class="block text-label text-secondary-700">Back Design</label>
                   <button
                     v-if="editBackFile || editForm._removeBack"
                     type="button"
                     @click="revertBackImage"
-                    class="text-xs text-secondary-500 hover:text-red-600"
+                    class="text-caption text-secondary-500 hover:text-red-600"
                   >
                     Revert to original
                   </button>
@@ -485,7 +485,7 @@
                     <img :src="getImageUrl(editForm.back_image_url)" alt="Current Back" class="max-h-28 mx-auto rounded opacity-70" />
                   </div>
                   <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     {{ editBackFile ? editBackFile.name : (editForm._removeBack ? '(Image will be removed)' : 'Click or drag to replace back design (leave empty to keep)') }}
                   </p>
                 </div>
@@ -494,11 +494,11 @@
               <div class="flex items-center gap-4">
                 <label class="flex items-center cursor-pointer">
                   <input type="checkbox" v-model="editForm.is_active" class="h-4 w-4 text-primary-600 border-secondary-300 rounded" />
-                  <span class="ml-2 text-sm text-secondary-700">Active</span>
+                  <span class="ml-2 text-body text-secondary-700">Active</span>
                 </label>
                 <label class="flex items-center cursor-pointer">
                   <input type="checkbox" v-model="editForm.is_hidden" class="h-4 w-4 text-primary-600 border-secondary-300 rounded" />
-                  <span class="ml-2 text-sm text-secondary-700">Hidden</span>
+                  <span class="ml-2 text-body text-secondary-700">Hidden</span>
                 </label>
               </div>
 
@@ -525,8 +525,8 @@
               <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                 <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-red-600" />
               </div>
-              <h3 class="text-lg font-medium text-secondary-900 mb-2">Delete Template</h3>
-              <p class="text-sm text-secondary-500 mb-6">
+              <h3 class="modal-title text-secondary-900 mb-2">Delete Template</h3>
+              <p class="text-body text-secondary-500 mb-6">
                 Are you sure you want to delete "{{ deleteTarget.name }}"? This action cannot be undone.
               </p>
               <div class="flex justify-center gap-3">
@@ -695,20 +695,20 @@ const getImageUrl = (url) => {
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    completed: 'px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800',
-    processing: 'px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800',
-    pending: 'px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
-    failed: 'px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800',
+    completed: 'px-2 py-1 text-badge rounded-full bg-green-100 text-green-800',
+    processing: 'px-2 py-1 text-badge rounded-full bg-yellow-100 text-yellow-800',
+    pending: 'px-2 py-1 text-badge rounded-full bg-blue-100 text-blue-800',
+    failed: 'px-2 py-1 text-badge rounded-full bg-red-100 text-red-800',
   };
   return classes[status] || classes.pending;
 };
 
 const getPlanBadgeClass = (plan) => {
   const classes = {
-    free: 'px-2 py-0.5 text-xs font-medium rounded-full bg-secondary-100 text-secondary-700',
-    basic: 'px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700',
-    premium: 'px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700',
-    business: 'px-2 py-0.5 text-xs font-medium rounded-full bg-primary-100 text-primary-700',
+    free: 'px-2 py-0.5 text-badge rounded-full bg-secondary-100 text-secondary-700',
+    basic: 'px-2 py-0.5 text-badge rounded-full bg-blue-100 text-blue-700',
+    premium: 'px-2 py-0.5 text-badge rounded-full bg-purple-100 text-purple-700',
+    business: 'px-2 py-0.5 text-badge rounded-full bg-primary-100 text-primary-700',
   };
   return classes[plan] || classes.free;
 };

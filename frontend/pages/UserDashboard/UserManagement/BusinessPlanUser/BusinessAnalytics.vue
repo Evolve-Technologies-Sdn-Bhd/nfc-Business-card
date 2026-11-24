@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Analytics</h1>
+          <h1 class="page-title">Analytics</h1>
           <p class="mt-2 text-secondary-600">
             Track engagement and performance metrics
           </p>
@@ -25,7 +25,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <!-- NFC Card Selector -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Select Card</label>
+            <label class="block text-label text-secondary-700 mb-2">Select Card</label>
             <select
               v-model="selectedCardId"
               @change="onCardChange"
@@ -43,7 +43,7 @@
           </div>
           <!-- Employee Filter -->
           <div v-if="employees.length > 0">
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Employee</label>
+            <label class="block text-label text-secondary-700 mb-2">Employee</label>
             <select
               v-model="selectedEmployeeId"
               @change="loadAnalytics"
@@ -61,7 +61,7 @@
           </div>
           <!-- Period Selector -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Time Period</label>
+            <label class="block text-label text-secondary-700 mb-2">Time Period</label>
             <select
               v-model="selectedPeriod"
               @change="loadAnalytics"
@@ -84,11 +84,11 @@
               <Icon name="heroicons:cursor-arrow-ripple" class="h-6 w-6 text-purple-600" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-secondary-500">Total Taps</p>
-              <p class="text-2xl font-semibold text-secondary-900">
+              <p class="stat-label">Total Taps</p>
+              <p class="stat-value">
                 {{ analytics.totalTaps }}
               </p>
-              <p :class="analytics.tapGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+              <p :class="analytics.tapGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
                 {{ analytics.tapGrowth >= 0 ? '+' : '' }}{{ analytics.tapGrowth }}% from last period
               </p>
             </div>
@@ -101,13 +101,13 @@
               <Icon name="heroicons:users" class="h-6 w-6 text-blue-600" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-secondary-500">
+              <p class="stat-label">
                 Unique Visitors
               </p>
-              <p class="text-2xl font-semibold text-secondary-900">
+              <p class="stat-value">
                 {{ analytics.uniqueVisitors }}
               </p>
-              <p :class="analytics.visitorGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+              <p :class="analytics.visitorGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
                 {{ analytics.visitorGrowth >= 0 ? '+' : '' }}{{ analytics.visitorGrowth }}% from last period
               </p>
             </div>
@@ -120,13 +120,13 @@
               <Icon name="heroicons:clock" class="h-6 w-6 text-green-600" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-secondary-500">
+              <p class="stat-label">
                 Avg. Engagement
               </p>
-              <p class="text-2xl font-semibold text-secondary-900">
+              <p class="stat-value">
                 {{ analytics.avgEngagement }}s
               </p>
-              <p :class="analytics.engagementGrowth >= 0 ? 'text-sm text-success-600' : 'text-sm text-red-600'">
+              <p :class="analytics.engagementGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
                 {{ analytics.engagementGrowth >= 0 ? '+' : '' }}{{ analytics.engagementGrowth }}% from last period
               </p>
             </div>
@@ -139,11 +139,11 @@
               <Icon name="heroicons:map-pin" class="h-6 w-6 text-orange-600" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-secondary-500">Top Location</p>
-              <p class="text-lg font-semibold text-secondary-900">
+              <p class="stat-label">Top Location</p>
+              <p class="stat-value">
                 {{ analytics.topLocation }}
               </p>
-              <p class="text-sm text-secondary-600">
+              <p class="text-body text-secondary-600">
                 {{ analytics.topLocationTaps }} taps
               </p>
             </div>
@@ -155,10 +155,10 @@
         <!-- Taps Over Time Chart -->
         <div class="card">
           <div class="card-header">
-            <h3 class="text-lg font-medium text-secondary-900">
+            <h3 class="card-title">
               Taps Over Time
             </h3>
-            <p class="text-sm text-secondary-600">
+            <p class="card-subtitle">
               Daily tap count for the selected period
             </p>
           </div>
@@ -167,7 +167,7 @@
               <div class="text-center">
                 <Icon name="heroicons:chart-bar" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
                 <p class="text-secondary-600">No tap data available yet</p>
-                <p class="text-sm text-secondary-500">Taps will appear here once recorded</p>
+                <p class="text-helper">Taps will appear here once recorded</p>
               </div>
             </div>
             <div v-else class="h-64">
@@ -183,14 +183,14 @@
                     :style="{ height: `${getBarHeight(day.count)}%`, minHeight: day.count > 0 ? '4px' : '0' }"
                   >
                     <!-- Tooltip -->
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-secondary-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-secondary-800 text-white text-caption rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                       {{ day.count }} taps
                     </div>
                   </div>
                 </div>
               </div>
               <!-- X-axis labels -->
-              <div class="flex justify-between mt-2 text-xs text-secondary-500">
+              <div class="flex justify-between mt-2 text-caption text-secondary-500">
                 <span>{{ formatChartDate(dailyTaps[0]?.date) }}</span>
                 <span v-if="dailyTaps.length > 1">{{ formatChartDate(dailyTaps[dailyTaps.length - 1]?.date) }}</span>
               </div>
@@ -201,8 +201,8 @@
         <!-- Device Types -->
         <div class="card">
           <div class="card-header">
-            <h3 class="text-lg font-medium text-secondary-900">Device Types</h3>
-            <p class="text-sm text-secondary-600">Breakdown by device type</p>
+            <h3 class="card-title">Device Types</h3>
+            <p class="card-subtitle">Breakdown by device type</p>
           </div>
           <div class="card-body">
             <div
@@ -226,7 +226,7 @@
                     :name="getDeviceIcon(device.type)"
                     class="h-5 w-5 text-secondary-400 mr-3"
                   />
-                  <span class="text-sm font-medium text-secondary-900">{{
+                  <span class="text-body font-medium text-secondary-900">{{
                     device.type
                   }}</span>
                 </div>
@@ -237,7 +237,7 @@
                       :style="{ width: `${device.percentage}%` }"
                     ></div>
                   </div>
-                  <span class="text-sm text-secondary-600 w-12 text-right"
+                  <span class="text-body text-secondary-600 w-12 text-right"
                     >{{ device.percentage }}%</span
                   >
                 </div>
@@ -254,7 +254,7 @@
           <div class="card">
             <div class="card-header">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-medium text-secondary-900">
+                <h3 class="card-title">
                   Recent Taps
                 </h3>
                 <button @click="refreshTaps" class="btn btn-sm btn-ghost">
@@ -276,8 +276,8 @@
                   name="heroicons:cursor-arrow-ripple"
                   class="h-12 w-12 mx-auto mb-3"
                 />
-                <p class="font-medium">No taps recorded yet</p>
-                <p class="text-sm">
+                <p class="card-title">No taps recorded yet</p>
+                <p class="text-body">
                   Taps will appear here when people interact with your NFC tag
                 </p>
               </div>
@@ -299,24 +299,24 @@
                     </div>
                     <div>
                       <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-secondary-900">{{
+                        <span class="text-body font-medium text-secondary-900">{{
                           tap.location || "Unknown Location"
                         }}</span>
-                        <span class="text-xs text-secondary-500">•</span>
-                        <span class="text-xs text-secondary-500">{{
+                        <span class="text-caption text-secondary-500">•</span>
+                        <span class="text-caption text-secondary-500">{{
                           tap.device || "Unknown Device"
                         }}</span>
                       </div>
-                      <p class="text-xs text-secondary-600">
+                      <p class="text-caption text-secondary-600">
                         {{ formatDateTime(tap.timestamp) }}
                       </p>
                     </div>
                   </div>
                   <div class="text-right">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       {{ tap.duration || 0 }}s
                     </p>
-                    <p class="text-xs text-secondary-500">duration</p>
+                    <p class="text-caption text-secondary-500">duration</p>
                   </div>
                 </div>
               </div>
@@ -335,7 +335,7 @@
           <!-- Geographic Data -->
           <div class="card">
             <div class="card-header">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="card-title">
                 Top Locations
               </h3>
             </div>
@@ -358,11 +358,11 @@
                       name="heroicons:map-pin"
                       class="h-4 w-4 text-secondary-400 mr-2"
                     />
-                    <span class="text-sm text-secondary-900">{{
+                    <span class="text-body text-secondary-900">{{
                       location.name
                     }}</span>
                   </div>
-                  <span class="text-sm font-medium text-secondary-600">{{
+                  <span class="text-body font-medium text-secondary-600">{{
                     location.taps
                   }}</span>
                 </div>
@@ -373,7 +373,7 @@
           <!-- Time Distribution -->
           <div class="card">
             <div class="card-header">
-              <h3 class="text-lg font-medium text-secondary-900">Peak Hours</h3>
+              <h3 class="card-title">Peak Hours</h3>
             </div>
             <div class="card-body">
               <div
@@ -389,7 +389,7 @@
                   :key="hour.time"
                   class="flex items-center justify-between"
                 >
-                  <span class="text-sm text-secondary-900">{{
+                  <span class="text-body text-secondary-900">{{
                     hour.time
                   }}</span>
                   <div class="flex items-center space-x-2">
@@ -399,7 +399,7 @@
                         :style="{ width: `${hour.percentage}%` }"
                       ></div>
                     </div>
-                    <span class="text-sm text-secondary-600">{{
+                    <span class="text-body text-secondary-600">{{
                       hour.taps
                     }}</span>
                   </div>
@@ -411,7 +411,7 @@
           <!-- Performance Score -->
           <div class="card">
             <div class="card-header">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="card-title">
                 Performance Score
               </h3>
             </div>
@@ -436,12 +436,12 @@
                   />
                 </svg>
                 <div class="absolute inset-0 flex items-center justify-center">
-                  <span class="text-xl font-bold text-secondary-900"
+                  <span class="stat-value"
                     >{{ analytics.performanceScore }}%</span
                   >
                 </div>
               </div>
-              <p class="text-sm text-secondary-600">
+              <p class="card-subtitle">
                 Based on tap frequency and engagement
               </p>
             </div>

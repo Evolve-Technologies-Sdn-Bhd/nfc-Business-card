@@ -6,17 +6,13 @@
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
       <div class="text-center">
-        <NuxtLink to="/" class="inline-flex items-center">
-          <Icon
-            name="heroicons:identification"
-            class="h-12 w-12 text-primary-600"
-          />
-          <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
+        <NuxtLink to="/" class="inline-flex items-center" aria-label="NFCGo home">
+          <NFCGoLogo variant="light" size="xl" />
         </NuxtLink>
-        <h2 class="mt-6 text-2xl sm:text-3xl font-bold text-secondary-900">
+        <h2 class="mt-6 page-title text-secondary-900">
           Reset your password
         </h2>
-        <p class="mt-2 text-sm text-secondary-600">
+        <p class="mt-2 text-body text-secondary-600">
           Enter your email and we'll send you instructions to reset your
           password.
         </p>
@@ -33,7 +29,7 @@
               class="h-10 w-10 text-green-600"
             />
           </div>
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             Check your email
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -62,7 +58,7 @@
               class="h-8 w-8"
             />
           </div>
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             Social Login Account
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -112,7 +108,7 @@
           <div class="text-center">
             <NuxtLink
               to="/UserAccount/login"
-              class="text-sm text-primary-600 hover:text-primary-500"
+              class="text-navigation text-primary-600 hover:text-primary-500"
             >
               <Icon name="heroicons:arrow-left" class="h-4 w-4 inline mr-1" />
               Back to login
@@ -122,7 +118,7 @@
       </div>
 
       <!-- Help Text -->
-      <div class="text-center text-sm text-secondary-600">
+      <div class="text-center text-body text-secondary-600">
         <p>
           Having trouble?
           <a

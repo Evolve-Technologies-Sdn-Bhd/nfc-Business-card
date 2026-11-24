@@ -87,6 +87,14 @@ class Subscription extends Model
     }
 
     /**
+     * Get orders linked to this subscription
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Get dunning logs
      */
     public function dunningLogs(): HasMany

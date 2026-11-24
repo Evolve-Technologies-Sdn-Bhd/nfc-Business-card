@@ -1,6 +1,6 @@
 <template>
   <div class="payment-method-selector">
-    <h3 class="text-xl font-semibold mb-4">Select Payment Method</h3>
+    <h3 class="modal-title mb-4">Select Payment Method</h3>
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-8">
@@ -29,15 +29,15 @@
               </svg>
             </div>
             <div>
-              <h4 class="font-medium">{{ rails.card.name }}</h4>
-              <p class="text-sm text-gray-600">Visa, Mastercard, AMEX</p>
+              <h4 class="card-title">{{ rails.card.name }}</h4>
+              <p class="text-body text-gray-600">Visa, Mastercard, AMEX</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-sm text-gray-600">
+            <p class="text-body text-gray-600">
               {{ rails.card.fees?.percentage || 2.9 }}% + RM{{ rails.card.fees?.fixed || 0.50 }}
             </p>
-            <span class="text-xs text-green-600 flex items-center">
+            <span class="text-caption text-green-600 flex items-center">
               <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
@@ -62,13 +62,13 @@
               </svg>
             </div>
             <div>
-              <h4 class="font-medium">{{ rails.fpx.name }}</h4>
-              <p class="text-sm text-gray-600">Maybank, CIMB, and more</p>
+              <h4 class="card-title">{{ rails.fpx.name }}</h4>
+              <p class="text-body text-gray-600">Maybank, CIMB, and more</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-sm text-gray-600">{{ rails.fpx.fees?.percentage || 1.5 }}%</p>
-            <span class="text-xs text-blue-600 flex items-center">
+            <p class="text-body text-gray-600">{{ rails.fpx.fees?.percentage || 1.5 }}%</p>
+            <span class="text-caption text-blue-600 flex items-center">
               <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
@@ -93,13 +93,13 @@
               </svg>
             </div>
             <div>
-              <h4 class="font-medium">{{ rails.ewallet.name }}</h4>
-              <p class="text-sm text-gray-600">TNG, GrabPay, Boost, ShopeePay</p>
+              <h4 class="card-title">{{ rails.ewallet.name }}</h4>
+              <p class="text-body text-gray-600">TNG, GrabPay, Boost, ShopeePay</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-sm text-gray-600">{{ rails.ewallet.fees?.percentage || 2.0 }}%</p>
-            <span class="text-xs text-blue-600 flex items-center">
+            <p class="text-body text-gray-600">{{ rails.ewallet.fees?.percentage || 2.0 }}%</p>
+            <span class="text-caption text-blue-600 flex items-center">
               <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
@@ -124,13 +124,13 @@
               </svg>
             </div>
             <div>
-              <h4 class="font-medium">{{ rails.manual_bank_transfer.name }}</h4>
-              <p class="text-sm text-gray-600">Direct bank transfer</p>
+              <h4 class="card-title">{{ rails.manual_bank_transfer.name }}</h4>
+              <p class="text-body text-gray-600">Direct bank transfer</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-sm text-gray-600">No fees</p>
-            <span class="text-xs text-yellow-600 flex items-center">
+            <p class="text-body text-gray-600">No fees</p>
+            <span class="text-caption text-yellow-600 flex items-center">
               <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
               </svg>
@@ -162,7 +162,7 @@
       v-if="selectedRail"
       @click="continueToPayment"
       :disabled="loading"
-      class="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+      class="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-button"
     >
       Continue with {{ getRailName(selectedRail) }}
     </button>

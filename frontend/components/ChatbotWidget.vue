@@ -47,17 +47,17 @@
               name="heroicons:hand-raised"
               class="h-12 w-12 text-primary-500 mb-3"
             />
-            <h4 class="text-lg font-semibold text-gray-900 mb-2">
-              Welcome! 👋
+            <h4 class="card-title text-gray-900 mb-2">
+              Welcome!
             </h4>
-            <p class="text-sm text-gray-600 mb-4">
+            <p class="text-body text-gray-600 mb-4">
               Ask me anything about our NFC business cards, features, or
               pricing!
             </p>
 
             <!-- Quick Questions -->
             <div class="space-y-2">
-              <p class="text-xs font-medium text-gray-500 mb-2">
+              <p class="text-caption font-medium text-gray-500 mb-2">
                 Quick Questions:
               </p>
               <button
@@ -119,8 +119,8 @@
 
           <!-- Feedback Form (shown when no answer found) -->
           <div v-if="showFeedbackForm" class="chatbot-feedback-form">
-            <p class="text-sm font-medium text-gray-700 mb-3">
-              📝 Help us improve! Leave your contact info and we'll get back to
+            <p class="text-body font-medium text-gray-700 mb-3">
+              Help us improve! Leave your contact info and we'll get back to
               you:
             </p>
             <input
@@ -179,12 +179,13 @@
 
         <!-- Feedback Link -->
         <div class="chatbot-feedback-link-container">
-          <a 
-            href="#" 
+          <a
+            href="#"
             class="chatbot-feedback-link"
             @click.prevent="showFeedbackPanel = true"
           >
-            💬 Send Feedback
+            <Icon name="heroicons:chat-bubble-left-ellipsis" class="inline h-4 w-4 align-text-bottom mr-1" aria-hidden="true" />
+            Send Feedback
           </a>
         </div>
       </div>
@@ -213,6 +214,7 @@ const unreadCount = ref(0);
 const showFeedbackForm = ref(false); // For inline "no answer" form
 const lastUserQuestion = ref("");
 const messagesContainer = ref(null);
+const sessionId = ref("session-" + Date.now());
 
 // For inline "no answer" form
 const feedbackData = ref({
@@ -287,27 +289,19 @@ const sendMessage = async () => {
   scrollToBottom();
 
   try {
-    // Call n8n webhook directly with correct payload format
-    const response = await $fetch(
-      "https://n8n.jiosgroup.com/webhook/e529b3a4-d09d-45d6-8de5-01cc6885bcb7/chat",
-      {
-        method: "POST",
-        body: {
-          action: "sendMessage",
-          sessionId: `session-${Date.now()}`, // Session identifier
-          chatInput: question,
-        },
-      },
-    );
+    // Ask our own backend, which searches the knowledge base first and
+    // proxies to the AI assistant server-side. The webhook URL is never
+    // exposed to the browser.
+    const { $api } = useNuxtApp();
 
-    // Simulate typing delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const response = await $api.post("/chatbot/ask", {
+      question,
+      session_id: sessionId.value,
+    });
 
-    // Handle n8n response - n8n returns { output: "..." }
-    const answer = response.output || response.answer || response.message || response.data?.answer;
+    const answer = response?.data?.answer;
 
-    if (answer) {
-      // Add bot response
+    if (response?.success && response?.found && answer) {
       messages.value.push({
         type: "bot",
         text: answer,
@@ -318,7 +312,9 @@ const sendMessage = async () => {
       // No answer found
       messages.value.push({
         type: "bot",
-        text: "I'm sorry, I don't have an answer to that question yet. Would you like to leave your contact details so our team can help you?",
+        text:
+          response?.message ||
+          "I'm sorry, I don't have an answer to that question yet. Would you like to leave your contact details so our team can help you?",
         timestamp: new Date(),
       });
       showFeedbackForm.value = true;
@@ -358,14 +354,14 @@ const submitDetailedFeedback = async () => {
 
     messages.value.push({
       type: "bot",
-      text: "Thank you! We've received your message and will get back to you soon. 🙏",
+      text: "Thank you! We've received your message and will get back to you soon.",
       timestamp: new Date(),
     });
   } catch (error) {
     console.error("Feedback submission error:", error);
     messages.value.push({
       type: "bot",
-      text: "Thank you for your message! Our team will review it. 🙏",
+      text: "Thank you for your message! Our team will review it.",
       timestamp: new Date(),
     });
   }
@@ -378,119 +374,6 @@ const submitDetailedFeedback = async () => {
 const closeFeedbackForm = () => {
   showFeedbackForm.value = false;
   feedbackData.value = { name: "", email: "", message: "" };
-};
-
-// Handle Inline Feedback (Yes/No)
-const handleInlineFeedback = async (message, type, index) => {
-  try {
-    const { $api } = useNuxtApp();
-    const userQuestion = index > 0 ? messages.value[index - 1]?.text : "";
-
-    // immediate visual feedback
-    if (type === "thumbs_up") {
-      // Optional: set a local state to show it was liked
-    }
-
-    await $api.post("/chatbot/feedback", {
-      feedback_type: type, // 'thumbs_up' or 'thumbs_down'
-      message: type === "thumbs_up" ? "Helpful" : "Not Helpful",
-      user_question: userQuestion,
-      bot_response: message.text,
-      conversation_id: "session-" + Date.now(), // In a real app, use actual session ID
-      category: "general",
-    });
-
-    messages.value[index].feedbackGiven = true;
-  } catch (error) {
-    console.error("Feedback error:", error);
-    // Mark as given anyway to prevent spam
-    messages.value[index].feedbackGiven = true;
-  }
-};
-
-// Open Detailed Feedback Modal (Comment)
-const openDetailedFeedback = (message, index) => {
-  activeFeedbackMessage.value = { ...message, index };
-
-  // Pre-fill modal functionality
-  generalFeedback.value = {
-    category: "suggestion",
-    message: "",
-    rating: 0,
-    name: "",
-    email: "",
-  };
-
-  showFeedbackPanel.value = true;
-};
-
-// Submit general feedback from the feedback panel
-const submitGeneralFeedback = async () => {
-  if (!generalFeedback.value.message.trim()) return;
-
-  submittingFeedback.value = true;
-
-  try {
-    const { $api } = useNuxtApp();
-
-    const response = await $api.post("/chatbot/feedback", {
-      category: generalFeedback.value.category,
-      message: generalFeedback.value.message,
-      user_name: generalFeedback.value.name || null,
-      user_email: generalFeedback.value.email || null,
-      rating: generalFeedback.value.rating || null,
-      feedback_type: "comment",
-      conversation_id: "session-" + Date.now(),
-      // Add context if this is feedback for a specific message
-      ...(activeFeedbackMessage.value
-        ? {
-            user_question:
-              activeFeedbackMessage.value.index > 0
-                ? messages.value[activeFeedbackMessage.value.index - 1]?.text
-                : "",
-            bot_response: activeFeedbackMessage.value.text,
-          }
-        : {}),
-    });
-
-    if (response.success) {
-      // Show success state in modal
-      feedbackSuccess.value = true;
-      
-      // If this was related to a specific message, mark it as handled
-      if (activeFeedbackMessage.value) {
-        if (messages.value[activeFeedbackMessage.value.index]) {
-          messages.value[activeFeedbackMessage.value.index].feedbackGiven = true;
-        }
-        activeFeedbackMessage.value = null;
-      }
-
-      // Auto-close after 2.5 seconds
-      setTimeout(() => {
-        if (feedbackSuccess.value) {
-          closeFeedbackPanel();
-          // Add success message to chat
-          messages.value.push({
-            type: "bot",
-            text: "Thank you for your feedback! 🙏 Our team will review it and get back to you if needed.",
-            timestamp: new Date(),
-          });
-          scrollToBottom();
-        }
-      }, 2500);
-    }
-  } catch (error) {
-    console.error("Feedback submission error:", error);
-    closeFeedbackPanel();
-    messages.value.push({
-      type: "bot",
-      text: "Sorry, there was an error submitting your feedback. Please try again.",
-      timestamp: new Date(),
-    });
-    scrollToBottom();
-  } finally {
-    submittingFeedback.value = false;
-  }
 };
 
 // Format message text (convert URLs to links, line breaks, etc.)

@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title">
             Employee Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -35,13 +35,13 @@
                 />
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-secondary-600">
+                <p class="stat-label">
                   Total Accounts
                 </p>
-                <p class="text-2xl font-semibold text-secondary-900">
+                <p class="stat-value">
                   {{ totalAccounts }}
                 </p>
-                <p class="text-xs text-secondary-500">
+                <p class="text-caption text-secondary-500">
                   1 owner + {{ employees.length }} employees
                 </p>
               </div>
@@ -61,10 +61,10 @@
                 />
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-secondary-600">
+                <p class="stat-label">
                   NFC Cards Ordered
                 </p>
-                <p class="text-2xl font-semibold text-secondary-900">
+                <p class="stat-value">
                   {{ orderedCardsCount }}
                 </p>
               </div>
@@ -84,13 +84,13 @@
                 />
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-secondary-600">
+                <p class="stat-label">
                   Available Quota
                 </p>
-                <p class="text-2xl font-semibold text-secondary-900">
+                <p class="stat-value">
                   {{ availableQuota }} / {{ totalQuota }}
                 </p>
-                <p class="text-xs text-secondary-500">For accounts & cards</p>
+                <p class="text-caption text-secondary-500">For accounts & cards</p>
               </div>
             </div>
           </div>
@@ -110,10 +110,10 @@
               class="h-5 w-5 text-warning-600 mt-0.5"
             />
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-warning-800">
+              <h3 class="text-label text-warning-800">
                 Quota Limit Reached
               </h3>
-              <p class="text-sm text-warning-700 mt-1">
+              <p class="text-body text-warning-700 mt-1">
                 You have reached the maximum quota ({{ totalQuota }}). Cannot
                 create more accounts or order more cards until quota is
                 increased. Please contact support to purchase additional quota.
@@ -130,15 +130,15 @@
               class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
             />
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-blue-800">
+              <h3 class="text-label text-blue-800">
                 Business Quota Information
               </h3>
-              <p class="text-sm text-blue-700 mt-1">
+              <p class="text-body text-blue-700 mt-1">
                 Your business has a total quota of
                 <strong>{{ totalQuota }}</strong> for both accounts and NFC
                 cards.
               </p>
-              <div class="text-sm text-blue-700 mt-2 space-y-1">
+              <div class="text-body text-blue-700 mt-2 space-y-1">
                 <p>📊 <strong>Current Usage:</strong></p>
                 <p class="ml-4">
                   • Accounts: {{ totalAccounts }} / {{ totalQuota }} (1 owner +
@@ -149,7 +149,7 @@
                 </p>
                 <p class="ml-4">• Available: {{ availableQuota }}</p>
               </div>
-              <p class="text-sm text-blue-600 mt-2">
+              <p class="text-body text-blue-600 mt-2">
                 💡 Employee accounts are created by Super Admin. You can upload
                 employee details and design their cards.
               </p>
@@ -162,7 +162,7 @@
       <div class="card">
         <div class="card-header">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-secondary-900">
+            <h3 class="card-title">
               Employee Accounts
             </h3>
             <div class="flex items-center space-x-3">
@@ -176,13 +176,13 @@
                   v-model="searchQuery"
                   type="text"
                   placeholder="Search employees..."
-                  class="pl-10 pr-4 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  class="pl-10 pr-4 py-2 border border-secondary-300 rounded-lg text-input focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
               <!-- Filter -->
               <select
                 v-model="filterStatus"
-                class="px-4 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                class="px-4 py-2 border border-secondary-300 rounded-lg text-input focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -207,7 +207,7 @@
               name="heroicons:user-group"
               class="h-16 w-16 text-secondary-400 mx-auto mb-4"
             />
-            <h3 class="text-lg font-semibold text-secondary-900 mb-2">
+            <h3 class="card-title mb-2">
               No Employees Found
             </h3>
             <p class="text-secondary-500">
@@ -225,32 +225,32 @@
               <thead class="bg-secondary-50">
                 <tr>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left table-head"
                   >
                     Employee
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left table-head"
                   >
                     Email
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left table-head"
                   >
                     Plan
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left table-head"
                   >
                     Status
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left table-head"
                   >
                     Created
                   </th>
                   <th
-                    class="px-6 py-3 text-right text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-right table-head"
                   >
                     Actions
                   </th>
@@ -267,28 +267,28 @@
                       <div
                         class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center"
                       >
-                        <span class="text-sm font-medium text-primary-600">{{
+                        <span class="text-body font-medium text-primary-600">{{
                           getInitials(employee.name)
                         }}</span>
                       </div>
                       <div class="ml-4">
-                        <div class="text-sm font-medium text-secondary-900">
+                        <div class="table-cell font-medium text-secondary-900">
                           {{ employee.name }}
                         </div>
-                        <div class="text-sm text-secondary-500">
+                        <div class="table-cell text-secondary-500">
                           {{ employee.position || "Employee" }}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900">
+                    <div class="table-cell text-secondary-900">
                       {{ employee.email }}
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span
-                      class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800"
+                      class="px-2 py-1 inline-flex text-badge rounded-full bg-primary-100 text-primary-800"
                     >
                       {{ employee.subscription_plan || "Premium" }}
                     </span>
@@ -296,7 +296,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span
                       :class="[
-                        'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
+                        'px-2 py-1 inline-flex text-badge rounded-full',
                         employee.subscription_active
                           ? 'bg-success-100 text-success-800'
                           : 'bg-secondary-100 text-secondary-800',
@@ -306,19 +306,19 @@
                     </span>
                   </td>
                   <td
-                    class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500"
+                    class="px-6 py-4 whitespace-nowrap table-cell text-secondary-500"
                   >
                     {{ formatDate(employee.created_at) }}
                   </td>
                   <td
-                    class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                    class="px-6 py-4 whitespace-nowrap text-right table-cell font-medium"
                   >
                     <div class="flex items-center justify-end space-x-2">
                       <!-- Toggle Status Button -->
                       <button
                         @click="toggleEmployeeStatus(employee)"
                         :class="[
-                          'px-2 py-1 rounded text-xs font-medium',
+                          'px-2 py-1 rounded text-badge',
                           employee.subscription_active
                             ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
                             : 'bg-success-100 text-success-700 hover:bg-success-200',
@@ -379,7 +379,7 @@
             class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="modal-title">
                 Employee Details
               </h3>
               <button
@@ -398,12 +398,12 @@
                   {{ getInitials(selectedEmployee.name) }}
                 </div>
                 <div>
-                  <h4 class="text-lg font-medium text-secondary-900">
+                  <h4 class="card-title">
                     {{ selectedEmployee.name }}
                   </h4>
                   <span
                     :class="[
-                      'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                      'inline-flex px-2 py-1 text-badge rounded-full',
                       selectedEmployee.subscription_active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800',
@@ -421,37 +421,37 @@
               <div class="space-y-3">
                 <div>
                   <label
-                    class="text-xs font-medium text-secondary-500 uppercase"
+                    class="text-label text-secondary-500 uppercase"
                     >Email</label
                   >
-                  <p class="text-sm text-secondary-900 mt-1">
+                  <p class="text-body text-secondary-900 mt-1">
                     {{ selectedEmployee.email }}
                   </p>
                 </div>
                 <div>
                   <label
-                    class="text-xs font-medium text-secondary-500 uppercase"
+                    class="text-label text-secondary-500 uppercase"
                     >Position</label
                   >
-                  <p class="text-sm text-secondary-900 mt-1">
+                  <p class="text-body text-secondary-900 mt-1">
                     {{ selectedEmployee.position || "N/A" }}
                   </p>
                 </div>
                 <div>
                   <label
-                    class="text-xs font-medium text-secondary-500 uppercase"
+                    class="text-label text-secondary-500 uppercase"
                     >Phone</label
                   >
-                  <p class="text-sm text-secondary-900 mt-1">
+                  <p class="text-body text-secondary-900 mt-1">
                     {{ selectedEmployee.phone || "N/A" }}
                   </p>
                 </div>
                 <div>
                   <label
-                    class="text-xs font-medium text-secondary-500 uppercase"
+                    class="text-label text-secondary-500 uppercase"
                     >Account Created</label
                   >
-                  <p class="text-sm text-secondary-900 mt-1">
+                  <p class="text-body text-secondary-900 mt-1">
                     {{ formatDate(selectedEmployee.created_at) }}
                   </p>
                 </div>
@@ -483,7 +483,7 @@
             class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="modal-title">
                 Reset Employee Password
               </h3>
               <button
@@ -502,7 +502,7 @@
                     class="h-5 w-5 text-yellow-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-sm text-yellow-700">
+                    <p class="text-body text-yellow-700">
                       A new password will be generated and sent to
                       <strong>{{ selectedEmployee.email }}</strong>
                     </p>
@@ -548,7 +548,7 @@
             class="bg-white rounded-lg max-w-2xl w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="modal-title">
                 Design Employee NFC Cards
               </h3>
               <button
@@ -567,7 +567,7 @@
                     class="h-5 w-5 text-blue-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-sm text-blue-700">
+                    <p class="text-body text-blue-700">
                       Navigate to <strong>Card Design</strong> page to create
                       and manage NFC card templates for your employees.
                     </p>

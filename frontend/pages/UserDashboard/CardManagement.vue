@@ -7,10 +7,10 @@
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center space-x-4">
             <div>
-              <h1 class="text-2xl font-semibold text-secondary-900">
+              <h1 class="page-title text-secondary-900">
                 Card Management
               </h1>
-              <p class="text-sm text-secondary-600">
+              <p class="card-subtitle">
                 Manage your physical NFC cards and subscriptions
               </p>
             </div>
@@ -66,7 +66,7 @@
               name="heroicons:lock-closed"
               class="h-16 w-16 text-secondary-400 mx-auto mb-4"
             />
-            <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+            <h3 class="card-title text-secondary-900 mb-2">
               Premium Feature
             </h3>
             <p class="text-secondary-600 mb-6">
@@ -83,9 +83,9 @@
         <!-- NFC Cards List -->
         <div v-else-if="nfcCards.length > 0" class="space-y-3">
           <div class="flex items-center justify-between mb-4 mt-2">
-            <h3 class="text-lg font-semibold text-secondary-900">
+            <h3 class="section-title text-secondary-900">
               Your Cards
-              <span class="text-sm font-normal text-secondary-500 ml-2">
+              <span class="text-body font-normal text-secondary-500 ml-2">
                 ({{ nfcCards.length }} total)
               </span>
             </h3>
@@ -102,10 +102,10 @@
                   <Icon name="heroicons:credit-card" class="h-5 w-5 text-white" />
                 </div>
                 <div class="min-w-0">
-                  <h4 class="text-base font-semibold text-secondary-900 truncate">
+                  <h4 class="card-title text-secondary-900 truncate">
                     {{ card.card_owner }}
                   </h4>
-                  <p class="text-sm text-secondary-500 font-mono truncate">
+                  <p class="text-helper font-mono truncate">
                     ID: {{ card.card_id || card.nfc_card_id }}
                   </p>
                 </div>
@@ -114,8 +114,8 @@
               <!-- Center: Plan -->
               <div class="flex justify-center min-w-0">
                 <div class="text-center">
-                  <p class="text-xs text-secondary-500">Plan</p>
-                  <p class="text-sm font-semibold text-primary-700">
+                  <p class="text-caption text-secondary-500">Plan</p>
+                  <p class="text-body font-semibold text-primary-700">
                     {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </p>
                 </div>
@@ -125,7 +125,7 @@
               <div class="flex items-center justify-end space-x-3 shrink-0 min-w-0">
                 <span
                   :class="card.status_badge_class || getStatusBadgeClass(card.status)"
-                  class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
+                  class="px-3 py-1.5 rounded-full text-badge whitespace-nowrap"
                 >
                   {{ getCardStatusLabel(card) }}
                 </span>
@@ -158,14 +158,14 @@
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="font-semibold text-orange-900">
+                          <h4 class="text-body font-semibold text-orange-900">
                             Complete Payment — Awaiting Payment
                           </h4>
-                          <p class="text-sm text-orange-800 mt-1">
+                          <p class="text-body text-orange-800 mt-1">
                             Please make payment for this order using the bank details below, then upload your payment proof.
                           </p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-lg border border-orange-100 p-4 text-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-lg border border-orange-100 p-4 text-body">
                           <div>
                             <p class="text-secondary-500">Bank Name</p>
                             <p class="font-medium text-secondary-900">Maybank Berhad</p>
@@ -180,7 +180,7 @@
                           </div>
                           <div>
                             <p class="text-secondary-500">Amount To Pay</p>
-                            <p class="font-bold text-primary-700 text-lg">
+                            <p class="text-h5 font-bold text-primary-700">
                               RM {{ (Number(card.purchase_amount) || 0).toFixed(2) }}
                             </p>
                           </div>
@@ -217,10 +217,10 @@
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="font-semibold text-yellow-900">
+                          <h4 class="text-body font-semibold text-yellow-900">
                             Awaiting Payment Verification
                           </h4>
-                          <p class="text-sm text-yellow-800 mt-1">
+                          <p class="text-body text-yellow-800 mt-1">
                             Your payment proof is being reviewed by admin. You will receive a notification after verification is complete. You may upload a new proof if needed.
                           </p>
                         </div>
@@ -259,16 +259,16 @@
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="font-semibold text-blue-900">
+                          <h4 class="text-body font-semibold text-blue-900">
                             Card Has Been Shipped!
                           </h4>
-                          <p class="text-sm text-blue-800 mt-1">
+                          <p class="text-body text-blue-800 mt-1">
                             Your NFC card has been shipped. If you have physically received the card, please click the button below to confirm receipt and activate your subscription.
                           </p>
                         </div>
                         <div
                           v-if="card.tracking_number"
-                          class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-md border border-blue-100 p-4 text-sm"
+                          class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-md border border-blue-100 p-4 text-body"
                         >
                           <div>
                             <p class="text-secondary-500">Courier</p>
@@ -317,11 +317,11 @@
                         </div>
                       </div>
                       <div class="flex-1">
-                        <h4 class="font-semibold text-red-900">Order Cancelled</h4>
-                        <p class="text-sm text-red-800 mt-1" v-if="card.cancelled_reason">
+                        <h4 class="text-body font-semibold text-red-900">Order Cancelled</h4>
+                        <p class="text-body text-red-800 mt-1" v-if="card.cancelled_reason">
                           Reason: {{ card.cancelled_reason }}
                         </p>
-                        <p class="text-sm text-red-700 mt-1">
+                        <p class="text-body text-red-700 mt-1">
                           Please contact customer support if you believe this is a mistake.
                         </p>
                       </div>
@@ -331,33 +331,33 @@
                   <!-- Row 1: Card Details (2 cols span) + Actions (1 col) -->
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="md:col-span-2">
-                      <h4 class="text-sm font-medium text-secondary-500 mb-3">
+                      <h4 class="card-subtitle mb-3">
                         Card Details
                       </h4>
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                         <div>
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">NFC ID</p>
-                          <p class="text-sm font-medium text-secondary-900 font-mono">{{ card.nfc_card_id || "-" }}</p>
+                          <p class="stat-label">NFC ID</p>
+                          <p class="text-body font-medium text-secondary-900 font-mono">{{ card.nfc_card_id || "-" }}</p>
                         </div>
                         <div>
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">Plan</p>
-                          <p class="text-sm font-semibold text-primary-700">{{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}</p>
+                          <p class="stat-label">Plan</p>
+                          <p class="text-body font-semibold text-primary-700">{{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}</p>
                         </div>
                         <div>
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">Amount</p>
-                          <p class="text-sm font-medium text-secondary-900">
+                          <p class="stat-label">Amount</p>
+                          <p class="text-body font-medium text-secondary-900">
                             RM {{ (Number(card.purchase_amount) || 0).toFixed(2) }}
                           </p>
                         </div>
                         <div>
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">Purchase Date</p>
-                          <p class="text-sm font-medium text-secondary-900">
+                          <p class="stat-label">Purchase Date</p>
+                          <p class="text-body font-medium text-secondary-900">
                             {{ card.purchase_date ? formatDate(card.purchase_date) : "-" }}
                           </p>
                         </div>
                         <div>
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">Expires</p>
-                          <p class="text-sm font-medium text-secondary-900">
+                          <p class="stat-label">Expires</p>
+                          <p class="text-body font-medium text-secondary-900">
                             {{
                               card.expiry_date || card.subscription_end_date
                                 ? formatDate(card.expiry_date || card.subscription_end_date)
@@ -366,8 +366,8 @@
                           </p>
                         </div>
                         <div v-if="card.courier || card.tracking_number">
-                          <p class="text-xs text-secondary-500 uppercase tracking-wide">Tracking</p>
-                          <p class="text-sm font-medium text-secondary-900">
+                          <p class="stat-label">Tracking</p>
+                          <p class="text-body font-medium text-secondary-900">
                             {{ card.courier || "-" }}
                             <span v-if="card.tracking_number">#{{ card.tracking_number }}</span>
                           </p>
@@ -375,7 +375,7 @@
                       </div>
                     </div>
                     <div>
-                      <h4 class="text-sm font-medium text-secondary-500 mb-3">
+                      <h4 class="card-subtitle mb-3">
                         Actions
                       </h4>
                       <div class="space-y-2">
@@ -455,7 +455,7 @@
 
                   <!-- Row 2: Progress (full-width, horizontal stepper, bottom row) -->
                   <div class="pt-5 mt-2 border-t border-secondary-200">
-                    <h4 class="text-sm font-medium text-secondary-500 mb-4">
+                    <h4 class="card-subtitle mb-4">
                       Progress
                     </h4>
                     <div class="w-full overflow-x-auto pb-2">
@@ -465,7 +465,7 @@
                             <!-- Circle -->
                             <div
                               :class="[
-                                'h-7 w-7 rounded-full flex items-center justify-center border text-[10px] font-semibold z-10 shrink-0',
+                                'h-7 w-7 rounded-full flex items-center justify-center border text-micro font-semibold z-10 shrink-0',
                                 step.current
                                   ? 'bg-primary-500 border-primary-500 text-white ring-4 ring-primary-100'
                                   : step.completed
@@ -488,7 +488,7 @@
                             <div class="mt-3 text-center px-1">
                               <p
                                 :class="[
-                                  'text-xs font-medium leading-tight',
+                                  'text-caption font-medium leading-tight',
                                   step.current
                                     ? 'text-primary-700'
                                     : step.completed
@@ -498,10 +498,10 @@
                               >
                                 {{ step.label }}
                               </p>
-                              <p v-if="step.description" class="text-[10px] text-secondary-500 mt-0.5 leading-tight">
+                              <p v-if="step.description" class="text-micro text-secondary-500 mt-0.5 leading-tight">
                                 {{ step.description }}
                               </p>
-                              <p v-if="step.date" class="text-[10px] text-secondary-400 mt-0.5">
+                              <p v-if="step.date" class="text-micro text-secondary-400 mt-0.5">
                                 {{ formatDate(step.date) }}
                               </p>
                             </div>
@@ -523,7 +523,7 @@
             name="heroicons:credit-card"
             class="h-16 w-16 text-secondary-400 mx-auto mb-4"
           />
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             No Physical Cards
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -550,7 +550,7 @@
           ></div>
           <div class="bg-white rounded-lg max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-5">
-              <h3 class="text-xl font-semibold text-secondary-900">
+              <h3 class="modal-title text-secondary-900">
                 Order New NFC Card
               </h3>
               <button
@@ -564,7 +564,7 @@
             <form @submit.prevent="submitOrder" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
+                  <label class="block text-label text-secondary-700 mb-1"
                     >Card Owner</label
                   >
                   <input
@@ -575,7 +575,7 @@
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
+                  <label class="block text-label text-secondary-700 mb-1"
                     >Billing Address</label
                   >
                   <textarea
@@ -586,7 +586,7 @@
                   ></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
+                  <label class="block text-label text-secondary-700 mb-1"
                     >Contact Number</label
                   >
                   <input
@@ -597,7 +597,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
+                  <label class="block text-label text-secondary-700 mb-1"
                     >Subscription Plan</label
                   >
                   <select
@@ -614,7 +614,7 @@
 
               <div class="border-t border-secondary-200 pt-5">
                 <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-base font-semibold text-secondary-900 flex items-center">
+                  <h4 class="card-title text-secondary-900 flex items-center">
                     <Icon name="heroicons:swatch" class="h-5 w-5 mr-2 text-primary-600" />
                     Card Design
                   </h4>
@@ -623,7 +623,7 @@
                       type="button"
                       @click="designMode = 'template'"
                       :class="[
-                        'px-4 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        'px-4 py-1.5 rounded-md text-button transition-colors',
                         designMode === 'template'
                           ? 'bg-white text-primary-700 shadow-sm'
                           : 'text-secondary-600 hover:text-secondary-900'
@@ -635,7 +635,7 @@
                       type="button"
                       @click="designMode = 'custom'"
                       :class="[
-                        'px-4 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        'px-4 py-1.5 rounded-md text-button transition-colors',
                         designMode === 'custom'
                           ? 'bg-white text-primary-700 shadow-sm'
                           : 'text-secondary-600 hover:text-secondary-900'
@@ -649,7 +649,7 @@
                 <div v-if="designMode === 'template'" class="space-y-3">
                   <div v-if="cardTemplatesLoading" class="text-center py-8 bg-secondary-50 rounded-lg border border-secondary-200">
                     <div class="spinner mx-auto mb-2"></div>
-                    <p class="text-sm text-secondary-500">Loading designs...</p>
+                    <p class="text-helper">Loading designs...</p>
                   </div>
                   <template v-else-if="cardTemplates.length > 0">
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
@@ -682,7 +682,7 @@
                         <div class="p-3">
                           <p
                             :class="[
-                              'text-sm font-semibold truncate',
+                              'text-body font-semibold truncate',
                               orderForm.card_template_id === tpl.id
                                 ? 'text-primary-700'
                                 : 'text-secondary-900'
@@ -690,13 +690,13 @@
                           >
                             {{ tpl.name }}
                           </p>
-                          <p class="text-xs text-secondary-500 mt-0.5 line-clamp-2" v-if="tpl.description">
+                          <p class="text-helper mt-0.5 line-clamp-2" v-if="tpl.description">
                             {{ tpl.description }}
                           </p>
                           <div class="flex items-center gap-1 mt-2">
                             <span
                               v-if="tpl.category"
-                              class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary-100 text-secondary-700 capitalize"
+                              class="inline-flex items-center px-2 py-0.5 rounded-full text-badge bg-secondary-100 text-secondary-700 capitalize"
                             >
                               {{ tpl.category }}
                             </span>
@@ -713,10 +713,10 @@
                   </template>
                   <div v-else class="text-center py-8 bg-secondary-50 rounded-lg border border-secondary-200 border-dashed">
                     <Icon name="heroicons:photo" class="h-10 w-10 text-secondary-300 mx-auto mb-2" />
-                    <p class="text-sm font-medium text-secondary-700">No templates available</p>
-                    <p class="text-xs text-secondary-500 mt-1">Try switching plan or use Upload Custom</p>
+                    <p class="text-body font-medium text-secondary-700">No templates available</p>
+                    <p class="text-helper mt-1">Try switching plan or use Upload Custom</p>
                   </div>
-                  <p class="text-xs text-secondary-500 flex items-center">
+                  <p class="text-helper flex items-center">
                     <Icon name="heroicons:information-circle" class="h-3.5 w-3.5 mr-1" />
                     You will be able to customize the profile content after payment is verified.
                   </p>
@@ -724,7 +724,7 @@
 
                 <div v-else class="space-y-3">
                   <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                    <label class="block text-label text-secondary-700 mb-2">
                       Front Design
                       <span class="text-danger-500 ml-1">*</span>
                     </label>
@@ -750,26 +750,26 @@
                         class="h-9 w-9 text-secondary-400 mx-auto mb-2"
                       />
                       <div v-if="!customDesignFront" class="space-y-0.5">
-                        <p class="text-sm font-medium text-secondary-700">
+                        <p class="text-body font-medium text-secondary-700">
                           Click to upload front design
                         </p>
-                        <p class="text-xs text-secondary-500">
+                        <p class="text-helper">
                           JPG / PNG / PDF. Max 10MB
                         </p>
                       </div>
                       <div v-else class="space-y-1">
-                        <div class="flex items-center justify-center gap-2 text-sm">
+                        <div class="flex items-center justify-center gap-2 text-body">
                           <Icon name="heroicons:document" class="h-5 w-5 text-primary-600 shrink-0" />
                           <span class="font-medium text-secondary-800 truncate max-w-[240px]">
                             {{ customDesignFront?.name }}
                           </span>
                         </div>
-                        <p class="text-xs text-secondary-500">
+                        <p class="text-helper">
                           {{ customDesignFront?.size != null ? (customDesignFront.size / 1024).toFixed(1) + ' KB' : '' }}
                         </p>
                         <button
                           type="button"
-                          class="text-xs text-danger-600 hover:text-danger-800 font-medium mt-1"
+                          class="text-helper font-medium text-danger-600 hover:text-danger-800 mt-1"
                           @click.stop="customDesignFront = null"
                         >
                           Remove
@@ -779,9 +779,9 @@
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                    <label class="block text-label text-secondary-700 mb-2">
                       Back Design
-                      <span class="text-secondary-400 font-normal text-xs ml-1">(Optional)</span>
+                      <span class="text-secondary-400 font-normal text-caption ml-1">(Optional)</span>
                     </label>
                     <div
                       :class="[
@@ -805,26 +805,26 @@
                         class="h-9 w-9 text-secondary-400 mx-auto mb-2"
                       />
                       <div v-if="!customDesignBack" class="space-y-0.5">
-                        <p class="text-sm font-medium text-secondary-700">
+                        <p class="text-body font-medium text-secondary-700">
                           Click to upload back design
                         </p>
-                        <p class="text-xs text-secondary-500">
+                        <p class="text-helper">
                           JPG / PNG / PDF. Max 10MB
                         </p>
                       </div>
                       <div v-else class="space-y-1">
-                        <div class="flex items-center justify-center gap-2 text-sm">
+                        <div class="flex items-center justify-center gap-2 text-body">
                           <Icon name="heroicons:document" class="h-5 w-5 text-primary-600 shrink-0" />
                           <span class="font-medium text-secondary-800 truncate max-w-[240px]">
                             {{ customDesignBack?.name }}
                           </span>
                         </div>
-                        <p class="text-xs text-secondary-500">
+                        <p class="text-helper">
                           {{ customDesignBack?.size != null ? (customDesignBack.size / 1024).toFixed(1) + ' KB' : '' }}
                         </p>
                         <button
                           type="button"
-                          class="text-xs text-danger-600 hover:text-danger-800 font-medium mt-1"
+                          class="text-helper font-medium text-danger-600 hover:text-danger-800 mt-1"
                           @click.stop="customDesignBack = null"
                         >
                           Remove
@@ -836,8 +836,8 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Design Notes / Instructions <span class="text-secondary-400 font-normal text-xs">(Optional)</span></label
+                <label class="block text-label text-secondary-700 mb-1"
+                  >Design Notes / Instructions <span class="text-secondary-400 font-normal text-caption">(Optional)</span></label
                 >
                 <textarea
                   v-model="orderForm.design_notes"
@@ -849,8 +849,8 @@
 
               <div class="border-t border-secondary-200 pt-4 space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
-                    >Shipping Address <span class="text-secondary-400 font-normal text-xs">(Optional)</span></label
+                  <label class="block text-label text-secondary-700 mb-1"
+                    >Shipping Address <span class="text-secondary-400 font-normal text-caption">(Optional)</span></label
                   >
                   <textarea
                     v-model="orderForm.shipping_address"
@@ -859,8 +859,8 @@
                   ></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-1"
-                    >Order Notes <span class="text-secondary-400 font-normal text-xs">(Optional)</span></label
+                  <label class="block text-label text-secondary-700 mb-1"
+                    >Order Notes <span class="text-secondary-400 font-normal text-caption">(Optional)</span></label
                   >
                   <textarea
                     v-model="orderForm.notes"
@@ -909,10 +909,10 @@
           >
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h3 class="text-xl font-semibold text-secondary-900">
+                <h3 class="modal-title text-secondary-900">
                   Card Details
                 </h3>
-                <p class="text-sm text-secondary-600 mt-1">
+                <p class="card-subtitle mt-1">
                   View all information for {{ selectedCard.card_owner }}'s card
                 </p>
               </div>
@@ -930,16 +930,16 @@
                 class="flex items-center justify-between p-4 bg-secondary-50 rounded-lg"
               >
                 <div>
-                  <p class="text-sm text-secondary-600">Status</p>
+                  <p class="text-helper">Status</p>
                   <p
-                    class="text-lg font-semibold text-secondary-900 capitalize"
+                    class="card-title text-secondary-900 capitalize"
                   >
                     {{ selectedCard.status }}
                   </p>
                 </div>
                 <span
                   :class="getStatusBadgeClass(selectedCard.status_badge)"
-                  class="px-4 py-2 rounded-full text-sm font-medium"
+                  class="px-4 py-2 rounded-full text-badge"
                 >
                   {{ selectedCard.status_badge }}
                 </span>
@@ -949,50 +949,50 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Card Information
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Card ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.card_id }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >NFC Card ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfc_card_id || "Not assigned" }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Card Owner</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.card_owner }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Subscription Plan</label
                     >
                     <p
-                      class="text-base text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ String(selectedCard.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
@@ -1001,39 +1001,39 @@
 
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Contact Information
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Contact Number</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.contact_number }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Billing Address</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
                     >
                       {{ selectedCard.billing_address }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.shipping_address">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Shipping Address</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
                     >
                       {{ selectedCard.shipping_address }}
                     </p>
@@ -1045,28 +1045,28 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Financial Details
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Purchase Amount</label
                     >
                     <p
-                      class="text-lg font-semibold text-primary-600 bg-secondary-50 px-3 py-2 rounded"
+                      class="card-title text-primary-600 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.formatted_purchase_amount }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.payment_method">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Payment Method</label
                     >
                     <p
-                      class="text-base text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.payment_method }}
                     </p>
@@ -1075,50 +1075,50 @@
 
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Timeline
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Purchase Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.purchase_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.shipped_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Shipped Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.shipped_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.delivered_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Delivered Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.delivered_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.expiry_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Expiry Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.expiry_date) }}
                     </p>
@@ -1129,17 +1129,17 @@
               <!-- Shipping Information -->
               <div v-if="selectedCard.tracking_number" class="space-y-4">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Shipping Information
                 </h4>
 
                 <div>
-                  <label class="block text-sm text-secondary-600 mb-1"
+                  <label class="block text-label text-secondary-600 mb-1"
                     >Tracking Number</label
                   >
                   <p
-                    class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                    class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                   >
                     {{ selectedCard.tracking_number }}
                   </p>
@@ -1149,13 +1149,13 @@
               <!-- Notes -->
               <div v-if="selectedCard.notes" class="space-y-4">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Notes
                 </h4>
 
                 <div class="bg-secondary-50 px-3 py-2 rounded">
-                  <p class="text-base text-secondary-900 whitespace-pre-wrap">
+                  <p class="text-body-lg text-secondary-900 whitespace-pre-wrap">
                     {{ selectedCard.notes }}
                   </p>
                 </div>
@@ -1164,29 +1164,29 @@
               <!-- NFC Tag Information -->
               <div v-if="selectedCard.nfcTag" class="space-y-4 border-t pt-6">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Linked Profile
                 </h4>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >NFC Tag ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfcTag.nfc_id }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Profile Name</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfcTag.name }}
                     </p>
@@ -1200,7 +1200,7 @@
               >
                 <div v-if="!cardCanDesignProfile(selectedCard)" class="flex items-center space-x-2">
                   <Icon name="heroicons:lock-closed" class="h-4 w-4 text-warning-500" />
-                  <p class="text-xs text-warning-700">
+                  <p class="text-helper text-warning-700">
                     Profile Builder access will be unlocked after payment is verified by admin
                   </p>
                 </div>
@@ -1243,10 +1243,10 @@
           <div class="bg-white rounded-lg max-w-lg w-full p-6 relative">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h3 class="text-lg font-semibold text-secondary-900">
+                <h3 class="modal-title text-secondary-900">
                   Upload Payment Proof
                 </h3>
-                <p v-if="selectedCardForUpload" class="text-sm text-secondary-600 mt-1">
+                <p v-if="selectedCardForUpload" class="card-subtitle mt-1">
                   Card Order ID: {{ selectedCardForUpload.card_id || selectedCardForUpload.nfc_card_id }}
                 </p>
               </div>
@@ -1260,7 +1260,7 @@
 
             <form @submit.prevent="uploadPaymentProof" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                <label class="block text-label text-secondary-700 mb-2">
                   Payment Proof File
                   <span class="text-danger-500">*</span>
                 </label>
@@ -1280,15 +1280,15 @@
                     class="h-10 w-10 text-secondary-400 mx-auto mb-3"
                   />
                   <div v-if="!paymentProofForm.file" class="space-y-1">
-                    <p class="text-sm font-medium text-secondary-700">
+                    <p class="text-body font-medium text-secondary-700">
                       Click to select a file or drag & drop
                     </p>
-                    <p class="text-xs text-secondary-500">
+                    <p class="text-helper">
                       Accepted formats: JPG, PNG, PDF. Max size: 5MB
                     </p>
                   </div>
                   <div v-else class="space-y-2">
-                    <div class="flex items-center justify-center space-x-2 text-sm">
+                    <div class="flex items-center justify-center space-x-2 text-body">
                       <Icon
                         name="heroicons:document"
                         class="h-5 w-5 text-primary-600"
@@ -1297,7 +1297,7 @@
                         {{ paymentProofForm.file.name }}
                       </span>
                     </div>
-                    <p class="text-xs text-secondary-500">
+                    <p class="text-helper">
                       {{ (paymentProofForm.file.size / 1024).toFixed(1) }} KB
                     </p>
                   </div>
@@ -1305,7 +1305,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1">
+                <label class="block text-label text-secondary-700 mb-1">
                   Bank Name
                 </label>
                 <input
@@ -1314,13 +1314,13 @@
                   placeholder="Example: Maybank, CIMB, Public Bank"
                   class="input w-full"
                 />
-                <p class="text-xs text-secondary-500 mt-1">
+                <p class="text-helper mt-1">
                   Optional: The bank you used to make the payment
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1">
+                <label class="block text-label text-secondary-700 mb-1">
                   Transaction Reference No.
                 </label>
                 <input
@@ -1329,7 +1329,7 @@
                   placeholder="Example: 20260929ABC12345"
                   class="input w-full"
                 />
-                <p class="text-xs text-secondary-500 mt-1">
+                <p class="text-helper mt-1">
                   Optional: Transaction reference number to help admin verify
                 </p>
               </div>
@@ -1337,8 +1337,8 @@
               <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
                 <div class="flex items-start space-x-2">
                   <Icon name="heroicons:information-circle" class="h-5 w-5 text-secondary-500 shrink-0 mt-0.5" />
-                  <div class="space-y-1 text-sm">
-                    <p class="font-medium text-secondary-700">
+                  <div class="space-y-1 text-body">
+                    <p class="text-body font-medium text-secondary-700">
                       After uploading:
                     </p>
                     <ul class="text-secondary-600 space-y-0.5 list-disc list-inside">

@@ -20,20 +20,20 @@
                   :alt="brandSettings.app_name || 'NFCGo'"
                   class="h-12 max-h-12 max-w-[160px] object-contain flex-shrink-0"
                 />
-                <span class="ml-3 text-lg font-bold text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
+                <span class="ml-3 text-h5 text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
               </template>
               <template v-else>
-                <Icon
-                  name="heroicons:id-card"
-                  class="h-9 w-9 text-primary-600 flex-shrink-0"
+                <NFCGoLogo
+                  variant="light"
+                  size="md"
+                  :label="brandSettings.app_name || 'NFCGo'"
                 />
-                <span class="ml-3 text-lg font-bold text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
               </template>
             </NuxtLink>
           </div>
 
           <!-- Navigation - Scrollable -->
-          <nav class="flex-1 overflow-y-auto px-3 py-6 text-sm font-normal text-secondary-700">
+          <nav class="flex-1 overflow-y-auto px-3 py-6 text-navigation text-secondary-700">
             <div
               v-for="(group, groupIndex) in navigation"
               :key="group.category"
@@ -44,7 +44,7 @@
                 v-if="group.items.length === 1"
                 :to="group.items[0].href"
                 :class="[
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 w-full text-left',
+                  'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-colors duration-200 w-full text-left',
                   isActiveRoute(group.items[0].href)
                     ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
                     : 'text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900',
@@ -53,7 +53,7 @@
                 {{ group.items[0].name }}
                 <span
                   v-if="group.items[0].badge && Number(group.items[0].badge) > 0"
-                  class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 min-w-[1.25rem] px-1"
+                  class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
                   :title="`${group.items[0].badge} unread`"
                 >
                   {{ group.items[0].badge }}
@@ -67,7 +67,7 @@
                   @click.stop="toggleGroup(group.category)"
                   class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-secondary-50 transition-colors group mb-1"
                 >
-                  <span class="text-sm font-semibold text-secondary-500 capitalize">
+                  <span class="text-label text-secondary-500 capitalize">
                     {{ group.category }}
                   </span>
                   <Icon
@@ -90,7 +90,7 @@
                       :key="item.name"
                       :to="item.href"
                       :class="[
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 w-full text-left',
+                        'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-colors duration-200 w-full text-left',
                         isActiveRoute(item.href)
                           ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
                           : 'text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900',
@@ -99,7 +99,7 @@
                       {{ item.name }}
                       <span
                         v-if="item.badge && Number(item.badge) > 0"
-                        class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 min-w-[1.25rem] px-1"
+                        class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
                         :title="`${item.badge} unread`"
                       >
                         {{ item.badge }}
@@ -133,7 +133,7 @@
                   class="h-6 w-6"
                 />
               </button>
-              <h1 class="text-lg font-semibold text-secondary-900">
+              <h1 class="text-h5 text-secondary-900">
                 {{ pageTitle }}
               </h1>
             </div>
@@ -158,7 +158,7 @@
                   <Icon name="heroicons:bell" class="h-5 w-5" />
                   <span
                     v-if="pendingNotificationCount > 0"
-                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-[0.65rem] font-bold bg-red-500 text-white ring-2 ring-white"
+                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-red-500 text-white ring-2 ring-white"
                   >
                     {{ pendingNotificationCount > 9 ? "9+" : pendingNotificationCount }}
                   </span>
@@ -173,7 +173,7 @@
                 <Icon name="heroicons:chat-bubble-left-right" class="h-5 w-5" />
                 <span
                   v-if="unreadFeedbackCount > 0"
-                  class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-[0.65rem] font-bold bg-amber-500 text-white ring-2 ring-white"
+                  class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-amber-500 text-white ring-2 ring-white"
                 >
                   {{ unreadFeedbackCount > 9 ? "9+" : unreadFeedbackCount }}
                 </span>
@@ -189,14 +189,14 @@
                   class="flex items-center gap-2 sm:gap-3 p-1.5 rounded-xl hover:bg-secondary-50 transition-colors"
                 >
                   <div class="hidden sm:block text-right leading-tight">
-                    <p class="text-sm font-semibold text-secondary-900 truncate max-w-[140px]">
+                    <p class="text-body font-semibold text-secondary-900 truncate max-w-[140px]">
                       {{
                         user?.first_name && user?.last_name
                           ? `${user.first_name} ${user.last_name}`
                           : user?.name || "Admin"
                       }}
                     </p>
-                    <p class="text-xs text-secondary-500 truncate max-w-[140px]">
+                    <p class="text-caption text-secondary-500 truncate max-w-[140px]">
                       {{ user?.admin_role_display || "Administrator" }}
                     </p>
                   </div>
@@ -232,17 +232,17 @@
                           class="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
                         />
                         <div class="min-w-0 flex-1">
-                          <p class="text-sm font-bold text-secondary-900 truncate">
+                          <p class="text-body font-bold text-secondary-900 truncate">
                             {{
                               user?.first_name && user?.last_name
                                 ? `${user.first_name} ${user.last_name}`
                                 : user?.name || "Admin"
                             }}
                           </p>
-                          <p class="text-xs text-secondary-500 truncate">
+                          <p class="text-caption text-secondary-500 truncate">
                             {{ user?.email || "admin@nfcgo.my" }}
                           </p>
-                          <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-red-100 text-red-700">
+                          <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-badge font-bold bg-red-100 text-red-700">
                             {{ user?.admin_role_display || "Administrator" }}
                           </span>
                         </div>
@@ -254,7 +254,7 @@
                       <NuxtLink
                         to="/AdminManagement/profile-settings"
                         @click="showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
                         <Icon
                           name="heroicons:user-circle"
@@ -266,7 +266,7 @@
                       <NuxtLink
                         to="/AdminManagement/configuration"
                         @click="showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
                         <Icon
                           name="heroicons:cog-6-tooth"
@@ -283,7 +283,7 @@
                     <div class="py-2">
                       <button
                         @click="handleLogout"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
                       >
                         <Icon
                           name="heroicons:arrow-right-on-rectangle"
@@ -464,6 +464,14 @@ const navigation = computed(() => [
         name: "Business Users",
         href: "/AdminManagement/business-users",
       },
+      {
+        name: "Business Enquiries",
+        href: "/AdminManagement/business-inquiries",
+      },
+      {
+        name: "Roles & Permissions",
+        href: "/AdminManagement/roles-permissions",
+      },
     ],
   },
   {
@@ -478,12 +486,20 @@ const navigation = computed(() => [
         href: "/AdminManagement/card-templates",
       },
       {
+        name: "Card Designer",
+        href: "/AdminManagement/card-designer",
+      },
+      {
         name: "Profile Builder Design",
         href: "/AdminManagement/profile-builder-design",
       },
       {
         name: "Invoices",
         href: "/AdminManagement/invoices",
+      },
+      {
+        name: "Refunds",
+        href: "/AdminManagement/refunds",
       },
     ],
   },
@@ -503,6 +519,10 @@ const navigation = computed(() => [
         name: "User Feedback",
         href: "/AdminManagement/feedback",
         badge: unreadFeedbackCount.value,
+      },
+      {
+        name: "Chatbot FAQ",
+        href: "/AdminManagement/chatbot-faq",
       },
       {
         name: "Audit Log",

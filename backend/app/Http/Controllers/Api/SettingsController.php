@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserNotificationPreference;
 use App\Services\NotificationService;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
@@ -164,6 +165,8 @@ class SettingsController extends Controller
     {
         $user = $request->user();
 
+        $preference = UserNotificationPreference::where('user_id', $user->id)->first();
+
         return response()->json([
             'success' => true,
             'user' => $user,
@@ -177,13 +180,77 @@ class SettingsController extends Controller
                 'analytics_enabled' => true,
                 'location_tracking' => true,
             ],
-            'notification_settings' => [
-                'profile_views' => true,
-                'nfc_taps' => true,
-                'weekly_reports' => true,
-                'product_updates' => false,
-            ]
+            'notification_settings' => $preference
+                ? [
+                    'profile_views' => (bool) $preference->profile_views,
+                    'nfc_taps' => (bool) $preference->nfc_taps,
+                    'weekly_reports' => (bool) $preference->weekly_reports,
+                    'product_updates' => (bool) $preference->product_updates,
+                ]
+                : UserNotificationPreference::DEFAULTS,
         ]);
+    }
+
+    /**
+     * Update a single (or several) email notification preference(s).
+     *
+     * PUT /api/settings/notifications
+     * Body: { profile_views?: bool, nfc_taps?: bool, weekly_reports?: bool, product_updates?: bool }
+     */
+    public function updateNotificationSettings(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'profile_views' => 'sometimes|boolean',
+            'nfc_taps' => 'sometimes|boolean',
+            'weekly_reports' => 'sometimes|boolean',
+            'product_updates' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $preference = UserNotificationPreference::firstOrCreate(
+                ['user_id' => $user->id],
+                UserNotificationPreference::DEFAULTS
+            );
+
+            // Only persist the keys that were actually submitted.
+            $updates = array_intersect_key(
+                $validator->validated(),
+                array_flip(['profile_views', 'nfc_taps', 'weekly_reports', 'product_updates'])
+            );
+
+            $preference->fill($updates)->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification settings updated',
+                'notification_settings' => [
+                    'profile_views' => (bool) $preference->profile_views,
+                    'nfc_taps' => (bool) $preference->nfc_taps,
+                    'weekly_reports' => (bool) $preference->weekly_reports,
+                    'product_updates' => (bool) $preference->product_updates,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to update notification settings', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update notification settings',
+            ], 500);
+        }
     }
 
     /**

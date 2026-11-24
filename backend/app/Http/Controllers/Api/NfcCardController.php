@@ -398,9 +398,36 @@ class NfcCardController extends Controller
     public function activate(Request $request, NfcCard $nfcCard)
     {
         $user = $request->user();
-        // Check ownership
-        if ($nfcCard->user_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+
+        $validator = Validator::make($request->all(), [
+            'nfc_id' => 'required|string|unique:nfc_tags,nfc_id',
+            'name' => 'nullable|string|max:255',
+            'activation_code' => 'nullable|string|max:32',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $isOwner = $nfcCard->user_id === $user->id;
+
+        // Claiming a card that is NOT already assigned to this user requires the
+        // card's activation code (proves physical ownership of the card).
+        // Owners — including cards already assigned to them through a paid order —
+        // are exempt and never need to re-enter the code.
+        if (!$isOwner) {
+            $provided = strtoupper(trim((string) $request->input('activation_code', '')));
+            $expected = strtoupper((string) $nfcCard->activation_code);
+
+            if ($provided === '' || $expected === '' || !hash_equals($expected, $provided)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This card does not belong to your account. Please enter the activation code printed with your card to claim it.'
+                ], 422);
+            }
         }
 
         // Check if user has access: premium sub OR card is in verified+ state
@@ -413,16 +440,9 @@ class NfcCardController extends Controller
             ], 403);
         }
 
-        $validator = Validator::make($request->all(), [
-            'nfc_id' => 'required|string|unique:nfc_tags,nfc_id',
-            'name' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+        // Claim ownership now that the activation code has been verified.
+        if (!$isOwner) {
+            $nfcCard->update(['user_id' => $user->id]);
         }
 
         // Create or update NFC tag
@@ -935,6 +955,16 @@ class NfcCardController extends Controller
                 'name' => $nfcCard->user->name ?? '',
                 'email' => $nfcCard->user->email ?? '',
             ]);
+        }
+
+        // Respect the owner's publication state: an unpublished profile
+        // (is_active = false) must not leak the owner's name, email, phone,
+        // address or social links on this unauthenticated endpoint.
+        if (!$landingPage->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This profile is not available.'
+            ], 404);
         }
 
         // Load social links relationship

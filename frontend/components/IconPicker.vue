@@ -4,10 +4,10 @@
     <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-300">
       <div class="text-3xl">{{ modelValue || '❓' }}</div>
       <div class="flex-1">
-        <p class="text-sm font-medium text-gray-900">
+        <p class="text-navigation text-gray-900">
           {{ modelValue ? 'Selected Icon' : 'No icon selected' }}
         </p>
-        <p class="text-xs text-gray-500">
+        <p class="text-caption text-gray-500">
           Click to choose an icon
         </p>
       </div>
@@ -15,7 +15,7 @@
         v-if="modelValue"
         @click="clearIcon"
         type="button"
-        class="px-3 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+        class="px-3 py-1 text-caption bg-gray-200 rounded hover:bg-gray-300"
       >
         Clear
       </button>
@@ -40,7 +40,7 @@
       <div class="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
         <!-- Header -->
         <div class="p-4 border-b flex items-center justify-between">
-          <h3 class="text-lg font-semibold">Select an Icon</h3>
+          <h3 class="modal-title">Select an Icon</h3>
           <button
             @click="showPicker = false"
             type="button"

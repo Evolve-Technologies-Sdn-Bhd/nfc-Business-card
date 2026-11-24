@@ -9,8 +9,8 @@
             <Icon name="heroicons:bell" class="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 class="text-2xl font-bold text-secondary-900 tracking-tight">Notifications</h1>
-            <p class="text-sm text-secondary-500 mt-0.5">
+            <h1 class="page-title text-secondary-900 tracking-tight">Notifications</h1>
+            <p class="card-subtitle mt-0.5">
               Stay updated with account activity, card status, and important announcements
             </p>
           </div>
@@ -20,13 +20,13 @@
         <button
           v-if="unreadCount > 0"
           @click="handleMarkAllAsRead"
-          class="px-4 py-2.5 text-sm bg-primary-600 text-white rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-all duration-200 font-medium flex items-center shadow-sm hover:shadow-md hover:shadow-primary-600/10"
+          class="px-4 py-2.5 text-button bg-primary-600 text-white rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-all duration-200 flex items-center shadow-sm hover:shadow-md hover:shadow-primary-600/10"
         >
           <Icon name="heroicons:check-double" class="w-4 h-4 mr-2" />
           Mark all as read
           <span
             v-if="unreadCount > 0"
-            class="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold"
+            class="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-badge"
           >
             {{ unreadCount > 9 ? "9+" : unreadCount }}
           </span>
@@ -34,7 +34,7 @@
         <button
           @click="loadNotifications()"
           :disabled="loading"
-          class="px-4 py-2.5 text-sm bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 active:bg-secondary-100 transition-all duration-200 flex items-center border border-secondary-200 shadow-sm disabled:opacity-50"
+          class="px-4 py-2.5 text-button bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 active:bg-secondary-100 transition-all duration-200 flex items-center border border-secondary-200 shadow-sm disabled:opacity-50"
         >
           <Icon
             name="heroicons:arrow-path"
@@ -50,8 +50,8 @@
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs text-secondary-500 font-semibold uppercase tracking-wider">Total</p>
-            <p class="text-3xl font-bold text-secondary-900 mt-1.5 tabular-nums">
+            <p class="stat-label">Total</p>
+            <p class="stat-value text-secondary-900 mt-1.5 tabular-nums">
               {{ notifications.length }}
             </p>
           </div>
@@ -73,8 +73,8 @@
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs text-orange-600 font-semibold uppercase tracking-wider">Unread</p>
-            <p class="text-3xl font-bold text-orange-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-orange-600">Unread</p>
+            <p class="stat-value text-orange-600 mt-1.5 tabular-nums">
               {{ unreadCount }}
             </p>
           </div>
@@ -96,8 +96,8 @@
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs text-green-600 font-semibold uppercase tracking-wider">Read</p>
-            <p class="text-3xl font-bold text-green-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-green-600">Read</p>
+            <p class="stat-value text-green-600 mt-1.5 tabular-nums">
               {{ readCount }}
             </p>
           </div>
@@ -127,7 +127,7 @@
             :key="cat.value"
             @click="categoryFilter = cat.value"
             :class="[
-              'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap',
+              'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-navigation transition-all duration-200 whitespace-nowrap',
               categoryFilter === cat.value
                 ? 'bg-primary-600 text-white shadow-sm shadow-primary-600/20'
                 : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200 hover:text-secondary-800',
@@ -145,7 +145,7 @@
             :key="tab.value"
             @click="filterTab = tab.value"
             :class="[
-              'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap',
+              'px-4 py-1.5 rounded-lg text-navigation transition-all duration-200 whitespace-nowrap',
               filterTab === tab.value
                 ? 'bg-white text-secondary-900 shadow-sm'
                 : 'text-secondary-500 hover:text-secondary-700',
@@ -174,7 +174,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search by title or message..."
-            class="w-full pl-10 pr-10 py-2.5 border border-secondary-200 rounded-xl bg-secondary-50/50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm text-secondary-900 placeholder:text-secondary-400"
+            class="w-full pl-10 pr-10 py-2.5 border border-secondary-200 rounded-xl bg-secondary-50/50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-input text-secondary-900 placeholder:text-secondary-400"
           />
           <button
             v-if="searchQuery"
@@ -190,7 +190,7 @@
           <button
             v-if="unreadVisibleCount > 0"
             @click="handleMarkFilteredAsRead"
-            class="px-3.5 py-2.5 text-xs bg-primary-50 text-primary-700 rounded-xl hover:bg-primary-100 active:bg-primary-150 transition-colors font-semibold flex items-center border border-primary-100"
+            class="px-3.5 py-2.5 text-button bg-primary-50 text-primary-700 rounded-xl hover:bg-primary-100 active:bg-primary-150 transition-colors flex items-center border border-primary-100"
             :title="`Mark ${unreadVisibleCount} visible notification(s) as read`"
           >
             <Icon name="heroicons:check" class="w-3.5 h-3.5 mr-1.5" />
@@ -225,10 +225,10 @@
               class="h-10 w-10 text-secondary-400"
             />
           </div>
-          <h3 class="text-base font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             No notifications found
           </h3>
-          <p class="text-sm text-secondary-500 max-w-sm mx-auto leading-relaxed">
+          <p class="text-body text-secondary-500 max-w-sm mx-auto leading-relaxed">
             {{ getEmptyStateMessage() }}
           </p>
         </div>
@@ -254,7 +254,7 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start gap-2 mb-1.5 flex-wrap">
                   <h3
-                    class="text-sm leading-snug"
+                    class="text-body leading-snug"
                     :class="[
                       !notification.is_read
                         ? 'font-bold text-secondary-900'
@@ -268,7 +268,7 @@
                       notification.priority === 'urgent' ||
                       notification.priority === 'high'
                     "
-                    class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full flex-shrink-0"
+                    class="px-2 py-0.5 text-badge uppercase tracking-wide rounded-full flex-shrink-0"
                     :class="getPriorityClass(notification.priority)"
                   >
                     {{ getPriorityLabel(notification.priority) }}
@@ -278,11 +278,11 @@
                     class="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0 mt-1.5"
                   ></span>
                 </div>
-                <p class="text-sm text-secondary-600 leading-relaxed mb-2 line-clamp-2">
+                <p class="text-body text-secondary-600 leading-relaxed mb-2 line-clamp-2">
                   {{ notification.message }}
                 </p>
                 <div class="flex items-center justify-between gap-3 flex-wrap">
-                  <div class="flex items-center gap-2.5 text-xs text-secondary-500">
+                  <div class="flex items-center gap-2.5 text-helper">
                     <span class="inline-flex items-center gap-1 font-medium">
                       <Icon name="heroicons:clock" class="w-3 h-3" />
                       {{ getTimeAgo(notification.created_at) }}
@@ -298,7 +298,7 @@
                   <div class="flex items-center gap-2">
                     <span
                       v-if="notification.is_read"
-                      class="flex items-center text-xs text-green-600 font-semibold"
+                      class="flex items-center text-caption text-green-600 font-semibold"
                     >
                       <Icon
                         name="heroicons:check-circle-20-solid"
@@ -308,7 +308,7 @@
                     </span>
                     <span
                       v-else
-                      class="flex items-center text-xs text-primary-600 font-semibold"
+                      class="flex items-center text-caption text-primary-600 font-semibold"
                     >
                       <Icon name="heroicons:envelope" class="w-3.5 h-3.5 mr-1" />
                       New
@@ -317,7 +317,7 @@
                 </div>
                 <div
                   v-if="notification.action_url"
-                  class="mt-3 inline-flex items-center text-sm text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+                  class="mt-3 inline-flex items-center text-navigation text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {{ notification.action_text || "View Details" }}
                   <Icon name="heroicons:arrow-right" class="w-4 h-4 ml-1" />
@@ -351,20 +351,20 @@
           <button
             v-if="hasReadNotifications"
             @click="handleDeleteAllRead"
-            class="px-3.5 py-2 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-semibold inline-flex items-center gap-1.5 border border-red-100"
+            class="px-3.5 py-2 text-button text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors inline-flex items-center gap-1.5 border border-red-100"
           >
             <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
             Clear all read
           </button>
         </div>
-        <div class="text-xs text-secondary-500 font-medium">
+        <div class="text-helper font-medium">
           Showing <span class="text-secondary-800 font-bold tabular-nums">{{ filteredNotifications.length }}</span> of <span class="text-secondary-800 font-bold tabular-nums">{{ notifications.length }}</span> notifications
         </div>
         <div>
           <button
             v-if="notifications.length >= 50"
             @click="loadNotifications(100)"
-            class="px-4 py-2 text-xs bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all border border-secondary-200 font-semibold inline-flex items-center gap-1.5"
+            class="px-4 py-2 text-button bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all border border-secondary-200 inline-flex items-center gap-1.5"
           >
             Load more
             <Icon name="heroicons:chevron-down" class="w-3.5 h-3.5" />

@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             NFC Card Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -25,7 +25,7 @@
       <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Search</label
             >
             <input
@@ -36,10 +36,10 @@
               maxlength="150"
               @input="handleSearch"
             />
-            <span class="text-xs text-secondary-500 mt-1 block">{{ filters.search.length }}/150</span>
+            <span class="text-helper mt-1 block">{{ filters.search.length }}/150</span>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Status</label
             >
             <select
@@ -62,7 +62,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Subscription Plan</label
             >
             <select
@@ -77,7 +77,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Sort By</label
             >
             <select
@@ -96,7 +96,7 @@
           <button @click="clearFilters" class="btn btn-outline btn-sm">
             Clear Filters
           </button>
-          <div class="text-sm text-secondary-500">
+          <div class="text-body text-secondary-500">
             {{ pagination.total }} cards found
           </div>
         </div>
@@ -114,27 +114,27 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Card Details
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   User
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Status
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Purchase Info
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Actions
                 </th>
@@ -159,13 +159,13 @@
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="table-cell font-medium text-secondary-900">
                         {{ card.card_owner }}
                       </div>
-                      <div class="text-sm text-secondary-500 font-mono">
+                      <div class="table-cell text-secondary-500 font-mono">
                         {{ card.nfc_card_id }}
                       </div>
-                      <div class="text-xs text-secondary-400">
+                      <div class="text-caption text-secondary-400">
                         Created: {{ formatDate(card.created_at) }}
                       </div>
                     </div>
@@ -182,10 +182,10 @@
                       class="h-8 w-8 rounded-full object-cover"
                     />
                     <div class="ml-3">
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="table-cell font-medium text-secondary-900">
                         {{ card.user?.full_name }}
                       </div>
-                      <div class="text-sm text-secondary-500">
+                      <div class="table-cell text-secondary-500">
                         {{ card.user?.email }}
                       </div>
                     </div>
@@ -194,7 +194,7 @@
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-2 py-1 text-badge rounded-full',
                       getStatusBadgeClass(card.status),
                     ]"
                   >
@@ -202,28 +202,28 @@
                   </span>
                   <div
                     v-if="card.tracking_number"
-                    class="text-xs text-secondary-500 mt-1"
+                    class="text-caption text-secondary-500 mt-1"
                   >
                     Tracking: {{ card.tracking_number }}
                   </div>
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-secondary-900">
+                  <div class="table-cell text-secondary-900">
                     <span class="font-medium">${{ card.purchase_amount }}</span>
                   </div>
-                  <div class="text-sm capitalize text-secondary-500">
+                  <div class="table-cell capitalize text-secondary-500">
                     {{ String(card.subscription_plan || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'N/A' }}
                   </div>
-                  <div class="text-xs text-secondary-400">
+                  <div class="text-caption text-secondary-400">
                     {{ formatDate(card.purchase_date) }}
                   </div>
                 </td>
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap table-cell font-medium">
                   <div class="flex items-center space-x-1.5 flex-wrap gap-y-1" :title="getCardStatusLabel(card.status)">
                     <!-- Status Badge -->
                     <span
                       :class="[
-                        'px-2 py-1 text-[11px] font-medium rounded-full mr-1',
+                        'px-2 py-1 text-badge rounded-full mr-1',
                         getStatusBadgeClass(card.status),
                       ]"
                     >
@@ -236,7 +236,7 @@
                       <button
                         @click="verifyNfcCardPayment(card)"
                         :disabled="actionLoading[card.id]?.verify"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
                         title="Verify payment proof"
                       >
                         <span v-if="actionLoading[card.id]?.verify" class="spinner spinner-sm mr-1"></span>
@@ -246,7 +246,7 @@
                       <button
                         @click="rejectNfcCardPayment(card)"
                         :disabled="actionLoading[card.id]?.reject"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
                         title="Reject payment proof"
                       >
                         <Icon v-if="!actionLoading[card.id]?.reject" name="heroicons:x-circle" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -257,7 +257,7 @@
                         v-if="card.transaction?.payment_proof_url"
                         :href="card.transaction.payment_proof_url"
                         target="_blank"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
+                        class="px-2 py-1 rounded text-micro bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
                         title="View payment proof"
                       >
                         <Icon name="heroicons:eye" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -270,7 +270,7 @@
                       <button
                         @click="markNfcCardProcessing(card)"
                         :disabled="actionLoading[card.id]?.processing"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50"
                         title="Mark order as processing"
                       >
                         <span v-if="actionLoading[card.id]?.processing" class="spinner spinner-sm mr-1"></span>
@@ -280,7 +280,7 @@
                       <button
                         @click="cancelNfcCard(card)"
                         :disabled="actionLoading[card.id]?.cancel"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
                         title="Cancel order"
                       >
                         <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -294,7 +294,7 @@
                       <button
                         @click="openMarkShippedModal(card)"
                         :disabled="actionLoading[card.id]?.shipped"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
                         title="Mark card as shipped"
                       >
                         <span v-if="actionLoading[card.id]?.shipped" class="spinner spinner-sm mr-1"></span>
@@ -304,7 +304,7 @@
                       <button
                         @click="cancelNfcCard(card)"
                         :disabled="actionLoading[card.id]?.cancel"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
                         title="Cancel order"
                       >
                         <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -315,7 +315,7 @@
 
                     <!-- shipped: END USER yang akan confirm received — Admin TIADA butang Mark Delivered, cuma show shipped badge + tracking info -->
                     <template v-else-if="card.status === 'shipped'">
-                      <div class="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-gray-100 text-gray-700 italic" title="Admin cannot mark delivered — End user must press 'I've Received The Card' in Card Management">
+                      <div class="flex items-center gap-1 px-2 py-1 rounded text-micro bg-gray-100 text-gray-700 italic" title="Admin cannot mark delivered — End user must press 'I've Received The Card' in Card Management">
                         <Icon name="heroicons:clock" class="h-3.5 w-3.5 inline mr-0.5" />
                         Waiting for user receipt
                       </div>
@@ -327,7 +327,7 @@
                         @click="toggleCardStatus(card)"
                         :disabled="actionLoading[card.id]?.toggle"
                         :class="[
-                          'px-2 py-1 rounded text-[11px] font-medium disabled:opacity-50',
+                          'px-2 py-1 rounded text-micro disabled:opacity-50',
                           ['active','delivered'].includes(card.status)
                             ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
                             : 'bg-success-100 text-success-700 hover:bg-success-200',
@@ -349,7 +349,7 @@
                       <a
                         :href="card.transaction.payment_proof_url"
                         target="_blank"
-                        class="px-2 py-1 rounded text-[11px] font-medium bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
+                        class="px-2 py-1 rounded text-micro bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
                         title="View existing payment proof"
                       >
                         <Icon name="heroicons:eye" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -391,7 +391,7 @@
             name="heroicons:credit-card"
             class="h-12 w-12 mx-auto text-secondary-300 mb-4"
           />
-          <p class="text-secondary-500">No NFC cards found</p>
+          <p class="text-body text-secondary-500">No NFC cards found</p>
         </div>
       </div>
     </div>
@@ -417,13 +417,13 @@
         class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             Register New NFC Card
           </h3>
         </div>
         <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >User *</label
             >
             <select v-model="form.user_id" required class="input">
@@ -439,7 +439,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >NFC Card ID *</label
             >
             <input
@@ -455,18 +455,18 @@
               ]"
             />
             <div class="flex justify-between mt-1">
-              <p v-if="formErrors.nfc_card_id" class="text-xs text-red-500">
+              <p v-if="formErrors.nfc_card_id" class="text-error">
                 {{ formErrors.nfc_card_id }}
               </p>
-              <p v-else class="text-xs text-secondary-500">
+              <p v-else class="text-helper">
                 Enter the unique identifier printed on the physical NFC card
               </p>
-              <span class="text-xs text-secondary-400">{{ form.nfc_card_id.length }}/16</span>
+              <span class="text-helper">{{ form.nfc_card_id.length }}/16</span>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Card Owner *</label
             >
             <input
@@ -482,15 +482,15 @@
               ]"
             />
             <div class="flex justify-between mt-1">
-              <p v-if="formErrors.card_owner" class="text-xs text-red-500">
+              <p v-if="formErrors.card_owner" class="text-error">
                 {{ formErrors.card_owner }}
               </p>
-              <span class="text-xs text-secondary-400 ml-auto">{{ form.card_owner.length }}/100</span>
+              <span class="text-helper ml-auto">{{ form.card_owner.length }}/100</span>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Billing Address *</label
             >
             <textarea
@@ -504,7 +504,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Contact Number *</label
               >
               <PhoneInput
@@ -513,12 +513,12 @@
                 :has-error="!!formErrors.contact_number"
                 placeholder="Phone number"
               />
-              <p v-if="formErrors.contact_number" class="text-xs text-red-500 mt-1">
+              <p v-if="formErrors.contact_number" class="text-error mt-1">
                 {{ formErrors.contact_number }}
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Subscription Plan *</label
               >
               <select v-model="form.subscription_plan" required class="input">
@@ -531,7 +531,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Purchase Amount *</label
               >
               <input
@@ -548,12 +548,12 @@
                   formErrors.purchase_amount ? 'border-red-500 focus:ring-red-500' : ''
                 ]"
               />
-              <p v-if="formErrors.purchase_amount" class="text-xs text-red-500 mt-1">
+              <p v-if="formErrors.purchase_amount" class="text-error mt-1">
                 {{ formErrors.purchase_amount }}
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Payment Method</label
               >
               <select v-model="form.payment_method" class="input">
@@ -567,7 +567,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Shipping Address</label
             >
             <textarea
@@ -579,7 +579,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Notes</label
             >
             <textarea
@@ -616,11 +616,11 @@
         class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="text-lg font-medium text-secondary-900">Edit NFC Card</h3>
+          <h3 class="modal-title text-secondary-900">Edit NFC Card</h3>
         </div>
         <form @submit.prevent="handleEditSubmit" class="p-6 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Card Owner</label
             >
             <input
@@ -632,7 +632,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Billing Address</label
             >
             <textarea
@@ -645,7 +645,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Contact Number</label
               >
               <PhoneInput
@@ -654,7 +654,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Status</label
               >
               <select v-model="editForm.status" class="input">
@@ -675,7 +675,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Courier</label
               >
               <input
@@ -686,7 +686,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Tracking No.</label
               >
               <input
@@ -700,7 +700,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Shipped Date</label
               >
               <input
@@ -710,7 +710,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Delivered Date</label
               >
               <input
@@ -722,7 +722,7 @@
           </div>
 
           <div v-if="editForm.status === 'cancelled'">
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Cancellation Reason</label
             >
             <textarea
@@ -734,7 +734,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Admin Notes</label
             >
             <textarea
@@ -753,16 +753,16 @@
             <div class="flex items-start justify-between gap-3 mb-2">
               <div>
                 <h4
-                  class="text-sm font-semibold text-primary-900 uppercase tracking-wide"
+                  class="text-label text-primary-900 uppercase tracking-wide"
                 >
                   Public Profile URL
                 </h4>
-                <p class="text-xs text-primary-700 mt-1">
+                <p class="text-caption text-primary-700 mt-1">
                   Copy this URL and encode it into the NFC tag chip
                 </p>
               </div>
               <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-600 text-white"
+                class="inline-flex items-center px-2 py-0.5 rounded text-badge bg-primary-600 text-white"
               >
                 FOR NFC ENCODING
               </span>
@@ -771,7 +771,7 @@
               <input
                 :value="getCardPublicProfileUrl(selectedCard, true)"
                 readonly
-                class="input bg-white font-mono text-xs flex-1"
+                class="input bg-white font-mono text-caption flex-1"
               />
               <button
                 type="button"
@@ -822,7 +822,7 @@
         class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
       >
         <div class="px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             Mark Card As Shipped
           </h3>
           <button
@@ -835,15 +835,15 @@
         </div>
         <form @submit.prevent="submitMarkShipped" class="p-6 space-y-4">
           <div v-if="shippedForm.card" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p class="text-sm text-blue-800">
+            <p class="text-body text-blue-800">
               <span class="font-semibold">{{ shippedForm.card.card_owner }}</span>
-              <span class="text-blue-600 text-xs block mt-0.5">
+              <span class="text-blue-600 text-caption block mt-0.5">
                 Card ID: {{ shippedForm.card.card_id || shippedForm.card.nfc_card_id || shippedForm.card.id }}
               </span>
             </p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-1">
+            <label class="block text-label text-secondary-700 mb-1">
               Courier <span class="text-error-500">*</span>
             </label>
             <select v-model="shippedForm.courier" required class="input">
@@ -861,7 +861,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-1">
+            <label class="block text-label text-secondary-700 mb-1">
               Tracking No. <span class="text-error-500">*</span>
             </label>
             <input
@@ -873,7 +873,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-1">
+            <label class="block text-label text-secondary-700 mb-1">
               Date Shipped
             </label>
             <input
@@ -916,7 +916,7 @@
         class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             NFC Card Details
           </h3>
         </div>
@@ -928,27 +928,27 @@
               </h4>
               <dl class="space-y-3">
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     NFC Card ID
                   </dt>
-                  <dd class="text-sm text-secondary-900 font-mono">
+                  <dd class="text-body text-secondary-900 font-mono">
                     {{ selectedCard.nfc_card_id }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Card Owner
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ selectedCard.card_owner }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">Status</dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dt class="text-body font-medium text-secondary-500">Status</dt>
+                  <dd class="text-body text-secondary-900">
                     <span
                       :class="[
-                        'px-2 py-1 text-xs font-medium rounded-full',
+                        'px-2 py-1 text-badge rounded-full',
                         getStatusBadgeClass(selectedCard.status),
                       ]"
                     >
@@ -957,10 +957,10 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Subscription Plan
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ String(selectedCard.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </dd>
                 </div>
@@ -972,34 +972,34 @@
               </h4>
               <dl class="space-y-3">
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Purchase Amount
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     ${{ selectedCard.purchase_amount }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Purchase Date
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ formatDate(selectedCard.purchase_date) }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Payment Method
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ selectedCard.payment_method || "N/A" }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Created
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ formatDate(selectedCard.created_at) }}
                   </dd>
                 </div>
@@ -1016,16 +1016,16 @@
           <div class="flex items-start justify-between gap-3 mb-2">
             <div>
               <h4
-                class="text-sm font-semibold text-primary-900 uppercase tracking-wide"
+                class="text-label text-primary-900 uppercase tracking-wide"
               >
                 Public Profile URL
                 <span
-                  class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-600 text-white align-middle"
+                  class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-badge bg-primary-600 text-white align-middle"
                 >
                   FOR NFC ENCODING
                 </span>
               </h4>
-              <p class="text-xs text-secondary-600 mt-1">
+              <p class="text-caption text-secondary-600 mt-1">
                 Copy this URL and encode/write it into the physical NFC tag chip
               </p>
             </div>
@@ -1034,7 +1034,7 @@
             <input
               :value="getCardPublicProfileUrl(selectedCard, true)"
               readonly
-              class="input bg-white font-mono text-xs flex-1"
+              class="input bg-white font-mono text-caption flex-1"
             />
             <button
               type="button"

@@ -33,6 +33,8 @@ export default defineNuxtConfig({
     families: {
       Inter: [300, 400, 500, 600, 700],
       Poppins: [300, 400, 500, 600, 700],
+      // Outfit powers the official NFCGo logo wordmark.
+      Outfit: [400, 500, 600, 700],
     },
   },
 
@@ -72,7 +74,15 @@ export default defineNuxtConfig({
             "Create smart digital business cards with NFC technology. Tap to share your professional profile instantly.",
         },
       ],
-      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+      link: [
+        // Official NFCGo mark (vector) — preferred by modern browsers.
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: "/nfcgo-app-icon.svg",
+        },
+        { rel: "alternate icon", type: "image/x-icon", href: "/favicon.ico" },
+      ],
     },
     pageTransition: { name: "page", mode: "out-in" },
     layoutTransition: { name: "layout", mode: "out-in" },
@@ -85,6 +95,12 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    // NOTE: do NOT set `vue.customElement: true` here. The default
+    // (only `*.ce.vue` files) is required; forcing it globally makes
+    // @vitejs/plugin-vue compile every SFC in custom-element mode, which
+    // attaches the component CSS as an inline `styles: [...]` option that
+    // is never injected into the document — i.e. all `<style>` / `<style scoped>`
+    // blocks silently stop applying at runtime.
     vue: {
       customElement: false,
     },

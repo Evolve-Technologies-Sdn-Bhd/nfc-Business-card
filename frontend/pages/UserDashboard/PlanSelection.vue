@@ -11,13 +11,13 @@
                 name="heroicons:identification"
                 class="h-8 w-8 text-primary-600"
               />
-              <span class="ml-2 text-xl font-bold text-secondary-900"
+              <span class="ml-2 text-h4 font-bold text-secondary-900"
                 >NFCGo</span
               >
             </NuxtLink>
           </div>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-secondary-600">Step 1 of 3</span>
+            <span class="text-body text-secondary-600">Step 1 of 3</span>
             <div class="flex space-x-1">
               <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
               <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
@@ -31,10 +31,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-secondary-900 mb-4">
+        <h1 class="page-title text-secondary-900 mb-4">
           Choose Your Plan
         </h1>
-        <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+        <p class="card-subtitle max-w-2xl mx-auto">
           Select the perfect plan for your business needs. Start with our free
           plan or unlock premium features with our paid plans.
         </p>
@@ -53,7 +53,7 @@
         >
           <!-- Current Plan Badge -->
           <div v-if="isCurrentPlan('free')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
               <Icon name="heroicons:check-circle" class="h-3 w-3" />
               Current Plan
             </span>
@@ -64,45 +64,45 @@
             >
               <Icon name="heroicons:gift" class="h-8 w-8 text-secondary-600" />
             </div>
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Free</h3>
+            <h3 class="card-title text-secondary-900 mb-2">Free</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">$0</span>
+              <span class="stat-value text-secondary-900">$0</span>
               <span class="text-secondary-600">/month</span>
             </div>
-            <p class="text-sm text-secondary-600 mb-6">
+            <p class="text-body text-secondary-600 mb-6">
               Perfect for getting started
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li class="flex items-center text-sm">
+              <li class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
                 <span>Digital business card</span>
               </li>
-              <li class="flex items-center text-sm">
+              <li class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
                 <span>Basic analytics</span>
               </li>
-              <li class="flex items-center text-sm">
+              <li class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
                 <span>Up to 5 social links</span>
               </li>
-              <li class="flex items-center text-sm">
+              <li class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
                 />
                 <span>Basic customization</span>
               </li>
-              <li class="flex items-center text-sm">
+              <li class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
@@ -115,7 +115,7 @@
               @click="selectPlan('free')"
               :disabled="isCurrentPlan('free')"
               :class="[
-                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
                 isCurrentPlan('free')
                   ? 'bg-green-100 text-green-700 cursor-not-allowed'
                   : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
@@ -137,7 +137,7 @@
         >
           <!-- Current Plan Badge -->
           <div v-if="isCurrentPlan('basic')" class="absolute -top-3 right-4 z-10">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
               <Icon name="heroicons:check-circle" class="h-3 w-3" />
               Current Plan
             </span>
@@ -148,7 +148,7 @@
             isCurrentPlan('basic') ? 'left-4' : 'left-1/2 transform -translate-x-1/2'
           ]">
             <span
-              class="bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+              class="bg-primary-600 text-white px-3 py-1 rounded-full text-badge"
               >Most Popular</span
             >
           </div>
@@ -158,18 +158,18 @@
             >
               <Icon name="heroicons:star" class="h-8 w-8 text-primary-600" />
             </div>
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Basic</h3>
+            <h3 class="card-title text-secondary-900 mb-2">Basic</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">
+              <span class="stat-value text-secondary-900">
                 {{ loading ? '...' : getFormattedPrice('basic') }}
               </span>
             </div>
-            <p class="text-sm text-secondary-600 mb-6">
+            <p class="text-body text-secondary-600 mb-6">
               Great for small businesses
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-center text-sm">
+              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
@@ -182,7 +182,7 @@
               @click="selectPlan('basic')"
               :disabled="isCurrentPlan('basic')"
               :class="[
-                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
                 isCurrentPlan('basic')
                   ? 'bg-green-100 text-green-700 cursor-not-allowed'
                   : 'bg-primary-600 text-white hover:bg-primary-700'
@@ -204,7 +204,7 @@
         >
           <!-- Current Plan Badge -->
           <div v-if="isCurrentPlan('premium')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
               <Icon name="heroicons:check-circle" class="h-3 w-3" />
               Current Plan
             </span>
@@ -215,18 +215,18 @@
             >
               <Icon name="heroicons:sparkles" class="h-8 w-8 text-purple-600" />
             </div>
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Premium</h3>
+            <h3 class="card-title text-secondary-900 mb-2">Premium</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">
+              <span class="stat-value text-secondary-900">
                 {{ loading ? '...' : getFormattedPrice('premium') }}
               </span>
             </div>
-            <p class="text-sm text-secondary-600 mb-6">
+            <p class="text-body text-secondary-600 mb-6">
               For growing businesses
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-center text-sm">
+              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
@@ -239,7 +239,7 @@
               @click="selectPlan('premium')"
               :disabled="isCurrentPlan('premium')"
               :class="[
-                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
                 isCurrentPlan('premium')
                   ? 'bg-green-100 text-green-700 cursor-not-allowed'
                   : 'bg-purple-600 text-white hover:bg-purple-700'
@@ -261,7 +261,7 @@
         >
           <!-- Current Plan Badge -->
           <div v-if="isCurrentPlan('business')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
               <Icon name="heroicons:check-circle" class="h-3 w-3" />
               Current Plan
             </span>
@@ -275,18 +275,18 @@
                 class="h-8 w-8 text-indigo-600"
               />
             </div>
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Business</h3>
+            <h3 class="card-title text-secondary-900 mb-2">Business</h3>
             <div class="mb-6">
-              <span class="text-3xl font-bold text-secondary-900">
+              <span class="stat-value text-secondary-900">
                 {{ loading ? '...' : getFormattedPrice('business') }}
               </span>
             </div>
-            <p class="text-sm text-secondary-600 mb-6">
+            <p class="text-body text-secondary-600 mb-6">
               For large organizations
             </p>
 
             <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-center text-sm">
+              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-center text-body">
                 <Icon
                   name="heroicons:check"
                   class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
@@ -299,7 +299,7 @@
               @click="selectPlan('business')"
               :disabled="isCurrentPlan('business')"
               :class="[
-                'w-full py-3 px-4 rounded-xl font-medium transition-colors mt-auto',
+                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
                 isCurrentPlan('business')
                   ? 'bg-green-100 text-green-700 cursor-not-allowed'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -313,11 +313,11 @@
 
       <!-- Additional Info -->
       <div class="text-center">
-        <p class="text-sm text-secondary-600 mb-4">
+        <p class="text-body text-secondary-600 mb-4">
           All paid plans include a 14-day free trial. No credit card required to
           start.
         </p>
-        <p class="text-xs text-secondary-500">
+        <p class="text-helper">
           Need help choosing?
           <a href="#" class="text-primary-600 hover:text-primary-500"
             >Contact our sales team</a
@@ -349,10 +349,10 @@
               />
             </div>
             <div>
-              <h3 class="text-2xl font-bold text-white">
+              <h3 class="modal-title text-white">
                 Business Plan Request
               </h3>
-              <p class="text-indigo-100 text-sm mt-1">
+              <p class="text-body text-indigo-100 mt-1">
                 Tell us about your organization
               </p>
             </div>
@@ -370,7 +370,7 @@
       <form @submit.prevent="submitBusinessRequest" class="p-6 space-y-6">
           <!-- Company Name -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Company Name <span class="text-red-500">*</span>
             </label>
             <input
@@ -384,7 +384,7 @@
 
           <!-- Company Address -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Company Address <span class="text-red-500">*</span>
             </label>
             <textarea
@@ -398,7 +398,7 @@
 
           <!-- Number of Cards (Quota) -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Number of NFC Cards Needed <span class="text-red-500">*</span>
             </label>
             <input
@@ -409,14 +409,14 @@
               placeholder="e.g., 50"
               class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
-            <p class="text-xs text-secondary-500 mt-2">
+            <p class="text-helper mt-2">
               How many NFC cards do you need for your team?
             </p>
           </div>
 
           <!-- Contact Person -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Contact Person <span class="text-red-500">*</span>
             </label>
             <input
@@ -430,7 +430,7 @@
 
           <!-- Phone Number -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Phone Number <span class="text-red-500">*</span>
             </label>
             <input
@@ -444,7 +444,7 @@
 
           <!-- Email -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Email Address <span class="text-red-500">*</span>
             </label>
             <input
@@ -458,7 +458,7 @@
 
           <!-- Additional Notes -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-900 mb-2">
+            <label class="block text-label text-secondary-900 mb-2">
               Additional Notes (Optional)
             </label>
             <textarea
@@ -474,14 +474,14 @@
             <button
               type="button"
               @click="closeBusinessModal"
-              class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl font-medium hover:bg-secondary-200 transition-colors"
+              class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl text-button hover:bg-secondary-200 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="submittingBusinessRequest"
-              class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-button hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <div v-if="submittingBusinessRequest" class="flex items-center">
                 <div
@@ -493,7 +493,7 @@
             </button>
           </div>
 
-          <p class="text-xs text-secondary-500 text-center">
+          <p class="text-helper text-center">
             Our team will contact you within 24 hours to discuss your Business
             Plan setup.
           </p>
@@ -620,64 +620,35 @@ const submitBusinessRequest = async () => {
   submittingBusinessRequest.value = true;
 
   try {
-    // Prepare email content
-    const subject = `Business Plan Request - ${businessForm.company_name}`;
-    const body = `
-Business Plan Request Details:
+    const { $api } = useNuxtApp();
 
-════════════════════════════════
-COMPANY INFORMATION
-════════════════════════════════
-Company Name: ${businessForm.company_name}
-Company Address: ${businessForm.company_address}
-Number of NFC Cards Needed: ${businessForm.quota} cards
+    const response = await $api.post("/business-inquiries", {
+      company_name: businessForm.company_name,
+      company_address: businessForm.company_address,
+      quota: businessForm.quota,
+      contact_person: businessForm.contact_person,
+      phone: businessForm.phone,
+      email: businessForm.email,
+      notes: businessForm.notes,
+      source: "plan_selection",
+    });
 
-════════════════════════════════
-CONTACT INFORMATION
-════════════════════════════════
-Contact Person: ${businessForm.contact_person}
-Email: ${businessForm.email}
-Phone: ${businessForm.phone}
+    if (!response?.success) {
+      throw new Error(response?.message || "Failed to submit enquiry");
+    }
 
-════════════════════════════════
-USER ACCOUNT DETAILS
-════════════════════════════════
-User: ${authStore.user?.first_name || ""} ${authStore.user?.last_name || ""}
-User Email: ${authStore.user?.email || ""}
-Submitted: ${new Date().toLocaleString()}
-${
-  businessForm.notes
-    ? `\n════════════════════════════════\nADDITIONAL NOTES\n════════════════════════════════\n${businessForm.notes}`
-    : ""
-}
-
-════════════════════════════════
-Please contact this customer within 24 hours.
-This is an automated request from NFCGo platform.
-`;
-
-    // Create Gmail compose URL
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-      "genn.chong@clbgroups.com"
-    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    // Open Gmail in new tab
-    window.open(gmailUrl, "_blank");
-
-    // Show success message
     $toast.success(
-      "Opening Gmail... Please send the email to complete your Business Plan request."
+      "Your Business Plan enquiry has been received. Our team will contact you soon."
     );
 
-    // Close modal and redirect to Homepage with success parameter after a short delay
-    setTimeout(() => {
-      closeBusinessModal();
-      navigateTo("/Homepage?businessRequest=success");
-    }, 2000);
+    // Close modal and redirect to Homepage with success parameter
+    closeBusinessModal();
+    await navigateTo("/Homepage?businessRequest=success");
   } catch (error) {
     console.error("Business plan request error:", error);
     $toast.error(
-      "Failed to open email client. Please contact genn.chong@clbgroups.com directly."
+      error?.response?.data?.message ||
+        "Failed to submit your enquiry. Please try again or contact support."
     );
   } finally {
     submittingBusinessRequest.value = false;

@@ -22,8 +22,8 @@
               <Icon name="heroicons:bell" class="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <h3 class="text-sm font-bold text-secondary-900 leading-tight">Notifications</h3>
-              <p class="text-[11px] text-secondary-500 leading-tight mt-0.5">
+              <h3 class="card-title text-secondary-900 leading-tight">Notifications</h3>
+              <p class="text-micro text-secondary-500 leading-tight mt-0.5">
                 {{ unreadCount > 0 ? `${unreadCount} unread · ${topNotifications.length} latest` : "All caught up" }}
               </p>
             </div>
@@ -32,7 +32,7 @@
             <button
               v-if="unreadCount > 0 && topNotifications.length > 0"
               @click="$emit('mark-all-read')"
-              class="px-2.5 py-1.5 text-[11px] font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors flex-shrink-0"
+              class="px-2.5 py-1.5 text-micro font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors flex-shrink-0"
             >
               Read all
             </button>
@@ -53,7 +53,7 @@
             <div
               class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-secondary-200 border-t-primary-600"
             ></div>
-            <p class="text-secondary-500 mt-3 text-[11px] font-medium">Loading...</p>
+            <p class="text-secondary-500 mt-3 text-micro font-medium">Loading...</p>
           </div>
 
           <!-- List -->
@@ -73,14 +73,14 @@
                   class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                   :class="getIconBgClass(notification.type)"
                 >
-                  <span class="text-sm leading-none">
+                  <span class="text-body leading-none">
                     {{ getIcon(notification.type) }}
                   </span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-2 mb-0.5">
                     <h4
-                      class="text-[13px] leading-snug min-w-0"
+                      class="text-body-sm leading-snug min-w-0"
                       :class="[
                         !notification.is_read
                           ? 'font-bold text-secondary-900'
@@ -94,11 +94,11 @@
                       ></span>
                     </h4>
                   </div>
-                  <p class="text-xs text-secondary-500 leading-relaxed line-clamp-2 mb-1.5">
+                  <p class="text-caption text-secondary-500 leading-relaxed line-clamp-2 mb-1.5">
                     {{ notification.message }}
                   </p>
                   <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-semibold text-secondary-400">
+                    <span class="text-micro font-semibold text-secondary-400">
                       {{ getTimeAgo(notification.created_at) }}
                     </span>
                     <div class="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -132,8 +132,8 @@
                 class="w-8 h-8 text-secondary-400"
               />
             </div>
-            <h4 class="text-sm font-bold text-secondary-900 mb-1">No notifications</h4>
-            <p class="text-[11px] text-secondary-500 leading-relaxed">
+            <h4 class="card-title text-secondary-900 mb-1">No notifications</h4>
+            <p class="text-body text-secondary-500 leading-relaxed">
               We'll alert you here when something needs your attention.
             </p>
           </div>
@@ -147,7 +147,7 @@
           <button
             v-if="hasRead"
             @click="$emit('clear-read')"
-            class="px-2.5 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1"
+            class="px-2.5 py-1.5 text-micro font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1"
           >
             <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
             Clear read
@@ -156,7 +156,7 @@
           <NuxtLink
             :to="viewAllHref"
             @click="$emit('close')"
-            class="px-3 py-1.5 text-[11px] font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors inline-flex items-center gap-1"
+            class="px-3 py-1.5 text-micro font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors inline-flex items-center gap-1"
           >
             View all
             <Icon name="heroicons:arrow-right" class="w-3 h-3" />

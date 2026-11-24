@@ -6,7 +6,7 @@
     :required="required"
     :min="min"
     :max="max"
-    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
   />
 </template>
 

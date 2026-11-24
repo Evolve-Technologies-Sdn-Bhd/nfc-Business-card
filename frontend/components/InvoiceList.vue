@@ -5,7 +5,7 @@
       <div
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <h3 class="text-lg font-semibold text-secondary-900">Invoices</h3>
+        <h3 class="card-title text-secondary-900">Invoices</h3>
 
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
@@ -34,7 +34,7 @@
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center py-12">
       <div class="spinner"></div>
-      <p class="ml-3 text-sm text-secondary-500">Loading invoices...</p>
+      <p class="ml-3 text-body text-secondary-500">Loading invoices...</p>
     </div>
 
     <!-- Empty state -->
@@ -43,8 +43,8 @@
         name="heroicons:document-text"
         class="mx-auto h-12 w-12 text-secondary-400"
       />
-      <h3 class="mt-2 text-sm font-medium text-secondary-900">No invoices</h3>
-      <p class="mt-1 text-sm text-secondary-500">
+      <h3 class="mt-2 card-title text-secondary-900">No invoices</h3>
+      <p class="mt-1 text-body text-secondary-500">
         {{
           filters.search || filters.status
             ? "No invoices match your filters."
@@ -60,31 +60,31 @@
           <tr>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left table-head"
             >
               Invoice #
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left table-head"
             >
               Date
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left table-head"
             >
               Amount
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+              class="px-6 py-3 text-left table-head"
             >
               Status
             </th>
             <th
               scope="col"
-              class="px-6 py-3 text-right text-xs font-medium text-secondary-500 uppercase tracking-wider"
+              class="px-6 py-3 text-right table-head"
             >
               Actions
             </th>
@@ -97,32 +97,32 @@
             class="hover:bg-secondary-50"
           >
             <td
-              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-secondary-900"
+              class="px-6 py-4 whitespace-nowrap table-cell font-medium text-secondary-900"
             >
               {{ invoice.invoice_number }}
               <span
                 v-if="invoice.version > 1"
-                class="ml-2 text-xs text-secondary-500"
+                class="ml-2 text-caption text-secondary-500"
               >
                 (v{{ invoice.version }})
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500">
+            <td class="px-6 py-4 whitespace-nowrap table-cell text-secondary-500">
               {{ formatDate(invoice.created_at) }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-900">
+            <td class="px-6 py-4 whitespace-nowrap table-cell text-secondary-900">
               {{ formatCurrency(invoice.total_amount, invoice.currency) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span
                 :class="getStatusBadgeClass(invoice.status)"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge"
               >
                 {{ getStatusLabel(invoice.status) }}
               </span>
             </td>
             <td
-              class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+              class="px-6 py-4 whitespace-nowrap text-right table-cell font-medium"
             >
               <button
                 @click="$emit('preview', invoice)"

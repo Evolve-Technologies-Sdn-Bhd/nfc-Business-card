@@ -8,10 +8,10 @@
       <!-- Modal Header -->
       <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
         <div class="flex-1 min-w-0">
-          <h2 class="text-xl font-bold text-gray-900 truncate">
+          <h2 class="modal-title text-gray-900 truncate">
             {{ type === 'privacy' ? 'Privacy Policy' : 'Terms of Service' }}
           </h2>
-          <div v-if="docInfo && !loading" class="flex items-center gap-3 mt-1 text-sm text-gray-600">
+          <div v-if="docInfo && !loading" class="flex items-center gap-3 mt-1 text-body text-gray-600">
             <span class="truncate max-w-[200px]" :title="docInfo.filename">
               <Icon name="heroicons:document" class="h-4 w-4 inline mr-1" />
               {{ docInfo.filename }}
@@ -45,7 +45,7 @@
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Icon name="heroicons:exclamation-triangle" class="h-8 w-8 text-red-600" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Not Available</h3>
+            <h3 class="card-title text-gray-900 mb-2">Document Not Available</h3>
             <p class="text-gray-600 mb-4">{{ error }}</p>
             <button
               @click="$emit('update:show', false)"

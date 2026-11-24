@@ -16,7 +16,7 @@
           <div
             class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"
           ></div>
-          <p class="mt-4 text-sm text-gray-600">Loading your profile...</p>
+          <p class="mt-4 text-helper text-gray-600">Loading your profile...</p>
         </div>
       </div>
     </Transition>
@@ -26,7 +26,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-14 sm:h-16">
           <div>
-            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">
+            <h1 class="page-title text-gray-900">
               Profile Builder
             </h1>
           </div>
@@ -36,7 +36,7 @@
               <button
                 @click="toggleCardSelector"
                 :disabled="loadingCards || userNfcCards.length === 0"
-                class="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+                class="px-3 sm:px-4 py-1.5 sm:py-2 text-button border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
               >
                 <Icon name="heroicons:credit-card" class="w-4 h-4" />
                 <span v-if="loadingCards">Loading...</span>
@@ -85,12 +85,12 @@
                                 : 'text-gray-400',
                             ]"
                           />
-                          <p class="text-sm font-bold text-gray-900 truncate">
+                          <p class="text-body font-bold text-gray-900 truncate">
                             {{ card.nfc_card_id || "Card #" + card.id }}
                           </p>
                         </div>
 
-                        <p class="text-xs text-gray-600 mb-2 truncate">
+                        <p class="text-caption text-gray-600 mb-2 truncate">
                           {{ card.card_owner || "No owner" }}
                         </p>
 
@@ -98,7 +98,7 @@
                         <div class="flex items-center gap-2 flex-wrap">
                           <span
                             :class="[
-                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-badge',
                               card.status === 'active'
                                 ? 'bg-green-100 text-green-800'
                                 : card.status === 'pending'
@@ -110,7 +110,7 @@
                           </span>
                           <span
                             :class="[
-                              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase',
+                              'inline-flex items-center px-2 py-0.5 rounded-full text-badge uppercase',
                               getPlanBadgeClass(card.subscription_plan),
                             ]"
                           >
@@ -135,7 +135,7 @@
             <button
               @click="saveProfile"
               :disabled="saving || !selectedNfcCardId"
-              class="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-4 sm:px-6 py-1.5 sm:py-2 text-button bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {{ saving ? "Saving..." : "Save" }}
             </button>
@@ -149,7 +149,7 @@
       <div class="lg:hidden mb-4">
         <button
           @click="showMobilePreview = !showMobilePreview"
-          class="w-full py-2 px-4 bg-white rounded-lg shadow-sm border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="w-full py-2 px-4 bg-white rounded-lg shadow-sm border border-gray-200 text-button text-gray-700 hover:bg-gray-50"
         >
           {{ showMobilePreview ? "Hide Preview" : "Show Preview" }}
         </button>
@@ -169,7 +169,7 @@
                 :key="tab.id"
                 @click="activeTab = tab.id"
                 :class="[
-                  'flex-1 py-1.5 sm:py-2 px-2 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all',
+                  'flex-1 py-1.5 sm:py-2 px-2 sm:px-4 rounded-md sm:rounded-lg text-button transition-all',
                   activeTab === tab.id
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-600 hover:text-gray-900',
@@ -200,16 +200,16 @@
                     class="h-5 w-5 text-yellow-400"
                   />
                   <div class="ml-3">
-                    <h3 class="text-sm font-medium text-yellow-800">
+                    <h3 class="text-label text-yellow-800">
                       No NFC Cards Found
                     </h3>
-                    <p class="text-sm text-yellow-700 mt-1">
+                    <p class="text-body text-yellow-700 mt-1">
                       You need to order an NFC card before creating a profile.
                       Go to Card Management to order your card.
                     </p>
                     <NuxtLink
                       to="/UserDashboard/CardManagement"
-                      class="inline-flex items-center mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900"
+                      class="inline-flex items-center mt-2 text-body font-medium text-yellow-800 hover:text-yellow-900"
                     >
                       Go to Card Management
                       <Icon name="heroicons:arrow-right" class="ml-1 h-4 w-4" />
@@ -220,7 +220,7 @@
 
               <!-- Profile Picture & Layout -->
               <div>
-                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                <h3 class="text-label text-gray-700 mb-3 sm:mb-4">
                   Profile Style
                 </h3>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
@@ -245,7 +245,7 @@
                         class="w-full h-16 sm:h-20 bg-gray-200 rounded-lg"
                       ></div>
                     </div>
-                    <p class="text-xs sm:text-sm text-center font-medium">
+                    <p class="text-caption text-center font-medium">
                       {{ style.name }}
                     </p>
                     <Icon
@@ -259,7 +259,7 @@
 
               <!-- Basic Info -->
               <div class="space-y-3 sm:space-y-4">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Basic Information
                 </h3>
 
@@ -287,44 +287,44 @@
                 />
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Name</label
                   >
                   <input
                     v-model="profileData.name"
                     type="text"
                     placeholder="Your name"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Position</label
                   >
                   <input
                     v-model="profileData.position"
                     type="text"
                     placeholder="Your job title"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Qualification
-                    <span class="text-xs text-gray-500">(Optional)</span></label
+                    <span class="text-helper text-gray-500">(Optional)</span></label
                   >
                   <input
                     v-model="profileData.qualification"
                     type="text"
                     placeholder="e.g., Bachelor of Business Administration"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Bio</label
                   >
                   <textarea
@@ -332,57 +332,57 @@
                     rows="4"
                     maxlength="500"
                     placeholder="Tell visitors about yourself..."
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   ></textarea>
-                  <p class="text-xs text-gray-500 mt-1 text-right">
+                  <p class="text-helper text-gray-500 mt-1 text-right">
                     {{ (profileData.bio || '').length }} / 500 characters
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Contact Number</label
                   >
                   <input
                     v-model="profileData.contactNumber"
                     type="tel"
                     placeholder="+60 12-345 6789"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Email Address</label
                   >
                   <input
                     v-model="profileData.email"
                     type="email"
                     placeholder="your@email.com"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Website
-                    <span class="text-xs text-gray-500">(Optional)</span></label
+                    <span class="text-helper text-gray-500">(Optional)</span></label
                   >
                   <input
                     v-model="profileData.website"
                     type="url"
                     placeholder="https://yourwebsite.com"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <!-- Stats Section -->
               <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Profile Statistics
                 </h3>
-                <p class="text-xs text-gray-500">
+                <p class="text-helper text-gray-500">
                   Add up to 3 statistics to showcase your achievements
                 </p>
                 <div
@@ -394,13 +394,13 @@
                     v-model="stat.num"
                     type="text"
                     :placeholder="'e.g., 10+'"
-                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
                     v-model="stat.label"
                     type="text"
                     :placeholder="'e.g., Years Experience'"
-                    class="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -409,7 +409,7 @@
             <!-- Company Tab -->
             <div v-if="activeTab === 'company'" class="space-y-4 sm:space-y-6">
               <div class="space-y-3 sm:space-y-4">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Company Information
                 </h3>
 
@@ -426,9 +426,9 @@
                 />
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Company Logo Text
-                    <span class="text-xs text-gray-500"
+                    <span class="text-helper text-gray-500"
                       >(Fallback if no logo)</span
                     ></label
                   >
@@ -437,164 +437,164 @@
                     type="text"
                     placeholder="e.g., CLB"
                     maxlength="5"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Company Name</label
                   >
                   <input
                     v-model="profileData.companyName"
                     type="text"
                     placeholder="Your company name"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Registration Number
-                    <span class="text-xs text-gray-500">(Optional)</span></label
+                    <span class="text-helper text-gray-500">(Optional)</span></label
                   >
                   <input
                     v-model="profileData.companyRegistrationNo"
                     type="text"
                     placeholder="e.g., 123456789-X"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Department
-                    <span class="text-xs text-gray-500">(Optional)</span></label
+                    <span class="text-helper text-gray-500">(Optional)</span></label
                   >
                   <input
                     v-model="profileData.companyDepartment"
                     type="text"
                     placeholder="e.g., Sales & Marketing Division"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <!-- Address Section -->
               <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Business Address
                 </h3>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Location Name</label
                   >
                   <input
                     v-model="profileData.addressName"
                     type="text"
                     placeholder="e.g., CLB Group Headquarters"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Street Address</label
                   >
                   <input
                     v-model="profileData.addressStreet"
                     type="text"
                     placeholder="e.g., 18, Jalan Mutiara Emas 5/5"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Area/District</label
                   >
                   <input
                     v-model="profileData.addressArea"
                     type="text"
                     placeholder="e.g., Taman Mount Austin"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >City & State</label
                   >
                   <input
                     v-model="profileData.addressCityState"
                     type="text"
                     placeholder="e.g., 81100 Johor Bahru, Johor"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Country</label
                   >
                   <input
                     v-model="profileData.addressCountry"
                     type="text"
                     placeholder="e.g., Malaysia"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                  <label class="block text-label text-gray-700 mb-1"
                     >Google Maps URL
-                    <span class="text-xs text-gray-500">(Optional)</span></label
+                    <span class="text-helper text-gray-500">(Optional)</span></label
                   >
                   <input
                     v-model="profileData.addressMapUrl"
                     type="url"
                     placeholder="https://maps.google.com/?q=..."
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <!-- Contact Methods Section -->
               <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Contact Methods
                 </h3>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                    <label class="block text-label text-gray-700 mb-1"
                       >Phone Number</label
                     >
                     <input
                       v-model="profileData.phoneNumber"
                       type="tel"
                       placeholder="+60 16-778 7616"
-                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                    <label class="block text-label text-gray-700 mb-1"
                       >Email Address</label
                     >
                     <input
                       v-model="profileData.emailAddress"
                       type="email"
                       placeholder="contact@company.com"
-                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                    <label class="block text-label text-gray-700 mb-1"
                       >WhatsApp Number
-                      <span class="text-xs text-gray-500"
+                      <span class="text-helper text-gray-500"
                         >(Optional)</span
                       ></label
                     >
@@ -602,14 +602,14 @@
                       v-model="profileData.whatsappNumber"
                       type="tel"
                       placeholder="+60167787616"
-                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                    <label class="block text-label text-gray-700 mb-1"
                       >Website URL
-                      <span class="text-xs text-gray-500"
+                      <span class="text-helper text-gray-500"
                         >(Optional)</span
                       ></label
                     >
@@ -617,7 +617,7 @@
                       v-model="profileData.websiteUrl"
                       type="url"
                       placeholder="https://www.yourcompany.com"
-                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -627,10 +627,10 @@
             <!-- Services Tab -->
             <div v-if="activeTab === 'services'" class="space-y-4 sm:space-y-6">
               <div class="space-y-3 sm:space-y-4">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Services & Expertise
                 </h3>
-                <p class="text-xs text-gray-500">
+                <p class="text-helper text-gray-500">
                   Add up to 6 services or areas of expertise
                 </p>
 
@@ -644,21 +644,21 @@
                     type="text"
                     placeholder="📱"
                     maxlength="2"
-                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                    class="col-span-1 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
                   />
                   <input
                     v-model="service.name"
                     type="text"
                     placeholder="Service name"
-                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="col-span-3 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <!-- Team Members Section -->
               <div class="space-y-3 sm:space-y-4 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700">Team Members</h3>
-                <p class="text-xs text-gray-500">
+                <h3 class="text-label text-gray-700">Team Members</h3>
+                <p class="text-helper text-gray-500">
                   Showcase up to 3 team members (optional)
                 </p>
 
@@ -672,19 +672,19 @@
                     type="text"
                     placeholder="JD"
                     maxlength="3"
-                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
+                    class="col-span-1 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center uppercase"
                   />
                   <input
                     v-model="member.name"
                     type="text"
                     placeholder="Full Name"
-                    class="col-span-3 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="col-span-3 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
                     v-model="member.role"
                     type="text"
                     placeholder="Role"
-                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="col-span-2 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -693,10 +693,10 @@
             <!-- Social Tab -->
             <div v-if="activeTab === 'social'" class="space-y-4 sm:space-y-6">
               <div class="space-y-3 sm:space-y-4">
-                <h3 class="text-sm font-medium text-gray-700">
+                <h3 class="text-label text-gray-700">
                   Social Media Links
                 </h3>
-                <p class="text-xs text-gray-500">
+                <p class="text-helper text-gray-500">
                   Add links to your social media profiles
                 </p>
 
@@ -710,19 +710,19 @@
                     type="text"
                     placeholder="📱"
                     maxlength="2"
-                    class="col-span-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                    class="col-span-1 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
                   />
                   <input
                     v-model="social.name"
                     type="text"
                     placeholder="Platform name"
-                    class="col-span-2 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="col-span-2 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
                     v-model="social.url"
                     type="url"
                     placeholder="https://..."
-                    class="col-span-5 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="col-span-5 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -732,10 +732,10 @@
             <div v-if="activeTab === 'links'" class="space-y-4 sm:space-y-6">
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <h3 class="text-sm font-medium text-gray-700">
+                  <h3 class="text-label text-gray-700">
                     Manage Links
                   </h3>
-                  <p class="text-xs text-gray-500 mt-1">
+                  <p class="text-helper text-gray-500 mt-1">
                     {{ links.length }} links
                   </p>
                 </div>
@@ -751,15 +751,15 @@
                     class="h-8 w-8 sm:h-10 sm:w-10 text-gray-400"
                   />
                 </div>
-                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2">
+                <h3 class="card-title text-gray-900 mb-2">
                   No Links Yet
                 </h3>
-                <p class="text-sm text-gray-600 mb-6">
+                <p class="card-subtitle mb-6">
                   Add your first link to get started
                 </p>
                 <button
                   @click="showAddLinkModal = true"
-                  class="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-button"
                 >
                   <Icon name="heroicons:plus" class="h-4 w-4 inline mr-2" />
                   Add Your First Link
@@ -818,17 +818,17 @@
                               v-model="link.title"
                               type="text"
                               placeholder="Link title"
-                              class="w-full px-3 py-1.5 text-sm font-medium bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded"
+                              class="w-full px-3 py-1.5 text-input font-medium bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded"
                               @blur="updateLink(link)"
                             />
                             <input
                               v-model="link.url"
                               type="url"
                               placeholder="URL"
-                              class="w-full px-3 py-1 mt-1 text-xs sm:text-sm text-gray-600 bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded"
+                              class="w-full px-3 py-1 mt-1 text-body text-gray-600 bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded"
                               @blur="updateLink(link)"
                             />
-                            <p class="text-xs text-gray-500 mt-1">
+                            <p class="text-helper text-gray-500 mt-1">
                               <Icon
                                 name="heroicons:cursor-arrow-ripple"
                                 class="h-3 w-3 inline mr-1"
@@ -886,13 +886,13 @@
             <div v-if="activeTab === 'design'" class="space-y-4 sm:space-y-6">
               <!-- Background Color -->
               <div>
-                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                <h3 class="text-label text-gray-700 mb-3 sm:mb-4">
                   Background
                 </h3>
                 <div class="space-y-3">
                   <div>
                     <label
-                      class="block text-xs sm:text-sm font-medium text-gray-600 mb-2"
+                      class="block text-label text-gray-600 mb-2"
                       >Background Color</label
                     >
                     <div class="flex items-center space-x-3">
@@ -908,7 +908,7 @@
                           type="text"
                           v-model="profileData.backgroundColor"
                           placeholder="#FFFFFF"
-                          class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                          class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                         />
                       </div>
                     </div>
@@ -918,7 +918,7 @@
 
               <!-- Theme Selection -->
               <div>
-                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                <h3 class="text-label text-gray-700 mb-3 sm:mb-4">
                   Theme Presets
                 </h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
@@ -939,7 +939,7 @@
                         theme.preview,
                       ]"
                     ></div>
-                    <p class="text-xs text-center font-medium">
+                    <p class="text-caption text-center font-medium">
                       {{ theme.name }}
                     </p>
                     <Icon
@@ -956,19 +956,19 @@
             <div v-if="activeTab === 'style'" class="space-y-4 sm:space-y-6">
               <!-- Font Selection -->
               <div>
-                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                <h3 class="text-label text-gray-700 mb-3 sm:mb-4">
                   Typography
                 </h3>
 
                 <!-- Font Dropdown -->
                 <div class="mb-4">
                   <label
-                    class="block text-xs sm:text-sm font-medium text-gray-600 mb-2"
+                    class="block text-label text-gray-600 mb-2"
                     >Font Family</label
                   >
                   <select
                     v-model="profileData.font"
-                    class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option
                       v-for="font in fonts"
@@ -980,7 +980,7 @@
                   </select>
                   <p
                     :style="{ fontFamily: getCurrentFont() }"
-                    class="mt-2 text-xs sm:text-sm text-gray-600"
+                    class="mt-2 text-body text-gray-600"
                   >
                     The quick brown fox jumps over the lazy dog
                   </p>
@@ -989,7 +989,7 @@
                 <!-- Text Color -->
                 <div>
                   <label
-                    class="block text-xs sm:text-sm font-medium text-gray-600 mb-2"
+                    class="block text-label text-gray-600 mb-2"
                     >Page Text Color</label
                   >
                   <div class="flex items-center space-x-3">
@@ -1005,7 +1005,7 @@
                         type="text"
                         v-model="profileData.textColor"
                         placeholder="#000000"
-                        class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                        class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                       />
                     </div>
                   </div>
@@ -1014,7 +1014,7 @@
 
               <!-- Button Style -->
               <div>
-                <h3 class="text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+                <h3 class="text-label text-gray-700 mb-3 sm:mb-4">
                   Button Style
                 </h3>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
@@ -1031,7 +1031,7 @@
                   >
                     <button
                       :class="[
-                        'w-full py-1.5 sm:py-2 px-3 sm:px-4 text-xs sm:text-sm',
+                        'w-full py-1.5 sm:py-2 px-3 sm:px-4 text-body',
                         style.class,
                       ]"
                       disabled
@@ -1090,13 +1090,13 @@
                         fontFamily: getCurrentFont(),
                         color: profileData.textColor,
                       }"
-                      class="text-lg sm:text-xl font-bold"
+                      class="card-title"
                     >
                       {{ profileData.name || "Your Name" }}
                     </h2>
                     <p
                       :style="{ color: profileData.textColor }"
-                      class="text-sm sm:text-base mt-1 sm:mt-2 opacity-80"
+                      class="text-body-lg mt-1 sm:mt-2 opacity-80"
                     >
                       {{ profileData.bio || "Your bio" }}
                     </p>
@@ -1109,7 +1109,7 @@
                       :key="link.id"
                       :href="link.url"
                       :class="[
-                        'block w-full text-center transition-all text-sm sm:text-base',
+                        'block w-full text-center transition-all text-button',
                         getButtonClass(),
                       ]"
                     >
@@ -1124,13 +1124,13 @@
                   >
                     <p
                       :style="{ color: profileData.textColor }"
-                      class="text-xs opacity-60"
+                      class="text-caption opacity-60"
                     >
                       Powered by
                     </p>
                     <p
                       :style="{ color: profileData.textColor }"
-                      class="text-sm font-semibold"
+                      class="text-body font-semibold"
                     >
                       NFC GO
                     </p>
@@ -1152,7 +1152,7 @@
         class="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
       >
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h3 class="text-lg sm:text-xl font-bold text-gray-900">
+          <h3 class="modal-title text-gray-900">
             Add New Link
           </h3>
           <button
@@ -1184,7 +1184,7 @@
 
         <!-- Platform Selection -->
         <div class="space-y-4">
-          <h4 class="text-sm font-medium text-gray-700">Popular Platforms</h4>
+          <h4 class="text-label text-gray-700">Popular Platforms</h4>
           <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
             <button
               v-for="platform in popularPlatforms"
@@ -1203,7 +1203,7 @@
                   class="h-6 w-6 sm:h-7 sm:w-7 text-white"
                 />
               </div>
-              <span class="text-xs sm:text-sm text-gray-700">{{
+              <span class="text-body text-gray-700">{{
                 platform.name
               }}</span>
             </button>
@@ -1215,7 +1215,7 @@
             class="w-full p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
           >
             <Icon name="heroicons:link" class="h-5 w-5 text-gray-600" />
-            <span class="text-sm text-gray-700">Add Custom URL</span>
+            <span class="text-body text-gray-700">Add Custom URL</span>
           </button>
         </div>
       </div>
@@ -1228,7 +1228,7 @@
     >
       <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h3 class="text-lg sm:text-xl font-bold text-gray-900">
+          <h3 class="modal-title text-gray-900">
             {{
               selectedPlatform
                 ? `Add ${selectedPlatform.name}`
@@ -1248,7 +1248,7 @@
 
         <form @submit.prevent="saveLink" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label class="block text-label text-gray-700 mb-1"
               >Title</label
             >
             <input
@@ -1261,7 +1261,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label class="block text-label text-gray-700 mb-1"
               >URL</label
             >
             <input
@@ -1282,7 +1282,7 @@
               id="activeLink"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label for="activeLink" class="text-sm text-gray-700"
+            <label for="activeLink" class="text-body text-gray-700"
               >Make this link active</label
             >
           </div>
@@ -1291,14 +1291,14 @@
             <button
               type="button"
               @click="closePlatformForm"
-              class="flex-1 py-2 px-4 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors text-sm font-medium"
+              class="flex-1 py-2 px-4 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors text-button"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="savingLink"
-              class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm font-medium"
+              class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 transition-colors text-button"
             >
               {{ savingLink ? "Adding..." : "Add Link" }}
             </button>

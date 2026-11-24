@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
       <div>
-        <h3 class="text-base font-bold text-gray-900">Layout Designer</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Drag to reorder • Toggle to show/hide</p>
+        <h3 class="card-title text-gray-900">Layout Designer</h3>
+        <p class="text-caption text-gray-500 mt-0.5">Drag to reorder • Toggle to show/hide</p>
       </div>
       <button 
         @click="resetToDefault" 
@@ -48,7 +48,7 @@
             </div>
 
             <!-- Order Badge -->
-            <span class="w-6 h-6 flex items-center justify-center text-xs font-bold rounded-md bg-white border border-gray-200 text-gray-500">
+            <span class="w-6 h-6 flex items-center justify-center text-caption font-bold rounded-md bg-white border border-gray-200 text-gray-500">
               {{ index + 1 }}
             </span>
 
@@ -62,8 +62,8 @@
 
             <!-- Section Info -->
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-900 truncate">{{ section.name }}</p>
-              <p class="text-xs text-gray-400 truncate">
+              <p class="text-navigation text-gray-900 truncate">{{ section.name }}</p>
+              <p class="text-caption text-gray-400 truncate">
                 {{ section.fields?.length > 0 ? `${getFieldCount(section.id)}/${section.fields.length} fields` : (section.description || getSectionDescription(section.id)) }}
               </p>
             </div>
@@ -97,14 +97,14 @@
       <div class="flex items-center justify-between mb-3 px-1">
         <div class="flex items-center gap-2">
           <div 
-            class="w-6 h-6 rounded-md flex items-center justify-center text-sm"
+            class="w-6 h-6 rounded-md flex items-center justify-center text-body"
             :style="{ background: getSectionColor(selectedSection) }"
           >
             {{ getSectionEmoji(selectedSection) }}
           </div>
-          <span class="text-sm font-semibold text-gray-700">{{ selectedSectionData.name }} Fields</span>
+          <span class="text-navigation text-gray-700">{{ selectedSectionData.name }} Fields</span>
         </div>
-        <span class="text-xs text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-200">
+        <span class="text-badge text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-200">
           {{ enabledFieldsCount }}/{{ selectedSectionFields.length }}
         </span>
       </div>
@@ -118,18 +118,18 @@
           <!-- Sub-section Label -->
           <div class="flex items-center gap-2 mb-2 px-1">
             <div 
-              class="w-5 h-5 rounded flex items-center justify-center text-xs"
+              class="w-5 h-5 rounded flex items-center justify-center text-caption"
               :style="{ background: getSectionColor(subSection.id) }"
             >
               {{ getSectionEmoji(subSection.id) }}
             </div>
-            <span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{{ subSection.name }}</span>
+            <span class="text-caption font-semibold text-gray-600 uppercase tracking-wide">{{ subSection.name }}</span>
             <div class="flex-1 h-px bg-gray-200"></div>
             <!-- Sub-section Toggle All -->
             <button
               @click.stop="toggleSubSection(selectedSection, subSection.id)"
               :disabled="!canCustomizeLayout"
-              class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+              class="text-micro px-2 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
             >
               {{ isSubSectionEnabled(selectedSection, subSection.id) ? 'Hide All' : 'Show All' }}
             </button>
@@ -147,11 +147,11 @@
                   : 'border-gray-100 opacity-50'
               ]"
             >
-              <span class="w-5 h-5 flex items-center justify-center text-[10px] font-medium rounded bg-gray-100 text-gray-400">
+              <span class="w-5 h-5 flex items-center justify-center text-micro font-medium rounded bg-gray-100 text-gray-400">
                 {{ fieldIdx + 1 }}
               </span>
               <Icon :name="field.icon || getFieldIcon(field.field_type)" class="w-4 h-4 text-gray-400" />
-              <span class="flex-1 text-xs text-gray-700 truncate">{{ field.label || field.field_key }}</span>
+              <span class="flex-1 text-caption text-gray-700 truncate">{{ field.label || field.field_key }}</span>
               <button
                 @click.stop="toggleField(selectedSection, field.field_key)"
                 :disabled="!canCustomizeLayout"
@@ -169,7 +169,7 @@
                 />
               </button>
             </div>
-            <div v-if="!getSubSectionFields(selectedSection, subSection.id)?.length" class="text-center py-2 text-gray-400 text-xs">
+            <div v-if="!getSubSectionFields(selectedSection, subSection.id)?.length" class="text-center py-2 text-gray-400 text-caption">
               No fields
             </div>
           </div>
@@ -203,11 +203,11 @@
             >
               <Icon name="heroicons:bars-2" class="w-3.5 h-3.5" />
             </div>
-            <span class="w-5 h-5 flex items-center justify-center text-[10px] font-medium rounded bg-gray-100 text-gray-400">
+            <span class="w-5 h-5 flex items-center justify-center text-micro font-medium rounded bg-gray-100 text-gray-400">
               {{ fieldIndex + 1 }}
             </span>
             <Icon :name="field.icon || getFieldIcon(field.field_type)" class="w-4 h-4 text-gray-400" />
-            <span class="flex-1 text-xs text-gray-700 truncate">{{ field.label || field.field_key }}</span>
+            <span class="flex-1 text-caption text-gray-700 truncate">{{ field.label || field.field_key }}</span>
             <button
               @click.stop="toggleField(selectedSection, field.field_key)"
               :disabled="!canCustomizeLayout || selectedSection === 'hero'"
@@ -232,12 +232,12 @@
 
       <div v-else class="text-center py-6 text-gray-400">
         <Icon name="heroicons:inbox" class="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p class="text-xs">No configurable fields</p>
+        <p class="text-body">No configurable fields</p>
       </div>
     </div>
 
     <!-- Upgrade Notice -->
-    <div v-if="!canCustomizeLayout" class="flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 text-xs font-medium">
+    <div v-if="!canCustomizeLayout" class="flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 text-caption font-medium">
       <Icon name="heroicons:lock-closed" class="w-4 h-4" />
       <span>Upgrade to customize layout</span>
     </div>

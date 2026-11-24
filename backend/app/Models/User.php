@@ -338,6 +338,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(NfcCard::class);
     }
 
+    /**
+     * Orders placed by this user (order lifecycle).
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
     // Profile relationship removed - using landing_pages instead
 
     public function notifications()

@@ -3,7 +3,7 @@
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Feedback Management</h1>
+      <h1 class="page-title text-secondary-900">Feedback Management</h1>
       <p class="mt-2 text-secondary-600">
         View and manage user feedback and reports
       </p>
@@ -19,8 +19,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Total Feedback</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Total Feedback</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics?.total_feedback || 0 }}
             </p>
           </div>
@@ -35,8 +35,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Unread</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Unread</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics?.unread_feedback || 0 }}
             </p>
           </div>
@@ -51,8 +51,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Pending</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Pending</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics?.pending_feedback || 0 }}
             </p>
           </div>
@@ -67,8 +67,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Avg Rating</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Avg Rating</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics?.average_rating || '0' }} / 5
             </p>
           </div>
@@ -81,7 +81,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- Search -->
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Search</label>
+          <label class="block text-label text-secondary-700 mb-2">Search</label>
           <input
             v-model="filters.search"
             type="text"
@@ -90,12 +90,12 @@
             class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             @input="applyFilters"
           />
-          <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
+          <p class="text-helper mt-1">{{ filters.search.length }}/150</p>
         </div>
 
         <!-- Status Filter -->
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Status</label>
+          <label class="block text-label text-secondary-700 mb-2">Status</label>
           <select
             v-model="filters.status"
             class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -110,7 +110,7 @@
 
         <!-- Category Filter -->
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Category</label>
+          <label class="block text-label text-secondary-700 mb-2">Category</label>
           <select
             v-model="filters.category"
             class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -128,7 +128,7 @@
 
         <!-- Read Status Filter -->
         <div>
-          <label class="block text-sm font-medium text-secondary-700 mb-2">Read Status</label>
+          <label class="block text-label text-secondary-700 mb-2">Read Status</label>
           <select
             v-model="filters.is_read"
             class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -155,7 +155,7 @@
     <!-- Feedback List -->
     <div class="card">
       <div class="card-header">
-        <h3 class="text-lg font-medium text-secondary-900">
+        <h3 class="card-title text-secondary-900">
           Feedback Items ({{ pagination.total }})
         </h3>
       </div>
@@ -180,7 +180,7 @@
                     <!-- Category Badge -->
                     <span
                       :class="[
-                        'px-3 py-1 text-xs font-medium rounded-full',
+                        'px-3 py-1 text-badge rounded-full',
                         getCategoryBadgeClass(feedback.category),
                       ]"
                     >
@@ -190,7 +190,7 @@
                     <!-- Status Badge -->
                     <span
                       :class="[
-                        'px-3 py-1 text-xs font-medium rounded-full',
+                        'px-3 py-1 text-badge rounded-full',
                         getStatusBadgeClass(feedback.status),
                       ]"
                     >
@@ -200,7 +200,7 @@
                     <!-- Unread Badge -->
                     <span
                       v-if="!feedback.is_read"
-                      class="px-3 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full"
+                      class="px-3 py-1 text-badge bg-red-100 text-red-800 rounded-full"
                     >
                       Unread
                     </span>
@@ -214,14 +214,14 @@
                   <h4 class="font-semibold text-secondary-900">
                     {{ feedback.user_name || 'Anonymous' }}
                   </h4>
-                  <p class="text-sm text-secondary-500">
+                  <p class="card-subtitle">
                     {{ feedback.user_email || 'No email provided' }}
                   </p>
                 </div>
 
                 <button
                   @click="selectedFeedback = feedback"
-                  class="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                  class="px-4 py-2 text-button text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   View Details
                 </button>
@@ -233,7 +233,7 @@
               </p>
 
               <!-- Footer -->
-              <div class="flex items-center justify-between text-xs text-secondary-500">
+              <div class="flex items-center justify-between text-caption text-secondary-500">
                 <span>{{ formatDate(feedback.created_at) }}</span>
                 <span>{{ formatTime(feedback.created_at) }}</span>
               </div>
@@ -272,8 +272,8 @@
         <!-- Modal Header -->
         <div class="p-6 border-b border-secondary-200 flex items-center justify-between">
           <div>
-            <h3 class="text-xl font-bold text-secondary-900">Feedback Details</h3>
-            <p class="text-sm text-secondary-600 mt-1">
+            <h3 class="modal-title text-secondary-900">Feedback Details</h3>
+            <p class="text-body text-secondary-600 mt-1">
               {{ formatDate(selectedFeedback.created_at) }} at {{ formatTime(selectedFeedback.created_at) }}
             </p>
           </div>
@@ -289,17 +289,17 @@
         <div class="p-6 space-y-6">
           <!-- User Information -->
           <div>
-            <h4 class="text-sm font-semibold text-secondary-700 mb-2">User Information</h4>
+            <h4 class="text-body font-semibold text-secondary-700 mb-2">User Information</h4>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <p class="text-xs text-secondary-600">Name</p>
-                <p class="text-sm font-medium text-secondary-900">
+                <p class="text-caption text-secondary-600">Name</p>
+                <p class="text-body font-medium text-secondary-900">
                   {{ selectedFeedback.user_name || 'Anonymous' }}
                 </p>
               </div>
               <div>
-                <p class="text-xs text-secondary-600">Email</p>
-                <p class="text-sm font-medium text-secondary-900">
+                <p class="text-caption text-secondary-600">Email</p>
+                <p class="text-body font-medium text-secondary-900">
                   {{ selectedFeedback.user_email || 'Not provided' }}
                 </p>
               </div>
@@ -308,29 +308,29 @@
 
           <!-- Feedback Details -->
           <div>
-            <h4 class="text-sm font-semibold text-secondary-700 mb-2">Feedback Details</h4>
+            <h4 class="text-body font-semibold text-secondary-700 mb-2">Feedback Details</h4>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <p class="text-xs text-secondary-600">Category</p>
-                <p class="text-sm font-medium text-secondary-900">
+                <p class="text-caption text-secondary-600">Category</p>
+                <p class="text-body font-medium text-secondary-900">
                   {{ getCategoryLabel(selectedFeedback.category) }}
                 </p>
               </div>
               <div>
-                <p class="text-xs text-secondary-600">Status</p>
-                <p class="text-sm font-medium text-secondary-900 capitalize">
+                <p class="text-caption text-secondary-600">Status</p>
+                <p class="text-body font-medium text-secondary-900 capitalize">
                   {{ selectedFeedback.status }}
                 </p>
               </div>
               <div v-if="selectedFeedback.rating">
-                <p class="text-xs text-secondary-600">Rating</p>
-                <p class="text-sm font-medium text-yellow-500">
+                <p class="text-caption text-secondary-600">Rating</p>
+                <p class="text-body font-medium text-yellow-500">
                   {{ '⭐'.repeat(selectedFeedback.rating) }} ({{ selectedFeedback.rating }}/5)
                 </p>
               </div>
               <div>
-                <p class="text-xs text-secondary-600">Read Status</p>
-                <p class="text-sm font-medium text-secondary-900">
+                <p class="text-caption text-secondary-600">Read Status</p>
+                <p class="text-body font-medium text-secondary-900">
                   {{ selectedFeedback.is_read ? 'Read' : 'Unread' }}
                 </p>
               </div>
@@ -340,14 +340,14 @@
           <!-- Message Context -->
           <div v-if="selectedFeedback.user_question || selectedFeedback.bot_response" class="grid grid-cols-1 gap-4">
             <div v-if="selectedFeedback.user_question">
-               <h4 class="text-sm font-semibold text-secondary-700 mb-2">User Question</h4>
-               <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-700">
+               <h4 class="text-body font-semibold text-secondary-700 mb-2">User Question</h4>
+               <div class="bg-gray-50 p-3 rounded-lg text-body text-gray-700">
                   {{ selectedFeedback.user_question }}
                </div>
             </div>
             <div v-if="selectedFeedback.bot_response">
-               <h4 class="text-sm font-semibold text-secondary-700 mb-2">Bot Response</h4>
-               <div class="bg-blue-50 p-3 rounded-lg text-sm text-gray-700 border-l-4 border-blue-400">
+               <h4 class="text-body font-semibold text-secondary-700 mb-2">Bot Response</h4>
+               <div class="bg-blue-50 p-3 rounded-lg text-body text-gray-700 border-l-4 border-blue-400">
                   {{ selectedFeedback.bot_response }}
                </div>
             </div>
@@ -355,10 +355,10 @@
 
           <!-- User Feedback Message -->
           <div v-if="selectedFeedback.user_message">
-            <h4 class="text-sm font-semibold text-secondary-700 mb-2">Feedback Message</h4>
+            <h4 class="text-body font-semibold text-secondary-700 mb-2">Feedback Message</h4>
             <div class="bg-secondary-50 p-4 rounded-lg">
               <div class="flex items-center gap-2 mb-2" v-if="selectedFeedback.feedback_type">
-                  <span class="text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <span class="text-caption font-bold uppercase tracking-wide text-gray-500">
                     Type: {{ selectedFeedback.feedback_type === 'thumbs_up' ? '👍 Positive' : (selectedFeedback.feedback_type === 'thumbs_down' ? '👎 Negative' : '💬 Comment') }}
                   </span>
               </div>
@@ -370,7 +370,7 @@
 
           <!-- Admin Notes -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-700 mb-2">Admin Notes</label>
+            <label class="block text-label text-secondary-700 mb-2">Admin Notes</label>
             <textarea
               v-model="adminNotes"
               rows="3"
@@ -381,7 +381,7 @@
 
           <!-- Status Update -->
           <div>
-            <label class="block text-sm font-semibold text-secondary-700 mb-2">Update Status</label>
+            <label class="block text-label text-secondary-700 mb-2">Update Status</label>
             <select
               v-model="newStatus"
               class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -394,8 +394,8 @@
 
           <!-- IP Address -->
           <div v-if="selectedFeedback.ip_address" class="pt-4 border-t border-secondary-200">
-            <p class="text-xs text-secondary-600">IP Address</p>
-            <p class="text-sm font-mono text-secondary-900">{{ selectedFeedback.ip_address }}</p>
+            <p class="text-caption text-secondary-600">IP Address</p>
+            <p class="text-body font-mono text-secondary-900">{{ selectedFeedback.ip_address }}</p>
           </div>
         </div>
 

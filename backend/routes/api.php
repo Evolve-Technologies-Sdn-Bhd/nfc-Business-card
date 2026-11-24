@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\LegalDocumentController;
 use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\AdminChatbotController;
+use App\Http\Controllers\Api\AdminRoleController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\Business\QuotaController;
@@ -36,7 +37,11 @@ use App\Http\Controllers\Api\ProfileDesignController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderFieldController;
 use App\Http\Controllers\Api\Admin\ProfileBuilderSectionController;
 use App\Http\Controllers\Api\CardTemplateController;
+use App\Http\Controllers\Api\Admin\CardDesignController;
 use App\Http\Controllers\Api\AdminExportController;
+use App\Http\Controllers\Api\BusinessInquiryController;
+use App\Http\Controllers\Api\Admin\BusinessInquiryController as AdminBusinessInquiryController;
+use App\Http\Middleware\EnsureEmailIsVerifiedWithGrace;
 
 // ============== API ROOT ROUTES (Diagnosis / Onboarding) ==============
 
@@ -115,10 +120,16 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
     ->middleware('throttle:3,1'); // 3 per minute
 
 // Public profile viewing (using landing pages)
-Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage']);
-Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackTap']);
-Route::post('/analytics/track', [AnalyticsController::class, 'track']);
-Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap']);
+// Rate-limited because these are unauthenticated endpoints that read a profile
+// and/or persist raw visitor IP + user-agent analytics — throttling blunts
+// scraping and analytics spam. Values are conservative per-minute limits.
+Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage'])->middleware('throttle:60,1'); // 60 reads per minute
+Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackTap'])->middleware('throttle:30,1'); // 30 writes per minute
+Route::post('/analytics/track', [AnalyticsController::class, 'track'])->middleware('throttle:30,1'); // 30 writes per minute
+Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap'])->middleware('throttle:30,1'); // 30 writes per minute
+
+// Business plan enquiries (public — homepage + plan selection forms)
+Route::post('/business-inquiries', [BusinessInquiryController::class, 'store'])->middleware('throttle:5,1'); // 5 per minute
 
 // Legacy password reset routes (no prefix) for backward compatibility with older clients
 Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
@@ -141,7 +152,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -218,6 +229,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Settings
     Route::get('/settings', [SettingsController::class, 'getSettings']);
     Route::put('/settings/personal-info', [SettingsController::class, 'updatePersonalInfo']);
+    Route::put('/settings/notifications', [SettingsController::class, 'updateNotificationSettings']);
     Route::post('/settings/upload-account-image', [SettingsController::class, 'uploadUserAccountImage']);
     Route::delete('/settings/delete-account-image', [SettingsController::class, 'deleteUserAccountImage']);
 
@@ -363,6 +375,10 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
     // Business Employee Management (Super Admin creates employees under Business accounts)
     Route::post('/business-employees', [AdminController::class, 'createBusinessEmployee']);
 
+    // ✅ Admin Roles & Permissions Management (super admin only for writes)
+    Route::get('/roles', [AdminRoleController::class, 'index']);
+    Route::put('/users/{user}/role', [AdminRoleController::class, 'update']);
+
     // Business User Management
     Route::prefix('business-users')->group(function () {
         Route::get('/', [BusinessUserController::class, 'index']);
@@ -421,6 +437,13 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::put('/feedback/{id}/status', [AdminChatbotController::class, 'updateFeedbackStatus']);
         Route::put('/feedback/{id}/read', [AdminChatbotController::class, 'markFeedbackAsRead']);
         Route::delete('/feedback/{id}', [AdminChatbotController::class, 'deleteFeedback']);
+
+        // ✅ Chatbot FAQ Knowledge Base Management
+        Route::get('/questions', [AdminChatbotController::class, 'index']);
+        Route::post('/questions', [AdminChatbotController::class, 'store']);
+        Route::put('/questions/{id}', [AdminChatbotController::class, 'update']);
+        Route::delete('/questions/{id}', [AdminChatbotController::class, 'destroy']);
+        Route::post('/questions/{id}/toggle-active', [AdminChatbotController::class, 'toggleActive']);
     });
 
     // ✅ Admin Payment Management
@@ -500,6 +523,16 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::post('/{id}/mark-completed', [CardTemplateController::class, 'markCompleted']);
     });
 
+    // ✅ Card Designer (admin artwork designer + PDF export source data)
+    Route::prefix('card-designs')->group(function () {
+        Route::get('/', [CardDesignController::class, 'index']);
+        Route::post('/', [CardDesignController::class, 'store']);
+        Route::post('/upload-background', [CardDesignController::class, 'uploadBackground']);
+        Route::get('/{id}', [CardDesignController::class, 'show']);
+        Route::put('/{id}', [CardDesignController::class, 'update']);
+        Route::delete('/{id}', [CardDesignController::class, 'destroy']);
+    });
+
     // ✅ Business User Custom Assignments (separate prefix to not conflict with BusinessUserController)
     Route::prefix('business-user-assignments')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Admin\BusinessUserAssignmentController::class, 'index']);
@@ -520,6 +553,14 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
     Route::prefix('audit-logs')->group(function () {
         Route::get('/', [AdminController::class, 'auditLogsIndex']);
         Route::get('/export-csv', [AdminController::class, 'auditLogsExportCsv']);
+    });
+
+    // ✅ Business Plan Enquiries (Admin triage)
+    Route::prefix('business-inquiries')->group(function () {
+        Route::get('/', [AdminBusinessInquiryController::class, 'index']);
+        Route::get('/statistics', [AdminBusinessInquiryController::class, 'statistics']);
+        Route::get('/{inquiry}', [AdminBusinessInquiryController::class, 'show']);
+        Route::put('/{inquiry}', [AdminBusinessInquiryController::class, 'update']);
     });
 
     // ✅ Admin System Settings

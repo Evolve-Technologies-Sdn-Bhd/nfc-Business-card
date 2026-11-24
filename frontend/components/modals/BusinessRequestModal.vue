@@ -21,10 +21,10 @@
               />
             </div>
             <div>
-              <h3 class="text-2xl font-bold text-white">
+              <h3 class="modal-title text-white">
                 Business Plan Request
               </h3>
-              <p class="text-indigo-100 text-sm mt-1">
+              <p class="text-indigo-100 text-body mt-1">
                 Tell us about your organization
               </p>
             </div>
@@ -42,7 +42,7 @@
       <form @submit.prevent="submitRequest" class="p-6 space-y-6">
         <!-- Company Name -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Company Name <span class="text-red-500">*</span>
           </label>
           <input
@@ -56,7 +56,7 @@
 
         <!-- Company Address -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Company Address <span class="text-red-500">*</span>
           </label>
           <textarea
@@ -70,7 +70,7 @@
 
         <!-- Number of Cards (Quota) -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Number of NFC Cards Needed <span class="text-red-500">*</span>
           </label>
           <input
@@ -81,14 +81,14 @@
             placeholder="e.g., 50"
             class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
           />
-          <p class="text-xs text-secondary-500 mt-2">
+          <p class="text-helper mt-2">
             How many NFC cards do you need for your team?
           </p>
         </div>
 
         <!-- Contact Person -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Contact Person <span class="text-red-500">*</span>
           </label>
           <input
@@ -102,7 +102,7 @@
 
         <!-- Phone Number -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Phone Number <span class="text-red-500">*</span>
           </label>
           <input
@@ -116,7 +116,7 @@
 
         <!-- Email -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Email Address <span class="text-red-500">*</span>
           </label>
           <input
@@ -130,7 +130,7 @@
 
         <!-- Additional Notes -->
         <div>
-          <label class="block text-sm font-semibold text-secondary-900 mb-2">
+          <label class="block text-label text-secondary-900 mb-2">
             Additional Notes (Optional)
           </label>
           <textarea
@@ -146,14 +146,14 @@
           <button
             type="button"
             @click="$emit('update:show', false)"
-            class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl font-medium hover:bg-secondary-200 transition-colors"
+            class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl text-button hover:bg-secondary-200 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             :disabled="submitting"
-            class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-button hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             <div v-if="submitting" class="flex items-center">
               <div
@@ -165,7 +165,7 @@
           </button>
         </div>
 
-        <p class="text-xs text-secondary-500 text-center">
+        <p class="text-helper text-center">
           Our team will contact you within 24 hours to discuss your Business
           Plan setup.
         </p>

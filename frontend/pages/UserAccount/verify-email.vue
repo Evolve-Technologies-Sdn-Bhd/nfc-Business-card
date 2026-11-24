@@ -6,19 +6,18 @@
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
       <div class="text-center">
-        <NuxtLink to="/" class="inline-flex items-center">
-          <Icon name="heroicons:identification" class="h-12 w-12 text-primary-600" />
-          <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
+        <NuxtLink to="/" class="inline-flex items-center" aria-label="NFCGo home">
+          <NFCGoLogo variant="light" size="xl" />
         </NuxtLink>
         <div class="mt-6 relative">
           <NuxtLink
             to="/UserAccount/login"
-            class="absolute -left-4 top-1/2 -translate-y-1/2 inline-flex items-center px-3 py-2 text-sm border border-secondary-300 rounded-lg text-secondary-600 hover:text-primary-600 hover:border-primary-600 transition-colors bg-white"
+            class="absolute -left-4 top-1/2 -translate-y-1/2 inline-flex items-center px-3 py-2 text-navigation border border-secondary-300 rounded-lg text-secondary-600 hover:text-primary-600 hover:border-primary-600 transition-colors bg-white"
           >
             <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
             Back
           </NuxtLink>
-          <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900">Verify your email</h2>
+          <h2 class="page-title text-secondary-900">Verify your email</h2>
         </div>
       </div>
 
@@ -31,8 +30,8 @@
         >
           <Icon name="heroicons:check-circle" class="w-6 h-6 flex-shrink-0" />
           <div>
-            <h3 class="font-semibold">Email verified successfully</h3>
-            <p class="text-sm mt-0.5">You can now sign in to your account.</p>
+            <h3 class="card-title">Email verified successfully</h3>
+            <p class="text-body mt-0.5">You can now sign in to your account.</p>
           </div>
         </div>
         <div
@@ -42,8 +41,8 @@
         >
           <Icon name="heroicons:information-circle" class="w-6 h-6 flex-shrink-0" />
           <div>
-            <h3 class="font-semibold">Email already verified</h3>
-            <p class="text-sm mt-0.5">Your email was already confirmed. Please sign in.</p>
+            <h3 class="card-title">Email already verified</h3>
+            <p class="text-body mt-0.5">Your email was already confirmed. Please sign in.</p>
           </div>
         </div>
         <div
@@ -53,8 +52,8 @@
         >
           <Icon name="heroicons:x-circle" class="w-6 h-6 flex-shrink-0" />
           <div>
-            <h3 class="font-semibold">Invalid or expired link</h3>
-            <p class="text-sm mt-0.5">Request a new verification link using the form below.</p>
+            <h3 class="card-title">Invalid or expired link</h3>
+            <p class="text-body mt-0.5">Request a new verification link using the form below.</p>
           </div>
         </div>
 
@@ -70,8 +69,8 @@
               <Icon name="heroicons:envelope" class="w-5 h-5 text-primary-600" />
             </div>
             <div class="space-y-1">
-              <h3 class="font-semibold text-secondary-900">Check your inbox</h3>
-              <p class="text-sm text-secondary-600">
+              <h3 class="card-title text-secondary-900">Check your inbox</h3>
+              <p class="text-body text-secondary-600">
                 We sent a verification link to
                 <span v-if="authenticatedUser?.email" class="font-medium text-secondary-900">
                   {{ authenticatedUser.email }}
@@ -79,7 +78,7 @@
                 <span v-else class="font-medium text-secondary-900">your registered email</span>.
                 Click the link to confirm ownership of this email address.
               </p>
-              <p class="text-xs text-secondary-500">
+              <p class="text-helper">
                 Can't find the email? Check your spam or promotions folder, or request a new link below.
               </p>
             </div>
@@ -117,19 +116,19 @@
             <span v-else>{{ isAuthenticated ? 'Resend verification link' : 'Send verification link' }}</span>
           </button>
 
-          <p v-if="successMessage" role="status" class="text-sm text-success-700 font-medium text-center">
+          <p v-if="successMessage" role="status" class="text-body text-success-700 font-medium text-center">
             {{ successMessage }}
           </p>
-          <p v-else-if="errorMessage" role="alert" class="text-sm text-error-700 font-medium text-center">
+          <p v-else-if="errorMessage" role="alert" class="text-error text-center">
             {{ errorMessage }}
           </p>
-          <p v-else-if="retryAfter" class="text-xs text-warning-700 text-center">
+          <p v-else-if="retryAfter" class="text-caption text-warning-700 text-center">
             Please wait {{ retryAfter }} seconds before retrying.
           </p>
         </form>
 
         <!-- Navigation -->
-        <div class="pt-2 border-t border-secondary-200 text-sm text-center space-y-2 text-secondary-600">
+        <div class="pt-2 border-t border-secondary-200 text-body text-center space-y-2 text-secondary-600">
           <NuxtLink
             v-if="isAuthenticated"
             to="/UserDashboard/CardManagement"

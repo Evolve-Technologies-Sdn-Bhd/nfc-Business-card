@@ -32,6 +32,37 @@
   --theme-secondary-700: #454037;
   --theme-secondary-800: #2e2a24;
   --theme-secondary-900: #1c1a15;
+
+  /* ============================================================
+     TYPOGRAPHY SCALE — NFCGo global font size system
+     Mirrors tailwind.config.js `fontSize`. Raw values live here so
+     scoped styles / plain CSS can reference the same scale.
+     Base unit: 1rem = 16px.
+     ============================================================ */
+  --text-display-xl: 3rem; /* 48px */
+  --text-display-lg: 2.5rem; /* 40px */
+  --text-h1: 2rem; /* 32px */
+  --text-h2: 1.75rem; /* 28px */
+  --text-h3: 1.5rem; /* 24px */
+  --text-h4: 1.25rem; /* 20px */
+  --text-h5: 1.125rem; /* 18px */
+  --text-body-lg: 1rem; /* 16px */
+  --text-body: 0.875rem; /* 14px */
+  --text-body-sm: 0.8125rem; /* 13px */
+  --text-caption: 0.75rem; /* 12px */
+  --text-micro: 0.6875rem; /* 11px */
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Line heights */
+  --leading-display: 1.08;
+  --leading-heading: 1.25;
+  --leading-body: 1.55;
+  --leading-compact: 1.35;
 }
 
 @layer base {
@@ -72,13 +103,272 @@
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     min-height: 100vh;
+    line-height: var(--leading-body);
+  }
+
+  /* ============================================================
+     ELEMENT-LEVEL TYPOGRAPHY DEFAULTS
+     Safety net so any heading / small / form control that does not
+     carry an explicit utility class still lands on the global scale.
+     Utility classes always win (utilities layer > base layer).
+     ============================================================ */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.015em;
+  }
+  h1 {
+    font-size: var(--text-h1);
+  }
+  h2 {
+    font-size: var(--text-h2);
+  }
+  h3 {
+    font-size: var(--text-h3);
+  }
+  h4 {
+    font-size: var(--text-h4);
+    font-weight: var(--weight-semibold);
+  }
+  h5 {
+    font-size: var(--text-h5);
+    font-weight: var(--weight-semibold);
+  }
+  h6 {
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0;
+  }
+  small {
+    font-size: var(--text-caption);
+    line-height: var(--leading-compact);
+  }
+  label {
+    font-weight: var(--weight-medium);
+  }
+  code,
+  pre,
+  kbd,
+  samp {
+    line-height: var(--leading-compact);
+  }
+
+  /* Form controls: 16px on touch viewports (prevents iOS focus-zoom),
+     14px on wider screens for a denser, consistent UI. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+  }
+  @media (min-width: 640px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+    select,
+    textarea {
+      font-size: var(--text-body);
+    }
   }
 }
 
 @layer components {
+  /* ============================================================
+     TYPOGRAPHY COMPONENTS — semantic classes bound to the scale.
+     Use these instead of ad-hoc font-size utilities so headings,
+     labels and UI text stay consistent across every page.
+     ============================================================ */
+  .text-display-xl {
+    font-size: var(--text-display-xl);
+    line-height: var(--leading-display);
+    letter-spacing: -0.03em;
+    font-weight: var(--weight-bold);
+  }
+  .text-display-lg {
+    font-size: var(--text-display-lg);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    font-weight: var(--weight-bold);
+  }
+  .text-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.02em;
+    font-weight: var(--weight-bold);
+  }
+  .text-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.018em;
+    font-weight: var(--weight-bold);
+  }
+  .text-h3 {
+    font-size: var(--text-h3);
+    line-height: 1.35;
+    letter-spacing: -0.012em;
+    font-weight: var(--weight-bold);
+  }
+  .text-h4 {
+    font-size: var(--text-h4);
+    line-height: 1.4;
+    letter-spacing: -0.008em;
+    font-weight: var(--weight-semibold);
+  }
+  .text-h5 {
+    font-size: var(--text-h5);
+    line-height: 1.45;
+    font-weight: var(--weight-semibold);
+  }
+  .text-body-lg {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+  }
+  .text-body {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  .text-body-sm {
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+  }
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: 1.4;
+  }
+  .text-micro {
+    font-size: var(--text-micro);
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+  }
+  .text-label {
+    font-size: var(--text-body-sm);
+    line-height: 1.35;
+    font-weight: var(--weight-semibold);
+  }
+  .text-button {
+    font-size: var(--text-body);
+    line-height: 1.25;
+    font-weight: var(--weight-semibold);
+  }
+  .text-input {
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+  .text-helper {
+    font-size: var(--text-body-sm);
+    line-height: 1.4;
+    color: var(--theme-secondary-500, #7f7763);
+  }
+  .text-error {
+    font-size: var(--text-body-sm);
+    line-height: 1.4;
+    font-weight: var(--weight-medium);
+    color: var(--theme-error-600, #dc2626);
+  }
+  .text-navigation {
+    font-size: var(--text-body);
+    line-height: 1.4;
+    font-weight: var(--weight-medium);
+  }
+  .text-table-header {
+    font-size: var(--text-caption);
+    line-height: 1.35;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+  }
+  .text-table-body {
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+  .text-badge {
+    font-size: var(--text-micro);
+    line-height: 1.25;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Composite typography roles --- */
+  .page-title {
+    font-size: clamp(1.75rem, 1.55rem + 0.8vw, 2rem);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.02em;
+    font-weight: var(--weight-bold);
+    color: var(--theme-secondary-900, #1c1a15);
+  }
+  .section-title {
+    font-size: clamp(1.5rem, 1.4rem + 0.5vw, 1.75rem);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.018em;
+    font-weight: var(--weight-bold);
+    color: var(--theme-secondary-900, #1c1a15);
+  }
+  .card-title {
+    font-size: var(--text-h5);
+    line-height: 1.45;
+    font-weight: var(--weight-semibold);
+    color: var(--theme-secondary-900, #1c1a15);
+  }
+  .card-subtitle {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--theme-secondary-500, #7f7763);
+  }
+  .modal-title {
+    font-size: var(--text-h4);
+    line-height: 1.4;
+    font-weight: var(--weight-semibold);
+    color: var(--theme-secondary-900, #1c1a15);
+  }
+  .stat-value {
+    font-size: var(--text-h2);
+    line-height: 1.2;
+    font-weight: var(--weight-bold);
+    color: var(--theme-secondary-900, #1c1a15);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-size: var(--text-caption);
+    line-height: 1.35;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--theme-secondary-500, #7f7763);
+  }
+  .breadcrumb {
+    font-size: var(--text-caption);
+    line-height: 1.4;
+    color: var(--theme-secondary-500, #7f7763);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: var(--text-micro);
+    line-height: 1.25;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.02em;
+  }
+  .table-head {
+    font-size: var(--text-caption);
+    line-height: 1.35;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--theme-secondary-500, #7f7763);
+  }
+  .table-cell {
+    font-size: var(--text-body);
+    line-height: 1.5;
+    color: var(--theme-secondary-700, #454037);
+  }
+
   /* Button Components */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
@@ -303,149 +593,6 @@
     box-shadow:
       0 0 0 1px color-mix(in srgb, var(--theme-primary-500, #4f5d82) 36%, transparent),
       inset 0 1px 0 color-mix(in srgb, #ffffff 16%, transparent);
-  }
-
-  /* Stage outer wrapper: ZERO visual artifacts.
-     No 1px borders, no outlines, no box-shadows. This eliminates the
-     "thin gray horizontal line" users sometimes see underneath the wave
-     stage: usually caused by either:
-       (a) stray 1px border/outline/box-shadow pseudo elements
-       (b) SVG stroke endpoints perfectly aligned at the same horizontal Y
-           (fixed via per-radius OPEN_OFFSET stagger)
-       (c) anti-aliased edge of the stage div against a background
-  */
-  .nfc-wave-stage,
-  .nfc-wave-stage::before,
-  .nfc-wave-stage::after,
-  .nfc-wave-stage > div {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .nfc-wave-stage .nfc-fan-wrap,
-  .nfc-wave-stage .nfc-fan-group {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* ============================================================
-       FAN-WAVE HALF ARCS (left & right, 3 each)
-       ============================================================ */
-  .nfc-fan-group {
-    @apply absolute top-1/2 -translate-y-1/2 z-[1] pointer-events-none;
-  }
-  /* Explicit width classes so Tailwind never drops them during purge.
-     70% width ensures the arc endpoints (at x=40 on a 100-wide viewbox
-     inside the left fan, and mirrored on the right) are fully visible
-     without any clipping that could look like a vertical stem. */
-  .nfc-fan-left { left: 0;  width: 70%; height: 100%; top: 0; bottom: 0; }
-  .nfc-fan-right { right: 0; width: 70%; height: 100%; top: 0; bottom: 0; }
-
-  /* Stroke gradients for each arc layer (SVG fills use CSS vars via currentColor) */
-  .nfc-fan-svg {
-    @apply block overflow-visible;
-    display: block;
-    overflow: visible;
-    /* Explicit no-fill so even if path's fill attr is dropped by mistake,
-       we never render a filled shape or a "closed" polygon. */
-    fill: none !important;
-    /* CRITICAL FIX — prevent aspect-ratio distortion.
-       The SVG viewBox is 100x100 (1:1). Previously `w-full h-full` forced
-       the SVG to stretch horizontally whenever the fan wrapper (width 70%) is wider
-       than the stage height. That turns circles into ellipses and the
-       thick stroke endpoints at cx-OPEN_OFFSET appear as a thin
-       horizontal "line" spanning across the middle of the stage (the "red
-       box" artifact users kept seeing).
-
-       Solution: height = wrapper height; width AUTO-SCALE to maintain 1:1 ratio.
-       This keeps arcs PERFECT CIRCLES regardless of wrapper dimensions. */
-    height: 100% !important;
-    width: auto !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-  }
-  .nfc-fan-right .nfc-fan-svg {
-    /* Align right-side SVGs to the right edge so the scaleX(-1) mirrored
-    arcs stay inside the wrapper (they would otherwise clip on the left). */
-    margin-left: auto;
-  }
-  .nfc-fan-svg path {
-    /* round caps + round joins eliminate any spiky miter artifacts
-       that might look like a thin vertical stem on scaled pulse. */
-    stroke-linecap: round !important;
-    stroke-linejoin: round !important;
-    fill: none !important;
-  }
-
-  /* ============================================================
-       3D BEVELLED NFC CHIP (center)
-       ============================================================ */
-  .nfc-chip-3d {
-    @apply relative rounded-[26%] z-[2];
-    background:
-      radial-gradient(
-        120% 110% at 32% 22%,
-        color-mix(in srgb, #ffffff 98%, var(--theme-secondary-50,#fafaf7)) 0%,
-        color-mix(in srgb, #ffffff 94%, var(--theme-primary-50,#f4f6fa)) 42%,
-        color-mix(in srgb, #ffffff 72%, var(--theme-primary-100,#e3e7ef)) 100%
-      );
-    /* Outer bevel light (top-left) + dark (bottom-right) */
-    box-shadow:
-      /* highlight top-left */
-      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 96%, transparent),
-      inset 3px 3px 6px color-mix(in srgb, #ffffff 86%, var(--theme-primary-50,#f4f6fa)),
-      /* shadow bottom-right */
-      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 52%, transparent),
-      /* contact shadow under chip */
-      0 2.5px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 10%, transparent),
-      0 6px 16px color-mix(in srgb, var(--theme-primary-800,#2c344e) 16%, transparent),
-      0 1px 2px color-mix(in srgb, var(--theme-primary-900,#23293b) 8%, transparent);
-  }
-
-  /* Contact pads: top strip + main pad with gradients + bevel */
-  .nfc-chip-3d::before,
-  .nfc-chip-3d::after {
-    content: "";
-    position: absolute;
-    border-radius: 3px;
-    /* inner highlight + shadow for pad depth */
-    box-shadow:
-      inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
-      inset 0 -2px 3px color-mix(in srgb, #000000 18%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--theme-primary-900,#23293b) 22%, transparent);
-  }
-
-  .nfc-chip-3d::before {
-    /* Top thin contact strip */
-    left: 19%;
-    right: 19%;
-    top: 16%;
-    height: 16%;
-    border-radius: 2.5px;
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--theme-primary-600,#3d496a) 98%, #ffffff) 0%,
-      color-mix(in srgb, var(--theme-primary-700,#323b56) 96%, #ffffff) 55%,
-      color-mix(in srgb, var(--theme-accent,#5d8c87) 88%, #ffffff) 100%
-    );
-  }
-
-  .nfc-chip-3d::after {
-    /* Main big contact pad */
-    left: 19%;
-    right: 19%;
-    bottom: 16%;
-    height: 45%;
-    border-radius: 4px;
-    background:
-      linear-gradient(
-        165deg,
-        color-mix(in srgb, var(--theme-primary-700,#323b56) 98%, #000000) 0%,
-        color-mix(in srgb, var(--theme-primary-600,#3d496a) 96%, #000000) 28%,
-        color-mix(in srgb, var(--theme-accent,#5d8c87) 90%, #000000) 62%,
-        color-mix(in srgb, var(--theme-accent-secondary,#b8956a) 82%, #000000) 100%
-      );
   }
 
   /* Brand gradient text with animated shimmer (background-position driven) */
@@ -1528,193 +1675,6 @@
   }
 }
 
-/* ============================================================
-   NFCGo FAN-WAVE WiFi ANIMATIONS
-   Half-arc wave animates outwards like WiFi signal pulse.
-   Horizontal stagger positions (gap between layers) are NOW set
-   statically via inline style on each SVG in NFCGoWaveLoader.vue:
-     Left inner  = 0,  mid = -6px,  outer = -13px
-     Right inner = 0,  mid = +6px,  outer = +13px  (after scaleX(-1) mirror, this gives outward visual gap)
-   These keyframes ONLY pulse opacity + scale (no translateX jitter).
-   ============================================================ */
-
-@keyframes nfcFanL1 {
-  0%, 100% {
-    opacity: 0.22;
-    transform: scale(0.82);
-  }
-  22% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.58;
-    transform: scale(0.95);
-  }
-  80% {
-    opacity: 0.3;
-    transform: scale(0.88);
-  }
-}
-@keyframes nfcFanL2 {
-  0%, 100% {
-    opacity: 0.17;
-    transform: scale(0.79);
-  }
-  16% {
-    opacity: 0.42;
-    transform: scale(0.86);
-  }
-  34% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  62% {
-    opacity: 0.6;
-    transform: scale(0.94);
-  }
-  86% {
-    opacity: 0.26;
-    transform: scale(0.86);
-  }
-}
-@keyframes nfcFanL3 {
-  0%, 100% {
-    opacity: 0.12;
-    transform: scale(0.75);
-  }
-  10% {
-    opacity: 0.24;
-    transform: scale(0.8);
-  }
-  28% {
-    opacity: 0.52;
-    transform: scale(0.88);
-  }
-  46% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  72% {
-    opacity: 0.62;
-    transform: scale(0.93);
-  }
-  90% {
-    opacity: 0.26;
-    transform: scale(0.82);
-  }
-}
-
-/* RIGHT side: pre-mirrored with scaleX(-1) inline, so keyframes ONLY
-   animate opacity + scale. Stagger is handled by inline style translateX. */
-@keyframes nfcFanR1 {
-  0%, 100% {
-    opacity: 0.22;
-    transform: scaleX(-1) scale(0.82);
-  }
-  22% {
-    opacity: 1;
-    transform: scaleX(-1) scale(1);
-  }
-  50% {
-    opacity: 0.58;
-    transform: scaleX(-1) scale(0.95);
-  }
-  80% {
-    opacity: 0.3;
-    transform: scaleX(-1) scale(0.88);
-  }
-}
-@keyframes nfcFanR2 {
-  0%, 100% {
-    opacity: 0.17;
-    transform: scaleX(-1) scale(0.79);
-  }
-  16% {
-    opacity: 0.42;
-    transform: scaleX(-1) scale(0.86);
-  }
-  34% {
-    opacity: 1;
-    transform: scaleX(-1) scale(1);
-  }
-  62% {
-    opacity: 0.6;
-    transform: scaleX(-1) scale(0.94);
-  }
-  86% {
-    opacity: 0.26;
-    transform: scaleX(-1) scale(0.86);
-  }
-}
-@keyframes nfcFanR3 {
-  0%, 100% {
-    opacity: 0.12;
-    transform: scaleX(-1) scale(0.75);
-  }
-  10% {
-    opacity: 0.24;
-    transform: scaleX(-1) scale(0.8);
-  }
-  28% {
-    opacity: 0.52;
-    transform: scaleX(-1) scale(0.88);
-  }
-  46% {
-    opacity: 1;
-    transform: scaleX(-1) scale(1);
-  }
-  72% {
-    opacity: 0.62;
-    transform: scaleX(-1) scale(0.93);
-  }
-  90% {
-    opacity: 0.26;
-    transform: scaleX(-1) scale(0.82);
-  }
-}
-@keyframes nfcChip3d {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-    box-shadow:
-      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 96%, transparent),
-      inset 3px 3px 6px color-mix(in srgb, #ffffff 86%, var(--theme-primary-50,#f4f6fa)),
-      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 52%, transparent),
-      0 2.5px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 10%, transparent),
-      0 6px 16px color-mix(in srgb, var(--theme-primary-800,#2c344e) 16%, transparent),
-      0 1px 2px color-mix(in srgb, var(--theme-primary-900,#23293b) 8%, transparent);
-  }
-  25% {
-    transform: translateY(-1.5px) scale(1.02);
-  }
-  50% {
-    transform: translateY(-0.5px) scale(1.01);
-    box-shadow:
-      inset 1.5px 1.5px 0 color-mix(in srgb, #ffffff 98%, transparent),
-      inset 3px 3px 8px color-mix(in srgb, #ffffff 92%, var(--theme-primary-50,#f4f6fa)),
-      inset -2px -3px 6px color-mix(in srgb, var(--theme-primary-200,#c9d0de) 60%, transparent),
-      0 3px 0 color-mix(in srgb, var(--theme-primary-800,#2c344e) 12%, transparent),
-      0 10px 22px color-mix(in srgb, var(--theme-accent,#5d8c87) 18%, transparent),
-      0 1px 3px color-mix(in srgb, var(--theme-primary-900,#23293b) 10%, transparent);
-  }
-  75% {
-    transform: translateY(-2px) scale(1.025);
-  }
-}
-@keyframes nfcChip3dLg {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  25% {
-    transform: translateY(-2.5px) scale(1.02);
-  }
-  50% {
-    transform: translateY(-0.8px) scale(1.01);
-  }
-  75% {
-    transform: translateY(-3px) scale(1.03);
-  }
-}
 @keyframes nfcFadeUp {
   from {
     opacity: 0;
@@ -1764,34 +1724,6 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* ====== FAN LAYER POSITIONING (horizontal fine-tuning) ======
- *  Applied on WRAPPER divs around the SVG. Wrapper div has no keyframes
- *  of its own, so translateX() is NEVER overwritten. Inner SVG still
- *  animates scale()/scaleX(-1) via keyframes — they're on different
- *  DOM nodes → no conflict, no jitter.
- *
- *  NOTE: The 3 arcs ARE ALREADY at different x positions because they
- *  have DIFFERENT RADII (16 / 26 / 36). Wider radius = apex farther
- *  from chip. So these translateX values are just FINE-TUNING to keep
- *  the opening (toward chip) at the same near-chip zone for all 3,
- *  giving exactly the nested look in the reference image.
- */
-.nfc-fan-wrap  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.nfc-fan-left-a  { transform: translateX(0px);   }   /* LEFT  inner (navy)  — opening at chip */
-.nfc-fan-left-b  { transform: translateX(0px);   }   /* LEFT  middle (teal) — already 10px wider */
-.nfc-fan-left-c  { transform: translateX(0px);   }   /* LEFT  outer  (gold) — already 20px wider */
-.nfc-fan-right-a { transform: translateX(0px);   }   /* RIGHT inner (navy)  — opening at chip */
-.nfc-fan-right-b { transform: translateX(0px);   }   /* RIGHT middle (teal) — already 10px wider */
-.nfc-fan-right-c { transform: translateX(0px);   }   /* RIGHT outer  (gold) — already 20px wider */
-
-.animate-nfc-fan-l-1 { animation: nfcFanL1 1.8s ease-in-out infinite; }
-.animate-nfc-fan-l-2 { animation: nfcFanL2 1.8s ease-in-out infinite; }
-.animate-nfc-fan-l-3 { animation: nfcFanL3 1.8s ease-in-out infinite; }
-.animate-nfc-fan-r-1 { animation: nfcFanR1 1.8s ease-in-out infinite; }
-.animate-nfc-fan-r-2 { animation: nfcFanR2 1.8s ease-in-out infinite; }
-.animate-nfc-fan-r-3 { animation: nfcFanR3 1.8s ease-in-out infinite; }
-.animate-nfc-chip-3d { animation: nfcChip3d 1.8s ease-in-out infinite; }
-.animate-nfc-chip-3d-lg { animation: nfcChip3dLg 1.8s ease-in-out infinite; }
 .animate-nfc-fade-up { animation: nfcFadeUp 420ms ease-out both; }
 .animate-nfc-text-shimmer { animation: nfcTextShimmer 2.6s linear infinite; }
 .animate-nfc-accent-line { animation: nfcAccentLine 1.8s ease-in-out infinite; }
@@ -1799,3 +1731,391 @@
 .animate-dot-bounce-1 { animation: dotBounce1 1.2s infinite ease-in-out; animation-delay: -0.32s; }
 .animate-dot-bounce-2 { animation: dotBounce2 1.2s infinite ease-in-out; animation-delay: -0.16s; }
 .animate-dot-bounce-3 { animation: dotBounce3 1.2s infinite ease-in-out; animation-delay: 0s; }
+
+/* ============================================================
+   NFCGo SHOWCASE LAYER — "Ink & Brass"
+   Additive design tokens + utilities for the public site.
+   Ink = deep near-black navy surfaces (product-led, cinematic)
+   Paper = warm off-white editorial surfaces
+   Brass = burnished gold accent (kept in family with --theme-accent-secondary)
+   Nothing here overrides the existing theme variables.
+   ============================================================ */
+
+:root {
+  --ink-950: #06090d;
+  --ink-900: #0b1017;
+  --ink-850: #0f1621;
+  --ink-800: #141d2b;
+  --ink-700: #1d2839;
+  --ink-600: #2a3648;
+  --paper: #f7f5f0;
+  --paper-2: #efece4;
+  --brass: #c2a068;
+  --brass-600: #a9854d;
+  --brass-200: #e8d9b8;
+}
+
+/* --- Surfaces --- */
+.ink-surface {
+  background-color: var(--ink-900);
+  background-image:
+    radial-gradient(120% 90% at 12% 0%, color-mix(in srgb, var(--theme-accent, #5d8c87) 30%, transparent) 0%, transparent 46%),
+    radial-gradient(90% 80% at 92% 12%, color-mix(in srgb, var(--brass) 24%, transparent) 0%, transparent 52%),
+    radial-gradient(140% 120% at 50% 120%, color-mix(in srgb, var(--ink-700) 90%, transparent) 0%, transparent 60%);
+  color: #eef1f6;
+}
+
+.ink-surface-2 {
+  background-color: var(--ink-850);
+  background-image:
+    radial-gradient(100% 70% at 85% 0%, color-mix(in srgb, var(--theme-accent, #5d8c87) 22%, transparent) 0%, transparent 50%);
+  color: #eef1f6;
+}
+
+.paper-surface {
+  background-color: var(--paper);
+}
+
+/* Fine grid overlay for ink sections (masked so it fades out) */
+.ink-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 0%, #000 0%, transparent 78%);
+          mask-image: radial-gradient(80% 70% at 50% 0%, #000 0%, transparent 78%);
+}
+
+/* Hairline divider that reads on ink */
+.ink-hairline {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* --- Typography on ink --- */
+.showcase-display {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  font-size: clamp(2.7rem, 6.2vw, 5.1rem);
+}
+
+.showcase-display .brass-grad,
+.brass-grad {
+  background-image: linear-gradient(
+    100deg,
+    var(--brass-200) 0%,
+    var(--brass) 34%,
+    #f4e2bd 52%,
+    var(--theme-accent, #5d8c87) 96%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lp-h2.on-ink,
+.h2-ink {
+  color: #f6f7fa;
+}
+
+.lp-lead.on-ink,
+.lead-ink {
+  color: rgba(238, 241, 246, 0.72);
+}
+
+.lp-kicker.on-ink {
+  color: var(--brass-200);
+}
+.lp-kicker.on-ink::before {
+  background: linear-gradient(90deg, transparent, var(--brass), transparent);
+}
+
+/* Brass eyebrow pill */
+.eyebrow-brass {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(194, 160, 104, 0.42);
+  background: rgba(194, 160, 104, 0.1);
+  color: var(--brass-200);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.eyebrow-brass .dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--brass);
+  box-shadow: 0 0 0 4px rgba(194, 160, 104, 0.18);
+}
+
+/* --- Buttons --- */
+.btn-brass {
+  @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200;
+  color: #1b1407;
+  background-image: linear-gradient(180deg, #f0dcaf 0%, var(--brass) 52%, var(--brass-600) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 14px 30px -14px rgba(194, 160, 104, 0.75);
+}
+.btn-brass:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 20px 40px -16px rgba(194, 160, 104, 0.85);
+}
+
+.btn-ghost-light {
+  @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200;
+  color: #eef1f6;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+}
+.btn-ghost-light:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Glass chip used on ink surfaces */
+.chip-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  color: rgba(238, 241, 246, 0.92);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* --- Product card mockup (CSS-only NFC card) --- */
+.nfc-mock {
+  position: relative;
+  border-radius: 1.05rem;
+  aspect-ratio: 1.6 / 1;
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.nfc-mock__face {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.15rem;
+  box-shadow:
+    0 30px 60px -28px rgba(3, 6, 12, 0.8),
+    0 2px 0 rgba(255, 255, 255, 0.12) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.09) inset;
+}
+
+.nfc-mock__face--back {
+  transform: rotateY(180deg);
+}
+
+.nfc-mock[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+
+/* Sheen that sweeps across the card face */
+.nfc-mock__sheen {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 120deg at 30% 20%,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.28) 42deg,
+    transparent 96deg,
+    transparent 360deg
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Material faces */
+.nfc-face-ink {
+  background-image: linear-gradient(155deg, #1c2740 0%, #101828 46%, #070b12 100%);
+  color: #eef1f6;
+}
+.nfc-face-brass {
+  background-image: linear-gradient(155deg, #4a3a21 0%, #2c2314 50%, #171207 100%);
+  color: #f4e6c6;
+}
+.nfc-face-metal {
+  background-image: linear-gradient(155deg, #6d7684 0%, #3c434e 48%, #1c2128 100%);
+  color: #f2f4f7;
+}
+.nfc-face-metal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    108deg,
+    rgba(255, 255, 255, 0.09) 0px,
+    rgba(255, 255, 255, 0.09) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  pointer-events: none;
+}
+.nfc-face-bamboo {
+  background-image: linear-gradient(155deg, #d9c39a 0%, #b99a6a 52%, #8c6f45 100%);
+  color: #2c2113;
+}
+.nfc-face-bamboo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    96deg,
+    rgba(90, 66, 34, 0.16) 0px,
+    rgba(90, 66, 34, 0.16) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  pointer-events: none;
+}
+.nfc-face-paper {
+  background-image: linear-gradient(155deg, #ffffff 0%, #f2efe7 60%, #e4dfd2 100%);
+  color: #1b2027;
+}
+
+/* Card content atoms */
+.nfc-mock__brand {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+}
+.nfc-mock__name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+.nfc-mock__role {
+  font-size: 0.74rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  opacity: 0.68;
+  margin-top: 0.2rem;
+}
+.nfc-mock__kwave {
+  opacity: 0.55;
+}
+.nfc-mock__qr {
+  background: rgba(255, 255, 255, 0.92);
+  color: #10131a;
+  border-radius: 0.4rem;
+  padding: 0.28rem;
+  display: inline-flex;
+}
+
+/* Chip that sits on the card */
+.nfc-mock__chip {
+  width: 2.4rem;
+  height: 1.85rem;
+  border-radius: 0.34rem;
+  background-image: linear-gradient(150deg, #f6e4b6 0%, #cfa964 46%, #9a7434 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  position: relative;
+}
+.nfc-mock__chip::before,
+.nfc-mock__chip::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  height: 22%;
+  border-radius: 2px;
+  background: rgba(30, 22, 8, 0.55);
+}
+.nfc-mock__chip::before {
+  top: 20%;
+}
+.nfc-mock__chip::after {
+  bottom: 20%;
+}
+
+/* Tap ripple used in hero */
+.tap-ripple {
+  position: absolute;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--brass) 70%, transparent);
+  pointer-events: none;
+  animation: tapRipple 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes tapRipple {
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* Scroll cue */
+.scroll-cue {
+  width: 1.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  position: relative;
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.45rem;
+  width: 0.28rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateX(-50%);
+  animation: scrollCue 1.9s ease-in-out infinite;
+}
+@keyframes scrollCue {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-50%, 0.85rem);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tap-ripple,
+  .scroll-cue::after {
+    animation: none !important;
+  }
+  .nfc-mock {
+    transition: none !important;
+  }
+}

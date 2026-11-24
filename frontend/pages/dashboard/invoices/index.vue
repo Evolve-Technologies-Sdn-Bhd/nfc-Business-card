@@ -3,8 +3,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page header -->
       <div class="mb-8">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Invoices</h1>
-        <p class="mt-2 text-sm text-gray-600">
+        <h1 class="page-title text-gray-900">Invoices</h1>
+        <p class="mt-2 text-body text-gray-600">
           View and download your invoices
         </p>
       </div>
@@ -21,10 +21,10 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
+                  <dt class="stat-label text-gray-500 truncate">
                     Total Invoices
                   </dt>
-                  <dd class="text-lg font-semibold text-gray-900">
+                  <dd class="stat-value text-gray-900">
                     {{ statistics.total_invoices }}
                   </dd>
                 </dl>
@@ -43,10 +43,10 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
+                  <dt class="stat-label text-gray-500 truncate">
                     Paid
                   </dt>
-                  <dd class="text-lg font-semibold text-green-600">
+                  <dd class="stat-value text-green-600">
                     {{ statistics.paid_invoices }}
                   </dd>
                 </dl>
@@ -65,10 +65,10 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
+                  <dt class="stat-label text-gray-500 truncate">
                     Pending
                   </dt>
-                  <dd class="text-lg font-semibold text-blue-600">
+                  <dd class="stat-value text-blue-600">
                     {{ statistics.pending_invoices }}
                   </dd>
                 </dl>
@@ -87,10 +87,10 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
+                  <dt class="stat-label text-gray-500 truncate">
                     Total Amount
                   </dt>
-                  <dd class="text-lg font-semibold text-gray-900">
+                  <dd class="stat-value text-gray-900">
                     {{ formatCurrency(statistics.total_amount) }}
                   </dd>
                 </dl>

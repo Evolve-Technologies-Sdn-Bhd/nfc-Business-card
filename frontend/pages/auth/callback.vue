@@ -8,7 +8,7 @@
         <Icon v-else name="heroicons:x-circle" class="h-8 w-8 text-error-600" />
       </div>
       
-      <h2 class="text-2xl font-bold text-secondary-900 mb-2">
+      <h2 class="page-title text-secondary-900 mb-2">
         {{ error ? 'Authentication Failed' : 'Completing sign in...' }}
       </h2>
       

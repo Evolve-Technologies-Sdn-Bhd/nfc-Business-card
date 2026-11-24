@@ -5,13 +5,13 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-2">
-          <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
+          <span class="text-badge text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
             <Icon name="heroicons:sparkles" class="w-3 h-3 inline mr-1" />
             Admin Module
           </span>
           </div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900 tracking-tight">Profile Builder Design</h1>
-          <p class="mt-2 text-sm text-secondary-600 max-w-2xl leading-relaxed">
+          <h1 class="page-title text-secondary-900 tracking-tight">Profile Builder Design</h1>
+          <p class="mt-2 text-body text-secondary-600 max-w-2xl leading-relaxed">
             Configure plan entitlements, field visibility, and design system options across all three subscription tiers.
             Every change here instantly reflects in your users' Profile Builder experience.
           </p>
@@ -26,10 +26,10 @@
           <div class="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center">
             <Icon name="heroicons:rectangle-stack" class="w-6 h-6 text-blue-600" />
           </div>
-          <span class="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-md">Sections</span>
+          <span class="text-badge text-blue-700 bg-blue-100 px-2 py-1 rounded-md">Sections</span>
         </div>
-        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalSections }}</div>
-        <div class="text-xs text-secondary-500">Active profile sections</div>
+        <div class="stat-value text-secondary-900 mb-1">{{ totalSections }}</div>
+        <div class="stat-label text-secondary-500">Active profile sections</div>
       </div>
 
       <div class="card p-5 bg-gradient-to-br from-white to-purple-50/30 border-purple-100">
@@ -37,10 +37,10 @@
           <div class="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center">
             <Icon name="heroicons:queue-list" class="w-6 h-6 text-purple-600" />
           </div>
-          <span class="text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded-md">Fields</span>
+          <span class="text-badge text-purple-700 bg-purple-100 px-2 py-1 rounded-md">Fields</span>
         </div>
-        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalFields }}</div>
-        <div class="text-xs text-secondary-500">Configurable input fields</div>
+        <div class="stat-value text-secondary-900 mb-1">{{ totalFields }}</div>
+        <div class="stat-label text-secondary-500">Configurable input fields</div>
       </div>
 
       <div class="card p-5 bg-gradient-to-br from-white to-pink-50/30 border-pink-100">
@@ -48,10 +48,10 @@
           <div class="w-11 h-11 rounded-xl bg-pink-500/10 flex items-center justify-center">
             <Icon name="heroicons:paint-brush" class="w-6 h-6 text-pink-600" />
           </div>
-          <span class="text-xs font-semibold text-pink-700 bg-pink-100 px-2 py-1 rounded-md">Designs</span>
+          <span class="text-badge text-pink-700 bg-pink-100 px-2 py-1 rounded-md">Designs</span>
         </div>
-        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalDesignOptions }}</div>
-        <div class="text-xs text-secondary-500">Themes, fonts & styles</div>
+        <div class="stat-value text-secondary-900 mb-1">{{ totalDesignOptions }}</div>
+        <div class="stat-label text-secondary-500">Themes, fonts & styles</div>
       </div>
 
       <div class="card p-5 bg-gradient-to-br from-white to-amber-50/30 border-amber-100">
@@ -59,10 +59,10 @@
           <div class="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center">
             <Icon name="heroicons:rocket-launch" class="w-6 h-6 text-amber-600" />
           </div>
-          <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-md">Features</span>
+          <span class="text-badge text-amber-700 bg-amber-100 px-2 py-1 rounded-md">Features</span>
         </div>
-        <div class="text-2xl font-bold text-secondary-900 mb-1">{{ totalFeatures }}</div>
-        <div class="text-xs text-secondary-500">Feature toggles available</div>
+        <div class="stat-value text-secondary-900 mb-1">{{ totalFeatures }}</div>
+        <div class="stat-label text-secondary-500">Feature toggles available</div>
       </div>
     </div>
 
@@ -70,10 +70,10 @@
     <div class="card mb-6 p-5 bg-gradient-to-r from-secondary-50/50 to-white">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-sm font-bold text-secondary-900">
+          <h3 class="card-title text-secondary-900">
             Plan Entitlement Snapshot
           </h3>
-          <p class="text-xs text-secondary-500 mt-0.5">Real-time breakdown of items enabled features across each tier</p>
+          <p class="text-helper mt-0.5">Real-time breakdown of items enabled features across each tier</p>
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -87,7 +87,7 @@
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2.5">
               <div :class="[
-                'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm',
+                'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-body',
                 stat.id === 'basic' ? 'bg-blue-500' :
                 stat.id === 'premium' ? 'bg-purple-500' :
                 'bg-amber-500'
@@ -97,7 +97,7 @@
               <span class="font-bold text-secondary-900">{{ stat.name }}</span>
             </div>
             <div :class="[
-              'text-sm font-bold px-2.5 py-1 rounded-md',
+              'text-body font-bold px-2.5 py-1 rounded-md',
               stat.id === 'basic' ? 'bg-blue-500 text-white' :
               stat.id === 'premium' ? 'bg-purple-500 text-white' :
               'bg-amber-500 text-white'
@@ -118,16 +118,16 @@
           </div>
           <div class="grid grid-cols-3 gap-2 text-center">
             <div class="bg-white/70 rounded-lg py-1.5 px-1">
-              <div class="text-xs font-bold text-secondary-900">{{ stat.fieldsCount }}</div>
-              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Fields</div>
+              <div class="text-caption font-bold text-secondary-900">{{ stat.fieldsCount }}</div>
+              <div class="text-micro text-secondary-500 uppercase tracking-wide">Fields</div>
             </div>
             <div class="bg-white/70 rounded-lg py-1.5 px-1">
-              <div class="text-xs font-bold text-secondary-900">{{ stat.designsCount }}</div>
-              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Designs</div>
+              <div class="text-caption font-bold text-secondary-900">{{ stat.designsCount }}</div>
+              <div class="text-micro text-secondary-500 uppercase tracking-wide">Designs</div>
             </div>
             <div class="bg-white/70 rounded-lg py-1.5 px-1">
-              <div class="text-xs font-bold text-secondary-900">{{ stat.featuresCount }}</div>
-              <div class="text-[10px] text-secondary-500 uppercase tracking-wide">Features</div>
+              <div class="text-caption font-bold text-secondary-900">{{ stat.featuresCount }}</div>
+              <div class="text-micro text-secondary-500 uppercase tracking-wide">Features</div>
             </div>
           </div>
         </div>
@@ -141,7 +141,7 @@
           <button
             @click="activeView = 'assignments'"
             :class="[
-              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
               activeView === 'assignments'
                 ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
                 : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
@@ -153,7 +153,7 @@
           <button
             @click="activeView = 'sections'"
             :class="[
-              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
               activeView === 'sections'
                 ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
                 : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
@@ -165,7 +165,7 @@
           <button
             @click="activeView = 'catalog'"
             :class="[
-              'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap',
+              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
               activeView === 'catalog'
                 ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
                 : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
@@ -182,14 +182,14 @@
     <div v-show="activeView === 'assignments'" class="card mb-6 p-5">
       <div class="flex items-center justify-between mb-4 pb-4 border-b border-secondary-200">
         <div>
-          <h2 class="text-xl font-bold text-secondary-900 flex items-center">
+          <h2 class="section-title text-secondary-900 flex items-center">
             <Icon name="heroicons:clipboard-document-check" class="w-5 h-5 mr-2 text-primary-600" />
             Plan Field Assignments
           </h2>
-          <p class="text-sm text-secondary-500 mt-1">Configure which fields and features are available for each plan</p>
+          <p class="card-subtitle mt-1">Configure which fields and features are available for each plan</p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
+          <span class="text-badge text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
             {{ generalTabs.length }} sections • {{ Object.values(fields).flat().length }} fields • {{ filteredOptionsFeatureToggles.length }} features
           </span>
         </div>
@@ -227,10 +227,10 @@
                 <Icon :name="plan.id === 'business' ? 'heroicons:building-office' : plan.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-5 h-5" />
               </div>
               <div class="text-left">
-                <span class="text-base font-bold text-secondary-900">{{ plan.name }}</span>
+                <span class="card-title text-secondary-900">{{ plan.name }}</span>
                 <div class="flex items-center gap-2 mt-0.5">
                   <span :class="[
-                    'text-xs font-medium px-2 py-0.5 rounded-full',
+                    'text-badge px-2 py-0.5 rounded-full',
                     plan.id === 'business' && 'bg-amber-200 text-amber-800',
                     plan.id === 'premium' && 'bg-purple-200 text-purple-800',
                     plan.id === 'basic' && 'bg-blue-200 text-blue-800'
@@ -255,7 +255,7 @@
                   <button
                     @click="businessViewTab = 'defaults'"
                     :class="[
-                      'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+                      'px-4 py-2 text-navigation border-b-2 transition-colors',
                       businessViewTab === 'defaults'
                         ? 'border-amber-500 text-amber-700'
                         : 'border-transparent text-secondary-500 hover:text-secondary-700'
@@ -267,7 +267,7 @@
                   <button
                     @click="businessViewTab = 'users'; loadBusinessUsers()"
                     :class="[
-                      'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+                      'px-4 py-2 text-navigation border-b-2 transition-colors',
                       businessViewTab === 'users'
                         ? 'border-amber-500 text-amber-700'
                         : 'border-transparent text-secondary-500 hover:text-secondary-700'
@@ -275,7 +275,7 @@
                   >
                     <Icon name="heroicons:users" class="w-4 h-4 inline mr-1" />
                     User Customizations
-                    <span v-if="businessUsers.filter(u => u.has_custom).length > 0" class="ml-1 px-1.5 py-0.5 text-xs bg-amber-200 text-amber-800 rounded-full">
+                    <span v-if="businessUsers.filter(u => u.has_custom).length > 0" class="ml-1 px-1.5 py-0.5 text-badge bg-amber-200 text-amber-800 rounded-full">
                       {{ businessUsers.filter(u => u.has_custom).length }}
                     </span>
                   </button>
@@ -292,7 +292,7 @@
                       v-model="businessUserSearch"
                       type="text"
                       placeholder="Search by name or email..."
-                      class="w-full pl-9 pr-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      class="w-full pl-9 pr-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                     <button
                       v-if="businessUserSearch"
@@ -317,17 +317,17 @@
                     class="flex items-center justify-between p-3 bg-white border border-secondary-200 rounded-lg hover:border-amber-300 transition-colors"
                   >
                     <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-medium text-sm">
+                      <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-medium text-body">
                         {{ user.name?.charAt(0) || '?' }}
                       </div>
                       <div>
-                        <div class="text-sm font-medium text-secondary-900">{{ user.name }}</div>
-                        <div class="text-xs text-secondary-500">{{ user.email }}</div>
+                        <div class="text-body font-medium text-secondary-900">{{ user.name }}</div>
+                        <div class="text-caption text-secondary-500">{{ user.email }}</div>
                       </div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <span v-if="user.has_custom" class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">Custom</span>
-                      <span v-else class="text-xs px-2 py-0.5 bg-secondary-100 text-secondary-500 rounded-full">Default</span>
+                      <span v-if="user.has_custom" class="text-badge px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">Custom</span>
+                      <span v-else class="text-badge px-2 py-0.5 bg-secondary-100 text-secondary-500 rounded-full">Default</span>
                       <button
                         @click="openBusinessUserModal(user)"
                         class="p-1.5 text-primary-600 hover:bg-primary-50 rounded transition-colors"
@@ -345,10 +345,10 @@
                 
                 <!-- Column 1: Data Fields -->
                 <div class="space-y-3">
-                  <h3 class="text-sm font-bold text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
                     <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2 text-blue-600" />
                     Data Fields
-                    <span class="ml-auto text-xs font-normal text-secondary-500">{{ generalTabs.length }} sections</span>
+                    <span class="ml-auto text-caption font-normal text-secondary-500">{{ generalTabs.length }} sections</span>
                   </h3>
                   <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
                     <div v-for="tab in generalTabs" :key="tab.id" class="border border-secondary-200 rounded-lg overflow-hidden">
@@ -365,10 +365,10 @@
                             class="w-4 h-4 rounded border-secondary-300 text-primary-600"
                           />
                           <Icon :name="tab.icon" class="w-4 h-4 text-secondary-600" />
-                          <span class="text-sm font-medium text-secondary-900">{{ tab.name }}</span>
+                          <span class="text-navigation text-secondary-900">{{ tab.name }}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                          <span class="text-xs text-secondary-500 bg-white px-1.5 py-0.5 rounded">{{ getFieldTabItemCount(tab.id) }}</span>
+                          <span class="text-badge text-secondary-500 bg-white px-1.5 py-0.5 rounded">{{ getFieldTabItemCount(tab.id) }}</span>
                           <Icon 
                             :name="expandedCategories[plan.id]?.includes(tab.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
                             class="w-4 h-4 text-secondary-400"
@@ -379,7 +379,7 @@
                         <label
                           v-for="field in (fields[tab.id.replace('field_', '')] || [])"
                           :key="field.id"
-                          class="flex items-center p-1.5 rounded hover:bg-secondary-50 cursor-pointer transition-all text-xs"
+                          class="flex items-center p-1.5 rounded hover:bg-secondary-50 cursor-pointer transition-all text-caption"
                         >
                           <input
                             type="checkbox"
@@ -389,7 +389,7 @@
                           />
                           <span class="ml-2 text-secondary-700 truncate">{{ field.label }}</span>
                         </label>
-                        <div v-if="(fields[tab.id.replace('field_', '')] || []).length === 0" class="text-xs text-secondary-400 italic p-2 text-center">
+                        <div v-if="(fields[tab.id.replace('field_', '')] || []).length === 0" class="text-caption text-secondary-400 italic p-2 text-center">
                           No fields yet
                         </div>
                       </div>
@@ -399,10 +399,10 @@
 
                 <!-- Column 2: Design Options -->
                 <div class="space-y-3">
-                  <h3 class="text-sm font-bold text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
                     <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2 text-purple-600" />
                     Design Options
-                    <span class="ml-auto text-xs font-normal text-secondary-500">{{ getDesignCategoryItemCount(['theme', 'font', 'button_style', 'color_scheme', 'layout']) }} items</span>
+                    <span class="ml-auto text-caption font-normal text-secondary-500">{{ getDesignCategoryItemCount(['theme', 'font', 'button_style', 'color_scheme', 'layout']) }} items</span>
                   </h3>
                   <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
                     <div v-for="designType in ['theme', 'font', 'button_style', 'color_scheme', 'layout']" :key="designType" class="border border-secondary-200 rounded-lg overflow-hidden">
@@ -419,10 +419,10 @@
                             class="w-4 h-4 rounded border-secondary-300 text-primary-600"
                           />
                           <Icon :name="getDesignTypeIcon(designType)" class="w-4 h-4 text-secondary-600" />
-                          <span class="text-sm font-medium text-secondary-900">{{ getTabName(designType) }}</span>
+                          <span class="text-navigation text-secondary-900">{{ getTabName(designType) }}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                          <span class="text-xs text-secondary-500 bg-white px-1.5 py-0.5 rounded">{{ (options[designType] || []).length }}</span>
+                          <span class="text-badge text-secondary-500 bg-white px-1.5 py-0.5 rounded">{{ (options[designType] || []).length }}</span>
                           <Icon 
                             :name="expandedCategories[plan.id]?.includes(designType) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
                             class="w-4 h-4 text-secondary-400"
@@ -433,7 +433,7 @@
                         <label
                           v-for="option in (options[designType] || [])"
                           :key="option.id"
-                          class="flex items-center p-1.5 rounded hover:bg-secondary-50 cursor-pointer transition-all text-xs"
+                          class="flex items-center p-1.5 rounded hover:bg-secondary-50 cursor-pointer transition-all text-caption"
                         >
                           <input
                             type="checkbox"
@@ -443,7 +443,7 @@
                           />
                           <span class="ml-2 text-secondary-700 truncate">{{ option.name }}</span>
                         </label>
-                        <div v-if="(options[designType] || []).length === 0" class="text-xs text-secondary-400 italic p-2 text-center">
+                        <div v-if="(options[designType] || []).length === 0" class="text-caption text-secondary-400 italic p-2 text-center">
                           No options yet
                         </div>
                       </div>
@@ -453,15 +453,15 @@
 
                 <!-- Column 3: Features -->
                 <div class="space-y-3">
-                  <h3 class="text-sm font-bold text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
                     <Icon name="heroicons:sparkles" class="w-4 h-4 mr-2 text-amber-600" />
                     Features
-                    <span class="ml-auto text-xs font-normal text-secondary-500">{{ filteredOptionsFeatureToggles.length }} toggles</span>
+                    <span class="ml-auto text-caption font-normal text-secondary-500">{{ filteredOptionsFeatureToggles.length }} toggles</span>
                   </h3>
                   <div class="space-y-2">
                     <div class="border border-secondary-200 rounded-lg p-3 bg-white">
                       <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-secondary-700">Select All Features</span>
+                        <span class="text-label text-secondary-700">Select All Features</span>
                         <input
                           type="checkbox"
                           :checked="isDesignTypeFullySelected(plan.id, 'feature_toggle')"
@@ -486,7 +486,7 @@
                               isAvailableForPlan(feature, plan.id) ? 'text-primary-600' : 'text-secondary-300'
                             ]" />
                             <span :class="[
-                              'text-sm font-medium',
+                              'text-navigation',
                               isAvailableForPlan(feature, plan.id) ? 'text-primary-900' : 'text-secondary-700'
                             ]">{{ feature.name }}</span>
                           </div>
@@ -497,7 +497,7 @@
                             class="w-4 h-4 rounded border-secondary-300 text-primary-600"
                           />
                         </label>
-                        <div v-if="filteredOptionsFeatureToggles.length === 0" class="text-xs text-secondary-400 italic p-4 text-center">
+                        <div v-if="filteredOptionsFeatureToggles.length === 0" class="text-caption text-secondary-400 italic p-4 text-center">
                           No features configured yet
                         </div>
                       </div>
@@ -517,11 +517,11 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
         <div>
-          <h2 class="text-xl font-bold text-secondary-900 flex items-center">
+          <h2 class="section-title text-secondary-900 flex items-center">
             <Icon name="heroicons:rectangle-stack" class="w-5 h-5 mr-2 text-primary-600" />
             Manage Field Sections
           </h2>
-          <p class="text-sm text-secondary-500 mt-1">
+          <p class="card-subtitle mt-1">
             Create and organize profile sections • {{ generalSections.length }} sections
           </p>
         </div>
@@ -551,7 +551,7 @@
       <div v-if="sectionsLoading" class="flex items-center justify-center py-12">
         <div class="text-center">
           <Icon name="heroicons:arrow-path" class="w-8 h-8 text-primary-500 animate-spin mx-auto mb-3" />
-          <p class="text-sm text-secondary-500">Loading sections...</p>
+          <p class="text-body text-secondary-500">Loading sections...</p>
         </div>
       </div>
 
@@ -580,7 +580,7 @@
           <div class="absolute top-3 right-3 z-10 flex gap-1.5">
             <span
               v-if="section.is_active === false"
-              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-secondary-200 text-secondary-600 border border-secondary-300"
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-badge bg-secondary-200 text-secondary-600 border border-secondary-300"
             >
               <Icon name="heroicons:eye-slash" class="w-3 h-3" />
               Hidden
@@ -607,19 +607,19 @@
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="font-bold text-secondary-900 truncate text-base group-hover:text-primary-700 transition-colors">{{ section.name }}</h3>
-                <code class="text-[11px] text-secondary-400 bg-secondary-100/70 px-1.5 py-0.5 rounded font-mono mt-1 inline-block border border-secondary-200/50">{{ section.key }}</code>
+                <h3 class="card-title text-secondary-900 truncate group-hover:text-primary-700 transition-colors">{{ section.name }}</h3>
+                <code class="text-micro text-secondary-400 bg-secondary-100/70 px-1.5 py-0.5 rounded font-mono mt-1 inline-block border border-secondary-200/50">{{ section.key }}</code>
               </div>
             </div>
 
             <!-- Stats -->
             <div class="flex items-center justify-between mb-4 px-3 py-2.5 bg-white/60 rounded-lg border border-secondary-100">
-              <div class="flex items-center gap-1.5 text-xs text-secondary-600">
+              <div class="flex items-center gap-1.5 text-caption text-secondary-600">
                 <Icon name="heroicons:queue-list" class="w-3.5 h-3.5 text-secondary-500" />
-                <span class="font-bold text-secondary-900 text-sm">{{ (fields[section.key] || []).length }}</span>
+                <span class="font-bold text-secondary-900 text-body">{{ (fields[section.key] || []).length }}</span>
                 <span class="text-secondary-500">fields</span>
               </div>
-              <div class="flex items-center gap-1.5 text-xs text-secondary-600">
+              <div class="flex items-center gap-1.5 text-caption text-secondary-600">
                 <Icon name="heroicons:hashtag" class="w-3.5 h-3.5 text-secondary-500" />
                 <span class="font-bold text-secondary-900">{{ section.display_order || index + 1 }}</span>
               </div>
@@ -628,8 +628,8 @@
             <!-- Plan Progress -->
             <div class="mb-3">
               <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[11px] font-bold text-secondary-500 uppercase tracking-wider">Plan Coverage</span>
-                <span class="text-[11px] font-bold text-secondary-700">{{ getSectionPlans(section.key).length }}/3 plans</span>
+                <span class="text-micro font-bold text-secondary-500 uppercase tracking-wider">Plan Coverage</span>
+                <span class="text-micro font-bold text-secondary-700">{{ getSectionPlans(section.key).length }}/3 plans</span>
               </div>
               <div class="w-full h-1.5 bg-secondary-100 rounded-full overflow-hidden">
                 <div
@@ -643,7 +643,7 @@
             <div class="flex flex-wrap gap-1.5 mb-3">
               <span
                 v-if="getSectionPlans(section.key).length === 0 || getSectionPlans(section.key).length === 3"
-                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-success-50 text-success-700 border border-success-200"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-badge bg-success-50 text-success-700 border border-success-200"
               >
                 <Icon name="heroicons:check-circle-solid" class="w-3 h-3" />
                 All Plans
@@ -653,7 +653,7 @@
                   v-for="plan in getSectionPlans(section.key)"
                   :key="plan"
                   :class="[
-                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border',
+                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-badge border',
                     plan === 'basic' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                     plan === 'premium' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                     'bg-amber-50 text-amber-700 border-amber-200'
@@ -671,7 +671,7 @@
             </div>
 
             <!-- Description (equal height with spacer) -->
-            <p v-if="section.description" class="text-xs text-secondary-500 line-clamp-2 mb-4 leading-relaxed flex-1">
+            <p v-if="section.description" class="text-caption text-secondary-500 line-clamp-2 mb-4 leading-relaxed flex-1">
               {{ section.description }}
             </p>
             <div v-else class="mb-4 flex-1 min-h-[2.5rem]"></div>
@@ -680,7 +680,7 @@
             <div class="flex items-center gap-2 pt-3 border-t border-secondary-200 mt-auto">
               <button
                 @click="openSectionModal('edit', section)"
-                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all border border-primary-100 hover:border-primary-200 group/edit"
+                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-button text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all border border-primary-100 hover:border-primary-200 group/edit"
               >
                 <Icon name="heroicons:pencil" class="w-3.5 h-3.5 group-hover/edit:scale-110 transition-transform" />
                 Edit
@@ -705,8 +705,8 @@
             <Icon name="heroicons:plus" class="w-8 h-8 text-secondary-400 group-hover:text-primary-600 transition-colors" />
           </div>
           <div class="text-center px-4">
-            <p class="text-sm font-bold text-secondary-700 group-hover:text-primary-700 transition-colors mb-1">Create New Section</p>
-            <p class="text-xs text-secondary-400 group-hover:text-secondary-500">Add a custom profile category</p>
+            <p class="card-title text-secondary-700 group-hover:text-primary-700 transition-colors mb-1">Create New Section</p>
+            <p class="text-caption text-secondary-400 group-hover:text-secondary-500">Add a custom profile category</p>
           </div>
         </button>
 
@@ -718,14 +718,14 @@
           <div class="w-24 h-24 bg-primary-50/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <Icon name="heroicons:folder-open" class="w-12 h-12 text-primary-400" />
           </div>
-          <h3 class="text-xl font-bold text-secondary-800 mb-2">Welcome to Profile Sections</h3>
-          <p class="text-sm text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
+          <h3 class="card-title text-secondary-800 mb-2">Welcome to Profile Sections</h3>
+          <p class="text-body text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
             Organize your user profile into logical sections like Personal Info, Company, Services, and more. 
             Each section can contain multiple fields and be restricted by subscription plan.
           </p>
           <button
             @click="openSectionModal('add')"
-            class="btn btn-primary px-6 py-2.5 text-sm font-bold"
+            class="btn btn-primary px-6 py-2.5 text-button"
           >
             <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
             Create Your First Section
@@ -736,8 +736,8 @@
 
     <!-- Apply Designs Header -->
     <div v-show="activeView === 'catalog'" class="mb-6">
-      <h2 class="text-2xl font-bold text-secondary-900 tracking-tight">Design & Field Catalog</h2>
-      <p class="text-sm text-secondary-600 mt-1">Master catalog: view, edit, and manage every configurable option across the system. Use the plan filter to quickly audit what each tier gets.</p>
+      <h2 class="page-title text-secondary-900 tracking-tight">Design & Field Catalog</h2>
+      <p class="text-body text-secondary-600 mt-1">Master catalog: view, edit, and manage every configurable option across the system. Use the plan filter to quickly audit what each tier gets.</p>
     </div>
 
     <!-- Main Content Card -->
@@ -756,7 +756,7 @@
               currentTab === tab.id
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'group inline-flex items-center py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors flex-shrink-0'
+              'group inline-flex items-center py-4 px-3 border-b-2 text-navigation whitespace-nowrap transition-colors flex-shrink-0'
             ]"
           >
             <Icon :name="tab.icon" class="w-4 h-4 mr-1.5 flex-shrink-0" />
@@ -764,7 +764,7 @@
             <span 
               :class="[
                 currentTab === tab.id ? 'bg-primary-100 text-primary-600' : 'bg-secondary-100 text-secondary-600',
-                'ml-2 py-0.5 px-2 rounded-full text-xs font-medium flex-shrink-0'
+                'ml-2 py-0.5 px-2 rounded-full text-badge flex-shrink-0'
               ]"
             >
               {{ getFilteredOptionCount(tab.id) }}
@@ -779,11 +779,11 @@
           <div class="flex flex-col sm:flex-row sm:items-center gap-3">
             <!-- Plan Filter Chips -->
             <div class="flex items-center gap-1.5 bg-secondary-50 p-1.5 rounded-xl">
-              <span class="text-xs font-semibold text-secondary-600 px-2">Plan:</span>
+              <span class="text-caption font-semibold text-secondary-600 px-2">Plan:</span>
               <button
                 @click="selectedPlanFilter = null"
                 :class="[
-                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all',
+                  'px-3 py-1.5 text-navigation rounded-lg transition-all',
                   selectedPlanFilter === null
                     ? 'bg-white text-secondary-900 shadow-sm shadow-secondary-200'
                     : 'text-secondary-500 hover:text-secondary-700 hover:bg-white/50'
@@ -794,7 +794,7 @@
               <button
                 @click="selectedPlanFilter = 'basic'"
                 :class="[
-                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'basic'
                     ? 'bg-blue-500 text-white shadow-sm shadow-blue-200'
                     : 'text-secondary-500 hover:text-blue-700 hover:bg-blue-50'
@@ -806,7 +806,7 @@
               <button
                 @click="selectedPlanFilter = 'premium'"
                 :class="[
-                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'premium'
                     ? 'bg-purple-500 text-white shadow-sm shadow-purple-200'
                     : 'text-secondary-500 hover:text-purple-700 hover:bg-purple-50'
@@ -818,7 +818,7 @@
               <button
                 @click="selectedPlanFilter = 'business'"
                 :class="[
-                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                  'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'business'
                     ? 'bg-amber-500 text-white shadow-sm shadow-amber-200'
                     : 'text-secondary-500 hover:text-amber-700 hover:bg-amber-50'
@@ -829,10 +829,10 @@
               </button>
             </div>
 
-            <span class="text-sm font-medium text-secondary-900">
+            <span class="text-body text-secondary-900">
               {{ isFieldTab ? filteredFieldsTable.length : getFilteredOptions.length }} {{ currentTabName }}{{ (isFieldTab ? filteredFieldsTable.length : getFilteredOptions.length) !== 1 ? 's' : '' }}
             </span>
-            <span v-if="selectedPlanFilter" class="text-xs text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">
+            <span v-if="selectedPlanFilter" class="text-badge text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">
               Showing for {{ selectedPlanFilter.charAt(0).toUpperCase() + selectedPlanFilter.slice(1) }}
             </span>
           </div>
@@ -845,7 +845,7 @@
                 v-model="fieldsSearchQuery"
                 type="text"
                 placeholder="Search fields..."
-                class="w-full sm:w-64 pl-9 pr-9 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                class="w-full sm:w-64 pl-9 pr-9 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
               />
               <button
                 v-if="fieldsSearchQuery"
@@ -869,7 +869,7 @@
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-16">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary-600 border-t-transparent"></div>
-          <p class="mt-3 text-sm text-secondary-600">Loading options...</p>
+          <p class="mt-3 text-body text-secondary-600">Loading options...</p>
         </div>
 
         <!-- Empty State -->
@@ -877,16 +877,16 @@
           <div class="w-20 h-20 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <Icon name="heroicons:inbox" class="w-10 h-10 text-secondary-300" />
           </div>
-          <p class="text-base font-semibold text-secondary-900 mb-1">
+          <p class="card-title text-secondary-900 mb-1">
             {{ selectedPlanFilter ? `No ${currentTabName.toLowerCase()} for ${selectedPlanFilter.charAt(0).toUpperCase() + selectedPlanFilter.slice(1)} plan` : fieldsSearchQuery ? 'No matching fields found' : `No ${currentTabName.toLowerCase()} yet` }}
           </p>
-          <p class="text-sm text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
+          <p class="text-body text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
             {{ selectedPlanFilter ? 'Try selecting a different plan or adjust your search criteria' : fieldsSearchQuery ? 'Clear the search box or try different keywords' : `Get started by creating your first ${currentTabName.toLowerCase()} below` }}
           </p>
           <div v-if="fieldsSearchQuery" class="mb-4">
             <button
               @click="fieldsSearchQuery = ''"
-              class="px-4 py-2 text-sm font-medium text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors"
+              class="px-4 py-2 text-button text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors"
             >
               <Icon name="heroicons:x-mark" class="w-4 h-4 inline mr-1.5" />
               Clear Search
@@ -908,25 +908,25 @@
             <table class="min-w-full divide-y divide-secondary-200">
               <thead class="sticky top-0 z-10">
                 <tr class="bg-gradient-to-r from-secondary-50 to-white">
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-left table-head">
                     Field
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-left table-head">
                     Type
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-left table-head">
                     Group
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center table-head">
                     Order
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider w-[280px]">
+                  <th scope="col" class="px-4 py-3.5 text-center table-head w-[280px]">
                     Plan Availability
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center table-head">
                     Status
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-secondary-700 uppercase tracking-wider">
+                  <th scope="col" class="px-4 py-3.5 text-center table-head">
                     Actions
                   </th>
                 </tr>
@@ -934,17 +934,17 @@
               <tbody class="bg-white divide-y divide-secondary-100">
                 <tr v-for="field in filteredFieldsTable" :key="field.id" class="hover:bg-primary-50/30 transition-colors group">
                   <td class="px-4 py-4">
-                    <div class="text-sm font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ field.label }}</div>
-                    <div class="text-xs text-secondary-500 font-mono mt-0.5 flex items-center gap-1">
+                    <div class="table-cell font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ field.label }}</div>
+                    <div class="text-caption text-secondary-500 font-mono mt-0.5 flex items-center gap-1">
                       <Icon name="heroicons:hashtag" class="w-3 h-3 opacity-50" />
                       {{ field.field_key }}
                     </div>
-                    <div v-if="field.placeholder" class="text-xs text-secondary-400 italic mt-1 pl-4 border-l-2 border-secondary-200">
+                    <div v-if="field.placeholder" class="text-caption text-secondary-400 italic mt-1 pl-4 border-l-2 border-secondary-200">
                       "{{ field.placeholder }}"
                     </div>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-badge bg-blue-50 text-blue-700 border border-blue-100">
                       <Icon name="heroicons:rectangle-group" class="w-3 h-3" />
                       {{ field.field_type }}
                     </span>
@@ -952,16 +952,16 @@
                   <td class="px-4 py-4">
                     <div v-if="field.field_group" class="flex items-center gap-1.5">
                       <Icon v-if="field.field_group_icon" :name="field.field_group_icon" class="w-4 h-4 text-indigo-500" />
-                      <span class="text-xs font-medium text-secondary-700 bg-indigo-50 px-2 py-1 rounded-md">{{ field.field_group }}</span>
-                      <span v-if="field.group_order" class="text-[10px] text-secondary-400">#{{ field.group_order }}</span>
+                      <span class="text-badge text-secondary-700 bg-indigo-50 px-2 py-1 rounded-md">{{ field.field_group }}</span>
+                      <span v-if="field.group_order" class="text-micro text-secondary-400">#{{ field.group_order }}</span>
                     </div>
-                    <span v-else class="text-xs text-secondary-400 italic">— Ungrouped —</span>
+                    <span v-else class="text-caption text-secondary-400 italic">— Ungrouped —</span>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap text-center">
                     <input
                       v-model.number="field.display_order"
                       type="number"
-                      class="w-16 px-2 py-1.5 text-sm text-center border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+                      class="w-16 px-2 py-1.5 text-input text-center border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                       @change="updateField(field)"
                     />
                   </td>
@@ -969,7 +969,7 @@
                     <div class="flex items-center justify-center gap-1.5">
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
+                          'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'basic')
                             ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm shadow-blue-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
@@ -979,7 +979,7 @@
                       </div>
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
+                          'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'premium')
                             ? 'bg-purple-50 text-purple-700 border-purple-300 shadow-sm shadow-purple-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
@@ -989,7 +989,7 @@
                       </div>
                       <div 
                         :class="[
-                          'px-3 py-1.5 rounded-md text-xs font-bold border-2 transition-all',
+                          'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'business')
                             ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm shadow-amber-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
@@ -1008,7 +1008,7 @@
                           class="w-4 h-4 rounded border-secondary-300 text-error-600 focus:ring-error-500"
                           @change="updateField(field)"
                         />
-                        <span :class="['ml-1.5 text-xs font-medium transition-colors', field.is_required ? 'text-error-700' : 'text-secondary-500 group-hover/req:text-error-600']">Req</span>
+                        <span :class="['ml-1.5 text-label transition-colors', field.is_required ? 'text-error-700' : 'text-secondary-500 group-hover/req:text-error-600']">Req</span>
                       </label>
                       <label class="flex items-center cursor-pointer group/vis" title="Visible in profile">
                         <input
@@ -1017,7 +1017,7 @@
                           class="w-4 h-4 rounded border-secondary-300 text-success-600 focus:ring-success-500"
                           @change="updateField(field)"
                         />
-                        <span :class="['ml-1.5 text-xs font-medium transition-colors', field.is_visible ? 'text-success-700' : 'text-secondary-500 group-hover/vis:text-success-600']">Vis</span>
+                        <span :class="['ml-1.5 text-label transition-colors', field.is_visible ? 'text-success-700' : 'text-secondary-500 group-hover/vis:text-success-600']">Vis</span>
                       </label>
                     </div>
                   </td>
@@ -1045,10 +1045,10 @@
           </div>
           <!-- Table Footer Summary -->
           <div class="px-4 py-3 bg-secondary-50 border-t border-secondary-200 flex items-center justify-between">
-            <span class="text-xs font-medium text-secondary-600">
+            <span class="text-caption font-medium text-secondary-600">
               Showing <span class="font-bold text-secondary-900">{{ filteredFieldsTable.length }}</span> of <span class="font-bold text-secondary-900">{{ getFilteredOptions.length }}</span> fields
             </span>
-            <div class="flex items-center gap-3 text-xs text-secondary-500">
+            <div class="flex items-center gap-3 text-caption text-secondary-500">
               <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Basic</span>
               <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-purple-500"></div> Premium</span>
               <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Business</span>
@@ -1098,21 +1098,21 @@
                       title="Business plan"
                     ></div>
                   </div>
-                  <span class="text-xs font-medium text-secondary-500">
+                  <span class="text-caption font-medium text-secondary-500">
                     {{ getPlanNames(option).join(' + ') || 'All Plans' }}
                   </span>
                 </div>
                 <div class="flex items-center gap-1.5">
                   <span
                     v-if="option.is_default"
-                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-primary-100 text-primary-700 border border-primary-200"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-badge bg-primary-100 text-primary-700 border border-primary-200"
                   >
                     <Icon name="heroicons:star-solid" class="w-3 h-3" />
                     Default
                   </span>
                   <span
                     :class="[
-                      'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold border',
+                      'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-badge border',
                       option.is_active 
                         ? 'bg-success-50 text-success-700 border-success-200' 
                         : 'bg-secondary-100 text-secondary-600 border-secondary-200'
@@ -1137,7 +1137,7 @@
                   <p :style="{ fontFamily: option.config?.family }" class="text-xl font-bold text-secondary-900 mb-1 leading-tight">
                     Quick Brown Fox
                   </p>
-                  <p :style="{ fontFamily: option.config?.family }" class="text-xs text-secondary-500 italic">
+                  <p :style="{ fontFamily: option.config?.family }" class="text-caption text-secondary-500 italic">
                     0123456789 • Aa Bb Cc
                   </p>
                 </div>
@@ -1145,7 +1145,7 @@
                 <!-- Button Style Preview -->
                 <div v-else-if="currentTab === 'button_style'" class="flex justify-center py-1">
                   <button
-                    :class="['w-auto min-w-[180px] py-2.5 px-6 text-sm font-bold shadow-sm', option.config?.class]"
+                    :class="['w-auto min-w-[180px] py-2.5 px-6 text-button shadow-sm', option.config?.class]"
                     disabled
                   >
                     <Icon name="heroicons:bolt" class="w-4 h-4 inline mr-1.5" />
@@ -1174,7 +1174,7 @@
                       class="flex-1 h-14 rounded-xl shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform"
                     ></div>
                   </div>
-                  <div class="flex gap-2.5 text-[10px] font-semibold text-center text-secondary-600 font-mono">
+                  <div class="flex gap-2.5 text-micro font-semibold text-center text-secondary-600 font-mono">
                     <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.primary || '—' }}</span>
                     <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.secondary || '—' }}</span>
                     <span class="flex-1 bg-white px-1 py-0.5 rounded border border-secondary-200">{{ option.config?.accent || '—' }}</span>
@@ -1198,7 +1198,7 @@
                       <div class="h-2 w-1/2 bg-secondary-200 rounded-full"></div>
                     </div>
                   </div>
-                  <div class="mt-2 text-center text-[10px] font-semibold text-secondary-500 uppercase tracking-wider">
+                  <div class="mt-2 text-center text-micro font-semibold text-secondary-500 uppercase tracking-wider">
                     {{ option.config?.alignment }} • {{ option.config?.maxWidth || 'default' }}
                   </div>
                 </div>
@@ -1209,7 +1209,7 @@
                     v-for="(tab, idx) in (option.config?.tabs || [])" 
                     :key="tab"
                     :class="[
-                      'px-3 py-1.5 text-xs font-bold rounded-md transition-all',
+                      'px-3 py-1.5 text-badge rounded-md transition-all',
                       idx === 0 
                         ? 'bg-primary-500 text-white shadow-sm shadow-primary-200' 
                         : 'bg-white border border-secondary-200 text-secondary-700 hover:bg-secondary-50'
@@ -1231,7 +1231,7 @@
                     ]"></div>
                   </div>
                   <span :class="[
-                    'text-xs font-bold uppercase tracking-wider',
+                    'text-caption font-bold uppercase tracking-wider',
                     option.config?.enabled ? 'text-success-700' : 'text-secondary-500'
                   ]">
                     {{ option.config?.enabled ? 'Enabled' : 'Disabled' }} by default
@@ -1241,14 +1241,14 @@
 
               <!-- Info -->
               <div class="mb-4">
-                <h3 class="text-sm font-bold text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
+                <h3 class="card-title text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
                   {{ option.name }}
                   <Icon v-if="option.is_default" name="heroicons:star-solid" class="w-3.5 h-3.5 text-amber-500" />
                 </h3>
-                <p v-if="option.description" class="text-xs text-secondary-600 line-clamp-2 leading-relaxed">
+                <p v-if="option.description" class="text-caption text-secondary-600 line-clamp-2 leading-relaxed">
                   {{ option.description }}
                 </p>
-                <code class="text-[11px] text-secondary-500 bg-secondary-50 px-2 py-1 rounded font-mono mt-2 inline-block border border-secondary-100">
+                <code class="text-micro text-secondary-500 bg-secondary-50 px-2 py-1 rounded font-mono mt-2 inline-block border border-secondary-100">
                   {{ option.option_id }}
                 </code>
               </div>
@@ -1258,7 +1258,7 @@
                 <button
                   v-if="!option.is_default"
                   @click="setAsDefault(option)"
-                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-bold text-secondary-700 bg-white border border-secondary-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all group/star"
+                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-button text-secondary-700 bg-white border border-secondary-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all group/star"
                   title="Set as default"
                 >
                   <Icon name="heroicons:star" class="w-3.5 h-3.5 group-hover/star:text-amber-500" />
@@ -1266,7 +1266,7 @@
                 <button
                   @click="toggleActive(option)"
                   :class="[
-                    'flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-bold border rounded-lg transition-all',
+                    'flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-button border rounded-lg transition-all',
                     option.is_active
                       ? 'text-error-700 bg-white border-error-200 hover:bg-error-50'
                       : 'text-success-700 bg-white border-success-200 hover:bg-success-50'
@@ -1324,7 +1324,7 @@
               <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
                 <!-- Modal Header -->
                 <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200">
-                  <DialogTitle as="h3" class="text-lg font-semibold text-secondary-900">
+                  <DialogTitle as="h3" class="modal-title text-secondary-900">
                     {{ modalMode === 'add' ? 'Add New' : 'Edit' }} {{ currentTabName }}
                   </DialogTitle>
                 </div>
@@ -1336,33 +1336,33 @@
                     <template v-if="isFieldTab">
                       <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">
+                          <label class="block text-label text-secondary-900 mb-2">
                             Field Key <span class="text-error-600">*</span>
                           </label>
                           <input
                             v-model="formData.field_key"
                             type="text"
                             :disabled="modalMode === 'edit'"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
                             placeholder="e.g., name, email, bio"
                           />
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Label <span class="text-error-600">*</span></label>
+                          <label class="block text-label text-secondary-900 mb-2">Label <span class="text-error-600">*</span></label>
                           <input
                             v-model="formData.label"
                             type="text"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             placeholder="Full Name"
                           />
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Field Type <span class="text-error-600">*</span></label>
+                          <label class="block text-label text-secondary-900 mb-2">Field Type <span class="text-error-600">*</span></label>
                           <select
                             v-model="formData.field_type"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                           >
                             <optgroup label="Basic Input">
                               <option value="text">Text</option>
@@ -1397,21 +1397,21 @@
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Placeholder</label>
+                          <label class="block text-label text-secondary-900 mb-2">Placeholder</label>
                           <input
                             v-model="formData.placeholder"
                             type="text"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             placeholder="Enter your name"
                           />
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Help Text</label>
+                          <label class="block text-label text-secondary-900 mb-2">Help Text</label>
                           <input
                             v-model="formData.help_text"
                             type="text"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             placeholder="Optional"
                           />
                         </div>
@@ -1419,25 +1419,25 @@
 
                       <!-- Field Grouping -->
                       <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                        <h4 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
+                        <h4 class="card-title text-secondary-900 mb-3 flex items-center">
                           <Icon name="heroicons:rectangle-group" class="w-4 h-4 mr-2 text-indigo-600" />
                           Field Grouping (for UI display)
                         </h4>
                         <div class="grid grid-cols-3 gap-4">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Group Name</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Group Name</label>
                             <input
                               v-model="formData.field_group"
                               type="text"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                               placeholder="e.g., Basic Information"
                             />
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Group Icon</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Group Icon</label>
                             <select
                               v-model="formData.field_group_icon"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                             >
                               <option value="">Select icon...</option>
                               <option value="heroicons:user-circle">👤 User Circle</option>
@@ -1462,67 +1462,67 @@
                             </select>
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Group Order</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Group Order</label>
                             <input
                               v-model.number="formData.group_order"
                               type="number"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                               placeholder="1"
                               min="1"
                             />
                           </div>
                         </div>
-                        <p class="text-xs text-secondary-500 mt-2">Fields with the same group name will be displayed together in Profile Builder</p>
+                        <p class="text-helper mt-2">Fields with the same group name will be displayed together in Profile Builder</p>
                       </div>
 
                       <!-- Repeater Configuration -->
                       <div v-if="formData.field_type === 'repeater'" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                        <h4 class="text-sm font-semibold text-secondary-900 mb-3 flex items-center">
+                        <h4 class="card-title text-secondary-900 mb-3 flex items-center">
                           <Icon name="heroicons:queue-list" class="w-4 h-4 mr-2" />
                           Repeater Configuration
                         </h4>
                         <div class="space-y-3">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Max Items</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Max Items</label>
                             <input
                               v-model.number="formData.config.max_items"
                               type="number"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                               placeholder="e.g., 3 or 6"
                               min="1"
                             />
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Sub-fields (JSON array)</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Sub-fields (JSON array)</label>
                             <textarea
                               v-model="formData.config.sub_fields"
                               rows="4"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono resize-none"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
                               placeholder='[{"key": "num", "label": "Number", "type": "text"}, {"key": "label", "label": "Label", "type": "text"}]'
                             ></textarea>
-                            <p class="text-xs text-secondary-500 mt-1">Define sub-fields as JSON array</p>
+                            <p class="text-helper mt-1">Define sub-fields as JSON array</p>
                           </div>
                         </div>
                       </div>
 
                       <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
-                        <h4 class="text-sm font-semibold text-secondary-900 mb-3">Validation</h4>
+                        <h4 class="card-title text-secondary-900 mb-3">Validation</h4>
                         <div class="grid grid-cols-2 gap-4">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Min Length</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Min Length</label>
                             <input
                               v-model.number="formData.validation_rules.min"
                               type="number"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                               placeholder="0"
                             />
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Max Length</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Max Length</label>
                             <input
                               v-model.number="formData.validation_rules.max"
                               type="number"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                               placeholder="255"
                             />
                           </div>
@@ -1533,136 +1533,136 @@
                     <!-- DESIGN OPTIONS FORM -->
                     <template v-else>
                       <div v-if="modalMode === 'add'">
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">
+                        <label class="block text-label text-secondary-900 mb-2">
                           Option ID <span class="text-error-600">*</span>
                         </label>
                         <input
                           v-model="formData.option_id"
                           type="text"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 font-mono"
+                          class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 font-mono"
                           placeholder="e.g., minimal, inter, solid"
                         />
                       </div>
 
                       <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">
+                        <label class="block text-label text-secondary-900 mb-2">
                           Display Name <span class="text-error-600">*</span>
                         </label>
                         <input
                           v-model="formData.name"
                           type="text"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                           placeholder="e.g., Minimal, Inter, Solid"
                         />
                       </div>
 
                       <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Description</label>
+                        <label class="block text-label text-secondary-900 mb-2">Description</label>
                         <textarea
                           v-model="formData.description"
                           rows="2"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
+                          class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
                           placeholder="Brief description..."
                         ></textarea>
                       </div>
 
                       <!-- Type-specific Configuration -->
                       <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
-                        <h4 class="text-sm font-semibold text-secondary-900 mb-3">Configuration</h4>
+                        <h4 class="card-title text-secondary-900 mb-3">Configuration</h4>
                         
                         <div v-if="currentTab === 'theme'" class="space-y-3">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Background Color</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Background Color</label>
                             <input
                               v-model="formData.config.backgroundColor"
                               type="text"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono"
                               placeholder="#FFFFFF"
                             />
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Preview Classes</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Preview Classes</label>
                             <input
                               v-model="formData.config.preview"
                               type="text"
-                              class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono"
                               placeholder="bg-white"
                             />
                           </div>
                         </div>
 
                         <div v-if="currentTab === 'font'">
-                          <label class="block text-xs font-medium text-secondary-700 mb-1.5">Font Family</label>
+                          <label class="block text-label text-secondary-700 mb-1.5">Font Family</label>
                           <input
                             v-model="formData.config.family"
                             type="text"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                             placeholder="Inter, sans-serif"
                           />
                         </div>
 
                         <div v-if="currentTab === 'button_style'">
-                          <label class="block text-xs font-medium text-secondary-700 mb-1.5">CSS Classes</label>
+                          <label class="block text-label text-secondary-700 mb-1.5">CSS Classes</label>
                           <textarea
                             v-model="formData.config.class"
                             rows="2"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono resize-none"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
                             placeholder="bg-black text-white rounded-full"
                           ></textarea>
                         </div>
 
                         <div v-if="currentTab === 'color_scheme'" class="space-y-3">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Primary</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Primary</label>
                             <div class="flex gap-2">
                               <input v-model="formData.config.primary" type="color" class="w-12 h-10 rounded border-2 border-secondary-300" />
-                              <input v-model="formData.config.primary" type="text" class="flex-1 px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono" placeholder="#000000" />
+                              <input v-model="formData.config.primary" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#000000" />
                             </div>
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Secondary</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Secondary</label>
                             <div class="flex gap-2">
                               <input v-model="formData.config.secondary" type="color" class="w-12 h-10 rounded border-2 border-secondary-300" />
-                              <input v-model="formData.config.secondary" type="text" class="flex-1 px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono" placeholder="#666666" />
+                              <input v-model="formData.config.secondary" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#666666" />
                             </div>
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Accent</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Accent</label>
                             <div class="flex gap-2">
                               <input v-model="formData.config.accent" type="color" class="w-12 h-10 rounded border-2 border-secondary-300" />
-                              <input v-model="formData.config.accent" type="text" class="flex-1 px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono" placeholder="#0066FF" />
+                              <input v-model="formData.config.accent" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#0066FF" />
                             </div>
                           </div>
                         </div>
 
                         <div v-if="currentTab === 'layout'" class="space-y-3">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Alignment</label>
-                            <select v-model="formData.config.alignment" class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg">
+                            <label class="block text-label text-secondary-700 mb-1.5">Alignment</label>
+                            <select v-model="formData.config.alignment" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg">
                               <option value="left">Left</option>
                               <option value="center">Center</option>
                               <option value="right">Right</option>
                             </select>
                           </div>
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Max Width</label>
-                            <input v-model="formData.config.maxWidth" type="text" class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg" placeholder="800px" />
+                            <label class="block text-label text-secondary-700 mb-1.5">Max Width</label>
+                            <input v-model="formData.config.maxWidth" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg" placeholder="800px" />
                           </div>
                         </div>
 
                         <div v-if="currentTab === 'tab_control'">
-                          <label class="block text-xs font-medium text-secondary-700 mb-1.5">Enabled Tabs (comma-separated)</label>
-                          <input v-model="tabsInput" type="text" class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg" placeholder="profile, company, services" @blur="updateTabsArray" />
+                          <label class="block text-label text-secondary-700 mb-1.5">Enabled Tabs (comma-separated)</label>
+                          <input v-model="tabsInput" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg" placeholder="profile, company, services" @blur="updateTabsArray" />
                         </div>
 
                         <div v-if="currentTab === 'feature_toggle'" class="space-y-3">
                           <div>
-                            <label class="block text-xs font-medium text-secondary-700 mb-1.5">Feature Key</label>
-                            <input v-model="formData.config.feature_key" type="text" class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg font-mono" placeholder="stats" />
+                            <label class="block text-label text-secondary-700 mb-1.5">Feature Key</label>
+                            <input v-model="formData.config.feature_key" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="stats" />
                           </div>
                           <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
                             <input v-model="formData.config.enabled" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                            <span class="ml-2 text-sm text-secondary-900">Enabled by Default</span>
+                            <span class="ml-2 text-body text-secondary-900">Enabled by Default</span>
                           </label>
                         </div>
                       </div>
@@ -1670,7 +1670,7 @@
 
                     <!-- Plan Availability - Redesigned -->
                     <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-lg p-5 border-2 border-secondary-200">
-                      <h4 class="text-sm font-semibold text-secondary-900 mb-4 flex items-center">
+                      <h4 class="card-title text-secondary-900 mb-4 flex items-center">
                         <Icon name="heroicons:shield-check" class="w-4 h-4 mr-2" />
                         Plan Availability
                       </h4>
@@ -1685,10 +1685,10 @@
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
-                              <span class="text-sm font-semibold text-secondary-900">Basic Plan</span>
+                              <span class="text-label text-secondary-900">Basic Plan</span>
                               <div class="w-3 h-3 rounded-full bg-blue-500"></div>
                             </div>
-                            <p class="text-xs text-secondary-600 mt-0.5">Essential features for individuals</p>
+                            <p class="text-caption text-secondary-600 mt-0.5">Essential features for individuals</p>
                           </div>
                         </label>
 
@@ -1702,10 +1702,10 @@
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
-                              <span class="text-sm font-semibold text-secondary-900">Premium Plan</span>
+                              <span class="text-label text-secondary-900">Premium Plan</span>
                               <div class="w-3 h-3 rounded-full bg-purple-500"></div>
                             </div>
-                            <p class="text-xs text-secondary-600 mt-0.5">Advanced features for professionals</p>
+                            <p class="text-caption text-secondary-600 mt-0.5">Advanced features for professionals</p>
                           </div>
                         </label>
 
@@ -1719,14 +1719,14 @@
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
-                              <span class="text-sm font-semibold text-secondary-900">Business Plan</span>
+                              <span class="text-label text-secondary-900">Business Plan</span>
                               <div class="w-3 h-3 rounded-full bg-amber-500"></div>
                             </div>
-                            <p class="text-xs text-secondary-600 mt-0.5">Full access for teams & enterprises</p>
+                            <p class="text-caption text-secondary-600 mt-0.5">Full access for teams & enterprises</p>
                           </div>
                         </label>
                       </div>
-                      <p class="mt-3 text-xs text-secondary-500 bg-white px-3 py-2 rounded border border-secondary-200">
+                      <p class="mt-3 text-helper bg-white px-3 py-2 rounded border border-secondary-200">
                         <Icon name="heroicons:information-circle" class="w-3 h-3 inline mr-1" />
                         Leave all unchecked to make available for all plans
                       </p>
@@ -1735,37 +1735,37 @@
                     <!-- Additional Settings -->
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Display Order</label>
+                        <label class="block text-label text-secondary-900 mb-2">Display Order</label>
                         <input
                           v-model.number="formData.display_order"
                           type="number"
-                          class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                           min="0"
                           placeholder="0"
                         />
                       </div>
 
                       <div>
-                        <label class="block text-sm font-medium text-secondary-900 mb-2">Status</label>
+                        <label class="block text-label text-secondary-900 mb-2">Status</label>
                         <div class="space-y-2 mt-2">
                           <template v-if="!isFieldTab">
                             <label class="flex items-center">
                               <input v-model="formData.is_active" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-success-600" />
-                              <span class="ml-2 text-sm text-secondary-700">Active</span>
+                              <span class="ml-2 text-body text-secondary-700">Active</span>
                             </label>
                             <label class="flex items-center">
                               <input v-model="formData.is_default" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                              <span class="ml-2 text-sm text-secondary-700">Default</span>
+                              <span class="ml-2 text-body text-secondary-700">Default</span>
                             </label>
                           </template>
                           <template v-else>
                             <label class="flex items-center">
                               <input v-model="formData.is_required" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-error-600" />
-                              <span class="ml-2 text-sm text-secondary-700">Required</span>
+                              <span class="ml-2 text-body text-secondary-700">Required</span>
                             </label>
                             <label class="flex items-center">
                               <input v-model="formData.is_visible" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-success-600" />
-                              <span class="ml-2 text-sm text-secondary-700">Visible</span>
+                              <span class="ml-2 text-body text-secondary-700">Visible</span>
                             </label>
                           </template>
                         </div>
@@ -1779,7 +1779,7 @@
                   <button
                     type="button"
                     @click="closeModal"
-                    class="px-4 py-2 text-sm font-medium text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
+                    class="px-4 py-2 text-button text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
                   >
                     Cancel
                   </button>
@@ -1787,7 +1787,7 @@
                     type="button"
                     @click="saveOption"
                     :disabled="saving"
-                    class="px-4 py-2 text-sm font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    class="px-4 py-2 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
                   >
                     <Icon v-if="saving" name="heroicons:arrow-path" class="w-4 h-4 mr-1.5 animate-spin inline" />
                     {{ saving ? 'Saving...' : (modalMode === 'add' ? 'Add' : 'Update') }}
@@ -1829,10 +1829,10 @@
               <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-5xl">
                 <!-- Modal Header -->
                 <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
-                  <DialogTitle as="h3" class="text-lg font-semibold text-secondary-900">
+                  <DialogTitle as="h3" class="modal-title text-secondary-900">
                     {{ sectionModalMode === 'add' ? 'Add New' : 'Edit' }} Section
                   </DialogTitle>
-                  <div class="flex items-center gap-2 text-xs text-secondary-500">
+                  <div class="flex items-center gap-2 text-caption text-secondary-500">
                     <span class="px-2 py-1 bg-secondary-100 rounded font-medium">{{ sectionFormData.key || 'new-section' }}</span>
                   </div>
                 </div>
@@ -1842,43 +1842,43 @@
                   <div class="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
                     <!-- ════════════════ SECTION SETTINGS ════════════════ -->
                     <div>
-                      <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-400 mb-3">Section Settings</h4>
+                      <h4 class="text-caption font-bold uppercase tracking-wider text-secondary-400 mb-3">Section Settings</h4>
                       <div class="grid grid-cols-2 gap-4">
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Section Key <span class="text-error-600">*</span></label>
+                          <label class="block text-label text-secondary-900 mb-2">Section Key <span class="text-error-600">*</span></label>
                           <input
                             v-model="sectionFormData.key"
                             type="text"
                             :disabled="sectionModalMode === 'edit'"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-secondary-100"
                             placeholder="e.g., profile, company, services"
                           />
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Section Name <span class="text-error-600">*</span></label>
+                          <label class="block text-label text-secondary-900 mb-2">Section Name <span class="text-error-600">*</span></label>
                           <input
                             v-model="sectionFormData.name"
                             type="text"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             placeholder="e.g., Profile, Company, Services"
                           />
                         </div>
 
                         <!-- ICON PICKER -->
                         <div class="relative">
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Icon</label>
+                          <label class="block text-label text-secondary-900 mb-2">Icon</label>
                           <button
                             type="button"
                             @click="showIconPicker = !showIconPicker"
-                            class="w-full flex items-center gap-3 px-3 py-2 text-sm border border-secondary-300 rounded-lg hover:border-primary-400 hover:bg-primary-50/30 focus:ring-2 focus:ring-primary-500 transition-all bg-white text-left"
+                            class="w-full flex items-center gap-3 px-3 py-2 text-input border border-secondary-300 rounded-lg hover:border-primary-400 hover:bg-primary-50/30 focus:ring-2 focus:ring-primary-500 transition-all bg-white text-left"
                           >
                             <div class="w-8 h-8 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center flex-shrink-0">
                               <Icon :name="sectionFormData.icon" class="w-4 h-4 text-primary-600" />
                             </div>
                             <div class="flex-1 min-w-0">
                               <div class="text-secondary-900 font-medium truncate">{{ sectionFormData.icon }}</div>
-                              <div class="text-xs text-secondary-400">Click to pick an icon</div>
+                              <div class="text-helper">Click to pick an icon</div>
                             </div>
                             <Icon :name="showIconPicker ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-4 h-4 text-secondary-400 flex-shrink-0" />
                           </button>
@@ -1895,7 +1895,7 @@
                                   v-model="sectionIconSearch"
                                   type="text"
                                   placeholder="Search icons..."
-                                  class="w-full pl-9 pr-3 py-2 text-sm border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                  class="w-full pl-9 pr-3 py-2 text-input border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                 />
                               </div>
                             </div>
@@ -1916,46 +1916,46 @@
                                 <Icon :name="iconName" :class="['w-5 h-5', sectionFormData.icon === iconName ? 'text-primary-600' : 'text-secondary-600']" />
                               </button>
                             </div>
-                            <div v-if="filteredSectionIconChoices.length === 0" class="py-6 text-center text-sm text-secondary-400 italic">
+                            <div v-if="filteredSectionIconChoices.length === 0" class="py-6 text-center text-body text-secondary-400 italic">
                               No icons match &quot;{{ sectionIconSearch }}&quot;
                             </div>
                           </div>
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Description</label>
+                          <label class="block text-label text-secondary-900 mb-2">Description</label>
                           <textarea
                             v-model="sectionFormData.description"
                             rows="2"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
                             placeholder="Brief description..."
                           ></textarea>
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Display Order</label>
+                          <label class="block text-label text-secondary-900 mb-2">Display Order</label>
                           <input
                             v-model.number="sectionFormData.display_order"
                             type="number"
-                            class="w-full px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             min="0"
                             placeholder="0"
                           />
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Has Fields</label>
+                          <label class="block text-label text-secondary-900 mb-2">Has Fields</label>
                           <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
                             <input v-model="sectionFormData.has_fields" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                            <span class="ml-2 text-sm text-secondary-900">Yes</span>
+                            <span class="ml-2 text-body text-secondary-900">Yes</span>
                           </label>
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-secondary-900 mb-2">Is Active</label>
+                          <label class="block text-label text-secondary-900 mb-2">Is Active</label>
                           <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
                             <input v-model="sectionFormData.is_active" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                            <span class="ml-2 text-sm text-secondary-900">Yes</span>
+                            <span class="ml-2 text-body text-secondary-900">Yes</span>
                           </label>
                         </div>
 
@@ -1965,8 +1965,8 @@
                             <div class="flex items-start gap-2">
                               <Icon name="heroicons:information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                               <div>
-                                <p class="text-sm font-medium text-blue-800">Plan Availability</p>
-                                <p class="text-xs text-blue-600 mt-1">
+                                <p class="text-label text-blue-800">Plan Availability</p>
+                                <p class="text-caption text-blue-600 mt-1">
                                   Section plans are automatically calculated based on the fields' plan settings.
                                   Configure plan availability in the "Plan Assignments" section below.
                                 </p>
@@ -1984,8 +1984,8 @@
                     <div>
                       <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
-                          <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-400">Section Fields</h4>
-                          <span class="text-xs px-2 py-0.5 bg-secondary-100 text-secondary-600 rounded-full font-bold">
+                          <h4 class="text-caption font-bold uppercase tracking-wider text-secondary-400">Section Fields</h4>
+                          <span class="text-badge px-2 py-0.5 bg-secondary-100 text-secondary-600 rounded-full font-bold">
                             {{ (fields[sectionFormData.key] || []).length }} fields
                           </span>
                         </div>
@@ -1993,7 +1993,7 @@
                           v-if="sectionFormData.has_fields && sectionFormData.key"
                           type="button"
                           @click="openAddFieldFromSection"
-                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
                         >
                           <Icon name="heroicons:plus" class="w-3.5 h-3.5" />
                           Add Field
@@ -2003,13 +2003,13 @@
                       <!-- Empty states -->
                       <div v-if="!sectionFormData.key" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
                         <Icon name="heroicons:pencil-square" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
-                        <p class="text-sm text-secondary-400 font-medium">Fill in Section Key first</p>
-                        <p class="text-xs text-secondary-400 mt-0.5">Fields are saved per section key</p>
+                        <p class="card-title text-secondary-400">Fill in Section Key first</p>
+                        <p class="text-body text-secondary-400 mt-0.5">Fields are saved per section key</p>
                       </div>
                       <div v-else-if="!sectionFormData.has_fields" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
                         <Icon name="heroicons:cube" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
-                        <p class="text-sm text-secondary-400 font-medium">This section has no fields enabled</p>
-                        <p class="text-xs text-secondary-400 mt-0.5">Tick "Has Fields" above to manage fields here</p>
+                        <p class="card-title text-secondary-400">This section has no fields enabled</p>
+                        <p class="text-body text-secondary-400 mt-0.5">Tick "Has Fields" above to manage fields here</p>
                       </div>
 
                       <!-- Fields list -->
@@ -2020,26 +2020,26 @@
                           class="group flex items-center gap-3 px-3 py-2.5 hover:bg-secondary-50/70 transition-colors"
                         >
                           <div class="w-6 text-center flex-shrink-0">
-                            <span class="text-[10px] font-bold text-secondary-400">#{{ fIdx + 1 }}</span>
+                            <span class="text-micro font-bold text-secondary-400">#{{ fIdx + 1 }}</span>
                           </div>
                           <div class="w-8 h-8 rounded-lg bg-secondary-50 border border-secondary-200 flex items-center justify-center flex-shrink-0">
                             <Icon name="heroicons:bars-3" class="w-4 h-4 text-secondary-400" />
                           </div>
                           <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                              <span class="text-sm font-semibold text-secondary-900 truncate">{{ field.label }}</span>
-                              <span v-if="field.required || field.is_required" class="text-[10px] px-1.5 py-0.5 rounded bg-error-50 text-error-700 font-bold border border-error-200">
+                              <span class="text-body font-semibold text-secondary-900 truncate">{{ field.label }}</span>
+                              <span v-if="field.required || field.is_required" class="text-badge px-1.5 py-0.5 rounded bg-error-50 text-error-700 font-bold border border-error-200">
                                 Required
                               </span>
-                              <span v-if="!field.is_active && field.is_active !== undefined" class="text-[10px] px-1.5 py-0.5 rounded bg-secondary-100 text-secondary-500 font-bold">
+                              <span v-if="!field.is_active && field.is_active !== undefined" class="text-badge px-1.5 py-0.5 rounded bg-secondary-100 text-secondary-500 font-bold">
                                 Inactive
                               </span>
                             </div>
                             <div class="flex items-center gap-2 mt-0.5">
-                              <span class="text-[11px] px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 font-medium border border-primary-100">
+                              <span class="text-badge px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 font-medium border border-primary-100">
                                 {{ field.type || field.input_type || 'text' }}
                               </span>
-                              <span class="text-[11px] text-secondary-400 font-mono truncate">key: {{ field.key || field.name }}</span>
+                              <span class="text-micro text-secondary-400 font-mono truncate">key: {{ field.key || field.name }}</span>
                             </div>
                           </div>
                           <!-- Plan chips -->
@@ -2048,7 +2048,7 @@
                               <span
                                 v-if="(field.available_plans && field.available_plans.includes(plan.id)) || (field.plan_assignments && field.plan_assignments.includes(plan.id)) || (plan.id === 'basic')"
                                 :class="[
-                                  'text-[10px] px-1.5 py-0.5 rounded-full font-bold',
+                                  'text-badge px-1.5 py-0.5 rounded-full font-bold',
                                   plan.color === 'amber' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                                   plan.color === 'purple' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                                   'bg-blue-50 text-blue-700 border border-blue-200'
@@ -2082,12 +2082,12 @@
                           <div class="w-14 h-14 mx-auto rounded-2xl bg-secondary-50 border-2 border-dashed border-secondary-200 flex items-center justify-center mb-3">
                             <Icon name="heroicons:queue-list" class="w-7 h-7 text-secondary-300" />
                           </div>
-                          <p class="text-sm font-semibold text-secondary-600 mb-1">No fields yet</p>
-                          <p class="text-xs text-secondary-400 mb-4">Add the first input field to this section</p>
+                          <p class="card-title text-secondary-600 mb-1">No fields yet</p>
+                          <p class="text-body text-secondary-400 mb-4">Add the first input field to this section</p>
                           <button
                             type="button"
                             @click="openAddFieldFromSection"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
                           >
                             <Icon name="heroicons:plus" class="w-4 h-4" />
                             Add First Field
@@ -2103,7 +2103,7 @@
                   <button
                     type="button"
                     @click="closeSectionModal"
-                    class="px-4 py-2 text-sm font-medium text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
+                    class="px-4 py-2 text-button text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
                   >
                     Cancel
                   </button>
@@ -2111,7 +2111,7 @@
                     type="button"
                     @click="saveSection"
                     :disabled="saving"
-                    class="px-4 py-2 text-sm font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    class="px-4 py-2 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
                   >
                     <Icon v-if="saving" name="heroicons:arrow-path" class="w-4 h-4 mr-1.5 animate-spin inline" />
                     {{ saving ? 'Saving...' : (sectionModalMode === 'add' ? 'Add' : 'Update') }}
@@ -2140,8 +2140,8 @@
                       <span class="text-amber-800 font-bold">{{ selectedBusinessUser?.name?.charAt(0) || '?' }}</span>
                     </div>
                     <div>
-                      <DialogTitle class="font-semibold text-secondary-900">{{ selectedBusinessUser?.name }}</DialogTitle>
-                      <p class="text-sm text-secondary-500">{{ selectedBusinessUser?.email }}</p>
+                      <DialogTitle class="modal-title text-secondary-900">{{ selectedBusinessUser?.name }}</DialogTitle>
+                      <p class="card-subtitle">{{ selectedBusinessUser?.email }}</p>
                     </div>
                   </div>
                   <button @click="closeBusinessUserModal" class="p-2 hover:bg-amber-100 rounded-lg">
@@ -2153,7 +2153,7 @@
                     <label class="flex items-center justify-between cursor-pointer">
                       <div>
                         <span class="font-medium text-secondary-900">Use Custom Settings</span>
-                        <p class="text-sm text-secondary-500">Override default Business plan settings</p>
+                        <p class="text-helper">Override default Business plan settings</p>
                       </div>
                       <input type="checkbox" v-model="businessUserFormData.use_custom" class="w-5 h-5 rounded border-secondary-300 text-amber-600" />
                     </label>
@@ -2173,12 +2173,12 @@
                                 @change="toggleTabFields(tabFields, $event.target.checked)"
                                 class="w-3.5 h-3.5 rounded text-blue-600"
                               />
-                              <span class="ml-2 text-xs font-semibold text-secondary-600 uppercase">{{ tabName }}</span>
+                              <span class="ml-2 text-caption font-semibold text-secondary-600 uppercase">{{ tabName }}</span>
                             </label>
-                            <span class="text-xs text-secondary-400">{{ getTabSelectedCount(tabFields) }}/{{ tabFields.length }}</span>
+                            <span class="text-caption text-secondary-400">{{ getTabSelectedCount(tabFields) }}/{{ tabFields.length }}</span>
                           </div>
                           <div class="grid grid-cols-3 gap-1">
-                            <label v-for="field in tabFields" :key="field.id" class="flex items-center p-1.5 bg-white rounded border text-xs cursor-pointer hover:border-primary-300">
+                            <label v-for="field in tabFields" :key="field.id" class="flex items-center p-1.5 bg-white rounded border text-caption cursor-pointer hover:border-primary-300">
                               <input type="checkbox" :value="field.id" v-model="businessUserFormData.enabled_fields" class="w-3 h-3 rounded" />
                               <span class="ml-1.5 truncate">{{ field.label }}</span>
                             </label>
@@ -2200,12 +2200,12 @@
                                   @change="toggleTypeOptions(typeOptions, $event.target.checked)"
                                   class="w-3.5 h-3.5 rounded text-purple-600"
                                 />
-                                <span class="ml-2 text-xs font-semibold text-secondary-600 uppercase">{{ typeName.replace('_', ' ') }}</span>
+                                <span class="ml-2 text-caption font-semibold text-secondary-600 uppercase">{{ typeName.replace('_', ' ') }}</span>
                               </label>
-                              <span class="text-xs text-secondary-400">{{ getTypeSelectedCount(typeOptions) }}/{{ typeOptions.length }}</span>
+                              <span class="text-caption text-secondary-400">{{ getTypeSelectedCount(typeOptions) }}/{{ typeOptions.length }}</span>
                             </div>
                             <div class="grid grid-cols-3 gap-1">
-                              <label v-for="option in typeOptions" :key="option.id" class="flex items-center p-1.5 bg-white rounded border text-xs cursor-pointer hover:border-primary-300">
+                              <label v-for="option in typeOptions" :key="option.id" class="flex items-center p-1.5 bg-white rounded border text-caption cursor-pointer hover:border-primary-300">
                                 <input type="checkbox" :value="option.id" v-model="businessUserFormData.enabled_design_options" class="w-3 h-3 rounded" />
                                 <span class="ml-1.5 truncate">{{ option.name }}</span>
                               </label>
@@ -2221,13 +2221,13 @@
                         <label v-for="feature in filteredBusinessUserFeatureToggles" :key="feature.option_id"
                           :class="['flex items-center p-2 rounded-lg border cursor-pointer', businessUserFormData.enabled_features.includes(feature.option_id) ? 'border-amber-300 bg-amber-50' : 'border-secondary-200']">
                           <input type="checkbox" :value="feature.option_id" v-model="businessUserFormData.enabled_features" class="w-4 h-4 rounded text-amber-600" />
-                          <span class="ml-2 text-sm font-medium">{{ feature.name }}</span>
+                          <span class="ml-2 text-body">{{ feature.name }}</span>
                         </label>
                       </div>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-secondary-700 mb-2">Admin Notes</label>
-                      <textarea v-model="businessUserFormData.notes" rows="2" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm" placeholder="Optional notes..."></textarea>
+                      <label class="block text-label text-secondary-700 mb-2">Admin Notes</label>
+                      <textarea v-model="businessUserFormData.notes" rows="2" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input" placeholder="Optional notes..."></textarea>
                     </div>
                   </div>
                   <!-- Default Settings UI -->
@@ -2237,11 +2237,11 @@
                   </div>
                 </div>
                 <div class="flex items-center justify-between p-4 border-t border-secondary-200 bg-secondary-50">
-                  <button v-if="businessUserFormData.use_custom" @click="resetBusinessUserToDefault" class="text-sm text-secondary-600 hover:text-secondary-900">Reset to Default</button>
+                  <button v-if="businessUserFormData.use_custom" @click="resetBusinessUserToDefault" class="text-button text-secondary-600 hover:text-secondary-900">Reset to Default</button>
                   <div v-else></div>
                   <div class="flex gap-3">
-                    <button @click="closeBusinessUserModal" class="px-4 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-100 rounded-lg">Cancel</button>
-                    <button @click="saveBusinessUserAssignment" :disabled="savingBusinessUser" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg disabled:opacity-50">
+                    <button @click="closeBusinessUserModal" class="px-4 py-2 text-button text-secondary-700 hover:bg-secondary-100 rounded-lg">Cancel</button>
+                    <button @click="saveBusinessUserAssignment" :disabled="savingBusinessUser" class="px-4 py-2 text-button text-white bg-amber-600 hover:bg-amber-700 rounded-lg disabled:opacity-50">
                       {{ savingBusinessUser ? 'Saving...' : 'Save' }}
                     </button>
                   </div>

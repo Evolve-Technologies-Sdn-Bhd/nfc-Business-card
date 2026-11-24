@@ -2,7 +2,7 @@
   <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
     <!-- Results counter -->
     <div class="flex items-center space-x-4">
-      <span class="text-sm text-secondary-700">
+      <span class="text-body text-secondary-700">
         Showing
         {{ total === 0 ? 0 : (currentPage - 1) * perPage + 1 }} -
         {{ Math.min(currentPage * perPage, total) }}
@@ -10,7 +10,7 @@
       </span>
       <!-- Per page selector -->
       <div class="flex items-center space-x-2">
-        <span class="text-sm text-secondary-600">Per page:</span>
+        <span class="text-body text-secondary-600">Per page:</span>
         <select
           :value="perPage"
           @change="$emit('per-page-change', Number($event.target.value))"

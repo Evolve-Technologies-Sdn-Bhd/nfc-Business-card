@@ -15,10 +15,10 @@
           </svg>
         </div>
 
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        <h2 class="mt-6 page-title text-gray-900">
           {{ isSuccess ? 'Payment Successful' : 'Payment Failed' }}
         </h2>
-        <p class="mt-2 text-sm text-gray-600">
+        <p class="mt-2 text-body text-gray-600">
           {{ isSuccess ? 'Your transaction has been completed successfully.' : 'There was an issue processing your payment.' }}
         </p>
       </div>
@@ -47,7 +47,7 @@
           v-if="isSuccess" 
           @click="downloadInvoice" 
           :disabled="isDownloading"
-          class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-button text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg v-if="!isDownloading" class="mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -69,13 +69,13 @@
           />
           <label 
             for="sendEmailCheckbox" 
-            class="text-sm text-gray-600 cursor-pointer select-none"
+            class="text-body text-gray-600 cursor-pointer select-none"
           >
             Email me a copy of this invoice
           </label>
         </div>
 
-        <button @click="handleReturn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <button @click="handleReturn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-button text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           Return to Dashboard
         </button>
       </div>

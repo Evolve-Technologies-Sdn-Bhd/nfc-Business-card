@@ -514,15 +514,38 @@
         boxSizing: 'border-box',
       }"
     >
-      <!-- Loading State -->
+      <!-- Loading State (skeleton mirrors the profile structure) -->
       <div
         v-if="loading"
-        :style="{ textAlign: 'center', padding: '60px 20px', color: responsive.textPrimary }"
+        :style="{ width: '100%', padding: '40px 20px' }"
+        aria-busy="true"
+        aria-live="polite"
       >
-        <div :style="{ marginBottom: '20px' }">
-          <Icon name="heroicons:arrow-path" class="w-12 h-12 animate-spin text-white/70 mx-auto" aria-hidden="true" />
+        <div
+          class="animate-pulse"
+          :style="{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '18px',
+            maxWidth: '560px',
+            margin: '0 auto',
+          }"
+        >
+          <div
+            :class="skeletonBarClass"
+            :style="{
+              width: isSmallMobile ? '96px' : isMobile ? '112px' : '128px',
+              height: isSmallMobile ? '96px' : isMobile ? '112px' : '128px',
+              borderRadius: '9999px',
+            }"
+          />
+          <div :class="skeletonBarClass" :style="{ width: '60%', height: '26px', borderRadius: '9999px' }" />
+          <div :class="skeletonBarClass" :style="{ width: '40%', height: '16px', borderRadius: '9999px' }" />
+          <div :class="skeletonBarClass" :style="{ width: '100%', height: '112px', borderRadius: '20px', marginTop: '12px' }" />
+          <div :class="skeletonBarClass" :style="{ width: '100%', height: '112px', borderRadius: '20px' }" />
+          <div :class="skeletonBarClass" :style="{ width: '100%', height: '72px', borderRadius: '20px' }" />
         </div>
-        <p :style="{ fontSize: responsive.h2Size }">Loading profile...</p>
       </div>
 
       <!-- No Profile Data Yet -->
@@ -571,7 +594,8 @@
           @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.4)'; }"
           @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)'; }"
         >
-          Set Up Profile Now →
+          Set Up Profile Now
+          <Icon name="heroicons:arrow-right" class="w-4 h-4 inline-block align-[-0.2em]" aria-hidden="true" />
         </button>
       </div>
 
@@ -581,7 +605,7 @@
         :style="{ textAlign: 'center', padding: '60px 20px', color: responsive.textPrimary }"
       >
         <div :style="{ marginBottom: '20px' }">
-          <Icon name="heroicons:x-circle" class="w-[72px] h-[72px] text-white/60 mx-auto" aria-hidden="true" />
+          <Icon name="heroicons:exclamation-circle" class="w-[72px] h-[72px] text-white/60 mx-auto" aria-hidden="true" />
         </div>
         <h2 :style="{ fontSize: responsive.h2Size, marginBottom: '15px' }">
           Profile Not Found
@@ -590,10 +614,30 @@
           :style="{
             fontSize: responsive.bodySize,
             color: responsive.textMuted,
+            marginBottom: '30px',
           }"
         >
           This profile doesn't exist or has been removed.
         </p>
+        <NuxtLink
+          to="/Homepage"
+          :style="{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '14px 28px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '50px',
+            color: responsive.textPrimary,
+            fontSize: responsive.bodySize,
+            fontWeight: 600,
+            textDecoration: 'none',
+          }"
+        >
+          <Icon name="heroicons:home" class="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+          Back to Home
+        </NuxtLink>
       </div>
 
       <!-- Profile Content -->
@@ -652,36 +696,7 @@
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
             }"
           >
-            <div
-              :style="{
-                width: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
-                height: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
-                border: '2px solid #2563eb',
-                borderRadius: isSmallMobile ? '4px' : '5px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }"
-            >
-              <svg :width="isSmallMobile ? '10' : isMobile ? '12' : '14'" :height="isSmallMobile ? '10' : isMobile ? '12' : '14'" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="16" rx="2"/>
-                <circle cx="9" cy="10" r="2"/>
-                <path d="M15 8h2"/>
-                <path d="M15 12h2"/>
-                <path d="M7 16h10"/>
-              </svg>
-            </div>
-            <span
-              :style="{
-                color: '#2563eb',
-                fontSize: isSmallMobile ? '11px' : isMobile ? '13px' : '15px',
-                fontWeight: 700,
-                letterSpacing: '0.3px',
-                lineHeight: 1,
-              }"
-            >
-              NFCGo
-            </span>
+            <NFCGoLogo variant="light" :size="isSmallMobile ? 'xs' : 'sm'" />
           </div>
 
           <!-- Hero Content - tiered responsive padding -->
@@ -814,8 +829,8 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">🎓</span>
-                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.qualification }}</span>
+                <Icon name="heroicons:academic-cap" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.qualification }}</span>
               </div>
               <div
                 v-if="profile.position"
@@ -839,8 +854,8 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">💼</span>
-                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.position }}</span>
+                <Icon name="heroicons:briefcase" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.position }}</span>
               </div>
               <!-- Pronouns Badge -->
               <div
@@ -865,8 +880,8 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <span :style="{ fontSize: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }">👤</span>
-                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis' }">{{ profile.pronouns }}</span>
+                <Icon name="heroicons:user" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.pronouns }}</span>
               </div>
             </div>
             
@@ -961,13 +976,16 @@
               transition: 'all 0.3s',
             }"
           >
-            <span
+            <Icon
+              :name="action.icon"
               :style="{
-                fontSize: responsive.actionIconSize,
+                width: responsive.actionIconSize,
+                height: responsive.actionIconSize,
                 lineHeight: 1,
                 flexShrink: 0,
               }"
-            >{{ action.icon }}</span>
+              aria-hidden="true"
+            />
             <span
               :style="{
                 fontSize: responsive.smallSize,
@@ -1022,7 +1040,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                🏢
+                <Icon name="heroicons:building-office" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -1114,6 +1132,8 @@
                       fontWeight: 800,
                       color: responsive.textPrimary,
                       marginBottom: '10px',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                   >
                     {{ company.name }}
@@ -1126,9 +1146,11 @@
                       color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       marginBottom: '8px',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                   >
-                    📋 {{ company.registrationNo }}
+                    <Icon name="heroicons:document-text" class="inline-block w-[1em] h-[1em] align-[-0.15em] mr-1" aria-hidden="true" />{{ company.registrationNo }}
                   </p>
                   
                   <!-- Industry & Year & Employee Count -->
@@ -1153,7 +1175,7 @@
                         color: responsive.textMuted,
                       }"
                     >
-                      🏭 {{ company.industry }}
+                      <Icon name="heroicons:building-storefront" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />{{ company.industry }}
                     </span>
                     <span
                       v-if="company.establishedYear && isFieldVisible('companyTeam', 'establishedYear')"
@@ -1168,7 +1190,7 @@
                         color: responsive.textMuted,
                       }"
                     >
-                      📅 Est. {{ company.establishedYear }}
+                      <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />Est. {{ company.establishedYear }}
                     </span>
                     <span
                       v-if="company.employeeCount && isFieldVisible('companyTeam', 'employeeCount')"
@@ -1183,7 +1205,7 @@
                         color: responsive.textMuted,
                       }"
                     >
-                      👥 {{ company.employeeCount }} employees
+                      <Icon name="heroicons:users" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />{{ company.employeeCount }} employees
                     </span>
                   </div>
                   
@@ -1195,6 +1217,8 @@
                       fontSize: responsive.bodySize,
                       lineHeight: '1.6',
                       marginBottom: '12px',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                     v-html="company.description"
                   />
@@ -1209,6 +1233,9 @@
                       color: '#a8b3ff',
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
+                      maxWidth: '100%',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                   >
                     {{ company.department }}
@@ -1245,7 +1272,7 @@
                     fontSize: isMobile ? '16px' : '20px',
                   }"
                 >
-                  👥
+                  <Icon name="heroicons:users" :style="{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }" aria-hidden="true" />
                 </div>
                 <h3
                   :style="{
@@ -1353,6 +1380,8 @@
                       fontSize: responsive.h4Size,
                       fontWeight: 700,
                       margin: '0 0 6px 0',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                   >
                     {{ member.name }}
@@ -1362,6 +1391,8 @@
                       color: responsive.textMuted,
                       fontSize: responsive.smallSize,
                       margin: 0,
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
                     }"
                   >
                     {{ member.role }}
@@ -1379,7 +1410,7 @@
                       gap: '4px',
                     }"
                   >
-                    View Profile →
+                    View Profile <Icon name="heroicons:arrow-right" class="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                   </p>
                 </component>
               </div>
@@ -1420,7 +1451,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                ✨
+                <Icon name="heroicons:sparkles" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -1526,7 +1557,7 @@
                     fontSize: isMobile ? '16px' : '20px',
                   }"
                 >
-                  🎓
+                  <Icon name="heroicons:academic-cap" :style="{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }" aria-hidden="true" />
                 </div>
                 <h3
                   :style="{
@@ -1543,7 +1574,7 @@
               <!-- Education List -->
               <div v-if="profile.education?.length > 0 && isFieldVisible('profileAchievements', 'education')" :style="{ marginBottom: profile.certifications?.length > 0 ? '24px' : '0' }">
                 <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
-                  <span :style="{ fontSize: '18px' }">📚</span>
+                  <Icon name="heroicons:book-open" :style="{ width: '18px', height: '18px' }" aria-hidden="true" />
                   <h4 :style="{ color: responsive.textPrimary, fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Education</h4>
                 </div>
                 <div :style="{ display: 'grid', gap: '16px', position: 'relative', paddingLeft: isMobile ? '0' : '20px' }">
@@ -1566,10 +1597,10 @@
                     <!-- Timeline dot -->
                     <div v-if="!isMobile" :style="{ position: 'absolute', left: '-26px', top: '24px', width: '12px', height: '12px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '50%', border: '2px solid rgba(10, 14, 39, 0.9)' }" />
                     <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }">
-                      <div :style="{ flex: 1 }">
-                        <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px' }">{{ edu.degree || edu.name }}</p>
-                        <p v-if="edu.institution" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, display: 'flex', alignItems: 'center', gap: '6px' }">
-                          <span>🏛️</span> {{ edu.institution }}
+                      <div :style="{ flex: 1, minWidth: 0 }">
+                        <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ edu.degree || edu.name }}</p>
+                        <p v-if="edu.institution" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, display: 'flex', alignItems: 'center', gap: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+                          <Icon name="heroicons:building-library" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ edu.institution }}
                         </p>
                       </div>
                       <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(79, 172, 254, 0.2)', borderRadius: '20px', color: '#7dd3fc', fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
@@ -1581,7 +1612,7 @@
               <!-- Certifications List -->
               <div v-if="profile.certifications?.length > 0 && isFieldVisible('profileAchievements', 'certifications')">
                 <div :style="{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }">
-                  <span :style="{ fontSize: '18px' }">📜</span>
+                  <Icon name="heroicons:document-check" :style="{ width: '18px', height: '18px' }" aria-hidden="true" />
                   <h4 :style="{ color: responsive.textPrimary, fontSize: responsive.h4Size, margin: 0, fontWeight: 600 }">Certifications</h4>
                 </div>
                 <div :style="{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }">
@@ -1602,11 +1633,11 @@
                     @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }"
                   >
                     <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
-                      <span :style="{ fontSize: '20px' }">✅</span>
+                      <Icon name="heroicons:check-badge" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                     </div>
-                    <div :style="{ flex: 1 }">
-                      <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px' }">{{ cert.name }}</p>
-                      <p v-if="cert.issuer" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px' }">{{ cert.issuer }}</p>
+                    <div :style="{ flex: 1, minWidth: 0 }">
+                      <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ cert.name }}</p>
+                      <p v-if="cert.issuer" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ cert.issuer }}</p>
                       <span v-if="cert.year" :style="{ color: responsive.textSubtle, fontSize: responsive.smallSize }">{{ cert.year }}</span>
                     </div>
                   </div>
@@ -1642,7 +1673,7 @@
                     fontSize: isMobile ? '16px' : '20px',
                   }"
                 >
-                  🏆
+                  <Icon name="heroicons:trophy" :style="{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }" aria-hidden="true" />
                 </div>
                 <h3
                   :style="{
@@ -1672,16 +1703,16 @@
                   @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.2)'; }"
                 >
                   <!-- Trophy decoration -->
-                  <div :style="{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.1, transform: 'rotate(15deg)' }">🏆</div>
+                  <div :style="{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.1, transform: 'rotate(15deg)' }"><Icon name="heroicons:trophy" :style="{ width: '60px', height: '60px' }" aria-hidden="true" /></div>
                   <div :style="{ position: 'relative', zIndex: 1 }">
                     <div :style="{ display: 'flex', alignItems: 'flex-start', gap: '14px' }">
                       <div :style="{ width: '50px', height: '50px', background: 'linear-gradient(135deg, #ffd700, #ffed4e)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)' }">
-                        <span :style="{ fontSize: '24px' }">🏆</span>
+                        <Icon name="heroicons:trophy" :style="{ width: '24px', height: '24px' }" aria-hidden="true" />
                       </div>
-                      <div :style="{ flex: 1 }">
-                        <p :style="{ color: '#ffd700', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)' }">{{ award.title || award.name }}</p>
-                        <p v-if="award.organization" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }">
-                          <span>🏛️</span> {{ award.organization }}
+                      <div :style="{ flex: 1, minWidth: 0 }">
+                        <p :style="{ color: '#ffd700', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ award.title || award.name }}</p>
+                        <p v-if="award.organization" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+                          <Icon name="heroicons:building-library" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ award.organization }}
                         </p>
                         <span v-if="award.year" :style="{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(255, 215, 0, 0.2)', borderRadius: '20px', color: '#ffd700', fontSize: responsive.smallSize, fontWeight: 600 }">{{ award.year }}</span>
                       </div>
@@ -1725,7 +1756,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                🚀
+                <Icon name="heroicons:rocket-launch" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -1791,9 +1822,11 @@
                         : 'scale(1)',
                   }"
                 >
-                  <span :style="{ fontSize: responsive.serviceIconSize }">{{
-                    service.icon
-                  }}</span>
+                  <Icon
+                    :name="resolveServiceIcon(service.icon)"
+                    :style="{ width: responsive.serviceIconSize, height: responsive.serviceIconSize }"
+                    aria-hidden="true"
+                  />
                 </div>
                 <h4
                   :style="{
@@ -1826,7 +1859,7 @@
                       fontSize: responsive.bodySize,
                       fontWeight: 700,
                     }"
-                    >{{ service.linkType === 'Direct Link' && service.url ? 'Visit →' : 'Explore →' }}</span>
+                    >{{ service.linkType === 'Direct Link' && service.url ? 'Visit' : 'Explore' }} <Icon name="heroicons:arrow-right" class="w-4 h-4 inline-block align-[-0.2em]" aria-hidden="true" /></span>
                 </div>
               </div>
             </div>
@@ -1891,7 +1924,7 @@
                     fontSize: responsive.bodySize,
                   }"
                 >
-                  ⏱️ {{ serviceDetails.duration }}
+                  <Icon name="heroicons:clock" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ serviceDetails.duration }}
                 </div>
               </div>
               
@@ -1911,7 +1944,7 @@
                       fontSize: responsive.bodySize,
                     }"
                   >
-                    <span :style="{ color: '#00ff88' }">✓</span> {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
+                    <span :style="{ color: '#00ff88' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span> {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
                   </li>
                 </ul>
               </div>
@@ -1960,7 +1993,7 @@
                   @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
                   @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
                 >
-                  📄 Download Brochure
+                  <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download Brochure
                 </a>
                 
                 <!-- Booking Button -->
@@ -1985,7 +2018,7 @@
                   @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
                   @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
                 >
-                  📅 Book Now
+                  <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Book Now
                 </a>
               </div>
             </div>
@@ -2024,7 +2057,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                💡
+                <Icon name="heroicons:light-bulb" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2100,7 +2133,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                📞
+                <Icon name="heroicons:phone" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2201,7 +2234,7 @@
                     flexShrink: 0,
                   }"
                 >
-                  →
+                  <Icon name="heroicons:arrow-right" class="w-6 h-6" aria-hidden="true" />
                 </div>
               </a>
             </div>
@@ -2240,7 +2273,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                📍
+                <Icon name="heroicons:map-pin" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2269,6 +2302,8 @@
                   fontSize: responsive.h4Size,
                   fontWeight: 700,
                   marginBottom: '15px',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
                 }"
               >
                 {{ address.name }}
@@ -2279,6 +2314,8 @@
                   color: responsive.textMuted,
                   lineHeight: '1.8',
                   fontSize: responsive.bodySize,
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
                 }"
               >
                 <template v-for="(line, idx) in addressDisplayLines" :key="idx">
@@ -2311,7 +2348,7 @@
               @mouseover="handleMapButtonHoverIn"
               @mouseout="handleMapButtonHoverOut"
             >
-              <span :style="{ fontSize: isMobile ? '20px' : '24px' }">🗺️</span>
+              <Icon name="heroicons:map" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               Open Maps
             </a>
           </div>
@@ -2349,7 +2386,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                🌐
+                <Icon name="heroicons:globe-alt" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2406,12 +2443,15 @@
                 @mouseover="(e) => handleSocialHoverIn(e, social.color)"
                 @mouseout="handleSocialHoverOut"
               >
-                <span
+                <Icon
+                  :name="social.emoji"
                   :style="{
-                    fontSize: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
+                    width: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
+                    height: isSmallMobile ? '18px' : isMobile ? '20px' : '24px',
                     flexShrink: 0,
                   }"
-                >{{ social.emoji }}</span>
+                  aria-hidden="true"
+                />
                 <span
                   :style="{
                     overflow: 'hidden',
@@ -2456,7 +2496,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                🕒
+                <Icon name="heroicons:clock" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2521,7 +2561,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                🖼️
+                <Icon name="heroicons:photo" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2600,7 +2640,7 @@
                   fontSize: isMobile ? '20px' : '24px',
                 }"
               >
-                💼
+                <Icon name="heroicons:briefcase" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
@@ -2658,7 +2698,7 @@
                 
                 <!-- Content -->
                 <div :style="{ padding: isMobile ? '20px' : '24px' }">
-                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3 }">{{ project.title }}</h3>
+                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ project.title }}</h3>
                   
                   <!-- Project Meta Info -->
                   <div
@@ -2681,9 +2721,12 @@
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
                       }"
                     >
-                      👤 {{ project.client_name }}
+                      <Icon name="heroicons:user" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />{{ project.client_name }}
                     </span>
                     <span
                       v-if="project.date_completed && isFieldVisible('portfolio', 'dateCompleted')"
@@ -2696,9 +2739,12 @@
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
                       }"
                     >
-                      📅 {{ project.date_completed }}
+                      <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />{{ project.date_completed }}
                     </span>
                     <span
                       v-if="project.location && isFieldVisible('portfolio', 'location')"
@@ -2711,9 +2757,12 @@
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
                       }"
                     >
-                      📍 {{ project.location }}
+                      <Icon name="heroicons:map-pin" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />{{ project.location }}
                     </span>
                   </div>
                   
@@ -2780,7 +2829,7 @@
                       @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)'; }"
                       @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)'; }"
                     >
-                      🔗 View Project
+                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> View Project
                     </button>
                     <a
                       v-if="project.pdf_download && isFieldVisible('portfolio', 'pdfDownload')"
@@ -2803,7 +2852,7 @@
                       @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)'; }"
                       @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.08)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'; }"
                     >
-                      📥 Download PDF
+                      <Icon name="heroicons:arrow-down-tray" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download PDF
                     </a>
                   </div>
                 </div>
@@ -2900,8 +2949,8 @@
                 <div :style="{ padding: isMobile ? '20px' : '24px' }">
                   <!-- Blog Meta -->
                   <div :style="{ display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }">
-                    <span v-if="post.published_date" :style="{ display: 'flex', alignItems: 'center', gap: '6px', color: responsive.textMuted, fontSize: responsive.smallSize }">📅 {{ post.published_date }}</span>
-                    <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: responsive.textMuted, fontSize: responsive.smallSize }">⏱️ {{ post.reading_time }}</span>
+                    <span v-if="post.published_date" :style="{ display: 'flex', alignItems: 'center', gap: '6px', color: responsive.textMuted, fontSize: responsive.smallSize }"><Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ post.published_date }}</span>
+                    <span v-if="post.reading_time && isFieldVisible('blog', 'readingTime')" :style="{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: responsive.textMuted, fontSize: responsive.smallSize }"><Icon name="heroicons:clock" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ post.reading_time }}</span>
                   </div>
                   
                   <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, whiteSpace: 'normal', overflowWrap: 'break-word' }">{{ post.title }}</h3>
@@ -2917,9 +2966,9 @@
                     }"
                   >
                     <div :style="{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
-                      <span :style="{ fontSize: '14px' }">✍️</span>
+                      <Icon name="heroicons:pencil" :style="{ width: '14px', height: '14px' }" aria-hidden="true" />
                     </div>
-                    <span :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, fontWeight: 500 }">{{ post.author_name }}</span>
+                    <span :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, fontWeight: 500, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ post.author_name }}</span>
                   </div>
                   
                   <p v-if="post.excerpt || post.description" :style="{ color: responsive.textMuted, fontSize: responsive.bodySize, lineHeight: '1.7', marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }" v-html="post.excerpt || post.description" />
@@ -2964,7 +3013,7 @@
                       @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)'; }"
                       @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(240, 147, 251, 0.3)'; }"
                     >
-                      📖 Read More
+                      <Icon name="heroicons:book-open" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Read More
                     </button>
 
                     <!-- External Link (if available) -->
@@ -2989,7 +3038,7 @@
                       @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; }"
                       @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.1)'; }"
                     >
-                      🔗 Visit Link
+                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Visit Link
                     </a>
                   </div>
                 </div>
@@ -3013,7 +3062,7 @@
               paddingBottom: isSmallMobile ? '10px' : '12px',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }">
-              <span :style="{ fontSize: isSmallMobile ? '16px' : '18px' }">⚡</span>
+              <Icon name="heroicons:bolt" :style="{ width: isSmallMobile ? '16px' : '18px', height: isSmallMobile ? '16px' : '18px' }" aria-hidden="true" />
               <span :style="{ color: responsive.textPrimary, fontSize: isSmallMobile ? '13px' : '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
             </div>
             
@@ -3041,7 +3090,7 @@
                 @mouseout="(e) => { e.currentTarget.style.background = 'rgba(102, 126, 234, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
               >
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)' }">
-                  <span :style="{ fontSize: '20px' }">📥</span>
+                  <Icon name="heroicons:arrow-down-tray" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Save Contact</span>
               </button>
@@ -3067,7 +3116,7 @@
                 @mouseout="(e) => { e.currentTarget.style.background = 'rgba(240, 147, 251, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.3)'; }"
               >
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(240, 147, 251, 0.4)' }">
-                  <span :style="{ fontSize: '20px' }">✉️</span>
+                  <Icon name="heroicons:envelope" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Message</span>
               </button>
@@ -3093,7 +3142,7 @@
                 @mouseout="(e) => { e.currentTarget.style.background = 'rgba(79, 172, 254, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.3)'; }"
               >
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)' }">
-                  <span :style="{ fontSize: '20px' }">📱</span>
+                  <Icon name="heroicons:qr-code" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">QR Code</span>
               </button>
@@ -3119,7 +3168,7 @@
                 @mouseout="(e) => { e.currentTarget.style.background = 'rgba(56, 239, 125, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(56, 239, 125, 0.3)'; }"
               >
                 <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #11998e, #38ef7d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(56, 239, 125, 0.4)' }">
-                  <span :style="{ fontSize: '20px' }">🔗</span>
+                  <Icon name="heroicons:share" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Share</span>
               </button>
@@ -3148,7 +3197,7 @@
               @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.5)'; }"
               @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.3)'; }"
             >
-              <span :style="{ fontSize: '18px' }">📅</span>
+              <Icon name="heroicons:calendar" :style="{ width: '18px', height: '18px' }" aria-hidden="true" />
               <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 600 }">Book Appointment</span>
             </a>
 
@@ -3182,7 +3231,7 @@
       @mouseout="handleScrollButtonHoverOut"
     >
       <span :style="{ display: 'block', animation: 'bounce 1s infinite' }"
-        >↑</span
+        ><Icon name="heroicons:arrow-up" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" /></span
       >
     </button>
 
@@ -3232,11 +3281,11 @@
             color: responsive.textPrimary,
             fontSize: '18px',
           }"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
 
         <!-- Header -->
         <div :style="{ marginBottom: '24px', textAlign: 'center' }">
-          <div :style="{ fontSize: '40px', marginBottom: '12px' }">✉️</div>
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:envelope" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
           <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
           <p :style="{ color: responsive.textMuted, fontSize: '14px' }">I'll get back to you as soon as possible</p>
         </div>
@@ -3253,7 +3302,7 @@
             marginBottom: '16px',
           }"
         >
-          <div :style="{ fontSize: '40px', marginBottom: '8px' }">✅</div>
+          <div :style="{ fontSize: '40px', marginBottom: '8px' }"><Icon name="heroicons:check-circle" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
           <p :style="{ color: '#22c55e', fontWeight: 600 }">Message sent successfully!</p>
         </div>
 
@@ -3404,11 +3453,11 @@
             color: responsive.textPrimary,
             fontSize: '18px',
           }"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
 
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
-          <div :style="{ fontSize: '40px', marginBottom: '12px' }">📱</div>
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:qr-code" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
           <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
           <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share this profile instantly</p>
         </div>
@@ -3432,8 +3481,8 @@
 
         <!-- Profile Info -->
         <div :style="{ marginBottom: '16px' }">
-          <p :style="{ color: responsive.textPrimary, fontSize: '18px', fontWeight: 600 }">{{ profile.name }}</p>
-          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">{{ profile.position }}</p>
+          <p :style="{ color: responsive.textPrimary, fontSize: '18px', fontWeight: 600, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.name }}</p>
+          <p :style="{ color: responsive.textMuted, fontSize: '14px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.position }}</p>
         </div>
 
         <!-- Copy Link Button -->
@@ -3455,7 +3504,7 @@
             gap: '8px',
           }"
         >
-          <span>📋</span> Copy Profile Link
+          <Icon name="heroicons:clipboard" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Copy Profile Link
         </button>
       </div>
     </div>
@@ -3507,11 +3556,11 @@
             color: responsive.textPrimary,
             fontSize: '18px',
           }"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
 
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
-          <div :style="{ fontSize: '40px', marginBottom: '12px' }">🔗</div>
+          <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:share" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
           <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
           <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share on your favorite platform</p>
         </div>
@@ -3524,7 +3573,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#1877f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📘</div>
+            <div :style="{ width: '56px', height: '56px', background: '#1877f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:globe-alt" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Facebook</span>
           </a>
           <!-- Twitter/X -->
@@ -3533,7 +3582,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#000000', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">🐦</div>
+            <div :style="{ width: '56px', height: '56px', background: '#000000', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:at-symbol" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">X</span>
           </a>
           <!-- LinkedIn -->
@@ -3542,7 +3591,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#0a66c2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💼</div>
+            <div :style="{ width: '56px', height: '56px', background: '#0a66c2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:briefcase" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">LinkedIn</span>
           </a>
           <!-- WhatsApp -->
@@ -3551,7 +3600,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#25d366', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
+            <div :style="{ width: '56px', height: '56px', background: '#25d366', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:chat-bubble-left-right" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">WhatsApp</span>
           </a>
           <!-- Telegram -->
@@ -3560,7 +3609,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#0088cc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">✈️</div>
+            <div :style="{ width: '56px', height: '56px', background: '#0088cc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:paper-airplane" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Telegram</span>
           </a>
           <!-- Email -->
@@ -3568,7 +3617,7 @@
             :href="`mailto:?subject=${encodeURIComponent('Check out ' + profile.name)}&body=${encodeURIComponent('Here is ' + profile.name + '\'s profile: ' + currentUrl)}`"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#ea4335', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📧</div>
+            <div :style="{ width: '56px', height: '56px', background: '#ea4335', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:envelope" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Email</span>
           </a>
           <!-- SMS -->
@@ -3576,7 +3625,7 @@
             :href="`sms:?body=${encodeURIComponent(profile.name + ' - ' + currentUrl)}`"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#34c759', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">💬</div>
+            <div :style="{ width: '56px', height: '56px', background: '#34c759', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:device-phone-mobile" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">SMS</span>
           </a>
           <!-- Copy Link -->
@@ -3584,7 +3633,7 @@
             @click="copyProfileLink"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }">📋</div>
+            <div :style="{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:clipboard" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Copy</span>
           </button>
         </div>
@@ -3642,7 +3691,7 @@
           }"
           @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
           @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-5 h-5" aria-hidden="true" /></button>
 
         <!-- Service Icon & Title -->
         <div :style="{ textAlign: 'center', marginBottom: '24px' }">
@@ -3657,9 +3706,9 @@
             justifyContent: 'center',
             fontSize: '40px',
           }">
-            {{ selectedService.icon || '🚀' }}
+            <Icon :name="resolveServiceIcon(selectedService.icon)" :style="{ width: '40px', height: '40px' }" aria-hidden="true" />
           </div>
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '8px' }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '8px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedService.name }}
           </h3>
           <div v-if="selectedService.category" :style="{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }">
@@ -3683,7 +3732,7 @@
               fontSize: '13px',
               fontWeight: 500,
             }">
-              ⏱️ {{ selectedService.duration }}
+              <Icon name="heroicons:clock" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedService.duration }}
             </span>
           </div>
         </div>
@@ -3724,13 +3773,16 @@
             padding: '16px',
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '12px',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
           }" v-html="selectedService.description"></p>
         </div>
 
         <!-- Features -->
         <div v-if="selectedService.features && selectedService.features.length > 0" :style="{ marginBottom: '24px' }">
           <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-            ✨ Key Features
+            <Icon name="heroicons:sparkles" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            Key Features
           </h4>
           <div :style="{ display: 'grid', gap: '10px' }">
             <div 
@@ -3745,8 +3797,8 @@
                 borderRadius: '10px',
               }"
             >
-              <span :style="{ color: '#00ff88', fontSize: '16px' }">✓</span>
-              <span :style="{ color: responsive.textPrimary, fontSize: '14px' }">
+              <span :style="{ color: '#00ff88', fontSize: '16px' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span>
+              <span :style="{ color: responsive.textPrimary, fontSize: '14px', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">
                 {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
               </span>
             </div>
@@ -3756,7 +3808,8 @@
         <!-- Tags -->
         <div v-if="selectedService.tags && selectedService.tags.length > 0" :style="{ marginBottom: '24px' }">
           <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-            🏷️ Keywords
+            <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            Keywords
           </h4>
           <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
             <span 
@@ -3769,6 +3822,9 @@
                 borderRadius: '16px',
                 color: '#a8b3ff',
                 fontSize: '13px',
+                maxWidth: '100%',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
               }"
             >
               #{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}
@@ -3779,7 +3835,8 @@
         <!-- Gallery -->
         <div v-if="selectedService.gallery && selectedService.gallery.length > 0" :style="{ marginBottom: '24px' }">
           <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-            🖼️ Gallery
+            <Icon name="heroicons:photo" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            Gallery
           </h4>
           <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }">
             <div 
@@ -3809,7 +3866,8 @@
         <!-- Video -->
         <div v-if="selectedService.video" :style="{ marginBottom: '24px' }">
           <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-            🎬 Promo Video
+            <Icon name="heroicons:film" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            Promo Video
           </h4>
           <a 
             :href="selectedService.video" 
@@ -3826,7 +3884,7 @@
               transition: 'all 0.3s',
             }"
           >
-            <span :style="{ fontSize: '24px' }">▶️</span>
+            <Icon name="heroicons:play-circle" :style="{ width: '24px', height: '24px' }" aria-hidden="true" />
             <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 500 }">Watch Video</span>
           </a>
         </div>
@@ -3858,7 +3916,7 @@
             @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'"
             @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
           >
-            📄 Download Brochure
+            <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download Brochure
           </a>
 
           <!-- Booking Button -->
@@ -3886,7 +3944,7 @@
             @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
             @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
           >
-            📅 Book Now
+            <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Book Now
           </a>
         </div>
       </div>
@@ -3943,7 +4001,7 @@
           }"
           @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
           @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-5 h-5" aria-hidden="true" /></button>
 
         <!-- Cover Image -->
         <div 
@@ -3970,7 +4028,7 @@
         <!-- Content -->
         <div :style="{ padding: isMobile ? '24px' : '32px', marginTop: selectedProject.cover_image ? '-60px' : 0, position: 'relative', zIndex: 2 }">
           <!-- Title -->
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '16px' }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '16px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedProject.title }}
           </h3>
 
@@ -3979,26 +4037,27 @@
             <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.4)', borderRadius: '20px', color: '#a8b3ff', fontSize: '13px' }">
               {{ selectedProject.category }}
             </span>
-            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px' }">
-              👤 {{ selectedProject.client_name }}
+            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+              <Icon name="heroicons:user" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.client_name }}
             </span>
-            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px' }">
-              📅 {{ selectedProject.date_completed }}
+            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+              <Icon name="heroicons:calendar" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.date_completed }}
             </span>
-            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px' }">
-              📍 {{ selectedProject.location }}
+            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+              <Icon name="heroicons:map-pin" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.location }}
             </span>
           </div>
 
           <!-- Description -->
           <div v-if="selectedProject.description" :style="{ marginBottom: '24px' }">
-            <p :style="{ color: responsive.textMuted, fontSize: '15px', lineHeight: '1.8' }" v-html="selectedProject.description"></p>
+            <p :style="{ color: responsive.textMuted, fontSize: '15px', lineHeight: '1.8', overflowWrap: 'break-word', wordBreak: 'break-word' }" v-html="selectedProject.description"></p>
           </div>
 
           <!-- Gallery -->
           <div v-if="selectedProject.gallery && selectedProject.gallery.length > 0" :style="{ marginBottom: '24px' }">
             <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
-              🖼️ Project Gallery
+              <Icon name="heroicons:photo" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+              Project Gallery
             </h4>
             <div :style="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }">
               <div 
@@ -4031,8 +4090,9 @@
 
           <!-- Skills/Tags -->
           <div v-if="(selectedProject.skills_used && selectedProject.skills_used.length > 0) || (selectedProject.tags && selectedProject.tags.length > 0)" :style="{ marginBottom: '24px' }">
-            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
-              🏷️ Skills & Tags
+            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+              <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+              Skills & Tags
             </h4>
             <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
               <span 
@@ -4072,7 +4132,7 @@
                 boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
               }"
             >
-              🔗 View Project
+              <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> View Project
             </a>
             <a
               v-if="selectedProject.pdf_download"
@@ -4095,7 +4155,7 @@
                 textDecoration: 'none',
               }"
             >
-              📄 Download PDF
+              <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download PDF
             </a>
           </div>
         </div>
@@ -4152,7 +4212,7 @@
           }"
           @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
           @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
-        >✕</button>
+        ><Icon name="heroicons:x-mark" class="w-5 h-5" aria-hidden="true" /></button>
 
         <!-- Media Gallery Carousel/Slider -->
         <!-- Priority: gallery array, then cover_image -->
@@ -4212,25 +4272,25 @@
               {{ selectedBlog.category }}
              </span>
              <span v-if="selectedBlog.published_date" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
-               📅 {{ selectedBlog.published_date }}
+               <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ selectedBlog.published_date }}
              </span>
              <span v-if="selectedBlog.reading_time" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
-               ⏱️ {{ selectedBlog.reading_time }}
+               <Icon name="heroicons:clock" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ selectedBlog.reading_time }}
              </span>
            </div>
 
           <!-- Title -->
-          <h3 :style="{ color: responsive.textPrimary, fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3 }">
+          <h3 :style="{ color: responsive.textPrimary, fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedBlog.title }}
           </h3>
 
           <!-- Author -->
           <div v-if="selectedBlog.author_name" :style="{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }">
               <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }">
-                  ✍️
+                  <Icon name="heroicons:pencil" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
               </div>
-              <div>
-                  <div :style="{ color: responsive.textPrimary, fontWeight: 600, fontSize: '15px' }">{{ selectedBlog.author_name }}</div>
+              <div :style="{ minWidth: 0 }">
+                  <div :style="{ color: responsive.textPrimary, fontWeight: 600, fontSize: '15px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ selectedBlog.author_name }}</div>
                   <div :style="{ color: responsive.textSubtle, fontSize: '13px' }">Author</div>
               </div>
           </div>
@@ -4243,6 +4303,8 @@
                 fontSize: responsive.bodySize,
                 lineHeight: '1.8',
                 marginBottom: '32px',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
                 whiteSpace: 'pre-wrap' // Preserve newlines if not HTML, but v-html handles HTML
             }"
             class="rich-text-content"
@@ -4251,8 +4313,9 @@
 
           <!-- Tags -->
           <div v-if="selectedBlog.tags && selectedBlog.tags.length > 0" :style="{ marginBottom: '32px' }">
-            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px' }">
-              🏷️ Tags
+            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+              <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+              Tags
             </h4>
             <div :style="{ display: 'flex', flexWrap: 'wrap', gap: '8px' }">
               <span
@@ -4285,7 +4348,7 @@
                 @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
                 @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
               >
-                🔗 Visit External Page
+                <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Visit External Page
               </a>
           </div>
 
@@ -4650,6 +4713,21 @@ const designSettings = reactive({
   bgAnimation: 'none',
 });
 
+// Loading skeleton bar colour - translucent so it never flashes a fixed colour
+// on the user's configured background. Light text => dark theme => translucent
+// white bars; dark text => light theme => translucent black bars.
+const skeletonBarClass = computed(() => {
+  const hex = (designSettings.textColor || "#ffffff").replace("#", "");
+  let h = hex;
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length !== 6) return "bg-white/10";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 140 ? "bg-black/10" : "bg-white/10";
+});
+
 // Card style library (matches ProfileBuilder DESIGN_LIBRARY)
 const CARD_STYLE_MAP = {
   minimal: 'bg-white/90 backdrop-blur-sm rounded-2xl border border-white/60',
@@ -4893,32 +4971,32 @@ const quickActions = computed(() => {
   
   // Phone (check field visibility)
   if (contactMethods.value[0]?.subtitle && isFieldVisible('contact', 'phone')) {
-    actions.push({ icon: "📞", label: "Call", action: "call" });
+    actions.push({ icon: "heroicons:phone", label: "Call", action: "call" });
   }
   
   // Email
   if (contactMethods.value[1]?.subtitle) {
-    actions.push({ icon: "✉️", label: "Email", action: "email" });
+    actions.push({ icon: "heroicons:envelope", label: "Email", action: "email" });
   }
   
   // WhatsApp (check field visibility)
   if (contactMethods.value[2]?.subtitle && contactMethods.value[2]?.href && isFieldVisible('contact', 'whatsapp')) {
-    actions.push({ icon: "💬", label: "Chat", action: "whatsapp" });
+    actions.push({ icon: "heroicons:chat-bubble-left-right", label: "Chat", action: "whatsapp" });
   }
   
   // Appointment (check booking_integration feature)
   if (appointmentLink.value && isFeatureEnabled('booking_integration')) {
-    actions.push({ icon: "📅", label: "Book", action: "appointment" });
+    actions.push({ icon: "heroicons:calendar", label: "Book", action: "appointment" });
   }
   
   // Payment
   if (paymentButton.value.url) {
-    actions.push({ icon: "💳", label: paymentButton.value.text || "Pay", action: "payment" });
+    actions.push({ icon: "heroicons:credit-card", label: paymentButton.value.text || "Pay", action: "payment" });
   }
   
   // Website
   if (contactMethods.value[3]?.subtitle) {
-    actions.push({ icon: "🌐", label: "Website", action: "website" });
+    actions.push({ icon: "heroicons:globe-alt", label: "Website", action: "website" });
   }
   
   return actions;
@@ -5084,6 +5162,7 @@ const openServiceModal = (service) => {
 
 // Handle service card click: direct link opens URL, otherwise opens details modal
 const handleServiceClick = (service) => {
+  activeService.value = null;
   if (service.linkType === 'Direct Link' && service.url) {
     window.open(service.url, '_blank', 'noopener,noreferrer');
     return;
@@ -5143,7 +5222,7 @@ const closePortfolioModal = () => {
 const isFeatureEnabled = (featureKey) => {
   const isEnabled = features.value[featureKey] !== false;
   if (typeof window !== 'undefined') {
-    console.log(`🔍 isFeatureEnabled("${featureKey}"): enabled=${isEnabled}`);
+    console.log(`isFeatureEnabled("${featureKey}"): enabled=${isEnabled}`);
   }
   return isEnabled;
 };
@@ -5155,7 +5234,7 @@ const quickActionCount = computed(() => quickActionKeys.filter(key => isFeatureE
 
 // Load preview data from localStorage (matches BusinessProfileBuilder.vue profileData structure)
 const loadPreviewData = (data) => {
-  console.log('📋 Loading preview data:', data);
+  console.log('Loading preview data:', data);
   
   // ============ PROFILE SECTION ============
   profile.value.name = data.name || "Your Name";
@@ -5294,7 +5373,7 @@ const loadPreviewData = (data) => {
       .map(service => ({
         ...service,
         name: service.name || service.service_name || service.serviceName,
-        icon: service.icon || "🚀",
+        icon: service.icon || "heroicons:rocket-launch",
         category: service.category || service.service_category || service.serviceCategory || "",
         linkType: service.link_type || service.serviceLinkType || service.service_link_type || "Description & Features",
         url: service.url || service.serviceUrl || service.service_url || "",
@@ -5389,7 +5468,7 @@ const loadPreviewData = (data) => {
       .filter((link) => link.is_active && link.url)
       .sort((a, b) => (a.order || 0) - (b.order || 0))
       .map((link) => ({
-        emoji: getPlatformEmoji(link.platform),
+        emoji: getPlatformIcon(link.platform),
         name: link.title || link.platform,
         href: link.url,
         color: getPlatformColor(link.platform),
@@ -5456,75 +5535,134 @@ const loadPreviewData = (data) => {
   // ============ SECTION LAYOUT ============
   if (data.sectionLayout && Array.isArray(data.sectionLayout)) {
     sectionLayout.value = data.sectionLayout;
-    console.log('📐 Section layout loaded from preview:', sectionLayout.value);
+    console.log('Section layout loaded from preview:', sectionLayout.value);
   } else {
-    console.log('⚠️ No sectionLayout in preview data, using defaults');
+    console.log('No sectionLayout in preview data, using defaults');
   }
   
   // ============ FIELD LAYOUT (with sub-section states) ============
   if (data.fieldLayout && typeof data.fieldLayout === 'object') {
     fieldLayout.value = data.fieldLayout;
-    console.log('📐 Field layout loaded from preview:', fieldLayout.value);
+    console.log('Field layout loaded from preview:', fieldLayout.value);
   }
 
   // ============ FEATURE SETTINGS ============
   // Load available features (assigned by admin)
   if (data.availableFeatures && Array.isArray(data.availableFeatures)) {
     availableFeatures.value = data.availableFeatures;
-    console.log('🔐 Available features (assigned by admin):', availableFeatures.value);
+    console.log('Available features (assigned by admin):', availableFeatures.value);
   } else {
     // If no availableFeatures provided, set to empty array (meaning admin didn't assign any features)
     availableFeatures.value = [];
-    console.log('🚫 No features assigned by admin');
+    console.log('No features assigned by admin');
   }
   
-  console.log('📥 Raw features from preview data:', data.features);
+  console.log('Raw features from preview data:', data.features);
   if (data.features && typeof data.features === 'object' && Object.keys(data.features).length > 0) {
     // Merge features - preview data overrides defaults
     Object.keys(data.features).forEach(key => {
       features.value[key] = data.features[key];
       console.log(`  → Setting feature "${key}" to:`, data.features[key]);
     });
-    console.log('✨ Features after merge:', JSON.stringify(features.value));
+    console.log('Features after merge:', JSON.stringify(features.value));
   } else {
-    console.log('⚠️ No features in preview data, using defaults:', features.value);
+    console.log('No features in preview data, using defaults:', features.value);
   }
   if (data.featureOrder && Array.isArray(data.featureOrder)) {
     featureOrder.value = data.featureOrder;
-    console.log('✨ Feature order loaded from preview:', featureOrder.value);
+    console.log('Feature order loaded from preview:', featureOrder.value);
   }
 
   profileNotFound.value = false;
-  console.log('✅ Preview data loaded successfully');
+  console.log('Preview data loaded successfully');
 };
 
 // Helper functions for platform data
-const getPlatformEmoji = (platform) => {
+const getPlatformIcon = (platform) => {
   const platformMap = {
-    instagram: "📸",
-    facebook: "📘",
-    tiktok: "🎵",
-    youtube: "📺",
-    spotify: "🎵",
-    whatsapp: "💬",
-    x: "🐦",
-    snapchat: "👻",
-    linkedin: "💼",
-    telegram: "✈️",
-    website: "🌐",
-    email: "📧",
+    instagram: "heroicons:camera",
+    facebook: "heroicons:globe-alt",
+    tiktok: "heroicons:musical-note",
+    youtube: "heroicons:play-circle",
+    spotify: "heroicons:musical-note",
+    whatsapp: "heroicons:chat-bubble-left-right",
+    x: "heroicons:at-symbol",
+    snapchat: "heroicons:face-smile",
+    linkedin: "heroicons:briefcase",
+    telegram: "heroicons:paper-airplane",
+    website: "heroicons:globe-alt",
+    email: "heroicons:envelope",
     // New platforms
-    reddit: "🤖",
-    pinterest: "📌",
-    wechat: "💬",
-    douyin: "🎵",
-    discord: "🎮",
-    threads: "🧵",
-    xiaohongshu: "📕",
-    quora: "❓",
-    custom: "🔗",
+    reddit: "heroicons:chat-bubble-bottom-center-text",
+    pinterest: "heroicons:map-pin",
+    wechat: "heroicons:chat-bubble-left-right",
+    douyin: "heroicons:musical-note",
+    discord: "heroicons:chat-bubble-oval-left",
+    threads: "heroicons:at-symbol",
+    xiaohongshu: "heroicons:book-open",
+    quora: "heroicons:question-mark-circle",
+    custom: "heroicons:link",
   };
-  return platformMap[platform?.toLowerCase()] || "🔗";
+  return platformMap[platform?.toLowerCase()] || "heroicons:link";
+};
+
+// Maps the ProfileBuilder SERVICE_ICONS emoji set to Heroicons names so the
+// public page always renders SVG icons, even when the stored service icon is
+// an emoji selected by the user in the builder.
+const SERVICE_EMOJI_ICON_MAP = {
+  "🚀": "heroicons:rocket-launch",
+  "💼": "heroicons:briefcase",
+  "🏢": "heroicons:building-office",
+  "👨‍💻": "heroicons:computer-desktop",
+  "👩‍💼": "heroicons:user-circle",
+  "📊": "heroicons:chart-bar",
+  "📈": "heroicons:arrow-trending-up",
+  "📉": "heroicons:arrow-trending-down",
+  "🎯": "heroicons:cursor-arrow-rays",
+  "💡": "heroicons:light-bulb",
+  "🛠️": "heroicons:wrench-screwdriver",
+  "🔧": "heroicons:wrench",
+  "⚙️": "heroicons:cog-6-tooth",
+  "🔩": "heroicons:cog-8-tooth",
+  "🏗️": "heroicons:building-office-2",
+  "🏭": "heroicons:building-office-2",
+  "📱": "heroicons:device-phone-mobile",
+  "💻": "heroicons:computer-desktop",
+  "🖥️": "heroicons:computer-desktop",
+  "🖨️": "heroicons:printer",
+  "🌐": "heroicons:globe-alt",
+  "☁️": "heroicons:cloud",
+  "🔒": "heroicons:lock-closed",
+  "🛡️": "heroicons:shield-check",
+  "📷": "heroicons:camera",
+  "🎨": "heroicons:paint-brush",
+  "✏️": "heroicons:pencil",
+  "🖌️": "heroicons:paint-brush",
+  "🎬": "heroicons:film",
+  "🎵": "heroicons:musical-note",
+  "📝": "heroicons:document-text",
+  "📚": "heroicons:book-open",
+  "🏥": "heroicons:building-office-2",
+  "💊": "heroicons:beaker",
+  "🦷": "heroicons:face-smile",
+  "👁️": "heroicons:eye",
+  "💉": "heroicons:beaker",
+  "🧬": "heroicons:beaker",
+  "🌿": "heroicons:sparkles",
+  "🍃": "heroicons:sparkles",
+  "🛒": "heroicons:shopping-cart",
+  "🛍️": "heroicons:shopping-bag",
+  "💳": "heroicons:credit-card",
+  "💰": "heroicons:banknotes",
+  "💵": "heroicons:banknotes",
+  "💎": "heroicons:sparkles",
+  "📦": "heroicons:cube",
+  "🚚": "heroicons:truck",
+};
+
+const resolveServiceIcon = (icon) => {
+  if (typeof icon === "string" && icon.includes(":")) return icon; // already an icon name
+  return SERVICE_EMOJI_ICON_MAP[icon] || "heroicons:sparkles";
 };
 
 const getPlatformColor = (platform) => {
@@ -5607,7 +5745,7 @@ const loadProfileData = async () => {
           
           // Check if data is fresh (within 5 minutes)
           if (Date.now() - previewData.timestamp < 5 * 60 * 1000) {
-            console.log('📋 Loading preview data from localStorage');
+            console.log('Loading preview data from localStorage');
             loadPreviewData(previewData);
             loading.value = false;
             return;
@@ -5619,16 +5757,16 @@ const loadProfileData = async () => {
     }
 
     // Fetch landing page data for this NFC card
-    console.log(`🔍 Fetching landing page for NFC card: ${nfcCardId}`);
-    console.log(`🌐 Request URL: /nfc-cards/${nfcCardId}/landing-page`);
+    console.log(`Fetching landing page for NFC card: ${nfcCardId}`);
+    console.log(`Request URL: /nfc-cards/${nfcCardId}/landing-page`);
     const response = await $api.get(`/nfc-cards/${nfcCardId}/landing-page`);
-    console.log('📡 API Response:', response);
-    console.log('📄 Landing Page Data:', response.landing_page);
-    console.log('✅ Has data?', !!response.landing_page);
+    console.log('API Response:', response);
+    console.log('Landing Page Data:', response.landing_page);
+    console.log('Has data?', !!response.landing_page);
 
     if (response.success && response.landing_page) {
       const data = response.landing_page;
-      console.log('✅ Loading landing page data...');
+      console.log('Loading landing page data...');
 
       // Basic Info (Profile Tab)
       profile.value.name = data.name || "Your Name";
@@ -5730,7 +5868,7 @@ const loadProfileData = async () => {
         services.value = data.services.map(service => ({
           ...service,
           name: service.name || service.service_name || service.serviceName,
-          icon: service.icon || "🚀",
+          icon: service.icon || "heroicons:rocket-launch",
           category: service.category || service.service_category || service.serviceCategory || "",
           linkType: service.link_type || service.serviceLinkType || service.service_link_type || "Description & Features",
           url: service.url || service.serviceUrl || service.service_url || "",
@@ -5825,7 +5963,7 @@ const loadProfileData = async () => {
           .filter((link) => link.is_active && link.url) // Only show active links
           .sort((a, b) => (a.order || 0) - (b.order || 0)) // Sort by order
           .map((link) => ({
-            emoji: getPlatformEmoji(link.platform),
+            emoji: getPlatformIcon(link.platform),
             name: link.title || link.platform,
             href: link.url,
             color: getPlatformColor(link.platform),
@@ -5940,20 +6078,20 @@ const loadProfileData = async () => {
       // ==================== A. LOAD SECTION LAYOUT ====================
       if (data.section_layout && Array.isArray(data.section_layout)) {
         sectionLayout.value = data.section_layout;
-        console.log('📐 Section layout loaded:', sectionLayout.value);
+        console.log('Section layout loaded:', sectionLayout.value);
       }
       
       // ==================== B. LOAD FIELD LAYOUT (with sub-section states) ====================
       if (data.field_layout && typeof data.field_layout === 'object') {
         fieldLayout.value = data.field_layout;
-        console.log('📐 Field layout loaded:', fieldLayout.value);
+        console.log('Field layout loaded:', fieldLayout.value);
       }
 
       // ==================== C. LOAD FEATURE SETTINGS ====================
       // Load user feature toggles first (needed to derive availableFeatures below)
       if (data.features && typeof data.features === 'object') {
         features.value = { ...features.value, ...data.features };
-        console.log('✨ Features loaded:', features.value);
+        console.log('Features loaded:', features.value);
       }
 
       // Load available features (assigned by admin)
@@ -5962,21 +6100,21 @@ const loadProfileData = async () => {
       const knownFeatureKeys = ['contact_form', 'vcard_download', 'qr_code', 'remove_branding', 'booking_integration', 'social_sharing'];
       if (data.available_features && Array.isArray(data.available_features) && data.available_features.length > 0) {
         availableFeatures.value = data.available_features;
-        console.log('🔐 Available features (from API):', availableFeatures.value);
+        console.log('Available features (from API):', availableFeatures.value);
       } else {
         const derivedFromFeatures = Object.keys(features.value).filter(k => knownFeatureKeys.includes(k));
         availableFeatures.value = derivedFromFeatures.length > 0 ? derivedFromFeatures : knownFeatureKeys;
-        console.log('🔐 Available features (derived):', availableFeatures.value);
+        console.log('Available features (derived):', availableFeatures.value);
       }
 
       if (data.feature_order && Array.isArray(data.feature_order)) {
         featureOrder.value = data.feature_order;
-        console.log('✨ Feature order loaded:', featureOrder.value);
+        console.log('Feature order loaded:', featureOrder.value);
       }
 
       // === Apply design_config (complete design object) ===
       if (data.design_config) {
-        console.log('🎨 Applying design config:', data.design_config);
+        console.log('Applying design config:', data.design_config);
         applyDesignConfig(data.design_config);
       }
       
@@ -5995,13 +6133,13 @@ const loadProfileData = async () => {
       // Check if current user owns this card (to show Edit button)
       await checkCardOwnership();
     } else {
-      console.warn('⚠️ No landing page data returned');
+      console.warn('No landing page data returned');
       noProfileData.value = true;
     }
   } catch (error) {
     // 404 = Card exists but has no landing page data yet
     if (error.response?.status === 404) {
-      console.log('ℹ️ No landing page data found for this card (expected for new cards)');
+      console.log('No landing page data found for this card (expected for new cards)');
       noProfileData.value = true;
       // Check if user owns this card to show setup button
       await checkCardOwnership();
@@ -6018,7 +6156,7 @@ const loadProfileData = async () => {
 // Added: Function to apply design configuration
 const applyDesignConfig = (designConfig) => {
   try {
-    console.log('🎨 Applying design config:', designConfig);
+    console.log('Applying design config:', designConfig);
     
     // Apply Theme
     if (designConfig.theme) {
@@ -6073,7 +6211,7 @@ const applyDesignConfig = (designConfig) => {
     // Save current theme configuration
     currentThemeConfig.value = designConfig;
     
-    console.log('✅ Design settings applied:', designSettings);
+    console.log('Design settings applied:', designSettings);
   } catch (error) {
     console.error('Error applying design config:', error);
   }
@@ -6260,6 +6398,51 @@ const currentUrl = computed(() => {
     return window.location.href;
   }
   return '';
+});
+
+// ============ SEO / OPEN GRAPH ============
+// Meta is derived from already-loaded profile data and stays reactive so it
+// updates once loadProfileData()/loadPreviewData() resolve. The description
+// never exposes the private contact fields (email/phone).
+const seoTitle = computed(() => {
+  const name = (profile.value.name || "").trim();
+  if (!name) return "NFCGo Digital Business Card";
+  const role = (profile.value.position || "").trim();
+  const comp = (company.value.name || "").trim();
+  const suffix = role && comp ? `${role} at ${comp}` : role || comp;
+  return suffix ? `${name} - ${suffix}` : `${name} | NFCGo Digital Business Card`;
+});
+
+const seoDescription = computed(() => {
+  const bio = (profile.value.bio || profile.value.tagline || "").trim();
+  if (bio) return bio.length > 160 ? `${bio.slice(0, 157)}...` : bio;
+  const name = (profile.value.name || "").trim();
+  return name
+    ? `View the digital business card of ${name} on NFCGo. Connect instantly by tapping an NFC card.`
+    : "NFCGo digital business card - tap to connect and share your professional profile instantly.";
+});
+
+// Only surface a real, user-supplied image URL. The default avatar is an inline
+// SVG data-URI placeholder, which must never be emitted as an og:image.
+const seoImage = computed(() => {
+  const img = profileImage.value;
+  return typeof img === "string" && img && !img.startsWith("data:")
+    ? img
+    : undefined;
+});
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogType: "profile",
+  ogUrl: currentUrl,
+  ogImage: seoImage,
+  twitterCard: "summary_large_image",
+  twitterTitle: seoTitle,
+  twitterDescription: seoDescription,
+  twitterImage: seoImage,
 });
 
 // Copy profile link to clipboard

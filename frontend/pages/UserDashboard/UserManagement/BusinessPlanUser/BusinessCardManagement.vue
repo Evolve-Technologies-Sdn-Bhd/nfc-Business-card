@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">Card Management</h1>
+          <h1 class="page-title">Card Management</h1>
           <p class="mt-2 text-secondary-600">
             Manage Business Plan NFC cards for employees
           </p>
@@ -26,17 +26,17 @@
         <div class="flex items-center">
           <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-600 mr-2" />
           <div>
-            <p class="text-sm font-medium text-blue-900">
+            <p class="text-body font-medium text-blue-900">
               Viewing cards for: {{ route.query.employee_name || 'Selected Employee' }}
             </p>
-            <p class="text-xs text-blue-700 mt-1">
+            <p class="text-caption text-blue-700 mt-1">
               You're viewing NFC cards for a specific employee
             </p>
           </div>
         </div>
         <button
           @click="clearEmployeeFilter"
-          class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+          class="text-navigation text-blue-600 hover:text-blue-800 flex items-center"
         >
           <Icon name="heroicons:x-mark" class="h-4 w-4 mr-1" />
           View All Cards
@@ -49,7 +49,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Employee Filter -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Filter by Employee
             </label>
             <select
@@ -73,7 +73,7 @@
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Filter by Status
             </label>
             <select
@@ -90,7 +90,7 @@
 
           <!-- Search -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">
+            <label class="block text-label text-secondary-700 mb-2">
               Search Cards
             </label>
             <div class="relative">
@@ -111,13 +111,13 @@
 
         <!-- Clear Filters -->
         <div class="mt-4 flex items-center justify-between">
-          <p class="text-sm text-secondary-600">
+          <p class="text-body text-secondary-600">
             Showing {{ filteredCards.length }} of {{ allCards.length }} cards
           </p>
           <div class="flex items-center space-x-3">
             <button
               @click="loadNfcCards"
-              class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+              class="text-navigation text-primary-600 hover:text-primary-700 flex items-center"
             >
               <Icon name="heroicons:arrow-path" class="h-4 w-4 mr-1" />
               Refresh
@@ -125,7 +125,7 @@
             <button
               v-if="hasActiveFilters"
               @click="clearFilters"
-              class="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              class="text-navigation text-primary-600 hover:text-primary-700"
             >
               Clear All Filters
             </button>
@@ -137,7 +137,7 @@
     <!-- My Cards Section -->
     <div v-if="myCards.length > 0" class="mb-8">
         <h2
-          class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
+          class="card-title text-secondary-900 mb-4 flex items-center"
         >
           <Icon name="heroicons:user" class="h-5 w-5 mr-2 text-primary-600" />
           Admin Cards ({{ myCards.length }})
@@ -147,17 +147,17 @@
             <div class="card-header">
               <div class="flex items-center justify-between">
                 <div>
-                  <h3 class="text-lg font-medium text-secondary-900">
+                  <h3 class="card-title">
                     {{ card.card_owner }}
                   </h3>
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     Card ID: {{ card.card_id }}
                   </p>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span
                     :class="getStatusBadgeClass(card.status_badge)"
-                    class="px-3 py-1 rounded-full text-xs font-medium"
+                    class="px-3 py-1 rounded-full text-badge"
                   >
                     {{ card.status_badge }}
                   </span>
@@ -173,54 +173,54 @@
             <div class="card-body">
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Card Details
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>NFC ID:</strong> {{ card.nfc_card_id }}
                     </p>
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Plan:</strong> {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Amount:</strong>
                       {{ card.formatted_purchase_amount }}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Contact
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       {{ card.contact_number }}
                     </p>
-                    <p class="text-sm text-secondary-600">
+                    <p class="text-body text-secondary-600">
                       {{ card.billing_address }}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Timeline
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Purchased:</strong>
                       {{ formatDate(card.purchase_date) }}
                     </p>
                     <p
                       v-if="card.shipped_date"
-                      class="text-sm text-secondary-900"
+                      class="text-body text-secondary-900"
                     >
                       <strong>Shipped:</strong>
                       {{ formatDate(card.shipped_date) }}
                     </p>
                     <p
                       v-if="card.delivered_date"
-                      class="text-sm text-secondary-900"
+                      class="text-body text-secondary-900"
                     >
                       <strong>Delivered:</strong>
                       {{ formatDate(card.delivered_date) }}
@@ -228,7 +228,7 @@
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Actions
                   </h4>
                   <div class="space-y-2">
@@ -266,7 +266,7 @@
     <!-- Employee Cards Section -->
     <div v-if="employeeCards.length > 0" class="mb-8">
         <h2
-          class="text-lg font-semibold text-secondary-900 mb-4 flex items-center"
+          class="card-title text-secondary-900 mb-4 flex items-center"
         >
           <Icon name="heroicons:users" class="h-5 w-5 mr-2 text-primary-600" />
           Employee Cards ({{ employeeCards.length }})
@@ -281,23 +281,23 @@
               <div class="flex items-center justify-between">
                 <div>
                   <div class="flex items-center space-x-2">
-                    <h3 class="text-lg font-medium text-secondary-900">
+                    <h3 class="card-title">
                       {{ card.card_owner }}
                     </h3>
                     <span
-                      class="px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-medium rounded"
+                      class="px-2 py-0.5 bg-primary-100 text-primary-700 text-badge rounded"
                     >
                       Employee
                     </span>
                   </div>
-                  <p class="text-sm text-secondary-600">
+                  <p class="text-body text-secondary-600">
                     Card ID: {{ card.card_id }}
                   </p>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span
                     :class="getStatusBadgeClass(card.status_badge)"
-                    class="px-3 py-1 rounded-full text-xs font-medium"
+                    class="px-3 py-1 rounded-full text-badge"
                   >
                     {{ card.status_badge }}
                   </span>
@@ -313,54 +313,54 @@
             <div class="card-body">
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Card Details
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>NFC ID:</strong> {{ card.nfc_card_id }}
                     </p>
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Plan:</strong> {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Amount:</strong>
                       {{ card.formatted_purchase_amount }}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Contact
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       {{ card.contact_number }}
                     </p>
-                    <p class="text-sm text-secondary-600">
+                    <p class="text-body text-secondary-600">
                       {{ card.billing_address }}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Timeline
                   </h4>
                   <div class="space-y-1">
-                    <p class="text-sm text-secondary-900">
+                    <p class="text-body text-secondary-900">
                       <strong>Purchased:</strong>
                       {{ formatDate(card.purchase_date) }}
                     </p>
                     <p
                       v-if="card.shipped_date"
-                      class="text-sm text-secondary-900"
+                      class="text-body text-secondary-900"
                     >
                       <strong>Shipped:</strong>
                       {{ formatDate(card.shipped_date) }}
                     </p>
                     <p
                       v-if="card.delivered_date"
-                      class="text-sm text-secondary-900"
+                      class="text-body text-secondary-900"
                     >
                       <strong>Delivered:</strong>
                       {{ formatDate(card.delivered_date) }}
@@ -368,7 +368,7 @@
                   </div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-secondary-500 mb-2">
+                  <h4 class="card-subtitle mb-2">
                     Actions
                   </h4>
                   <div class="space-y-2">
@@ -410,7 +410,7 @@
             name="heroicons:credit-card"
             class="h-16 w-16 text-secondary-400 mx-auto mb-4"
           />
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title mb-2">
             No Business Plan Cards
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -440,7 +440,7 @@
           ></div>
           <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-secondary-900">
+              <h3 class="card-title">
                 Order Business Plan NFC Card
               </h3>
               <button
@@ -453,7 +453,7 @@
 
             <form @submit.prevent="submitOrder" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Card Owner</label
                 >
                 <input
@@ -464,7 +464,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Billing Address</label
                 >
                 <textarea
@@ -475,7 +475,7 @@
                 ></textarea>
               </div>
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Contact Number</label
                 >
                 <input
@@ -486,7 +486,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Subscription Plan</label
                 >
                 <input
@@ -496,12 +496,12 @@
                   disabled
                   readonly
                 />
-                <p class="text-xs text-secondary-500 mt-1">
+                <p class="text-helper mt-1">
                   Business Plan is automatically applied for employee cards
                 </p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Shipping Address (Optional)</label
                 >
                 <textarea
@@ -511,7 +511,7 @@
                 ></textarea>
               </div>
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-1"
+                <label class="block text-label text-secondary-700 mb-1"
                   >Notes (Optional)</label
                 >
                 <textarea
@@ -560,10 +560,10 @@
           >
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h3 class="text-xl font-semibold text-secondary-900">
+                <h3 class="modal-title">
                   Card Details
                 </h3>
-                <p class="text-sm text-secondary-600 mt-1">
+                <p class="text-body text-secondary-600 mt-1">
                   View all information for {{ selectedCard.card_owner }}'s card
                 </p>
               </div>
@@ -581,16 +581,16 @@
                 class="flex items-center justify-between p-4 bg-secondary-50 rounded-lg"
               >
                 <div>
-                  <p class="text-sm text-secondary-600">Status</p>
+                  <p class="text-body text-secondary-600">Status</p>
                   <p
-                    class="text-lg font-semibold text-secondary-900 capitalize"
+                    class="card-title capitalize"
                   >
                     {{ selectedCard.status }}
                   </p>
                 </div>
                 <span
                   :class="getStatusBadgeClass(selectedCard.status_badge)"
-                  class="px-4 py-2 rounded-full text-sm font-medium"
+                  class="px-4 py-2 rounded-full text-badge"
                 >
                   {{ selectedCard.status_badge }}
                 </span>
@@ -600,50 +600,50 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Card Information
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Card ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.card_id }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >NFC Card ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfc_card_id || "Not assigned" }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Card Owner</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.card_owner }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Subscription Plan</label
                     >
                     <p
-                      class="text-base text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ String(selectedCard.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                     </p>
@@ -652,39 +652,39 @@
 
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Contact Information
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Contact Number</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.contact_number }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Billing Address</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
                     >
                       {{ selectedCard.billing_address }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.shipping_address">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Shipping Address</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded whitespace-pre-wrap"
                     >
                       {{ selectedCard.shipping_address }}
                     </p>
@@ -696,28 +696,28 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Financial Details
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Purchase Amount</label
                     >
                     <p
-                      class="text-lg font-semibold text-primary-600 bg-secondary-50 px-3 py-2 rounded"
+                      class="card-title text-primary-600 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.formatted_purchase_amount }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.payment_method">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Payment Method</label
                     >
                     <p
-                      class="text-base text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 capitalize bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.payment_method }}
                     </p>
@@ -726,50 +726,50 @@
 
                 <div class="space-y-4">
                   <h4
-                    class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                    class="text-label text-secondary-900 uppercase tracking-wide"
                   >
                     Timeline
                   </h4>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Purchase Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.purchase_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.shipped_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Shipped Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.shipped_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.delivered_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Delivered Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.delivered_date) }}
                     </p>
                   </div>
 
                   <div v-if="selectedCard.expiry_date">
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Expiry Date</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ formatDate(selectedCard.expiry_date) }}
                     </p>
@@ -780,17 +780,17 @@
               <!-- Shipping Information -->
               <div v-if="selectedCard.tracking_number" class="space-y-4">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Shipping Information
                 </h4>
 
                 <div>
-                  <label class="block text-sm text-secondary-600 mb-1"
+                  <label class="block text-body text-secondary-600 mb-1"
                     >Tracking Number</label
                   >
                   <p
-                    class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                    class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                   >
                     {{ selectedCard.tracking_number }}
                   </p>
@@ -800,13 +800,13 @@
               <!-- Notes -->
               <div v-if="selectedCard.notes" class="space-y-4">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Notes
                 </h4>
 
                 <div class="bg-secondary-50 px-3 py-2 rounded">
-                  <p class="text-base text-secondary-900 whitespace-pre-wrap">
+                  <p class="text-body-lg text-secondary-900 whitespace-pre-wrap">
                     {{ selectedCard.notes }}
                   </p>
                 </div>
@@ -815,29 +815,29 @@
               <!-- NFC Tag Information -->
               <div v-if="selectedCard.nfcTag" class="space-y-4 border-t pt-6">
                 <h4
-                  class="text-sm font-semibold text-secondary-900 uppercase tracking-wide"
+                  class="text-label text-secondary-900 uppercase tracking-wide"
                 >
                   Linked Profile
                 </h4>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >NFC Tag ID</label
                     >
                     <p
-                      class="text-base text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 font-mono bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfcTag.nfc_id }}
                     </p>
                   </div>
 
                   <div>
-                    <label class="block text-sm text-secondary-600 mb-1"
+                    <label class="block text-label text-secondary-600 mb-1"
                       >Profile Name</label
                     >
                     <p
-                      class="text-base text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
+                      class="text-body-lg text-secondary-900 bg-secondary-50 px-3 py-2 rounded"
                     >
                       {{ selectedCard.nfcTag.name }}
                     </p>

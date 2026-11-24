@@ -1,6 +1,6 @@
 <template>
   <div class="ewallet-selector">
-    <h3 class="text-xl font-semibold mb-4">E-Wallet Payment</h3>
+    <h3 class="modal-title mb-4">E-Wallet Payment</h3>
 
     <!-- E-Wallet Options -->
     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -45,13 +45,13 @@
       <div class="flex justify-center mb-4">
         <img :src="qrCode" alt="QR Code" class="w-64 h-64 border-2 border-gray-200 rounded-lg" />
       </div>
-      <p class="text-center text-sm text-gray-600">
+      <p class="text-center text-body text-gray-600">
         Or open {{ getWalletName(selectedWallet) }} app and select "Scan to Pay"
       </p>
       
       <!-- Countdown Timer -->
       <div v-if="expiresIn > 0" class="mt-4 text-center">
-        <p class="text-sm text-gray-600">
+        <p class="text-body text-gray-600">
           QR code expires in: 
           <span class="font-semibold text-red-600">{{ formatTime(expiresIn) }}</span>
         </p>
@@ -66,7 +66,7 @@
         </svg>
         <div>
           <p class="font-medium text-blue-800">How to pay</p>
-          <ol class="text-sm text-blue-700 mt-1 list-decimal list-inside space-y-1">
+          <ol class="text-body text-blue-700 mt-1 list-decimal list-inside space-y-1">
             <li>Click "Open {{ getWalletName(selectedWallet) }} App" below</li>
             <li>Your {{ getWalletName(selectedWallet) }} app will open automatically</li>
             <li>Review the payment details</li>
@@ -85,7 +85,7 @@
         </svg>
         <div>
           <p class="font-medium text-green-800">Payment Ready!</p>
-          <p class="text-sm text-green-700 mt-1">
+          <p class="text-body text-green-700 mt-1">
             Click "Open {{ getWalletName(selectedWallet) }} App" below to complete your payment.
             You'll be redirected to your {{ getWalletName(selectedWallet) }} app to authorize the payment with Secure Sign.
           </p>
@@ -103,7 +103,7 @@
       <button
         @click="handleBack"
         type="button"
-        class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+        class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors text-button"
       >
         Back
       </button>
@@ -111,7 +111,7 @@
         v-if="!qrCode"
         @click="handlePayment"
         :disabled="!selectedWallet || processing"
-        class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-button"
       >
         <span v-if="!processing">Continue to {{ getWalletName(selectedWallet) || 'Payment' }}</span>
         <span v-else class="flex items-center justify-center">
@@ -125,7 +125,7 @@
       <button
         v-else
         @click="openDeepLink"
-        class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
+        class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-button"
       >
         Open {{ getWalletName(selectedWallet) }} App
       </button>

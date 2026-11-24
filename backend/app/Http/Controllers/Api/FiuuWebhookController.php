@@ -21,11 +21,16 @@ class FiuuWebhookController extends Controller
 {
     protected PaymentService $paymentService;
     protected \App\Services\InvoiceService $invoiceService;
+    protected \App\Services\OrderFulfilmentService $orderFulfilmentService;
 
-    public function __construct(PaymentService $paymentService, \App\Services\InvoiceService $invoiceService)
-    {
+    public function __construct(
+        PaymentService $paymentService,
+        \App\Services\InvoiceService $invoiceService,
+        \App\Services\OrderFulfilmentService $orderFulfilmentService
+    ) {
         $this->paymentService = $paymentService;
         $this->invoiceService = $invoiceService;
+        $this->orderFulfilmentService = $orderFulfilmentService;
     }
 
     /**
@@ -88,6 +93,16 @@ class FiuuWebhookController extends Controller
                 $this->invoiceService->generateInvoiceFromTransaction($transaction);
             } catch (Exception $e) {
                 Log::error('Failed to generate invoice in return handler', [
+                    'order_id' => $orderId,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Fulfil the order (idempotent — safe if notification already fulfilled it).
+            try {
+                $this->orderFulfilmentService->fulfilForTransaction($transaction->fresh());
+            } catch (Exception $e) {
+                Log::error('Failed to fulfil order in return handler', [
                     'order_id' => $orderId,
                     'error' => $e->getMessage()
                 ]);
@@ -213,6 +228,16 @@ class FiuuWebhookController extends Controller
                         'error' => $e->getMessage()
                     ]);
                 }
+
+                // Fulfil the order (idempotent — guarded by order fulfilled_at).
+                try {
+                    $this->orderFulfilmentService->fulfilForTransaction($transaction->fresh());
+                } catch (Exception $e) {
+                    Log::error('Failed to fulfil order for transaction', [
+                        'transaction_id' => $transaction->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             Log::info('Fiuu notification processed successfully', [
@@ -297,6 +322,16 @@ class FiuuWebhookController extends Controller
                     $this->invoiceService->generateInvoiceFromTransaction($transaction);
                 } catch (Exception $e) {
                     Log::error('Failed to generate invoice for transaction', [
+                        'transaction_id' => $transaction->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                // Fulfil the order (idempotent — guarded by order fulfilled_at).
+                try {
+                    $this->orderFulfilmentService->fulfilForTransaction($transaction->fresh());
+                } catch (Exception $e) {
+                    Log::error('Failed to fulfil order for transaction', [
                         'transaction_id' => $transaction->id,
                         'error' => $e->getMessage()
                     ]);

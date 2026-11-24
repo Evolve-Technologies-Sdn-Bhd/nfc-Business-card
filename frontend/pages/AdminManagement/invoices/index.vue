@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Invoice Management
           </h1>
           <p class="mt-2 text-secondary-600">Manage all customer invoices</p>
@@ -25,8 +25,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Total Invoices</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Total Invoices</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics.total_invoices }}
             </p>
           </div>
@@ -41,13 +41,13 @@
             </div>
           </div>
           <div class="ml-4 flex-1">
-            <p class="text-sm font-medium text-secondary-600">Paid Invoices</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Paid Invoices</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics.paid_invoices }}
             </p>
             <div class="mt-2">
               <div
-                class="flex items-center justify-between text-xs text-secondary-500 mb-1"
+                class="flex items-center justify-between text-helper mb-1"
               >
                 <span>Payment Rate</span>
                 <span v-if="statistics.total_invoices > 0">
@@ -90,13 +90,13 @@
             </div>
           </div>
           <div class="ml-4 flex-1">
-            <p class="text-sm font-medium text-secondary-600">Total Revenue</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Total Revenue</p>
+            <p class="stat-value text-secondary-900">
               {{ formatCurrency(statistics.paid_amount) }}
             </p>
             <div class="mt-2">
               <div
-                class="flex items-center justify-between text-xs text-secondary-500 mb-1"
+                class="flex items-center justify-between text-helper mb-1"
               >
                 <span>Collection Rate</span>
                 <span
@@ -140,8 +140,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Pending Amount</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Pending Amount</p>
+            <p class="stat-value text-secondary-900">
               {{ formatCurrency(statistics.pending_amount) }}
             </p>
           </div>

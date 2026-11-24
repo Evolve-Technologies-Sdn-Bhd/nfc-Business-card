@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Business Plan User Management
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -33,10 +33,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               Business Accounts
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ statistics.total_business_users }}
             </p>
           </div>
@@ -51,10 +51,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               Total Employees
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ statistics.total_employees }}
             </p>
           </div>
@@ -69,10 +69,10 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               Active Accounts
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ statistics.active_accounts }}
             </p>
           </div>
@@ -87,8 +87,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">Total Cards</p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-label text-secondary-600">Total Cards</p>
+            <p class="stat-value text-secondary-900">
               {{ statistics.total_cards }}
             </p>
           </div>
@@ -101,7 +101,7 @@
       <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Search</label
             >
             <input
@@ -112,11 +112,11 @@
               class="input"
               maxlength="150"
             />
-            <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
+            <p class="text-helper mt-1">{{ filters.search.length }}/150</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Status</label
             >
             <select
@@ -137,7 +137,7 @@
           </div>
         </div>
         <div class="mt-4 flex justify-end">
-          <div class="text-sm text-secondary-500">
+          <div class="card-subtitle">
             {{ pagination.total }} business users found
           </div>
         </div>
@@ -155,42 +155,42 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Business Account
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Email
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   <div class="flex flex-col">
                     <span>Employees</span>
-                    <span class="text-xs font-semibold text-secondary-500 normal-case mt-0.5">
+                    <span class="text-caption font-semibold text-secondary-500 normal-case mt-0.5">
                       (excl. admin)
                     </span>
                   </div>
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Quota
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Cards
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Status
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Actions
                 </th>
@@ -208,32 +208,32 @@
                       <div
                         class="h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center"
                       >
-                        <span class="text-white font-medium text-sm">
+                        <span class="text-white text-body font-medium">
                           {{ user.first_name?.charAt(0)
                           }}{{ user.last_name?.charAt(0) }}
                         </span>
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="text-body font-medium text-secondary-900">
                         {{ user.first_name }} {{ user.last_name }}
                       </div>
-                      <div class="text-sm text-secondary-500">
+                      <div class="card-subtitle">
                         {{ user.company || "N/A" }}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-secondary-900">{{ user.email }}</div>
+                  <div class="text-body text-secondary-900">{{ user.email }}</div>
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-secondary-900">
+                  <div class="text-body font-medium text-secondary-900">
                     {{ user.employees_count || 0 }}
                   </div>
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-secondary-900">
+                  <div class="text-body text-secondary-900">
                     <span class="font-semibold">{{
                       user.quota_info?.available_quota || 0
                     }}</span>
@@ -244,7 +244,7 @@
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                    class="px-2 py-1 text-badge bg-blue-100 text-blue-800 rounded-full"
                   >
                     {{ user.cards_count || 0 }}
                   </span>
@@ -252,7 +252,7 @@
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-2 py-1 text-badge rounded-full',
                       user.subscription_active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800',
@@ -261,7 +261,7 @@
                     {{ user.subscription_active ? "Active" : "Inactive" }}
                   </span>
                 </td>
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap table-cell font-medium">
                   <div class="flex space-x-2">
                     <button
                       @click="viewDetails(user)"
@@ -296,10 +296,10 @@
             name="heroicons:building-office-2"
             class="h-16 w-16 mx-auto text-secondary-300 mb-4"
           />
-          <h3 class="text-lg font-medium text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             No Business Users Found
           </h3>
-          <p class="text-sm">
+          <p class="text-body">
             There are no business plan users matching your filters.
           </p>
         </div>
@@ -326,7 +326,7 @@
     >
       <div class="card max-w-5xl w-full" @click.stop>
         <div class="card-header">
-          <h2 class="text-xl font-bold text-secondary-900">
+          <h2 class="modal-title text-secondary-900">
             Create Employee Account
           </h2>
         </div>
@@ -337,7 +337,7 @@
             <button
               @click="createMode = 'single'"
               :class="[
-                'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
+                'px-6 py-3 text-button border-b-2 transition-colors',
                 createMode === 'single'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
@@ -349,7 +349,7 @@
             <button
               @click="createMode = 'bulk'"
               :class="[
-                'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
+                'px-6 py-3 text-button border-b-2 transition-colors',
                 createMode === 'bulk'
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
@@ -369,7 +369,7 @@
           <div v-if="createMode === 'single'">
             <form @submit.prevent="submitCreateEmployee" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2"
+                <label class="block text-label text-secondary-700 mb-2"
                   >Business Account *</label
                 >
                 <select
@@ -393,7 +393,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >First Name *</label
                   >
                   <input
@@ -406,7 +406,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Last Name *</label
                   >
                   <input
@@ -419,7 +419,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2"
+                <label class="block text-label text-secondary-700 mb-2"
                   >Email *</label
                 >
                 <input
@@ -431,7 +431,7 @@
               </div>
 
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p class="text-sm text-blue-700">
+                <p class="text-body text-blue-700">
                   <Icon
                     name="heroicons:information-circle"
                     class="h-4 w-4 inline mr-1"
@@ -446,7 +446,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Phone</label
                   >
                   <input type="tel" v-model="newEmployee.phone" class="input" />
@@ -454,7 +454,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Job Title</label
                   >
                   <input
@@ -489,7 +489,7 @@
           <div v-else class="space-y-4">
             <!-- Business Account Selection -->
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Business Account *</label
               >
               <select v-model="bulkImport.business_account_id" class="input">
@@ -535,12 +535,12 @@
                       class="hidden"
                     />
                   </div>
-                  <p class="text-sm text-secondary-500 mb-2">
+                  <p class="text-body text-secondary-500 mb-2">
                     Upload a CSV or XLSX file with employee information
                   </p>
                   <button
                     @click="downloadTemplate"
-                    class="text-sm text-primary-600 hover:text-primary-800 underline"
+                    class="text-body text-primary-600 hover:text-primary-800 underline"
                   >
                     <Icon
                       name="heroicons:arrow-down-tray"
@@ -552,17 +552,17 @@
               </div>
 
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 class="text-sm font-medium text-blue-900 mb-2">
+                <h4 class="text-body font-medium text-blue-900 mb-2">
                   <Icon
                     name="heroicons:information-circle"
                     class="h-5 w-5 inline mr-1"
                   />
                   Template Format
                 </h4>
-                <p class="text-sm text-blue-700 mb-2">
+                <p class="text-body text-blue-700 mb-2">
                   Your file should include the following columns:
                 </p>
-                <ul class="text-sm text-blue-700 space-y-1 ml-4">
+                <ul class="text-body text-blue-700 space-y-1 ml-4">
                   <li>• <strong>first_name</strong> (required)</li>
                   <li>• <strong>last_name</strong> (required)</li>
                   <li>• <strong>email</strong> (required)</li>
@@ -579,7 +579,7 @@
             <!-- Editable Table Preview -->
             <div v-else class="space-y-4">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-secondary-900">
+                <h3 class="card-title text-secondary-900">
                   Preview & Edit Employee Data ({{
                     bulkImport.employees.length
                   }}
@@ -598,42 +598,42 @@
                   <thead class="bg-secondary-50">
                     <tr>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         #
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         First Name *
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Last Name *
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Email *
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Password
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Phone
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Job Title
                       </th>
                       <th
-                        class="px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase"
+                        class="px-4 py-3 text-left table-head"
                       >
                         Actions
                       </th>
@@ -645,7 +645,7 @@
                       :key="index"
                       class="hover:bg-secondary-50"
                     >
-                      <td class="px-4 py-3 text-sm text-secondary-900">
+                      <td class="px-4 py-3 table-cell text-secondary-900">
                         {{ index + 1 }}
                       </td>
                       <td class="px-4 py-3">
@@ -718,14 +718,14 @@
                 v-if="bulkImport.errors.length"
                 class="bg-red-50 border border-red-200 rounded-lg p-4"
               >
-                <h4 class="text-sm font-medium text-red-900 mb-2">
+                <h4 class="text-body font-medium text-red-900 mb-2">
                   <Icon
                     name="heroicons:exclamation-triangle"
                     class="h-5 w-5 inline mr-1"
                   />
                   Validation Errors ({{ bulkImport.errors.length }})
                 </h4>
-                <ul class="text-sm text-red-800 font-medium space-y-1 ml-4">
+                <ul class="text-body text-red-800 font-medium space-y-1 ml-4">
                   <li v-for="(error, index) in bulkImport.errors" :key="index">
                     • {{ error }}
                   </li>
@@ -772,40 +772,40 @@
     >
       <div class="card max-w-3xl w-full" @click.stop>
         <div class="card-header">
-          <h2 class="text-xl font-bold text-secondary-900">
+          <h2 class="modal-title text-secondary-900">
             Business Account Details
           </h2>
         </div>
 
         <div class="card-body space-y-6">
           <div class="bg-secondary-50 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title text-secondary-900 mb-4">
               Account Information
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">Name</p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-caption font-medium text-secondary-500 mb-1">Name</p>
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.first_name }} {{ selectedUser.last_name }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">Email</p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-caption font-medium text-secondary-500 mb-1">Email</p>
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.email }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-caption font-medium text-secondary-500 mb-1">
                   Company
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.company || "N/A" }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">Phone</p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-caption font-medium text-secondary-500 mb-1">Phone</p>
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.phone || "N/A" }}
                 </p>
               </div>
@@ -813,39 +813,39 @@
           </div>
 
           <div class="bg-secondary-50 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title text-secondary-900 mb-4">
               Quota Information
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-caption font-medium text-secondary-500 mb-1">
                   Total Quota
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.total_account_slots || 0 }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-caption font-medium text-secondary-500 mb-1">
                   Employees
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.employees_count || 0 }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-caption font-medium text-secondary-500 mb-1">
                   Available
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.quota_info?.available_quota || 0 }}
                 </p>
               </div>
               <div>
-                <p class="text-xs font-medium text-secondary-500 mb-1">
+                <p class="text-caption font-medium text-secondary-500 mb-1">
                   Total Cards
                 </p>
-                <p class="text-sm text-secondary-900">
+                <p class="text-body text-secondary-900">
                   {{ selectedUser.cards_count || 0 }}
                 </p>
               </div>
@@ -856,7 +856,7 @@
             v-if="selectedUser.employees && selectedUser.employees.length > 0"
             class="bg-secondary-50 rounded-lg p-4"
           >
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">
+            <h3 class="card-title text-secondary-900 mb-4">
               Employees ({{ selectedUser.employees.length }})
             </h3>
             <div class="space-y-3">
@@ -867,18 +867,18 @@
               >
                 <div class="flex items-center justify-between mb-2">
                   <div>
-                    <p class="text-sm font-medium text-secondary-900">
+                    <p class="text-body font-medium text-secondary-900">
                       {{ employee.first_name }} {{ employee.last_name }}
                     </p>
-                    <p class="text-xs text-secondary-500">{{ employee.email }}</p>
+                    <p class="text-caption text-secondary-500">{{ employee.email }}</p>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                    <span class="px-2 py-1 text-badge bg-blue-100 text-blue-800 rounded-full">
                       {{ employee.cards_count || 0 }} card{{ (employee.cards_count || 0) !== 1 ? 's' : '' }}
                     </span>
                     <span
                       :class="[
-                        'px-2 py-1 text-xs font-medium rounded-full',
+                        'px-2 py-1 text-badge rounded-full',
                         employee.subscription_active
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800',
@@ -891,9 +891,9 @@
                 
                 <!-- Show NFC cards if any -->
                 <div v-if="employee.nfc_cards && employee.nfc_cards.length > 0" class="mt-2 pl-4 border-l-2 border-blue-200">
-                  <p class="text-xs text-secondary-600 font-medium mb-1">NFC Cards:</p>
+                  <p class="text-caption text-secondary-600 font-medium mb-1">NFC Cards:</p>
                   <div class="space-y-1">
-                    <div v-for="card in employee.nfc_cards" :key="card.id" class="text-xs text-secondary-500">
+                    <div v-for="card in employee.nfc_cards" :key="card.id" class="text-caption text-secondary-500">
                       • {{ card.nfc_card_id }} - {{ card.card_owner }}
                     </div>
                   </div>

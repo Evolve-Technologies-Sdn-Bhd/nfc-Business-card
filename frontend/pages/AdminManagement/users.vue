@@ -4,7 +4,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">User Management</h1>
+          <h1 class="page-title text-secondary-900">User Management</h1>
           <p class="mt-2 text-secondary-600">
             Manage all registered users and their accounts
           </p>
@@ -23,7 +23,7 @@
       <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Search</label
             >
             <input
@@ -34,10 +34,10 @@
               maxlength="150"
               @input="handleSearch"
             />
-            <p class="text-xs text-secondary-500 mt-1">{{ filters.search.length }}/150</p>
+            <p class="text-helper mt-1">{{ filters.search.length }}/150</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Business Plan User</label
             >
             <select
@@ -53,7 +53,7 @@
             </select>
           </div>
           <div v-if="employeeList.length && filters.businessUserId">
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Employee Account</label
             >
             <select
@@ -68,7 +68,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Subscription Plan</label
             >
             <select
@@ -84,7 +84,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Status</label
             >
             <select
@@ -99,7 +99,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2"
+            <label class="block text-label text-secondary-700 mb-2"
               >Admin Status</label
             >
             <select
@@ -117,7 +117,7 @@
           <button @click="clearFilters" class="btn btn-outline btn-sm">
             Clear Filters
           </button>
-          <div class="text-sm text-secondary-500">
+          <div class="card-subtitle">
             {{ pagination.total }} users found
           </div>
         </div>
@@ -135,27 +135,27 @@
             <thead class="bg-secondary-50">
               <tr>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   User
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Subscription
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Status
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Last Login
                 </th>
                 <th
-                  class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
+                  class="px-3 sm:px-6 py-3 text-left table-head"
                 >
                   Actions
                 </th>
@@ -177,19 +177,19 @@
                       class="h-10 w-10 rounded-full object-cover"
                     />
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="text-body font-medium text-secondary-900">
                         {{ user.full_name }}
                         <span
                           v-if="user.is_admin"
-                          class="ml-2 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full"
+                          class="ml-2 px-2 py-1 text-badge bg-red-100 text-red-800 rounded-full"
                         >
                           {{ user.admin_role_display }}
                         </span>
                       </div>
-                      <div class="text-sm text-secondary-500">
+                      <div class="card-subtitle">
                         {{ user.email }}
                       </div>
-                      <div class="text-xs text-secondary-400">
+                      <div class="text-caption text-secondary-400">
                         {{ user.company }}
                       </div>
                     </div>
@@ -198,7 +198,7 @@
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-2 py-1 text-badge rounded-full',
                       getSubscriptionBadgeClass(user.subscription_plan),
                     ]"
                   >
@@ -206,7 +206,7 @@
                   </span>
                   <div
                     v-if="user.subscription_end_date"
-                    class="text-xs text-secondary-500 mt-1"
+                    class="text-helper mt-1"
                   >
                     Expires: {{ formatDate(user.subscription_end_date) }}
                   </div>
@@ -214,7 +214,7 @@
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-2 py-1 text-badge rounded-full',
                       user.subscription_active
                         ? 'bg-success-100 text-success-800'
                         : 'bg-error-100 text-error-800',
@@ -224,13 +224,13 @@
                   </span>
                   <div
                     v-if="user.has_physical_card"
-                    class="text-xs text-secondary-500 mt-1"
+                    class="text-helper mt-1"
                   >
                     Has Physical Card
                   </div>
                 </td>
                 <td
-                  class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500"
+                  class="px-6 py-4 whitespace-nowrap table-cell text-secondary-500"
                 >
                   {{
                     user.last_login_at
@@ -238,12 +238,12 @@
                       : "Never"
                   }}
                 </td>
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-3 sm:px-6 py-4 whitespace-nowrap table-cell font-medium">
                   <div class="flex items-center space-x-2">
                     <button
                       @click="toggleUserStatus(user)"
                       :class="[
-                        'px-2 py-1 rounded text-xs font-medium',
+                        'px-2 py-1 rounded text-caption font-medium',
                         user.subscription_active
                           ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
                           : 'bg-success-100 text-success-700 hover:bg-success-200',
@@ -314,14 +314,14 @@
         class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="text-lg font-medium text-secondary-900">
+          <h3 class="modal-title text-secondary-900">
             {{ showEditModal ? "Edit User" : "Create New User" }}
           </h3>
         </div>
         <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >First Name *</label
               >
               <input
@@ -333,13 +333,13 @@
                 @input="validateFirstName"
               />
               <div class="flex justify-between mt-1">
-                <span v-if="formErrors.first_name" class="text-xs text-red-500">{{ formErrors.first_name }}</span>
-                <span v-else class="text-xs text-secondary-500"></span>
-                <span class="text-xs text-secondary-500">{{ form.first_name.length }}/100</span>
+                <span v-if="formErrors.first_name" class="text-error">{{ formErrors.first_name }}</span>
+                <span v-else class="text-helper"></span>
+                <span class="text-helper">{{ form.first_name.length }}/100</span>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Last Name *</label
               >
               <input
@@ -351,16 +351,16 @@
                 @input="validateLastName"
               />
               <div class="flex justify-between mt-1">
-                <span v-if="formErrors.last_name" class="text-xs text-red-500">{{ formErrors.last_name }}</span>
-                <span v-else class="text-xs text-secondary-500"></span>
-                <span class="text-xs text-secondary-500">{{ form.last_name.length }}/100</span>
+                <span v-if="formErrors.last_name" class="text-error">{{ formErrors.last_name }}</span>
+                <span v-else class="text-helper"></span>
+                <span class="text-helper">{{ form.last_name.length }}/100</span>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Email *</label
               >
               <input
@@ -372,13 +372,13 @@
                 @input="validateEmail"
               />
               <div class="flex justify-between mt-1">
-                <span v-if="formErrors.email" class="text-xs text-red-500">{{ formErrors.email }}</span>
-                <span v-else class="text-xs text-secondary-500"></span>
-                <span class="text-xs text-secondary-500">{{ form.email.length }}/100</span>
+                <span v-if="formErrors.email" class="text-error">{{ formErrors.email }}</span>
+                <span v-else class="text-helper"></span>
+                <span class="text-helper">{{ form.email.length }}/100</span>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Phone</label
               >
               <PhoneInput
@@ -386,13 +386,13 @@
                 :has-error="!!formErrors.phone"
                 placeholder="Phone number"
               />
-              <p v-if="formErrors.phone" class="text-xs text-red-500 mt-1">{{ formErrors.phone }}</p>
+              <p v-if="formErrors.phone" class="text-error mt-1">{{ formErrors.phone }}</p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Company</label
               >
               <input
@@ -401,10 +401,10 @@
                 maxlength="150"
                 class="input"
               />
-              <span class="text-xs text-secondary-500 mt-1 block text-right">{{ (form.company || '').length }}/150</span>
+              <span class="text-helper mt-1 block text-right">{{ (form.company || '').length }}/150</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Job Title</label
               >
               <input
@@ -413,7 +413,7 @@
                 maxlength="30"
                 class="input"
               />
-              <span class="text-xs text-secondary-500 mt-1 block text-right">{{ (form.job_title || '').length }}/30</span>
+              <span class="text-helper mt-1 block text-right">{{ (form.job_title || '').length }}/30</span>
             </div>
           </div>
 
@@ -422,7 +422,7 @@
             class="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Password *</label
               >
               <div class="relative">
@@ -442,7 +442,7 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Confirm Password *</label
               >
               <div class="relative">
@@ -465,7 +465,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Subscription Plan</label
               >
               <select v-model="form.subscription_plan" class="input">
@@ -476,14 +476,14 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Account Status</label
               >
               <select v-model="form.subscription_active" class="input">
                 <option :value="true">Active</option>
                 <option :value="false">Inactive</option>
               </select>
-              <p class="text-xs text-secondary-500 mt-1">
+              <p class="text-helper mt-1">
                 Inactive accounts cannot log in or use the system
               </p>
             </div>
@@ -491,7 +491,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Admin Status</label
               >
               <select v-model="form.is_admin" class="input">
@@ -506,7 +506,7 @@
             v-if="form.subscription_plan === 'business'"
             class="border-t border-secondary-200 pt-4 mt-4"
           >
-            <h4 class="text-sm font-medium text-secondary-900 mb-4">
+            <h4 class="text-body font-medium text-secondary-900 mb-4">
               Business Plan Settings
             </h4>
 
@@ -521,10 +521,10 @@
                   class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
                 />
                 <div class="ml-3 flex-1">
-                  <h5 class="text-sm font-medium text-blue-900 mb-2">
+                  <h5 class="text-body font-medium text-blue-900 mb-2">
                     Current Quota Usage
                   </h5>
-                  <div class="space-y-2 text-sm">
+                  <div class="space-y-2 text-body">
                     <div>
                       <p class="text-blue-700 font-medium">Total Accounts:</p>
                       <p class="text-blue-600">
@@ -537,7 +537,7 @@
                           selectedUser.quota_info.total_quota ||
                           selectedUser.quota_info.total_account_slots
                         }}
-                        <span class="text-xs text-blue-500">
+                        <span class="text-caption text-blue-500">
                           (1 owner +
                           {{ selectedUser.quota_info.employees_count }}
                           employees)
@@ -558,7 +558,7 @@
                     </div>
                     <div class="pt-2 border-t border-blue-200">
                       <p class="text-blue-700 font-medium">Available Quota:</p>
-                      <p class="text-blue-600 text-lg font-semibold">
+                      <p class="text-blue-600 text-h5">
                         {{
                           selectedUser.quota_info.available_quota ||
                           Math.min(
@@ -570,7 +570,7 @@
                       </p>
                     </div>
                   </div>
-                  <p class="text-xs text-blue-600 mt-3">
+                  <p class="text-caption text-blue-600 mt-3">
                     ⚠️ Cannot set quota below max(total_accounts, ordered_cards)
                   </p>
                 </div>
@@ -578,7 +578,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Total Business Quota *</label
               >
               <input
@@ -589,13 +589,13 @@
                 class="input"
                 placeholder="e.g. 50"
               />
-              <p class="text-xs text-secondary-500 mt-1">
+              <p class="text-helper mt-1">
                 Maximum number of accounts (including owner) AND NFC cards this
                 business can have
               </p>
               <p
                 v-if="showEditModal && selectedUser?.quota_info"
-                class="text-xs text-warning-600 mt-1"
+                class="text-caption text-warning-600 mt-1"
               >
                 Minimum: {{ getMinimumQuota() }} (based on current usage)
               </p>
@@ -608,10 +608,10 @@
                   class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
                 />
                 <div class="ml-3">
-                  <p class="text-sm text-blue-700">
+                  <p class="text-body text-blue-700">
                     <strong>Unified Quota System:</strong>
                   </p>
-                  <ul class="text-sm text-blue-600 mt-1 space-y-1">
+                  <ul class="text-body text-blue-600 mt-1 space-y-1">
                     <li>• Quota applies to both accounts AND cards</li>
                     <li>
                       • If quota = 10: max 10 accounts (1 owner + 9 employees)
@@ -632,7 +632,7 @@
             class="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Admin Role</label
               >
               <select v-model="form.admin_role" class="input">
@@ -641,7 +641,7 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2"
+              <label class="block text-label text-secondary-700 mb-2"
                 >Admin Permissions</label
               >
               <div class="space-y-2">
@@ -702,7 +702,7 @@
         class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="text-lg font-medium text-secondary-900">User Details</h3>
+          <h3 class="modal-title text-secondary-900">User Details</h3>
         </div>
         <div v-if="selectedUser" class="p-6">
           <!-- User info will be displayed here -->
@@ -713,30 +713,30 @@
               </h4>
               <dl class="space-y-3">
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">Name</dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dt class="text-body font-medium text-secondary-500">Name</dt>
+                  <dd class="text-body text-secondary-900">
                     {{ selectedUser.full_name }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">Email</dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dt class="text-body font-medium text-secondary-500">Email</dt>
+                  <dd class="text-body text-secondary-900">
                     {{ selectedUser.email }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Company
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ selectedUser.company || "N/A" }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Job Title
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ selectedUser.job_title || "N/A" }}
                   </dd>
                 </div>
@@ -748,19 +748,19 @@
               </h4>
               <dl class="space-y-3">
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Subscription Plan
                   </dt>
-                  <dd class="text-sm text-secondary-900 capitalize">
+                  <dd class="text-body text-secondary-900 capitalize">
                     {{ String(selectedUser.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">Status</dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dt class="text-body font-medium text-secondary-500">Status</dt>
+                  <dd class="text-body text-secondary-900">
                     <span
                       :class="[
-                        'px-2 py-1 text-xs font-medium rounded-full',
+                        'px-2 py-1 text-badge rounded-full',
                         selectedUser.subscription_active
                           ? 'bg-success-100 text-success-800'
                           : 'bg-error-100 text-error-800',
@@ -773,10 +773,10 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Last Login
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{
                       selectedUser.last_login_at
                         ? formatTimeAgo(selectedUser.last_login_at)
@@ -785,10 +785,10 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-secondary-500">
+                  <dt class="text-body font-medium text-secondary-500">
                     Member Since
                   </dt>
-                  <dd class="text-sm text-secondary-900">
+                  <dd class="text-body text-secondary-900">
                     {{ formatDate(selectedUser.created_at) }}
                   </dd>
                 </div>

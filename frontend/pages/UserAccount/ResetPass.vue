@@ -6,17 +6,13 @@
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
       <div class="text-center">
-        <NuxtLink to="/" class="inline-flex items-center">
-          <Icon
-            name="heroicons:identification"
-            class="h-12 w-12 text-primary-600"
-          />
-          <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
+        <NuxtLink to="/" class="inline-flex items-center" aria-label="NFCGo home">
+          <NFCGoLogo variant="light" size="xl" />
         </NuxtLink>
-        <h2 class="mt-6 text-2xl sm:text-3xl font-bold text-secondary-900">
+        <h2 class="mt-6 page-title text-secondary-900">
           Set new password
         </h2>
-        <p class="mt-2 text-sm text-secondary-600">
+        <p class="mt-2 text-body text-secondary-600">
           Choose a strong password for your account.
         </p>
       </div>
@@ -29,7 +25,7 @@
           >
             <Icon name="heroicons:x-circle" class="h-10 w-10 text-red-600" />
           </div>
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             Invalid or expired link
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -53,7 +49,7 @@
               class="h-10 w-10 text-green-600"
             />
           </div>
-          <h3 class="text-xl font-semibold text-secondary-900 mb-2">
+          <h3 class="card-title text-secondary-900 mb-2">
             Password reset successful
           </h3>
           <p class="text-secondary-600 mb-6">
@@ -105,7 +101,7 @@
 
             <!-- Password Strength Indicator -->
             <div v-if="form.password" class="mt-2">
-              <div class="flex items-center justify-between text-xs mb-1">
+              <div class="flex items-center justify-between text-caption mb-1">
                 <span class="text-secondary-600">Password strength</span>
                 <span :class="passwordStrengthColor">{{
                   passwordStrengthText
@@ -174,10 +170,10 @@
 
           <!-- Password Requirements -->
           <div class="bg-secondary-50 rounded-lg p-4">
-            <p class="text-xs font-medium text-secondary-700 mb-2">
+            <p class="text-caption font-medium text-secondary-700 mb-2">
               Password must contain:
             </p>
-            <ul class="text-xs text-secondary-600 space-y-1">
+            <ul class="text-caption text-secondary-600 space-y-1">
               <li :class="form.password.length >= 8 ? 'text-green-600' : ''">
                 <Icon
                   :name="
@@ -238,7 +234,7 @@
           <div class="text-center">
             <NuxtLink
               to="/UserAccount/login"
-              class="text-sm text-primary-600 hover:text-primary-500"
+              class="text-navigation text-primary-600 hover:text-primary-500"
             >
               <Icon name="heroicons:arrow-left" class="h-4 w-4 inline mr-1" />
               Back to login

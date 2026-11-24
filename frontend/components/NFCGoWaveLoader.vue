@@ -13,164 +13,90 @@
          ============================================================ -->
     <div class="flex items-center justify-center w-full h-full select-none">
       <!-- ============================================================
-           VARIANT 1: NFC FAN-WAVE (wave — DEFAULT)
-           Half-circle fan arcs LEFT (3) + RIGHT (3) + 3D beveled chip
-           Exact style like traditional NFC icon, upgraded with 3D depth
+           VARIANT 1: NFCGo LOGO DRAW (wave — DEFAULT)
+           Official loading animation: the NFCGo mark draws itself in
+           (inner ring → bar) while the outer signal waves pulse.
+           Source: "NFCGo – Loading animation-html".
            ============================================================ -->
       <template v-if="variant === 'wave'">
         <div
           :class="[
-            'flex flex-row items-center justify-center relative select-none nfc-wave-stage',
-            sizes[size].stage,
+            'nfg-loader',
+            `nfg-loader--${theme}`,
+            sizes[size],
             !inline ? 'animate-nfc-fade-up' : '',
           ]"
           :style="!inline ? { animationDelay: '60ms' } : {}"
         >
-          <!-- ==================== COLUMN 1: LEFT WAVE (3 arcs container) ==================== -->
-          <div
-            :class="['relative h-full flex items-center justify-end', sizes[size].leftCol]"
+          <!-- Brand mark (draw-in animation) -->
+          <svg
+            class="nfg-loader__mark"
+            viewBox="0 0 120 120"
+            fill="none"
+            aria-hidden="true"
           >
-            <div class="nfc-fan-group nfc-fan-left relative h-full w-full">
-              <!-- LEFT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
-              <div class="nfc-fan-wrap nfc-fan-left-c absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-l-3"
-                  :class="sizes[size].fanSvg3"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath3"
-                    :stroke="sizes[size].strokeGold"
-                    :stroke-width="sizes[size].strokeW3"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-              <!-- LEFT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
-              <div class="nfc-fan-wrap nfc-fan-left-b absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-l-2"
-                  :class="sizes[size].fanSvg2"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath2"
-                    :stroke="sizes[size].strokeTeal"
-                    :stroke-width="sizes[size].strokeW2"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-              <!-- LEFT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
-              <div class="nfc-fan-wrap nfc-fan-left-a absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-l-1"
-                  :class="sizes[size].fanSvg1"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath1"
-                    :stroke="sizes[size].strokeNavy"
-                    :stroke-width="sizes[size].strokeW1"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+            <defs>
+              <linearGradient :id="gradientId" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" :stop-color="palette.gradStart" />
+                <stop offset="0.5" :stop-color="palette.gradMid" />
+                <stop offset="1" :stop-color="palette.gradEnd" />
+              </linearGradient>
+            </defs>
 
-          <!-- ==================== COLUMN 2: CENTER — NFCGo BRAND (no hint, no chip) ==================== -->
-          <div
-            v-if="showText"
-            :class="[
-              'flex flex-col items-center justify-center relative z-[2]',
-              sizes[size].centerCol,
-            ]"
-          >
-            <span
-              class="nfcgo-brand-text animate-nfc-text-shimmer font-poppins whitespace-nowrap relative"
-              :class="sizes[size].brand"
-            >
-              {{ labelText }}
-            </span>
-          </div>
+            <!-- Static track behind the animated inner ring -->
+            <path
+              d="M84 62 A32 32 0 1 1 72.57 37.49"
+              :stroke="palette.track"
+              stroke-width="10"
+              stroke-linecap="round"
+            />
+            <!-- Inner ring — draws in -->
+            <path
+              class="nfg-ring"
+              d="M84 62 A32 32 0 1 1 72.57 37.49"
+              :stroke="gradientUrl"
+              stroke-width="10"
+              stroke-linecap="round"
+            />
+            <!-- Cross bar — draws in just after the ring -->
+            <path
+              class="nfg-bar"
+              d="M84 62 H58"
+              :stroke="gradientUrl"
+              stroke-width="10"
+              stroke-linecap="round"
+            />
+            <!-- Outer signal waves — pulse -->
+            <path
+              class="nfg-w1"
+              d="M85.94 28.06 A48 48 0 0 1 98.36 49.58"
+              :stroke="gradientUrl"
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+            <path
+              class="nfg-w2"
+              d="M95.84 18.16 A62 62 0 0 1 111.89 45.95"
+              :stroke="gradientUrl"
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+          </svg>
 
-          <!-- If no text shown (inline), still render a minimal invisible spacer -->
-          <div
-            v-else
-            :class="[
-              'flex flex-col items-center justify-center relative z-[2]',
-              sizes[size].centerCol,
-            ]"
-          >
-            <div class="relative" :class="sizes[size].chipWrapper">
-              <div
-                class="nfc-chip-3d"
-                :class="[
-                  sizes[size].isLg ? 'animate-nfc-chip-3d-lg' : 'animate-nfc-chip-3d',
-                  sizes[size].chip,
-                ]"
-              ></div>
+          <!-- Wordmark + progress bar + status label -->
+          <div v-if="showText" class="nfg-loader__meta">
+            <div class="nfg-loader__wordmark">
+              <span class="nfg-loader__word">NFC</span
+              ><span class="nfg-loader__go">Go</span>
             </div>
-          </div>
 
-          <!-- ==================== COLUMN 3: RIGHT WAVE (3 arcs container) ==================== -->
-          <div
-            :class="['relative h-full flex items-center justify-start', sizes[size].rightCol]"
-          >
-            <div class="nfc-fan-group nfc-fan-right relative h-full w-full">
-              <!-- RIGHT arc 3 (OUTERMOST, thinnest) — MATTE GOLD — farthest from chip -->
-              <div class="nfc-fan-wrap nfc-fan-right-c absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-r-3"
-                  :class="sizes[size].fanSvg3"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath3"
-                    :stroke="sizes[size].strokeGold"
-                    :stroke-width="sizes[size].strokeW3"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-              <!-- RIGHT arc 2 (MIDDLE) — MATTE TEAL — middle distance -->
-              <div class="nfc-fan-wrap nfc-fan-right-b absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-r-2"
-                  :class="sizes[size].fanSvg2"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath2"
-                    :stroke="sizes[size].strokeTeal"
-                    :stroke-width="sizes[size].strokeW2"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-              <!-- RIGHT arc 1 (INNERMOST, thickest) — MATTE NAVY — closest to chip -->
-              <div class="nfc-fan-wrap nfc-fan-right-a absolute inset-0">
-                <svg
-                  class="nfc-fan-svg animate-nfc-fan-r-1"
-                  :class="sizes[size].fanSvg1"
-                  :viewBox="sizes[size].fanViewBox"
-                  fill="none"
-                >
-                  <path
-                    :d="sizes[size].fanPath1"
-                    :stroke="sizes[size].strokeNavy"
-                    :stroke-width="sizes[size].strokeW1"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
+            <div class="nfg-loader__bar">
+              <span class="nfg-loader__track-line"></span>
             </div>
+
+            <p v-if="hintText && showHintText" class="nfg-loader__label">
+              {{ hintText }}
+            </p>
           </div>
         </div>
       </template>
@@ -269,6 +195,11 @@
   </div>
 </template>
 
+<script>
+// Module-scope counter → guarantees a unique gradient id per instance.
+let gradientSeq = 0;
+</script>
+
 <script setup>
 import { computed } from 'vue';
 
@@ -282,6 +213,12 @@ const props = defineProps({
     type: String,
     default: 'wave',
     validator: (v) => ['wave', 'dotPulse', 'cardScan'].includes(v),
+  },
+  // Surface the loader sits on: 'dark' = ink/black surface, 'light' = white/paper surface
+  theme: {
+    type: String,
+    default: 'dark',
+    validator: (v) => ['dark', 'light'].includes(v),
   },
   showText: {
     type: Boolean,
@@ -317,6 +254,26 @@ const props = defineProps({
   },
 });
 
+const gradientId = `nfg-loader-gold-${++gradientSeq}`;
+const gradientUrl = `url(#${gradientId})`;
+
+// Colour sets for the logo-draw variant (dark ink vs. light paper surfaces).
+const palettes = {
+  dark: {
+    track: '#1E1A0E',
+    gradStart: '#F7E2A1',
+    gradMid: '#D4AF37',
+    gradEnd: '#9C7420',
+  },
+  light: {
+    track: '#EAE3D0',
+    gradStart: '#E6C15A',
+    gradMid: '#C9A227',
+    gradEnd: '#9C7420',
+  },
+};
+const palette = computed(() => palettes[props.theme] ?? palettes.dark);
+
 // Helper — widths for skeleton bars so look natural
 const barWidth = (n, total) => {
   if (n === total) return '58%';
@@ -325,218 +282,14 @@ const barWidth = (n, total) => {
   return '96%';
 };
 
-// Colors (stroke for fan arcs — consistent with matte theme)
-const NAVY = 'var(--theme-primary-600, #3d496a)';
-const TEAL = 'var(--theme-accent, #5d8c87)';
-const GOLD = 'var(--theme-accent-secondary, #b8956a)';
-
-// Common SVG fan geometry (VIEWBOX 100x100, center 50,50).
-// Exactly as in the reference image: 3 CONCENTRIC CIRCULAR OPEN ARCS,
-// with a UNIFORM PERPENDICULAR GAP between each stroke (6px visual
-// clearance), and ALL 3 ARCs OPEN AT THE SAME X-COORDINATE (on the side
-// facing the chip) so they LOOK ALIGNED just like the reference image.
-// Opening sits at openXOffset = 10 units inside from center → x = 40.
-const VB = '0 0 100 100';
-const cx = 50;
-const cy = 50;
-// -------- Geometry tuned to match reference image exactly --------
-const OPEN_OFFSET = 10;        // Opening x = cx - OPEN_OFFSET = 40 (ALL arcs open here)
-const R1 = 16;                 // inner (navy)  radius
-const STROKE_STEP = 9;         // 9px between stroke centerlines → 9 - strokeW visual gap
-const R2 = R1 + STROKE_STEP;   // middle (teal) radius
-const R3 = R2 + STROKE_STEP;   // outer  (gold) radius
-// For a given r, compute sweep angle (half-angle) so that the arc's
-// endpoint lands exactly at x = cx - OPEN_OFFSET (the opening line).
-// r · cos(θ) = r_projected  (where projected is the length from center
-//                              toward the opening, measured along x)
-// The opening is at x = cx - OPEN_OFFSET (10 units inward from center)
-// → along the circle, the x-coordinate at angle θ from +x toward -x is:
-//      cx - r·cos θ = cx - OPEN_OFFSET  ←  must equal the opening x line
-//   →  r·cos θ = OPEN_OFFSET
-//   →  θ = arccos(OPEN_OFFSET / r)
-const arcHalfAngle = (r) => Math.acos(Math.min(OPEN_OFFSET / r, 0.999));
-// Draw one OPEN CIRCULAR ARC. All arcs share the same center. All open
-// toward +x (chip side) at exactly the same x boundary (cx - OPEN_OFFSET).
-// Sweep counter-clockwise through the FAR LEFT side → no chord line.
-/* Construct a single half-circle WiFi fan arc using pure SVG elliptical arc.
-   All 3 arcs share the same center (cx, cy) but have DIFFERENT RADII and
-   DIFFERENT OPENING OFFSETS (per-radius).
-   Critical detail about OPEN_OFFSET:
-     - If all 3 arcs use the SAME opening x-line (cx - 10 = 40), then all 6
-       endpoints (3 left + 3 right, 2 each top/bottom) land on the SAME
-       horizontal Y-level because they all sit on the same x vertical line and
-       have roughly proportional arc angles. This creates a "fake horizontal
-       line" visual caused by 6 rounded stroke endpoints lining up perfectly.
-     - To eliminate that spurious "red box line" artifact, the inner arc's
-       endpoints sit DEEPER (larger offset, closer to chip) while outer arc's
-       endpoints sit FURTHER OUT (smaller offset). This staggers the endpoint
-       Y-levels so they never form a straight horizontal line.
-   Per-layer offsets chosen for a natural nested WiFi symbol look:
-     Arc1/R=16 (Navy,  innermost): off = 13  (deepest opening)
-     Arc2/R=25 (Teal,  middle   ): off = 10  (middle)
-     Arc3/R=34 (Gold,  outermost): off = 7   (widest opening)
-*/
-const circularFan = (r, openOffset) => {
-  const theta = Math.acos(openOffset / r); // angle subtended by opening
-  const sinA = Math.sin(theta);
-  const x1 = cx - openOffset;
-  const y1 = cy - r * sinA;
-  const x2 = x1;
-  const y2 = cy + r * sinA;
-  // large-arc-flag = 0 (2θ < 180°, small arc)
-  // sweep-flag     = 0 (counter-clockwise → curve bulges toward FAR LEFT)
-  const f = (v) => v.toFixed(3);
-  return `M ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 0 0 ${f(x2)} ${f(y2)}`;
-};
-const FANPATH_1 = circularFan(R1, 13); // Navy inner  — deep opening  (x=37)
-const FANPATH_2 = circularFan(R2, 10); // Teal middle — standard      (x=40)
-const FANPATH_3 = circularFan(R3, 7);  // Gold outer  — wide opening  (x=43)
-
-// Wave variant — Size map (HALF-WAVE fan style)
-// Horizontal gap between arc layers (via margin so it doesn't clash with
-// keyframe animations that also use the CSS transform property).
-// These are CONSTANT for all sizes (see template for inline margin styles):
-//   Left  inner/arc1 = marginLeft 0px,   mid/arc2 = -6px,   outer/arc3 = -13px
-//   Right inner/arc1 = marginLeft 0px,   mid/arc2 = +6px,   outer/arc3 = +13px
+// Wave variant — scale class (everything else derives from --nfg-mark)
 const sizes = {
-  xs: {
-    stage: 'w-28 h-8',
-    leftCol: 'w-6 h-6 shrink-0 mr-[1px]',
-    rightCol: 'w-6 h-6 shrink-0 ml-[1px]',
-    centerCol: 'shrink-0 max-w-[70%] -translate-y-[10px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 4,
-    strokeW2: 4,
-    strokeW3: 4,
-    chipWrapper: 'w-4 h-4',
-    chip: 'w-4 h-4',
-    isLg: false,
-    brand: 'text-[11px] leading-none font-bold tracking-wide',
-  },
-  sm: {
-    stage: 'w-48 h-14',
-    leftCol: 'w-12 h-12 shrink-0 mr-[1px]',
-    rightCol: 'w-12 h-12 shrink-0 ml-[1px]',
-    centerCol: 'shrink-0 max-w-[65%] -translate-y-[18px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 4,
-    strokeW2: 4,
-    strokeW3: 4,
-    chipWrapper: 'w-8 h-8',
-    chip: 'w-8 h-8',
-    isLg: false,
-    brand: 'text-[15px] leading-none font-bold tracking-wide',
-  },
-  md: {
-    stage: 'w-72 h-20',
-    leftCol: 'w-20 h-20 shrink-0 mr-[2px]',
-    rightCol: 'w-20 h-20 shrink-0 ml-[2px]',
-    centerCol: 'shrink-0 max-w-[60%] -translate-y-[30px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-12 h-12',
-    chip: 'w-12 h-12',
-    isLg: false,
-    brand: 'text-xl leading-none font-bold tracking-wide',
-  },
-  lg: {
-    stage: 'w-96 h-24',
-    leftCol: 'w-24 h-24 shrink-0 mr-[2px]',
-    rightCol: 'w-24 h-24 shrink-0 ml-[2px]',
-    centerCol: 'shrink-0 max-w-[55%] -translate-y-[44px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-16 h-16',
-    chip: 'w-16 h-16',
-    isLg: true,
-    brand: 'text-3xl leading-none font-bold tracking-wide',
-  },
-  xl: {
-    stage: 'w-[36rem] h-32',
-    leftCol: 'w-32 h-32 shrink-0 mr-[3px]',
-    rightCol: 'w-32 h-32 shrink-0 ml-[3px]',
-    centerCol: 'shrink-0 max-w-[50%] -translate-y-[60px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-20 h-20',
-    chip: 'w-20 h-20',
-    isLg: true,
-    brand: 'text-4xl leading-none font-bold tracking-wide',
-  },
-  full: {
-    stage: 'w-full max-w-[48rem] h-40',
-    leftCol: 'w-40 h-40 shrink-0 mr-[4px]',
-    rightCol: 'w-40 h-40 shrink-0 ml-[4px]',
-    centerCol: 'shrink-0 max-w-[50%] -translate-y-[72px] items-center justify-center',
-    fanSvg1: 'w-full h-full block',
-    fanSvg2: 'w-full h-full block',
-    fanSvg3: 'w-full h-full block',
-    fanViewBox: VB,
-    fanPath1: FANPATH_1,
-    fanPath2: FANPATH_2,
-    fanPath3: FANPATH_3,
-    strokeNavy: NAVY,
-    strokeTeal: TEAL,
-    strokeGold: GOLD,
-    strokeW1: 5,
-    strokeW2: 5,
-    strokeW3: 5,
-    chipWrapper: 'w-24 h-24',
-    chip: 'w-24 h-24',
-    isLg: true,
-    brand: 'text-5xl leading-none font-bold tracking-wide',
-  },
+  xs: 'nfg-loader--xs',
+  sm: 'nfg-loader--sm',
+  md: 'nfg-loader--md',
+  lg: 'nfg-loader--lg',
+  xl: 'nfg-loader--xl',
+  full: 'nfg-loader--full',
 };
 
 // Dot pulse variant — Size map
@@ -648,3 +401,185 @@ const wrapperClass = computed(() => {
   return c.join(' ');
 });
 </script>
+
+<style scoped>
+/* ============================================================
+   VARIANT 1 — NFCGo LOGO DRAW (official loading animation)
+   Every dimension derives from --nfg-mark so the whole lockup
+   scales proportionally (proportions taken from the design:
+   mark 180px · wordmark 40px · bar 160×3px · gaps 28/14px).
+   ============================================================ */
+.nfg-loader {
+  --nfg-mark: 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--nfg-mark) * 0.156);
+  font-family: 'Outfit', 'Poppins', system-ui, sans-serif;
+  line-height: 1;
+  user-select: none;
+}
+
+.nfg-loader--xs {
+  --nfg-mark: 2.25rem;
+}
+.nfg-loader--sm {
+  --nfg-mark: 4rem;
+}
+.nfg-loader--md {
+  --nfg-mark: 6rem;
+}
+.nfg-loader--lg {
+  --nfg-mark: 8rem;
+}
+.nfg-loader--xl,
+.nfg-loader--full {
+  --nfg-mark: 11.25rem;
+}
+
+.nfg-loader__mark {
+  width: var(--nfg-mark);
+  height: var(--nfg-mark);
+  display: block;
+}
+
+.nfg-loader__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--nfg-mark) * 0.0778);
+}
+
+.nfg-loader__wordmark {
+  font-size: calc(var(--nfg-mark) * 0.222);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nfg-loader__bar {
+  width: calc(var(--nfg-mark) * 0.889);
+  height: max(2px, calc(var(--nfg-mark) * 0.0167));
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.nfg-loader__track-line {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: 999px;
+  background: #d4af37;
+  animation: nfgSlide 2s ease-in-out infinite;
+}
+
+.nfg-loader__label {
+  margin: 0;
+  font-size: max(10px, calc(var(--nfg-mark) * 0.0778));
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---- Palette: dark (ink) surfaces ---- */
+.nfg-loader--dark .nfg-loader__word {
+  color: #f6f1e4;
+}
+.nfg-loader--dark .nfg-loader__go {
+  color: #d4af37;
+}
+.nfg-loader--dark .nfg-loader__bar {
+  background: #1e1a0e;
+}
+.nfg-loader--dark .nfg-loader__label {
+  color: #9c927a;
+}
+
+/* ---- Palette: light (paper) surfaces ---- */
+.nfg-loader--light .nfg-loader__word {
+  color: #0a0a0a;
+}
+.nfg-loader--light .nfg-loader__go {
+  color: #8a6915;
+}
+.nfg-loader--light .nfg-loader__bar {
+  background: #efe9d8;
+}
+.nfg-loader--light .nfg-loader__track-line {
+  background: #c9a227;
+}
+.nfg-loader--light .nfg-loader__label {
+  color: #8a8069;
+}
+
+/* ---- Mark animation: ring draws, bar follows, waves pulse ---- */
+.nfg-ring {
+  stroke-dasharray: 176;
+  animation: nfgDraw 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.nfg-bar {
+  stroke-dasharray: 28;
+  animation: nfgDraw2 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.nfg-w1 {
+  animation: nfgPulse 2s ease-in-out infinite 0.5s;
+}
+.nfg-w2 {
+  animation: nfgPulse 2s ease-in-out infinite 0.75s;
+}
+
+@keyframes nfgDraw {
+  0% {
+    stroke-dashoffset: 176;
+  }
+  45%,
+  70% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -176;
+  }
+}
+@keyframes nfgDraw2 {
+  0%,
+  25% {
+    stroke-dashoffset: 28;
+  }
+  55%,
+  75% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -28;
+  }
+}
+@keyframes nfgPulse {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@keyframes nfgSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nfg-ring,
+  .nfg-bar,
+  .nfg-w1,
+  .nfg-w2,
+  .nfg-loader__track-line {
+    animation: none;
+  }
+}
+</style>

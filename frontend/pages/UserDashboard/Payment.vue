@@ -11,13 +11,13 @@
                 name="heroicons:identification"
                 class="h-8 w-8 text-primary-600"
               />
-              <span class="ml-2 text-xl font-bold text-secondary-900"
+              <span class="ml-2 text-h4 font-bold text-secondary-900"
                 >NFCGo</span
               >
             </NuxtLink>
           </div>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-secondary-600">Step 3 of 3</span>
+            <span class="breadcrumb">Step 3 of 3</span>
             <div class="flex space-x-1">
               <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
               <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
@@ -31,10 +31,10 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-secondary-900 mb-4">
+        <h1 class="page-title text-secondary-900 mb-4">
           Complete Your Order
         </h1>
-        <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+        <p class="card-subtitle max-w-2xl mx-auto">
           Review your order details and complete the payment to receive your NFC
           business card.
         </p>
@@ -45,7 +45,7 @@
         <div class="space-y-6">
           <!-- Order Summary -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Order Summary
             </h2>
 
@@ -58,7 +58,7 @@
                   <h3 class="font-semibold text-secondary-900">
                     {{ orderSummary.planName }}
                   </h3>
-                  <p class="text-sm text-secondary-600">
+                  <p class="card-subtitle">
                     {{ orderSummary.planDescription }}
                   </p>
                 </div>
@@ -66,28 +66,58 @@
                   <p class="font-semibold text-secondary-900">
                     ${{ orderSummary.planPrice }}/month
                   </p>
-                  <p class="text-xs text-secondary-500">14-day free trial</p>
+                  <p class="text-helper">14-day free trial</p>
                 </div>
               </div>
 
               <!-- NFC Card -->
-              <div
-                class="flex justify-between items-center py-3 border-b border-secondary-200"
-              >
-                <div>
-                  <h3 class="font-semibold text-secondary-900">
-                    Physical NFC Card
-                  </h3>
-                  <p class="text-sm text-secondary-600">
-                    {{ orderSummary.cardType }}
-                  </p>
+              <div class="py-3 border-b border-secondary-200">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="font-semibold text-secondary-900">
+                      Physical NFC Card
+                    </h3>
+                    <p class="card-subtitle">
+                      {{ orderSummary.cardType }}
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-semibold text-secondary-900">
+                      ${{ orderSummary.cardPrice }}
+                    </p>
+                    <p class="text-helper">One-time</p>
+                  </div>
                 </div>
-                <div class="text-right">
-                  <p class="font-semibold text-secondary-900">
-                    ${{ orderSummary.cardPrice }}
-                  </p>
-                  <p class="text-xs text-secondary-500">One-time</p>
+                <div class="flex items-center justify-between mt-3">
+                  <span class="text-body text-secondary-600">Quantity</span>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      @click="decreaseQuantity"
+                      :disabled="cardQuantity <= 1"
+                      class="w-8 h-8 rounded-lg border border-secondary-300 text-secondary-700 hover:bg-secondary-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                      aria-label="Decrease card quantity"
+                    >
+                      <Icon name="heroicons:minus" class="h-4 w-4" />
+                    </button>
+                    <span class="w-8 text-center font-medium text-secondary-900">{{ cardQuantity }}</span>
+                    <button
+                      type="button"
+                      @click="increaseQuantity"
+                      :disabled="cardQuantity >= maxQuantity"
+                      class="w-8 h-8 rounded-lg border border-secondary-300 text-secondary-700 hover:bg-secondary-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                      aria-label="Increase card quantity"
+                    >
+                      <Icon name="heroicons:plus" class="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
+                <p
+                  v-if="cardQuantity > 1"
+                  class="text-helper mt-2"
+                >
+                  ${{ orderSummary.cardUnitPrice }} × {{ cardQuantity }} cards
+                </p>
               </div>
 
               <!-- Shipping -->
@@ -96,7 +126,7 @@
               >
                 <div>
                   <h3 class="font-semibold text-secondary-900">Shipping</h3>
-                  <p class="text-sm text-secondary-600">
+                  <p class="card-subtitle">
                     Standard delivery (5-7 business days)
                   </p>
                 </div>
@@ -109,14 +139,14 @@
 
               <!-- Total -->
               <div class="flex justify-between items-center py-3">
-                <h3 class="text-lg font-bold text-secondary-900">
+                <h3 class="card-title text-secondary-900">
                   Total Today
                 </h3>
                 <div class="text-right">
-                  <p class="text-2xl font-bold text-primary-600">
+                  <p class="stat-value text-primary-600">
                     ${{ orderSummary.total }}
                   </p>
-                  <p class="text-xs text-secondary-500">
+                  <p class="text-helper">
                     Then ${{ orderSummary.planPrice }}/month
                   </p>
                 </div>
@@ -126,7 +156,7 @@
 
           <!-- Card Preview -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Your NFC Card
             </h2>
 
@@ -136,7 +166,7 @@
                 <div
                   class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-lg"
                 >
-                  <div class="absolute inset-0 p-3 text-white text-xs">
+                  <div class="absolute inset-0 p-3 text-white text-caption">
                     <div class="flex items-center justify-between h-full">
                       <div>
                         <div class="font-bold">
@@ -161,8 +191,8 @@
             </div>
 
             <div class="mt-4 text-center">
-              <p class="text-sm text-secondary-600">Card Size: 90mm x 54mm</p>
-              <p class="text-xs text-secondary-500">
+              <p class="card-subtitle">Card Size: 90mm x 54mm</p>
+              <p class="text-helper">
                 Standard business card dimensions
               </p>
             </div>
@@ -171,9 +201,123 @@
 
         <!-- Right Panel - Payment Form -->
         <div class="space-y-6">
+          <!-- Shipping Address (shown once a payment method is chosen) -->
+          <div v-if="selectedPaymentRail" class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="card-title text-secondary-800">
+              Shipping Address
+            </h3>
+            <p class="card-subtitle mb-4">
+              We deliver your physical NFC card(s) to this address.
+            </p>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >Full Name</label
+                  >
+                  <input
+                    v-model="billingAddress.fullName"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >Phone Number</label
+                  >
+                  <input
+                    v-model="billingAddress.phone"
+                    type="tel"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="0123456789"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  class="block text-label text-secondary-700 mb-1"
+                  >Address</label
+                >
+                <textarea
+                  v-model="billingAddress.address"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="123 Main Street, Unit 4-2"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >City</label
+                  >
+                  <input
+                    v-model="billingAddress.city"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="City"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >State</label
+                  >
+                  <input
+                    v-model="billingAddress.state"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Selangor"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >ZIP / Postcode</label
+                  >
+                  <input
+                    v-model="billingAddress.zipCode"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="47300"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >Country</label
+                  >
+                  <input
+                    v-model="billingAddress.country"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Malaysia"
+                  />
+                </div>
+              </div>
+
+              <p
+                v-if="!isAddressValid"
+                class="text-error text-amber-600 flex items-center gap-1"
+              >
+                <Icon name="heroicons:exclamation-triangle" class="h-4 w-4" />
+                Please complete your shipping address before paying.
+              </p>
+            </div>
+          </div>
+
           <!-- Payment Method Selection -->
           <div v-if="!selectedPaymentRail" class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Choose Payment Method
             </h2>
             <PaymentMethodSelector
@@ -191,6 +335,7 @@
               payment-rail="card"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
+              :disabled="!isFormValid"
               @payment-success="handlePaymentSuccess"
               @payment-failed="handlePaymentFailed"
               @back="selectedPaymentRail = null"
@@ -205,6 +350,7 @@
               payment-rail="fpx"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
+              :disabled="!isFormValid"
               @payment-success="handlePaymentSuccess"
               @payment-failed="handlePaymentFailed"
               @back="selectedPaymentRail = null"
@@ -219,6 +365,7 @@
               payment-rail="ewallet"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
+              :disabled="!isFormValid"
               @payment-success="handlePaymentSuccess"
               @payment-failed="handlePaymentFailed"
               @back="selectedPaymentRail = null"
@@ -231,72 +378,11 @@
               :amount="orderSummary.total"
               :description="`${orderSummary.planName} + NFC Card`"
               :metadata="orderMetadata"
+              :disabled="!isFormValid"
               @payment-initiated="handleManualTransferInitiated"
               @proof-uploaded="handleProofUploaded"
               @back="selectedPaymentRail = null"
             />
-          </div>
-
-          <!-- Billing Address (shown for all payment methods) -->
-          <div v-if="selectedPaymentRail" class="bg-white rounded-2xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-secondary-800 mb-4">
-              Billing Address
-            </h3>
-
-            <div class="space-y-4">
-              <div>
-                <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Full Name</label
-                >
-                <input
-                  v-model="billingAddress.fullName"
-                  type="text"
-                  class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="block text-sm font-medium text-secondary-700 mb-1"
-                  >Address</label
-                >
-                <textarea
-                  v-model="billingAddress.address"
-                  rows="3"
-                  class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="123 Main Street, City, State, ZIP"
-                ></textarea>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
-                    >City</label
-                  >
-                  <input
-                    v-model="billingAddress.city"
-                    type="text"
-                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="City"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-secondary-700 mb-1"
-                    >ZIP Code</label
-                  >
-                  <input
-                    v-model="billingAddress.zipCode"
-                    type="text"
-                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="12345"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Terms and Conditions -->
@@ -312,7 +398,7 @@
                 />
                 <label
                   for="terms"
-                  class="ml-2 block text-sm text-secondary-700"
+                  class="ml-2 block text-body text-secondary-700"
                 >
                   I agree to the
                   <button
@@ -343,7 +429,7 @@
                 />
                 <label
                   for="billing"
-                  class="ml-2 block text-sm text-secondary-700"
+                  class="ml-2 block text-body text-secondary-700"
                 >
                   I authorize NFCGo to charge my payment method for the
                   subscription amount
@@ -359,7 +445,7 @@
                 />
                 <label
                   for="marketing"
-                  class="ml-2 block text-sm text-secondary-700"
+                  class="ml-2 block text-body text-secondary-700"
                 >
                   I would like to receive marketing emails about new features
                   and updates
@@ -372,7 +458,7 @@
           <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="text-center">
               <div
-                class="flex items-center justify-center space-x-2 text-sm text-secondary-600"
+                class="flex items-center justify-center space-x-2 text-body text-secondary-600"
               >
                 <Icon name="heroicons:shield-check" class="h-4 w-4" />
                 <span>Your payment is secured with SSL encryption</span>
@@ -405,7 +491,7 @@
       >
         <div class="p-6 border-b border-secondary-200">
           <div class="flex items-center justify-between">
-            <h3 class="text-2xl font-bold text-secondary-900">
+            <h3 class="modal-title text-secondary-900">
               Terms of Service
             </h3>
             <button
@@ -415,7 +501,7 @@
               <Icon name="heroicons:x-mark" class="h-6 w-6" />
             </button>
           </div>
-          <p v-if="termsDocument" class="text-sm text-secondary-500 mt-2">
+          <p v-if="termsDocument" class="text-helper mt-2">
             Version {{ termsDocument.version }} • Effective
             {{ formatDate(termsDocument.effective_date) }}
           </p>
@@ -451,7 +537,7 @@
       >
         <div class="p-6 border-b border-secondary-200">
           <div class="flex items-center justify-between">
-            <h3 class="text-2xl font-bold text-secondary-900">
+            <h3 class="modal-title text-secondary-900">
               Privacy Policy
             </h3>
             <button
@@ -461,7 +547,7 @@
               <Icon name="heroicons:x-mark" class="h-6 w-6" />
             </button>
           </div>
-          <p v-if="privacyDocument" class="text-sm text-secondary-500 mt-2">
+          <p v-if="privacyDocument" class="text-helper mt-2">
             Version {{ privacyDocument.version }} • Effective
             {{ formatDate(privacyDocument.effective_date) }}
           </p>
@@ -497,7 +583,7 @@
         >
           <Icon name="heroicons:check" class="h-8 w-8 text-success-600" />
         </div>
-        <h3 class="text-2xl font-bold text-secondary-900 mb-2">
+        <h3 class="modal-title text-secondary-900 mb-2">
           Payment Successful!
         </h3>
         <p class="text-secondary-600 mb-6">
@@ -561,13 +647,26 @@ const paymentForm = reactive({
   cardholderName: "",
 });
 
-// Billing address
+// Shipping address (delivery address for the physical NFC card)
 const billingAddress = reactive({
   fullName: "",
+  phone: "",
   address: "",
   city: "",
+  state: "",
   zipCode: "",
+  country: "Malaysia",
 });
+
+// Physical NFC card quantity
+const maxQuantity = 5;
+const cardQuantity = ref(1);
+const increaseQuantity = () => {
+  if (cardQuantity.value < maxQuantity) cardQuantity.value++;
+};
+const decreaseQuantity = () => {
+  if (cardQuantity.value > 1) cardQuantity.value--;
+};
 
 // Plan prices from API
 const { getPlanPrice, getPlanDetails, loadPrices } = usePlanPrices();
@@ -592,7 +691,8 @@ const orderSummary = computed(() => {
   };
 
   const planPrice = getPlanPrice(selectedPlan) || 0;
-  const cardPrice = 15; // Fixed card price
+  const cardUnitPrice = 15; // Fixed price per physical card
+  const cardPrice = cardUnitPrice * cardQuantity.value;
   const shippingCost = 5; // Fixed shipping cost
   const total = planPrice + cardPrice + shippingCost;
 
@@ -602,6 +702,7 @@ const orderSummary = computed(() => {
       planDescriptions[selectedPlan] || "Perfect for getting started",
     planPrice,
     cardType: cardTypes[selectedPlan] || "Digital Only",
+    cardUnitPrice,
     cardPrice,
     shippingCost,
     total,
@@ -611,9 +712,21 @@ const orderSummary = computed(() => {
 // Order metadata for payment components
 const orderMetadata = computed(() => ({
   plan: sessionStorage.getItem("selectedPlan"),
+  plan_price: orderSummary.value.planPrice,
   card_type: orderSummary.value.cardType,
+  card_unit_price: orderSummary.value.cardUnitPrice,
+  card_quantity: cardQuantity.value,
   shipping_cost: orderSummary.value.shippingCost,
   card_info: cardInfo.value,
+  billing_address: {
+    full_name: billingAddress.fullName,
+    phone: billingAddress.phone,
+    address: billingAddress.address,
+    city: billingAddress.city,
+    state: billingAddress.state,
+    zip_code: billingAddress.zipCode,
+    country: billingAddress.country,
+  },
 }));
 
 // Card info from previous step
@@ -622,19 +735,29 @@ const cardInfo = computed(() => {
   return stored ? JSON.parse(stored) : {};
 });
 
+// Shipping address completeness
+const isAddressValid = computed(
+  () =>
+    !!(
+      billingAddress.fullName &&
+      billingAddress.phone &&
+      billingAddress.address &&
+      billingAddress.city &&
+      billingAddress.state &&
+      billingAddress.zipCode &&
+      billingAddress.country
+    )
+);
+
 // Form validation
 const isFormValid = computed(() => {
   if (!selectedPaymentRail.value) {
     return false;
   }
-  
-  const billingValid =
-    billingAddress.fullName &&
-    billingAddress.address &&
-    billingAddress.city &&
-    billingAddress.zipCode;
-    
-  return billingValid && termsAccepted.value && billingConsent.value;
+
+  return (
+    isAddressValid.value && termsAccepted.value && billingConsent.value
+  );
 });
 
 // Handle payment rail selection
@@ -754,9 +877,16 @@ onMounted(async () => {
   // Load plan prices from API
   await loadPrices();
 
-  // Load user data for billing address
+  // Prefill shipping address from the user profile
   if (authStore.user) {
-    billingAddress.fullName = authStore.user.full_name || "";
+    billingAddress.fullName =
+      authStore.user.full_name || authStore.user.name || "";
+    billingAddress.phone = authStore.user.phone || "";
+    billingAddress.city = authStore.user.city || "";
+    billingAddress.state = authStore.user.state || "";
+    billingAddress.zipCode =
+      authStore.user.postcode || authStore.user.zip_code || "";
+    billingAddress.country = authStore.user.country || "Malaysia";
   }
 
   // Load legal documents (non-blocking)

@@ -1,14 +1,14 @@
 <template>
   <div v-if="shouldShowField" class="space-y-1">
     <!-- Label -->
-    <label class="block text-sm font-medium text-gray-700">
+    <label class="block text-label text-gray-700">
       {{ field.label }}
-      <span v-if="!field.is_required" class="text-xs text-gray-500">(Optional)</span>
+      <span v-if="!field.is_required" class="text-caption text-gray-500">(Optional)</span>
       <span v-if="field.is_required" class="text-error-600">*</span>
     </label>
 
     <!-- Help Text -->
-    <p v-if="field.help_text" class="text-xs text-gray-500 mb-1">
+    <p v-if="field.help_text" class="text-helper mb-1">
       {{ field.help_text }}
     </p>
 
@@ -21,7 +21,7 @@
       :required="field.is_required"
       :minlength="field.validation_rules?.min"
       :maxlength="field.validation_rules?.max"
-      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       @input="$emit('update:modelValue', modelValue)"
     />
 
@@ -34,12 +34,12 @@
         :minlength="field.validation_rules?.min"
         :maxlength="getTextareaMaxLength(field)"
         :rows="field.config?.rows || 4"
-        class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         :class="{ 'border-amber-400 focus:ring-amber-400': isNearCharLimit(field) }"
         @input="$emit('update:modelValue', modelValue)"
       ></textarea>
       <p 
-        class="text-xs text-right"
+        class="text-caption text-right"
         :class="isNearCharLimit(field) ? 'text-amber-600 font-medium' : 'text-gray-500'"
       >
         <span v-if="isAtCharLimit(field) && getTextareaMaxLength(field) === 300" class="text-red-500 font-bold mr-1">About Me cannot exceed 300 characters</span>
@@ -59,7 +59,7 @@
       :required="field.is_required"
       :min="field.validation_rules?.min"
       :max="field.validation_rules?.max"
-      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       @input="$emit('update:modelValue', modelValue)"
     />
 
@@ -72,10 +72,10 @@
         :required="field.is_required"
         :maxlength="userPlan === 'basic' ? getTextareaMaxLength(field) : undefined"
         rows="8"
-        class="w-full px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent origin-top"
+        class="w-full px-3 py-2 text-input resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent origin-top"
         @input="$emit('update:modelValue', modelValue)"
       ></textarea>
-      <div class="bg-gray-50 px-3 py-1 text-xs text-gray-500 border-t flex justify-between items-center"
+      <div class="bg-gray-50 px-3 py-1 text-caption text-gray-500 border-t flex justify-between items-center"
            :class="{ 'bg-amber-50 text-amber-700': userPlan === 'basic' && isNearCharLimit(field) }">
         <span>Rich text editor (basic). Use formatting in your text.</span>
         <!-- Basic Plan: Show limit and error -->
@@ -105,7 +105,7 @@
       v-else-if="field.field_type === 'select'"
       v-model="modelValue[field.field_key]"
       :required="field.is_required"
-      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       @change="$emit('update:modelValue', modelValue)"
     >
       <option value="">{{ field.placeholder || 'Select an option...' }}</option>
@@ -132,7 +132,7 @@
         />
         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
       </div>
-      <span class="ml-3 text-sm font-medium text-gray-700">
+      <span class="ml-3 text-navigation text-gray-700">
         {{ field.config?.onLabel || 'Enabled' }}
       </span>
     </label>
@@ -148,7 +148,7 @@
         class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
         @change="$emit('update:modelValue', modelValue)"
       />
-      <span class="ml-2 text-sm text-gray-700">
+      <span class="ml-2 text-body text-gray-700">
         {{ field.placeholder || field.label }}
       </span>
     </label>
@@ -173,7 +173,7 @@
         type="file"
         accept="image/*"
         @change="handleImageUpload($event, field.field_key)"
-        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+        class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg"
       />
     </div>
 
@@ -188,7 +188,7 @@
 
     <!-- File Upload -->
     <div v-else-if="field.field_type === 'file'" class="space-y-2">
-      <div v-if="modelValue[field.field_key]" class="text-sm text-gray-700 flex items-center gap-2">
+      <div v-if="modelValue[field.field_key]" class="text-body text-gray-700 flex items-center gap-2">
         <Icon name="heroicons:document" class="w-4 h-4" />
         {{ modelValue[field.field_key] }}
         <button
@@ -203,7 +203,7 @@
         type="file"
         :accept="field.config?.accept || '*/*'"
         @change="handleFileUpload($event, field.field_key)"
-        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+        class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg"
       />
     </div>
 
@@ -223,7 +223,7 @@
       <button
         type="button"
         @click="addRepeaterItem(field.field_key)"
-        class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+        class="flex items-center gap-2 text-button text-blue-600 hover:text-blue-800"
       >
         <Icon name="heroicons:plus-circle" class="w-5 h-5" />
         Add Item
@@ -245,21 +245,21 @@
           <Icon name="heroicons:x-mark" class="w-4 h-4" />
         </button>
         
-        <div class="text-xs text-gray-400 font-medium mb-2">Item {{ index + 1 }}</div>
+        <div class="text-caption text-gray-400 font-medium mb-2">Item {{ index + 1 }}</div>
         
         <div
           v-for="subField in getSubFields(field.field_key)"
           :key="subField.key"
           class="flex flex-col"
         >
-          <label class="text-xs font-medium text-gray-600 mb-1">
+          <label class="text-label text-gray-600 mb-1">
             {{ subField.label }}
           </label>
           <!-- Select type -->
           <select
             v-if="subField.type === 'select'"
             v-model="modelValue[field.field_key][index][subField.key]"
-            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            class="px-2 py-1.5 text-input border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
             @change="$emit('update:modelValue', modelValue)"
           >
             <option value="">{{ subField.placeholder || 'Select...' }}</option>
@@ -271,7 +271,7 @@
             v-model="modelValue[field.field_key][index][subField.key]"
             :placeholder="subField.placeholder"
             rows="2"
-            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            class="px-2 py-1.5 text-input border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
             @input="$emit('update:modelValue', modelValue)"
           />
           <!-- Default input -->
@@ -281,14 +281,14 @@
             v-model="modelValue[field.field_key][index][subField.key]"
             :placeholder="subField.placeholder"
             :maxlength="subField.maxlength"
-            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            class="px-2 py-1.5 text-input border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
             @input="$emit('update:modelValue', modelValue)"
           />
         </div>
       </div>
       
       <!-- Empty State -->
-      <div v-if="!modelValue[field.field_key] || modelValue[field.field_key].length === 0" class="text-center py-4 text-gray-400 text-sm">
+      <div v-if="!modelValue[field.field_key] || modelValue[field.field_key].length === 0" class="text-center py-4 text-gray-400 text-body">
         No items yet. Click "Add Item" to start.
       </div>
     </div>
@@ -313,7 +313,7 @@
         <span
           v-for="(tag, index) in (modelValue[field.field_key] || [])"
           :key="index"
-          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-body rounded-full"
         >
           {{ tag }}
           <button
@@ -330,13 +330,13 @@
           type="text"
           v-model="newTagInput"
           :placeholder="field.placeholder || 'Type and press Enter to add tag'"
-          class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          class="flex-1 px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           @keydown.enter.prevent="addTag(field.field_key)"
         />
         <button
           type="button"
           @click="addTag(field.field_key)"
-          class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          class="px-3 py-2 text-button bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Add
         </button>
@@ -349,7 +349,7 @@
       type="text"
       v-model="modelValue[field.field_key]"
       :placeholder="field.placeholder"
-      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="w-full px-3 py-2 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       @input="$emit('update:modelValue', modelValue)"
     />
   </div>

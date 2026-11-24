@@ -18,6 +18,7 @@ class Transaction extends Model
         'user_id',
         'payment_method_id',
         'nfc_card_id',
+        'order_id',
         'type',
         'payment_rail',
         'provider',
@@ -114,6 +115,14 @@ class Transaction extends Model
     public function nfcCard(): ?BelongsTo
     {
         return $this->belongsTo(NfcCard::class);
+    }
+
+    /**
+     * Get the order this transaction belongs to
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**

@@ -1,658 +1,795 @@
 <!-- pages/UserAccount/register.vue -->
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 px-4 sm:px-6 lg:px-8"
-  >
-    <div class="max-w-md w-full space-y-8">
-      <!-- Header -->
-      <div class="text-center">
-        <NuxtLink to="/" class="inline-flex items-center">
-          <Icon
-            name="heroicons:identification"
-            class="h-12 w-12 text-primary-600"
-          />
-          <span class="ml-3 text-2xl font-bold text-secondary-900">NFCGo</span>
-        </NuxtLink>
-        <div class="mt-6 relative">
-          <NuxtLink
-            to="/"
-            class="absolute -left-4 top-1/2 -translate-y-1/2 inline-flex items-center px-3 py-2 text-sm border border-secondary-300 rounded-lg text-secondary-600 hover:text-primary-600 hover:border-primary-600 transition-colors bg-white"
-          >
-            <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-1" />
-            Back
-          </NuxtLink>
-          <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900">
-            Create your account
-          </h2>
-        </div>
-        <p class="mt-2 text-sm text-secondary-600">
-          Already have an account?
-          <NuxtLink
-            to="/UserAccount/login"
-            class="font-medium text-primary-600 hover:text-primary-500"
-          >
-            Sign in here
-          </NuxtLink>
-        </p>
-      </div>
+  <div class="lg-auth-root">
+    <div class="lg-auth-split">
+      <!-- ============================================================
+           BRAND PANEL (Ink & Brass) — same shell as the login page
+           ============================================================ -->
+      <aside class="lg-ink-side ink-surface ink-grid">
+        <div class="lg-ink-glow" aria-hidden="true"></div>
 
-      <!-- Registration Form -->
-      <div class="card p-8">
-        <form @submit.prevent="handleRegister" class="space-y-6">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="form-group">
-              <label for="first_name" class="form-label">First name</label>
-              <input
-                id="first_name"
-                v-model="form.first_name"
-                type="text"
-                required
-                :class="['input', errors.first_name ? 'input-error' : '']"
-                placeholder="John"
-                :disabled="loading"
-              />
-              <p v-if="errors.first_name" class="form-error">
-                {{ errors.first_name[0] }}
-              </p>
-            </div>
-            <div class="form-group">
-              <label for="last_name" class="form-label">Last name</label>
-              <input
-                id="last_name"
-                v-model="form.last_name"
-                type="text"
-                required
-                :class="['input', errors.last_name ? 'input-error' : '']"
-                placeholder="Doe"
-                :disabled="loading"
-              />
-              <p v-if="errors.last_name" class="form-error">
-                {{ errors.last_name[0] }}
-              </p>
-            </div>
+        <div class="lg-ink-inner">
+          <!-- Brand row -->
+          <div class="lg-brand-row">
+            <NuxtLink to="/Homepage" class="lg-brand" aria-label="NFCGo home">
+              <NFCGoLogo variant="dark" size="lg" />
+            </NuxtLink>
+            <NuxtLink to="/Homepage" class="lg-explore-pill">
+              <Icon name="heroicons:arrow-left" class="h-4 w-4" />
+              <span class="lg-explore-pill-text">Back to website</span>
+            </NuxtLink>
           </div>
 
-          <div class="form-group">
-            <label for="email" class="form-label">Email address</label>
-            <input
-              id="email"
-              v-model="form.email"
-              type="email"
-              required
-              :class="['input', errors.email ? 'input-error' : '']"
-              placeholder="john@example.com"
-              :disabled="loading"
-            />
-            <p v-if="errors.email" class="form-error">{{ errors.email[0] }}</p>
-          </div>
-
-          <div class="form-group">
-            <label for="password" class="form-label">Password</label>
-            <div class="relative">
-              <input
-                id="password"
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                required
-                :class="[
-                  'input pr-10',
-                  errors.password ? 'input-error' : '',
-                  form.password && passwordStrength === 0 && !errors.password ? 'border-warning-400 focus:ring-warning-500 focus:border-warning-500' : '',
-                  form.password && passwordStrength >= 3 ? 'border-success-400 focus:ring-success-500 focus:border-success-500' : '',
-                ]"
-                placeholder="Create a strong password"
-                :disabled="loading"
-                aria-describedby="password-requirements"
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                :disabled="loading"
-              >
-                <Icon
-                  :name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
-                  class="h-5 w-5 text-secondary-400"
-                />
-              </button>
-            </div>
-
-            <!-- Password Strength Meter -->
-            <div v-if="form.password" class="mt-2 space-y-2" aria-live="polite">
-              <!-- Strength bar segments -->
-              <div class="flex gap-1.5" role="group" :aria-label="`Password strength: ${getPasswordStrengthText(passwordStrength)}`">
-                <div
-                  v-for="segment in 4"
-                  :key="segment"
-                  :class="[
-                    'h-1.5 flex-1 rounded-full transition-colors duration-200',
-                    segment <= passwordStrength
-                      ? getPasswordStrengthColor(passwordStrength)
-                      : 'bg-secondary-200',
-                  ]"
-                  :aria-hidden="segment > passwordStrength"
-                ></div>
-              </div>
-              <!-- Strength label + requirements summary -->
-              <div class="flex items-center justify-between text-xs">
-                <span
-                  :class="[
-                    'font-medium',
-                    passwordStrength <= 1 ? 'text-error-600' : '',
-                    passwordStrength === 2 ? 'text-warning-600' : '',
-                    passwordStrength === 3 ? 'text-success-500' : '',
-                    passwordStrength >= 4 ? 'text-success-600' : '',
-                  ]"
-                >
-                  {{ getPasswordStrengthText(passwordStrength) }}
-                </span>
-                <span class="text-secondary-500">
-                  {{ form.password.length }} characters
-                </span>
-              </div>
-              <!-- Requirement checklist -->
-              <ul id="password-requirements" class="grid grid-cols-2 gap-x-3 gap-y-1.5 pt-1">
-                <li class="flex items-center gap-1.5 text-xs" :class="hasMinLength ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="hasMinLength ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
-                  Min 8 characters
-                </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="hasMixedCase ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="hasMixedCase ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
-                  Upper + lowercase
-                </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="hasNumber ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="hasNumber ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
-                  Contains a number
-                </li>
-                <li class="flex items-center gap-1.5 text-xs" :class="hasSymbol ? 'text-success-600' : 'text-secondary-400'">
-                  <Icon :name="hasSymbol ? 'heroicons:check-circle' : 'heroicons:minus-circle'" class="w-3.5 h-3.5 flex-shrink-0" />
-                  Special symbol
-                </li>
-              </ul>
-            </div>
-
-            <p v-if="errors.password" class="form-error">
-              {{ errors.password[0] }}
+          <!-- Brand message -->
+          <div class="lg-hero-copy">
+            <span class="eyebrow-brass">
+              <span class="dot"></span>
+              Smart NFC Business Card
+            </span>
+            <h1 class="lg-hero-title">
+              Create your digital identity,
+              <span class="brass-grad">ready in one tap</span>
+            </h1>
+            <p class="lg-hero-lead">
+              Set up your NFCGo account and start sharing your professional
+              profile with a single tap.
             </p>
           </div>
 
-          <div class="form-group">
-            <label for="password_confirmation" class="form-label"
-              >Confirm password</label
-            >
-            <div class="relative">
-              <input
-                id="password_confirmation"
-                v-model="form.password_confirmation"
-                :type="showConfirmPassword ? 'text' : 'password'"
-                required
-                :class="[
-                  'input pr-16',
-                  errors.password_confirmation ? 'input-error' : '',
-                  !errors.password_confirmation && form.password && form.password_confirmation && form.password === form.password_confirmation
-                    ? 'border-success-400 focus:ring-success-500 focus:border-success-500 pr-16'
-                    : '',
-                  !errors.password_confirmation && form.password && form.password_confirmation && form.password !== form.password_confirmation
-                    ? 'border-error-400 focus:ring-error-500 focus:border-error-500 pr-16'
-                    : '',
-                ]"
-                placeholder="Confirm your password"
-                :disabled="loading"
-                aria-invalid="
-                  form.password &&
-                  form.password_confirmation &&
-                  form.password !== form.password_confirmation
-                "
-              />
-              <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1">
-                <!-- Match status icon -->
-                <span
-                  v-if="form.password && form.password_confirmation"
-                  class="flex-shrink-0"
-                  aria-hidden="true"
-                >
-                  <Icon
-                    v-if="form.password === form.password_confirmation"
-                    name="heroicons:check-circle"
-                    class="w-5 h-5 text-success-500"
+          <!-- NFC card mockup (desktop) -->
+          <div class="lg-card-stage">
+            <span class="tap-ripple lg-ripple" aria-hidden="true"></span>
+
+            <div class="nfc-mock lg-mock">
+              <div class="nfc-mock__face nfc-face-ink">
+                <div class="nfc-mock__sheen"></div>
+                <div class="relative z-10 flex items-start justify-between">
+                  <div class="flex flex-col">
+                    <span
+                      class="text-2xl font-black tracking-tighter brass-grad leading-none"
+                      >NFCGo</span
+                    >
+                    <span class="lg-mock-sub">SMART DIGITAL IDENTITY</span>
+                  </div>
+                  <Icon name="heroicons:wifi" class="h-7 w-7 text-white/45" />
+                </div>
+                <div class="nfc-mock__chip relative z-10"></div>
+                <div class="relative z-10 flex justify-between items-end">
+                  <div>
+                    <h3 class="nfc-mock__name text-white">Your Name</h3>
+                    <p class="nfc-mock__role text-white">Job Title</p>
+                  </div>
+                  <div class="nfc-mock__qr">
+                    <Icon name="heroicons:qr-code" class="h-8 w-8" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="lg-chip lg-chip-1 chip-ink">
+              <Icon name="heroicons:bolt" class="lg-chip-ico" />
+              Opens in 1 tap
+            </div>
+            <div class="lg-chip lg-chip-2 chip-ink">
+              <Icon name="heroicons:device-phone-mobile" class="lg-chip-ico" />
+              Works on iOS &amp; Android
+            </div>
+          </div>
+
+          <!-- Trust ticks -->
+          <div class="lg-ticks">
+            <span>
+              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+              No app required
+            </span>
+            <span>
+              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+              Instant setup
+            </span>
+            <span>
+              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+              Secure sign-up
+            </span>
+          </div>
+
+          <!-- Explore CTA (desktop) -->
+          <div class="lg-explore">
+            <span class="lg-explore-label">Already with NFCGo?</span>
+            <div class="lg-explore-links">
+              <NuxtLink to="/UserAccount/login" class="btn-brass">
+                <Icon name="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
+                Sign in instead
+              </NuxtLink>
+              <NuxtLink to="/Homepage#pricing" class="btn-ghost-light">
+                View pricing
+              </NuxtLink>
+              <NuxtLink to="/Homepage#how-it-works" class="lg-explore-text">
+                How it works
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ============================================================
+           AUTH PANEL (Paper)
+           ============================================================ -->
+      <main class="lg-form-side">
+        <div class="lg-form-wrap lg-form-wrap--wide">
+          <!-- Mobile brand row -->
+          <NuxtLink to="/Homepage" class="lg-brand-mobile" aria-label="NFCGo home">
+            <NFCGoLogo variant="light" size="md" />
+          </NuxtLink>
+
+          <div class="lg-card">
+            <header class="lg-card-head">
+              <span class="lg-kicker">Get started</span>
+              <h2 class="lg-title">Create your account</h2>
+              <p class="lg-subtitle">
+                Start building your smart digital business card in minutes.
+              </p>
+            </header>
+
+            <form class="lg-form lg-form--two-col" @submit.prevent="handleRegister">
+              <div class="lg-name-grid">
+                <div class="lg-field">
+                  <label for="first_name" class="lg-label">First name</label>
+                  <div class="lg-control">
+                    <Icon name="heroicons:user" class="lg-control-ico" />
+                    <input
+                      id="first_name"
+                      v-model="form.first_name"
+                      type="text"
+                      required
+                      class="lg-input"
+                      :class="errors.first_name ? 'lg-input--error' : ''"
+                      placeholder="John"
+                      :disabled="loading"
+                      autocomplete="given-name"
+                      :aria-invalid="!!errors.first_name"
+                      :aria-describedby="errors.first_name ? 'first_name-error' : undefined"
+                    />
+                  </div>
+                  <p
+                    v-if="errors.first_name"
+                    id="first_name-error"
+                    class="lg-error"
+                    role="alert"
+                  >
+                    <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                    {{ errors.first_name[0] }}
+                  </p>
+                </div>
+
+                <div class="lg-field">
+                  <label for="last_name" class="lg-label">Last name</label>
+                  <div class="lg-control">
+                    <Icon name="heroicons:user" class="lg-control-ico" />
+                    <input
+                      id="last_name"
+                      v-model="form.last_name"
+                      type="text"
+                      required
+                      class="lg-input"
+                      :class="errors.last_name ? 'lg-input--error' : ''"
+                      placeholder="Doe"
+                      :disabled="loading"
+                      autocomplete="family-name"
+                      :aria-invalid="!!errors.last_name"
+                      :aria-describedby="errors.last_name ? 'last_name-error' : undefined"
+                    />
+                  </div>
+                  <p
+                    v-if="errors.last_name"
+                    id="last_name-error"
+                    class="lg-error"
+                    role="alert"
+                  >
+                    <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                    {{ errors.last_name[0] }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="lg-field lg-field--full">
+                <label for="email" class="lg-label">Email address</label>
+                <div class="lg-control">
+                  <Icon name="heroicons:envelope" class="lg-control-ico" />
+                  <input
+                    id="email"
+                    v-model="form.email"
+                    type="email"
+                    required
+                    class="lg-input"
+                    :class="errors.email ? 'lg-input--error' : ''"
+                    placeholder="john@example.com"
+                    :disabled="loading"
+                    autocomplete="email"
+                    inputmode="email"
+                    :aria-invalid="!!errors.email"
+                    :aria-describedby="errors.email ? 'email-error' : undefined"
                   />
-                  <Icon
-                    v-else
-                    name="heroicons:x-circle"
-                    class="w-5 h-5 text-error-500"
+                </div>
+                <p v-if="errors.email" id="email-error" class="lg-error" role="alert">
+                  <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                  {{ errors.email[0] }}
+                </p>
+              </div>
+
+              <div class="lg-field">
+                <label for="password" class="lg-label">Password</label>
+                <div class="lg-control">
+                  <Icon name="heroicons:lock-closed" class="lg-control-ico" />
+                  <input
+                    id="password"
+                    v-model="form.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    required
+                    class="lg-input lg-input--pw"
+                    :class="errors.password ? 'lg-input--error' : ''"
+                    placeholder="Create a strong password"
+                    :disabled="loading"
+                    autocomplete="new-password"
+                    aria-describedby="password-requirements"
+                    :aria-invalid="!!errors.password"
                   />
-                </span>
-                <button
-                  type="button"
-                  @click="showConfirmPassword = !showConfirmPassword"
-                  class="flex-shrink-0"
-                  :disabled="loading"
-                >
-                  <Icon
-                    :name="
-                      showConfirmPassword
-                        ? 'heroicons:eye-slash'
-                        : 'heroicons:eye'
+                  <button
+                    type="button"
+                    class="lg-toggle"
+                    :disabled="loading"
+                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                    :aria-pressed="showPassword"
+                    @click="showPassword = !showPassword"
+                  >
+                    <Icon
+                      :name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
+                      class="h-5 w-5"
+                    />
+                  </button>
+                </div>
+
+                <!-- Password strength -->
+                <div v-if="form.password" class="lg-strength" aria-live="polite">
+                  <div
+                    class="lg-strength-bars"
+                    role="group"
+                    :aria-label="`Password strength: ${getPasswordStrengthText(passwordStrength)}`"
+                  >
+                    <span
+                      v-for="segment in 4"
+                      :key="segment"
+                      class="lg-strength-seg"
+                      :class="
+                        segment <= passwordStrength
+                          ? `is-on is-${strengthTone}`
+                          : ''
+                      "
+                      aria-hidden="true"
+                    ></span>
+                  </div>
+                  <div class="lg-strength-meta">
+                    <span class="lg-strength-text" :class="`is-${strengthTone}`">
+                      {{ getPasswordStrengthText(passwordStrength) }}
+                    </span>
+                    <span class="lg-strength-count">
+                      {{ form.password.length }} characters
+                    </span>
+                  </div>
+                  <ul id="password-requirements" class="lg-reqs">
+                    <li class="lg-req" :class="hasMinLength ? 'lg-req--ok' : ''">
+                      <Icon
+                        :name="hasMinLength ? 'heroicons:check-circle' : 'heroicons:minus-circle'"
+                        class="lg-req-ico"
+                      />
+                      Min 8 characters
+                    </li>
+                    <li class="lg-req" :class="hasMixedCase ? 'lg-req--ok' : ''">
+                      <Icon
+                        :name="hasMixedCase ? 'heroicons:check-circle' : 'heroicons:minus-circle'"
+                        class="lg-req-ico"
+                      />
+                      Upper + lowercase
+                    </li>
+                    <li class="lg-req" :class="hasNumber ? 'lg-req--ok' : ''">
+                      <Icon
+                        :name="hasNumber ? 'heroicons:check-circle' : 'heroicons:minus-circle'"
+                        class="lg-req-ico"
+                      />
+                      Contains a number
+                    </li>
+                    <li class="lg-req" :class="hasSymbol ? 'lg-req--ok' : ''">
+                      <Icon
+                        :name="hasSymbol ? 'heroicons:check-circle' : 'heroicons:minus-circle'"
+                        class="lg-req-ico"
+                      />
+                      Special symbol
+                    </li>
+                  </ul>
+                </div>
+
+                <p v-if="errors.password" class="lg-error" role="alert">
+                  <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                  {{ errors.password[0] }}
+                </p>
+              </div>
+
+              <div class="lg-field">
+                <label for="password_confirmation" class="lg-label">
+                  Confirm password
+                </label>
+                <div class="lg-control">
+                  <Icon name="heroicons:lock-closed" class="lg-control-ico" />
+                  <input
+                    id="password_confirmation"
+                    v-model="form.password_confirmation"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    required
+                    class="lg-input lg-input--pw-wide"
+                    :class="
+                      errors.password_confirmation || passwordsMismatch
+                        ? 'lg-input--error'
+                        : ''
                     "
-                    class="h-5 w-5 text-secondary-400"
+                    placeholder="Confirm your password"
+                    :disabled="loading"
+                    autocomplete="new-password"
+                    :aria-invalid="passwordsMismatch || !!errors.password_confirmation"
+                    :aria-describedby="
+                      passwordsMismatch ? 'password-confirmation-status' : undefined
+                    "
                   />
-                </button>
+                  <div class="lg-trail-group">
+                    <span
+                      v-if="passwordsMatch || passwordsMismatch"
+                      class="lg-match-ico"
+                      :class="passwordsMatch ? 'is-ok' : 'is-bad'"
+                      aria-hidden="true"
+                    >
+                      <Icon
+                        :name="
+                          passwordsMatch
+                            ? 'heroicons:check-circle'
+                            : 'heroicons:x-circle'
+                        "
+                        class="h-full w-full"
+                      />
+                    </span>
+                    <button
+                      type="button"
+                      class="lg-toggle"
+                      :disabled="loading"
+                      :aria-label="
+                        showConfirmPassword ? 'Hide password' : 'Show password'
+                      "
+                      :aria-pressed="showConfirmPassword"
+                      @click="showConfirmPassword = !showConfirmPassword"
+                    >
+                      <Icon
+                        :name="
+                          showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'
+                        "
+                        class="h-5 w-5"
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <p
+                  v-if="errors.password_confirmation"
+                  class="lg-error"
+                  role="alert"
+                >
+                  <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                  {{ errors.password_confirmation[0] }}
+                </p>
+                <p
+                  v-if="passwordsMismatch && !errors.password_confirmation"
+                  id="password-confirmation-status"
+                  class="lg-error"
+                  role="alert"
+                >
+                  <Icon name="heroicons:information-circle" class="lg-error-ico" />
+                  Passwords do not match
+                </p>
+                <p
+                  v-else-if="passwordsMatch"
+                  class="lg-strength-text is-strong"
+                  style="margin-top: 0.45rem; display: block; font-size: 0.8rem"
+                  role="status"
+                >
+                  Passwords match
+                </p>
               </div>
-            </div>
-            <p v-if="errors.password_confirmation" class="form-error">
-              {{ errors.password_confirmation[0] }}
-            </p>
-            <p
-              v-if="
-                form.password &&
-                form.password_confirmation &&
-                form.password !== form.password_confirmation
-              "
-              class="flex items-center gap-1 text-xs text-error-600 mt-1 font-medium"
-              role="alert"
-            >
-              <Icon name="heroicons:information-circle" class="w-3.5 h-3.5 flex-shrink-0" />
-              Passwords do not match
-            </p>
-            <p
-              v-if="
-                form.password &&
-                form.password_confirmation &&
-                form.password === form.password_confirmation
-              "
-              class="flex items-center gap-1 text-xs text-success-600 mt-1 font-medium"
-              role="status"
-            >
-              <Icon name="heroicons:check-circle" class="w-3.5 h-3.5 flex-shrink-0" />
-              Passwords match
-            </p>
-          </div>
 
-          <div class="form-group">
-            <label for="company" class="form-label">Company (optional)</label>
-            <input
-              id="company"
-              v-model="form.company"
-              type="text"
-              :class="['input', errors.company ? 'input-error' : '']"
-              placeholder="Your company name"
-              :disabled="loading"
-            />
-            <p v-if="errors.company" class="form-error">
-              {{ errors.company[0] }}
-            </p>
-          </div>
+              <div class="lg-field">
+                <label for="company" class="lg-label">Company (optional)</label>
+                <div class="lg-control">
+                  <Icon name="heroicons:building-office" class="lg-control-ico" />
+                  <input
+                    id="company"
+                    v-model="form.company"
+                    type="text"
+                    class="lg-input"
+                    :class="errors.company ? 'lg-input--error' : ''"
+                    placeholder="Your company name"
+                    :disabled="loading"
+                    autocomplete="organization"
+                  />
+                </div>
+                <p v-if="errors.company" class="lg-error" role="alert">
+                  <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                  {{ errors.company[0] }}
+                </p>
+              </div>
 
-          <div class="form-group">
-            <label for="job_title" class="form-label"
-              >Job Title (optional)</label
-            >
-            <input
-              id="job_title"
-              v-model="form.job_title"
-              type="text"
-              :class="['input', errors.job_title ? 'input-error' : '']"
-              placeholder="Your job title"
-              :disabled="loading"
-            />
-            <p v-if="errors.job_title" class="form-error">
-              {{ errors.job_title[0] }}
-            </p>
-          </div>
+              <div class="lg-field">
+                <label for="job_title" class="lg-label">Job title (optional)</label>
+                <div class="lg-control">
+                  <Icon name="heroicons:briefcase" class="lg-control-ico" />
+                  <input
+                    id="job_title"
+                    v-model="form.job_title"
+                    type="text"
+                    class="lg-input"
+                    :class="errors.job_title ? 'lg-input--error' : ''"
+                    placeholder="Your job title"
+                    :disabled="loading"
+                    autocomplete="organization-title"
+                  />
+                </div>
+                <p v-if="errors.job_title" class="lg-error" role="alert">
+                  <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                  {{ errors.job_title[0] }}
+                </p>
+              </div>
 
-          <div class="flex items-start">
-            <input
-              id="terms"
-              v-model="form.terms"
-              type="checkbox"
-              required
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded mt-1"
-              :disabled="loading"
-            />
-            <label for="terms" class="ml-2 block text-sm text-secondary-700">
-              I agree to the
+              <div class="lg-check-row">
+                <input
+                  id="terms"
+                  v-model="form.terms"
+                  type="checkbox"
+                  required
+                  class="lg-checkbox"
+                  :disabled="loading"
+                />
+                <label for="terms" class="lg-check-label">
+                  I agree to the
+                  <button
+                    type="button"
+                    class="lg-link-btn"
+                    @click="showTermsModal = true"
+                  >
+                    Terms of Service
+                  </button>
+                  and
+                  <button
+                    type="button"
+                    class="lg-link-btn"
+                    @click="showPrivacyModal = true"
+                  >
+                    Privacy Policy
+                  </button>
+                </label>
+              </div>
+              <p v-if="errors.terms" class="lg-error" role="alert">
+                <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+                {{ errors.terms[0] }}
+              </p>
+
+              <div class="lg-check-row">
+                <input
+                  id="marketing"
+                  v-model="form.marketing"
+                  type="checkbox"
+                  class="lg-checkbox"
+                  :disabled="loading"
+                />
+                <label for="marketing" class="lg-check-label">
+                  I would like to receive marketing emails about new features and
+                  updates
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                :disabled="loading || !form.terms || !isFormValid"
+                :aria-busy="loading"
+                class="btn-brass lg-submit"
+              >
+                <NFCGoWaveLoader
+                  v-if="loading"
+                  variant="dotPulse"
+                  size="xs"
+                  :showText="false"
+                  inline
+                />
+                <Icon
+                  v-else
+                  name="heroicons:user-plus"
+                  class="h-5 w-5"
+                />
+                <span>{{ loading ? "Creating account…" : "Create account" }}</span>
+              </button>
+
+              <p class="lg-pill">
+                <Icon name="heroicons:sparkles" class="lg-pill-ico" />
+                14-day free trial of our Professional plan. No credit card
+                required.
+              </p>
+            </form>
+
+            <!-- Social signup -->
+            <div class="lg-divider"><span>or sign up with</span></div>
+            <div class="lg-oauth">
               <button
                 type="button"
-                @click="showTermsModal = true"
-                class="text-primary-600 hover:text-primary-500 underline"
+                class="lg-oauth-btn"
+                :disabled="loading"
+                title="Sign up with Google"
+                @click="handleGoogleSignup"
               >
-                Terms of Service
+                <Icon name="logos:google-icon" class="h-5 w-5" />
+                <span>Google</span>
               </button>
-              and
               <button
                 type="button"
-                @click="showPrivacyModal = true"
-                class="text-primary-600 hover:text-primary-500 underline"
+                class="lg-oauth-btn"
+                :disabled="loading"
+                title="Sign up with Apple"
+                @click="handleAppleSignup"
               >
-                Privacy Policy
+                <Icon name="logos:apple" class="h-5 w-5" />
+                <span>Apple</span>
               </button>
-            </label>
-          </div>
-          <p v-if="errors.terms" class="form-error">{{ errors.terms[0] }}</p>
+            </div>
 
-          <div class="flex items-start">
-            <input
-              id="marketing"
-              v-model="form.marketing"
-              type="checkbox"
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded mt-1"
-              :disabled="loading"
-            />
-            <label
-              for="marketing"
-              class="ml-2 block text-sm text-secondary-700"
-            >
-              I would like to receive marketing emails about new features and
-              updates
-            </label>
+            <p class="lg-register">
+              Already have an account?
+              <NuxtLink to="/UserAccount/login">Sign in here</NuxtLink>
+            </p>
           </div>
 
-          <button
-            type="submit"
-            :disabled="loading || !form.terms || !isFormValid"
-            class="btn btn-primary w-full"
-          >
-            <div v-if="loading" class="spinner mr-2"></div>
-            <Icon v-else name="heroicons:user-plus" class="h-5 w-5 mr-2" />
-            {{ loading ? "Creating account..." : "Create account" }}
-          </button>
-
-          <p class="text-xs text-secondary-500 text-center">
-            By creating an account, you'll get a 14-day free trial of our
-            Professional plan. No credit card required.
-          </p>
-        </form>
-
-        <!-- Divider -->
-        <div class="mt-6">
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-secondary-300"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-secondary-500"
-                >Or sign up with</span
-              >
-            </div>
+          <!-- Trust strip -->
+          <div class="lg-trust">
+            <span>
+              <Icon name="heroicons:shield-check" class="h-4 w-4" />
+              SSL secured
+            </span>
+            <span>
+              <Icon name="heroicons:lock-closed" class="h-4 w-4" />
+              Privacy protected
+            </span>
+            <NuxtLink to="/Homepage#faq" class="lg-trust-link">
+              <Icon name="heroicons:question-mark-circle" class="h-4 w-4" />
+              Help
+            </NuxtLink>
           </div>
         </div>
+      </main>
+    </div>
 
-        <!-- Social Registration -->
-        <div class="mt-6 grid grid-cols-2 gap-3">
-          <button
-            @click="handleGoogleSignup"
-            :disabled="loading"
-            class="btn btn-outline w-full"
-          >
-            <Icon name="logos:google-icon" class="h-5 w-5 mr-2" />
-            Google
-          </button>
-          <button
-            @click="handleAppleSignup"
-            :disabled="loading"
-            class="btn btn-outline w-full"
-          >
-            <Icon name="logos:apple" class="h-5 w-5 mr-2" />
-            Apple
-          </button>
-        </div>
-
-        <!-- Trust Indicators -->
-        <div class="mt-6 text-center">
-          <div
-            class="flex items-center justify-center space-x-6 text-secondary-500"
-          >
-            <div class="flex items-center">
-              <Icon name="heroicons:shield-check" class="h-4 w-4 mr-1" />
-              <span class="text-xs">SSL Secured</span>
-            </div>
-            <div class="flex items-center">
-              <Icon name="heroicons:clock" class="h-4 w-4 mr-1" />
-              <span class="text-xs">Free Trial</span>
-            </div>
-            <div class="flex items-center">
-              <Icon name="heroicons:x-mark" class="h-4 w-4 mr-1" />
-              <span class="text-xs">No Spam</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Terms of Service Modal -->
+    <!-- ============================================================
+         Terms of Service
+         ============================================================ -->
+    <div
+      v-if="showTermsModal"
+      class="lg-modal-overlay"
+      @click.self="showTermsModal = false"
+    >
       <div
-        v-if="showTermsModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-        @click.self="showTermsModal = false"
+        class="lg-modal lg-modal--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lg-terms-title"
       >
-        <div
-          class="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-        >
-          <div class="p-6 border-b border-secondary-200">
-            <div class="flex items-center justify-between">
-              <h3 class="text-2xl font-bold text-secondary-900">
-                Terms of Service
-              </h3>
-              <button
-                @click="showTermsModal = false"
-                class="text-secondary-400 hover:text-secondary-600"
-              >
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
-              </button>
-            </div>
-            <p v-if="termsDocument" class="text-sm text-secondary-500 mt-2">
+        <div class="lg-modal-bar">
+          <div>
+            <h3 id="lg-terms-title" class="lg-modal-title">Terms of Service</h3>
+            <p v-if="termsDocument" class="lg-modal-meta">
               Version {{ termsDocument.version }} • Effective
               {{ formatDate(termsDocument.effective_date) }}
             </p>
           </div>
-          <div class="flex-1 p-6 overflow-hidden">
-            <PdfViewer
-              url="http://localhost:8000/api/legal/pdf/terms/view"
-              :require-auth="false"
-              :disable-download="true"
-              min-height="calc(85vh - 200px)"
-            />
-          </div>
-          <div class="p-6 border-t border-secondary-200">
-            <button
-              @click="showTermsModal = false"
-              class="btn btn-primary w-full flex items-center justify-center"
-            >
-              <Icon name="heroicons:x-mark" class="h-5 w-5 mr-2" />
-              Close
-            </button>
-          </div>
+          <button
+            type="button"
+            class="lg-modal-close"
+            aria-label="Close Terms of Service"
+            @click="showTermsModal = false"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
+          </button>
+        </div>
+        <div class="lg-modal-body">
+          <PdfViewer
+            url="http://localhost:8000/api/legal/pdf/terms/view"
+            :require-auth="false"
+            :disable-download="true"
+            min-height="calc(85vh - 200px)"
+          />
+        </div>
+        <div class="lg-modal-foot">
+          <button
+            type="button"
+            class="lg-oauth-btn"
+            style="width: 100%"
+            @click="showTermsModal = false"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
+            <span>Close</span>
+          </button>
         </div>
       </div>
+    </div>
 
-      <!-- Privacy Policy Modal -->
+    <!-- ============================================================
+         Privacy Policy
+         ============================================================ -->
+    <div
+      v-if="showPrivacyModal"
+      class="lg-modal-overlay"
+      @click.self="showPrivacyModal = false"
+    >
       <div
-        v-if="showPrivacyModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-        @click.self="showPrivacyModal = false"
+        class="lg-modal lg-modal--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lg-privacy-title"
       >
-        <div
-          class="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-        >
-          <div class="p-6 border-b border-secondary-200">
-            <div class="flex items-center justify-between">
-              <h3 class="text-2xl font-bold text-secondary-900">
-                Privacy Policy
-              </h3>
-              <button
-                @click="showPrivacyModal = false"
-                class="text-secondary-400 hover:text-secondary-600"
-              >
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
-              </button>
-            </div>
-            <p v-if="privacyDocument" class="text-sm text-secondary-500 mt-2">
+        <div class="lg-modal-bar">
+          <div>
+            <h3 id="lg-privacy-title" class="lg-modal-title">Privacy Policy</h3>
+            <p v-if="privacyDocument" class="lg-modal-meta">
               Version {{ privacyDocument.version }} • Effective
               {{ formatDate(privacyDocument.effective_date) }}
             </p>
           </div>
-          <div class="flex-1 p-6 overflow-hidden">
-            <PdfViewer
-              url="http://localhost:8000/api/legal/pdf/privacy/view"
-              :require-auth="false"
-              :disable-download="true"
-              min-height="calc(85vh - 200px)"
-            />
-          </div>
-          <div class="p-6 border-t border-secondary-200">
-            <button
-              @click="showPrivacyModal = false"
-              class="btn btn-primary w-full flex items-center justify-center"
-            >
-              <Icon name="heroicons:x-mark" class="h-5 w-5 mr-2" />
-              Close
-            </button>
-          </div>
+          <button
+            type="button"
+            class="lg-modal-close"
+            aria-label="Close Privacy Policy"
+            @click="showPrivacyModal = false"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
+          </button>
+        </div>
+        <div class="lg-modal-body">
+          <PdfViewer
+            url="http://localhost:8000/api/legal/pdf/privacy/view"
+            :require-auth="false"
+            :disable-download="true"
+            min-height="calc(85vh - 200px)"
+          />
+        </div>
+        <div class="lg-modal-foot">
+          <button
+            type="button"
+            class="lg-oauth-btn"
+            style="width: 100%"
+            @click="showPrivacyModal = false"
+          >
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
+            <span>Close</span>
+          </button>
         </div>
       </div>
+    </div>
 
-      <!-- 2FA Setup Modal -->
+    <!-- ============================================================
+         2FA setup
+         ============================================================ -->
+    <div v-if="show2FASetup" class="lg-modal-overlay">
       <div
-        v-if="show2FASetup"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        class="lg-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lg-2fa-setup-title"
       >
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
-          <div class="text-center mb-6">
-            <div
-              class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Icon
-                name="heroicons:shield-check"
-                class="h-8 w-8 text-primary-600"
-              />
-            </div>
-            <h3 class="text-2xl font-bold text-secondary-900 mb-2">
-              Setup Two-Factor Authentication
-            </h3>
-            <p class="text-secondary-600">
-              Secure your account with an additional layer of protection
+        <div class="lg-modal-head">
+          <span class="lg-modal-mark">
+            <Icon name="heroicons:shield-check" class="h-6 w-6" />
+          </span>
+          <h3 id="lg-2fa-setup-title" class="lg-modal-title">
+            Set up two-factor authentication
+          </h3>
+          <p class="lg-modal-text">
+            Secure your account with an additional layer of protection.
+          </p>
+        </div>
+
+        <div class="lg-qr">
+          <div class="lg-qr-box">
+            <Icon name="heroicons:qr-code" class="h-14 w-14" />
+          </div>
+          <p class="lg-qr-hint">
+            Scan this QR code with your authenticator app
+          </p>
+          <p class="lg-qr-apps">
+            Recommended: Google Authenticator, Authy, 1Password
+          </p>
+          <button
+            type="button"
+            class="lg-inline-link"
+            style="margin-top: 0.75rem"
+            @click="showManualSetup = !showManualSetup"
+          >
+            Can't scan? Enter code manually
+          </button>
+          <p v-if="showManualSetup" class="lg-manual">JBSWY3DPEHPK3PXP</p>
+        </div>
+
+        <form class="lg-modal-form" style="margin-top: 1.4rem" @submit.prevent="handle2FASetup">
+          <div class="lg-field">
+            <label class="lg-label lg-centered block" for="two_factor_code">
+              Enter the 6-digit verification code
+            </label>
+            <input
+              id="two_factor_code"
+              v-model="twoFactorCode"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              class="lg-otp"
+              placeholder="000000"
+              :disabled="loading"
+              :aria-invalid="!!errors.code"
+            />
+            <p v-if="errors.code" class="lg-error lg-centered" role="alert">
+              <Icon name="heroicons:exclamation-circle" class="lg-error-ico" />
+              {{ errors.code[0] }}
             </p>
           </div>
 
-          <div class="space-y-6">
-            <!-- QR Code placeholder -->
-            <div class="bg-secondary-100 rounded-lg p-8 text-center">
-              <div
-                class="w-32 h-32 bg-white rounded-lg mx-auto flex items-center justify-center border-2 border-dashed border-secondary-300"
-              >
-                <div class="text-center">
-                  <Icon
-                    name="heroicons:qr-code"
-                    class="h-12 w-12 text-secondary-400 mx-auto mb-2"
-                  />
-                  <p class="text-xs text-secondary-500">QR Code</p>
-                </div>
-              </div>
-              <p class="text-sm text-secondary-600 mt-4">
-                Scan this QR code with your authenticator app
-              </p>
-              <p class="text-xs text-secondary-500 mt-2">
-                Recommended apps: Google Authenticator, Authy, 1Password
-              </p>
-            </div>
-
-            <!-- Manual Setup -->
-            <div class="text-center">
-              <button
-                @click="showManualSetup = !showManualSetup"
-                class="text-sm text-primary-600 hover:text-primary-500"
-              >
-                Can't scan? Enter code manually
-              </button>
-              <div
-                v-if="showManualSetup"
-                class="mt-3 p-3 bg-secondary-50 rounded text-xs font-mono text-secondary-700"
-              >
-                JBSWY3DPEHPK3PXP
-              </div>
-            </div>
-
-            <form @submit.prevent="handle2FASetup" class="space-y-4">
-              <div class="form-group">
-                <label class="form-label text-center block"
-                  >Enter 6-digit verification code</label
-                >
-                <div class="flex justify-center">
-                  <vue3-otp-input
-                    :value="twoFactorCode"
-                    @update:value="twoFactorCode = $event"
-                    :num-inputs="6"
-                    :should-auto-focus="true"
-                    :is-input-num="true"
-                    separator=""
-                    :class-list="{
-                      input:
-                        'w-12 h-12 text-center border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg font-semibold',
-                      inputBox: 'mx-1',
-                    }"
-                  />
-                </div>
-                <p v-if="errors.code" class="form-error text-center">
-                  {{ errors.code[0] }}
-                </p>
-              </div>
-
-              <div class="flex space-x-3">
-                <button
-                  type="button"
-                  @click="skip2FASetup"
-                  class="btn btn-secondary flex-1"
-                  :disabled="loading"
-                >
-                  Skip for now
-                </button>
-                <button
-                  type="submit"
-                  class="btn btn-primary flex-1"
-                  :disabled="loading || twoFactorCode.length !== 6"
-                >
-                  <div v-if="loading" class="spinner mr-2"></div>
-                  <Icon
-                    v-else
-                    name="heroicons:shield-check"
-                    class="h-4 w-4 mr-2"
-                  />
-                  {{ loading ? "Verifying..." : "Complete Setup" }}
-                </button>
-              </div>
-            </form>
-
-            <div class="text-center">
-              <p class="text-xs text-secondary-500">
-                You can always enable 2FA later in your account settings
-              </p>
-            </div>
+          <div class="lg-modal-actions">
+            <button
+              type="button"
+              class="lg-oauth-btn"
+              :disabled="loading"
+              @click="skip2FASetup"
+            >
+              Skip for now
+            </button>
+            <button
+              type="submit"
+              class="btn-brass lg-submit"
+              :disabled="loading || twoFactorCode.length !== 6"
+            >
+              <span v-if="loading" class="lg-spin lg-spin--light"></span>
+              {{ loading ? "Verifying…" : "Complete setup" }}
+            </button>
           </div>
-        </div>
+
+          <p class="lg-modal-text" style="text-align: center">
+            You can always enable 2FA later in your account settings.
+          </p>
+        </form>
       </div>
+    </div>
 
-      <!-- Success Modal -->
+    <!-- ============================================================
+         Registration success
+         ============================================================ -->
+    <div v-if="showSuccessModal" class="lg-modal-overlay">
       <div
-        v-if="showSuccessModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        class="lg-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lg-success-title"
       >
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
-          <div
-            class="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4"
-          >
-            <Icon name="heroicons:check" class="h-8 w-8 text-success-600" />
-          </div>
-          <h3 class="text-2xl font-bold text-secondary-900 mb-2">
-            Welcome to NFCGo!
-          </h3>
-          <p class="text-secondary-600 mb-6">
+        <div class="lg-modal-head">
+          <span class="lg-modal-mark lg-modal-mark--success">
+            <Icon name="heroicons:check" class="h-6 w-6" />
+          </span>
+          <h3 id="lg-success-title" class="lg-modal-title">Welcome to NFCGo</h3>
+          <p class="lg-modal-text">
             Your account has been created successfully. Let's choose your plan
             and get started.
           </p>
-          <button @click="goToPlanSelection" class="btn btn-primary w-full">
-            <Icon name="heroicons:arrow-right" class="h-5 w-5 mr-2" />
-            Choose Your Plan
-          </button>
         </div>
+
+        <button type="button" class="btn-brass lg-submit" @click="goToPlanSelection">
+          <Icon name="heroicons:arrow-right" class="h-5 w-5" />
+          <span>Choose your plan</span>
+        </button>
       </div>
     </div>
   </div>
@@ -738,6 +875,24 @@ const passwordStrength = computed(() => {
   return strength;
 });
 
+// Strength tone used for the meter colours (weak | fair | good | strong)
+const strengthTone = computed(() => {
+  const tones = { 1: "weak", 2: "fair", 3: "good", 4: "strong" };
+  return tones[passwordStrength.value] || "weak";
+});
+
+// Password confirmation match state
+const passwordsMatch = computed(
+  () =>
+    form.password_confirmation.length > 0 &&
+    form.password === form.password_confirmation
+);
+const passwordsMismatch = computed(
+  () =>
+    form.password_confirmation.length > 0 &&
+    form.password !== form.password_confirmation
+);
+
 // Form validation
 const isFormValid = computed(() => {
   return (
@@ -751,17 +906,7 @@ const isFormValid = computed(() => {
   );
 });
 
-// Password strength helpers
-const getPasswordStrengthColor = (strength) => {
-  const colors = {
-    1: "bg-error-500",
-    2: "bg-warning-500",
-    3: "bg-warning-400",
-    4: "bg-success-500",
-  };
-  return colors[strength] || "bg-secondary-200";
-};
-
+// Password strength helper
 const getPasswordStrengthText = (strength) => {
   const texts = {
     0: "Enter a password",
@@ -891,33 +1036,6 @@ const loadLegalDocuments = async () => {
   }
 };
 
-// Render Markdown to HTML (lightweight parser)
-const renderMarkdown = (markdown) => {
-  if (!markdown) return "";
-
-  let html = markdown
-    // Headers
-    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-    // Bold
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    // Italic
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    // Links
-    .replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" class="text-primary-600 hover:text-primary-500 underline">$1</a>'
-    )
-    // Line breaks
-    .replace(/\n\n/g, "</p><p>")
-    // Lists
-    .replace(/^\- (.*$)/gim, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
-
-  return `<div>${html}</div>`;
-};
-
 // Format date
 const formatDate = (date) => {
   if (!date) return "";
@@ -1030,3 +1148,5 @@ onMounted(() => {
   }
 });
 </script>
+
+<style scoped src="../../assets/css/auth.css"></style>

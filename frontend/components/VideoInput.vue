@@ -5,7 +5,7 @@
       <button
         @click="inputMethod = 'url'"
         :class="[
-          'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+          'px-4 py-2 rounded-lg text-button transition-colors',
           inputMethod === 'url'
             ? 'bg-blue-600 text-white'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -19,7 +19,7 @@
         v-if="allowUpload"
         @click="inputMethod = 'upload'"
         :class="[
-          'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+          'px-4 py-2 rounded-lg text-button transition-colors',
           inputMethod === 'upload'
             ? 'bg-blue-600 text-white'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -40,7 +40,7 @@
         placeholder="https://youtube.com/watch?v=... or direct video URL"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
-      <p class="text-xs text-gray-500">
+      <p class="text-caption text-gray-500">
         Supports: YouTube, Vimeo, or direct video URLs (.mp4, .webm)
       </p>
     </div>
@@ -54,10 +54,10 @@
         @change="handleFileUpload"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
       />
-      <p class="text-xs text-gray-500">
+      <p class="text-caption text-gray-500">
         Max file size: {{ maxSize }}MB. Supported formats: MP4, WebM, MOV
       </p>
-      <div v-if="uploading" class="text-sm text-blue-600">
+      <div v-if="uploading" class="text-body text-blue-600">
         <Icon name="heroicons:arrow-path" class="w-4 h-4 inline animate-spin" />
         Uploading... {{ uploadProgress }}%
       </div>

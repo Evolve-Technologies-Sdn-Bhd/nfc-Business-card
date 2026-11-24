@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 class="page-title text-secondary-900">
             Profile Settings
           </h1>
           <p class="mt-2 text-secondary-600">
@@ -43,28 +43,28 @@
                 class="hidden"
               />
             </div>
-            <h2 class="mt-4 text-lg font-bold text-secondary-900">
+            <h2 class="mt-4 card-title text-secondary-900">
               {{ user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.name || 'Admin User' }}
             </h2>
-            <p class="text-sm text-secondary-500">{{ user?.email || 'admin@nfcgo.my' }}</p>
-            <span class="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+            <p class="card-subtitle">{{ user?.email || 'admin@nfcgo.my' }}</p>
+            <span class="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-red-100 text-red-700">
               {{ user?.admin_role_display || 'Administrator' }}
             </span>
           </div>
 
           <div class="p-6 space-y-4">
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between text-body">
               <span class="text-secondary-500">Account Status</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-badge bg-green-100 text-green-800">
                 <Icon name="heroicons:check-circle" class="h-3 w-3 mr-1" />
                 Active
               </span>
             </div>
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between text-body">
               <span class="text-secondary-500">Member Since</span>
               <span class="font-medium text-secondary-900">{{ formatDate(user?.created_at) }}</span>
             </div>
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between text-body">
               <span class="text-secondary-500">Last Login</span>
               <span class="font-medium text-secondary-900">{{ formatDate(user?.last_login_at) }}</span>
             </div>
@@ -78,10 +78,10 @@
         <div class="card">
           <div class="px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold text-secondary-900">
+              <h2 class="section-title text-secondary-900">
                 Personal Information
               </h2>
-              <p class="text-sm text-secondary-600">
+              <p class="text-body text-secondary-600">
                 Update your personal details
               </p>
             </div>
@@ -90,7 +90,7 @@
             <form @submit.prevent="savePersonalInfo">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     First Name *
                   </label>
                   <input
@@ -102,7 +102,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Last Name *
                   </label>
                   <input
@@ -114,7 +114,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Email Address *
                   </label>
                   <input
@@ -126,7 +126,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Phone Number
                   </label>
                   <input
@@ -155,10 +155,10 @@
         <!-- Change Password -->
         <div class="card">
           <div class="px-6 py-4 border-b border-secondary-200">
-            <h2 class="text-lg font-semibold text-secondary-900">
+            <h2 class="section-title text-secondary-900">
               Change Password
             </h2>
-            <p class="text-sm text-secondary-600">
+            <p class="text-body text-secondary-600">
               Update your account password regularly for security
             </p>
           </div>
@@ -166,7 +166,7 @@
             <form @submit.prevent="changePassword">
               <div class="space-y-4 max-w-xl">
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Current Password
                   </label>
                   <div class="relative">
@@ -187,7 +187,7 @@
                   </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     New Password
                   </label>
                   <div class="relative">
@@ -208,7 +208,7 @@
                   </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-secondary-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Confirm New Password
                   </label>
                   <div class="relative">
@@ -247,17 +247,17 @@
         <!-- Preferences -->
         <div class="card">
           <div class="px-6 py-4 border-b border-secondary-200">
-            <h2 class="text-lg font-semibold text-secondary-900">
+            <h2 class="section-title text-secondary-900">
               Preferences
             </h2>
-            <p class="text-sm text-secondary-600">
+            <p class="text-body text-secondary-600">
               Customize your interface experience
             </p>
           </div>
           <div class="p-6 space-y-6">
             <!-- Theme -->
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-3">
+              <label class="block text-label text-secondary-700 mb-3">
                 Interface Theme
               </label>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -281,7 +281,7 @@
                       <Icon :name="t.icon" class="h-5 w-5" :style="{ color: t.color }" />
                     </div>
                     <div>
-                      <p class="text-sm font-semibold text-secondary-900">{{ t.name }}</p>
+                      <p class="text-label text-secondary-900">{{ t.name }}</p>
                     </div>
                   </div>
                   <div
@@ -296,7 +296,7 @@
 
             <!-- Language -->
             <div>
-              <label class="block text-sm font-medium text-secondary-700 mb-2">
+              <label class="block text-label text-secondary-700 mb-2">
                 Interface Language
               </label>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
@@ -312,7 +312,7 @@
                       : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
                   ]"
                 >
-                  <span class="font-medium text-secondary-900 text-sm">{{ lang.label }}</span>
+                  <span class="text-body text-secondary-900">{{ lang.label }}</span>
                   <Icon v-if="currentLanguage === lang.code" name="heroicons:check" class="h-4 w-4 text-primary-600" />
                 </button>
               </div>

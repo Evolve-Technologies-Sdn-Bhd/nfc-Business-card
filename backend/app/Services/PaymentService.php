@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\Refund;
 use App\Models\WebhookLog;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -261,8 +262,14 @@ class PaymentService
                 ]),
             ]);
 
+            // Create the order lifecycle record and link it back to the transaction.
+            $order = $this->createOrderForTransaction($user, $transaction, $data);
+            $transaction->update(['order_id' => $order->id]);
+            $transaction->setRelation('order', $order);
+
             Log::info('Fiuu payment initiated', [
                 'order_id' => $orderId,
+                'order_number' => $order->order_number,
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'channel' => $channel,
@@ -338,7 +345,141 @@ class PaymentService
             'user_agent' => request()->userAgent(),
         ]);
 
+        // Create the order lifecycle record and link it back to the transaction.
+        $order = $this->createOrderForTransaction($user, $transaction, $data);
+        $transaction->update(['order_id' => $order->id]);
+        $transaction->setRelation('order', $order);
+
         return $transaction;
+    }
+
+    /**
+     * Build the Order (+ its line items) for an initiated transaction.
+     *
+     * Only persists data actually present in the payment payload; anything the
+     * current checkout does not send (e.g. a shipping address) is stored as NULL
+     * rather than invented.
+     */
+    protected function createOrderForTransaction(User $user, Transaction $transaction, array $data): Order
+    {
+        $amount = (float) $transaction->amount;
+        $metadata = $data['metadata'] ?? [];
+        if (!is_array($metadata)) {
+            $metadata = [];
+        }
+
+        // Shipping fee is the only breakdown the checkout currently sends.
+        $shippingFee = (float) ($metadata['shipping_cost'] ?? 0);
+        if ($shippingFee < 0 || $shippingFee > $amount) {
+            $shippingFee = 0;
+        }
+        $shippingFee = round($shippingFee, 2);
+        $subtotal = round($amount - $shippingFee, 2);
+
+        // Shipping details — captured when present, otherwise left NULL.
+        $shippingAddress = $metadata['billing_address'] ?? null;
+        $shipping = [
+            'shipping_name' => null,
+            'shipping_phone' => null,
+            'shipping_address_line1' => null,
+            'shipping_city' => null,
+            'shipping_state' => null,
+            'shipping_postcode' => null,
+            'shipping_country' => null,
+        ];
+        if (is_array($shippingAddress)) {
+            $shipping = [
+                'shipping_name' => $shippingAddress['full_name'] ?? null,
+                'shipping_phone' => $shippingAddress['phone'] ?? null,
+                'shipping_address_line1' => $shippingAddress['address'] ?? null,
+                'shipping_city' => $shippingAddress['city'] ?? null,
+                'shipping_state' => $shippingAddress['state'] ?? null,
+                'shipping_postcode' => $shippingAddress['zip_code'] ?? $shippingAddress['postcode'] ?? null,
+                'shipping_country' => $shippingAddress['country'] ?? null,
+            ];
+        }
+
+        $order = Order::create(array_merge([
+            'user_id' => $user->id,
+            'type' => Order::TYPE_CARD,
+            'status' => Order::STATUS_PENDING,
+            'currency' => $transaction->currency ?? config('payment.currency', 'MYR'),
+            'subtotal' => $subtotal,
+            'discount_amount' => 0,
+            'shipping_fee' => $shippingFee,
+            'tax_amount' => 0,
+            'total' => round($amount, 2),
+            'transaction_id' => $transaction->id,
+            'metadata' => $metadata,
+        ], $shipping));
+
+        // Line items — split into plan / card / shipping when the checkout
+        // sends a price breakdown, otherwise keep a single derived line.
+        $plan = $metadata['plan'] ?? null;
+        $cardType = $metadata['card_type'] ?? null;
+
+        $cardQuantity = (int) ($metadata['card_quantity'] ?? 1);
+        if ($cardQuantity < 1) {
+            $cardQuantity = 1;
+        } elseif ($cardQuantity > 50) {
+            $cardQuantity = 50;
+        }
+
+        $hasBreakdown = array_key_exists('plan_price', $metadata)
+            || array_key_exists('card_unit_price', $metadata);
+
+        if ($hasBreakdown) {
+            $planPrice = round((float) ($metadata['plan_price'] ?? 0), 2);
+            $cardUnitPrice = round((float) ($metadata['card_unit_price'] ?? 0), 2);
+
+            if ($planPrice > 0) {
+                $order->items()->create([
+                    'name' => ($plan ? ucfirst((string) $plan) : 'Subscription') . ' Plan',
+                    'unit_price' => $planPrice,
+                    'quantity' => 1,
+                    'line_total' => $planPrice,
+                    'metadata' => $plan ? ['plan' => $plan] : null,
+                ]);
+            }
+
+            if ($cardUnitPrice > 0) {
+                $order->items()->create([
+                    'name' => $cardType ?: 'Physical NFC Card',
+                    'unit_price' => $cardUnitPrice,
+                    'quantity' => $cardQuantity,
+                    'line_total' => round($cardUnitPrice * $cardQuantity, 2),
+                    'metadata' => ['card_type' => $cardType, 'quantity' => $cardQuantity],
+                ]);
+            }
+        } else {
+            $mainName = $transaction->description ?: 'Payment';
+            if ($plan) {
+                $mainName = ucfirst((string) $plan) . ' Plan';
+                if ($cardType) {
+                    $mainName .= ' — ' . $cardType;
+                }
+            }
+
+            $order->items()->create([
+                'name' => $mainName,
+                'description' => $transaction->description,
+                'unit_price' => $subtotal,
+                'quantity' => 1,
+                'line_total' => $subtotal,
+                'metadata' => $plan ? ['plan' => $plan, 'card_type' => $cardType] : null,
+            ]);
+        }
+
+        if ($shippingFee > 0) {
+            $order->items()->create([
+                'name' => 'Shipping',
+                'unit_price' => $shippingFee,
+                'quantity' => 1,
+                'line_total' => $shippingFee,
+            ]);
+        }
+
+        return $order;
     }
 
     /**

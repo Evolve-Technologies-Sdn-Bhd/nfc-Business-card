@@ -1,6 +1,6 @@
 <template>
   <div class="fiuu-payment-form">
-    <h3 class="text-xl font-semibold mb-4">{{ getPaymentTitle }}</h3>
+    <h3 class="modal-title mb-4">{{ getPaymentTitle }}</h3>
 
     <!-- Payment Info Banner -->
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -9,8 +9,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
-          <p class="text-sm text-blue-800 font-medium">Secure Payment via Fiuu</p>
-          <p class="text-sm text-blue-600 mt-1">You will be redirected to Fiuu's secure payment gateway to complete your transaction.</p>
+          <p class="text-navigation text-blue-800">Secure Payment via Fiuu</p>
+          <p class="text-body text-blue-600 mt-1">You will be redirected to Fiuu's secure payment gateway to complete your transaction.</p>
         </div>
       </div>
     </div>
@@ -23,11 +23,11 @@
     </div>
     
     <div v-else-if="paymentRail === 'fpx'" class="flex items-center gap-2 mb-4">
-      <span class="text-sm text-gray-600">Available Banks: Maybank, CIMB, Public Bank, RHB, and more</span>
+      <span class="text-body text-gray-600">Available Banks: Maybank, CIMB, Public Bank, RHB, and more</span>
     </div>
     
     <div v-else-if="paymentRail === 'ewallet'" class="flex items-center gap-2 mb-4">
-      <span class="text-sm text-gray-600">TNG, GrabPay, Boost, ShopeePay</span>
+      <span class="text-body text-gray-600">TNG, GrabPay, Boost, ShopeePay</span>
     </div>
 
     <!-- Payment Summary -->
@@ -48,7 +48,7 @@
 
     <!-- Description -->
     <div v-if="description" class="mb-4">
-      <p class="text-sm text-gray-600">{{ description }}</p>
+      <p class="text-body text-gray-600">{{ description }}</p>
     </div>
 
     <!-- Error Message -->
@@ -61,14 +61,14 @@
       <button
         @click="$emit('back')"
         type="button"
-        class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+        class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors text-button"
       >
         Back
       </button>
       <button
         @click="initiatePayment"
-        :disabled="processing"
-        class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        :disabled="processing || disabled"
+        class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-button"
       >
         <span v-if="!processing">Pay RM {{ total.toFixed(2) }}</span>
         <span v-else class="flex items-center justify-center">
@@ -124,6 +124,10 @@ const props = defineProps({
   metadata: {
     type: Object,
     default: () => ({})
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -150,6 +154,11 @@ const getPaymentTitle = computed(() => {
 
 // Initiate payment and redirect to Fiuu
 const initiatePayment = async () => {
+  if (props.disabled) {
+    errorMessage.value = 'Please complete the required details above before paying.'
+    return
+  }
+
   processing.value = true
   errorMessage.value = null
   

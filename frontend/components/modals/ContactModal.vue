@@ -8,8 +8,8 @@
       <!-- Modal Header -->
       <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Contact Us</h2>
-          <p class="text-sm text-gray-600 mt-1">We'd love to hear from you!</p>
+          <h2 class="modal-title text-gray-900">Contact Us</h2>
+          <p class="text-body text-gray-600 mt-1">We'd love to hear from you!</p>
         </div>
         <button
           @click="$emit('update:show', false)"

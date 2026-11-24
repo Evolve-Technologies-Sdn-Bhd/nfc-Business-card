@@ -3,7 +3,7 @@
   <div class="relative">
     <!-- Welcome Header -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-secondary-900">
+      <h1 class="page-title text-secondary-900">
         Welcome back, {{ displayName }}
       </h1>
       <p class="mt-2 text-secondary-600">
@@ -21,15 +21,15 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-secondary-600">
+            <p class="stat-label text-secondary-600">
               {{ stat.name }}
             </p>
-            <p class="text-2xl font-semibold text-secondary-900">
+            <p class="stat-value text-secondary-900">
               {{ stat.value }}
             </p>
           </div>
           <div class="ml-auto">
-            <span v-if="stat.badge" :class="['px-2.5 py-1 text-xs font-semibold rounded-full', stat.badgeClass]">
+            <span v-if="stat.badge" :class="['px-2.5 py-1 text-badge rounded-full', stat.badgeClass]">
               {{ stat.badge }}
             </span>
           </div>
@@ -41,14 +41,14 @@
               :style="{ width: stat.progress }"
             ></div>
           </div>
-          <p class="mt-2 text-xs text-secondary-500">{{ stat.progressLabel }}</p>
+          <p class="mt-2 text-helper">{{ stat.progressLabel }}</p>
         </div>
       </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="mb-8">
-      <h2 class="text-lg font-semibold text-secondary-900 mb-4">Quick Actions</h2>
+      <h2 class="section-title text-secondary-900 mb-4">Quick Actions</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <NuxtLink
           v-for="action in quickActions"
@@ -63,11 +63,11 @@
             <Icon :name="action.icon" :class="['h-5 w-5', action.iconText]" />
           </div>
           <div class="mt-4 flex-1 flex flex-col">
-            <h3 class="text-sm font-semibold text-secondary-900 leading-snug">{{ action.label }}</h3>
-            <p class="mt-1 text-xs text-secondary-500 leading-relaxed">{{ action.description }}</p>
+            <h3 class="card-title text-secondary-900 leading-snug">{{ action.label }}</h3>
+            <p class="mt-1 text-helper leading-relaxed">{{ action.description }}</p>
           </div>
           <div v-if="action.disabled" class="mt-3 pt-3 border-t border-secondary-100">
-            <span class="text-[11px] leading-relaxed font-medium text-secondary-500 block">{{ action.disabledMessage }}</span>
+            <span class="text-micro leading-relaxed font-medium text-secondary-500 block">{{ action.disabledMessage }}</span>
           </div>
         </NuxtLink>
       </div>
@@ -79,33 +79,33 @@
       <div class="card p-6 lg:col-span-2">
         <div class="flex items-start justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-secondary-900">Current Plan</h3>
-            <p class="mt-1 text-sm text-secondary-500">Your subscription details and status</p>
+            <h3 class="card-title text-secondary-900">Current Plan</h3>
+            <p class="mt-1 card-subtitle">Your subscription details and status</p>
           </div>
-          <span :class="['px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide', planBadgeClass]">
+          <span :class="['px-3 py-1 text-badge rounded-full uppercase tracking-wide', planBadgeClass]">
             {{ planLabel }}
           </span>
         </div>
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="text-xs font-medium text-secondary-500">Subscription</p>
-            <p class="mt-1 text-base font-semibold text-secondary-900">{{ subscriptionStatus }}</p>
+            <p class="stat-label text-secondary-500">Subscription</p>
+            <p class="mt-1 stat-value text-secondary-900">{{ subscriptionStatus }}</p>
           </div>
           <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="text-xs font-medium text-secondary-500">Active Cards</p>
-            <p class="mt-1 text-base font-semibold text-secondary-900">{{ nfcCardsCount }}</p>
+            <p class="stat-label text-secondary-500">Active Cards</p>
+            <p class="mt-1 stat-value text-secondary-900">{{ nfcCardsCount }}</p>
           </div>
           <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="text-xs font-medium text-secondary-500">Builder Access</p>
-            <p class="mt-1 text-base font-semibold text-secondary-900">{{ builderAccessStatus }}</p>
+            <p class="stat-label text-secondary-500">Builder Access</p>
+            <p class="mt-1 stat-value text-secondary-900">{{ builderAccessStatus }}</p>
           </div>
         </div>
         <div v-if="resolvedPlan !== 'business'" class="mt-6 pt-6 border-t border-secondary-100 flex items-center justify-between">
           <div class="max-w-[62%]">
-            <p class="text-sm font-semibold text-secondary-900">
+            <p class="text-body font-semibold text-secondary-900">
               {{ resolvedPlan === 'premium' ? 'Need more features?' : 'Ready to unlock more?'}}
             </p>
-            <p class="mt-0.5 text-xs text-secondary-500 leading-relaxed">
+            <p class="mt-0.5 text-helper leading-relaxed">
               {{ resolvedPlan === 'premium'
                 ? 'Upgrade to Business for team seats and full analytics.'
                 : 'Upgrade to Premium for Profile Builder, custom branding, and unlimited taps.' }}
@@ -113,7 +113,7 @@
           </div>
           <NuxtLink
             to="/UserDashboard/PlanSelection"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm hover:shadow whitespace-nowrap flex-shrink-0"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-button text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm hover:shadow whitespace-nowrap flex-shrink-0"
           >
             <Icon name="heroicons:arrow-trending-up" class="h-4 w-4" />
             <span class="truncate max-w-[180px]">
@@ -125,22 +125,22 @@
 
       <!-- Getting Started -->
       <div class="card p-6">
-        <h3 class="text-lg font-semibold text-secondary-900">Getting Started</h3>
-        <p class="mt-1 text-sm text-secondary-500">Complete these steps</p>
+        <h3 class="card-title text-secondary-900">Getting Started</h3>
+        <p class="mt-1 card-subtitle">Complete these steps</p>
         <div class="mt-5 space-y-3">
           <div v-for="(step, idx) in gettingStartedSteps" :key="idx" class="flex items-start gap-3">
             <div :class="[
-              'flex-shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-xs font-bold',
+              'flex-shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-badge',
               step.completed ? 'bg-success-100 text-success-700' : 'bg-secondary-100 text-secondary-500'
             ]">
               <Icon v-if="step.completed" name="heroicons:check" class="h-3 w-3" />
               <span v-else>{{ idx + 1 }}</span>
             </div>
             <div class="flex-1 min-w-0">
-              <p :class="['text-sm font-medium', step.completed ? 'text-secondary-500 line-through' : 'text-secondary-900']">
+              <p :class="['text-body font-medium', step.completed ? 'text-secondary-500 line-through' : 'text-secondary-900']">
                 {{ step.label }}
               </p>
-              <p v-if="step.description" class="text-xs text-secondary-500 mt-0.5">{{ step.description }}</p>
+              <p v-if="step.description" class="text-helper mt-0.5">{{ step.description }}</p>
             </div>
           </div>
         </div>

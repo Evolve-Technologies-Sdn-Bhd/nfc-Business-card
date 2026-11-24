@@ -403,6 +403,20 @@ export default defineNuxtPlugin((nuxtApp) => {
       // - Otherwise show toast normally.
       if (error.response?.status === 403) {
         const { $toast } = nuxtApp;
+        const forbiddenData = error.response.data || {};
+
+        // Email verification enforcement (with grace period): guide the user to
+        // the verification page instead of a generic "access denied" toast.
+        if (forbiddenData.error === 'EMAIL_NOT_VERIFIED' || forbiddenData.email_verification_required) {
+          if ($toast && typeof $toast.error === 'function') {
+            $toast.error(forbiddenData.message || 'Please verify your email address to continue.');
+          }
+          try {
+            await navigateTo('/UserAccount/verify-email');
+          } catch (_) { /* navigation unavailable */ }
+          return Promise.reject(error);
+        }
+
         const reqUrl = originalRequest.url || '';
         const isAdminRoute = typeof reqUrl === 'string' && (reqUrl.startsWith('/admin') || reqUrl.includes('/admin/'));
         let userIsAdmin = false;

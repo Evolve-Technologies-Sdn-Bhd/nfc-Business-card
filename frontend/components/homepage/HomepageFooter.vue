@@ -4,11 +4,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <div class="flex items-center mb-4">
-            <Icon
-              name="heroicons:identification"
-              class="h-8 w-8 text-primary-400"
-            />
-            <span class="ml-2 text-xl font-bold">NFCGo</span>
+            <NFCGoLogo variant="dark" />
           </div>
           <p class="text-secondary-400 mb-4">
             The future of professional networking is here. Connect smarter
@@ -38,7 +34,7 @@
           </div>
         </div>
         <div>
-          <h4 class="font-semibold mb-4">Product</h4>
+          <h4 class="card-title text-white mb-4">Product</h4>
           <ul class="space-y-2">
             <li>
               <a
@@ -73,7 +69,7 @@
           </ul>
         </div>
         <div>
-          <h4 class="font-semibold mb-4">Support</h4>
+          <h4 class="card-title text-white mb-4">Support</h4>
           <ul class="space-y-2">
             <li>
               <a
@@ -107,7 +103,7 @@
           </ul>
         </div>
         <div>
-          <h4 class="font-semibold mb-4">Company</h4>
+          <h4 class="card-title text-white mb-4">Company</h4>
           <ul class="space-y-2">
             <li>
               <a

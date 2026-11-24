@@ -15,6 +15,68 @@ module.exports = {
         inter: ["Inter", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
       },
+      /**
+       * NFCGo Typography Scale — single source of truth.
+       * Every `text-*` utility in the app resolves to one of these tokens,
+       * each paired with an intentional line-height (and where relevant a
+       * weight / letter-spacing) so type is consistent everywhere.
+       *
+       *  Display XL 48  | Display LG 40 | H1 32 | H2 28 | H3 24 | H4 20 | H5 18
+       *  Body LG 16     | Body MD 14    | Body SM 13 | Caption 12 | Micro 11
+       */
+      fontSize: {
+        /* --- Core scale (refined line-heights, keys preserved for existing usage) --- */
+        xs: ["0.75rem", { lineHeight: "1.05rem" }], // 12px  → Caption
+        sm: ["0.875rem", { lineHeight: "1.35rem" }], // 14px  → Body MD
+        base: ["1rem", { lineHeight: "1.6rem" }], // 16px  → Body LG
+        lg: ["1.125rem", { lineHeight: "1.75rem" }], // 18px  → H5
+        xl: ["1.25rem", { lineHeight: "1.8rem" }], // 20px  → H4
+        "2xl": ["1.5rem", { lineHeight: "1.95rem" }], // 24px  → H3
+        "3xl": ["1.75rem", { lineHeight: "2.15rem" }], // 28px  → H2
+        "4xl": ["2rem", { lineHeight: "2.4rem" }], // 32px  → H1
+        "5xl": ["2.5rem", { lineHeight: "2.85rem" }], // 40px  → Display LG
+        "6xl": ["3rem", { lineHeight: "3.25rem" }], // 48px  → Display XL
+
+        /* --- Semantic scale (preferred for new markup) --- */
+        "display-xl": [
+          "clamp(2.5rem, 1.9rem + 2.4vw, 3rem)",
+          { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "800" },
+        ],
+        "display-lg": [
+          "clamp(2.125rem, 1.75rem + 1.6vw, 2.5rem)",
+          { lineHeight: "1.1", letterSpacing: "-0.025em", fontWeight: "700" },
+        ],
+        h1: [
+          "clamp(1.75rem, 1.55rem + 0.8vw, 2rem)",
+          { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" },
+        ],
+        h2: [
+          "clamp(1.5rem, 1.4rem + 0.5vw, 1.75rem)",
+          { lineHeight: "1.25", letterSpacing: "-0.018em", fontWeight: "700" },
+        ],
+        h3: ["1.5rem", { lineHeight: "1.35", letterSpacing: "-0.012em", fontWeight: "700" }],
+        h4: ["1.25rem", { lineHeight: "1.4", letterSpacing: "-0.008em", fontWeight: "600" }],
+        h5: ["1.125rem", { lineHeight: "1.45", fontWeight: "600" }],
+        "body-lg": ["1rem", { lineHeight: "1.6" }],
+        body: ["0.875rem", { lineHeight: "1.55" }],
+        "body-sm": ["0.8125rem", { lineHeight: "1.5" }],
+        caption: ["0.75rem", { lineHeight: "1.4" }],
+        micro: ["0.6875rem", { lineHeight: "1.35", letterSpacing: "0.01em" }],
+
+        /* --- UI text roles --- */
+        label: ["0.8125rem", { lineHeight: "1.35", fontWeight: "600" }],
+        button: ["0.875rem", { lineHeight: "1.25", fontWeight: "600" }],
+        input: ["0.875rem", { lineHeight: "1.5" }],
+        helper: ["0.8125rem", { lineHeight: "1.4" }],
+        error: ["0.8125rem", { lineHeight: "1.4", fontWeight: "500" }],
+        navigation: ["0.875rem", { lineHeight: "1.4", fontWeight: "500" }],
+        "table-header": [
+          "0.75rem",
+          { lineHeight: "1.35", fontWeight: "600", letterSpacing: "0.04em" },
+        ],
+        "table-body": ["0.875rem", { lineHeight: "1.5" }],
+        badge: ["0.6875rem", { lineHeight: "1.25", fontWeight: "600", letterSpacing: "0.02em" }],
+      },
       colors: {
         // Primary colors - using CSS variables for dynamic theming
         primary: {
@@ -99,14 +161,6 @@ module.exports = {
         "slide-in-left": "slideInLeft 0.3s ease-in-out",
         "bounce-in": "bounceIn 0.6s ease-in-out",
         "pulse-slow": "pulse 3s infinite",
-        "nfc-fan-l-1": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
-        "nfc-fan-l-2": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.28s infinite",
-        "nfc-fan-l-3": "nfcFanWaveLeft 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.56s infinite",
-        "nfc-fan-r-1": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
-        "nfc-fan-r-2": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.28s infinite",
-        "nfc-fan-r-3": "nfcFanWaveRight 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.56s infinite",
-        "nfc-chip-3d": "nfcChip3D 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite",
-        "nfc-chip-3d-lg": "nfcChip3DLg 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
         "nfc-text-shimmer": "nfcTextShimmer 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
         "nfc-fade-up": "nfcFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
         "nfc-accent-line": "nfcAccentLine 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite",
@@ -141,52 +195,6 @@ module.exports = {
           "50%": { transform: "scale(1.05)" },
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", opacity: "1" },
-        },
-        nfcFanWaveLeft: {
-          "0%": {
-            transform: "translateX(14%) scale(0.86)",
-            opacity: "0",
-          },
-          "32%": {
-            opacity: "0.92",
-          },
-          "100%": {
-            transform: "translateX(-22%) scale(1.08)",
-            opacity: "0",
-          },
-        },
-        nfcFanWaveRight: {
-          "0%": {
-            transform: "translateX(-14%) scale(0.86)",
-            opacity: "0",
-          },
-          "32%": {
-            opacity: "0.92",
-          },
-          "100%": {
-            transform: "translateX(22%) scale(1.08)",
-            opacity: "0",
-          },
-        },
-        nfcChip3D: {
-          "0%, 100%": {
-            transform: "translateY(0) scale(1)",
-          },
-          "50%": {
-            transform: "translateY(-1.5px) scale(1.025)",
-          },
-        },
-        nfcChip3DLg: {
-          "0%, 100%": {
-            transform: "perspective(600px) rotateX(3.5deg) rotateY(-4deg) translateY(0) scale(1)",
-            filter:
-              "drop-shadow(0 8px 20px color-mix(in srgb, var(--theme-primary-800,#2c344e) 22%, transparent)) drop-shadow(0 2px 4px color-mix(in srgb, var(--theme-accent,#5d8c87) 28%, transparent))",
-          },
-          "50%": {
-            transform: "perspective(600px) rotateX(3.5deg) rotateY(-4deg) translateY(-3px) scale(1.03)",
-            filter:
-              "drop-shadow(0 16px 32px color-mix(in srgb, var(--theme-primary-800,#2c344e) 28%, transparent)) drop-shadow(0 4px 9px color-mix(in srgb, var(--theme-accent,#5d8c87) 40%, transparent))",
-          },
         },
         nfcTextShimmer: {
           "0%, 100%": {

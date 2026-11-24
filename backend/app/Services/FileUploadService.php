@@ -100,7 +100,12 @@ class FileUploadService
     }
 
     /**
-     * Validate image file
+     * Validate image file.
+     *
+     * In addition to the extension/mimes rule, the file's REAL content type is
+     * verified with PHP's finfo so a spoofed extension (a script, or an SVG
+     * renamed to .jpg) cannot slip through. SVG is rejected explicitly because
+     * it can carry inline JavaScript.
      */
     public function validateImage(UploadedFile $file, $maxSize = 5120)
     {
@@ -109,8 +114,36 @@ class FileUploadService
         ];
 
         $validator = \Illuminate\Support\Facades\Validator::make(['image' => $file], $rules);
-        
-        return $validator->passes();
+
+        if (!$validator->passes()) {
+            return false;
+        }
+
+        // Server-side content sniffing — never trust the client-supplied name.
+        return $this->hasAllowedImageMimeType($file);
+    }
+
+    /**
+     * Read the actual MIME type of the uploaded file (via finfo) and confirm it
+     * is an allowed raster image. Anything else — including image/svg+xml — is
+     * rejected.
+     */
+    private function hasAllowedImageMimeType(UploadedFile $file): bool
+    {
+        $path = $file->getRealPath();
+        if (!$path || !is_readable($path)) {
+            return false;
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($path);
+
+        return in_array($mimeType, [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+        ], true);
     }
 
     /**

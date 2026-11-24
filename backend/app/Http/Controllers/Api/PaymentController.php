@@ -157,6 +157,9 @@ class PaymentController extends Controller
                 default => throw new Exception('Unsupported payment rail'),
             };
 
+            // Order lifecycle record created alongside the transaction.
+            $order = $transaction->order;
+
             // Log transaction initiation
             Log::info('Payment initiated', [
                 'transaction_id' => $transaction->transaction_id,
@@ -168,9 +171,20 @@ class PaymentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Payment initiated successfully',
+                'order' => $order ? [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'type' => $order->type,
+                    'total' => $order->total,
+                    'currency' => $order->currency,
+                ] : null,
+                'order_number' => $order?->order_number,
                 'transaction' => [
                     'id' => $transaction->id,
                     'transaction_id' => $transaction->transaction_id,
+                    'order_id' => $order?->id,
+                    'order_number' => $order?->order_number,
                     'amount' => $transaction->amount,
                     'currency' => $transaction->currency,
                     'status' => $transaction->status,

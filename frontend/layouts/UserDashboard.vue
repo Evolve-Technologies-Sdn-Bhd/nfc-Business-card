@@ -13,24 +13,8 @@
           <div
             class="flex items-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
           >
-            <NuxtLink
-              to="/"
-              class="flex w-full min-w-0 items-center gap-3"
-            >
-              <img
-                v-if="systemBrand.system_logo_url"
-                :src="systemBrand.system_logo_url + (systemBrand.system_logo_url.includes('?') ? '&' : '?') + 'v=' + (systemBrand.brandVersion || 1)"
-                :alt="systemBrand.app_name || 'NFCGo'"
-                class="h-8 w-auto max-w-[100px] shrink-0 object-contain"
-              />
-              <Icon
-                v-else
-                name="heroicons:id-card"
-                class="h-8 w-8 shrink-0 text-primary-600"
-              />
-              <span class="truncate text-xl font-bold text-secondary-900">
-                {{ systemBrand.app_name || 'NFCGo' }}
-              </span>
+            <NuxtLink to="/" class="flex items-center" aria-label="NFCGo home">
+              <NFCGoLogo variant="light" size="md" />
             </NuxtLink>
           </div>
 
@@ -56,7 +40,7 @@
                 :key="item.name"
                 :to="item.href"
                 :class="[
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                  'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-all duration-200',
                   isActiveRoute(item.href)
                     ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
@@ -68,7 +52,7 @@
                 {{ item.name }}
                 <span
                   v-if="item.badge"
-                  class="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                  class="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-primary-100 text-primary-800"
                 >
                   {{ item.badge }}
                 </span>
@@ -79,14 +63,14 @@
                 :key="'lock-' + item.name"
                 :title="item.disabledMessage || 'This feature is locked — please complete onboarding first.'"
                 :class="[
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200',
+                  'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-colors duration-200',
                   'text-secondary-400 opacity-70 cursor-not-allowed select-none',
                 ]"
               >
                 {{ item.name }}
                 <span
                   v-if="item.badge"
-                  class="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
+                  class="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-gray-100 text-gray-600"
                 >
                   {{ item.badge }}
                 </span>
@@ -111,17 +95,17 @@
                   />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold leading-snug truncate">
+                  <p class="text-label leading-snug truncate">
                     {{ authStore.user?.subscription_plan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
                   </p>
-                  <p class="text-xs text-primary-100 mt-0.5 leading-relaxed">
+                  <p class="text-caption text-primary-100 mt-0.5 leading-relaxed">
                     {{ authStore.user?.subscription_plan === 'premium' ? 'Team seats + advanced analytics' : 'Unlock the full Profile Builder' }}
                   </p>
                 </div>
               </div>
               <button
                 @click="navigateTo('/UserDashboard/PlanSelection')"
-                class="mt-3.5 w-full bg-white text-primary-600 py-2 px-4 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors shadow-sm whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5"
+                class="mt-3.5 w-full bg-white text-primary-600 py-2 px-4 rounded-lg text-button hover:bg-primary-50 transition-colors shadow-sm whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5"
               >
                 <Icon name="heroicons:arrow-trending-up" class="h-3.5 w-3.5 flex-shrink-0" />
                 <span class="truncate">Upgrade Now</span>
@@ -155,13 +139,13 @@
               </button>
               <h1
                 v-if="pageTitle"
-                class="hidden lg:block text-lg font-semibold text-secondary-900"
+                class="hidden lg:block text-h5 text-secondary-900"
               >
                 {{ pageTitle }}
               </h1>
               <h1
                 v-else
-                class="lg:hidden text-lg font-semibold text-secondary-900"
+                class="lg:hidden text-h5 text-secondary-900"
               >
                 NFCGo
               </h1>
@@ -188,7 +172,7 @@
                   />
                   <span
                     v-if="unreadCount > 0"
-                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-[0.65rem] font-bold bg-red-500 text-white ring-2 ring-white"
+                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-red-500 text-white ring-2 ring-white"
                   >
                     {{ unreadCount > 9 ? "9+" : unreadCount }}
                   </span>
@@ -205,14 +189,14 @@
                   class="flex items-center gap-2 sm:gap-3 p-1.5 rounded-xl hover:bg-secondary-50 transition-colors"
                 >
                   <div class="hidden sm:block text-right leading-tight">
-                    <p class="text-sm font-semibold text-secondary-900 truncate max-w-[140px]">
+                    <p class="text-body font-semibold text-secondary-900 truncate max-w-[140px]">
                       {{
                         user?.first_name && user?.last_name
                           ? `${user.first_name} ${user.last_name}`
                           : user?.name || "User"
                       }}
                     </p>
-                    <p class="text-xs text-secondary-500 truncate max-w-[140px]">
+                    <p class="text-caption text-secondary-500 truncate max-w-[140px]">
                       {{ user?.subscription_plan ? user.subscription_plan.charAt(0).toUpperCase() + user.subscription_plan.slice(1) : 'User' }}
                     </p>
                   </div>
@@ -248,14 +232,14 @@
                           class="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
                         />
                         <div class="min-w-0 flex-1">
-                          <p class="text-sm font-bold text-secondary-900 truncate">
+                          <p class="text-body font-bold text-secondary-900 truncate">
                             {{
                               user?.first_name && user?.last_name
                                 ? `${user.first_name} ${user.last_name}`
                                 : user?.name || "User"
                             }}
                           </p>
-                          <p class="text-xs text-secondary-500 truncate">
+                          <p class="text-caption text-secondary-500 truncate">
                             {{ user?.email }}
                           </p>
                         </div>
@@ -266,7 +250,7 @@
                     <div class="py-2">
                       <button
                         @click="showProfilePreview = true; showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
                         <Icon
                           name="heroicons:eye"
@@ -277,7 +261,7 @@
 
                       <button
                         @click="navigateTo('/UserDashboard/Notifications'); showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
                         <Icon
                           name="heroicons:bell"
@@ -286,7 +270,7 @@
                         <span>All Notifications</span>
                         <span
                           v-if="unreadCount > 0"
-                          class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-700"
+                          class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-badge bg-primary-100 text-primary-700"
                         >
                           {{ unreadCount > 9 ? "9+" : unreadCount }}
                         </span>
@@ -301,7 +285,7 @@
                       <button
                         @click="handleLogout"
                         :disabled="logoutLoading"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <div v-if="logoutLoading" class="spinner"></div>
                         <Icon
@@ -373,7 +357,7 @@
               class="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
             >
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-secondary-900">
+                <h3 class="modal-title">
                   Profile Preview
                 </h3>
                 <button
@@ -388,7 +372,7 @@
               </div>
               <!-- Profile preview content -->
               <div v-if="hasPreviewProfile" class="space-y-3">
-                <div class="flex items-center justify-between text-sm text-secondary-500">
+                <div class="flex items-center justify-between text-body text-secondary-500">
                   <span>
                     Live preview of your public landing page
                   </span>
@@ -417,14 +401,14 @@
                   <Icon name="heroicons:id-card" class="w-7 h-7 text-secondary-400" />
                 </div>
                 <div class="space-y-1">
-                  <h4 class="font-semibold text-secondary-800">No profile available yet</h4>
-                  <p class="text-sm text-secondary-500">
+                  <h4 class="text-h5 text-secondary-800">No profile available yet</h4>
+                  <p class="text-body text-secondary-500">
                     Create your first NFC card and set up your profile landing page to preview it here.
                   </p>
                 </div>
                 <NuxtLink
                   to="/UserDashboard/CardManagement"
-                  class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+                  class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-button text-white bg-primary-600 hover:bg-primary-700 transition-colors"
                   @click="showProfilePreview = false"
                 >
                   Go to Card Management
@@ -465,12 +449,6 @@ import { routeNavigationInProgress } from "~/plugins/router.client.js";
 // Stores
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
-const systemBrand = useState("systemBrand", () => ({
-  app_name: "NFCGo",
-  system_logo_url: "",
-  system_favicon_url: "",
-  brandVersion: 0,
-}));
 
 const route = useRoute();
 

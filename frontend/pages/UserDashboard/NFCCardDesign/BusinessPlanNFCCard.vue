@@ -12,13 +12,13 @@
                 name="heroicons:identification"
                 class="h-8 w-8 text-primary-600"
               />
-              <span class="ml-2 text-xl font-bold text-secondary-900"
+              <span class="ml-2 text-h4 font-bold text-secondary-900"
                 >NFCGo</span
               >
             </NuxtLink>
           </div>
           <div class="flex items-center space-x-4">
-            <span class="text-sm font-medium text-primary-600"
+            <span class="text-navigation text-primary-600"
               >Business Plan - Order New Card</span
             >
           </div>
@@ -29,10 +29,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page Header -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-secondary-900 mb-4">
+        <h1 class="page-title text-secondary-900 mb-4">
           Customize Your NFC Card
         </h1>
-        <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+        <p class="text-body-lg text-secondary-600 max-w-2xl mx-auto">
           Choose from our professional templates or upload your own design. Your
           card will be 54mm x 90mm (standard business card size).
         </p>
@@ -40,16 +40,16 @@
 
       <!-- Company Information Section -->
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+        <h2 class="section-title text-secondary-900 mb-6">
           <Icon name="heroicons:building-office-2" class="h-7 w-7 inline-block mr-2 text-primary-600" />
           Company Information
         </h2>
-        <p class="text-sm text-secondary-600 mb-6">This information will appear on all cards ordered.</p>
+        <p class="text-body text-secondary-600 mb-6">This information will appear on all cards ordered.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Company Logo Upload -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Company Logo</label>
+            <label class="block text-label text-secondary-700 mb-2">Company Logo</label>
             <div class="flex items-start gap-4">
               <!-- Logo Preview -->
               <div 
@@ -77,16 +77,16 @@
                 <button
                   type="button"
                   @click="$refs.logoInput.click()"
-                  class="w-full px-4 py-2 border border-secondary-300 rounded-lg text-sm font-medium text-secondary-700 hover:bg-secondary-50 transition-colors"
+                  class="w-full px-4 py-2 border border-secondary-300 rounded-lg text-button text-secondary-700 hover:bg-secondary-50 transition-colors"
                 >
                   <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 inline-block mr-1" />
                   Upload Logo
                 </button>
-                <p class="text-xs text-secondary-500 mt-2">PNG, JPG up to 2MB. Recommended: 200x200px</p>
+                <p class="text-helper text-secondary-500 mt-2">PNG, JPG up to 2MB. Recommended: 200x200px</p>
                 <button
                   v-if="companyInfo.logo"
                   @click="removeLogo"
-                  class="text-xs text-red-600 hover:text-red-800 mt-1"
+                  class="text-error text-red-600 hover:text-red-800 mt-1"
                 >
                   Remove logo
                 </button>
@@ -96,7 +96,7 @@
 
           <!-- Company Name -->
           <div>
-            <label class="block text-sm font-medium text-secondary-700 mb-2">Company Name *</label>
+            <label class="block text-label text-secondary-700 mb-2">Company Name *</label>
             <input
               v-model="companyInfo.name"
               type="text"
@@ -104,14 +104,14 @@
               class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Enter your company name"
             />
-            <p class="text-xs text-secondary-500 mt-2">This will be displayed on your NFC cards</p>
+            <p class="text-helper text-secondary-500 mt-2">This will be displayed on your NFC cards</p>
           </div>
         </div>
       </div>
 
       <!-- Card Recipients Section -->
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h2 class="text-2xl font-bold text-secondary-900 mb-6">Card Recipients</h2>
+        <h2 class="section-title text-secondary-900 mb-6">Card Recipients</h2>
 
         <!-- Include Admin Card -->
         <div class="mb-6 border-2 border-secondary-200 rounded-lg overflow-hidden">
@@ -122,7 +122,7 @@
               type="checkbox"
               class="h-5 w-5 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
             />
-            <label for="includeAdmin" class="ml-3 text-lg font-semibold text-secondary-900">
+            <label for="includeAdmin" class="ml-3 text-h5 text-secondary-900">
               Include myself (Admin)
             </label>
           </div>
@@ -132,22 +132,22 @@
             <form class="space-y-3">
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-secondary-700 mb-1">Name *</label>
+                  <label class="block text-label text-secondary-700 mb-1">Name *</label>
                   <input
                     v-model="adminInfo.name"
                     type="text"
                     required
-                    class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                     placeholder="Your full name"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-secondary-700 mb-1">Email *</label>
+                  <label class="block text-label text-secondary-700 mb-1">Email *</label>
                   <input
                     v-model="adminInfo.email"
                     type="email"
                     required
-                    class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -155,58 +155,58 @@
               
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-secondary-700 mb-1">Position *</label>
+                  <label class="block text-label text-secondary-700 mb-1">Position *</label>
                   <input
                     v-model="adminInfo.position"
                     type="text"
                     required
-                    class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                     placeholder="Your position/job title"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-secondary-700 mb-1">Contact Number *</label>
+                  <label class="block text-label text-secondary-700 mb-1">Contact Number *</label>
                   <input
                     v-model="adminInfo.contactNumber"
                     type="tel"
                     required
-                    class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                     placeholder="+60 12-345 6789"
                   />
                 </div>
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-secondary-700 mb-1">Website (Optional)</label>
+                <label class="block text-label text-secondary-700 mb-1">Website (Optional)</label>
                 <input
                   v-model="adminInfo.website"
                   type="url"
-                  class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                  class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                   placeholder="https://yourwebsite.com"
                 />
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-secondary-700 mb-1">Business Address *</label>
+                <label class="block text-label text-secondary-700 mb-1">Business Address *</label>
                 <input
                   v-model="adminInfo.address"
                   type="text"
                   required
-                  class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                  class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                   placeholder="Your business address"
                 />
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-secondary-700 mb-1">
+                <label class="block text-label text-secondary-700 mb-1">
                   Delivery Address * 
-                  <span class="text-xs text-primary-600">(All cards will be delivered here)</span>
+                  <span class="text-caption text-primary-600">(All cards will be delivered here)</span>
                 </label>
                 <input
                   v-model="adminInfo.deliveryAddress"
                   type="text"
                   required
-                  class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                  class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                   placeholder="Delivery address for all cards"
                 />
               </div>
@@ -218,17 +218,17 @@
         <div v-if="!includeAdminCard && uploadedEmployees.length > 0" class="mb-6 p-4 border-2 border-amber-200 bg-amber-50 rounded-lg">
           <div class="flex items-center mb-3">
             <Icon name="heroicons:truck" class="h-5 w-5 text-amber-600 mr-2" />
-            <h3 class="text-sm font-semibold text-amber-900">Delivery Address for All Cards</h3>
+            <h3 class="text-label text-amber-900">Delivery Address for All Cards</h3>
           </div>
           <div>
             <input
               v-model="adminInfo.deliveryAddress"
               type="text"
               required
-              class="w-full px-3 py-2 text-sm border border-amber-300 rounded focus:ring-2 focus:ring-amber-500 bg-white"
+              class="w-full px-3 py-2 text-input border border-amber-300 rounded focus:ring-2 focus:ring-amber-500 bg-white"
               placeholder="Enter delivery address for all employee cards"
             />
-            <p class="text-xs text-amber-700 mt-1">
+            <p class="text-caption text-amber-700 mt-1">
               All {{ uploadedEmployees.length }} employee card{{ uploadedEmployees.length > 1 ? 's' : '' }} will be delivered to this address
             </p>
           </div>
@@ -236,7 +236,7 @@
 
         <!-- Add Employees Section -->
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold text-secondary-800">Add Employees</h3>
+          <h3 class="card-title text-secondary-800">Add Employees</h3>
           
           <!-- Employee Add Method Selection -->
           <div class="flex gap-4 mb-4">
@@ -270,7 +270,7 @@
           <div v-if="employeeAddMethod === 'upload'" class="space-y-4">
               <!-- File Upload -->
               <div>
-                <label class="block text-sm font-medium text-secondary-700 mb-2"
+                <label class="block text-label text-secondary-700 mb-2"
                   >Upload CSV or XLSX File *</label
                 >
                 <div
@@ -281,7 +281,7 @@
                       name="heroicons:document-arrow-up"
                       class="mx-auto h-12 w-12 text-secondary-400"
                     />
-                    <div class="flex text-sm text-secondary-600">
+                    <div class="flex text-body text-secondary-600">
                       <label
                         class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                       >
@@ -294,7 +294,7 @@
                         />
                       </label>
                     </div>
-                    <p class="text-xs text-secondary-500">
+                    <p class="text-helper text-secondary-500">
                       CSV or XLSX up to 5MB
                     </p>
                   </div>
@@ -308,7 +308,7 @@
                       name="heroicons:document-text"
                       class="h-5 w-5 text-primary-600 mr-2"
                     />
-                    <span class="text-sm text-primary-900 font-medium">{{
+                    <span class="text-body text-primary-900 font-medium">{{
                       employeeFile.name
                     }}</span>
                   </div>
@@ -329,11 +329,11 @@
                     class="h-5 w-5 text-blue-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-sm text-blue-700">
+                    <p class="text-body text-blue-700">
                       <strong>Required Columns:</strong>
                     </p>
                     <ul
-                      class="text-sm text-blue-600 mt-1 list-disc list-inside"
+                      class="text-body text-blue-600 mt-1 list-disc list-inside"
                     >
                       <li>Name (required)</li>
                       <li>Email (required)</li>
@@ -341,13 +341,13 @@
                       <li>Contact Number (required)</li>
                       <li>Website (optional)</li>
                     </ul>
-                    <p class="text-xs text-blue-600 mt-2 italic">
+                    <p class="text-caption text-blue-600 mt-2 italic">
                       <strong>Note:</strong> Business address and delivery address will automatically use Admin's addresses
                     </p>
                     <div class="mt-3 flex items-center space-x-2">
                       <button
                         @click="downloadCSVTemplate"
-                        class="text-sm text-primary-600 hover:text-primary-800 underline font-medium inline-flex items-center"
+                        class="text-navigation text-primary-600 hover:text-primary-800 underline inline-flex items-center"
                       >
                         <Icon
                           name="heroicons:arrow-down-tray"
@@ -358,7 +358,7 @@
                       <span class="text-secondary-400">|</span>
                       <button
                         @click="downloadXLSXTemplate"
-                        class="text-sm text-primary-600 hover:text-primary-800 underline font-medium inline-flex items-center"
+                        class="text-navigation text-primary-600 hover:text-primary-800 underline inline-flex items-center"
                       >
                         <Icon
                           name="heroicons:arrow-down-tray"
@@ -379,27 +379,27 @@
                     <div class="grid grid-cols-2 gap-3">
                       <div>
                         <label
-                          class="block text-xs font-medium text-secondary-700 mb-1"
+                          class="block text-label text-secondary-700 mb-1"
                           >Name *</label
                         >
                         <input
                           v-model="manualEmployee.name"
                           type="text"
                           required
-                          class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                           placeholder="Employee name"
                         />
                       </div>
                       <div>
                         <label
-                          class="block text-xs font-medium text-secondary-700 mb-1"
+                          class="block text-label text-secondary-700 mb-1"
                           >Email *</label
                         >
                         <input
                           v-model="manualEmployee.email"
                           type="email"
                           required
-                          class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                           placeholder="email@company.com"
                         />
                       </div>
@@ -407,45 +407,45 @@
                     <div class="grid grid-cols-2 gap-3">
                       <div>
                         <label
-                          class="block text-xs font-medium text-secondary-700 mb-1"
+                          class="block text-label text-secondary-700 mb-1"
                           >Position *</label
                         >
                         <input
                           v-model="manualEmployee.position"
                           type="text"
                           required
-                          class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                           placeholder="Job title"
                         />
                       </div>
                       <div>
                         <label
-                          class="block text-xs font-medium text-secondary-700 mb-1"
+                          class="block text-label text-secondary-700 mb-1"
                           >Contact Number *</label
                         >
                         <input
                           v-model="manualEmployee.contactNumber"
                           type="tel"
                           required
-                          class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                          class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                           placeholder="+60 12-345 6789"
                         />
                       </div>
                     </div>
                     <div>
                       <label
-                        class="block text-xs font-medium text-secondary-700 mb-1"
+                        class="block text-label text-secondary-700 mb-1"
                         >Website (Optional)</label
                       >
                       <input
                         v-model="manualEmployee.website"
                         type="url"
-                        class="w-full px-2 py-1.5 text-sm border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
+                        class="w-full px-2 py-1.5 text-input border border-secondary-300 rounded focus:ring-2 focus:ring-primary-500"
                         placeholder="https://website.com"
                       />
                     </div>
                     <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                      <p class="text-xs text-blue-700">
+                      <p class="text-caption text-blue-700">
                         <Icon name="heroicons:information-circle" class="h-4 w-4 inline mr-1" />
                         <strong>Note:</strong> Business address and delivery address will use Admin's addresses
                       </p>
@@ -469,12 +469,12 @@
           <!-- Employee Queue - Shared List -->
           <div v-if="uploadedEmployees.length > 0" class="space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-secondary-800">
+              <h3 class="card-title text-secondary-800">
                 Employee Queue ({{ uploadedEmployees.length }} employees)
               </h3>
               <button
                 @click="uploadedEmployees = []"
-                class="text-sm text-red-600 hover:text-red-800"
+                class="text-error text-red-600 hover:text-red-800"
               >
                 Clear All
               </button>
@@ -483,25 +483,25 @@
               <table class="min-w-full divide-y divide-secondary-200">
                 <thead class="bg-secondary-50 sticky top-0">
                   <tr>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                    <th class="px-3 py-2 text-left table-head">
                       Name
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                    <th class="px-3 py-2 text-left table-head">
                       Email
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                    <th class="px-3 py-2 text-left table-head">
                       Position
                     </th>
-                    <th class="px-3 py-2 text-center text-xs font-medium text-secondary-500 uppercase">
+                    <th class="px-3 py-2 text-center table-head">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-secondary-200">
                   <tr v-for="(emp, index) in uploadedEmployees" :key="index">
-                    <td class="px-3 py-2 text-sm text-secondary-900">{{ emp.name }}</td>
-                    <td class="px-3 py-2 text-sm text-secondary-600">{{ emp.email }}</td>
-                    <td class="px-3 py-2 text-sm text-secondary-600">{{ emp.position }}</td>
+                    <td class="px-3 py-2 table-cell text-secondary-900">{{ emp.name }}</td>
+                    <td class="px-3 py-2 table-cell text-secondary-600">{{ emp.email }}</td>
+                    <td class="px-3 py-2 table-cell text-secondary-600">{{ emp.position }}</td>
                     <td class="px-3 py-2 text-center">
                       <button
                         @click="removeEmployee(index)"
@@ -523,13 +523,13 @@
         <div class="space-y-8">
           <!-- Design Options -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Card Design
             </h2>
 
             <!-- Design Method Selection -->
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-secondary-800 mb-4">
+              <h3 class="card-title text-secondary-800 mb-4">
                 Choose Design Method
               </h3>
               <div class="grid grid-cols-3 gap-4">
@@ -547,8 +547,8 @@
                     name="heroicons:clock"
                     class="h-8 w-8 mx-auto mb-2 text-primary-600"
                   />
-                  <p class="text-sm font-medium">Previous Design</p>
-                  <p v-if="!hasPreviousDesigns" class="text-xs text-secondary-500 mt-1">No previous designs</p>
+                  <p class="text-button">Previous Design</p>
+                  <p v-if="!hasPreviousDesigns" class="text-helper text-secondary-500 mt-1">No previous designs</p>
                 </button>
                 <button
                   @click="designMethod = 'template'"
@@ -563,7 +563,7 @@
                     name="heroicons:squares-2x2"
                     class="h-8 w-8 mx-auto mb-2 text-primary-600"
                   />
-                  <p class="text-sm font-medium">Use Template</p>
+                  <p class="text-button">Use Template</p>
                 </button>
                 <button
                   @click="designMethod = 'custom'"
@@ -578,14 +578,14 @@
                     name="heroicons:arrow-up-tray"
                     class="h-8 w-8 mx-auto mb-2 text-primary-600"
                   />
-                  <p class="text-sm font-medium">Upload Design</p>
+                  <p class="text-button">Upload Design</p>
                 </button>
               </div>
             </div>
 
             <!-- Previous Designs Selection -->
             <div v-if="designMethod === 'previous' && previousDesigns.length > 0" class="space-y-4">
-              <h3 class="text-sm font-semibold text-secondary-800">
+              <h3 class="text-label text-secondary-800">
                 Select Previous Design
               </h3>
               <div class="grid grid-cols-3 gap-2">
@@ -612,10 +612,10 @@
                       <Icon name="heroicons:photo" class="h-5 w-5" />
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-center truncate">
+                  <p class="text-caption font-medium text-center truncate">
                     {{ design.card_name || 'Card ' + design.id }}
                   </p>
-                  <p class="text-xs text-secondary-500 text-center truncate">
+                  <p class="text-helper text-secondary-500 text-center truncate">
                     {{ formatDate(design.created_at) }}
                   </p>
                   <Icon
@@ -629,7 +629,7 @@
 
             <!-- Template Selection -->
             <div v-if="designMethod === 'template'" class="space-y-4">
-              <h3 class="text-sm font-semibold text-secondary-800">
+              <h3 class="text-label text-secondary-800">
                 Choose Template
               </h3>
 
@@ -670,17 +670,17 @@
                       class="w-full h-full object-cover"
                     />
                     <!-- Fallback Preview if no image -->
-                    <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 text-white flex flex-col justify-between text-xs">
+                    <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 text-white flex flex-col justify-between text-caption">
                       <div>
                         <div class="font-bold">{{ template.name }}</div>
-                        <div class="opacity-80 text-xs">Template</div>
+                        <div class="opacity-80 text-caption">Template</div>
                       </div>
-                      <div class="text-right text-xs">
+                      <div class="text-right text-caption">
                         <div>NFC Card</div>
                       </div>
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-center truncate">
+                  <p class="text-caption font-medium text-center truncate">
                     {{ template.name }}
                   </p>
                   <Icon
@@ -694,14 +694,14 @@
 
             <!-- Custom Design Upload -->
             <div v-if="designMethod === 'custom'" class="space-y-6">
-              <h3 class="text-lg font-semibold text-secondary-800">
+              <h3 class="card-title text-secondary-800">
                 Upload Your Design
               </h3>
 
               <div class="space-y-4">
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Front Side *</label
                   >
                   <div
@@ -712,7 +712,7 @@
                         name="heroicons:document-arrow-up"
                         class="mx-auto h-12 w-12 text-secondary-400"
                       />
-                      <div class="flex text-sm text-secondary-600">
+                      <div class="flex text-body text-secondary-600">
                         <label
                           class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                         >
@@ -725,7 +725,7 @@
                           />
                         </label>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper text-secondary-500">
                         PNG, JPG, PDF. Size: 90mm x 54mm
                       </p>
                     </div>
@@ -741,7 +741,7 @@
 
                 <div>
                   <label
-                    class="block text-sm font-medium text-secondary-700 mb-2"
+                    class="block text-label text-secondary-700 mb-2"
                     >Back Side *</label
                   >
                   <div
@@ -752,7 +752,7 @@
                         name="heroicons:document-arrow-up"
                         class="mx-auto h-12 w-12 text-secondary-400"
                       />
-                      <div class="flex text-sm text-secondary-600">
+                      <div class="flex text-body text-secondary-600">
                         <label
                           class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
                         >
@@ -765,7 +765,7 @@
                           />
                         </label>
                       </div>
-                      <p class="text-xs text-secondary-500">
+                      <p class="text-helper text-secondary-500">
                         PNG, JPG, PDF. Size: 90mm x 54mm
                       </p>
                     </div>
@@ -784,7 +784,7 @@
 
           <!-- Card Design Preview -->
           <div v-if="hasSelectedDesign" class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Card Design Preview
             </h2>
 
@@ -806,7 +806,7 @@
                       <div v-else class="w-full h-full bg-gradient-to-br from-secondary-200 to-secondary-300 flex items-center justify-center">
                         <div class="text-center text-secondary-600">
                           <Icon name="heroicons:photo" class="h-5 w-5 mx-auto mb-1" />
-                          <p class="text-xs">Previous</p>
+                          <p class="text-caption">Previous</p>
                         </div>
                       </div>
                     </div>
@@ -822,18 +822,18 @@
                       />
                       <!-- Fallback gradient if no image -->
                       <div v-else class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 p-1.5">
-                        <div class="text-white h-full flex flex-col justify-between text-xs">
+                        <div class="text-white h-full flex flex-col justify-between text-caption">
                           <div class="flex items-start gap-1.5">
                             <div v-if="companyInfo.logo" class="w-6 h-6 rounded bg-white/20 flex-shrink-0 overflow-hidden">
                               <img :src="companyInfo.logo" alt="Logo" class="w-full h-full object-contain" />
                             </div>
                             <div class="flex-1 min-w-0">
-                              <div class="font-bold text-[10px] truncate">{{ companyInfo.name || 'Company Name' }}</div>
+                              <div class="font-bold text-micro truncate">{{ companyInfo.name || 'Company Name' }}</div>
                               <div class="font-semibold truncate">{{ adminInfo.name || 'Your Name' }}</div>
-                              <div class="opacity-90 text-[9px]">{{ adminInfo.position || 'Position' }}</div>
+                              <div class="opacity-90 text-micro">{{ adminInfo.position || 'Position' }}</div>
                             </div>
                           </div>
-                          <div class="text-[9px] space-y-0.5">
+                          <div class="text-micro space-y-0.5">
                             <div>{{ adminInfo.contactNumber || '+60 12-345 6789' }}</div>
                             <div class="truncate">{{ adminInfo.email || 'email@company.com' }}</div>
                           </div>
@@ -854,14 +854,14 @@
                     <div v-else class="w-full h-full bg-secondary-100 flex items-center justify-center">
                       <div class="text-center text-secondary-500">
                         <Icon name="heroicons:photo" class="h-5 w-5 mx-auto mb-1" />
-                        <p class="text-xs">Select design</p>
+                        <p class="text-caption">Select design</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Design Info Badge -->
                   <div class="mt-2 text-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-primary-100 text-primary-800">
                       <Icon name="heroicons:sparkles" class="h-3 w-3 mr-1" />
                       {{ 
                         designMethod === 'previous' ? 'Previous' : 
@@ -869,7 +869,7 @@
                         'Custom'
                       }}
                     </span>
-                    <p class="text-xs text-secondary-500 mt-1">
+                    <p class="text-helper text-secondary-500 mt-1">
                       90mm × 54mm
                     </p>
                   </div>
@@ -880,7 +880,7 @@
 
           <!-- Order Summary -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-secondary-900 mb-6">
+            <h2 class="section-title text-secondary-900 mb-6">
               Order Summary
             </h2>
 
@@ -895,30 +895,30 @@
                     <Icon name="heroicons:building-office-2" class="h-5 w-5 text-primary-600" />
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-xs text-primary-600 font-medium">Company</p>
-                    <p class="text-sm font-semibold text-primary-900 truncate">{{ companyInfo.name || 'Not set' }}</p>
+                    <p class="text-caption text-primary-600 font-medium">Company</p>
+                    <p class="text-body font-semibold text-primary-900 truncate">{{ companyInfo.name || 'Not set' }}</p>
                   </div>
                 </div>
               </div>
 
               <div class="flex justify-between items-center p-3 bg-secondary-50 rounded-lg">
-                <span class="text-sm font-medium text-secondary-700">Admin Card:</span>
-                <span class="text-sm font-semibold text-secondary-900">
+                <span class="text-body font-medium text-secondary-700">Admin Card:</span>
+                <span class="text-body font-semibold text-secondary-900">
                   {{ includeAdminCard ? '1 card' : 'Not included' }}
                 </span>
               </div>
               
               <div class="flex justify-between items-center p-3 bg-secondary-50 rounded-lg">
-                <span class="text-sm font-medium text-secondary-700">Employee Cards:</span>
-                <span class="text-sm font-semibold text-secondary-900">
+                <span class="text-body font-medium text-secondary-700">Employee Cards:</span>
+                <span class="text-body font-semibold text-secondary-900">
                   {{ uploadedEmployees.length }} {{ uploadedEmployees.length === 1 ? 'card' : 'cards' }}
                 </span>
               </div>
               
               <div class="border-t border-secondary-200 pt-4">
                 <div class="flex justify-between items-center">
-                  <span class="text-lg font-bold text-secondary-900">Total Cards:</span>
-                  <span class="text-2xl font-bold text-primary-600">
+                  <span class="text-h5 font-bold text-secondary-900">Total Cards:</span>
+                  <span class="stat-value text-primary-600">
                     {{ totalCardsCount }}
                   </span>
                 </div>
@@ -928,11 +928,11 @@
                 <div class="flex items-start">
                   <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div class="ml-3">
-                    <p class="text-sm text-blue-800">
+                    <p class="text-body text-blue-800">
                       <strong>Design Method:</strong>
                       {{ designMethod === 'previous' ? 'Previous Design' : designMethod === 'template' ? 'Template' : 'Custom Upload' }}
                     </p>
-                    <p class="text-xs text-blue-600 mt-1">
+                    <p class="text-caption text-blue-600 mt-1">
                       All cards will use the same design
                     </p>
                   </div>
@@ -962,13 +962,13 @@
               <div v-if="totalCardsCount > 0" class="bg-primary-50 border border-primary-200 px-4 py-2 rounded-lg">
                 <div class="flex items-center gap-2">
                   <Icon name="heroicons:shopping-cart" class="h-5 w-5 text-primary-600" />
-                  <span class="text-sm font-medium text-primary-900">
+                  <span class="text-body font-medium text-primary-900">
                     {{ totalCardsCount }} {{ totalCardsCount === 1 ? 'Card' : 'Cards' }}
                   </span>
-                  <span v-if="includeAdminCard" class="text-xs text-primary-600">
+                  <span v-if="includeAdminCard" class="text-caption text-primary-600">
                     ({{ includeAdminCard ? '1 Admin' : '' }}{{ uploadedEmployees.length > 0 ? ' + ' + uploadedEmployees.length + ' Employee' + (uploadedEmployees.length > 1 ? 's' : '') : '' }})
                   </span>
-                  <span v-else-if="uploadedEmployees.length > 0" class="text-xs text-primary-600">
+                  <span v-else-if="uploadedEmployees.length > 0" class="text-caption text-primary-600">
                     ({{ uploadedEmployees.length }} Employee{{ uploadedEmployees.length > 1 ? 's' : '' }})
                   </span>
                 </div>
@@ -990,19 +990,19 @@
 
           <!-- Validation Message -->
           <div v-if="!isFormValid && totalCardsCount === 0" class="mt-3 text-center">
-            <p class="text-sm text-red-600 flex items-center justify-center gap-1">
+            <p class="text-error text-red-600 flex items-center justify-center gap-1">
               <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
               Please add at least one card recipient and select a design method
             </p>
           </div>
           <div v-else-if="!isFormValid && includeAdminCard && !adminInfo.position" class="mt-3 text-center">
-            <p class="text-sm text-red-600 flex items-center justify-center gap-1">
+            <p class="text-error text-red-600 flex items-center justify-center gap-1">
               <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
               Please fill in all required Admin fields
             </p>
           </div>
           <div v-else-if="!isFormValid" class="mt-3 text-center">
-            <p class="text-sm text-red-600 flex items-center justify-center gap-1">
+            <p class="text-error text-red-600 flex items-center justify-center gap-1">
               <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
               Please select a design method to continue
             </p>
@@ -1023,7 +1023,7 @@
             class="bg-white rounded-lg max-w-2xl w-full p-6 relative z-10 shadow-xl"
           >
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-xl font-bold text-secondary-900">
+              <h3 class="modal-title text-secondary-900">
                 Confirm Order
               </h3>
               <button
@@ -1043,10 +1043,10 @@
                     class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
                   />
                   <div class="ml-3">
-                    <h4 class="text-sm font-semibold text-blue-900 mb-2">
+                    <h4 class="text-label text-blue-900 mb-2">
                       Order Summary
                     </h4>
-                    <div class="text-sm text-blue-800 space-y-1">
+                    <div class="text-body text-blue-800 space-y-1">
                       <p>
                         <strong>Total Cards:</strong> {{ totalCardsCount }}
                         <span v-if="includeAdminCard">(1 Admin + {{ uploadedEmployees.length }} Employees)</span>
@@ -1070,11 +1070,11 @@
 
               <!-- Admin Card Info -->
               <div v-if="includeAdminCard" class="border border-primary-200 rounded-lg p-4 bg-primary-50">
-                <h4 class="text-sm font-semibold text-primary-900 mb-3 flex items-center">
+                <h4 class="text-label text-primary-900 mb-3 flex items-center">
                   <Icon name="heroicons:user-circle" class="h-5 w-5 mr-2" />
                   Admin Card
                 </h4>
-                <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="grid grid-cols-2 gap-3 text-body">
                   <div>
                     <span class="text-primary-700">Name:</span>
                     <span class="ml-2 text-primary-900 font-medium">{{ adminInfo.name }}</span>
@@ -1100,17 +1100,17 @@
               
               <!-- Delivery Address Info -->
               <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
-                <h4 class="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                <h4 class="text-label text-blue-900 mb-2 flex items-center">
                   <Icon name="heroicons:truck" class="h-5 w-5 mr-2" />
                   Delivery Address (All Cards)
                 </h4>
-                <p class="text-sm text-blue-800">{{ adminInfo.deliveryAddress }}</p>
+                <p class="text-body text-blue-800">{{ adminInfo.deliveryAddress }}</p>
               </div>
 
               <!-- Employee List Preview -->
               <div v-if="uploadedEmployees.length > 0" class="border border-secondary-200 rounded-lg">
                 <div class="bg-secondary-50 px-4 py-2 border-b border-secondary-200">
-                  <h4 class="text-sm font-semibold text-secondary-900 flex items-center">
+                  <h4 class="text-label text-secondary-900 flex items-center">
                     <Icon name="heroicons:user-group" class="h-5 w-5 mr-2" />
                     Employee Cards ({{ uploadedEmployees.length }})
                   </h4>
@@ -1119,22 +1119,22 @@
                   <table class="min-w-full divide-y divide-secondary-200">
                     <thead class="bg-secondary-50 sticky top-0">
                       <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                        <th class="px-4 py-2 text-left table-head">
                           Name
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                        <th class="px-4 py-2 text-left table-head">
                           Email
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">
+                        <th class="px-4 py-2 text-left table-head">
                           Position
                         </th>
                       </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-secondary-200">
                       <tr v-for="(emp, index) in uploadedEmployees" :key="index">
-                        <td class="px-4 py-2 text-sm text-secondary-900">{{ emp.name }}</td>
-                        <td class="px-4 py-2 text-sm text-secondary-600">{{ emp.email }}</td>
-                        <td class="px-4 py-2 text-sm text-secondary-600">{{ emp.position }}</td>
+                        <td class="px-4 py-2 table-cell text-secondary-900">{{ emp.name }}</td>
+                        <td class="px-4 py-2 table-cell text-secondary-600">{{ emp.email }}</td>
+                        <td class="px-4 py-2 table-cell text-secondary-600">{{ emp.position }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1149,7 +1149,7 @@
                     class="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5"
                   />
                   <div class="ml-3">
-                    <p class="text-sm text-yellow-800">
+                    <p class="text-body text-yellow-800">
                       A notification will be sent to Super Admin for approval.
                       The order will be processed after admin confirmation.
                     </p>
