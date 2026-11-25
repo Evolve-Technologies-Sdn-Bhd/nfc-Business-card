@@ -67,6 +67,17 @@ class FeatureToggleSeeder extends Seeder
             ],
             [
                 'type' => 'feature_toggle',
+                'option_id' => 'nfcgo_branding',
+                'name' => 'NFCGo Branding',
+                'description' => 'Show the "Powered by NFCGo" badge on public profiles. Tick the plans that should display it.',
+                'config' => json_encode([]),
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => json_encode(['free', 'basic']),
+                'display_order' => 55,
+            ],
+            [
+                'type' => 'feature_toggle',
                 'option_id' => 'booking_integration',
                 'name' => 'Booking Integration',
                 'description' => 'Enable appointment booking feature',

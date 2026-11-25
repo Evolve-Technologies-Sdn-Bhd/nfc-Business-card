@@ -115,4 +115,19 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Business Plan Enquiry Recipient
+    |--------------------------------------------------------------------------
+    |
+    | Where new Business plan enquiries (bulk NFC card orders, custom design
+    | templates, etc.) are emailed. Triage in the admin panel, but the sales
+    | inbox gets notified immediately.
+    |
+    */
+
+    'business_inquiry' => [
+        'address' => env('BUSINESS_INQUIRY_EMAIL', 'sales@clbgroups.com'),
+    ],
+
 ];

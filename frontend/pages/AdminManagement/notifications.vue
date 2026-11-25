@@ -2,10 +2,10 @@
 <template>
   <div class="min-h-screen bg-secondary-50">
     <!-- Header -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
       <div>
         <div class="flex items-center gap-3 mb-2">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-sm">
             <Icon name="heroicons:megaphone" class="w-5 h-5 text-white" />
           </div>
           <div>
@@ -19,7 +19,7 @@
       <div class="flex items-center gap-3 flex-shrink-0">
         <button
           @click="showSendModal = true"
-          class="px-4 py-2.5 text-button bg-primary-600 text-white rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-all duration-200 flex items-center shadow-sm hover:shadow-md hover:shadow-primary-600/10"
+          class="btn btn-primary"
         >
           <Icon name="heroicons:megaphone" class="w-4 h-4 mr-2" />
           Send Announcement
@@ -29,7 +29,7 @@
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+      <div class="card p-5 hover:shadow-card-hover transition-shadow duration-200">
         <div class="flex items-center justify-between">
           <div>
             <p class="stat-label text-secondary-500">Total</p>
@@ -37,82 +37,82 @@
               {{ statistics.total_notifications || 0 }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-info-100 to-info-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:inbox-stack"
-              class="w-6 h-6 text-blue-600"
+              class="w-6 h-6 text-info-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-blue-100 rounded-full overflow-hidden">
-          <div class="h-full bg-blue-500 rounded-full w-full"></div>
+        <div class="mt-4 h-1 bg-info-100 rounded-full overflow-hidden">
+          <div class="h-full bg-info-500 rounded-full w-full"></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+      <div class="card p-5 hover:shadow-card-hover transition-shadow duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label text-orange-600">Unread</p>
-            <p class="stat-value text-orange-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-warning-600">Unread</p>
+            <p class="stat-value text-warning-600 mt-1.5 tabular-nums">
               {{ statistics.total_unread || 0 }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-warning-100 to-warning-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:envelope"
-              class="w-6 h-6 text-orange-600"
+              class="w-6 h-6 text-warning-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-orange-100 rounded-full overflow-hidden">
+        <div class="mt-4 h-1 bg-warning-100 rounded-full overflow-hidden">
           <div
-            class="h-full bg-orange-500 rounded-full transition-all duration-500"
+            class="h-full bg-warning-500 rounded-full transition-all duration-500"
             :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.total_unread || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
           ></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+      <div class="card p-5 hover:shadow-card-hover transition-shadow duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label text-green-600">Today</p>
-            <p class="stat-value text-green-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-success-600">Today</p>
+            <p class="stat-value text-success-600 mt-1.5 tabular-nums">
               {{ statistics.today || 0 }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-success-100 to-success-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:calendar-days"
-              class="w-6 h-6 text-green-600"
+              class="w-6 h-6 text-success-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
+        <div class="mt-4 h-1 bg-success-100 rounded-full overflow-hidden">
           <div
-            class="h-full bg-green-500 rounded-full transition-all duration-500"
+            class="h-full bg-success-500 rounded-full transition-all duration-500"
             :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.today || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
           ></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
+      <div class="card p-5 hover:shadow-card-hover transition-shadow duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label text-purple-600">Last 7 Days</p>
-            <p class="stat-value text-purple-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-primary-600">Last 7 Days</p>
+            <p class="stat-value text-primary-600 mt-1.5 tabular-nums">
               {{ statistics.recent_7_days || 0 }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:chart-bar"
-              class="w-6 h-6 text-purple-600"
+              class="w-6 h-6 text-primary-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-purple-100 rounded-full overflow-hidden">
+        <div class="mt-4 h-1 bg-primary-100 rounded-full overflow-hidden">
           <div
-            class="h-full bg-purple-500 rounded-full transition-all duration-500"
+            class="h-full bg-primary-500 rounded-full transition-all duration-500"
             :style="{ width: statistics.total_notifications ? Math.min(100, Math.round((statistics.recent_7_days || 0) / statistics.total_notifications * 100)) + '%' : '0%' }"
           ></div>
         </div>
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Actions Bar -->
-    <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 mb-5 overflow-hidden">
+    <div class="card mb-5 overflow-hidden">
       <div class="p-5">
         <!-- Main filters row -->
         <div class="flex flex-wrap items-center gap-3">
@@ -244,7 +244,7 @@
 
             <button
               @click="showCleanupModal = true"
-              class="px-3.5 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors flex items-center border border-red-100 text-caption font-semibold"
+              class="px-3.5 py-2 bg-error-50 text-error-700 rounded-xl hover:bg-error-100 transition-colors flex items-center border border-error-100 text-caption font-semibold"
             >
               <Icon name="heroicons:trash" class="w-3.5 h-3.5 mr-1.5" />
               Cleanup
@@ -252,7 +252,7 @@
 
             <button
               @click="exportNotifications"
-              class="px-3.5 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors flex items-center border border-green-100 text-caption font-semibold"
+              class="px-3.5 py-2 bg-success-50 text-success-700 rounded-xl hover:bg-success-100 transition-colors flex items-center border border-success-100 text-caption font-semibold"
             >
               <Icon name="heroicons:arrow-down-tray" class="w-3.5 h-3.5 mr-1.5" />
               Export CSV
@@ -263,12 +263,12 @@
     </div>
 
     <!-- Notifications Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 overflow-hidden">
+    <div class="card overflow-hidden">
       <!-- Table Header Strip -->
       <div class="px-5 py-3.5 border-b border-secondary-200/60 bg-secondary-50/40 flex items-center justify-between">
         <h3 class="text-body font-semibold text-secondary-800">Notification Log</h3>
         <div class="flex items-center gap-1.5 text-caption text-secondary-500">
-          <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+          <span class="inline-block w-2 h-2 rounded-full bg-info-500"></span>
           Showing {{ paginationData.from || 0 }}–{{ paginationData.to || 0 }} of {{ paginationData.total || 0 }}
         </div>
       </div>
@@ -323,12 +323,15 @@
             <!-- Loading State -->
             <tr v-if="loading">
               <td colspan="8" class="px-3 sm:px-5 py-16">
+                <!-- Inside a table cell → `inline` centres it in the cell
+                     instead of claiming a full-viewport block. -->
                 <NFCGoWaveLoader
                   variant="wave"
                   size="md"
                   theme="light"
                   :showText="true"
                   hintText="Loading notifications..."
+                  inline
                 />
               </td>
             </tr>
@@ -399,7 +402,7 @@
                         notification.type === 'business_card_order_request' &&
                         notification.data?.total_cards
                       "
-                      class="text-badge text-blue-600 mt-0.5 inline-flex items-center gap-1"
+                      class="text-badge text-info-600 mt-0.5 inline-flex items-center gap-1"
                     >
                       <Icon name="heroicons:identification" class="w-3 h-3" />
                       {{ notification.data.total_cards }} card{{
@@ -453,7 +456,7 @@
               <td class="px-3 sm:px-5 py-4 whitespace-nowrap">
                 <span
                   v-if="notification.delivery_failed"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-red-100 text-red-700"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-error-100 text-error-700"
                 >
                   <Icon
                     name="heroicons:exclamation-triangle"
@@ -463,14 +466,14 @@
                 </span>
                 <span
                   v-else-if="notification.delivered_at"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-green-100 text-green-700"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-success-100 text-success-700"
                 >
                   <Icon name="heroicons:check-circle-20-solid" class="w-3 h-3" />
                   Delivered
                 </span>
                 <span
                   v-else
-                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-amber-100 text-amber-700"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-badge rounded-lg bg-warning-100 text-warning-700"
                 >
                   <Icon name="heroicons:clock" class="w-3 h-3" />
                   Pending
@@ -497,7 +500,7 @@
                     <button
                       @click="approveOrder(notification)"
                       :disabled="approvingId === notification.id"
-                      class="px-2.5 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-badge transition-colors disabled:opacity-50 inline-flex items-center gap-1 border border-green-100"
+                      class="px-2.5 py-1.5 bg-success-50 text-success-700 hover:bg-success-100 rounded-lg text-badge transition-colors disabled:opacity-50 inline-flex items-center gap-1 border border-success-100"
                       title="Approve order"
                     >
                       <Icon name="heroicons:check" class="w-3 h-3" />
@@ -505,7 +508,7 @@
                     </button>
                     <button
                       @click="openRejectModal(notification)"
-                      class="px-2.5 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-badge transition-colors inline-flex items-center gap-1 border border-red-100"
+                      class="px-2.5 py-1.5 bg-error-50 text-error-700 hover:bg-error-100 rounded-lg text-badge transition-colors inline-flex items-center gap-1 border border-error-100"
                       title="Reject order"
                     >
                       <Icon name="heroicons:x-mark" class="w-3 h-3" />
@@ -520,7 +523,7 @@
                   >
                     <span
                       v-if="notification.is_approved"
-                      class="px-2.5 py-1.5 bg-green-50 text-green-700 rounded-lg text-badge inline-flex items-center gap-1 border border-green-100"
+                      class="px-2.5 py-1.5 bg-success-50 text-success-700 rounded-lg text-badge inline-flex items-center gap-1 border border-success-100"
                     >
                       <Icon
                         name="heroicons:check-circle-20-solid"
@@ -530,7 +533,7 @@
                     </span>
                     <span
                       v-else-if="notification.is_rejected"
-                      class="px-2.5 py-1.5 bg-red-50 text-red-700 rounded-lg text-badge inline-flex items-center gap-1 border border-red-100"
+                      class="px-2.5 py-1.5 bg-error-50 text-error-700 rounded-lg text-badge inline-flex items-center gap-1 border border-error-100"
                     >
                       <Icon name="heroicons:x-circle" class="w-3 h-3" />
                       Rejected
@@ -539,21 +542,21 @@
                   <div class="w-px h-5 bg-secondary-200 mx-1"></div>
                   <button
                     @click="viewDetails(notification)"
-                    class="p-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                    class="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
                     title="View details"
                   >
                     <Icon name="heroicons:eye" class="w-4 h-4" />
                   </button>
                   <button
                     @click="viewUserHistory(notification.user)"
-                    class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                    class="p-2 text-info-600 hover:text-info-700 hover:bg-info-50 rounded-lg transition-colors"
                     title="View user history"
                   >
                     <Icon name="heroicons:clock" class="w-4 h-4" />
                   </button>
                   <button
                     @click="deleteNotification(notification.id)"
-                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                    class="p-2 text-error-600 hover:text-error-700 hover:bg-error-50 rounded-lg transition-colors"
                     title="Delete"
                   >
                     <Icon name="heroicons:trash" class="w-4 h-4" />
@@ -590,49 +593,49 @@
           class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
         >
           <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            class="fixed inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
           ></div>
 
           <div
             class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
           >
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 class="modal-title text-gray-900 mb-4">
+              <h3 class="modal-title text-secondary-900 mb-4">
                 Send Announcement
               </h3>
 
               <div class="space-y-4">
                 <div>
-                  <label class="block text-label text-gray-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Title
                   </label>
                   <input
                     v-model="announcementForm.title"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="Announcement title"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-label text-gray-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Message
                   </label>
                   <textarea
                     v-model="announcementForm.message"
                     rows="4"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="Enter your message"
                   ></textarea>
                 </div>
 
                 <div>
-                  <label class="block text-label text-gray-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Priority
                   </label>
                   <select
                     v-model="announcementForm.priority"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="low">Low</option>
                     <option value="normal">Normal</option>
@@ -642,25 +645,25 @@
                 </div>
 
                 <div>
-                  <label class="block text-label text-gray-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Action URL (Optional)
                   </label>
                   <input
                     v-model="announcementForm.action_url"
                     type="url"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="https://..."
                   />
                 </div>
 
                 <div>
-                  <label class="block text-label text-gray-700 mb-1">
+                  <label class="block text-label text-secondary-700 mb-1">
                     Action Text (Optional)
                   </label>
                   <input
                     v-model="announcementForm.action_text"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="Learn More"
                   />
                 </div>
@@ -672,11 +675,11 @@
                       id="schedule-checkbox"
                       v-model="announcementForm.schedule"
                       type="checkbox"
-                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      class="h-4 w-4 text-info-600 focus:ring-primary-500 border-secondary-300 rounded"
                     />
                     <label
                       for="schedule-checkbox"
-                      class="ml-2 block text-label text-gray-700"
+                      class="ml-2 block text-label text-secondary-700"
                     >
                       Schedule for later
                     </label>
@@ -685,7 +688,7 @@
                   <div v-if="announcementForm.schedule" class="space-y-3 pl-6">
                     <div>
                       <label
-                        class="block text-label text-gray-700 mb-1"
+                        class="block text-label text-secondary-700 mb-1"
                       >
                         Schedule Date & Time
                       </label>
@@ -693,7 +696,7 @@
                         v-model="announcementForm.scheduled_at"
                         type="datetime-local"
                         :min="minScheduleDateTime"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                       />
                       <p class="text-helper mt-1">
                         Notification will be sent at the specified time
@@ -702,13 +705,13 @@
 
                     <div>
                       <label
-                        class="block text-label text-gray-700 mb-1"
+                        class="block text-label text-secondary-700 mb-1"
                       >
                         Timezone
                       </label>
                       <select
                         v-model="announcementForm.timezone"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                       >
                         <option value="UTC">UTC</option>
                         <option value="Asia/Kuala_Lumpur">
@@ -731,12 +734,12 @@
             </div>
 
             <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+              class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
             >
               <button
                 @click="sendAnnouncement"
                 :disabled="sending"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-button text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-button text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto disabled:opacity-50"
               >
                 {{
                   sending
@@ -749,7 +752,7 @@
               <button
                 @click="showSendModal = false"
                 type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-button text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto"
               >
                 Cancel
               </button>
@@ -770,24 +773,24 @@
           class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
         >
           <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            class="fixed inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
           ></div>
 
           <div
             class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
           >
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 class="modal-title text-gray-900 mb-4">
+              <h3 class="modal-title text-secondary-900 mb-4">
                 Cleanup Old Notifications
               </h3>
 
-              <p class="text-body text-gray-500 mb-4">
+              <p class="text-body text-secondary-500 mb-4">
                 Delete read notifications older than:
               </p>
 
               <select
                 v-model="cleanupDays"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option :value="7">7 days</option>
                 <option :value="14">14 days</option>
@@ -798,19 +801,19 @@
             </div>
 
             <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+              class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
             >
               <button
                 @click="cleanupNotifications"
                 :disabled="cleaning"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-button text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-error-600 text-button text-white hover:bg-error-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error-500 sm:ml-3 sm:w-auto disabled:opacity-50"
               >
                 {{ cleaning ? "Cleaning..." : "Delete" }}
               </button>
               <button
                 @click="showCleanupModal = false"
                 type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-button text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto"
               >
                 Cancel
               </button>
@@ -831,26 +834,26 @@
           class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
         >
           <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            class="fixed inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
           ></div>
 
           <div
             class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
           >
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 class="modal-title text-gray-900 mb-4">
+              <h3 class="modal-title text-secondary-900 mb-4">
                 Reject Order
               </h3>
 
               <div class="space-y-4">
                 <div>
-                  <label class="block text-label text-gray-700 mb-2">
+                  <label class="block text-label text-secondary-700 mb-2">
                     Rejection Reason *
                   </label>
                   <textarea
                     v-model="rejectForm.reason"
                     rows="4"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="Please provide a reason for rejecting this order..."
                   ></textarea>
                 </div>
@@ -858,19 +861,19 @@
             </div>
 
             <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+              class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
             >
               <button
                 @click="submitRejectOrder"
                 :disabled="rejectingId || !rejectForm.reason.trim()"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-button text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-error-600 text-button text-white hover:bg-error-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error-500 sm:ml-3 sm:w-auto disabled:opacity-50"
               >
                 {{ rejectingId ? "Rejecting..." : "Reject Order" }}
               </button>
               <button
                 @click="showRejectModal = false"
                 type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-button text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto"
               >
                 Cancel
               </button>
@@ -891,7 +894,7 @@
           class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
         >
           <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            class="fixed inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
           ></div>
 
           <div
@@ -899,12 +902,12 @@
           >
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="modal-title text-gray-900">
+                <h3 class="modal-title text-secondary-900">
                   Notification Details
                 </h3>
                 <button
                   @click="showDetailsModal = false"
-                  class="text-gray-400 hover:text-gray-500"
+                  class="text-secondary-400 hover:text-secondary-500"
                 >
                   <Icon name="heroicons:x-mark" class="w-6 h-6" />
                 </button>
@@ -913,18 +916,18 @@
               <div v-if="selectedNotificationDetail" class="space-y-4">
                 <!-- Basic Info -->
                 <div class="border-b pb-4">
-                  <h4 class="text-body font-semibold text-gray-700 mb-3">
+                  <h4 class="text-body font-semibold text-secondary-700 mb-3">
                     Basic Information
                   </h4>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-caption text-gray-500">Type</label>
+                      <label class="text-caption text-secondary-500">Type</label>
                       <p class="text-body font-medium">
                         {{ formatType(selectedNotificationDetail.type) }}
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Priority</label>
+                      <label class="text-caption text-secondary-500">Priority</label>
                       <p class="text-body">
                         <span
                           :class="[
@@ -939,24 +942,24 @@
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Status</label>
+                      <label class="text-caption text-secondary-500">Status</label>
                       <p class="text-body">
                         <span
                           v-if="selectedNotificationDetail.is_read"
-                          class="px-2 py-1 text-badge rounded-full bg-gray-100 text-gray-800"
+                          class="px-2 py-1 text-badge rounded-full bg-secondary-100 text-secondary-800"
                         >
                           Read
                         </span>
                         <span
                           v-else
-                          class="px-2 py-1 text-badge rounded-full bg-blue-100 text-blue-800"
+                          class="px-2 py-1 text-badge rounded-full bg-info-100 text-info-800"
                         >
                           Unread
                         </span>
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Date</label>
+                      <label class="text-caption text-secondary-500">Date</label>
                       <p class="text-body">
                         {{ formatDate(selectedNotificationDetail.created_at) }}
                       </p>
@@ -966,13 +969,13 @@
 
                 <!-- Message -->
                 <div class="border-b pb-4">
-                  <h4 class="text-body font-semibold text-gray-700 mb-2">
+                  <h4 class="text-body font-semibold text-secondary-700 mb-2">
                     Message
                   </h4>
-                  <p class="card-title text-gray-900 mb-2">
+                  <p class="card-title text-secondary-900 mb-2">
                     {{ selectedNotificationDetail.title }}
                   </p>
-                  <p class="text-body text-gray-600">
+                  <p class="text-body text-secondary-600">
                     {{ selectedNotificationDetail.message }}
                   </p>
                 </div>
@@ -985,12 +988,12 @@
                   "
                   class="border-b pb-4"
                 >
-                  <h4 class="text-body font-semibold text-gray-700 mb-3">
+                  <h4 class="text-body font-semibold text-secondary-700 mb-3">
                     Order Details
                   </h4>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-caption text-gray-500"
+                      <label class="text-caption text-secondary-500"
                         >Requesting User</label
                       >
                       <p class="text-body font-medium">
@@ -1001,7 +1004,7 @@
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Email</label>
+                      <label class="text-caption text-secondary-500">Email</label>
                       <p class="text-body">
                         {{
                           selectedNotificationDetail.data
@@ -1010,13 +1013,13 @@
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Total Cards</label>
-                      <p class="text-body font-medium text-blue-600">
+                      <label class="text-caption text-secondary-500">Total Cards</label>
+                      <p class="text-body font-medium text-info-600">
                         {{ selectedNotificationDetail.data?.total_cards || 0 }}
                       </p>
                     </div>
                     <div>
-                      <label class="text-caption text-gray-500">Plan</label>
+                      <label class="text-caption text-secondary-500">Plan</label>
                       <p class="text-body">
                         {{
                           selectedNotificationDetail.data?.subscription_plan ||
@@ -1036,7 +1039,7 @@
                   "
                   class="border-b pb-4"
                 >
-                  <h4 class="text-body font-semibold text-gray-700 mb-3">
+                  <h4 class="text-body font-semibold text-secondary-700 mb-3">
                     Cards in this Order
                   </h4>
                   <div class="space-y-3 max-h-64 overflow-y-auto">
@@ -1044,52 +1047,52 @@
                       v-for="(card, index) in selectedNotificationDetail.data
                         .cards"
                       :key="index"
-                      class="bg-gray-50 p-3 rounded-lg"
+                      class="bg-secondary-50 p-3 rounded-lg"
                     >
                       <div class="flex items-start justify-between mb-2">
                         <div class="flex items-center">
-                          <span class="text-caption font-medium text-gray-500 mr-2"
+                          <span class="text-caption font-medium text-secondary-500 mr-2"
                             >#{{ index + 1 }}</span
                           >
-                          <h5 class="text-body font-semibold text-gray-900">
+                          <h5 class="text-body font-semibold text-secondary-900">
                             {{ card.name }}
                           </h5>
                         </div>
                         <span
                           v-if="card.is_admin_card"
-                          class="px-2 py-0.5 text-badge rounded bg-purple-100 text-purple-700"
+                          class="px-2 py-0.5 text-badge rounded bg-primary-100 text-primary-700"
                         >
                           Admin
                         </span>
                         <span
                           v-else
-                          class="px-2 py-0.5 text-badge rounded bg-blue-100 text-blue-700"
+                          class="px-2 py-0.5 text-badge rounded bg-info-100 text-info-700"
                         >
                           Employee
                         </span>
                       </div>
                       <div class="grid grid-cols-2 gap-2 text-caption">
                         <div>
-                          <span class="text-gray-500">Email:</span>
-                          <span class="text-gray-700 ml-1">{{
+                          <span class="text-secondary-500">Email:</span>
+                          <span class="text-secondary-700 ml-1">{{
                             card.email
                           }}</span>
                         </div>
                         <div>
-                          <span class="text-gray-500">Position:</span>
-                          <span class="text-gray-700 ml-1">{{
+                          <span class="text-secondary-500">Position:</span>
+                          <span class="text-secondary-700 ml-1">{{
                             card.position
                           }}</span>
                         </div>
                         <div>
-                          <span class="text-gray-500">Contact:</span>
-                          <span class="text-gray-700 ml-1">{{
+                          <span class="text-secondary-500">Contact:</span>
+                          <span class="text-secondary-700 ml-1">{{
                             card.contact_number
                           }}</span>
                         </div>
                         <div v-if="card.website">
-                          <span class="text-gray-500">Website:</span>
-                          <span class="text-gray-700 ml-1">{{
+                          <span class="text-secondary-500">Website:</span>
+                          <span class="text-secondary-700 ml-1">{{
                             card.website
                           }}</span>
                         </div>
@@ -1108,16 +1111,16 @@
                   class="border-b pb-4"
                 >
                   <h4
-                    class="text-body font-semibold text-gray-700 mb-3 flex items-center"
+                    class="text-body font-semibold text-secondary-700 mb-3 flex items-center"
                   >
                     <Icon
                       name="heroicons:map-pin"
-                      class="w-4 h-4 mr-2 text-blue-600"
+                      class="w-4 h-4 mr-2 text-info-600"
                     />
                     Delivery Address
                   </h4>
-                  <div class="bg-blue-50 p-4 rounded-lg">
-                    <p class="text-body text-gray-800">
+                  <div class="bg-info-50 p-4 rounded-lg">
+                    <p class="text-body text-secondary-800">
                       {{ selectedNotificationDetail.data.delivery_address }}
                     </p>
                   </div>
@@ -1132,23 +1135,23 @@
                       selectedNotificationDetail.is_rejected)
                   "
                 >
-                  <h4 class="text-body font-semibold text-gray-700 mb-2">
+                  <h4 class="text-body font-semibold text-secondary-700 mb-2">
                     Status
                   </h4>
                   <div
                     v-if="selectedNotificationDetail.is_approved"
-                    class="bg-green-50 p-4 rounded-lg"
+                    class="bg-success-50 p-4 rounded-lg"
                   >
                     <div class="flex items-center">
                       <Icon
                         name="heroicons:check-circle"
-                        class="w-5 h-5 text-green-600 mr-2"
+                        class="w-5 h-5 text-success-600 mr-2"
                       />
                       <div>
-                        <p class="text-body font-medium text-green-800">
+                        <p class="text-body font-medium text-success-800">
                           Approved
                         </p>
-                        <p class="text-caption text-green-600">
+                        <p class="text-caption text-success-600">
                           {{
                             formatDate(selectedNotificationDetail.approved_at)
                           }}
@@ -1158,23 +1161,23 @@
                   </div>
                   <div
                     v-if="selectedNotificationDetail.is_rejected"
-                    class="bg-red-50 p-4 rounded-lg"
+                    class="bg-error-50 p-4 rounded-lg"
                   >
                     <div class="flex items-start">
                       <Icon
                         name="heroicons:x-circle"
-                        class="w-5 h-5 text-red-600 mr-2 mt-0.5"
+                        class="w-5 h-5 text-error-600 mr-2 mt-0.5"
                       />
                       <div class="flex-1">
-                        <p class="text-body font-medium text-red-800 mb-1">
+                        <p class="text-body font-medium text-error-800 mb-1">
                           Rejected
                         </p>
-                        <p class="text-caption text-red-600 mb-2">
+                        <p class="text-caption text-error-600 mb-2">
                           {{
                             formatDate(selectedNotificationDetail.rejected_at)
                           }}
                         </p>
-                        <p class="text-body text-gray-700">
+                        <p class="text-body text-secondary-700">
                           <strong>Reason:</strong>
                           {{ selectedNotificationDetail.rejection_reason }}
                         </p>
@@ -1186,12 +1189,12 @@
             </div>
 
             <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+              class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
             >
               <button
                 @click="showDetailsModal = false"
                 type="button"
-                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 sm:w-auto"
+                class="w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-button text-secondary-700 hover:bg-secondary-50 sm:w-auto"
               >
                 Close
               </button>
@@ -1212,7 +1215,7 @@
           class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
         >
           <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            class="fixed inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
           ></div>
 
           <div
@@ -1220,15 +1223,15 @@
           >
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="modal-title text-gray-900">
+                <h3 class="modal-title text-secondary-900">
                   Notification History
-                  <span v-if="selectedUser" class="text-body text-gray-500">
+                  <span v-if="selectedUser" class="text-body text-secondary-500">
                     - {{ selectedUser.full_name }}
                   </span>
                 </h3>
                 <button
                   @click="showHistoryModal = false"
-                  class="text-gray-400 hover:text-gray-500"
+                  class="text-secondary-400 hover:text-secondary-500"
                 >
                   <Icon name="heroicons:x-mark" class="w-6 h-6" />
                 </button>
@@ -1246,7 +1249,7 @@
                       <div
                         :class="[
                           'w-10 h-10 rounded-full flex items-center justify-center',
-                          item.is_read ? 'bg-gray-100' : 'bg-blue-100',
+                          item.is_read ? 'bg-secondary-100' : 'bg-info-100',
                         ]"
                       >
                         <Icon
@@ -1257,7 +1260,7 @@
                           "
                           class="w-5 h-5"
                           :class="
-                            item.is_read ? 'text-gray-600' : 'text-blue-600'
+                            item.is_read ? 'text-secondary-600' : 'text-info-600'
                           "
                         />
                       </div>
@@ -1265,10 +1268,10 @@
                     <div class="flex-1">
                       <div class="flex items-start justify-between">
                         <div>
-                          <h4 class="text-body font-medium text-gray-900">
+                          <h4 class="text-body font-medium text-secondary-900">
                             {{ item.title }}
                           </h4>
-                          <p class="text-body text-gray-500 mt-1">
+                          <p class="text-body text-secondary-500 mt-1">
                             {{ item.message }}
                           </p>
                         </div>
@@ -1282,7 +1285,7 @@
                         </span>
                       </div>
                       <div
-                        class="flex items-center gap-4 mt-2 text-caption text-gray-500"
+                        class="flex items-center gap-4 mt-2 text-caption text-secondary-500"
                       >
                         <span>{{ formatDate(item.created_at) }}</span>
                         <span v-if="item.read_at">
@@ -1290,7 +1293,7 @@
                         </span>
                         <span
                           v-if="item.delivery_failed"
-                          class="text-red-600 flex items-center"
+                          class="text-error-600 flex items-center"
                         >
                           <Icon
                             name="heroicons:exclamation-circle"
@@ -1305,13 +1308,13 @@
 
                 <div v-if="loadingHistory" class="text-center py-8">
                   <div
-                    class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+                    class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-secondary-300 border-t-primary-600"
                   ></div>
                 </div>
 
                 <div
                   v-if="!loadingHistory && notificationHistory.length === 0"
-                  class="text-center py-8 text-gray-500"
+                  class="text-center py-8 text-secondary-500"
                 >
                   No notification history found
                 </div>
@@ -1319,12 +1322,12 @@
             </div>
 
             <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+              class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
             >
               <button
                 @click="showHistoryModal = false"
                 type="button"
-                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 sm:w-auto"
+                class="w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-button text-secondary-700 hover:bg-secondary-50 sm:w-auto"
               >
                 Close
               </button>
@@ -1679,29 +1682,29 @@ const exportNotifications = async () => {
 // Helper functions
 const getTypeClass = (type) => {
   const classes = {
-    admin_announcement: "bg-purple-100 text-purple-800",
-    system_message: "bg-blue-100 text-blue-800",
-    registration_success: "bg-green-100 text-green-800",
-    login_new_device: "bg-red-100 text-red-800",
-    profile_updated: "bg-teal-100 text-teal-800",
-    password_changed: "bg-rose-100 text-rose-800",
-    payment_successful: "bg-emerald-100 text-emerald-800",
-    payment_failed: "bg-red-100 text-red-800",
-    nfc_card_purchased: "bg-orange-100 text-orange-800",
-    nfc_card_activated: "bg-amber-100 text-amber-800",
-    business_card_order_request: "bg-indigo-100 text-indigo-800",
+    admin_announcement: "bg-primary-100 text-primary-800",
+    system_message: "bg-info-100 text-info-800",
+    registration_success: "bg-success-100 text-success-800",
+    login_new_device: "bg-error-100 text-error-800",
+    profile_updated: "bg-info-100 text-info-800",
+    password_changed: "bg-error-100 text-error-800",
+    payment_successful: "bg-success-100 text-success-800",
+    payment_failed: "bg-error-100 text-error-800",
+    nfc_card_purchased: "bg-warning-100 text-warning-800",
+    nfc_card_activated: "bg-warning-100 text-warning-800",
+    business_card_order_request: "bg-primary-100 text-primary-800",
   };
-  return classes[type] || "bg-gray-100 text-gray-700";
+  return classes[type] || "bg-secondary-100 text-secondary-700";
 };
 
 const getPriorityClass = (priority) => {
   const classes = {
-    low: "bg-gray-100 text-gray-800",
-    normal: "bg-blue-100 text-blue-800",
-    high: "bg-orange-100 text-orange-800",
-    urgent: "bg-red-100 text-red-800",
+    low: "bg-secondary-100 text-secondary-800",
+    normal: "bg-info-100 text-info-800",
+    high: "bg-warning-100 text-warning-800",
+    urgent: "bg-error-100 text-error-800",
   };
-  return classes[priority] || "bg-gray-100 text-gray-800";
+  return classes[priority] || "bg-secondary-100 text-secondary-800";
 };
 
 const getPriorityLabel = (priority) => {

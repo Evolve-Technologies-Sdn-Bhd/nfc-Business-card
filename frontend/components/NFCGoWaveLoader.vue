@@ -234,7 +234,7 @@ const props = defineProps({
   },
   hintText: {
     type: String,
-    default: 'Memuatkan...',
+    default: 'Loading...',
   },
   visible: {
     type: Boolean,
@@ -385,16 +385,19 @@ const wrapperClass = computed(() => {
   } else if (props.inline) {
     c.push('inline-flex flex-col items-center align-middle py-0');
   } else {
-    // STANDALONE / BLOCK usage (not overlay, not inline): ALWAYS self-center
-    // both horizontal + vertical axes, filling full viewport screen when used
-    // directly on a page without a height-constrained parent.
+    // PAGE-LEVEL usage (default: not overlay, not inline):
+    // centre on the VISIBLE VIEWPORT, not on the document. Sizing off
+    // `min-height: 100vh` inside normal flow does NOT do this — any sticky
+    // header or container padding pushes the visual centre down, which is
+    // why the loader used to look off-centre on long pages.
+    // Sticky chrome is subtracted via `--nfg-viewport-offset`, declared once
+    // by the surrounding layout (header + container padding) so every page
+    // loader in every layout centres identically.
     c.push(
+      'nfg-viewport',
       'flex flex-col items-center justify-center',
-      'w-full max-w-full mx-auto',
-      'min-h-screen h-full my-auto',
-      'p-2 m-auto',
+      'w-full max-w-full',
       'text-center',
-      'place-self-center',
     );
   }
 
@@ -403,6 +406,20 @@ const wrapperClass = computed(() => {
 </script>
 
 <style scoped>
+/* ============================================================
+   PAGE-LEVEL CENTRING — the one concept used by every loader.
+
+   Fills the *visible viewport* and centres on both axes, so the
+   loader never looks off-centre when the document is taller than
+   the screen. `--nfg-viewport-offset` is what the sticky chrome
+   above the loader already occupies (header + container padding);
+   each layout declares it once so all page loaders inside agree.
+   ============================================================ */
+.nfg-viewport {
+  min-height: calc(100vh - var(--nfg-viewport-offset, 0px));
+  min-height: calc(100dvh - var(--nfg-viewport-offset, 0px));
+}
+
 /* ============================================================
    VARIANT 1 — NFCGo LOGO DRAW (official loading animation)
    Every dimension derives from --nfg-mark so the whole lockup

@@ -244,7 +244,7 @@
                 </td>
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 py-1 text-badge bg-blue-100 text-blue-800 rounded-full"
+                    class="px-2 py-1 text-badge bg-info-100 text-info-800 rounded-full"
                   >
                     {{ user.cards_count || 0 }}
                   </span>
@@ -254,8 +254,8 @@
                     :class="[
                       'px-2 py-1 text-badge rounded-full',
                       user.subscription_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800',
+                        ? 'bg-success-100 text-success-800'
+                        : 'bg-error-100 text-error-800',
                     ]"
                   >
                     {{ user.subscription_active ? "Active" : "Inactive" }}
@@ -430,15 +430,15 @@
                 />
               </div>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p class="text-body text-blue-700">
+              <div class="bg-info-50 border border-info-200 rounded-lg p-3">
+                <p class="text-body text-info-700">
                   <Icon
                     name="heroicons:information-circle"
                     class="h-4 w-4 inline mr-1"
                   />
                   <strong>Default Password:</strong> The employee will receive a
                   temporary password
-                  <code class="bg-blue-100 px-1 rounded">Welcome123@</code> and
+                  <code class="bg-info-100 px-1 rounded">Welcome123@</code> and
                   can change it after first login.
                 </p>
               </div>
@@ -551,24 +551,24 @@
                 </div>
               </div>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 class="text-body font-medium text-blue-900 mb-2">
+              <div class="bg-info-50 border border-info-200 rounded-lg p-4">
+                <h4 class="text-body font-medium text-info-900 mb-2">
                   <Icon
                     name="heroicons:information-circle"
                     class="h-5 w-5 inline mr-1"
                   />
                   Template Format
                 </h4>
-                <p class="text-body text-blue-700 mb-2">
+                <p class="text-body text-info-700 mb-2">
                   Your file should include the following columns:
                 </p>
-                <ul class="text-body text-blue-700 space-y-1 ml-4">
+                <ul class="text-body text-info-700 space-y-1 ml-4">
                   <li>• <strong>first_name</strong> (required)</li>
                   <li>• <strong>last_name</strong> (required)</li>
                   <li>• <strong>email</strong> (required)</li>
                   <li>
                     • <strong>password</strong> (optional, defaults to
-                    <code class="bg-blue-100 px-1 rounded">Welcome123@</code>)
+                    <code class="bg-info-100 px-1 rounded">Welcome123@</code>)
                   </li>
                   <li>• <strong>phone</strong> (optional)</li>
                   <li>• <strong>job_title</strong> (optional)</li>
@@ -653,7 +653,7 @@
                           v-model="employee.first_name"
                           type="text"
                           class="input input-sm w-full"
-                          :class="{ 'border-red-500': !employee.first_name }"
+                          :class="{ 'border-error-500': !employee.first_name }"
                         />
                       </td>
                       <td class="px-4 py-3">
@@ -661,7 +661,7 @@
                           v-model="employee.last_name"
                           type="text"
                           class="input input-sm w-full"
-                          :class="{ 'border-red-500': !employee.last_name }"
+                          :class="{ 'border-error-500': !employee.last_name }"
                         />
                       </td>
                       <td class="px-4 py-3">
@@ -670,7 +670,7 @@
                           type="email"
                           class="input input-sm w-full"
                           :class="{
-                            'border-red-500':
+                            'border-error-500':
                               !employee.email || !isValidEmail(employee.email),
                           }"
                         />
@@ -682,7 +682,7 @@
                           placeholder="Welcome123@"
                           class="input input-sm w-full"
                           :class="{
-                            'border-red-500':
+                            'border-error-500':
                               employee.password && employee.password.length < 8,
                           }"
                         />
@@ -704,7 +704,7 @@
                       <td class="px-4 py-3">
                         <button
                           @click="removeEmployee(index)"
-                          class="text-red-600 hover:text-red-900"
+                          class="text-error-600 hover:text-error-900"
                           title="Remove"
                         >
                           <Icon name="heroicons:trash" class="h-5 w-5" />
@@ -716,16 +716,16 @@
               </div>
               <div
                 v-if="bulkImport.errors.length"
-                class="bg-red-50 border border-red-200 rounded-lg p-4"
+                class="bg-error-50 border border-error-200 rounded-lg p-4"
               >
-                <h4 class="text-body font-medium text-red-900 mb-2">
+                <h4 class="text-body font-medium text-error-900 mb-2">
                   <Icon
                     name="heroicons:exclamation-triangle"
                     class="h-5 w-5 inline mr-1"
                   />
                   Validation Errors ({{ bulkImport.errors.length }})
                 </h4>
-                <ul class="text-body text-red-800 font-medium space-y-1 ml-4">
+                <ul class="text-body text-error-800 font-medium space-y-1 ml-4">
                   <li v-for="(error, index) in bulkImport.errors" :key="index">
                     • {{ error }}
                   </li>
@@ -873,15 +873,15 @@
                     <p class="text-caption text-secondary-500">{{ employee.email }}</p>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="px-2 py-1 text-badge bg-blue-100 text-blue-800 rounded-full">
+                    <span class="px-2 py-1 text-badge bg-info-100 text-info-800 rounded-full">
                       {{ employee.cards_count || 0 }} card{{ (employee.cards_count || 0) !== 1 ? 's' : '' }}
                     </span>
                     <span
                       :class="[
                         'px-2 py-1 text-badge rounded-full',
                         employee.subscription_active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800',
+                          ? 'bg-success-100 text-success-800'
+                          : 'bg-error-100 text-error-800',
                       ]"
                     >
                       {{ employee.subscription_active ? "Active" : "Inactive" }}
@@ -890,7 +890,7 @@
                 </div>
                 
                 <!-- Show NFC cards if any -->
-                <div v-if="employee.nfc_cards && employee.nfc_cards.length > 0" class="mt-2 pl-4 border-l-2 border-blue-200">
+                <div v-if="employee.nfc_cards && employee.nfc_cards.length > 0" class="mt-2 pl-4 border-l-2 border-info-200">
                   <p class="text-caption text-secondary-600 font-medium mb-1">NFC Cards:</p>
                   <div class="space-y-1">
                     <div v-for="card in employee.nfc_cards" :key="card.id" class="text-caption text-secondary-500">

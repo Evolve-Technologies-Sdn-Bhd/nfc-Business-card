@@ -197,6 +197,12 @@ class NotificationService
             'icon' => '🚫',
             'priority' => 'urgent',
         ],
+        'free_plan_deactivated' => [
+            'title' => 'Your Free Account Has Ended',
+            'message' => 'Your free {trial_days}-day account window has ended. Purchase an NFC card to reactivate your account and keep using your digital business card.',
+            'icon' => '⏳',
+            'priority' => 'high',
+        ],
     ];
 
     /**
@@ -213,18 +219,61 @@ class NotificationService
         // Replace placeholders in message
         $message = $this->replacePlaceholders($template['message'], $data);
         $title = $this->replacePlaceholders($template['title'], $data);
+        $priority = $data['priority'] ?? $template['priority'];
 
-        return Notification::create([
+        $notification = Notification::create([
             'user_id' => $user->id,
             'type' => $type,
             'title' => $title,
             'message' => $message,
             'data' => $data,
             'icon' => $data['icon'] ?? $template['icon'],
-            'priority' => $data['priority'] ?? $template['priority'],
+            'priority' => $priority,
             'action_url' => $data['action_url'] ?? null,
             'action_text' => $data['action_text'] ?? null,
         ]);
+
+        // Mirror important notifications to e-mail (the in-app record above
+        // remains the source of truth).
+        $this->maybeSendEmail($user, $title, $message, $priority, $data);
+
+        return $notification;
+    }
+
+    /**
+     * Send an e-mail copy of important notifications.
+     *
+     * Only high/urgent priority events are e-mailed, so users are alerted to
+     * time-sensitive events (payment failures, approvals, rejections, shipping)
+     * without flooding their inbox. Delivery failures are logged, never thrown,
+     * so a broken mail transport can never block the primary business action.
+     */
+    private function maybeSendEmail(User $user, string $title, string $message, string $priority, array $data): void
+    {
+        if (!in_array($priority, ['high', 'urgent'], true)) {
+            return;
+        }
+
+        if (empty($user->email)) {
+            return;
+        }
+
+        try {
+            $body = $message;
+            if (!empty($data['action_url'])) {
+                $body .= "\n\n" . $data['action_url'];
+            }
+
+            \Illuminate\Support\Facades\Mail::raw($body, function ($mail) use ($user, $title) {
+                $mail->to($user->email)->subject('[NFC Go] ' . $title);
+            });
+        } catch (\Throwable $e) {
+            \Log::warning('Notification e-mail delivery failed', [
+                'user_id' => $user->id,
+                'title' => $title,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

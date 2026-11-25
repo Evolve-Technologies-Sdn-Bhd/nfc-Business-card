@@ -237,9 +237,9 @@ const canEdit = (admin) => {
 
 const getRoleBadgeClass = (role) => {
   const classes = {
-    super_admin: "bg-red-100 text-red-800",
+    super_admin: "bg-error-100 text-error-800",
     admin: "bg-primary-100 text-primary-800",
-    moderator: "bg-yellow-100 text-yellow-800",
+    moderator: "bg-warning-100 text-warning-800",
   };
   return classes[role] || "bg-secondary-100 text-secondary-700";
 };

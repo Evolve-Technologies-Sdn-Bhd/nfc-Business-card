@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\LandingPage;
 use App\Models\NfcCard;
 use App\Models\Order;
+use App\Models\Subscription;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -99,11 +101,10 @@ class OrderFulfilmentService
                         'order_confirmed_at' => now(),
                     ]);
 
-                    LandingPage::create([
-                        'nfc_card_id' => $newCard->id,
-                        'name' => $user->full_name ?: '',
-                        'email' => $user->email,
-                    ]);
+                    LandingPage::create(array_merge(
+                        ['nfc_card_id' => $newCard->id],
+                        $this->landingPageDefaults($order, $user)
+                    ));
 
                     // Link the first card back onto the transaction.
                     if ($card === null) {
@@ -115,14 +116,18 @@ class OrderFulfilmentService
 
             // 3) Ensure the primary card has a landing page.
             if (!$card->landingPage()->exists()) {
-                LandingPage::create([
-                    'nfc_card_id' => $card->id,
-                    'name' => $user->full_name ?: '',
-                    'email' => $user->email,
-                ]);
+                LandingPage::create(array_merge(
+                    ['nfc_card_id' => $card->id],
+                    $this->landingPageDefaults($order, $user)
+                ));
             }
 
-            // 4) Stamp fulfilment — the permanent idempotency marker.
+            // 4) Maintain the subscription record so renewal / expiry / downgrade
+            //    logic has something to act on (previously no row was ever created
+            //    for card-purchase payments).
+            $this->syncSubscription($order, $user);
+
+            // 5) Stamp fulfilment — the permanent idempotency marker.
             $order->update(['fulfilled_at' => now()]);
 
             Log::info('Order fulfilled after successful payment', [
@@ -154,6 +159,110 @@ class OrderFulfilmentService
         }
 
         return max(1, min(50, $quantity));
+    }
+
+    /**
+     * Create or refresh the Subscription record for a paid self-serve plan.
+     *
+     * Only basic/premium are handled here: free needs no subscription, and
+     * business is an enquiry-driven, admin-approved path. Idempotent — a repeat
+     * fulfilment call refreshes the existing active subscription instead of
+     * creating a duplicate.
+     */
+    protected function syncSubscription(Order $order, User $user): void
+    {
+        $metadata = is_array($order->metadata) ? $order->metadata : [];
+        $plan = $metadata['plan'] ?? $user->subscription_plan;
+
+        if (!in_array($plan, ['basic', 'premium'], true)) {
+            return;
+        }
+
+        $start = now();
+        $end = now()->addYear();
+        $amount = (float) $order->total;
+
+        $subscription = Subscription::where('user_id', $user->id)
+            ->whereIn('status', ['active', 'past_due'])
+            ->latest()
+            ->first();
+
+        if ($subscription) {
+            $subscription->update([
+                'plan_name' => ucfirst($plan) . ' Plan',
+                'plan_type' => $plan,
+                'amount' => $amount,
+                'status' => 'active',
+                'current_period_end' => $end,
+                'next_billing_date' => $end,
+            ]);
+        } else {
+            $subscription = Subscription::create([
+                'user_id' => $user->id,
+                'provider' => 'fiuu',
+                'plan_name' => ucfirst($plan) . ' Plan',
+                'plan_type' => $plan,
+                'amount' => $amount,
+                'currency' => $order->currency ?: config('payment.currency', 'MYR'),
+                'interval' => 'yearly',
+                'status' => 'active',
+                'current_period_start' => $start,
+                'current_period_end' => $end,
+                'next_billing_date' => $end,
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                ],
+            ]);
+        }
+
+        // Link the order to the subscription and align the user's plan fields.
+        $order->update(['subscription_id' => $subscription->id]);
+
+        $user->update([
+            'subscription_plan' => $plan,
+            'subscription_active' => true,
+            'subscription_start_date' => $user->subscription_start_date ?? $start,
+            'subscription_end_date' => $end,
+        ]);
+    }
+
+    /**
+     * Seed values for a newly-created landing page, sourced from what the user
+     * actually entered during checkout (order metadata) with the account's own
+     * name/email as fallbacks. Only non-empty optional values are included so we
+     * never write empty placeholders over a real profile.
+     */
+    protected function landingPageDefaults(Order $order, User $user): array
+    {
+        $metadata = is_array($order->metadata) ? $order->metadata : [];
+
+        $cardInfo = $metadata['card_info'] ?? [];
+        if (!is_array($cardInfo)) {
+            $cardInfo = [];
+        }
+
+        $attributes = [
+            'name' => $cardInfo['name'] ?? ($user->full_name ?: ($user->name ?? '')),
+            'email' => $cardInfo['email'] ?? $user->email,
+        ];
+
+        $optional = [
+            'title' => $cardInfo['position'] ?? null,
+            'phone' => $cardInfo['contactNumber'] ?? ($order->shipping_phone ?: ($user->phone ?? null)),
+            'website' => $cardInfo['website'] ?? null,
+            'address' => $cardInfo['address'] ?? $this->formatShippingAddress($order),
+            'bio' => $cardInfo['companyBackground'] ?? null,
+            'company_logo' => $cardInfo['companyLogo'] ?? null,
+        ];
+
+        foreach ($optional as $field => $value) {
+            if (!empty($value)) {
+                $attributes[$field] = $value;
+            }
+        }
+
+        return $attributes;
     }
 
     /**

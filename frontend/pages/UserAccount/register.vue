@@ -51,7 +51,7 @@
                     >
                     <span class="lg-mock-sub">SMART DIGITAL IDENTITY</span>
                   </div>
-                  <Icon name="heroicons:wifi" class="h-7 w-7 text-white/45" />
+                  <Icon name="heroicons:wifi" class="h-7 w-7 text-white/60" />
                 </div>
                 <div class="nfc-mock__chip relative z-10"></div>
                 <div class="relative z-10 flex justify-between items-end">
@@ -64,15 +64,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="lg-chip lg-chip-1 chip-ink">
-              <Icon name="heroicons:bolt" class="lg-chip-ico" />
-              Opens in 1 tap
-            </div>
-            <div class="lg-chip lg-chip-2 chip-ink">
-              <Icon name="heroicons:device-phone-mobile" class="lg-chip-ico" />
-              Works on iOS &amp; Android
             </div>
           </div>
 
@@ -100,10 +91,10 @@
                 <Icon name="heroicons:arrow-right-on-rectangle" class="h-4 w-4" />
                 Sign in instead
               </NuxtLink>
-              <NuxtLink to="/Homepage#pricing" class="btn-ghost-light">
+              <NuxtLink to="/Homepage/pricing" class="btn-ghost-light">
                 View pricing
               </NuxtLink>
-              <NuxtLink to="/Homepage#how-it-works" class="lg-explore-text">
+              <NuxtLink to="/Homepage/how-it-works" class="lg-explore-text">
                 How it works
               </NuxtLink>
             </div>
@@ -513,7 +504,7 @@
 
               <p class="lg-pill">
                 <Icon name="heroicons:sparkles" class="lg-pill-ico" />
-                14-day free trial of our Professional plan. No credit card
+                Your free account includes 14 days of access. No credit card
                 required.
               </p>
             </form>
@@ -547,22 +538,6 @@
               Already have an account?
               <NuxtLink to="/UserAccount/login">Sign in here</NuxtLink>
             </p>
-          </div>
-
-          <!-- Trust strip -->
-          <div class="lg-trust">
-            <span>
-              <Icon name="heroicons:shield-check" class="h-4 w-4" />
-              SSL secured
-            </span>
-            <span>
-              <Icon name="heroicons:lock-closed" class="h-4 w-4" />
-              Privacy protected
-            </span>
-            <NuxtLink to="/Homepage#faq" class="lg-trust-link">
-              <Icon name="heroicons:question-mark-circle" class="h-4 w-4" />
-              Help
-            </NuxtLink>
           </div>
         </div>
       </main>

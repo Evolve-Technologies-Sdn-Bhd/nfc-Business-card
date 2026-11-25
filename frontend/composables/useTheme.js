@@ -9,29 +9,30 @@ const DEFAULT_THEME = 'zoraPro';
 // NOTE: Secondary colors can change between themes now since we support warm slate vs cool slate
 const themes = {
   zoraPro: {
-    name: 'Zora Pro',
-    description: 'Matte Deep Navy + Matte Teal. Mature-eyes friendly, premium professional tone.',
+    // Key kept as `zoraPro` so existing localStorage selections stay valid.
+    name: 'Ink & Brass',
+    description: 'The system default. Ink (near-black) + Brass (gold) + Paper (warm off-white) — three colours, AA contrast.',
     icon: 'heroicons:square-3-stack-3d',
     colors: {
-      // Primary — Matte Deep Navy (non-glare, non-neon)
-      primary50: '#F4F6FA',
-      primary100: '#E5E9F1',
-      primary200: '#C9D0DE',
-      primary300: '#9FAAC1',
-      primary400: '#6F7EA0',
-      primary500: '#4F5D82',
-      primary600: '#3D496A',
-      primary700: '#323B56',
-      primary800: '#2A3248',
-      primary900: '#23293B',
-      // Accents — Matte Teal (calm) + Burnished Gold (luxury)
-      accent: '#5D8C87',
-      accentSecondary: '#B8956A',
-      // Secondary — Warm Slate Neutral (matte, not OLED-black)
-      secondary50: '#FAFAF7',
-      secondary100: '#F4F2EC',
-      secondary200: '#E6E2D8',
-      secondary300: '#CDC7B9',
+      // Primary — INK (near-black navy)
+      primary50: '#F4F5F7',
+      primary100: '#E6E8EC',
+      primary200: '#CCD1D9',
+      primary300: '#A5ADBA',
+      primary400: '#6F7A8B',
+      primary500: '#414C5E',
+      primary600: '#1D2839',
+      primary700: '#141D2B',
+      primary800: '#0F1621',
+      primary900: '#0B1017',
+      // Accent — BRASS (burnished gold)
+      accent: '#C2A068',
+      accentSecondary: '#A9854D',
+      // Secondary — PAPER (warm off-white neutral)
+      secondary50: '#FAF9F6',
+      secondary100: '#F3F1EA',
+      secondary200: '#E6E2D6',
+      secondary300: '#CDC7B7',
       secondary400: '#A8A190',
       secondary500: '#7F7763',
       secondary600: '#5C5548',

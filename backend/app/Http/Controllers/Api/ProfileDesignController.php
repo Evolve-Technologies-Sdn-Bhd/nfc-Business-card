@@ -22,6 +22,11 @@ class ProfileDesignController extends Controller
         $user = auth()->user();
         
         $query = ProfileDesignOption::active()->ordered();
+
+        // 'nfcgo_branding' is an admin-only branding policy (it decides which
+        // plans display the NFCGo badge). It must never surface as a user-facing
+        // feature toggle inside the profile builder.
+        $query->where('option_id', '!=', 'nfcgo_branding');
         
         if ($type) {
             $query->ofType($type);
@@ -56,7 +61,10 @@ class ProfileDesignController extends Controller
         } elseif ($plan && \Schema::hasColumn('profile_design_options', 'available_plans')) {
             \Log::info("ProfileDesign: Using plan-based filtering for plan={$plan}");
             $options = $options->filter(function($option) use ($plan) {
-                $isAvailable = $option->isAvailableForPlan($plan);
+                // Free trial = basic feature set + free-specific additions
+                $isAvailable = $plan === 'free'
+                    ? ($option->isAvailableForPlan('free') || $option->isAvailableForPlan('basic'))
+                    : $option->isAvailableForPlan($plan);
                 if ($option->type === 'feature_toggle') {
                     \Log::info("ProfileDesign: Feature '{$option->option_id}' available_plans=" . json_encode($option->available_plans) . ", isAvailable={$isAvailable}");
                 }
@@ -125,7 +133,7 @@ class ProfileDesignController extends Controller
             'is_active' => 'boolean',
             'is_default' => 'boolean',
             'available_plans' => 'nullable|array',
-            'available_plans.*' => 'in:basic,premium,business',
+            'available_plans.*' => 'in:free,basic,premium,business',
             'display_order' => 'integer',
             'description' => 'nullable|string',
         ]);

@@ -110,14 +110,18 @@ class SocialAuthController extends Controller
                 ]
             );
             
-            // Create a Sanctum token for the user
-            $token = $user->createToken('oauth-token')->plainTextToken;
+            // Issue a short-lived, single-use authorization code instead of putting the
+            // Sanctum token in the redirect URL. Query strings end up in browser history
+            // and server access logs, so the token must never appear there.
+            $oauthCode = Str::random(64);
+            Cache::put("oauth_code:{$oauthCode}", [
+                'user_id' => $user->id,
+            ], now()->addSeconds(120));
 
-            // Redirect to frontend callback page with token and is_new_user flag
+            // Redirect to frontend callback page with the one-time code
             $frontendUrl = config('services.frontend_url');
-            $isNewUser = $user->is_new_user ? 'true' : 'false';
-            
-            return redirect($frontendUrl . '/auth/callback?token=' . $token . '&is_new_user=' . $isNewUser);
+
+            return redirect($frontendUrl . '/auth/callback?code=' . $oauthCode);
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
             
@@ -141,6 +145,42 @@ class SocialAuthController extends Controller
 
             return redirect(config('services.frontend_url') . '/auth/callback?error=auth_failed&message=' . urlencode($errorMessage));
         }
+    }
+
+    /**
+     * Exchange a one-time OAuth authorization code for a Sanctum token.
+     *
+     * The code is issued by callback() and pulled from cache (single use), so it
+     * is safe to expose in a redirect URL while the token itself never is.
+     */
+    public function exchange(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $payload = Cache::pull('oauth_code:' . $request->code);
+
+        if (!$payload) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired authorization code. Please sign in again.',
+            ], 401);
+        }
+
+        $user = \App\Models\User::find($payload['user_id']);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User no longer exists. Please sign in again.',
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'token' => $user->createToken('oauth-token')->plainTextToken,
+        ]);
     }
 
     /**

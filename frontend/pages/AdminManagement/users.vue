@@ -181,7 +181,7 @@
                         {{ user.full_name }}
                         <span
                           v-if="user.is_admin"
-                          class="ml-2 px-2 py-1 text-badge bg-red-100 text-red-800 rounded-full"
+                          class="ml-2 px-2 py-1 text-badge bg-error-100 text-error-800 rounded-full"
                         >
                           {{ user.admin_role_display }}
                         </span>
@@ -329,7 +329,7 @@
                 type="text"
                 required
                 maxlength="100"
-                :class="['input', formErrors.first_name ? 'border-red-500' : '']"
+                :class="['input', formErrors.first_name ? 'border-error-500' : '']"
                 @input="validateFirstName"
               />
               <div class="flex justify-between mt-1">
@@ -347,7 +347,7 @@
                 type="text"
                 required
                 maxlength="100"
-                :class="['input', formErrors.last_name ? 'border-red-500' : '']"
+                :class="['input', formErrors.last_name ? 'border-error-500' : '']"
                 @input="validateLastName"
               />
               <div class="flex justify-between mt-1">
@@ -368,7 +368,7 @@
                 type="email"
                 required
                 maxlength="100"
-                :class="['input', formErrors.email ? 'border-red-500' : '']"
+                :class="['input', formErrors.email ? 'border-error-500' : '']"
                 @input="validateEmail"
               />
               <div class="flex justify-between mt-1">
@@ -513,21 +513,21 @@
             <!-- Current Quota Usage (Edit Mode Only) -->
             <div
               v-if="showEditModal && selectedUser?.quota_info"
-              class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4"
+              class="bg-info-50 border border-info-200 rounded-lg p-4 mb-4"
             >
               <div class="flex items-start">
                 <Icon
                   name="heroicons:information-circle"
-                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
+                  class="h-5 w-5 text-info-600 flex-shrink-0 mt-0.5"
                 />
                 <div class="ml-3 flex-1">
-                  <h5 class="text-body font-medium text-blue-900 mb-2">
+                  <h5 class="text-body font-medium text-info-900 mb-2">
                     Current Quota Usage
                   </h5>
                   <div class="space-y-2 text-body">
                     <div>
-                      <p class="text-blue-700 font-medium">Total Accounts:</p>
-                      <p class="text-blue-600">
+                      <p class="text-info-700 font-medium">Total Accounts:</p>
+                      <p class="text-info-600">
                         {{
                           selectedUser.quota_info.total_accounts ||
                           1 + selectedUser.quota_info.employees_count
@@ -537,7 +537,7 @@
                           selectedUser.quota_info.total_quota ||
                           selectedUser.quota_info.total_account_slots
                         }}
-                        <span class="text-caption text-blue-500">
+                        <span class="text-caption text-info-500">
                           (1 owner +
                           {{ selectedUser.quota_info.employees_count }}
                           employees)
@@ -545,10 +545,10 @@
                       </p>
                     </div>
                     <div>
-                      <p class="text-blue-700 font-medium">
+                      <p class="text-info-700 font-medium">
                         NFC Cards Ordered:
                       </p>
-                      <p class="text-blue-600">
+                      <p class="text-info-600">
                         {{ selectedUser.quota_info.ordered_cards_count }} /
                         {{
                           selectedUser.quota_info.total_quota ||
@@ -556,9 +556,9 @@
                         }}
                       </p>
                     </div>
-                    <div class="pt-2 border-t border-blue-200">
-                      <p class="text-blue-700 font-medium">Available Quota:</p>
-                      <p class="text-blue-600 text-h5">
+                    <div class="pt-2 border-t border-info-200">
+                      <p class="text-info-700 font-medium">Available Quota:</p>
+                      <p class="text-info-600 text-h5">
                         {{
                           selectedUser.quota_info.available_quota ||
                           Math.min(
@@ -570,7 +570,7 @@
                       </p>
                     </div>
                   </div>
-                  <p class="text-caption text-blue-600 mt-3">
+                  <p class="text-caption text-info-600 mt-3">
                     ⚠️ Cannot set quota below max(total_accounts, ordered_cards)
                   </p>
                 </div>
@@ -601,17 +601,17 @@
               </p>
             </div>
 
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+            <div class="bg-info-50 border border-info-200 rounded-lg p-3 mt-3">
               <div class="flex">
                 <Icon
                   name="heroicons:information-circle"
-                  class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
+                  class="h-5 w-5 text-info-600 flex-shrink-0 mt-0.5"
                 />
                 <div class="ml-3">
-                  <p class="text-body text-blue-700">
+                  <p class="text-body text-info-700">
                     <strong>Unified Quota System:</strong>
                   </p>
-                  <ul class="text-body text-blue-600 mt-1 space-y-1">
+                  <ul class="text-body text-info-600 mt-1 space-y-1">
                     <li>• Quota applies to both accounts AND cards</li>
                     <li>
                       • If quota = 10: max 10 accounts (1 owner + 9 employees)
@@ -1254,9 +1254,9 @@ const getMinimumQuota = () => {
 const getSubscriptionBadgeClass = (plan) => {
   const classes = {
     free: "bg-secondary-100 text-secondary-800",
-    basic: "bg-blue-100 text-blue-800",
-    premium: "bg-purple-100 text-purple-800",
-    business: "bg-green-100 text-green-800",
+    basic: "bg-info-100 text-info-800",
+    premium: "bg-primary-100 text-primary-800",
+    business: "bg-success-100 text-success-800",
   };
   return classes[plan] || classes.free;
 };

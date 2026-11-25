@@ -14,8 +14,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-blue-100">
-              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6 text-blue-600" />
+            <div class="p-3 rounded-lg bg-info-100">
+              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6 text-info-600" />
             </div>
           </div>
           <div class="ml-4">
@@ -30,8 +30,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-yellow-100">
-              <Icon name="heroicons:bell" class="h-6 w-6 text-yellow-600" />
+            <div class="p-3 rounded-lg bg-warning-100">
+              <Icon name="heroicons:bell" class="h-6 w-6 text-warning-600" />
             </div>
           </div>
           <div class="ml-4">
@@ -46,8 +46,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-orange-100">
-              <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-orange-600" />
+            <div class="p-3 rounded-lg bg-warning-100">
+              <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-warning-600" />
             </div>
           </div>
           <div class="ml-4">
@@ -62,8 +62,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-green-100">
-              <Icon name="heroicons:star" class="h-6 w-6 text-green-600" />
+            <div class="p-3 rounded-lg bg-success-100">
+              <Icon name="heroicons:star" class="h-6 w-6 text-success-600" />
             </div>
           </div>
           <div class="ml-4">
@@ -171,7 +171,7 @@
               v-for="feedback in feedbackList"
               :key="feedback.id"
               class="border border-secondary-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              :class="{ 'bg-blue-50': !feedback.is_read }"
+              :class="{ 'bg-info-50': !feedback.is_read }"
             >
               <!-- Header -->
               <div class="flex items-start justify-between mb-3">
@@ -200,13 +200,13 @@
                     <!-- Unread Badge -->
                     <span
                       v-if="!feedback.is_read"
-                      class="px-3 py-1 text-badge bg-red-100 text-red-800 rounded-full"
+                      class="px-3 py-1 text-badge bg-error-100 text-error-800 rounded-full"
                     >
                       Unread
                     </span>
 
                     <!-- Rating -->
-                    <span v-if="feedback.rating" class="text-yellow-500">
+                    <span v-if="feedback.rating" class="text-warning-500">
                       {{ '⭐'.repeat(feedback.rating) }}
                     </span>
                   </div>
@@ -324,7 +324,7 @@
               </div>
               <div v-if="selectedFeedback.rating">
                 <p class="text-caption text-secondary-600">Rating</p>
-                <p class="text-body font-medium text-yellow-500">
+                <p class="text-body font-medium text-warning-500">
                   {{ '⭐'.repeat(selectedFeedback.rating) }} ({{ selectedFeedback.rating }}/5)
                 </p>
               </div>
@@ -341,13 +341,13 @@
           <div v-if="selectedFeedback.user_question || selectedFeedback.bot_response" class="grid grid-cols-1 gap-4">
             <div v-if="selectedFeedback.user_question">
                <h4 class="text-body font-semibold text-secondary-700 mb-2">User Question</h4>
-               <div class="bg-gray-50 p-3 rounded-lg text-body text-gray-700">
+               <div class="bg-secondary-50 p-3 rounded-lg text-body text-secondary-700">
                   {{ selectedFeedback.user_question }}
                </div>
             </div>
             <div v-if="selectedFeedback.bot_response">
                <h4 class="text-body font-semibold text-secondary-700 mb-2">Bot Response</h4>
-               <div class="bg-blue-50 p-3 rounded-lg text-body text-gray-700 border-l-4 border-blue-400">
+               <div class="bg-info-50 p-3 rounded-lg text-body text-secondary-700 border-l-4 border-info-400">
                   {{ selectedFeedback.bot_response }}
                </div>
             </div>
@@ -358,7 +358,7 @@
             <h4 class="text-body font-semibold text-secondary-700 mb-2">Feedback Message</h4>
             <div class="bg-secondary-50 p-4 rounded-lg">
               <div class="flex items-center gap-2 mb-2" v-if="selectedFeedback.feedback_type">
-                  <span class="text-caption font-bold uppercase tracking-wide text-gray-500">
+                  <span class="text-caption font-bold uppercase tracking-wide text-secondary-500">
                     Type: {{ selectedFeedback.feedback_type === 'thumbs_up' ? '👍 Positive' : (selectedFeedback.feedback_type === 'thumbs_down' ? '👎 Negative' : '💬 Comment') }}
                   </span>
               </div>
@@ -405,7 +405,7 @@
             v-if="!selectedFeedback.is_read"
             @click="markAsRead"
             :disabled="updatingFeedback"
-            class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            class="flex-1 py-2 px-4 bg-info-600 text-white rounded-lg font-medium hover:bg-info-700 transition-colors disabled:opacity-50"
           >
             {{ updatingFeedback ? 'Updating...' : 'Mark as Read' }}
           </button>
@@ -421,7 +421,7 @@
           <button
             @click="deleteFeedback"
             :disabled="updatingFeedback"
-            class="py-2 px-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            class="py-2 px-4 bg-error-600 text-white rounded-lg font-medium hover:bg-error-700 transition-colors disabled:opacity-50"
           >
             {{ updatingFeedback ? '...' : 'Delete' }}
           </button>
@@ -663,23 +663,23 @@ const getCategoryLabel = (category) => {
 
 const getCategoryBadgeClass = (category) => {
   const classes = {
-    bug: 'bg-red-100 text-red-800',
-    feature: 'bg-purple-100 text-purple-800',
-    question: 'bg-blue-100 text-blue-800',
-    complaint: 'bg-orange-100 text-orange-800',
-    suggestion: 'bg-green-100 text-green-800',
-    other: 'bg-gray-100 text-gray-800',
+    bug: 'bg-error-100 text-error-800',
+    feature: 'bg-primary-100 text-primary-800',
+    question: 'bg-info-100 text-info-800',
+    complaint: 'bg-warning-100 text-warning-800',
+    suggestion: 'bg-success-100 text-success-800',
+    other: 'bg-secondary-100 text-secondary-800',
   };
-  return classes[category] || 'bg-gray-100 text-gray-800';
+  return classes[category] || 'bg-secondary-100 text-secondary-800';
 };
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    resolved: 'bg-green-100 text-green-800',
+    pending: 'bg-warning-100 text-warning-800',
+    in_progress: 'bg-info-100 text-info-800',
+    resolved: 'bg-success-100 text-success-800',
   };
-  return classes[status] || 'bg-gray-100 text-gray-800';
+  return classes[status] || 'bg-secondary-100 text-secondary-800';
 };
 
 const getStatusLabel = (status) => {

@@ -242,6 +242,11 @@
                   <th
                     class="px-6 py-3 text-left table-head"
                   >
+                    Role
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left table-head"
+                  >
                     Status
                   </th>
                   <th
@@ -291,6 +296,25 @@
                       class="px-2 py-1 inline-flex text-badge rounded-full bg-primary-100 text-primary-800"
                     >
                       {{ employee.subscription_plan || "Premium" }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <!-- Owner can reassign roles; other managers see a read-only badge -->
+                    <select
+                      v-if="isOwnerViewer"
+                      :value="employee.business_role || 'member'"
+                      @change="updateEmployeeRole(employee, $event.target.value)"
+                      class="input py-1 text-body"
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="card_manager">Card Manager</option>
+                      <option value="member">Member</option>
+                    </select>
+                    <span
+                      v-else
+                      class="px-2 py-1 inline-flex text-badge rounded-full bg-secondary-100 text-secondary-700"
+                    >
+                      {{ roleLabels[employee.business_role] || "Member" }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -614,6 +638,16 @@ const showResetPasswordModal = ref(false);
 const showCardDesignModal = ref(false);
 const resetPasswordLoading = ref(false);
 
+// Role management — only the account owner may reassign delegated roles
+const isOwnerViewer = ref(false);
+const roleLabels = {
+  owner: "Owner",
+  admin: "Admin",
+  card_manager: "Card Manager",
+  member: "Member",
+};
+const updatingRoleId = ref(null);
+
 // Selected Employee for view/reset actions
 const selectedEmployee = ref(null);
 
@@ -674,7 +708,11 @@ const loadEmployees = async () => {
         subscription_active: emp.subscription_active,
         name: emp.full_name || `${emp.first_name} ${emp.last_name}`,
         position: emp.job_title,
+        business_role: emp.business_role || "member",
       }));
+
+      // Only the owner sees role selectors
+      isOwnerViewer.value = response.data.is_owner === true;
 
       const quotaInfo = response.data.quota_info || {};
       totalQuota.value =
@@ -686,6 +724,33 @@ const loadEmployees = async () => {
     $toast.error("Failed to load employees");
   } finally {
     loading.value = false;
+  }
+};
+
+// Update an employee's delegated Business role (owner-only action)
+const updateEmployeeRole = async (employee, role) => {
+  if (!employee || updatingRoleId.value) return;
+
+  const previous = employee.business_role;
+  updatingRoleId.value = employee.id;
+
+  try {
+    const response = await $api.post(
+      `/business/employees/${employee.id}/role`,
+      { role }
+    );
+
+    if (response.success) {
+      employee.business_role = response.data?.business_role || role;
+      $toast.success("Employee role updated");
+    }
+  } catch (error) {
+    // Revert the selection if the request was rejected
+    employee.business_role = previous;
+    console.error("Failed to update employee role:", error);
+    $toast.error(error?.data?.message || "Failed to update employee role");
+  } finally {
+    updatingRoleId.value = null;
   }
 };
 

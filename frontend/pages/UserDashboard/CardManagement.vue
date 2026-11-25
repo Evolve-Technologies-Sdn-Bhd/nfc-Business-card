@@ -1706,9 +1706,10 @@ const buildDefaultTimeline = (card) => {
 };
 
 const upgradeToPremium = () => {
-  // Redirect to upgrade page or show upgrade modal
-  $toast.info("Redirecting to upgrade page...");
-  // navigateTo('/upgrade')
+  // Send the user to the real, working plan-selection / upgrade route.
+  // (There is no dedicated /upgrade page.)
+  $toast.info("Opening upgrade options...");
+  navigateTo("/UserDashboard/PlanSelection");
 };
 
 const loadCardTemplates = async (plan) => {

@@ -47,7 +47,7 @@
               <tr v-for="refund in refunds" :key="refund.id" class="hover:bg-secondary-50">
                 <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                   <div class="table-cell font-mono text-secondary-900">{{ refund.refund_id }}</div>
-                  <span class="mt-1 inline-block px-2 py-0.5 text-badge bg-yellow-100 text-yellow-800 rounded-full">
+                  <span class="mt-1 inline-block px-2 py-0.5 text-badge bg-warning-100 text-warning-800 rounded-full">
                     Pending
                   </span>
                 </td>

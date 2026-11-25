@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register admin middleware alias
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'business.manager' => \App\Http\Middleware\EnsureBusinessManager::class,
         ]);
 
         // Handle unauthenticated API requests

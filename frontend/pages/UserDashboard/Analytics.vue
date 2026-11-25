@@ -764,7 +764,9 @@ const refreshTaps = () => loadAnalytics();
 
 const upgradeToPremium = () => {
   const { $toast } = useNuxtApp();
-  $toast?.info?.("Redirecting to upgrade page...");
+  $toast?.info?.("Opening upgrade options...");
+  // Send the user to the real, working plan-selection / upgrade route.
+  navigateTo("/UserDashboard/PlanSelection");
 };
 
 const exportAnalytics = async () => {

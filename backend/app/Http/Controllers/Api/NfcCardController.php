@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\LandingPage;
+use App\Models\ProfileDesignOption;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\ActivityLog;
@@ -972,8 +973,42 @@ class NfcCardController extends Controller
 
         return response()->json([
             'success' => true,
-            'landing_page' => $landingPage
+            'landing_page' => $landingPage,
+            'show_nfcgo_branding' => $this->shouldShowNfcgoBranding($nfcCard, $landingPage),
         ]);
+    }
+
+    /**
+     * Decide whether the NFCGo "Powered by" branding renders on a public profile.
+     *
+     * Admin-controlled via the 'nfcgo_branding' feature toggle:
+     *   - is_active       → master on/off switch
+     *   - available_plans → the plans that display the branding
+     *
+     * Owners who unlocked the "Remove Branding" capability can still hide it,
+     * so plan defaults and the paid override never conflict.
+     */
+    private function shouldShowNfcgoBranding(NfcCard $nfcCard, LandingPage $landingPage): bool
+    {
+        $policy = ProfileDesignOption::query()
+            ->where('type', 'feature_toggle')
+            ->where('option_id', 'nfcgo_branding')
+            ->first();
+
+        if (!$policy || !$policy->is_active) {
+            return false;
+        }
+
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+
+        if (!$policy->isAvailableForPlan($plan)) {
+            return false;
+        }
+
+        // Per-profile override: a purchased "Remove Branding" hides the badge.
+        $features = $landingPage->features ?? [];
+
+        return ($features['remove_branding'] ?? false) !== true;
     }
 
     /**

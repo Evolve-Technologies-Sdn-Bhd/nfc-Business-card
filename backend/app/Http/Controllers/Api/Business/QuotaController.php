@@ -70,35 +70,39 @@ class QuotaController extends Controller
      */
     public function getEmployees(Request $request)
     {
-        $user = auth()->user();
+        // Resolve the Business account (owner) — works for the owner and for
+        // employees delegated the `admin` business role.
+        $businessAccount = $request->user()->resolvedBusinessAccount();
 
-        // Only Business account owners can view employees
-        if (!$user->isBusinessAccount()) {
+        if (!$businessAccount) {
             return response()->json([
                 'success' => false,
-                'message' => 'Only Business account owners can access this endpoint'
+                'message' => 'Only Business accounts and their delegated managers can access this endpoint'
             ], 403);
         }
 
         // Get employees
-        $employees = $user->employees()
-            ->select('id', 'first_name', 'last_name', 'email', 'job_title', 'phone', 'created_at', 'subscription_active')
+        $employees = $businessAccount->employees()
+            ->select('id', 'first_name', 'last_name', 'email', 'job_title', 'phone', 'created_at', 'subscription_active', 'business_role')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Add full_name attribute
+        // Resolve display name and effective role for each employee.
         $employees->each(function ($employee) {
             $employee->full_name = $employee->full_name;
+            $employee->business_role = $employee->businessRole();
         });
 
         // Get quota info
-        $quotaInfo = $user->getQuotaInfo();
+        $quotaInfo = $businessAccount->getQuotaInfo();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'employees' => $employees,
-                'quota_info' => $quotaInfo
+                'quota_info' => $quotaInfo,
+                'viewer_role' => $request->user()->businessRole(),
+                'is_owner' => $request->user()->isBusinessAccount(),
             ]
         ]);
     }
@@ -199,19 +203,18 @@ class QuotaController extends Controller
      */
     public function deleteEmployee(Request $request, $id)
     {
-        $user = auth()->user();
+        $businessAccount = $request->user()->resolvedBusinessAccount();
 
-        // Validate user is Business account
-        if (!$user->isBusinessAccount()) {
+        if (!$businessAccount) {
             return response()->json([
                 'success' => false,
-                'message' => 'Only Business account owners can delete employees'
+                'message' => 'Only Business accounts and their delegated managers can delete employees'
             ], 403);
         }
 
         // Find employee
         $employee = User::where('id', $id)
-            ->where('parent_business_id', $user->id)
+            ->where('parent_business_id', $businessAccount->id)
             ->first();
 
         if (!$employee) {
@@ -227,11 +230,12 @@ class QuotaController extends Controller
         if ($hasCards) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete employee. Employee has ordered NFC cards. Please transfer or delete cards first.'
+                'message' => 'Cannot delete employee. Employee has assigned NFC cards. Please reassign them first.'
             ], 403);
         }
 
-        // Delete employee
+        // Deleting an employee frees their account slot (business_role rows are
+        // removed with the account).
         $employee->delete();
 
         return response()->json([

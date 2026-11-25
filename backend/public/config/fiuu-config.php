@@ -115,7 +115,7 @@ define('FROM_NAME', 'NFC Business Card');
 // ============================================
 // FRONTEND URLS
 // ============================================
-define('FRONTEND_URL', 'http://localhost:3000');
+define('FRONTEND_URL', 'http://localhost:3001');
 define('DASHBOARD_URL', FRONTEND_URL . '/dashboard');
 define('PRICING_URL', BASE_URL . '/pricing.php');
 

@@ -185,6 +185,33 @@ export default defineNuxtPlugin((nuxtApp) => {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
+      // ─── PERSISTENT DEVICE ID ──────────────────────────────────────────────
+      // Generated once per browser and stored in localStorage. The server-side
+      // one-time free-trial guard reads it from X-Device-Id so a user cannot
+      // farm a second free trial by registering a new email on the same machine.
+      // (LocalStorage, not a cookie, because the API is called cross-origin with
+      // withCredentials:false — a cookie would not be sent.)
+      try {
+        let deviceId =
+          typeof window !== "undefined"
+            ? window.localStorage.getItem("nfcgo-device-id")
+            : null;
+        if (!deviceId) {
+          deviceId =
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `d-${Date.now().toString(36)}-${Math.random()
+                  .toString(36)
+                  .slice(2, 12)}`);
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("nfcgo-device-id", deviceId);
+          }
+        }
+        config.headers["X-Device-Id"] = deviceId;
+      } catch (_) {
+        // Storage blocked (private mode / SSR) — server treats device as unknown.
+      }
+
       // Set Content-Type only if not already set (important for multipart/form-data)
       // ⚠️ NEVER default to application/json WHEN data is FormData!
       //    Browser must set Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryXXX
@@ -393,7 +420,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         const authStore = useAuthStore();
         authStore.clearAuth(); // Clear auth state
-        await navigateTo("/UserAccount/login");
+        const route = useRoute();
+        const isAdminRoute = route.path.startsWith("/AdminManagement");
+        await navigateTo({
+          path: "/UserAccount/login",
+          query: isAdminRoute
+            ? { redirect: route.fullPath, admin: "1" }
+            : { redirect: route.fullPath },
+        });
         return Promise.reject(error);
       }
 
@@ -407,13 +441,42 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         // Email verification enforcement (with grace period): guide the user to
         // the verification page instead of a generic "access denied" toast.
-        if (forbiddenData.error === 'EMAIL_NOT_VERIFIED' || forbiddenData.email_verification_required) {
+        if (
+          forbiddenData.error === 'EMAIL_NOT_VERIFIED' ||
+          forbiddenData.code === 'EMAIL_NOT_VERIFIED' ||
+          forbiddenData.email_verification_required
+        ) {
           if ($toast && typeof $toast.error === 'function') {
             $toast.error(forbiddenData.message || 'Please verify your email address to continue.');
           }
           try {
             await navigateTo('/UserAccount/verify-email');
           } catch (_) { /* navigation unavailable */ }
+          return Promise.reject(error);
+        }
+
+        // One-time free trial refused (TRIAL_EMAIL_USED / TRIAL_IP_USED /
+        // TRIAL_DEVICE_USED / DISPOSABLE_EMAIL). The ACCOUNT is still valid —
+        // only the trial is denied — so show the specific reason, never the
+        // generic "access denied" message.
+        if (typeof forbiddenData.code === 'string' && forbiddenData.code.startsWith('TRIAL_')) {
+          if ($toast && typeof $toast.error === 'function') {
+            $toast.error(
+              forbiddenData.message ||
+                'Your free trial is no longer available. Please purchase an NFC card to continue.'
+            );
+          }
+          return Promise.reject(error);
+        }
+
+        // Disposable email addresses are refused the same way — specific reason.
+        if (forbiddenData.code === 'DISPOSABLE_EMAIL') {
+          if ($toast && typeof $toast.error === 'function') {
+            $toast.error(
+              forbiddenData.message ||
+                'Disposable email addresses are not eligible for the free trial.'
+            );
+          }
           return Promise.reject(error);
         }
 

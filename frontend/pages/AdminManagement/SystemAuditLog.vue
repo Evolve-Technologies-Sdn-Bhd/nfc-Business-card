@@ -57,8 +57,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-teal-100">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-teal-700" />
+            <div class="p-3 rounded-xl bg-info-100">
+              <Icon name="heroicons:clock" class="h-6 w-6 text-info-700" />
             </div>
           </div>
           <div class="ml-5">
@@ -74,8 +74,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-amber-100">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-amber-700" />
+            <div class="p-3 rounded-xl bg-warning-100">
+              <Icon name="heroicons:clock" class="h-6 w-6 text-warning-700" />
             </div>
           </div>
           <div class="ml-5">
@@ -91,8 +91,8 @@
       <div class="card p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-violet-100">
-              <Icon name="heroicons:check-circle" class="h-6 w-6 text-violet-700" />
+            <div class="p-3 rounded-xl bg-primary-100">
+              <Icon name="heroicons:check-circle" class="h-6 w-6 text-primary-700" />
             </div>
           </div>
           <div class="ml-5">
@@ -310,7 +310,7 @@
                       {{ log.user?.email || log.metadata?.admin_context || 'N/A' }}
                     </div>
                     <div v-if="log.metadata?.admin_context" class="flex items-center gap-1 mt-1">
-                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-badge uppercase tracking-wider bg-violet-100 text-violet-800">
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-badge uppercase tracking-wider bg-primary-100 text-primary-800">
                         Admin
                       </span>
                     </div>
@@ -335,7 +335,7 @@
                   {{ log.description || 'No description' }}
                 </div>
                 <div v-if="log.metadata?.new_values && typeof log.metadata.new_values === 'object' && Object.keys(log.metadata.new_values).length > 0" class="mt-2.5">
-                  <div class="inline-flex items-center gap-1 text-badge px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  <div class="inline-flex items-center gap-1 text-badge px-2 py-0.5 rounded-full bg-success-50 text-success-700 border border-success-200">
                     <Icon name="heroicons:pencil-square" class="h-3 w-3" />
                     <span>{{ Object.keys(log.metadata.new_values).length }} fields updated</span>
                   </div>
@@ -591,22 +591,22 @@
           <!-- Old Values Section -->
           <div v-if="detailModal.log.metadata?.old_values && typeof detailModal.log.metadata.old_values === 'object' && Object.keys(detailModal.log.metadata.old_values).length > 0">
             <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:archive-box-arrow-down" class="h-4 w-4 text-orange-500" />
+              <Icon name="heroicons:archive-box-arrow-down" class="h-4 w-4 text-warning-500" />
               Old Values
             </h4>
-            <div class="bg-orange-50 border border-orange-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-caption font-mono text-orange-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.old_values) }}</pre>
+            <div class="bg-warning-50 border border-warning-200 rounded-xl overflow-hidden">
+              <pre class="p-4 text-caption font-mono text-warning-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.old_values) }}</pre>
             </div>
           </div>
 
           <!-- New Values Section -->
           <div v-if="detailModal.log.metadata?.new_values && typeof detailModal.log.metadata.new_values === 'object' && Object.keys(detailModal.log.metadata.new_values).length > 0">
             <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:sparkles" class="h-4 w-4 text-green-600" />
+              <Icon name="heroicons:sparkles" class="h-4 w-4 text-success-600" />
               New Values
             </h4>
-            <div class="bg-green-50 border border-green-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-caption font-mono text-green-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.new_values) }}</pre>
+            <div class="bg-success-50 border border-success-200 rounded-xl overflow-hidden">
+              <pre class="p-4 text-caption font-mono text-success-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.new_values) }}</pre>
             </div>
           </div>
 
@@ -674,7 +674,7 @@ useHead({
 });
 
 // =============== UTILITIES (SHARED) ===============
-const { $api, showSuccess, showError } = useNuxtApp();
+const { $api, $toast } = useNuxtApp();
 
 // =============== STATE ===============
 const loading = ref(false);
@@ -837,11 +837,11 @@ const fetchAuditLogs = async (resetPage = false) => {
         meta.to = logs.value.length ? from + logs.value.length - 1 : 0;
       }
     } else {
-      showError(resp?.message || 'Failed to load audit log.');
+      $toast.error(resp?.message || 'Failed to load audit log.');
     }
   } catch (e) {
     console.error('[Audit Log] Fetch failed:', e);
-    showError(e?.data?.message || e?.message || 'Error while loading audit log data.');
+    $toast.error(e?.data?.message || e?.message || 'Error while loading audit log data.');
   } finally {
     loading.value = false;
   }
@@ -890,10 +890,10 @@ const exportAuditCsv = async () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
     }, 150);
-    showSuccess('Audit log CSV file has been generated and downloaded.');
+    $toast.success('Audit log CSV file has been generated and downloaded.');
   } catch (e) {
     console.error('[Audit Log] Export CSV failed:', e);
-    showError(e?.data?.message || e?.message || 'Failed to generate CSV. Please try again later.');
+    $toast.error(e?.data?.message || e?.message || 'Failed to generate CSV. Please try again later.');
   } finally {
     exportingCsv.value = false;
   }
@@ -928,9 +928,9 @@ const copyLogDetail = async () => {
   ].filter(Boolean).join('\n');
   try {
     await navigator.clipboard.writeText(text);
-    showSuccess('Audit log details copied to clipboard.');
+    $toast.success('Audit log details copied to clipboard.');
   } catch {
-    showError('Failed to copy to clipboard.');
+    $toast.error('Failed to copy to clipboard.');
   }
 };
 
@@ -976,13 +976,13 @@ const prettyJSON = (obj) => {
 // =============== BADGE COLOR HELPERS ===============
 const getActionBadgeClass = (actionType) => {
   const at = (actionType || '').toString().toLowerCase();
-  if (/create|register|purchase|send|add_|_created$/.test(at)) return 'bg-green-100 text-green-800';
-  if (/update|edit|modify|change|assign|enable|sync/.test(at)) return 'bg-amber-100 text-amber-800';
-  if (/delete|remove|revoke|disable|cancel|unlink|purge/.test(at)) return 'bg-red-100 text-red-800';
-  if (/login|auth|verify|2fa/.test(at)) return 'bg-sky-100 text-sky-800';
-  if (/logout/.test(at)) return 'bg-gray-100 text-gray-700';
-  if (/export|download|report|backup/.test(at)) return 'bg-purple-100 text-purple-800';
-  if (/admin|audit|impersonate|bulk/.test(at)) return 'bg-violet-100 text-violet-800';
+  if (/create|register|purchase|send|add_|_created$/.test(at)) return 'bg-success-100 text-success-800';
+  if (/update|edit|modify|change|assign|enable|sync/.test(at)) return 'bg-warning-100 text-warning-800';
+  if (/delete|remove|revoke|disable|cancel|unlink|purge/.test(at)) return 'bg-error-100 text-error-800';
+  if (/login|auth|verify|2fa/.test(at)) return 'bg-info-100 text-info-800';
+  if (/logout/.test(at)) return 'bg-secondary-100 text-secondary-700';
+  if (/export|download|report|backup/.test(at)) return 'bg-primary-100 text-primary-800';
+  if (/admin|audit|impersonate|bulk/.test(at)) return 'bg-primary-100 text-primary-800';
   return 'bg-secondary-100 text-secondary-700';
 };
 
@@ -1004,10 +1004,10 @@ const getActionIcon = (actionType) => {
 
 const getHttpMethodBadgeClass = (method) => {
   const m = (method || '').toString().toUpperCase();
-  if (m === 'GET' || m === 'HEAD') return 'bg-sky-100 text-sky-800';
-  if (m === 'POST') return 'bg-green-100 text-green-800';
-  if (m === 'PUT' || m === 'PATCH') return 'bg-amber-100 text-amber-800';
-  if (m === 'DELETE') return 'bg-red-100 text-red-800';
+  if (m === 'GET' || m === 'HEAD') return 'bg-info-100 text-info-800';
+  if (m === 'POST') return 'bg-success-100 text-success-800';
+  if (m === 'PUT' || m === 'PATCH') return 'bg-warning-100 text-warning-800';
+  if (m === 'DELETE') return 'bg-error-100 text-error-800';
   return 'bg-secondary-100 text-secondary-700';
 };
 

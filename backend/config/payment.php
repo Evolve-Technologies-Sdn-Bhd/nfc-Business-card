@@ -253,12 +253,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Checkout / Physical NFC Card Pricing
+    |--------------------------------------------------------------------------
+    | Single source of truth for the physical card unit price and the flat
+    | shipping fee applied at checkout. The checkout page reads these via the
+    | public GET /payment/config endpoint instead of hard-coding the amounts in
+    | the Vue component, so pricing changes no longer require a frontend deploy.
+    */
+    'checkout' => [
+        'card_unit_price' => (float) env('CHECKOUT_CARD_UNIT_PRICE', 15.00),
+        'shipping_fee' => (float) env('CHECKOUT_SHIPPING_FEE', 5.00),
+        'max_card_quantity' => (int) env('CHECKOUT_MAX_CARD_QUANTITY', 5),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Subscription & Recurring Payments
     |--------------------------------------------------------------------------
     */
     'subscriptions' => [
         'enabled' => true,
-        'provider' => 'stripe', // Primary provider for subscriptions
+        'provider' => 'fiuu', // Primary provider for subscriptions (Fiuu / MOLPay)
 
         'plans' => [
             'basic' => [
@@ -276,6 +291,54 @@ return [
         ],
 
         'trial_days' => 14,
+
+        /*
+        |----------------------------------------------------------------------
+        | Free-trial abuse prevention (one-time trial)
+        |----------------------------------------------------------------------
+        | A free account is granted ONCE per person. The check is enforced at
+        | OnboardingController::selectPlan('free'). It is NOT a hard account
+        | block: the user may still register and buy a card, they just cannot
+        | claim a second free trial.
+        |
+        | Signals, from strongest to weakest:
+        |   email    — permanent ledger keyed by a NORMALISED email hash
+        |              (gmail dots + "+tag" aliases are merged, disposable
+        |              domains rejected). Survives account deletion.
+        |   device   — browser fingerprint sent as X-Device-Id.
+        |   ip       — flat shared NAT (office/campus/mobile CGNAT) is the usual
+        |              false positive, so this threshold is configurable. Set to 0
+        |              to disable IP-based refusal entirely.
+        */
+        'abuse' => [
+            'enabled' => true,
+
+            // Require a VERIFIED email before the trial is granted. This is
+            // stricter than the app-wide grace period: a throwaway address can
+            // register, but it cannot claim a free trial until it is confirmed.
+            'require_email_verification' => true,
+
+            'max_claims_per_email' => 1,
+            'max_claims_per_device' => 1,
+            'max_claims_per_ip' => 1,
+
+            // IPv4 /24 prefix used when recording the network of a claim
+            // (stored for audit; not used to refuse by default).
+            'ip_subnet_prefix_v4' => 24,
+
+            // Throwaway / temp-mail domains that are never eligible.
+            'disposable_domains' => [
+                'mailinator.com', 'guerrillamail.com', 'guerrillamail.net',
+                'sharklasers.com', '10minutemail.com', '10minutemail.net',
+                'tempmail.com', 'tempmail.net', 'temp-mail.org', 'tempmailo.com',
+                'throwawaymail.com', 'yopmail.com', 'yopmail.fr', 'getnada.com',
+                'nada.email', 'trashmail.com', 'trashmail.de', 'dispostable.com',
+                'maildrop.cc', 'mailnesia.com', 'moakt.com', 'fakeinbox.com',
+                'mintemail.com', 'spamgourmet.com', 'mytrashmail.com',
+                'mailcatch.com', 'emailondeck.com', 'getairmail.com',
+                'discard.email', 'throwam.com', 'tempr.email', 'tempinbox.com',
+            ],
+        ],
 
         // Dunning management
         'dunning' => [

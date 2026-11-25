@@ -314,6 +314,84 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Cancel the current user's active subscription (convenience endpoint).
+     *
+     * The UI knows it wants "cancel my subscription" without necessarily holding
+     * the internal subscription_id, so this resolves the active row for the user.
+     */
+    public function cancelActive(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'nullable|string|max:500',
+            'immediate' => 'boolean',
+            'cancel_immediately' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $user = auth()->user();
+            $subscription = Subscription::where('user_id', $user->id)
+                ->whereIn('status', ['active', 'past_due'])
+                ->latest()
+                ->first();
+
+            if (!$subscription) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No active subscription to cancel',
+                ], 404);
+            }
+
+            $immediate = $request->boolean('immediate') || $request->boolean('cancel_immediately');
+
+            if ($immediate) {
+                $subscription->cancel($request->reason);
+                $user->update(['subscription_active' => false]);
+            } else {
+                // Cancel at end of the current billing period.
+                $subscription->update([
+                    'cancelled_at' => $subscription->current_period_end,
+                    'cancellation_reason' => $request->reason,
+                ]);
+            }
+
+            Log::info('Active subscription cancelled', [
+                'subscription_id' => $subscription->subscription_id,
+                'user_id' => $user->id,
+                'immediate' => $immediate,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $immediate
+                    ? 'Subscription cancelled immediately'
+                    : 'Subscription will be cancelled at the end of the billing period',
+                'subscription' => [
+                    'status' => $subscription->fresh()->status,
+                    'cancelled_at' => $subscription->fresh()->cancelled_at,
+                ],
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Active subscription cancellation failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel subscription',
+            ], 500);
+        }
+    }
+
+    /**
      * Reactivate cancelled subscription
      */
     public function reactivate($subscriptionId)

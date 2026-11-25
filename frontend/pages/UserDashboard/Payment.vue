@@ -66,7 +66,7 @@
                   <p class="font-semibold text-secondary-900">
                     ${{ orderSummary.planPrice }}/month
                   </p>
-                  <p class="text-helper">14-day free trial</p>
+                  <p class="text-helper">Billed monthly</p>
                 </div>
               </div>
 
@@ -638,15 +638,6 @@ const selectedPaymentRail = ref(null);
 const paymentFee = ref(0);
 const feeCalculation = ref(null);
 
-// Payment form (legacy - kept for compatibility)
-const paymentMethod = ref("stripe");
-const paymentForm = reactive({
-  cardNumber: "",
-  expiryDate: "",
-  cvv: "",
-  cardholderName: "",
-});
-
 // Shipping address (delivery address for the physical NFC card)
 const billingAddress = reactive({
   fullName: "",
@@ -659,14 +650,20 @@ const billingAddress = reactive({
 });
 
 // Physical NFC card quantity
-const maxQuantity = 5;
+const maxQuantity = ref(5);
 const cardQuantity = ref(1);
 const increaseQuantity = () => {
-  if (cardQuantity.value < maxQuantity) cardQuantity.value++;
+  if (cardQuantity.value < maxQuantity.value) cardQuantity.value++;
 };
 const decreaseQuantity = () => {
   if (cardQuantity.value > 1) cardQuantity.value--;
 };
+
+// Physical card / shipping pricing — sourced from the backend
+// (GET /payment/config → config/payment.php 'checkout'). Defaults mirror the
+// backend defaults so checkout still works if the config call fails.
+const cardUnitPrice = ref(15);
+const shippingCost = ref(5);
 
 // Plan prices from API
 const { getPlanPrice, getPlanDetails, loadPrices } = usePlanPrices();
@@ -691,10 +688,10 @@ const orderSummary = computed(() => {
   };
 
   const planPrice = getPlanPrice(selectedPlan) || 0;
-  const cardUnitPrice = 15; // Fixed price per physical card
-  const cardPrice = cardUnitPrice * cardQuantity.value;
-  const shippingCost = 5; // Fixed shipping cost
-  const total = planPrice + cardPrice + shippingCost;
+  const unitPrice = cardUnitPrice.value;
+  const shipping = shippingCost.value;
+  const cardPrice = unitPrice * cardQuantity.value;
+  const total = planPrice + cardPrice + shipping;
 
   return {
     planName: planNames[selectedPlan] || "Free Plan",
@@ -702,9 +699,9 @@ const orderSummary = computed(() => {
       planDescriptions[selectedPlan] || "Perfect for getting started",
     planPrice,
     cardType: cardTypes[selectedPlan] || "Digital Only",
-    cardUnitPrice,
+    cardUnitPrice: unitPrice,
     cardPrice,
-    shippingCost,
+    shippingCost: shipping,
     total,
   };
 });
@@ -836,7 +833,7 @@ const handleManualTransferInitiated = (data) => {
 };
 
 // Handle proof uploaded
-const handleProofUploaded = (data) => {
+const handleProofUploaded = async (data) => {
   console.log('Payment proof uploaded:', data);
   
   // Store pending order details
@@ -854,13 +851,52 @@ const handleProofUploaded = (data) => {
       status: 'pending_verification',
     })
   );
-  
+
+  // FIX: Complete onboarding immediately so the user is not bounced back
+  // to PlanSelection. Manual bank transfer is pending admin verification,
+  // but the user has already submitted their proof and should have access
+  // to the dashboard while waiting.
+  try {
+    const { $api } = useNuxtApp();
+    await $api.post("/complete-onboarding");
+    console.log("✅ Onboarding completed after manual bank transfer proof upload");
+    if (authStore.user) {
+      authStore.user.is_new_user = false;
+    }
+  } catch (error) {
+    console.warn("Failed to complete onboarding after proof upload:", error);
+  }
+
   $toast.success("Payment proof uploaded. We'll verify it within 24 hours.");
   
   // Redirect to dashboard after short delay
   setTimeout(() => {
     navigateTo("/UserDashboard");
   }, 2000);
+};
+
+// Load physical-card / shipping pricing from the backend
+const loadCheckoutConfig = async () => {
+  try {
+    const { $api } = useNuxtApp();
+    const response = await $api.get("/payment/config");
+    const data = response?.data ?? response;
+    if (data?.card_unit_price !== undefined) {
+      cardUnitPrice.value = Number(data.card_unit_price);
+    }
+    if (data?.shipping_fee !== undefined) {
+      shippingCost.value = Number(data.shipping_fee);
+    }
+    if (data?.max_card_quantity) {
+      maxQuantity.value = Number(data.max_card_quantity);
+      if (cardQuantity.value > maxQuantity.value) {
+        cardQuantity.value = maxQuantity.value;
+      }
+    }
+  } catch (error) {
+    // Non-critical: keep the backend-matching defaults
+    console.warn("Failed to load checkout config, using defaults:", error);
+  }
 };
 
 // Check if user is authenticated
@@ -876,6 +912,9 @@ onMounted(async () => {
 
   // Load plan prices from API
   await loadPrices();
+
+  // Load physical-card / shipping pricing from the backend config
+  await loadCheckoutConfig();
 
   // Prefill shipping address from the user profile
   if (authStore.user) {

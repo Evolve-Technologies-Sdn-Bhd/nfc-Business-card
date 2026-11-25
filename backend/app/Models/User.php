@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'first_name',
         'last_name',
         'email',
+        'email_verified_at',
         'name_slug',
         'password',
         'provider',     
@@ -37,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'subscription_start_date',
         'subscription_end_date',
         'subscription_active',
+        'deactivated_at',
         'stripe_customer_id',
         'stripe_subscription_id',
         'has_physical_card',
@@ -53,6 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'total_account_slots',
         'total_card_quota',
         'parent_business_id',
+        'business_role',
     ];
 
     protected $hidden = [
@@ -67,6 +70,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'subscription_start_date' => 'date',
         'subscription_end_date' => 'date',
         'subscription_active' => 'boolean',
+        'deactivated_at' => 'datetime',
         'has_physical_card' => 'boolean',
         'two_factor_enabled' => 'boolean',
         'settings' => 'array',
@@ -364,40 +368,17 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Plan check helpers — now use accessors (accessors are SoT-backed already).
+     * Plan check helpers — all delegate to EntitlementService, the single
+     * source of truth for plan/feature access (see App\Services\EntitlementService).
      */
     public function hasPremiumSubscription()
     {
-        $hasActiveSub = in_array($this->subscription_plan, ['premium', 'basic','business'], true) && $this->subscription_active;
-        if ($hasActiveSub) {
-            return true;
-        }
-        if ($this->relationLoaded('nfcCards')) {
-            return $this->getRelation('nfcCards')->contains(function ($c) {
-                return in_array($c->status, ['payment_verified','processing','shipped','delivered','active'], true);
-            });
-        }
-        return (bool) $this->nfcCards()
-            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
-            ->limit(1)
-            ->count();
+        return app(\App\Services\EntitlementService::class)->hasPaidAccess($this);
     }
 
     public function hasBasicSubscription()
     {
-        $hasActiveSub = in_array($this->subscription_plan, ['basic', 'premium', 'business'], true) && $this->subscription_active;
-        if ($hasActiveSub) {
-            return true;
-        }
-        if ($this->relationLoaded('nfcCards')) {
-            return $this->getRelation('nfcCards')->contains(function ($c) {
-                return in_array($c->status, ['payment_verified','processing','shipped','delivered','active'], true);
-            });
-        }
-        return (bool) $this->nfcCards()
-            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
-            ->limit(1)
-            ->count();
+        return app(\App\Services\EntitlementService::class)->hasPaidAccess($this);
     }
 
     /**
@@ -405,13 +386,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasBusinessSubscription(): bool
     {
-        if ($this->subscription_plan === 'business' && $this->subscription_active) {
-            return true;
-        }
-        return $this->nfcCards()
-            ->where('subscription_plan', 'business')
-            ->whereIn('status', ['payment_verified','processing','shipped','delivered','active'])
-            ->exists();
+        return app(\App\Services\EntitlementService::class)->hasBusinessAccess($this);
     }
 
     public function hasPhysicalCard()
@@ -426,28 +401,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canAccessPaidProfileBuilder(?string $plan = null): bool
     {
-        $eligibleStatuses = ['payment_verified','processing','shipped','delivered','active'];
-
-        if ($plan === null) {
-            // Any paid card/subscription is fine
-            return $this->subscription_active
-                || $this->nfcCards()->whereIn('status', $eligibleStatuses)->exists();
-        }
-
-        $planMatch = in_array($plan, ['premium','business'], true)
-            ? [$plan]
-            : ['basic','premium','business'];
-
-        // Active subscription matches requested tier
-        if ($this->subscription_active && in_array($this->subscription_plan, $planMatch, true)) {
-            return true;
-        }
-
-        // Has card order matching tier, with verified+ status
-        return $this->nfcCards()
-            ->whereIn('subscription_plan', $planMatch)
-            ->whereIn('status', $eligibleStatuses)
-            ->exists();
+        return app(\App\Services\EntitlementService::class)->canAccessPaidProfileBuilder($this, $plan);
     }
 
     /**
@@ -585,6 +539,73 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isBusinessEmployee(): bool
     {
         return $this->parent_business_id !== null;
+    }
+
+    /** Business tenant roles (delegated management within a Business account). */
+    public const BUSINESS_ROLE_OWNER = 'owner';
+    public const BUSINESS_ROLE_ADMIN = 'admin';
+    public const BUSINESS_ROLE_CARD_MANAGER = 'card_manager';
+    public const BUSINESS_ROLE_MEMBER = 'member';
+
+    /** Assignable roles for employees (owner is implicit). */
+    public const BUSINESS_EMPLOYEE_ROLES = [
+        self::BUSINESS_ROLE_ADMIN,
+        self::BUSINESS_ROLE_CARD_MANAGER,
+        self::BUSINESS_ROLE_MEMBER,
+    ];
+
+    /**
+     * Resolve this user's role within their Business tenant.
+     * Owners are always 'owner'; employees default to 'member' when unset.
+     */
+    public function businessRole(): ?string
+    {
+        if ($this->isBusinessAccount()) {
+            return self::BUSINESS_ROLE_OWNER;
+        }
+        if ($this->isBusinessEmployee()) {
+            return $this->business_role ?: self::BUSINESS_ROLE_MEMBER;
+        }
+        return null;
+    }
+
+    /**
+     * Resolve the Business account (owner) this user operates within, or null.
+     */
+    public function resolvedBusinessAccount(): ?self
+    {
+        if ($this->isBusinessAccount()) {
+            return $this;
+        }
+        if ($this->isBusinessEmployee()) {
+            return $this->parentBusiness()->first();
+        }
+        return null;
+    }
+
+    /**
+     * Can this user manage the Business tenant (employees, roles, activity)?
+     * Owners and delegated business admins can.
+     */
+    public function canManageBusiness(): bool
+    {
+        return in_array($this->businessRole(), [
+            self::BUSINESS_ROLE_OWNER,
+            self::BUSINESS_ROLE_ADMIN,
+        ], true);
+    }
+
+    /**
+     * Can this user manage Business NFC cards (order/assign/activate)?
+     * Owners, delegated admins and card managers can.
+     */
+    public function canManageBusinessCards(): bool
+    {
+        return in_array($this->businessRole(), [
+            self::BUSINESS_ROLE_OWNER,
+            self::BUSINESS_ROLE_ADMIN,
+            self::BUSINESS_ROLE_CARD_MANAGER,
+        ], true);
     }
 
     /**

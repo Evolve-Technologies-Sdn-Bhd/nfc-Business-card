@@ -597,7 +597,7 @@
                     step="0.1"
                     :class="[
                       'input',
-                      versionErrors.terms ? 'border-red-500 focus:ring-red-500' : ''
+                      versionErrors.terms ? 'border-error-500 focus:ring-error-500' : ''
                     ]"
                     placeholder="1.0"
                     @input="validateTermsVersion"
@@ -621,13 +621,13 @@
                 </div>
               </div>
 
-              <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p class="text-body text-amber-800">
+              <div class="bg-warning-50 border border-warning-200 rounded-lg p-3">
+                <p class="text-body text-warning-800">
                   <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
                 </p>
               </div>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="bg-info-50 border border-info-200 rounded-lg p-4">
                 <h3 class="card-title text-secondary-900 mb-3">
                   PDF Document Upload
                 </h3>
@@ -637,10 +637,10 @@
 
                 <div
                   v-if="termsPdfStatus.exists"
-                  class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
+                  class="mb-4 flex items-center justify-between bg-success-50 border border-success-200 rounded p-3"
                 >
-                  <div class="flex items-center space-x-2 text-body text-green-700">
-                    <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
+                  <div class="flex items-center space-x-2 text-body text-success-700">
+                    <Icon name="heroicons:document-check" class="h-5 w-5 text-success-500" />
                     <span>{{ getLegalDisplayFileName(termsPdfStatus.fileInfo?.original_filename) }} ({{
                       formatLegalFileSize(termsPdfStatus.fileInfo?.size)
                     }})</span>
@@ -655,8 +655,8 @@
                   </button>
                 </div>
 
-                <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
-                  <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-yellow-600" />
+                <div v-else class="mb-4 text-body text-secondary-500 bg-warning-50 border border-warning-200 rounded p-3">
+                  <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-warning-600" />
                   No PDF uploaded yet. Please upload a PDF file below.
                 </div>
 
@@ -733,7 +733,7 @@
                     step="0.1"
                     :class="[
                       'input',
-                      versionErrors.privacy ? 'border-red-500 focus:ring-red-500' : ''
+                      versionErrors.privacy ? 'border-error-500 focus:ring-error-500' : ''
                     ]"
                     placeholder="1.0"
                     @input="validatePrivacyVersion"
@@ -757,13 +757,13 @@
                 </div>
               </div>
 
-              <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p class="text-body text-amber-800">
+              <div class="bg-warning-50 border border-warning-200 rounded-lg p-3">
+                <p class="text-body text-warning-800">
                   <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
                 </p>
               </div>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="bg-info-50 border border-info-200 rounded-lg p-4">
                 <h3 class="card-title text-secondary-900 mb-3">
                   PDF Document Upload
                 </h3>
@@ -773,10 +773,10 @@
 
                 <div
                   v-if="privacyPdfStatus.exists"
-                  class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded p-3"
+                  class="mb-4 flex items-center justify-between bg-success-50 border border-success-200 rounded p-3"
                 >
-                  <div class="flex items-center space-x-2 text-body text-green-700">
-                    <Icon name="heroicons:document-check" class="h-5 w-5 text-green-500" />
+                  <div class="flex items-center space-x-2 text-body text-success-700">
+                    <Icon name="heroicons:document-check" class="h-5 w-5 text-success-500" />
                     <span>{{ getLegalDisplayFileName(privacyPdfStatus.fileInfo?.original_filename) }} ({{
                       formatLegalFileSize(privacyPdfStatus.fileInfo?.size)
                     }})</span>
@@ -791,8 +791,8 @@
                   </button>
                 </div>
 
-                <div v-else class="mb-4 text-body text-secondary-500 bg-yellow-50 border border-yellow-200 rounded p-3">
-                  <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-yellow-600" />
+                <div v-else class="mb-4 text-body text-secondary-500 bg-warning-50 border border-warning-200 rounded p-3">
+                  <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 inline mr-1 text-warning-600" />
                   No PDF uploaded yet. Please upload a PDF file below.
                 </div>
 
@@ -1630,7 +1630,7 @@ const changedPlansList = computed(() =>
 const getPlanBorderClass = (planType) => {
   switch (planType) {
     case 'basic': return 'border-info-300 hover:border-info-400';
-    case 'premium': return 'border-purple-300 hover:border-purple-400';
+    case 'premium': return 'border-primary-300 hover:border-primary-400';
     case 'business': return 'border-success-300 hover:border-success-400';
     default: return 'border-secondary-300';
   }
@@ -1639,7 +1639,7 @@ const getPlanBorderClass = (planType) => {
 const getPlanHeaderClass = (planType) => {
   switch (planType) {
     case 'basic': return 'bg-gradient-to-r from-info-500 to-info-600';
-    case 'premium': return 'bg-gradient-to-r from-purple-500 to-purple-600';
+    case 'premium': return 'bg-gradient-to-r from-primary-500 to-primary-600';
     case 'business': return 'bg-gradient-to-r from-success-500 to-success-600';
     default: return 'bg-secondary-500';
   }

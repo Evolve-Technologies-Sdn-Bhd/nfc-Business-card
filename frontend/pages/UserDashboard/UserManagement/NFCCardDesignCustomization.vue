@@ -689,8 +689,16 @@ const selectTemplate = (template) => {
   selectedTemplateData.value = template;
 };
 
-// Get user's current plan (prioritize auth store, fallback to sessionStorage for onboarding)
+// Get user's current plan (prioritize the in-progress onboarding selection)
 const getCurrentUserPlan = () => {
+  // While the user is still onboarding, the plan they just chose is the
+  // authoritative one and lives in sessionStorage. The account's stored plan
+  // only becomes active after payment is verified, so reading it here would
+  // wrongly show the previous tier's templates (e.g. free instead of premium).
+  if (authStore.user?.is_new_user) {
+    const selected = sessionStorage.getItem("selectedPlan");
+    if (selected) return selected;
+  }
   return (
     authStore.user?.subscription_plan ||
     sessionStorage.getItem("selectedPlan") ||

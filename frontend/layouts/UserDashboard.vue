@@ -78,40 +78,6 @@
             </div>
           </nav>
 
-          <!-- Upgrade Banner - Bottom of sidebar (only non-Business users).
-               Flex-shrink + explicit sizing so it never overlaps scrollable nav. -->
-          <div
-            v-if="authStore.user?.subscription_plan !== 'business'"
-            class="p-4 border-t border-secondary-200 flex-shrink-0 bg-white"
-          >
-            <div
-              class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-4 text-white shadow-sm"
-            >
-              <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 mt-0.5">
-                  <Icon
-                    name="heroicons:star"
-                    class="h-5 w-5 text-yellow-300"
-                  />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-label leading-snug truncate">
-                    {{ authStore.user?.subscription_plan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
-                  </p>
-                  <p class="text-caption text-primary-100 mt-0.5 leading-relaxed">
-                    {{ authStore.user?.subscription_plan === 'premium' ? 'Team seats + advanced analytics' : 'Unlock the full Profile Builder' }}
-                  </p>
-                </div>
-              </div>
-              <button
-                @click="navigateTo('/UserDashboard/PlanSelection')"
-                class="mt-3.5 w-full bg-white text-primary-600 py-2 px-4 rounded-lg text-button hover:bg-primary-50 transition-colors shadow-sm whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5"
-              >
-                <Icon name="heroicons:arrow-trending-up" class="h-3.5 w-3.5 flex-shrink-0" />
-                <span class="truncate">Upgrade Now</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -304,7 +270,9 @@
         </header>
 
         <!-- Page Content - Scrollable -->
-        <main class="flex-1 overflow-y-auto bg-secondary-50 w-full">
+        <main
+          class="dashboard-main flex-1 overflow-y-auto bg-secondary-50 w-full"
+        >
           <div class="p-4 sm:p-6 lg:p-8 w-full">
             <div class="max-w-7xl mx-auto w-full">
               <slot />
@@ -805,6 +773,20 @@ watch(
 </script>
 
 <style scoped>
+/*
+  Page-level loaders inside this layout (NFCGoWaveLoader `.nfg-viewport`)
+  centre on the VISIBLE content area: subtract the sticky top bar (h-16 =
+  4rem) plus the content padding above + below (1rem / 2rem).
+*/
+.dashboard-main {
+  --nfg-viewport-offset: 6rem;
+}
+@media (min-width: 1024px) {
+  .dashboard-main {
+    --nfg-viewport-offset: 8rem;
+  }
+}
+
 /* Custom scrollbar for sidebar */
 nav::-webkit-scrollbar {
   width: 6px;

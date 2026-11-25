@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\Concerns\ScopesBuilderPlan;
 use App\Models\ProfileDesignOption;
 use App\Models\ProfileBuilderField;
 use App\Models\ProfileBuilderSection;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class ProfileBuilderInitController extends Controller
 {
+    use ScopesBuilderPlan;
+
     /**
      * BATCH ENDPOINT: Merge 3 config datasets into ONE HTTP roundtrip for page-load performance.
      * Previously: frontend called /profile-builder-sections + /profile-builder-fields +
@@ -56,11 +59,7 @@ class ProfileBuilderInitController extends Controller
         $sectionsQuery = ProfileBuilderSection::active()->orderBy('display_order');
 
         if ($plan) {
-            $sectionsQuery->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($sectionsQuery, 'available_plans', $plan);
         }
 
         $dbSections = $sectionsQuery->get();
@@ -79,11 +78,7 @@ class ProfileBuilderInitController extends Controller
         if ($customFieldIds !== null) {
             $fieldsQuery->whereIn('id', $customFieldIds);
         } elseif ($plan) {
-            $fieldsQuery->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($fieldsQuery, 'available_plans', $plan);
         }
 
         $fields = $fieldsQuery->get()->groupBy('tab');
@@ -123,11 +118,7 @@ class ProfileBuilderInitController extends Controller
         if ($customFieldIds !== null) {
             $query->whereIn('id', $customFieldIds);
         } elseif ($plan) {
-            $query->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($query, 'available_plans', $plan);
         }
 
         $fields = $query->get();
@@ -144,6 +135,9 @@ class ProfileBuilderInitController extends Controller
     private function loadDesignOptions(?string $plan, $user)
     {
         $query = ProfileDesignOption::active()->ordered();
+
+        // 'nfcgo_branding' is an admin-only branding policy — never a user-facing toggle.
+        $query->where('option_id', '!=', 'nfcgo_branding');
 
         // Business user custom assignments (design options + feature toggles)
         $customDesignOptionIds = null;

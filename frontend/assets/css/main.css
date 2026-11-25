@@ -4,28 +4,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme CSS Custom Properties - Default: Zora Pro (Matte Navy + Matte Teal) */
-/* Accessibility-first: mature-eyes friendly, matte non-neon, warm neutrals */
+/* ============================================================
+   SYSTEM PALETTE — "Ink & Brass" (single source of truth)
+   Exactly three brand colours, plus functional status colours:
+     1. Ink   — near-black navy  → `primary` scale (surfaces, text, buttons)
+     2. Brass — burnished gold   → `accent` (CTA, highlights, focus)
+     3. Paper — warm off-white   → `secondary` scale (page + light surfaces)
+   Mirrors the --ink-* / --brass* / --paper tokens further down this file.
+   Accessibility-first: matte, non-neon, every text/background pair AA.
+   ============================================================ */
 :root {
-  /* Primary palette — Matte Deep Navy (mature, professional, non-glare) */
-  --theme-primary-50: #f4f6fa;
-  --theme-primary-100: #e5e9f1;
-  --theme-primary-200: #c9d0de;
-  --theme-primary-300: #9faac1;
-  --theme-primary-400: #6f7ea0;
-  --theme-primary-500: #4f5d82;
-  --theme-primary-600: #3d496a;
-  --theme-primary-700: #323b56;
-  --theme-primary-800: #2a3248;
-  --theme-primary-900: #23293b;
-  /* Accent — Matte Teal (calm, premium, non-neon) */
-  --theme-accent: #5d8c87;
-  --theme-accent-secondary: #b8956a;
-  /* Secondary palette — Warm Slate Neutral (matte, not cold OLED-black) */
-  --theme-secondary-50: #fafaf7;
-  --theme-secondary-100: #f4f2ec;
-  --theme-secondary-200: #e6e2d8;
-  --theme-secondary-300: #cdc7b9;
+  /* Primary palette — INK (near-black navy) */
+  --theme-primary-50: #f4f5f7;
+  --theme-primary-100: #e6e8ec;
+  --theme-primary-200: #ccd1d9;
+  --theme-primary-300: #a5adba;
+  --theme-primary-400: #6f7a8b;
+  --theme-primary-500: #414c5e;
+  --theme-primary-600: #1d2839;
+  --theme-primary-700: #141d2b;
+  --theme-primary-800: #0f1621;
+  --theme-primary-900: #0b1017;
+  /* Accent — BRASS (burnished gold) */
+  --theme-accent: #c2a068;
+  --theme-accent-secondary: #a9854d;
+  /* Secondary palette — PAPER (warm off-white neutral) */
+  --theme-secondary-50: #faf9f6;
+  --theme-secondary-100: #f3f1ea;
+  --theme-secondary-200: #e6e2d6;
+  --theme-secondary-300: #cdc7b7;
   --theme-secondary-400: #a8a190;
   --theme-secondary-500: #7f7763;
   --theme-secondary-600: #5c5548;
@@ -1753,6 +1760,9 @@
   --brass: #c2a068;
   --brass-600: #a9854d;
   --brass-200: #e8d9b8;
+  /* Deep brass — the accessible gold for small text on paper surfaces
+     (plain --brass only clears AA on ink surfaces). */
+  --brass-700: #8a6a33;
 }
 
 /* --- Surfaces --- */
@@ -1876,12 +1886,12 @@
 
 .btn-ghost-light {
   @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200;
-  color: #eef1f6;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--paper, #f7f5f0);
+  border: 1px solid rgba(194, 160, 104, 0.28);
   background: rgba(255, 255, 255, 0.04);
 }
 .btn-ghost-light:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 55%, transparent);
   background: rgba(255, 255, 255, 0.1);
 }
 

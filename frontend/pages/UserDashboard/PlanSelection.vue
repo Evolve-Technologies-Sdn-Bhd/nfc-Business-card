@@ -1,405 +1,297 @@
-<!-- pages/onboarding/plan-selection.vue -->
+<!--
+  pages/UserDashboard/PlanSelection.vue
+  Onboarding step 1 — in-app plan selection.
+
+  Design contract: this step deliberately reuses the exact card language of
+  /Homepage/pricing (`.price-card*` in assets/css/public.css) so the marketing
+  funnel and the onboarding funnel read as ONE product. The only additions are
+  the states that only exist in-app: "Current Plan" and a per-button loading
+  state. Palette is the system standard: Ink (black) + Brass (gold) + Paper.
+-->
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b">
+  <div class="min-h-screen ink-surface ink-grid relative overflow-hidden">
+    <!-- Onboarding top bar -->
+    <header class="ink-topbar sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <div class="flex items-center">
-            <NuxtLink to="/" class="inline-flex items-center">
-              <Icon
-                name="heroicons:identification"
-                class="h-8 w-8 text-primary-600"
-              />
-              <span class="ml-2 text-h4 font-bold text-secondary-900"
-                >NFCGo</span
-              >
-            </NuxtLink>
-          </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-body text-secondary-600">Step 1 of 3</span>
-            <div class="flex space-x-1">
-              <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
-              <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
-              <div class="w-2 h-2 bg-secondary-300 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <NuxtLink to="/Homepage" class="inline-flex items-center">
+            <NFCGoLogo variant="dark" size="sm" />
+          </NuxtLink>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Page Header -->
-      <div class="text-center mb-12">
-        <h1 class="page-title text-secondary-900 mb-4">
-          Choose Your Plan
-        </h1>
-        <p class="card-subtitle max-w-2xl mx-auto">
-          Select the perfect plan for your business needs. Start with our free
-          plan or unlock premium features with our paid plans.
-        </p>
-      </div>
-
-      <!-- Plans Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <!-- Free Plan -->
-        <div
-          :class="[
-            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
-            isCurrentPlan('free') 
-              ? 'border-green-500 ring-2 ring-green-200' 
-              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-primary-300'
-          ]"
-        >
-          <!-- Current Plan Badge -->
-          <div v-if="isCurrentPlan('free')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
-              <Icon name="heroicons:check-circle" class="h-3 w-3" />
-              Current Plan
-            </span>
-          </div>
-          <div class="text-center flex flex-col flex-1">
-            <div
-              class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Icon name="heroicons:gift" class="h-8 w-8 text-secondary-600" />
-            </div>
-            <h3 class="card-title text-secondary-900 mb-2">Free</h3>
-            <div class="mb-6">
-              <span class="stat-value text-secondary-900">$0</span>
-              <span class="text-secondary-600">/month</span>
-            </div>
-            <p class="text-body text-secondary-600 mb-6">
-              Perfect for getting started
-            </p>
-
-            <ul class="text-left space-y-3 mb-8">
-              <li class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Digital business card</span>
-              </li>
-              <li class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Basic analytics</span>
-              </li>
-              <li class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Up to 5 social links</span>
-              </li>
-              <li class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>Basic customization</span>
-              </li>
-              <li class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>QR code generation</span>
-              </li>
-            </ul>
-
-            <button
-              @click="selectPlan('free')"
-              :disabled="isCurrentPlan('free')"
-              :class="[
-                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
-                isCurrentPlan('free')
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
-              ]"
-            >
-              {{ isCurrentPlan('free') ? '✓ Current Plan' : 'Get Started Free' }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Basic Plan -->
-        <div
-          :class="[
-            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
-            isCurrentPlan('basic')
-              ? 'border-green-500 ring-2 ring-green-200'
-              : 'border-primary-200 hover:scale-105 hover:shadow-2xl hover:border-primary-400'
-          ]"
-        >
-          <!-- Current Plan Badge -->
-          <div v-if="isCurrentPlan('basic')" class="absolute -top-3 right-4 z-10">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
-              <Icon name="heroicons:check-circle" class="h-3 w-3" />
-              Current Plan
-            </span>
-          </div>
-          <!-- Most Popular Badge - positioned left when Current Plan badge exists -->
-          <div :class="[
-            'absolute -top-3 z-10',
-            isCurrentPlan('basic') ? 'left-4' : 'left-1/2 transform -translate-x-1/2'
-          ]">
+          <div class="flex items-center gap-3 sm:gap-4">
             <span
-              class="bg-primary-600 text-white px-3 py-1 rounded-full text-badge"
-              >Most Popular</span
+              class="hidden sm:inline text-micro uppercase text-white/55"
+              style="letter-spacing: 0.16em"
             >
+              Step 1 of 3 · Plan
+            </span>
+            <div class="flex items-center gap-1.5" aria-hidden="true">
+              <span class="step-dot step-dot--active"></span>
+              <span class="step-dot"></span>
+              <span class="step-dot"></span>
+            </div>
           </div>
-          <div class="text-center flex flex-col flex-1">
-            <div
-              class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Icon name="heroicons:star" class="h-8 w-8 text-primary-600" />
-            </div>
-            <h3 class="card-title text-secondary-900 mb-2">Basic</h3>
-            <div class="mb-6">
-              <span class="stat-value text-secondary-900">
-                {{ loading ? '...' : getFormattedPrice('basic') }}
-              </span>
-            </div>
-            <p class="text-body text-secondary-600 mb-6">
-              Great for small businesses
-            </p>
+        </div>
+      </div>
+    </header>
 
-            <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in basicPlan?.features" :key="feature" class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
+    <div class="container relative py-14 sm:py-20">
+      <!-- Step header -->
+      <div class="max-w-2xl mb-14">
+        <span class="lp-kicker on-ink">Pricing · Step 1 of 3</span>
+        <h1 class="lp-h2 on-ink mt-4 mb-4">Choose your plan</h1>
+        <p class="lp-lead lead-ink">
+          Same plans as our pricing page — pick one now to finish setting up
+          your account<template v-if="accountEmail"> (<span class="text-[color:var(--brass)]">{{ accountEmail }}</span>)</template>.
+          You can upgrade, downgrade or cancel anytime.
+        </p>
+        <NuxtLink
+          to="/Homepage/pricing"
+          class="inline-flex items-center gap-1.5 mt-5 text-body-sm font-semibold text-[color:var(--brass)] hover:text-[color:var(--brass-200)] transition-colors"
+        >
+          <Icon name="heroicons:arrows-right-left" class="h-4 w-4" />
+          Compare the full feature breakdown on the pricing page
+        </NuxtLink>
+      </div>
 
+      <!-- Plans grid -->
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
+      >
+        <!-- Free -->
+        <div
+          class="price-card"
+          :class="{ 'price-card--current': isCurrentPlan('free') }"
+        >
+          <span
+            v-if="isCurrentPlan('free')"
+            class="price-card__badge price-card__badge--outline"
+          >
+            <Icon name="heroicons:check-circle" class="h-3 w-3" />
+            Current Plan
+          </span>
+          <h2 class="price-card__name">Free</h2>
+          <div class="price-card__amount">RM0</div>
+          <p class="price-card__desc">Perfect for getting started</p>
+          <ul class="price-card__list">
+            <li v-for="feature in freeFeatures" :key="feature">
+              <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+          <div class="price-card__cta">
             <button
+              class="btn-ghost-light w-full"
+              :disabled="isCurrentPlan('free') || selectingPlan !== null"
+              @click="selectPlan('free')"
+            >
+              <span v-if="selectingPlan === 'free'" class="btn-spinner"></span>
+              <span>{{ isCurrentPlan('free') ? 'Current Plan' : 'Get Started Free' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Basic -->
+        <div
+          class="price-card"
+          :class="{ 'price-card--current': isCurrentPlan('basic') }"
+        >
+          <span
+            v-if="isCurrentPlan('basic')"
+            class="price-card__badge price-card__badge--outline"
+          >
+            <Icon name="heroicons:check-circle" class="h-3 w-3" />
+            Current Plan
+          </span>
+          <h2 class="price-card__name">Basic</h2>
+          <div class="price-card__amount">{{ priceLabel('basic') }}</div>
+          <p class="price-card__desc">
+            {{ basicPlan?.description || 'For individual professionals' }}
+          </p>
+          <ul class="price-card__list">
+            <li v-for="feature in basicPlan?.features" :key="feature">
+              <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+          <div class="price-card__cta">
+            <button
+              class="btn-ghost-light w-full"
+              :disabled="isCurrentPlan('basic') || selectingPlan !== null"
               @click="selectPlan('basic')"
-              :disabled="isCurrentPlan('basic')"
-              :class="[
-                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
-                isCurrentPlan('basic')
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                  : 'bg-primary-600 text-white hover:bg-primary-700'
-              ]"
             >
-              {{ isCurrentPlan('basic') ? '✓ Current Plan' : 'Choose Basic' }}
+              <span v-if="selectingPlan === 'basic'" class="btn-spinner"></span>
+              <span>{{ isCurrentPlan('basic') ? 'Current Plan' : 'Choose Basic' }}</span>
             </button>
           </div>
         </div>
 
-        <!-- Premium Plan -->
+        <!-- Premium -->
         <div
-          :class="[
-            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
-            isCurrentPlan('premium')
-              ? 'border-green-500 ring-2 ring-green-200'
-              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-purple-300'
-          ]"
+          class="price-card price-card--pop"
+          :class="{ 'price-card--current': isCurrentPlan('premium') }"
         >
-          <!-- Current Plan Badge -->
-          <div v-if="isCurrentPlan('premium')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
-              <Icon name="heroicons:check-circle" class="h-3 w-3" />
-              Current Plan
-            </span>
-          </div>
-          <div class="text-center flex flex-col flex-1">
-            <div
-              class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Icon name="heroicons:sparkles" class="h-8 w-8 text-purple-600" />
-            </div>
-            <h3 class="card-title text-secondary-900 mb-2">Premium</h3>
-            <div class="mb-6">
-              <span class="stat-value text-secondary-900">
-                {{ loading ? '...' : getFormattedPrice('premium') }}
-              </span>
-            </div>
-            <p class="text-body text-secondary-600 mb-6">
-              For growing businesses
-            </p>
-
-            <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in premiumPlan?.features" :key="feature" class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
-
+          <span
+            class="price-card__badge"
+            :class="
+              isCurrentPlan('premium') ? 'price-card__badge--left' : undefined
+            "
+          >
+            Most Popular
+          </span>
+          <span
+            v-if="isCurrentPlan('premium')"
+            class="price-card__badge price-card__badge--outline price-card__badge--right"
+          >
+            <Icon name="heroicons:check-circle" class="h-3 w-3" />
+            Current Plan
+          </span>
+          <h2 class="price-card__name">Premium</h2>
+          <div class="price-card__amount">{{ priceLabel('premium') }}</div>
+          <p class="price-card__desc">
+            {{ premiumPlan?.description || 'For growing businesses' }}
+          </p>
+          <ul class="price-card__list">
+            <li v-for="feature in premiumPlan?.features" :key="feature">
+              <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+          <div class="price-card__cta">
             <button
+              class="btn-brass w-full"
+              :disabled="isCurrentPlan('premium') || selectingPlan !== null"
               @click="selectPlan('premium')"
-              :disabled="isCurrentPlan('premium')"
-              :class="[
-                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
-                isCurrentPlan('premium')
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                  : 'bg-purple-600 text-white hover:bg-purple-700'
-              ]"
             >
-              {{ isCurrentPlan('premium') ? '✓ Current Plan' : 'Choose Premium' }}
+              <span v-if="selectingPlan === 'premium'" class="btn-spinner"></span>
+              <span>{{ isCurrentPlan('premium') ? 'Current Plan' : 'Choose Premium' }}</span>
             </button>
           </div>
         </div>
 
-        <!-- Business Plan -->
-        <div
-          :class="[
-            'bg-white rounded-2xl shadow-lg border-2 p-6 relative flex flex-col h-full transition-all duration-300 cursor-pointer',
-            isCurrentPlan('business')
-              ? 'border-green-500 ring-2 ring-green-200'
-              : 'border-secondary-200 hover:scale-105 hover:shadow-2xl hover:border-indigo-300'
-          ]"
-        >
-          <!-- Current Plan Badge -->
-          <div v-if="isCurrentPlan('business')" class="absolute -top-3 right-4">
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-badge flex items-center gap-1">
-              <Icon name="heroicons:check-circle" class="h-3 w-3" />
-              Current Plan
-            </span>
-          </div>
-          <div class="text-center flex flex-col flex-1">
-            <div
-              class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Icon
-                name="heroicons:building-office"
-                class="h-8 w-8 text-indigo-600"
-              />
-            </div>
-            <h3 class="card-title text-secondary-900 mb-2">Business</h3>
-            <div class="mb-6">
-              <span class="stat-value text-secondary-900">
-                {{ loading ? '...' : getFormattedPrice('business') }}
-              </span>
-            </div>
-            <p class="text-body text-secondary-600 mb-6">
-              For large organizations
-            </p>
-
-            <ul class="text-left space-y-3 mb-8">
-              <li v-for="feature in businessPlan?.features" :key="feature" class="flex items-center text-body">
-                <Icon
-                  name="heroicons:check"
-                  class="h-4 w-4 text-success-500 mr-2 flex-shrink-0"
-                />
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
-
+        <!-- Business -->
+        <div class="price-card">
+          <h2 class="price-card__name">Business</h2>
+          <div class="price-card__amount">{{ priceLabel('business') }}</div>
+          <p class="price-card__desc">
+            {{ businessPlan?.description || 'For large organizations' }}
+          </p>
+          <ul class="price-card__list">
+            <li v-for="feature in businessPlan?.features" :key="feature">
+              <Icon name="heroicons:check" class="h-4 w-4 price-card__tick" />
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+          <div class="price-card__cta">
             <button
+              class="btn-ghost-light w-full"
+              :disabled="selectingPlan !== null"
               @click="selectPlan('business')"
-              :disabled="isCurrentPlan('business')"
-              :class="[
-                'w-full py-3 px-4 rounded-xl text-button transition-colors mt-auto',
-                isCurrentPlan('business')
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              ]"
             >
-              {{ isCurrentPlan('business') ? '✓ Current Plan' : 'Choose Business' }}
+              Contact Sales
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Additional Info -->
-      <div class="text-center">
-        <p class="text-body text-secondary-600 mb-4">
-          All paid plans include a 14-day free trial. No credit card required to
-          start.
+      <!-- Footnotes — same wording as the pricing page -->
+      <div class="mt-12">
+        <p class="text-white/55">
+          Free plan: 14 days • No credit card required • Upgrade anytime
         </p>
-        <p class="text-helper">
-          Need help choosing?
-          <a href="#" class="text-primary-600 hover:text-primary-500"
-            >Contact our sales team</a
+        <div
+          class="mt-3 flex flex-col sm:flex-row gap-2 items-start sm:items-center"
+        >
+          <p class="text-body-sm text-white/65">Need help choosing?</p>
+          <NuxtLink
+            to="/Homepage/pricing"
+            class="text-[color:var(--brass)] hover:text-[color:var(--brass-200)] font-medium text-body-sm underline"
           >
-        </p>
+            Talk to our sales team
+          </NuxtLink>
+        </div>
       </div>
     </div>
 
-    <!-- Business Plan Request Modal -->
-  <div
-    v-if="showBusinessModal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    @click="closeBusinessModal"
-  >
+    <!-- Business plan enquiry modal (paper panel on the ink page) -->
     <div
-      class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-      @click.stop
+      v-if="showBusinessModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      @click="closeBusinessModal"
     >
-      <!-- Modal Header -->
       <div
-        class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl"
+        class="paper-surface text-secondary-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        @click.stop
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="p-3 bg-white/20 rounded-xl mr-4">
+        <!-- Modal header -->
+        <div
+          class="relative flex items-start justify-between gap-4 p-6 rounded-t-2xl"
+          style="background-color: var(--ink-900)"
+        >
+          <div class="flex items-start gap-4">
+            <div
+              class="flex items-center justify-center h-12 w-12 rounded-xl"
+              style="
+                background: color-mix(in srgb, var(--brass) 18%, transparent);
+                border: 1px solid color-mix(in srgb, var(--brass) 40%, transparent);
+              "
+            >
               <Icon
                 name="heroicons:building-office"
-                class="h-8 w-8 text-white"
+                class="h-6 w-6 text-[color:var(--brass)]"
               />
             </div>
             <div>
-              <h3 class="modal-title text-white">
+              <h3 class="modal-title text-[color:var(--paper)]">
                 Business Plan Request
               </h3>
-              <p class="text-body text-indigo-100 mt-1">
-                Tell us about your organization
+              <p class="text-body-sm text-white/60 mt-1">
+                Tell us about your organization and we'll tailor a plan.
               </p>
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Close"
+            class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             @click="closeBusinessModal"
-            class="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
           >
-            <Icon name="heroicons:x-mark" class="h-6 w-6" />
+            <Icon name="heroicons:x-mark" class="h-5 w-5" />
           </button>
         </div>
-      </div>
 
-      <!-- Modal Body -->
-      <form @submit.prevent="submitBusinessRequest" class="p-6 space-y-6">
-          <!-- Company Name -->
+        <!-- Modal body -->
+        <form class="p-6 space-y-5" @submit.prevent="submitBusinessRequest">
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Company Name <span class="text-red-500">*</span>
+              Company Name <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <input
               v-model="businessForm.company_name"
               type="text"
               required
               placeholder="Enter your company name"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             />
           </div>
 
-          <!-- Company Address -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Company Address <span class="text-red-500">*</span>
+              Company Address <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <textarea
               v-model="businessForm.company_address"
               required
               rows="3"
               placeholder="Enter your company address"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             ></textarea>
           </div>
 
-          <!-- Number of Cards (Quota) -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Number of NFC Cards Needed <span class="text-red-500">*</span>
+              Number of NFC Cards Needed
+              <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <input
               v-model.number="businessForm.quota"
@@ -407,56 +299,52 @@
               required
               min="1"
               placeholder="e.g., 50"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             />
             <p class="text-helper mt-2">
               How many NFC cards do you need for your team?
             </p>
           </div>
 
-          <!-- Contact Person -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Contact Person <span class="text-red-500">*</span>
+              Contact Person <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <input
               v-model="businessForm.contact_person"
               type="text"
               required
               placeholder="Full name"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             />
           </div>
 
-          <!-- Phone Number -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Phone Number <span class="text-red-500">*</span>
+              Phone Number <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <input
               v-model="businessForm.phone"
               type="tel"
               required
               placeholder="+60 12-345 6789"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             />
           </div>
 
-          <!-- Email -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
-              Email Address <span class="text-red-500">*</span>
+              Email Address <span class="text-[color:var(--brass-700)]">*</span>
             </label>
             <input
               v-model="businessForm.email"
               type="email"
               required
               placeholder="your@company.com"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             />
           </div>
 
-          <!-- Additional Notes -->
           <div>
             <label class="block text-label text-secondary-900 mb-2">
               Additional Notes (Optional)
@@ -465,35 +353,29 @@
               v-model="businessForm.notes"
               rows="3"
               placeholder="Any special requirements or questions?"
-              class="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              class="ink-field"
             ></textarea>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex space-x-4 pt-4">
+          <div class="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               @click="closeBusinessModal"
-              class="flex-1 py-3 px-4 bg-secondary-100 text-secondary-700 rounded-xl text-button hover:bg-secondary-200 transition-colors"
+              class="flex-1 inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-secondary-700 bg-secondary-100 hover:bg-secondary-200 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="submittingBusinessRequest"
-              class="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-button hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              class="flex-1 btn-brass"
             >
-              <div v-if="submittingBusinessRequest" class="flex items-center">
-                <div
-                  class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"
-                ></div>
-                Submitting...
-              </div>
-              <span v-else>Submit Request</span>
+              <span v-if="submittingBusinessRequest" class="btn-spinner"></span>
+              <span>{{ submittingBusinessRequest ? 'Submitting...' : 'Submit Request' }}</span>
             </button>
           </div>
 
-          <p class="text-helper text-center">
+          <p class="text-helper text-center text-secondary-600">
             Our team will contact you within 24 hours to discuss your Business
             Plan setup.
           </p>
@@ -504,7 +386,6 @@
 </template>
 
 <script setup>
-// Meta tags
 useHead({
   title: "Choose Your Plan - NFCGo",
   meta: [
@@ -519,30 +400,51 @@ useHead({
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
-// Plan prices from API
-const { loading, getFormattedPrice, getPlanDetails, loadPrices } = usePlanPrices();
+// Plan prices from API (same source as /Homepage/pricing)
+const { loading, planPrices, loadPrices } = usePlanPrices();
 
-// Get plan details
-const basicPlan = computed(() => getPlanDetails('basic'));
-const premiumPlan = computed(() => getPlanDetails('premium'));
-const businessPlan = computed(() => getPlanDetails('business'));
+const basicPlan = computed(() =>
+  planPrices.value.find((p) => p.plan_type === "basic")
+);
+const premiumPlan = computed(() =>
+  planPrices.value.find((p) => p.plan_type === "premium")
+);
+const businessPlan = computed(() =>
+  planPrices.value.find((p) => p.plan_type === "business")
+);
+
+// Free plan copy is kept identical to the pricing page so both funnels match.
+const freeFeatures = [
+  "1 Digital Profile",
+  "Basic Templates",
+  "Contact Information",
+  "Social Media Links",
+  "QR Code Backup",
+  "Basic Analytics",
+];
+
+// Same amount formatting as the pricing page.
+const priceLabel = (planType) => {
+  if (loading.value) return "Loading...";
+  const plan = planPrices.value.find((p) => p.plan_type === planType);
+  return plan ? `${plan.currency} ${plan.price}` : "Contact for Pricing";
+};
 
 // Get user's current plan
-const currentPlan = computed(() => authStore.user?.subscription_plan || 'free');
+const currentPlan = computed(() => authStore.user?.subscription_plan || "free");
+const accountEmail = computed(() => authStore.user?.email || "");
 
-// Check if a plan is the current plan (only for free/basic/premium, NOT business)
-const PLANS_WITH_INDICATOR = ['free', 'basic', 'premium'];
+// Only free/basic/premium can be shown as "current" — business is enquiry-only.
+const PLANS_WITH_INDICATOR = ["free", "basic", "premium"];
 const isCurrentPlan = (plan) => {
-  // Business plan users should NOT see any current plan indicator
-  if (!PLANS_WITH_INDICATOR.includes(currentPlan.value)) {
-    return false;
-  }
+  if (!PLANS_WITH_INDICATOR.includes(currentPlan.value)) return false;
   return currentPlan.value === plan;
 };
 
 // Business plan modal state
 const showBusinessModal = ref(false);
 const submittingBusinessRequest = ref(false);
+const selectingPlan = ref(null);
 
 // Business form data
 const businessForm = reactive({
@@ -555,64 +457,49 @@ const businessForm = reactive({
   notes: "",
 });
 
-// Check if user is authenticated
-onMounted(async () => {
-  console.log("PlanSelection mounted, checking auth...");
-  console.log("Initial auth state:", {
-    isAuthenticated: authStore.isAuthenticated,
-    hasUser: !!authStore.user,
-    userEmail: authStore.user?.email,
-  });
+const prefillContact = () => ({
+  contact_person:
+    authStore.user?.first_name && authStore.user?.last_name
+      ? `${authStore.user.first_name} ${authStore.user.last_name}`
+      : authStore.user?.name || "",
+  email: authStore.user?.email || "",
+});
 
+onMounted(async () => {
   // Wait for auth state to be ready (especially important after registration)
   if (!authStore.isAuthenticated || !authStore.user) {
-    console.log("Waiting for auth state to initialize...");
-
-    // Wait up to 2 seconds for auth state to be ready
     let attempts = 0;
     while ((!authStore.isAuthenticated || !authStore.user) && attempts < 10) {
       await new Promise((resolve) => setTimeout(resolve, 200));
       attempts++;
-      console.log(`Waiting for auth (attempt ${attempts})...`);
     }
 
-    // If still not authenticated after waiting, redirect to login
     if (!authStore.isAuthenticated || !authStore.user) {
-      console.log("Auth state not ready, redirecting to login");
       await navigateTo("/UserAccount/login");
       return;
     }
   }
 
-  console.log("User authenticated:", authStore.user.email);
-
-  // Load plan prices from API
   await loadPrices();
 
   // Pre-fill user info
-  businessForm.email = authStore.user?.email || "";
-  businessForm.contact_person =
-    authStore.user?.first_name && authStore.user?.last_name
-      ? `${authStore.user.first_name} ${authStore.user.last_name}`
-      : authStore.user?.name || "";
+  Object.assign(businessForm, prefillContact());
 });
 
 // Close business modal
 const closeBusinessModal = () => {
   showBusinessModal.value = false;
-  // Reset form
-  Object.assign(businessForm, {
-    company_name: "",
-    company_address: "",
-    quota: null,
-    contact_person:
-      authStore.user?.first_name && authStore.user?.last_name
-        ? `${authStore.user.first_name} ${authStore.user.last_name}`
-        : authStore.user?.name || "",
-    phone: "",
-    email: authStore.user?.email || "",
-    notes: "",
-  });
+  Object.assign(
+    businessForm,
+    {
+      company_name: "",
+      company_address: "",
+      quota: null,
+      phone: "",
+      notes: "",
+    },
+    prefillContact()
+  );
 };
 
 // Submit business plan request
@@ -641,7 +528,6 @@ const submitBusinessRequest = async () => {
       "Your Business Plan enquiry has been received. Our team will contact you soon."
     );
 
-    // Close modal and redirect to Homepage with success parameter
     closeBusinessModal();
     await navigateTo("/Homepage?businessRequest=success");
   } catch (error) {
@@ -657,39 +543,67 @@ const submitBusinessRequest = async () => {
 
 // Select plan and proceed
 const selectPlan = async (plan) => {
-  try {
-    // If business plan is selected, show the modal instead
-    if (plan === "business") {
-      showBusinessModal.value = true;
-      return;
-    }
+  // Business is an enquiry, not a self-serve plan.
+  if (plan === "business") {
+    showBusinessModal.value = true;
+    return;
+  }
 
+  if (selectingPlan.value || isCurrentPlan(plan)) return;
+  selectingPlan.value = plan;
+
+  try {
     // Store selected plan in session storage for the onboarding flow
     sessionStorage.setItem("selectedPlan", plan);
 
-    // Call backend API to update user's plan
     const { $api } = useNuxtApp();
     await $api.post("/onboarding/select-plan", { plan });
 
-    // Free plan users skip NFC customization and go directly to their profile builder
+    // Free plan users skip NFC customization and go straight to the profile builder
     if (plan === "free") {
       $toast.success("Free plan activated! Welcome to your profile builder.");
-      await navigateTo("/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder");
+      await navigateTo(
+        "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder"
+      );
       return;
     }
 
     // Paid plans continue to NFC card customization
-    $toast.success(
-      `Great choice! Let's customize your ${plan} plan NFC card.`
-    );
-    
-    // Use navigateTo for proper Nuxt 3 navigation instead of router.push
-    await navigateTo(
-      "/UserDashboard/UserManagement/NFCCardDesignCustomization"
-    );
+    $toast.success(`Great choice! Let's customize your ${plan} plan NFC card.`);
+    await navigateTo("/UserDashboard/UserManagement/NFCCardDesignCustomization");
   } catch (error) {
     console.error("Plan selection error:", error);
-    $toast.error("Failed to select plan. Please try again.");
+    // The global api.client 403 handler already toasts the specific reason for
+    // one-time-trial refusals (TRIAL_* / DISPOSABLE_EMAIL) and for unverified
+    // emails, so only show a fallback toast for everything else.
+    const data = error?.response?.data;
+    const handledByInterceptor =
+      error?.response?.status === 403 &&
+      (typeof data?.code === "string" ||
+        data?.email_verification_required ||
+        data?.error === "EMAIL_NOT_VERIFIED");
+    if (!handledByInterceptor) {
+      $toast.error(data?.message || "Failed to select plan. Please try again.");
+    }
+    selectingPlan.value = null;
   }
 };
 </script>
+
+<style scoped>
+/* Small inline spinner that inherits the button's own text colour. */
+.btn-spinner {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: plan-spin 0.7s linear infinite;
+}
+@keyframes plan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

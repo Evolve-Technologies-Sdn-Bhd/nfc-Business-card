@@ -3,18 +3,17 @@
   <div class="relative">
     <!-- ==============================================
          FULL-PAGE INITIAL LOADING
-         Show when: dashboard belum fetch lagi (null) OR API still loading
+         Show when: dashboard belum fetch lagi (null) OR API still loading.
+         The loader centres itself on the visible viewport (see
+         NFCGoWaveLoader `.nfg-viewport`) — no wrapper height needed.
          ============================================== -->
-    <div
-      v-if="dashboard === null || loading"
-      class="w-full min-h-[60vh] flex items-center justify-center py-16"
-    >
+    <div v-if="dashboard === null || loading" class="w-full">
       <NFCGoWaveLoader
         variant="wave"
         size="lg"
         theme="light"
         :showText="true"
-        hintText="Memuatkan dashboard..."
+        hintText="Loading dashboard..."
       />
     </div>
 
@@ -127,7 +126,7 @@
                 </span>
                 <span
                   v-if="user.is_admin"
-                  class="px-2 py-1 text-badge bg-red-100 text-red-800 rounded-full"
+                  class="px-2 py-1 text-badge bg-error-100 text-error-800 rounded-full"
                 >
                   Admin
                 </span>
@@ -391,9 +390,9 @@ onMounted(async () => {
 const getSubscriptionBadgeClass = (plan) => {
   const classes = {
     free: "bg-secondary-100 text-secondary-800",
-    basic: "bg-blue-100 text-blue-800",
-    premium: "bg-purple-100 text-purple-800",
-    business: "bg-green-100 text-green-800",
+    basic: "bg-info-100 text-info-800",
+    premium: "bg-primary-100 text-primary-800",
+    business: "bg-success-100 text-success-800",
   };
   return classes[plan] || classes.free;
 };
@@ -473,18 +472,18 @@ const getActivityIcon = (action) => {
 const getActivityIconClass = (action) => {
   const classes = {
     // Analytics interactions
-    profile_view: "bg-blue-500",
-    nfc_tap: "bg-green-500",
-    link_click: "bg-purple-500",
+    profile_view: "bg-info-500",
+    nfc_tap: "bg-success-500",
+    link_click: "bg-primary-500",
 
     // Auth / session
-    user_logged_in: "bg-orange-500",
-    user_login_success: "bg-orange-500",
+    user_logged_in: "bg-warning-500",
+    user_login_success: "bg-warning-500",
     user_logged_out: "bg-secondary-500",
     user_registered: "bg-success-500",
     registration: "bg-success-500",
     user_verified: "bg-success-500",
-    email_verified: "bg-blue-500",
+    email_verified: "bg-info-500",
     password_updated: "bg-info-500",
     password_reset_requested: "bg-warning-500",
     password_reset_completed: "bg-success-500",
@@ -502,8 +501,8 @@ const getActivityIconClass = (action) => {
     payment_succeeded: "bg-success-500",
     payment_failed: "bg-error-500",
     payment_verified: "bg-success-500",
-    order_placed: "bg-blue-500",
-    nfc_order_placed: "bg-blue-500",
+    order_placed: "bg-info-500",
+    nfc_order_placed: "bg-info-500",
     order_approved: "bg-success-500",
     order_rejected: "bg-error-500",
     order_shipped: "bg-primary-500",
@@ -521,8 +520,8 @@ const getActivityIconClass = (action) => {
     profile_published: "bg-success-500",
     profile_unpublished: "bg-secondary-500",
     profile_builder_accessed: "bg-primary-500",
-    template_applied: "bg-purple-500",
-    theme_changed: "bg-pink-500",
+    template_applied: "bg-primary-500",
+    theme_changed: "bg-success-500",
 
     // Admin / system
     admin_approved_user: "bg-success-500",
@@ -530,7 +529,7 @@ const getActivityIconClass = (action) => {
     admin_verified_payment: "bg-success-500",
     admin_created_card: "bg-primary-500",
     admin_updated_config: "bg-info-500",
-    admin_updated_branding: "bg-purple-500",
+    admin_updated_branding: "bg-primary-500",
     admin_deleted_user: "bg-error-500",
 
     // Business

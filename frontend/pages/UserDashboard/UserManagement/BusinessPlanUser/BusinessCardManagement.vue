@@ -18,6 +18,35 @@
         </div>
       </div>
     </div>
+
+    <!-- Bulk Selection Toolbar -->
+    <div
+      v-if="selectedCardIds.length > 0"
+      class="sticky top-4 z-30 mb-6 bg-primary-600 text-white rounded-lg shadow-lg px-4 py-3 flex items-center justify-between"
+    >
+      <div class="flex items-center">
+        <Icon name="heroicons:check-circle" class="h-5 w-5 mr-2" />
+        <span class="text-body font-medium">
+          {{ selectedCardIds.length }} card{{ selectedCardIds.length > 1 ? "s" : "" }} selected
+        </span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button
+          @click="clearSelection"
+          class="text-navigation text-white/90 hover:text-white"
+        >
+          Clear
+        </button>
+        <button
+          @click="openAssignModal"
+          class="btn btn-sm bg-white text-primary-700 hover:bg-primary-50"
+        >
+          <Icon name="heroicons:user-plus" class="h-4 w-4 mr-1" />
+          Assign to Employee
+        </button>
+      </div>
+    </div>
+
       <!-- Employee Filter Notice -->
       <div
         v-if="route.query.employee_id"
@@ -146,13 +175,21 @@
           <div v-for="card in myCards" :key="card.id" class="card">
             <div class="card-header">
               <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="card-title">
-                    {{ card.card_owner }}
-                  </h3>
-                  <p class="text-body text-secondary-600">
-                    Card ID: {{ card.card_id }}
-                  </p>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(card.id)"
+                    @change="toggleSelect(card.id)"
+                    class="h-4 w-4 mr-3 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <div>
+                    <h3 class="card-title">
+                      {{ card.card_owner }}
+                    </h3>
+                    <p class="text-body text-secondary-600">
+                      Card ID: {{ card.card_id }}
+                    </p>
+                  </div>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span
@@ -279,7 +316,13 @@
           >
             <div class="card-header">
               <div class="flex items-center justify-between">
-                <div>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(card.id)"
+                    @change="toggleSelect(card.id)"
+                    class="h-4 w-4 mr-3 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                  />
                   <div class="flex items-center space-x-2">
                     <h3 class="card-title">
                       {{ card.card_owner }}
@@ -869,6 +912,85 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Bulk Assign Modal -->
+    <Transition name="modal">
+      <div v-if="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50"
+            @click="showAssignModal = false"
+          ></div>
+          <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="card-title">
+                Assign Cards to Employee
+              </h3>
+              <button
+                @click="showAssignModal = false"
+                class="text-secondary-400 hover:text-secondary-600"
+              >
+                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              </button>
+            </div>
+
+            <p class="text-body text-secondary-600 mb-4">
+              {{ selectedCardIds.length }} card(s) selected. Choose which employee
+              these cards should belong to.
+            </p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-label text-secondary-700 mb-1">
+                  Assign To
+                </label>
+                <select v-model="assignTargetEmployeeId" class="input w-full">
+                  <option value="">Account Owner (unassigned)</option>
+                  <option
+                    v-for="employee in employees"
+                    :key="employee.id"
+                    :value="employee.id"
+                  >
+                    {{ employee.name }} ({{ employee.email }})
+                  </option>
+                </select>
+                <p class="text-helper mt-1">
+                  Choosing the account owner returns these cards to Admin Cards.
+                </p>
+              </div>
+
+              <div
+                v-if="employees.length === 0"
+                class="bg-warning-50 border border-warning-200 rounded-lg p-3"
+              >
+                <p class="text-body text-warning-700">
+                  No employees found. Add employees from Employee Management first.
+                </p>
+              </div>
+
+              <div class="flex items-center justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  @click="showAssignModal = false"
+                  class="btn btn-outline"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  @click="submitBulkAssign"
+                  class="btn btn-primary"
+                  :disabled="bulkAssignLoading"
+                >
+                  <div v-if="bulkAssignLoading" class="spinner mr-2"></div>
+                  Assign Cards
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -909,6 +1031,12 @@ const showOrderModal = ref(false);
 const orderLoading = ref(false);
 const showCardDetailsModal = ref(false);
 const selectedCard = ref(null);
+
+// Bulk assignment
+const selectedCardIds = ref([]);
+const showAssignModal = ref(false);
+const assignTargetEmployeeId = ref("");
+const bulkAssignLoading = ref(false);
 
 // Filters
 const filters = ref({
@@ -1029,8 +1157,12 @@ const goToDesignPage = () => {
 const loadEmployees = async () => {
   try {
     const response = await $api.get("/business/employees");
-    if (response && response.success) {
-      employees.value = response.employees || [];
+    if (response && response.success && response.data) {
+      employees.value = (response.data.employees || []).map((emp) => ({
+        ...emp,
+        name: emp.full_name || `${emp.first_name || ""} ${emp.last_name || ""}`.trim(),
+        business_role: emp.business_role || "member",
+      }));
     } else {
       employees.value = [];
     }
@@ -1067,6 +1199,7 @@ const loadNfcCards = async () => {
 const applyFilters = () => {
   // Filters are applied via computed property
   // This function is called to trigger reactivity
+  clearSelection();
 };
 
 const clearFilters = () => {
@@ -1075,16 +1208,71 @@ const clearFilters = () => {
     status: "",
     search: "",
   };
+  clearSelection();
 };
 
 const clearEmployeeFilter = () => {
   // Clear filter
   filters.value.employee_id = "";
+  clearSelection();
   // Remove query params from URL
   router.push({ 
     path: route.path,
     query: {} 
   });
+};
+
+// ─── Bulk card assignment ───────────────────────────────────────────────
+const isSelected = (cardId) => selectedCardIds.value.includes(cardId);
+
+const toggleSelect = (cardId) => {
+  const index = selectedCardIds.value.indexOf(cardId);
+  if (index === -1) {
+    selectedCardIds.value.push(cardId);
+  } else {
+    selectedCardIds.value.splice(index, 1);
+  }
+};
+
+const clearSelection = () => {
+  selectedCardIds.value = [];
+};
+
+const openAssignModal = () => {
+  if (selectedCardIds.value.length === 0) return;
+  assignTargetEmployeeId.value = "";
+  showAssignModal.value = true;
+};
+
+const submitBulkAssign = async () => {
+  if (selectedCardIds.value.length === 0) return;
+
+  bulkAssignLoading.value = true;
+  try {
+    const response = await $api.post("/business/cards/bulk-assign", {
+      card_ids: selectedCardIds.value,
+      employee_id:
+        assignTargetEmployeeId.value === ""
+          ? null
+          : Number(assignTargetEmployeeId.value),
+    });
+
+    if (response && response.success) {
+      $toast.success(response.message || "Cards assigned successfully");
+      showAssignModal.value = false;
+      clearSelection();
+
+      const uid = authStore.user?.id;
+      if (uid) invalidateCardsCache(uid);
+      await loadNfcCards();
+      if (uid) setCachedNfcCards(uid, nfcCards.value);
+    }
+  } catch (error) {
+    console.error("Bulk assign error:", error);
+    $toast.error(error?.data?.message || "Failed to assign cards");
+  } finally {
+    bulkAssignLoading.value = false;
+  }
 };
 
 const orderNewCard = () => {

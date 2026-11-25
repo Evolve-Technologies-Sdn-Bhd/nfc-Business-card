@@ -88,13 +88,25 @@ return new class extends Migration
         }
 
         try {
-            Schema::table('activity_logs', function (Blueprint $table) {
-                // Re-create useful indexes on the new varchar column
-                $table->index('action_type', 'activity_logs_action_type_index');
-                $table->index(['user_id', 'created_at'], 'activity_logs_user_created_index');
-                $table->index(['business_account_id', 'created_at'], 'activity_logs_business_created_index');
-                $table->index('created_at', 'activity_logs_created_at_index');
-            });
+            // Re-create useful indexes on the new varchar column, but only when
+            // they are missing — `Schema::change()` on SQLite may already carry
+            // some of them over, which previously triggered "index ... already
+            // exists" errors on every fresh migrate.
+            $indexes = [
+                'activity_logs_action_type_index' => ['action_type'],
+                'activity_logs_user_created_index' => ['user_id', 'created_at'],
+                'activity_logs_business_created_index' => ['business_account_id', 'created_at'],
+                'activity_logs_created_at_index' => ['created_at'],
+            ];
+
+            foreach ($indexes as $name => $columns) {
+                if (Schema::hasIndex('activity_logs', $name)) {
+                    continue;
+                }
+                Schema::table('activity_logs', function (Blueprint $table) use ($columns, $name) {
+                    $table->index($columns, $name);
+                });
+            }
         } catch (\Throwable $e) {
             // If re-index fails the table is still fully functional.
             report($e);

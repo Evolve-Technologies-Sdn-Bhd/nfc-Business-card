@@ -635,9 +635,9 @@
             />
           </div>
 
-          <!-- NFCGo Watermark (shown when Remove Branding is disabled) -->
+          <!-- NFCGo Watermark (shown when the plan/admin policy includes branding) -->
           <div
-            v-if="!isFeatureEnabled('remove_branding')"
+            v-if="showNfcgoBranding"
             :style="{
               position: 'absolute',
               top: isSmallMobile ? '10px' : isMobile ? '12px' : '16px',
@@ -667,7 +667,7 @@
                 : '88px 56px 64px',
               position: 'relative',
               zIndex: 1,
-              paddingTop: isFeatureEnabled('remove_branding')
+              paddingTop: !showNfcgoBranding
                 ? (isSmallMobile ? '28px' : isPhablet ? '32px' : isMobile ? '36px' : isTablet ? '48px' : '56px')
                 : undefined,
             }"
@@ -863,30 +863,6 @@
             </p>
           </div>
 
-          <!-- Particles -->
-          <div
-            :style="{
-              position: 'absolute',
-              inset: 0,
-              overflow: 'hidden',
-              pointerEvents: 'none',
-            }"
-          >
-            <div
-              v-for="n in 20"
-              :key="n"
-              :style="{
-                position: 'absolute',
-                width: '4px',
-                height: '4px',
-                background: 'white',
-                borderRadius: '50%',
-                animation: 'particleFloat 3s infinite ease-in-out',
-                opacity: 0.3,
-                ...getParticleStyle(n),
-              }"
-            />
-          </div>
           </div>
         </div>
 
@@ -5020,6 +4996,10 @@ const features = ref({
   social_sharing: true,       // Social Sharing buttons
 });
 
+// NFCGo branding visibility — resolved by the plan + admin policy on the API
+// response (show_nfcgo_branding). Preview mode falls back to the owner toggle.
+const showNfcgoBranding = ref(true);
+
 // Available features (assigned by admin) - if empty, all features are available
 const availableFeatures = ref([]);
 
@@ -5461,6 +5441,10 @@ const loadPreviewData = (data) => {
   } else {
     console.log('⚠️ No features in preview data, using defaults:', features.value);
   }
+
+  // Preview has no server-side plan policy — mirror the owner's branding toggle.
+  showNfcgoBranding.value = features.value.remove_branding !== true;
+
   if (data.featureOrder && Array.isArray(data.featureOrder)) {
     featureOrder.value = data.featureOrder;
     console.log('✨ Feature order loaded from preview:', featureOrder.value);
@@ -5921,6 +5905,11 @@ const loadProfileData = async () => {
         console.log('✨ Features loaded:', features.value);
       }
 
+      // Branding visibility is resolved server-side (plan + admin policy).
+      showNfcgoBranding.value = typeof response.show_nfcgo_branding === 'boolean'
+        ? response.show_nfcgo_branding
+        : features.value.remove_branding !== true;
+
       // Load available features (assigned by admin)
       // Backend does not persist available_features, so derive it from the user's
       // feature toggles. Any feature the user has a setting for is "available".
@@ -6106,14 +6095,6 @@ const shouldShowField = (fieldKey) => {
   
   return visibleFieldsConfig.value.some(f => f.field_key === fieldKey);
 };
-
-// Functions
-const getParticleStyle = (n) => ({
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-  animationDelay: `${Math.random() * 3}s`,
-  animationDuration: `${Math.random() * 3 + 2}s`,
-});
 
 // ==================== C. Handle Actions (using real data) ====================
 const handleAction = (action) => {

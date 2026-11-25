@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="mb-6">
+    <div class="mb-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 class="page-title text-secondary-900">Card Designer</h1>
@@ -24,6 +24,10 @@
             <Icon v-if="exporting" name="heroicons:arrow-path" class="h-4 w-4 mr-1.5 animate-spin" />
             <Icon v-else name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1.5" />
             Export PDF
+          </button>
+          <button @click="openTemplateModal" class="btn btn-outline btn-sm">
+            <Icon name="heroicons:rectangle-stack" class="h-4 w-4 mr-1.5" />
+            Save as Template
           </button>
         </div>
       </div>
@@ -409,6 +413,71 @@
         </div>
       </div>
     </div>
+
+    <!-- Save as Template Modal -->
+    <Transition name="modal">
+      <div v-if="showTemplateModal" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-screen items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/50" @click="closeTemplateModal"></div>
+          <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+            <div class="flex items-start justify-between mb-6">
+              <div>
+                <h3 class="modal-title text-secondary-900">Save as Template</h3>
+                <p class="text-helper mt-1">Render the current design into a card template customers can pick.</p>
+              </div>
+              <button @click="closeTemplateModal" class="-mt-1 text-secondary-400 hover:text-secondary-600">
+                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              </button>
+            </div>
+
+            <form @submit.prevent="promoteToTemplate" class="space-y-5">
+              <div>
+                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
+                <input v-model="templateForm.name" type="text" class="input" maxlength="80" placeholder="e.g. Emerald Executive" />
+              </div>
+
+              <div>
+                <label class="block text-label text-secondary-700 mb-2">Description</label>
+                <textarea v-model="templateForm.description" rows="2" class="input resize-none" maxlength="200" placeholder="Short description about this template"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-label text-secondary-700 mb-2">Category</label>
+                <select v-model="templateForm.category" class="input">
+                  <option value="business">Business</option>
+                  <option value="personal">Personal</option>
+                  <option value="creative">Creative</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-label text-secondary-700 mb-2">Available Plans *</label>
+                <div class="flex flex-wrap gap-4">
+                  <label v-for="p in templatePlanOptions" :key="p.value" class="flex items-center gap-2 text-body text-secondary-600 cursor-pointer">
+                    <input type="checkbox" class="rounded text-primary-600" :value="p.value" v-model="templateForm.planTypes" />
+                    {{ p.label }}
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2">
+                <Icon name="heroicons:information-circle" class="h-4 w-4 text-secondary-400 shrink-0" />
+                <span class="text-helper">Front and back sides are rendered at {{ EXPORT_PX_PER_MM }}px/mm and saved as a new template.</span>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="btn btn-outline" @click="closeTemplateModal" :disabled="promoting">Cancel</button>
+                <button type="submit" class="btn btn-primary" :disabled="promoting">
+                  <Icon v-if="promoting" name="heroicons:arrow-path" class="h-4 w-4 mr-1.5 animate-spin" />
+                  <Icon v-else name="heroicons:check" class="h-4 w-4 mr-1.5" />
+                  {{ promoting ? 'Creating...' : 'Create Template' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -449,6 +518,21 @@ const loadingDesigns = ref(false);
 const designs = ref([]);
 const bgInput = ref(null);
 const imgInput = ref(null);
+
+// "Save as Template" state
+const showTemplateModal = ref(false);
+const promoting = ref(false);
+const templatePlanOptions = [
+  { value: 'basic', label: 'Basic' },
+  { value: 'premium', label: 'Premium' },
+  { value: 'business', label: 'Business' },
+];
+const templateForm = reactive({
+  name: '',
+  description: '',
+  category: 'business',
+  planTypes: ['business'],
+});
 
 const design = reactive({
   id: null,
@@ -960,6 +1044,149 @@ async function exportPdf() {
     $toast.error('Failed to export PDF');
   } finally {
     exporting.value = false;
+  }
+}
+
+// ── Save as Template ────────────────────────────────────────
+const FONT_FAMILY_MAP = {
+  helvetica: 'Helvetica, Arial, sans-serif',
+  times: '"Times New Roman", Times, serif',
+  courier: '"Courier New", Courier, monospace',
+};
+
+function openTemplateModal() {
+  if (!design.name.trim()) {
+    $toast.error('Please enter a design name first');
+    return;
+  }
+  templateForm.name = design.name.trim();
+  templateForm.description = '';
+  templateForm.category = 'business';
+  templateForm.planTypes = ['business'];
+  showTemplateModal.value = true;
+}
+
+function closeTemplateModal() {
+  if (promoting.value) return;
+  showTemplateModal.value = false;
+}
+
+function dataURLtoBlob(dataURL) {
+  const [meta, b64] = dataURL.split(',');
+  const mime = (meta.match(/:(.*?);/) || [])[1] || 'image/png';
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+function sideHasContent(side) {
+  return (design[`${side}_elements`] || []).length > 0 || !!design[`background_${side}_url`];
+}
+
+// Draw a single element onto the target canvas at the given mm→px scale.
+async function drawElementOnCanvas(ctx, el, bleedMm, pxPerMm) {
+  if (el.type === 'text') {
+    const fontPx = (el.fontSize || 10) * PT_TO_MM * pxPerMm;
+    ctx.save();
+    ctx.translate((el.x + bleedMm) * pxPerMm, (el.y + bleedMm) * pxPerMm);
+    if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
+    ctx.fillStyle = el.color || '#000000';
+    ctx.font = `${el.fontWeight === 'bold' ? 'bold' : 'normal'} ${fontPx}px ${FONT_FAMILY_MAP[el.fontFamily] || 'sans-serif'}`;
+    ctx.textAlign = el.align || 'left';
+    ctx.textBaseline = 'alphabetic';
+    const lineH = fontPx * (el.lineHeight || 1.2);
+    const boxW = el.w * pxPerMm;
+    const tx = el.align === 'center' ? boxW / 2 : el.align === 'right' ? boxW : 0;
+    String(el.text || '').split('\n').forEach((line, i) => {
+      ctx.fillText(line, tx, fontPx * 0.82 + i * lineH);
+    });
+    ctx.restore();
+    return;
+  }
+
+  if (!['image', 'rect', 'qr'].includes(el.type)) return;
+
+  try {
+    const { dataURL } = await renderShape(el, pxPerMm);
+    const img = await loadImage(dataURL);
+    const cx = (el.x + bleedMm + el.w / 2) * pxPerMm;
+    const cy = (el.y + bleedMm + el.h / 2) * pxPerMm;
+    ctx.drawImage(img, cx - img.width / 2, cy - img.height / 2, img.width, img.height);
+  } catch (err) {
+    console.warn(`Template render skipped ${el.type} element`, err);
+  }
+}
+
+// Render one full side (background + elements) into a PNG data URL.
+async function renderSideToDataURL(side) {
+  const pxPerMm = EXPORT_PX_PER_MM;
+  const b = design.bleed ? BLEED_MM : 0;
+  const pw = cardSize.value.w + b * 2;
+  const ph = cardSize.value.h + b * 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(pw * pxPerMm);
+  canvas.height = Math.round(ph * pxPerMm);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const bgUrl = design[`background_${side}_url`];
+  if (bgUrl) {
+    try {
+      const bgImg = await loadImage(await urlToDataURL(bgUrl));
+      drawCover(ctx, bgImg, 0, 0, canvas.width, canvas.height);
+    } catch (err) {
+      console.warn('Template background render skipped', err);
+    }
+  }
+
+  for (const el of design[`${side}_elements`] || []) {
+    await drawElementOnCanvas(ctx, el, b, pxPerMm);
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
+async function promoteToTemplate() {
+  if (!templateForm.name.trim()) {
+    $toast.error('Please enter a template name');
+    return;
+  }
+  if (!templateForm.planTypes.length) {
+    $toast.error('Select at least one plan');
+    return;
+  }
+
+  promoting.value = true;
+  try {
+    const frontData = await renderSideToDataURL('front');
+    const hasBack = sideHasContent('back');
+
+    const fd = new FormData();
+    fd.append('name', templateForm.name.trim());
+    fd.append('description', templateForm.description.trim());
+    fd.append('category', templateForm.category);
+    templateForm.planTypes.forEach((p) => fd.append('plan_types[]', p));
+    fd.append('front_image', dataURLtoBlob(frontData), 'front.png');
+    if (hasBack) {
+      const backData = await renderSideToDataURL('back');
+      fd.append('back_image', dataURLtoBlob(backData), 'back.png');
+    }
+
+    const res = await $api.post('/admin/card-templates', fd);
+    if (res?.success) {
+      $toast.success(res.message || 'Template created');
+      showTemplateModal.value = false;
+    } else {
+      $toast.error(res?.message || 'Failed to create template');
+    }
+  } catch (err) {
+    console.error(err);
+    $toast.error(err?.data?.message || 'Failed to create template');
+  } finally {
+    promoting.value = false;
   }
 }
 

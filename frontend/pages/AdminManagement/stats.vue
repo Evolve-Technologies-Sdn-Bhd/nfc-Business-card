@@ -183,19 +183,19 @@
             </div>
             <div class="grid grid-cols-3 gap-4">
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-h5 text-blue-600">
+                <p class="text-h5 text-info-600">
                   {{ stats.analytics.profile_views }}
                 </p>
                 <p class="text-caption text-secondary-600">Profile Views</p>
               </div>
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-h5 text-green-600">
+                <p class="text-h5 text-success-600">
                   {{ stats.analytics.nfc_taps }}
                 </p>
                 <p class="text-caption text-secondary-600">NFC Taps</p>
               </div>
               <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                <p class="text-h5 text-purple-600">
+                <p class="text-h5 text-primary-600">
                   {{ stats.analytics.link_clicks }}
                 </p>
                 <p class="text-caption text-secondary-600">Link Clicks</p>
@@ -422,9 +422,9 @@ onMounted(async () => {
 const getPlanColor = (plan) => {
   const colors = {
     free: "bg-secondary-400",
-    basic: "bg-blue-400",
-    premium: "bg-purple-400",
-    business: "bg-green-400",
+    basic: "bg-info-400",
+    premium: "bg-primary-400",
+    business: "bg-success-400",
   };
   return colors[plan] || "bg-secondary-400";
 };
@@ -496,17 +496,17 @@ const getActivityIcon = (action) => {
 
 const getActivityIconClass = (action) => {
   const classes = {
-    profile_view: "bg-blue-500",
-    nfc_tap: "bg-green-500",
-    link_click: "bg-purple-500",
+    profile_view: "bg-info-500",
+    nfc_tap: "bg-success-500",
+    link_click: "bg-primary-500",
 
-    user_logged_in: "bg-orange-500",
-    user_login_success: "bg-orange-500",
+    user_logged_in: "bg-warning-500",
+    user_login_success: "bg-warning-500",
     user_logged_out: "bg-secondary-500",
     user_registered: "bg-success-500",
     registration: "bg-success-500",
     user_verified: "bg-success-500",
-    email_verified: "bg-blue-500",
+    email_verified: "bg-info-500",
     password_updated: "bg-info-500",
     password_reset_requested: "bg-warning-500",
     password_reset_completed: "bg-success-500",
@@ -522,8 +522,8 @@ const getActivityIconClass = (action) => {
     payment_succeeded: "bg-success-500",
     payment_failed: "bg-error-500",
     payment_verified: "bg-success-500",
-    order_placed: "bg-blue-500",
-    nfc_order_placed: "bg-blue-500",
+    order_placed: "bg-info-500",
+    nfc_order_placed: "bg-info-500",
     order_approved: "bg-success-500",
     order_rejected: "bg-error-500",
     order_shipped: "bg-primary-500",
@@ -540,15 +540,15 @@ const getActivityIconClass = (action) => {
     profile_published: "bg-success-500",
     profile_unpublished: "bg-secondary-500",
     profile_builder_accessed: "bg-primary-500",
-    template_applied: "bg-purple-500",
-    theme_changed: "bg-pink-500",
+    template_applied: "bg-primary-500",
+    theme_changed: "bg-success-500",
 
     admin_approved_user: "bg-success-500",
     admin_rejected_user: "bg-error-500",
     admin_verified_payment: "bg-success-500",
     admin_created_card: "bg-primary-500",
     admin_updated_config: "bg-info-500",
-    admin_updated_branding: "bg-purple-500",
+    admin_updated_branding: "bg-primary-500",
     admin_deleted_user: "bg-error-500",
 
     business_created: "bg-primary-500",

@@ -1402,11 +1402,11 @@ const profileData = reactive({
     { initials: "", name: "", role: "" },
   ],
 
-  // Design Settings
+  // Design Settings — default = system "Ink & Brass" palette (black + gold)
   profileStyle: "classic",
-  theme: "minimal",
-  backgroundColor: "#FFFFFF",
-  textColor: "#000000",
+  theme: "ink-brass",
+  backgroundColor: "#06090d",
+  textColor: "#f7f5f0",
   font: "inter",
   buttonStyle: "solid",
   bio: "",
@@ -1485,6 +1485,12 @@ const tabs = [
 const profileStyles = [{ id: "classic", name: "Classic" }];
 
 const themes = [
+  {
+    id: "ink-brass",
+    name: "Ink & Brass",
+    preview: "bg-[#06090d]",
+    backgroundColor: "#06090d",
+  },
   {
     id: "minimal",
     name: "Minimal",

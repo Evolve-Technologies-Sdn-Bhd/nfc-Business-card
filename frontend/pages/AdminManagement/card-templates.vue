@@ -50,15 +50,15 @@
                 <span class="font-semibold text-secondary-900">{{ templates.length }}</span>
                 <span class="text-secondary-500"> total</span>
               </span>
-              <span class="text-body text-green-600">
+              <span class="text-body text-success-600">
                 <Icon name="heroicons:check-circle" class="h-4 w-4 inline" />
                 {{ activeCount }}
               </span>
-              <span class="text-body text-yellow-600">
+              <span class="text-body text-warning-600">
                 <Icon name="heroicons:clock" class="h-4 w-4 inline" />
                 {{ processingCount }}
               </span>
-              <span class="text-body text-red-600">
+              <span class="text-body text-error-600">
                 <Icon name="heroicons:x-circle" class="h-4 w-4 inline" />
                 {{ failedCount }}
               </span>
@@ -128,7 +128,7 @@
                 </button>
                 <button
                   @click="toggleVisibility(template)"
-                  class="p-2 rounded-full bg-white text-secondary-700 hover:bg-yellow-50"
+                  class="p-2 rounded-full bg-white text-secondary-700 hover:bg-warning-50"
                   :title="template.is_hidden ? 'Show' : 'Hide'"
                 >
                   <Icon :name="template.is_hidden ? 'heroicons:eye' : 'heroicons:eye-slash'" class="h-5 w-5" />
@@ -136,14 +136,14 @@
                 <button
                   v-if="template.processing_status === 'failed'"
                   @click="retryProcessing(template)"
-                  class="p-2 rounded-full bg-white text-yellow-600 hover:bg-yellow-50"
+                  class="p-2 rounded-full bg-white text-warning-600 hover:bg-warning-50"
                   title="Retry Processing"
                 >
                   <Icon name="heroicons:arrow-path" class="h-5 w-5" />
                 </button>
                 <button
                   @click="confirmDelete(template)"
-                  class="p-2 rounded-full bg-white text-red-600 hover:bg-red-50"
+                  class="p-2 rounded-full bg-white text-error-600 hover:bg-error-50"
                   title="Delete"
                 >
                   <Icon name="heroicons:trash" class="h-5 w-5" />
@@ -307,11 +307,11 @@
               </div>
 
               <!-- Cloudinary Upload Info -->
-              <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="p-4 bg-success-50 border border-success-200 rounded-lg">
                 <div class="flex">
-                  <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5 text-success-600 flex-shrink-0 mt-0.5" />
                   <div class="ml-3">
-                    <p class="text-body text-green-800">
+                    <p class="text-body text-success-800">
                       Images will be uploaded to Cloudinary CDN for fast, worldwide delivery. 
                       Your template will be available immediately after upload.
                     </p>
@@ -420,7 +420,7 @@
                     v-if="editFrontFile || editForm._removeFront"
                     type="button"
                     @click="revertFrontImage"
-                    class="text-caption text-secondary-500 hover:text-red-600"
+                    class="text-caption text-secondary-500 hover:text-error-600"
                   >
                     Revert to original
                   </button>
@@ -460,7 +460,7 @@
                     v-if="editBackFile || editForm._removeBack"
                     type="button"
                     @click="revertBackImage"
-                    class="text-caption text-secondary-500 hover:text-red-600"
+                    class="text-caption text-secondary-500 hover:text-error-600"
                   >
                     Revert to original
                   </button>
@@ -522,8 +522,8 @@
           <div class="fixed inset-0 bg-black/50" @click="showDeleteModal = false"></div>
           <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div class="text-center">
-              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-red-600" />
+              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-error-100 mb-4">
+                <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-error-600" />
               </div>
               <h3 class="modal-title text-secondary-900 mb-2">Delete Template</h3>
               <p class="text-body text-secondary-500 mb-6">
@@ -531,7 +531,7 @@
               </p>
               <div class="flex justify-center gap-3">
                 <button @click="showDeleteModal = false" class="btn btn-outline">Cancel</button>
-                <button @click="deleteTemplate" class="btn bg-red-600 text-white hover:bg-red-700" :disabled="deleting">
+                <button @click="deleteTemplate" class="btn bg-error-600 text-white hover:bg-error-700" :disabled="deleting">
                   <div v-if="deleting" class="spinner mr-2"></div>
                   {{ deleting ? 'Deleting...' : 'Delete' }}
                 </button>
@@ -695,10 +695,10 @@ const getImageUrl = (url) => {
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    completed: 'px-2 py-1 text-badge rounded-full bg-green-100 text-green-800',
-    processing: 'px-2 py-1 text-badge rounded-full bg-yellow-100 text-yellow-800',
-    pending: 'px-2 py-1 text-badge rounded-full bg-blue-100 text-blue-800',
-    failed: 'px-2 py-1 text-badge rounded-full bg-red-100 text-red-800',
+    completed: 'px-2 py-1 text-badge rounded-full bg-success-100 text-success-800',
+    processing: 'px-2 py-1 text-badge rounded-full bg-warning-100 text-warning-800',
+    pending: 'px-2 py-1 text-badge rounded-full bg-info-100 text-info-800',
+    failed: 'px-2 py-1 text-badge rounded-full bg-error-100 text-error-800',
   };
   return classes[status] || classes.pending;
 };
@@ -706,8 +706,8 @@ const getStatusBadgeClass = (status) => {
 const getPlanBadgeClass = (plan) => {
   const classes = {
     free: 'px-2 py-0.5 text-badge rounded-full bg-secondary-100 text-secondary-700',
-    basic: 'px-2 py-0.5 text-badge rounded-full bg-blue-100 text-blue-700',
-    premium: 'px-2 py-0.5 text-badge rounded-full bg-purple-100 text-purple-700',
+    basic: 'px-2 py-0.5 text-badge rounded-full bg-info-100 text-info-700',
+    premium: 'px-2 py-0.5 text-badge rounded-full bg-primary-100 text-primary-700',
     business: 'px-2 py-0.5 text-badge rounded-full bg-primary-100 text-primary-700',
   };
   return classes[plan] || classes.free;

@@ -1999,6 +1999,7 @@ const PREMIUM_MAX_BIO_LENGTH = 500;
 // ============================================================
 const DESIGN_LIBRARY = {
   themes: [
+    { id: "ink-brass", name: "Ink & Brass", previewCss: "background: linear-gradient(160deg, #0f1621 0%, #06090d 100%); border: 1px solid rgba(194,160,104,0.35);", backgroundColor: "#06090d", textColor: "#f7f5f0", accentColor: "#c2a068", bgGradient: "radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), #06090d" },
     { id: "minimal", name: "Minimal White", previewCss: "background: #FFFFFF; border: 1px solid #E5E7EB;", backgroundColor: "#FFFFFF", textColor: "#111827", accentColor: "#1F2937", bgGradient: null },
     { id: "modern", name: "Modern Soft Grey", previewCss: "background: linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%);", backgroundColor: "#F9FAFB", textColor: "#111827", accentColor: "#2563EB", bgGradient: "linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%)" },
     { id: "creative", name: "Creative Purple Pink", previewCss: "background: linear-gradient(135deg, #A855F7 0%, #EC4899 100%);", backgroundColor: "#A855F7", textColor: "#FFFFFF", accentColor: "#EC4899", bgGradient: "linear-gradient(135deg, #A855F7 0%, #EC4899 100%)" },
@@ -2279,17 +2280,19 @@ const profileData = reactive({
   relatedPosts: [],           // Related Posts
 
   // ============ DESIGN SETTINGS ============
+  // Default = system "Ink & Brass" palette (black + gold) so every new card
+  // matches the public landing page and the public profile renderer.
   profileStyle: "classic",
-  theme: "minimal",
-  backgroundColor: "#FFFFFF",
-  textColor: "#000000",
-  accentColor: "#1F2937",
-  bgGradient: null,
+  theme: "ink-brass",
+  backgroundColor: "#06090d",
+  textColor: "#f7f5f0",
+  accentColor: "#c2a068",
+  bgGradient: "radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), #06090d",
   font: "inter",
   buttonStyle: "solid",
   cardStyle: "minimal",
   bgAnimation: "none",
-  cardEffectColor: "#22D3EE",
+  cardEffectColor: "#c2a068",
   cardEffectOpacity: 0.55,
   colorScheme: "",
   layout: "",

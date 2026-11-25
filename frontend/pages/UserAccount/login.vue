@@ -24,15 +24,14 @@
           <div class="lg-hero-copy">
             <span class="eyebrow-brass">
               <span class="dot"></span>
-              Smart NFC Business Card
+              {{ isAdminLogin ? 'Administration Console' : 'Smart NFC Business Card' }}
             </span>
             <h1 class="lg-hero-title">
-              Your digital identity,
-              <span class="brass-grad">one tap away</span>
+              {{ isAdminLogin ? 'Manage your platform,' : 'Your digital identity,' }}
+              <span class="brass-grad">{{ isAdminLogin ? 'admin access' : 'one tap away' }}</span>
             </h1>
             <p class="lg-hero-lead">
-              Sign in to manage your smart business cards and share your
-              professional profile with a single tap.
+              {{ isAdminLogin ? 'Sign in to manage users, cards, invoices, and platform configuration.' : 'Sign in to manage your smart business cards and share your professional profile with a single tap.' }}
             </p>
           </div>
 
@@ -51,7 +50,7 @@
                     >
                     <span class="lg-mock-sub">SMART DIGITAL IDENTITY</span>
                   </div>
-                  <Icon name="heroicons:wifi" class="h-7 w-7 text-white/45" />
+                  <Icon name="heroicons:wifi" class="h-7 w-7 text-white/60" />
                 </div>
                 <div class="nfc-mock__chip relative z-10"></div>
                 <div class="relative z-10 flex justify-between items-end">
@@ -64,15 +63,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="lg-chip lg-chip-1 chip-ink">
-              <Icon name="heroicons:bolt" class="lg-chip-ico" />
-              Opens in 1 tap
-            </div>
-            <div class="lg-chip lg-chip-2 chip-ink">
-              <Icon name="heroicons:device-phone-mobile" class="lg-chip-ico" />
-              Works on iOS &amp; Android
             </div>
           </div>
 
@@ -93,17 +83,17 @@
           </div>
 
           <!-- Explore CTA (desktop) -->
-          <div class="lg-explore">
+          <div v-if="!isAdminLogin" class="lg-explore">
             <span class="lg-explore-label">New to NFCGo?</span>
             <div class="lg-explore-links">
               <NuxtLink to="/UserAccount/register" class="btn-brass">
                 <Icon name="heroicons:sparkles" class="h-4 w-4" />
                 Create free account
               </NuxtLink>
-              <NuxtLink to="/Homepage#pricing" class="btn-ghost-light">
+              <NuxtLink to="/Homepage/pricing" class="btn-ghost-light">
                 View pricing
               </NuxtLink>
-              <NuxtLink to="/Homepage#how-it-works" class="lg-explore-text">
+              <NuxtLink to="/Homepage/how-it-works" class="lg-explore-text">
                 How it works
               </NuxtLink>
             </div>
@@ -123,10 +113,10 @@
 
           <div class="lg-card">
             <header class="lg-card-head">
-              <span class="lg-kicker">Account access</span>
-              <h2 class="lg-title">Welcome back</h2>
+              <span class="lg-kicker">{{ isAdminLogin ? 'Administration Portal' : 'Account access' }}</span>
+              <h2 class="lg-title">{{ isAdminLogin ? 'Admin Sign In' : 'Welcome back' }}</h2>
               <p class="lg-subtitle">
-                Sign in to continue to your NFCGo dashboard.
+                {{ isAdminLogin ? 'Sign in to access the NFCGo administration dashboard.' : 'Sign in to continue to your NFCGo dashboard.' }}
               </p>
             </header>
 
@@ -311,8 +301,8 @@
             </div>
 
             <!-- Social login -->
-            <div class="lg-divider"><span>or continue with</span></div>
-            <div class="lg-oauth">
+            <div v-if="!isAdminLogin" class="lg-divider"><span>or continue with</span></div>
+            <div v-if="!isAdminLogin" class="lg-oauth">
               <button
                 type="button"
                 class="lg-oauth-btn"
@@ -335,7 +325,7 @@
               </button>
             </div>
 
-            <p class="lg-register">
+            <p v-if="!isAdminLogin" class="lg-register">
               Don't have an account?
               <NuxtLink to="/UserAccount/register">Create one for free</NuxtLink>
             </p>
@@ -351,7 +341,7 @@
               <Icon name="heroicons:lock-closed" class="h-4 w-4" />
               Privacy protected
             </span>
-            <NuxtLink to="/Homepage#faq" class="lg-trust-link">
+            <NuxtLink to="/Homepage/faq" class="lg-trust-link">
               <Icon name="heroicons:question-mark-circle" class="h-4 w-4" />
               Help
             </NuxtLink>
@@ -434,14 +424,25 @@ definePageMeta({
   middleware: ['business-plan-guard']
 })
 
+// Route and router
+const route = useRoute();
+const router = useRouter();
+
+// Detect admin login context (set by admin middleware when redirecting
+// unauthenticated users from /AdminManagement routes)
+const isAdminLogin = computed(() => route.query.admin === "1");
+
 // Meta tags
 useHead({
-  title: "Login - NFCGo",
+  title: computed(() => (isAdminLogin.value ? "Admin Login - NFCGo" : "Login - NFCGo")),
   meta: [
     {
       name: "description",
-      content:
-        "Sign in to your NFCGo account to manage your digital business cards.",
+      content: computed(() =>
+        isAdminLogin.value
+          ? "Sign in to the NFCGo administration portal to manage users, cards, invoices, and platform settings."
+          : "Sign in to your NFCGo account to manage your digital business cards."
+      ),
     },
   ],
 });
@@ -449,10 +450,6 @@ useHead({
 // Stores
 const authStore = useAuthStore();
 const { $toast, $api } = useNuxtApp();
-
-// Route and router
-const route = useRoute();
-const router = useRouter();
 
 // Reactive data
 const loading = ref(false);

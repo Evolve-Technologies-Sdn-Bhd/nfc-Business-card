@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Page Header with Title & Breadcrumb Context -->
-    <div class="mb-6">
+    <div class="mb-8">
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-2">
@@ -21,45 +21,45 @@
 
     <!-- Overview Stat Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="card p-5 bg-gradient-to-br from-white to-blue-50/30 border-blue-100">
+      <div class="card p-5 bg-gradient-to-br from-white to-info-50/30 border-info-100">
         <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center">
-            <Icon name="heroicons:rectangle-stack" class="w-6 h-6 text-blue-600" />
+          <div class="w-11 h-11 rounded-xl bg-info-500/10 flex items-center justify-center">
+            <Icon name="heroicons:rectangle-stack" class="w-6 h-6 text-info-600" />
           </div>
-          <span class="text-badge text-blue-700 bg-blue-100 px-2 py-1 rounded-md">Sections</span>
+          <span class="text-badge text-info-700 bg-info-100 px-2 py-1 rounded-md">Sections</span>
         </div>
         <div class="stat-value text-secondary-900 mb-1">{{ totalSections }}</div>
         <div class="stat-label text-secondary-500">Active profile sections</div>
       </div>
 
-      <div class="card p-5 bg-gradient-to-br from-white to-purple-50/30 border-purple-100">
+      <div class="card p-5 bg-gradient-to-br from-white to-primary-50/30 border-primary-100">
         <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center">
-            <Icon name="heroicons:queue-list" class="w-6 h-6 text-purple-600" />
+          <div class="w-11 h-11 rounded-xl bg-primary-500/10 flex items-center justify-center">
+            <Icon name="heroicons:queue-list" class="w-6 h-6 text-primary-600" />
           </div>
-          <span class="text-badge text-purple-700 bg-purple-100 px-2 py-1 rounded-md">Fields</span>
+          <span class="text-badge text-primary-700 bg-primary-100 px-2 py-1 rounded-md">Fields</span>
         </div>
         <div class="stat-value text-secondary-900 mb-1">{{ totalFields }}</div>
         <div class="stat-label text-secondary-500">Configurable input fields</div>
       </div>
 
-      <div class="card p-5 bg-gradient-to-br from-white to-pink-50/30 border-pink-100">
+      <div class="card p-5 bg-gradient-to-br from-white to-success-50/30 border-success-100">
         <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-pink-500/10 flex items-center justify-center">
-            <Icon name="heroicons:paint-brush" class="w-6 h-6 text-pink-600" />
+          <div class="w-11 h-11 rounded-xl bg-success-500/10 flex items-center justify-center">
+            <Icon name="heroicons:paint-brush" class="w-6 h-6 text-success-600" />
           </div>
-          <span class="text-badge text-pink-700 bg-pink-100 px-2 py-1 rounded-md">Designs</span>
+          <span class="text-badge text-success-700 bg-success-100 px-2 py-1 rounded-md">Designs</span>
         </div>
         <div class="stat-value text-secondary-900 mb-1">{{ totalDesignOptions }}</div>
         <div class="stat-label text-secondary-500">Themes, fonts & styles</div>
       </div>
 
-      <div class="card p-5 bg-gradient-to-br from-white to-amber-50/30 border-amber-100">
+      <div class="card p-5 bg-gradient-to-br from-white to-warning-50/30 border-warning-100">
         <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center">
-            <Icon name="heroicons:rocket-launch" class="w-6 h-6 text-amber-600" />
+          <div class="w-11 h-11 rounded-xl bg-warning-500/10 flex items-center justify-center">
+            <Icon name="heroicons:rocket-launch" class="w-6 h-6 text-warning-600" />
           </div>
-          <span class="text-badge text-amber-700 bg-amber-100 px-2 py-1 rounded-md">Features</span>
+          <span class="text-badge text-warning-700 bg-warning-100 px-2 py-1 rounded-md">Features</span>
         </div>
         <div class="stat-value text-secondary-900 mb-1">{{ totalFeatures }}</div>
         <div class="stat-label text-secondary-500">Feature toggles available</div>
@@ -76,21 +76,23 @@
           <p class="text-helper mt-0.5">Real-time breakdown of items enabled features across each tier</p>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div v-for="stat in planStatsList" :key="stat.id"
              :class="[
                'p-4 rounded-xl border-2 transition-all',
-               stat.id === 'basic' ? 'border-blue-200 bg-blue-50/40' :
-               stat.id === 'premium' ? 'border-purple-200 bg-purple-50/40' :
-               'border-amber-200 bg-amber-50/40'
+               stat.id === 'free' ? 'border-secondary-200 bg-secondary-50/40' :
+               stat.id === 'basic' ? 'border-info-200 bg-info-50/40' :
+               stat.id === 'premium' ? 'border-primary-200 bg-primary-50/40' :
+               'border-warning-200 bg-warning-50/40'
              ]">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2.5">
               <div :class="[
                 'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-body',
-                stat.id === 'basic' ? 'bg-blue-500' :
-                stat.id === 'premium' ? 'bg-purple-500' :
-                'bg-amber-500'
+                stat.id === 'free' ? 'bg-secondary-500' :
+                stat.id === 'basic' ? 'bg-info-500' :
+                stat.id === 'premium' ? 'bg-primary-500' :
+                'bg-warning-500'
               ]">
                 <Icon :name="stat.id === 'business' ? 'heroicons:building-office' : stat.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-4 h-4" />
               </div>
@@ -98,9 +100,10 @@
             </div>
             <div :class="[
               'text-body font-bold px-2.5 py-1 rounded-md',
-              stat.id === 'basic' ? 'bg-blue-500 text-white' :
-              stat.id === 'premium' ? 'bg-purple-500 text-white' :
-              'bg-amber-500 text-white'
+              stat.id === 'free' ? 'bg-secondary-500 text-white' :
+              stat.id === 'basic' ? 'bg-info-500 text-white' :
+              stat.id === 'premium' ? 'bg-primary-500 text-white' :
+              'bg-warning-500 text-white'
             ]">
               {{ stat.percentage }}%
             </div>
@@ -109,9 +112,10 @@
             <div
               :class="[
                 'h-full rounded-full transition-all duration-700',
-                stat.id === 'basic' ? 'bg-blue-500' :
-                stat.id === 'premium' ? 'bg-purple-500' :
-                'bg-amber-500'
+                stat.id === 'free' ? 'bg-secondary-500' :
+                stat.id === 'basic' ? 'bg-info-500' :
+                stat.id === 'premium' ? 'bg-primary-500' :
+                'bg-warning-500'
               ]"
               :style="{ width: stat.percentage + '%' }"
             ></div>
@@ -201,9 +205,10 @@
           :key="plan.id"
           :class="[
             'rounded-xl border-2 transition-all overflow-hidden',
-            expandedPlans.includes(plan.id) && plan.id === 'business' && 'border-amber-400 shadow-lg shadow-amber-100',
-            expandedPlans.includes(plan.id) && plan.id === 'premium' && 'border-purple-400 shadow-lg shadow-purple-100',
-            expandedPlans.includes(plan.id) && plan.id === 'basic' && 'border-blue-400 shadow-lg shadow-blue-100',
+            expandedPlans.includes(plan.id) && plan.id === 'free' && 'border-secondary-400 shadow-lg shadow-secondary-100',
+            expandedPlans.includes(plan.id) && plan.id === 'business' && 'border-warning-400 shadow-lg shadow-warning-100',
+            expandedPlans.includes(plan.id) && plan.id === 'premium' && 'border-primary-400 shadow-lg shadow-primary-100',
+            expandedPlans.includes(plan.id) && plan.id === 'basic' && 'border-info-400 shadow-lg shadow-info-100',
             !expandedPlans.includes(plan.id) && 'border-secondary-200 hover:border-secondary-300'
           ]"
         >
@@ -211,18 +216,20 @@
             @click="togglePlan(plan.id)"
             :class="[
               'w-full flex items-center justify-between p-4 transition-all',
-              expandedPlans.includes(plan.id) && plan.id === 'business' && 'bg-gradient-to-r from-amber-50 to-amber-100',
-              expandedPlans.includes(plan.id) && plan.id === 'premium' && 'bg-gradient-to-r from-purple-50 to-purple-100',
-              expandedPlans.includes(plan.id) && plan.id === 'basic' && 'bg-gradient-to-r from-blue-50 to-blue-100',
+              expandedPlans.includes(plan.id) && plan.id === 'free' && 'bg-gradient-to-r from-secondary-50 to-secondary-100',
+              expandedPlans.includes(plan.id) && plan.id === 'business' && 'bg-gradient-to-r from-warning-50 to-warning-100',
+              expandedPlans.includes(plan.id) && plan.id === 'premium' && 'bg-gradient-to-r from-primary-50 to-primary-100',
+              expandedPlans.includes(plan.id) && plan.id === 'basic' && 'bg-gradient-to-r from-info-50 to-info-100',
               !expandedPlans.includes(plan.id) && 'bg-white hover:bg-secondary-50'
             ]"
           >
             <div class="flex items-center gap-3">
               <div :class="[
                 'w-10 h-10 rounded-lg flex items-center justify-center',
-                plan.id === 'business' && 'bg-amber-500 text-white',
-                plan.id === 'premium' && 'bg-purple-500 text-white',
-                plan.id === 'basic' && 'bg-blue-500 text-white'
+                plan.id === 'free' && 'bg-secondary-500 text-white',
+                plan.id === 'business' && 'bg-warning-500 text-white',
+                plan.id === 'premium' && 'bg-primary-500 text-white',
+                plan.id === 'basic' && 'bg-info-500 text-white'
               ]">
                 <Icon :name="plan.id === 'business' ? 'heroicons:building-office' : plan.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-5 h-5" />
               </div>
@@ -231,9 +238,10 @@
                 <div class="flex items-center gap-2 mt-0.5">
                   <span :class="[
                     'text-badge px-2 py-0.5 rounded-full',
-                    plan.id === 'business' && 'bg-amber-200 text-amber-800',
-                    plan.id === 'premium' && 'bg-purple-200 text-purple-800',
-                    plan.id === 'basic' && 'bg-blue-200 text-blue-800'
+                    plan.id === 'free' && 'bg-secondary-200 text-secondary-800',
+                    plan.id === 'business' && 'bg-warning-200 text-warning-800',
+                    plan.id === 'premium' && 'bg-primary-200 text-primary-800',
+                    plan.id === 'basic' && 'bg-info-200 text-info-800'
                   ]">
                     {{ getPlanOptionCount(plan.id) }} items
                   </span>
@@ -257,7 +265,7 @@
                     :class="[
                       'px-4 py-2 text-navigation border-b-2 transition-colors',
                       businessViewTab === 'defaults'
-                        ? 'border-amber-500 text-amber-700'
+                        ? 'border-warning-500 text-warning-700'
                         : 'border-transparent text-secondary-500 hover:text-secondary-700'
                     ]"
                   >
@@ -269,13 +277,13 @@
                     :class="[
                       'px-4 py-2 text-navigation border-b-2 transition-colors',
                       businessViewTab === 'users'
-                        ? 'border-amber-500 text-amber-700'
+                        ? 'border-warning-500 text-warning-700'
                         : 'border-transparent text-secondary-500 hover:text-secondary-700'
                     ]"
                   >
                     <Icon name="heroicons:users" class="w-4 h-4 inline mr-1" />
                     User Customizations
-                    <span v-if="businessUsers.filter(u => u.has_custom).length > 0" class="ml-1 px-1.5 py-0.5 text-badge bg-amber-200 text-amber-800 rounded-full">
+                    <span v-if="businessUsers.filter(u => u.has_custom).length > 0" class="ml-1 px-1.5 py-0.5 text-badge bg-warning-200 text-warning-800 rounded-full">
                       {{ businessUsers.filter(u => u.has_custom).length }}
                     </span>
                   </button>
@@ -292,7 +300,7 @@
                       v-model="businessUserSearch"
                       type="text"
                       placeholder="Search by name or email..."
-                      class="w-full pl-9 pr-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      class="w-full pl-9 pr-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-warning-500 focus:border-transparent"
                     />
                     <button
                       v-if="businessUserSearch"
@@ -304,7 +312,7 @@
                   </div>
                 </div>
                 <div v-if="businessUsersLoading" class="text-center py-8">
-                  <Icon name="heroicons:arrow-path" class="w-6 h-6 text-amber-500 animate-spin mx-auto" />
+                  <Icon name="heroicons:arrow-path" class="w-6 h-6 text-warning-500 animate-spin mx-auto" />
                 </div>
                 <div v-else-if="filteredBusinessUsers.length === 0" class="text-center py-8 text-secondary-500">
                   <Icon name="heroicons:users" class="w-8 h-8 mx-auto mb-2 text-secondary-300" />
@@ -314,10 +322,10 @@
                   <div
                     v-for="user in filteredBusinessUsers"
                     :key="user.id"
-                    class="flex items-center justify-between p-3 bg-white border border-secondary-200 rounded-lg hover:border-amber-300 transition-colors"
+                    class="flex items-center justify-between p-3 bg-white border border-secondary-200 rounded-lg hover:border-warning-300 transition-colors"
                   >
                     <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-medium text-body">
+                      <div class="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center text-warning-700 font-medium text-body">
                         {{ user.name?.charAt(0) || '?' }}
                       </div>
                       <div>
@@ -326,7 +334,7 @@
                       </div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <span v-if="user.has_custom" class="text-badge px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">Custom</span>
+                      <span v-if="user.has_custom" class="text-badge px-2 py-0.5 bg-warning-100 text-warning-700 rounded-full">Custom</span>
                       <span v-else class="text-badge px-2 py-0.5 bg-secondary-100 text-secondary-500 rounded-full">Default</span>
                       <button
                         @click="openBusinessUserModal(user)"
@@ -346,7 +354,7 @@
                 <!-- Column 1: Data Fields -->
                 <div class="space-y-3">
                   <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
-                    <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2 text-blue-600" />
+                    <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2 text-info-600" />
                     Data Fields
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ generalTabs.length }} sections</span>
                   </h3>
@@ -400,7 +408,7 @@
                 <!-- Column 2: Design Options -->
                 <div class="space-y-3">
                   <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
-                    <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2 text-purple-600" />
+                    <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2 text-primary-600" />
                     Design Options
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ getDesignCategoryItemCount(['theme', 'font', 'button_style', 'color_scheme', 'layout']) }} items</span>
                   </h3>
@@ -454,7 +462,7 @@
                 <!-- Column 3: Features -->
                 <div class="space-y-3">
                   <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
-                    <Icon name="heroicons:sparkles" class="w-4 h-4 mr-2 text-amber-600" />
+                    <Icon name="heroicons:sparkles" class="w-4 h-4 mr-2 text-warning-600" />
                     Features
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ filteredOptionsFeatureToggles.length }} toggles</span>
                   </h3>
@@ -570,10 +578,10 @@
           <!-- Accent Border -->
           <div :class="[
             'absolute top-0 left-0 right-0 h-1',
-            index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-500' :
-            index % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-purple-500' :
-            index % 4 === 2 ? 'bg-gradient-to-r from-amber-400 to-amber-500' :
-            'bg-gradient-to-r from-emerald-400 to-emerald-500'
+            index % 4 === 0 ? 'bg-gradient-to-r from-info-400 to-info-500' :
+            index % 4 === 1 ? 'bg-gradient-to-r from-primary-400 to-primary-500' :
+            index % 4 === 2 ? 'bg-gradient-to-r from-warning-400 to-warning-500' :
+            'bg-gradient-to-r from-success-400 to-success-500'
           ]"></div>
 
           <!-- Status Badge -->
@@ -595,10 +603,10 @@
                 :class="[
                   'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm',
                   'bg-gradient-to-br',
-                  index % 4 === 0 ? 'from-blue-100 to-blue-200 text-blue-600' :
-                  index % 4 === 1 ? 'from-purple-100 to-purple-200 text-purple-600' :
-                  index % 4 === 2 ? 'from-amber-100 to-amber-200 text-amber-600' :
-                  'from-emerald-100 to-emerald-200 text-emerald-600'
+                  index % 4 === 0 ? 'from-info-100 to-info-200 text-info-600' :
+                  index % 4 === 1 ? 'from-primary-100 to-primary-200 text-primary-600' :
+                  index % 4 === 2 ? 'from-warning-100 to-warning-200 text-warning-600' :
+                  'from-success-100 to-success-200 text-success-600'
                 ]"
               >
                 <Icon 
@@ -629,12 +637,12 @@
             <div class="mb-3">
               <div class="flex items-center justify-between mb-1.5">
                 <span class="text-micro font-bold text-secondary-500 uppercase tracking-wider">Plan Coverage</span>
-                <span class="text-micro font-bold text-secondary-700">{{ getSectionPlans(section.key).length }}/3 plans</span>
+                <span class="text-micro font-bold text-secondary-700">{{ getSectionPlans(section.key).length }}/4 plans</span>
               </div>
               <div class="w-full h-1.5 bg-secondary-100 rounded-full overflow-hidden">
                 <div
-                  class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500"
-                  :style="{ width: Math.round((getSectionPlans(section.key).length / 3) * 100) + '%' }"
+                  class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-info-500 via-primary-500 to-warning-500"
+                  :style="{ width: Math.round((getSectionPlans(section.key).length / 4) * 100) + '%' }"
                 ></div>
               </div>
             </div>
@@ -642,7 +650,7 @@
             <!-- Plan Badges (Auto-calculated from fields) -->
             <div class="flex flex-wrap gap-1.5 mb-3">
               <span
-                v-if="getSectionPlans(section.key).length === 0 || getSectionPlans(section.key).length === 3"
+                v-if="getSectionPlans(section.key).length === 0 || getSectionPlans(section.key).length === 4"
                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-badge bg-success-50 text-success-700 border border-success-200"
               >
                 <Icon name="heroicons:check-circle-solid" class="w-3 h-3" />
@@ -654,16 +662,18 @@
                   :key="plan"
                   :class="[
                     'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-badge border',
-                    plan === 'basic' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                    plan === 'premium' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                    'bg-amber-50 text-amber-700 border-amber-200'
+                    plan === 'free' ? 'bg-secondary-50 text-secondary-700 border-secondary-200' :
+                    plan === 'basic' ? 'bg-info-50 text-info-700 border-info-200' :
+                    plan === 'premium' ? 'bg-primary-50 text-primary-700 border-primary-200' :
+                    'bg-warning-50 text-warning-700 border-warning-200'
                   ]"
                 >
                   <div :class="[
                     'w-1.5 h-1.5 rounded-full',
-                    plan === 'basic' ? 'bg-blue-500' :
-                    plan === 'premium' ? 'bg-purple-500' :
-                    'bg-amber-500'
+                    plan === 'free' ? 'bg-secondary-500' :
+                    plan === 'basic' ? 'bg-info-500' :
+                    plan === 'premium' ? 'bg-primary-500' :
+                    'bg-warning-500'
                   ]"></div>
                   {{ plan.charAt(0).toUpperCase() + plan.slice(1) }}
                 </span>
@@ -796,11 +806,11 @@
                 :class="[
                   'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'basic'
-                    ? 'bg-blue-500 text-white shadow-sm shadow-blue-200'
-                    : 'text-secondary-500 hover:text-blue-700 hover:bg-blue-50'
+                    ? 'bg-info-500 text-white shadow-sm shadow-info-200'
+                    : 'text-secondary-500 hover:text-info-700 hover:bg-info-50'
                 ]"
               >
-                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'basic' ? 'bg-white' : 'bg-blue-500'"></div>
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'basic' ? 'bg-white' : 'bg-info-500'"></div>
                 Basic
               </button>
               <button
@@ -808,11 +818,11 @@
                 :class="[
                   'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'premium'
-                    ? 'bg-purple-500 text-white shadow-sm shadow-purple-200'
-                    : 'text-secondary-500 hover:text-purple-700 hover:bg-purple-50'
+                    ? 'bg-primary-500 text-white shadow-sm shadow-primary-200'
+                    : 'text-secondary-500 hover:text-primary-700 hover:bg-primary-50'
                 ]"
               >
-                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'premium' ? 'bg-white' : 'bg-purple-500'"></div>
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'premium' ? 'bg-white' : 'bg-primary-500'"></div>
                 Premium
               </button>
               <button
@@ -820,12 +830,24 @@
                 :class="[
                   'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
                   selectedPlanFilter === 'business'
-                    ? 'bg-amber-500 text-white shadow-sm shadow-amber-200'
-                    : 'text-secondary-500 hover:text-amber-700 hover:bg-amber-50'
+                    ? 'bg-warning-500 text-white shadow-sm shadow-warning-200'
+                    : 'text-secondary-500 hover:text-warning-700 hover:bg-warning-50'
                 ]"
               >
-                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'business' ? 'bg-white' : 'bg-amber-500'"></div>
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'business' ? 'bg-white' : 'bg-warning-500'"></div>
                 Business
+              </button>
+              <button
+                @click="selectedPlanFilter = 'free'"
+                :class="[
+                  'px-3 py-1.5 text-navigation rounded-lg transition-all flex items-center gap-1.5',
+                  selectedPlanFilter === 'free'
+                    ? 'bg-secondary-500 text-white shadow-sm shadow-secondary-200'
+                    : 'text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50'
+                ]"
+              >
+                <div class="w-2 h-2 rounded-full" :class="selectedPlanFilter === 'free' ? 'bg-white' : 'bg-secondary-500'"></div>
+                Free
               </button>
             </div>
 
@@ -944,15 +966,15 @@
                     </div>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-badge bg-blue-50 text-blue-700 border border-blue-100">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-badge bg-info-50 text-info-700 border border-info-100">
                       <Icon name="heroicons:rectangle-group" class="w-3 h-3" />
                       {{ field.field_type }}
                     </span>
                   </td>
                   <td class="px-4 py-4">
                     <div v-if="field.field_group" class="flex items-center gap-1.5">
-                      <Icon v-if="field.field_group_icon" :name="field.field_group_icon" class="w-4 h-4 text-indigo-500" />
-                      <span class="text-badge text-secondary-700 bg-indigo-50 px-2 py-1 rounded-md">{{ field.field_group }}</span>
+                      <Icon v-if="field.field_group_icon" :name="field.field_group_icon" class="w-4 h-4 text-primary-500" />
+                      <span class="text-badge text-secondary-700 bg-primary-50 px-2 py-1 rounded-md">{{ field.field_group }}</span>
                       <span v-if="field.group_order" class="text-micro text-secondary-400">#{{ field.group_order }}</span>
                     </div>
                     <span v-else class="text-caption text-secondary-400 italic">— Ungrouped —</span>
@@ -970,8 +992,18 @@
                       <div 
                         :class="[
                           'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
+                          isAvailableForPlan(field, 'free')
+                            ? 'bg-secondary-50 text-secondary-700 border-secondary-300 shadow-sm shadow-secondary-100'
+                            : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
+                        ]"
+                      >
+                        F
+                      </div>
+                      <div 
+                        :class="[
+                          'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'basic')
-                            ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm shadow-blue-100'
+                            ? 'bg-info-50 text-info-700 border-info-300 shadow-sm shadow-info-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
@@ -981,7 +1013,7 @@
                         :class="[
                           'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'premium')
-                            ? 'bg-purple-50 text-purple-700 border-purple-300 shadow-sm shadow-purple-100'
+                            ? 'bg-primary-50 text-primary-700 border-primary-300 shadow-sm shadow-primary-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
@@ -991,7 +1023,7 @@
                         :class="[
                           'px-3 py-1.5 rounded-md text-badge border-2 transition-all',
                           isAvailableForPlan(field, 'business')
-                            ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm shadow-amber-100'
+                            ? 'bg-warning-50 text-warning-700 border-warning-300 shadow-sm shadow-warning-100'
                             : 'bg-secondary-50 text-secondary-400 border-secondary-200 line-through opacity-60'
                         ]"
                       >
@@ -1049,9 +1081,9 @@
               Showing <span class="font-bold text-secondary-900">{{ filteredFieldsTable.length }}</span> of <span class="font-bold text-secondary-900">{{ getFilteredOptions.length }}</span> fields
             </span>
             <div class="flex items-center gap-3 text-caption text-secondary-500">
-              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Basic</span>
-              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-purple-500"></div> Premium</span>
-              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Business</span>
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-info-500"></div> Basic</span>
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-primary-500"></div> Premium</span>
+              <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-warning-500"></div> Business</span>
             </div>
           </div>
         </div>
@@ -1079,21 +1111,28 @@
                     <div 
                       :class="[
                         'w-2.5 h-2.5 rounded-full transition-all',
-                        isAvailableForPlan(option, 'basic') ? 'bg-blue-500 shadow-sm shadow-blue-200' : 'bg-secondary-300'
+                        isAvailableForPlan(option, 'free') ? 'bg-secondary-500 shadow-sm shadow-secondary-200' : 'bg-secondary-300'
+                      ]"
+                      title="Free plan"
+                    ></div>
+                    <div 
+                      :class="[
+                        'w-2.5 h-2.5 rounded-full transition-all',
+                        isAvailableForPlan(option, 'basic') ? 'bg-info-500 shadow-sm shadow-info-200' : 'bg-secondary-300'
                       ]"
                       title="Basic plan"
                     ></div>
                     <div 
                       :class="[
                         'w-2.5 h-2.5 rounded-full transition-all',
-                        isAvailableForPlan(option, 'premium') ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-secondary-300'
+                        isAvailableForPlan(option, 'premium') ? 'bg-primary-500 shadow-sm shadow-primary-200' : 'bg-secondary-300'
                       ]"
                       title="Premium plan"
                     ></div>
                     <div 
                       :class="[
                         'w-2.5 h-2.5 rounded-full transition-all',
-                        isAvailableForPlan(option, 'business') ? 'bg-amber-500 shadow-sm shadow-amber-200' : 'bg-secondary-300'
+                        isAvailableForPlan(option, 'business') ? 'bg-warning-500 shadow-sm shadow-warning-200' : 'bg-secondary-300'
                       ]"
                       title="Business plan"
                     ></div>
@@ -1243,7 +1282,7 @@
               <div class="mb-4">
                 <h3 class="card-title text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
                   {{ option.name }}
-                  <Icon v-if="option.is_default" name="heroicons:star-solid" class="w-3.5 h-3.5 text-amber-500" />
+                  <Icon v-if="option.is_default" name="heroicons:star-solid" class="w-3.5 h-3.5 text-warning-500" />
                 </h3>
                 <p v-if="option.description" class="text-caption text-secondary-600 line-clamp-2 leading-relaxed">
                   {{ option.description }}
@@ -1258,10 +1297,10 @@
                 <button
                   v-if="!option.is_default"
                   @click="setAsDefault(option)"
-                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-button text-secondary-700 bg-white border border-secondary-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all group/star"
+                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-2 text-button text-secondary-700 bg-white border border-secondary-200 rounded-lg hover:bg-warning-50 hover:border-warning-300 hover:text-warning-700 transition-all group/star"
                   title="Set as default"
                 >
-                  <Icon name="heroicons:star" class="w-3.5 h-3.5 group-hover/star:text-amber-500" />
+                  <Icon name="heroicons:star" class="w-3.5 h-3.5 group-hover/star:text-warning-500" />
                 </button>
                 <button
                   @click="toggleActive(option)"
@@ -1418,9 +1457,9 @@
                       </div>
 
                       <!-- Field Grouping -->
-                      <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                      <div class="bg-primary-50 rounded-lg p-4 border border-primary-200">
                         <h4 class="card-title text-secondary-900 mb-3 flex items-center">
-                          <Icon name="heroicons:rectangle-group" class="w-4 h-4 mr-2 text-indigo-600" />
+                          <Icon name="heroicons:rectangle-group" class="w-4 h-4 mr-2 text-primary-600" />
                           Field Grouping (for UI display)
                         </h4>
                         <div class="grid grid-cols-3 gap-4">
@@ -1476,7 +1515,7 @@
                       </div>
 
                       <!-- Repeater Configuration -->
-                      <div v-if="formData.field_type === 'repeater'" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                      <div v-if="formData.field_type === 'repeater'" class="bg-info-50 rounded-lg p-4 border border-info-200">
                         <h4 class="card-title text-secondary-900 mb-3 flex items-center">
                           <Icon name="heroicons:queue-list" class="w-4 h-4 mr-2" />
                           Repeater Configuration
@@ -1675,54 +1714,71 @@
                         Plan Availability
                       </h4>
                       <div class="space-y-3">
-                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-blue-400"
-                          :class="formData.available_plans.includes('basic') ? 'border-blue-500 shadow-sm' : 'border-secondary-300'">
+                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-info-400"
+                          :class="formData.available_plans.includes('basic') ? 'border-info-500 shadow-sm' : 'border-secondary-300'">
                           <input
                             type="checkbox"
                             value="basic"
                             v-model="formData.available_plans"
-                            class="w-5 h-5 rounded border-secondary-300 text-blue-600 focus:ring-blue-500"
+                            class="w-5 h-5 rounded border-secondary-300 text-info-600 focus:ring-info-500"
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
                               <span class="text-label text-secondary-900">Basic Plan</span>
-                              <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                              <div class="w-3 h-3 rounded-full bg-info-500"></div>
                             </div>
                             <p class="text-caption text-secondary-600 mt-0.5">Essential features for individuals</p>
                           </div>
                         </label>
 
-                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-purple-400"
-                          :class="formData.available_plans.includes('premium') ? 'border-purple-500 shadow-sm' : 'border-secondary-300'">
+                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-primary-400"
+                          :class="formData.available_plans.includes('premium') ? 'border-primary-500 shadow-sm' : 'border-secondary-300'">
                           <input
                             type="checkbox"
                             value="premium"
                             v-model="formData.available_plans"
-                            class="w-5 h-5 rounded border-secondary-300 text-purple-600 focus:ring-purple-500"
+                            class="w-5 h-5 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
                               <span class="text-label text-secondary-900">Premium Plan</span>
-                              <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                              <div class="w-3 h-3 rounded-full bg-primary-500"></div>
                             </div>
                             <p class="text-caption text-secondary-600 mt-0.5">Advanced features for professionals</p>
                           </div>
                         </label>
 
-                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-amber-400"
-                          :class="formData.available_plans.includes('business') ? 'border-amber-500 shadow-sm' : 'border-secondary-300'">
+                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-warning-400"
+                          :class="formData.available_plans.includes('business') ? 'border-warning-500 shadow-sm' : 'border-secondary-300'">
                           <input
                             type="checkbox"
                             value="business"
                             v-model="formData.available_plans"
-                            class="w-5 h-5 rounded border-secondary-300 text-amber-600 focus:ring-amber-500"
+                            class="w-5 h-5 rounded border-secondary-300 text-warning-600 focus:ring-warning-500"
                           />
                           <div class="ml-3 flex-1">
                             <div class="flex items-center justify-between">
                               <span class="text-label text-secondary-900">Business Plan</span>
-                              <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                              <div class="w-3 h-3 rounded-full bg-warning-500"></div>
                             </div>
                             <p class="text-caption text-secondary-600 mt-0.5">Full access for teams & enterprises</p>
+                          </div>
+                        </label>
+
+                        <label class="flex items-center p-3 bg-white rounded-lg border-2 cursor-pointer transition-all hover:border-secondary-400"
+                          :class="formData.available_plans.includes('free') ? 'border-secondary-500 shadow-sm' : 'border-secondary-300'">
+                          <input
+                            type="checkbox"
+                            value="free"
+                            v-model="formData.available_plans"
+                            class="w-5 h-5 rounded border-secondary-300 text-secondary-600 focus:ring-secondary-500"
+                          />
+                          <div class="ml-3 flex-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-label text-secondary-900">Free Plan</span>
+                              <div class="w-3 h-3 rounded-full bg-secondary-500"></div>
+                            </div>
+                            <p class="text-caption text-secondary-600 mt-0.5">Free trial with limited features</p>
                           </div>
                         </label>
                       </div>
@@ -1961,12 +2017,12 @@
 
                         <!-- Available Plans Info -->
                         <div class="col-span-2">
-                          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <div class="bg-info-50 border border-info-200 rounded-lg p-3">
                             <div class="flex items-start gap-2">
-                              <Icon name="heroicons:information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <Icon name="heroicons:information-circle" class="w-5 h-5 text-info-600 flex-shrink-0 mt-0.5" />
                               <div>
-                                <p class="text-label text-blue-800">Plan Availability</p>
-                                <p class="text-caption text-blue-600 mt-1">
+                                <p class="text-label text-info-800">Plan Availability</p>
+                                <p class="text-caption text-info-600 mt-1">
                                   Section plans are automatically calculated based on the fields' plan settings.
                                   Configure plan availability in the "Plan Assignments" section below.
                                 </p>
@@ -2049,9 +2105,10 @@
                                 v-if="(field.available_plans && field.available_plans.includes(plan.id)) || (field.plan_assignments && field.plan_assignments.includes(plan.id)) || (plan.id === 'basic')"
                                 :class="[
                                   'text-badge px-1.5 py-0.5 rounded-full font-bold',
-                                  plan.color === 'amber' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                                  plan.color === 'purple' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                                  'bg-blue-50 text-blue-700 border border-blue-200'
+                                  plan.color === 'amber' ? 'bg-warning-50 text-warning-700 border border-warning-200' :
+                                  plan.color === 'purple' ? 'bg-primary-50 text-primary-700 border border-primary-200' :
+                                  plan.color === 'slate' ? 'bg-secondary-50 text-secondary-700 border border-secondary-200' :
+                                  'bg-info-50 text-info-700 border border-info-200'
                                 ]"
                               >
                                 {{ plan.name.charAt(0) }}
@@ -2134,17 +2191,17 @@
           <div class="flex min-h-full items-center justify-center p-4">
             <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95">
               <DialogPanel class="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl">
-                <div class="flex items-center justify-between p-4 border-b border-secondary-200 bg-amber-50">
+                <div class="flex items-center justify-between p-4 border-b border-secondary-200 bg-warning-50">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center">
-                      <span class="text-amber-800 font-bold">{{ selectedBusinessUser?.name?.charAt(0) || '?' }}</span>
+                    <div class="w-10 h-10 rounded-full bg-warning-200 flex items-center justify-center">
+                      <span class="text-warning-800 font-bold">{{ selectedBusinessUser?.name?.charAt(0) || '?' }}</span>
                     </div>
                     <div>
                       <DialogTitle class="modal-title text-secondary-900">{{ selectedBusinessUser?.name }}</DialogTitle>
                       <p class="card-subtitle">{{ selectedBusinessUser?.email }}</p>
                     </div>
                   </div>
-                  <button @click="closeBusinessUserModal" class="p-2 hover:bg-amber-100 rounded-lg">
+                  <button @click="closeBusinessUserModal" class="p-2 hover:bg-warning-100 rounded-lg">
                     <Icon name="heroicons:x-mark" class="w-5 h-5 text-secondary-500" />
                   </button>
                 </div>
@@ -2155,14 +2212,14 @@
                         <span class="font-medium text-secondary-900">Use Custom Settings</span>
                         <p class="text-helper">Override default Business plan settings</p>
                       </div>
-                      <input type="checkbox" v-model="businessUserFormData.use_custom" class="w-5 h-5 rounded border-secondary-300 text-amber-600" />
+                      <input type="checkbox" v-model="businessUserFormData.use_custom" class="w-5 h-5 rounded border-secondary-300 text-warning-600" />
                     </label>
                   </div>
                   <!-- Custom Settings UI - Always rendered but conditionally visible -->
                   <div :class="{'hidden': !businessUserFormData.use_custom}" class="space-y-4">
                     <!-- Data Fields - Grouped by Tab -->
                     <div>
-                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:rectangle-stack" class="w-4 h-4 inline mr-1 text-blue-600" />Data Fields</h4>
+                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:rectangle-stack" class="w-4 h-4 inline mr-1 text-info-600" />Data Fields</h4>
                       <div class="max-h-[250px] overflow-y-auto p-2 bg-secondary-50 rounded-lg space-y-3">
                         <div v-for="(tabFields, tabName) in businessUserAvailableData.fields" :key="tabName">
                           <div class="flex items-center justify-between sticky top-0 bg-secondary-50 py-1 mb-1">
@@ -2171,7 +2228,7 @@
                                 type="checkbox" 
                                 :checked="isTabFullySelected(tabFields)" 
                                 @change="toggleTabFields(tabFields, $event.target.checked)"
-                                class="w-3.5 h-3.5 rounded text-blue-600"
+                                class="w-3.5 h-3.5 rounded text-info-600"
                               />
                               <span class="ml-2 text-caption font-semibold text-secondary-600 uppercase">{{ tabName }}</span>
                             </label>
@@ -2188,7 +2245,7 @@
                     </div>
                     <!-- Design Options - Grouped by Type -->
                     <div>
-                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:paint-brush" class="w-4 h-4 inline mr-1 text-purple-600" />Design Options</h4>
+                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:paint-brush" class="w-4 h-4 inline mr-1 text-primary-600" />Design Options</h4>
                       <div class="max-h-[200px] overflow-y-auto p-2 bg-secondary-50 rounded-lg space-y-3">
                         <template v-for="(typeOptions, typeName) in businessUserAvailableData.design_options" :key="typeName">
                           <div v-if="typeName !== 'feature_toggle'">
@@ -2198,7 +2255,7 @@
                                   type="checkbox" 
                                   :checked="isTypeFullySelected(typeOptions)" 
                                   @change="toggleTypeOptions(typeOptions, $event.target.checked)"
-                                  class="w-3.5 h-3.5 rounded text-purple-600"
+                                  class="w-3.5 h-3.5 rounded text-primary-600"
                                 />
                                 <span class="ml-2 text-caption font-semibold text-secondary-600 uppercase">{{ typeName.replace('_', ' ') }}</span>
                               </label>
@@ -2216,11 +2273,11 @@
                     </div>
                     <!-- Features -->
                     <div>
-                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:sparkles" class="w-4 h-4 inline mr-1 text-amber-600" />Features</h4>
+                      <h4 class="font-medium text-secondary-900 mb-2"><Icon name="heroicons:sparkles" class="w-4 h-4 inline mr-1 text-warning-600" />Features</h4>
                       <div class="grid grid-cols-2 gap-2">
                         <label v-for="feature in filteredBusinessUserFeatureToggles" :key="feature.option_id"
-                          :class="['flex items-center p-2 rounded-lg border cursor-pointer', businessUserFormData.enabled_features.includes(feature.option_id) ? 'border-amber-300 bg-amber-50' : 'border-secondary-200']">
-                          <input type="checkbox" :value="feature.option_id" v-model="businessUserFormData.enabled_features" class="w-4 h-4 rounded text-amber-600" />
+                          :class="['flex items-center p-2 rounded-lg border cursor-pointer', businessUserFormData.enabled_features.includes(feature.option_id) ? 'border-warning-300 bg-warning-50' : 'border-secondary-200']">
+                          <input type="checkbox" :value="feature.option_id" v-model="businessUserFormData.enabled_features" class="w-4 h-4 rounded text-warning-600" />
                           <span class="ml-2 text-body">{{ feature.name }}</span>
                         </label>
                       </div>
@@ -2241,7 +2298,7 @@
                   <div v-else></div>
                   <div class="flex gap-3">
                     <button @click="closeBusinessUserModal" class="px-4 py-2 text-button text-secondary-700 hover:bg-secondary-100 rounded-lg">Cancel</button>
-                    <button @click="saveBusinessUserAssignment" :disabled="savingBusinessUser" class="px-4 py-2 text-button text-white bg-amber-600 hover:bg-amber-700 rounded-lg disabled:opacity-50">
+                    <button @click="saveBusinessUserAssignment" :disabled="savingBusinessUser" class="px-4 py-2 text-button text-white bg-warning-600 hover:bg-warning-700 rounded-lg disabled:opacity-50">
                       {{ savingBusinessUser ? 'Saving...' : 'Save' }}
                     </button>
                   </div>
@@ -2328,6 +2385,7 @@ const fieldPlanBreakdown = computed(() => {
     basic: allFields.filter(f => isAvailableForPlan(f, 'basic')).length,
     premium: allFields.filter(f => isAvailableForPlan(f, 'premium')).length,
     business: allFields.filter(f => isAvailableForPlan(f, 'business')).length,
+    free: allFields.filter(f => isAvailableForPlan(f, 'free')).length,
     total: allFields.length,
   };
 });
@@ -2340,6 +2398,7 @@ const designPlanBreakdown = computed(() => {
     basic: allDesigns.filter(o => isAvailableForPlan(o, 'basic')).length,
     premium: allDesigns.filter(o => isAvailableForPlan(o, 'premium')).length,
     business: allDesigns.filter(o => isAvailableForPlan(o, 'business')).length,
+    free: allDesigns.filter(o => isAvailableForPlan(o, 'free')).length,
     total: allDesigns.length,
   };
 });
@@ -2425,7 +2484,7 @@ const sectionFormData = ref({
   description: '',
   display_order: 0,
   is_active: true,
-  available_plans: ['basic', 'premium', 'business']
+  available_plans: ['free', 'basic', 'premium', 'business']
 });
 
 const showIconPicker = ref(false);
@@ -2547,6 +2606,7 @@ const plans = [
   { id: 'business', name: 'Business', color: 'amber' },
   { id: 'premium', name: 'Premium', color: 'purple' },
   { id: 'basic', name: 'Basic', color: 'blue' },
+  { id: 'free', name: 'Free', color: 'slate' },
 ];
 
 // Computed: General Sections (for Section Management UI)
@@ -2672,7 +2732,7 @@ const openSectionModal = (mode, section = null) => {
       description: section.description || '',
       display_order: section.display_order || 0,
       is_active: section.is_active !== false,
-      available_plans: section.available_plans || ['basic', 'premium', 'business']
+      available_plans: section.available_plans || ['free', 'basic', 'premium', 'business']
     };
   } else {
     editingSection.value = null;
@@ -2685,7 +2745,7 @@ const openSectionModal = (mode, section = null) => {
       description: '',
       display_order: availableSections.value.length, // Auto-increment order
       is_active: true,
-      available_plans: ['basic', 'premium', 'business']
+      available_plans: ['free', 'basic', 'premium', 'business']
     };
   }
   
@@ -2707,7 +2767,7 @@ const closeSectionModal = () => {
     description: '',
     display_order: 0,
     is_active: true,
-    available_plans: ['basic', 'premium', 'business']
+    available_plans: ['free', 'basic', 'premium', 'business']
   };
 };
 
@@ -2830,7 +2890,7 @@ const ensureArray = (value) => {
 const getSectionPlans = (sectionKey) => {
   const sectionFields = fields.value[sectionKey] || [];
   if (sectionFields.length === 0) {
-    return ['basic', 'premium', 'business']; // No fields = all plans
+    return ['free', 'basic', 'premium', 'business']; // No fields = all plans
   }
   
   // Calculate union of all fields' available_plans
@@ -2839,6 +2899,7 @@ const getSectionPlans = (sectionKey) => {
     const fieldPlans = ensureArray(field.available_plans);
     if (fieldPlans.length === 0) {
       // Empty means all plans
+      plansSet.add('free');
       plansSet.add('basic');
       plansSet.add('premium');
       plansSet.add('business');
@@ -2917,6 +2978,7 @@ const getPlanNames = (option) => {
     return [];
   }
   return option.available_plans.map(p => {
+    if (p === 'free') return 'Free';
     if (p === 'basic') return 'Basic';
     if (p === 'premium') return 'Premium';
     if (p === 'business') return 'Business';
@@ -3039,10 +3101,10 @@ const toggleOptionForPlan = async (item, planId, checked, skipRefresh = false) =
     console.log(`🔄 toggleOptionForPlan: ${item.label || item.name}, plan=${planId}, checked=${checked}`);
     console.log(`   Before: available_plans =`, JSON.stringify(item.available_plans));
     
-    // If available_plans is empty, it means "all plans" - initialize with all 3
+    // If available_plans is empty, it means "all plans" - initialize with all 4
     let plans = item.available_plans || [];
     if (plans.length === 0) {
-      plans = ['basic', 'premium', 'business'];
+      plans = ['free', 'basic', 'premium', 'business'];
       console.log(`   Initialized empty to all plans`);
     } else {
       plans = [...plans]; // Clone to avoid reference issues
@@ -3168,7 +3230,7 @@ const toggleDesignTypeForPlan = async (planId, designType, checked) => {
       // If empty, initialize with all plans first
       let newPlans = option.available_plans?.length > 0 
         ? [...option.available_plans] 
-        : ['basic', 'premium', 'business'];
+        : ['free', 'basic', 'premium', 'business'];
       
       if (checked && !newPlans.includes(planId)) {
         newPlans.push(planId);
@@ -3231,7 +3293,7 @@ const toggleSectionForPlan = async (planId, tabId, checked) => {
       // If empty, initialize with all plans first
       let newPlans = field.available_plans?.length > 0 
         ? [...field.available_plans] 
-        : ['basic', 'premium', 'business'];
+        : ['free', 'basic', 'premium', 'business'];
       
       if (checked && !newPlans.includes(planId)) {
         newPlans.push(planId);
@@ -3308,7 +3370,7 @@ const toggleDesignSectionForPlan = async (planId, subItems, checked) => {
       // If empty, initialize with all plans first
       let newPlans = option.available_plans?.length > 0 
         ? [...option.available_plans] 
-        : ['basic', 'premium', 'business'];
+        : ['free', 'basic', 'premium', 'business'];
       
       if (checked && !newPlans.includes(planId)) {
         newPlans.push(planId);

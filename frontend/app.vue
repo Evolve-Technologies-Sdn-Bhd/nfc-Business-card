@@ -24,14 +24,14 @@
           size="xl"
           theme="dark"
           :showText="true"
-          hintText="Memuatkan aplikasi..."
+          hintText="Loading application..."
         />
       </div>
     </Transition>
 
     <!-- ==============================================
          PAGE NAVIGATION LOADING BAR (top progress)
-         Matches brand gradient: Matte Navy → Matte Teal → Gold
+         Matches the system palette gradient: Ink → Brass → Deep Brass
          ============================================== -->
     <ClientOnly>
       <NuxtLoadingIndicator
@@ -54,60 +54,30 @@ import { useTheme } from '~/composables/useTheme';
 
 const appBootLoading = ref(true);
 const { initTheme } = useTheme();
-const systemBrand = useState("systemBrand", () => ({
-  app_name: "NFCGo",
-  system_logo_url: "",
-  system_favicon_url: "",
-  brandVersion: 0,
-}));
 
-const { $api } = useNuxtApp();
+// The browser favicon is hardcoded to the official NFCGo system logo so it
+// always matches the system branding, regardless of admin-configured values.
+// Kept in sync with the app icon declared in nuxt.config.ts.
+const SYSTEM_FAVICON_URL = "/nfcgo-app-icon.svg";
 
-// Sync the browser favicon with the branding configured in admin settings.
-// Non-blocking: a slow or unavailable endpoint never delays app boot.
-const loadSystemBrand = async () => {
-  try {
-    const response = await $api.get("/system-settings/brand/public");
-    // api.client.js response interceptor returns the JSON body directly.
-    // Keep compatibility with either a direct body or an Axios response.
-    const payload = response?.data?.success !== undefined ? response.data : response;
-    const data = payload?.data || {};
+const applySystemFavicon = () => {
+  if (typeof document === "undefined") return;
 
-    if (!payload?.success) return;
-
-    systemBrand.value = {
-      ...systemBrand.value,
-      app_name: data.app_name || "NFCGo",
-      system_logo_url: data.system_logo_public_url || data.system_logo_url || "",
-      system_favicon_url: data.system_favicon_public_url || data.system_favicon_url || "",
-      brandVersion: Date.now(),
-    };
-
-    const url = systemBrand.value.system_favicon_url;
-    if (!url || typeof document === "undefined") return;
-
-    let link = document.querySelector("link[rel~='icon']");
-    if (!link) {
-      link = document.createElement("link");
-      link.rel = "icon";
-      document.head.appendChild(link);
-    }
-
-    link.href = url + (url.includes("?") ? "&" : "?") + "v=" + systemBrand.value.brandVersion;
-    link.type = url.split("?")[0].endsWith(".svg")
-      ? "image/svg+xml"
-      : url.split("?")[0].endsWith(".png")
-        ? "image/png"
-        : "image/x-icon";
-  } catch (error) {
-    console.warn("Public system branding unavailable; using defaults.");
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    document.head.appendChild(link);
   }
+
+  link.href = SYSTEM_FAVICON_URL;
+  link.type = "image/svg+xml";
 };
 
 onMounted(() => {
   initTheme();
 
-  loadSystemBrand();
+  applySystemFavicon();
 
   // Minimum visible duration for the branded NFCGo logo-draw loader.
   // The animation completes one full cycle every 2s, so we keep the

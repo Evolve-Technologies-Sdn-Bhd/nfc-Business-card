@@ -13,7 +13,9 @@ export default defineNuxtRouteMiddleware((to) => {
     // Check if user is authenticated
     if (!authStore.isAuthenticated) {
       console.log("Not authenticated, redirecting to login");
-      return navigateTo("/UserAccount/login");
+      return navigateTo(
+        `/UserAccount/login?redirect=${encodeURIComponent(to.fullPath)}&admin=1`
+      );
     }
 
     // Check if user is admin

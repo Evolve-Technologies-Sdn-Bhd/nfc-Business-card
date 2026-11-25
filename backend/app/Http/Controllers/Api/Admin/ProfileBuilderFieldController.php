@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\Concerns\ScopesBuilderPlan;
 use App\Models\ProfileBuilderField;
 use App\Models\ProfileBuilderSection;
 use App\Models\BusinessUserAssignment;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileBuilderFieldController extends Controller
 {
+    use ScopesBuilderPlan;
+
     /**
      * Get all profile builder fields grouped by tab
      * Supports filtering by plan parameter
@@ -43,11 +46,7 @@ class ProfileBuilderFieldController extends Controller
             $query->whereIn('id', $customFieldIds);
         } elseif ($plan) {
             // Default plan filtering
-            $query->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($query, 'available_plans', $plan);
         }
         
         $fields = $query->get();
@@ -86,11 +85,7 @@ class ProfileBuilderFieldController extends Controller
         
         // Filter by plan if specified
         if ($plan) {
-            $sectionsQuery->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($sectionsQuery, 'available_plans', $plan);
         }
         
         $dbSections = $sectionsQuery->get();
@@ -110,11 +105,7 @@ class ProfileBuilderFieldController extends Controller
         if ($customFieldIds !== null) {
             $fieldsQuery->whereIn('id', $customFieldIds);
         } elseif ($plan) {
-            $fieldsQuery->where(function($q) use ($plan) {
-                $q->whereJsonContains('available_plans', $plan)
-                  ->orWhereNull('available_plans')
-                  ->orWhereJsonLength('available_plans', 0);
-            });
+            $this->applyBuilderPlanScope($fieldsQuery, 'available_plans', $plan);
         }
         
         $fields = $fieldsQuery->get()->groupBy('tab');
@@ -208,7 +199,7 @@ class ProfileBuilderFieldController extends Controller
         $data = $request->all();
         // Default to all plans if not specified or empty
         if (empty($data['available_plans'])) {
-            $data['available_plans'] = ['basic', 'premium', 'business'];
+            $data['available_plans'] = ['free', 'basic', 'premium', 'business'];
         }
         
         $field = ProfileBuilderField::create($data);

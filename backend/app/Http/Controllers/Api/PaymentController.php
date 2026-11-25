@@ -116,6 +116,26 @@ class PaymentController extends Controller
     }
 
     /**
+     * Public checkout configuration.
+     *
+     * Exposes the physical-card unit price, flat shipping fee and the maximum
+     * per-order card quantity so the frontend order summary stays in sync with
+     * the backend pricing configuration (config/payment.php → 'checkout').
+     */
+    public function getCheckoutConfig()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'currency' => config('payment.currency', 'MYR'),
+                'card_unit_price' => (float) config('payment.checkout.card_unit_price', 15.00),
+                'shipping_fee' => (float) config('payment.checkout.shipping_fee', 5.00),
+                'max_card_quantity' => (int) config('payment.checkout.max_card_quantity', 5),
+            ],
+        ]);
+    }
+
+    /**
      * Initiate a payment
      */
     public function initiatePayment(Request $request)
@@ -168,9 +188,28 @@ class PaymentController extends Controller
                 'rail' => $request->payment_rail,
             ]);
 
+            // Manual bank transfer: return the reference code + bank accounts so
+            // the checkout can render the transfer instructions and the receipt
+            // upload form. Without this the frontend's `bank_details` is undefined
+            // and the upload step never appears.
+            $bankDetails = null;
+            if ($request->payment_rail === 'manual_bank') {
+                $accounts = config('payment.rails.manual_bank.accounts', []);
+                $bankDetails = [
+                    'reference_code' => $transaction->bank_reference_code,
+                    'account_name' => $accounts[0]['account_name'] ?? null,
+                    'banks' => array_map(fn ($account) => [
+                        'name' => $account['bank_name'] ?? '',
+                        'account_number' => $account['account_number'] ?? '',
+                        'swift' => $account['swift'] ?? null,
+                    ], $accounts),
+                ];
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Payment initiated successfully',
+                'bank_details' => $bankDetails,
                 'order' => $order ? [
                     'id' => $order->id,
                     'order_number' => $order->order_number,

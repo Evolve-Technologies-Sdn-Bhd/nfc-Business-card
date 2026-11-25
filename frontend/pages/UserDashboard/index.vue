@@ -295,7 +295,8 @@ const quickActions = computed(() => {
       iconBg: 'bg-success-100',
       iconText: 'text-success-600',
       href: profileBuilderHref.value,
-      disabled: !authStore.canAccessPaidProfileBuilder(),
+      disabled:
+        !authStore.canAccessPaidProfileBuilder() && resolvedPlan.value !== 'free',
       disabledMessage: 'Complete payment first to unlock',
     },
     {

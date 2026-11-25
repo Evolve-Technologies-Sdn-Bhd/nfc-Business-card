@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   },
 
   // CSS Framework
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "~/assets/css/public.css"],
 
   // Modules
   modules: [
@@ -35,6 +35,9 @@ export default defineNuxtConfig({
       Poppins: [300, 400, 500, 600, 700],
       // Outfit powers the official NFCGo logo wordmark.
       Outfit: [400, 500, 600, 700],
+      // Fraunces is the editorial display serif used for the public profile
+      // masthead + section titles (high-contrast, optical-size aware).
+      Fraunces: [300, 400, 500, 600, 700, 900],
     },
   },
 
@@ -75,17 +78,18 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        // Official NFCGo mark (vector) — preferred by modern browsers.
+        // Hardcoded browser favicon — always the official NFCGo system logo.
         {
           rel: "icon",
           type: "image/svg+xml",
           href: "/nfcgo-app-icon.svg",
         },
-        { rel: "alternate icon", type: "image/x-icon", href: "/favicon.ico" },
       ],
     },
     pageTransition: { name: "page", mode: "out-in" },
-    layoutTransition: { name: "layout", mode: "out-in" },
+    // Avoid nested page/layout out-in transitions leaving the previous auth
+    // page mounted when a guard redirects into the public layout.
+    layoutTransition: false,
   },
 
   // Tailwind CSS
@@ -132,7 +136,16 @@ export default defineNuxtConfig({
   nitro: {
     compressPublicAssets: true,
     prerender: {
-      routes: ['/', '/UserAccount/login', '/UserAccount/register'],
+      routes: [
+        '/',
+        '/UserAccount/login',
+        '/UserAccount/register',
+        '/Homepage/features',
+        '/Homepage/how-it-works',
+        '/Homepage/cards',
+        '/Homepage/pricing',
+        '/Homepage/faq',
+      ],
       crawlLinks: true,
       failOnError: false,
     },

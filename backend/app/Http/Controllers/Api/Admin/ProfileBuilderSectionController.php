@@ -103,7 +103,7 @@ class ProfileBuilderSectionController extends Controller
         $data['has_fields'] = $data['has_fields'] ?? true;
         $data['is_active'] = $data['is_active'] ?? true;
         // Default to all plans if not specified
-        $data['available_plans'] = $data['available_plans'] ?? ['basic', 'premium', 'business'];
+        $data['available_plans'] = $data['available_plans'] ?? ['free', 'basic', 'premium', 'business'];
         
         $section = ProfileBuilderSection::create($data);
 

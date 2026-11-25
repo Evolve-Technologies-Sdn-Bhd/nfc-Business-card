@@ -151,6 +151,7 @@ class BusinessUserController extends Controller
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string|max:20',
             'job_title' => 'nullable|string|max:255',
+            'business_role' => 'nullable|in:' . implode(',', User::BUSINESS_EMPLOYEE_ROLES),
         ]);
 
         if ($validator->fails()) {
@@ -192,6 +193,7 @@ class BusinessUserController extends Controller
                 'subscription_start_date' => $businessAccount->subscription_start_date,
                 'subscription_end_date' => $businessAccount->subscription_end_date,
                 'parent_business_id' => $businessAccount->id,
+                'business_role' => $request->business_role ?? User::BUSINESS_ROLE_MEMBER,
             ]);
 
             DB::commit();
@@ -224,6 +226,7 @@ class BusinessUserController extends Controller
             'employees.*.password' => 'required|string|min:8',
             'employees.*.phone' => 'nullable|string|max:20',
             'employees.*.job_title' => 'nullable|string|max:255',
+            'employees.*.business_role' => 'nullable|in:' . implode(',', User::BUSINESS_EMPLOYEE_ROLES),
         ]);
 
         if ($validator->fails()) {
@@ -279,6 +282,7 @@ class BusinessUserController extends Controller
                     'subscription_start_date' => $businessAccount->subscription_start_date,
                     'subscription_end_date' => $businessAccount->subscription_end_date,
                     'parent_business_id' => $businessAccount->id,
+                    'business_role' => $employeeData['business_role'] ?? User::BUSINESS_ROLE_MEMBER,
                 ]);
 
                 $createdEmployees[] = $employee;

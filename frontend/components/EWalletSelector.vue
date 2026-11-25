@@ -147,7 +147,6 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
 import { usePayment } from '~/composables/usePayment'
-import { useToast } from '~/composables/useToast'
 
 const props = defineProps({
   amount: {
@@ -171,7 +170,7 @@ const props = defineProps({
 const emit = defineEmits(['payment-success', 'payment-failed', 'back'])
 
 const { initiatePayment, getTransaction, loading, error } = usePayment()
-const { showToast } = useToast()
+const { $toast } = useNuxtApp()
 
 const selectedWallet = ref(null)
 const processing = ref(false)
@@ -249,14 +248,14 @@ const handlePayment = async () => {
       // Start expiry countdown
       startExpiryCountdown()
       
-      showToast('Please complete payment in your ' + getWalletName(selectedWallet.value) + ' app', 'success')
+      $toast.success('Please complete payment in your ' + getWalletName(selectedWallet.value) + ' app')
     } else {
       throw new Error('Failed to generate payment link')
     }
   } catch (err) {
     console.error('E-wallet payment error:', err)
     error.value = err.message || 'Failed to initiate payment'
-    showToast(error.value, 'error')
+    $toast.error(error.value)
     emit('payment-failed', err)
   } finally {
     processing.value = false
@@ -285,13 +284,13 @@ const startStatusCheck = () => {
         clearInterval(statusCheckInterval)
         clearInterval(expiryInterval)
         checkingStatus.value = false
-        showToast('Payment successful!', 'success')
+        $toast.success('Payment successful!')
         emit('payment-success', transaction)
       } else if (transaction.status === 'failed' || transaction.status === 'cancelled') {
         clearInterval(statusCheckInterval)
         clearInterval(expiryInterval)
         checkingStatus.value = false
-        showToast('Payment failed or cancelled', 'error')
+        $toast.error('Payment failed or cancelled')
         emit('payment-failed', transaction)
       }
     } catch (err) {

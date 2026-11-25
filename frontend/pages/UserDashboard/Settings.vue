@@ -1311,7 +1311,7 @@
               </div>
             </div>
 
-            <!-- Invoices & Payment History Placeholder -->
+            <!-- Billing & Invoice History — driven by the real invoice records -->
             <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
@@ -1323,104 +1323,25 @@
                       All your subscription payment receipts and invoices
                     </p>
                   </div>
-                  <button class="btn btn-outline btn-sm" disabled>
-                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
-                    Download All
+                  <button
+                    class="btn btn-outline btn-sm"
+                    @click="viewInvoices"
+                  >
+                    <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4 mr-2" />
+                    Open Full Page
                   </button>
                 </div>
               </div>
-              <div class="p-0 overflow-hidden">
-                <div class="overflow-x-auto">
-                  <table class="w-full text-body">
-                    <thead class="bg-secondary-50 border-b border-secondary-200">
-                      <tr>
-                        <th class="text-left px-6 py-3 table-head text-secondary-500">Date</th>
-                        <th class="text-left px-6 py-3 table-head text-secondary-500">Receipt No.</th>
-                        <th class="text-left px-6 py-3 table-head text-secondary-500">Description</th>
-                        <th class="text-left px-6 py-3 table-head text-secondary-500">Amount</th>
-                        <th class="text-left px-6 py-3 table-head text-secondary-500">Status</th>
-                        <th class="text-right px-6 py-3 table-head text-secondary-500">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-secondary-200">
-                      <tr class="hover:bg-secondary-50/50">
-                        <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-mono text-secondary-600">No records</td>
-                        <td class="px-6 py-4 text-secondary-600">
-                          <span class="inline-flex items-center gap-1.5 text-badge px-2 py-1 rounded-full bg-secondary-100 text-secondary-600">
-                            <Icon name="heroicons:information-circle" class="h-3.5 w-3.5" />
-                            Invoice history will appear after your first payment
-                          </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-secondary-700">—</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-gray-100 text-gray-700">
-                            No Transactions
-                          </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                          <button class="btn btn-outline btn-xs" disabled>
-                            <Icon name="heroicons:document-text" class="h-3.5 w-3.5 mr-1" />
-                            PDF
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <div class="p-6">
+                <InvoiceList @preview="handleInvoicePreview" />
               </div>
             </div>
 
-            <!-- Payment Methods Placeholder -->
-            <div class="card">
-              <div class="px-6 py-4 border-b border-secondary-200">
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                  <div>
-                    <h2 class="card-title text-secondary-900">
-                      Payment Methods
-                    </h2>
-                    <p class="card-subtitle text-secondary-600">
-                      Payment methods are stored for automatic subscription charging
-                    </p>
-                  </div>
-                  <button class="btn btn-outline btn-sm" disabled>
-                    <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-                    Add New Method
-                  </button>
-                </div>
-              </div>
-              <div class="p-6 space-y-4">
-                <div class="p-4 rounded-xl border border-secondary-200 bg-secondary-50/50 flex items-center justify-between flex-wrap gap-3">
-                  <div class="flex items-center gap-4">
-                    <div class="w-14 h-9 rounded-md bg-white border border-secondary-200 flex items-center justify-center shadow-sm">
-                      <Icon name="heroicons:banknotes" class="h-6 w-6 text-secondary-400" />
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2 mb-0.5">
-                        <h4 class="text-label text-secondary-900">FPX Online Banking</h4>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-badge bg-green-100 text-green-800">
-                          <Icon name="heroicons:check" class="h-3 w-3 mr-1" />
-                          Default
-                        </span>
-                      </div>
-                      <p class="text-helper text-secondary-500">
-                        Supported: Maybank2u, CIMB Clicks, Public Bank, RHB, Hong Leong & 20+ other banks
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex gap-2">
-                    <button class="btn btn-outline btn-xs" disabled>
-                      <Icon name="heroicons:pencil" class="h-3.5 w-3.5 mr-1" />
-                      Update
-                    </button>
-                    <button class="btn btn-outline btn-xs text-red-600 border-red-300 hover:bg-red-50" disabled>
-                      <Icon name="heroicons:trash" class="h-3.5 w-3.5 mr-1" />
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <InvoicePreviewModal
+              :show="showInvoicePreview"
+              :invoice="selectedInvoice"
+              @close="closeInvoicePreview"
+            />
           </div>
 
           <!-- Danger Zone Tab -->
@@ -1837,6 +1758,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
+import InvoiceList from "~/components/InvoiceList.vue";
+import InvoicePreviewModal from "~/components/InvoicePreviewModal.vue";
 
 // Meta
 definePageMeta({
@@ -2036,6 +1959,18 @@ const showLinkAccountPassword = ref(false);
 // Modal states
 const showDeleteConfirmation = ref(false);
 const deleteConfirmation = ref("");
+
+// Invoice preview modal state
+const showInvoicePreview = ref(false);
+const selectedInvoice = ref(null);
+const handleInvoicePreview = (invoice) => {
+  selectedInvoice.value = invoice;
+  showInvoicePreview.value = true;
+};
+const closeInvoicePreview = () => {
+  showInvoicePreview.value = false;
+  selectedInvoice.value = null;
+};
 
 // Toast states
 const showSuccessToast = ref(false);
@@ -2779,8 +2714,8 @@ const manageBilling = () => {
 };
 
 const viewInvoices = () => {
-  // Redirect to invoices page
-  navigateTo("/UserDashboard/billing/invoices");
+  // Full invoices page (paginated list + statistics + PDF downloads)
+  navigateTo("/dashboard/invoices");
 };
 
 // Subscription helper methods - now using data from price-management
@@ -2886,7 +2821,9 @@ const cancelSubscription = async () => {
 
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.post("/settings/subscription/cancel");
+    // Cancels the current user's active subscription at the end of the paid
+    // period (see SubscriptionController::cancelActive + api.php subscription routes).
+    const response = await $api.post("/subscription/cancel");
     
     if (response.success) {
       showSuccess("Subscription cancelled successfully");

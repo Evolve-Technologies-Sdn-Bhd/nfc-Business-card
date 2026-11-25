@@ -23,7 +23,7 @@
         @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -30px) scale(1.05); } }
         @keyframes floatSlow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes pulse-status { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); } }
+        @keyframes pulse-status { 0%, 100% { box-shadow: 0 0 0 0 rgba(194, 160, 104, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(194, 160, 104, 0); } }
         @keyframes charBounce { 0% { opacity: 0; transform: translateY(20px); } 50% { transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes particleFloat { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; } 50% { transform: translateY(-20px) scale(1.2); opacity: 0.6; } }
@@ -124,7 +124,7 @@
         <div
           :style="{
             position: 'absolute', inset: '-25%',
-            background: `linear-gradient(115deg, rgba(56,189,248,0.72), rgba(168,85,247,0.68) 22%, rgba(236,72,153,0.6) 45%, rgba(20,184,166,0.62) 68%, rgba(129,140,248,0.7) 90%)`,
+            background: `linear-gradient(115deg, rgba(169, 133, 77,0.72), rgba(169, 133, 77,0.68) 22%, rgba(138, 106, 51,0.6) 45%, rgba(138, 106, 51,0.62) 68%, rgba(169, 133, 77,0.7) 90%)`,
             backgroundSize: '300% 300%',
             animation: 'auroraShift 14s ease infinite',
             filter: 'blur(52px)',
@@ -134,7 +134,7 @@
         <div
           :style="{
             position: 'absolute', inset: '-15%',
-            background: `radial-gradient(ellipse at 20% 20%, ${designSettings.accentColor}55 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(236,72,153,0.45) 0%, transparent 50%)`,
+            background: `radial-gradient(ellipse at 20% 20%, ${designSettings.accentColor}55 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(138, 106, 51,0.45) 0%, transparent 50%)`,
             backgroundSize: '220% 220%',
             animation: 'auroraShift 22s ease-in-out infinite reverse',
             filter: 'blur(35px)',
@@ -149,7 +149,7 @@
             position: 'absolute',
             width: '62%', height: '62%',
             top: '-18%', left: '-14%',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.82) 0%, rgba(99,102,241,0.15) 45%, transparent 72%)',
+            background: 'radial-gradient(circle, rgba(194, 160, 104,0.82) 0%, rgba(194, 160, 104,0.15) 45%, transparent 72%)',
             animation: 'meshMove 18s ease-in-out infinite',
             filter: 'blur(22px)',
             mixBlendMode: 'screen',
@@ -160,7 +160,7 @@
             position: 'absolute',
             width: '58%', height: '58%',
             top: '12%', right: '-18%',
-            background: 'radial-gradient(circle, rgba(236,72,153,0.78) 0%, rgba(236,72,153,0.12) 45%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(138, 106, 51,0.78) 0%, rgba(138, 106, 51,0.12) 45%, transparent 70%)',
             animation: 'meshMove 22s ease-in-out infinite reverse',
             filter: 'blur(22px)',
             mixBlendMode: 'screen',
@@ -171,7 +171,7 @@
             position: 'absolute',
             width: '68%', height: '60%',
             bottom: '-22%', left: '22%',
-            background: 'radial-gradient(circle, rgba(20,184,166,0.78) 0%, rgba(20,184,166,0.15) 45%, transparent 72%)',
+            background: 'radial-gradient(circle, rgba(138, 106, 51,0.78) 0%, rgba(138, 106, 51,0.15) 45%, transparent 72%)',
             animation: 'meshMove 20s ease-in-out infinite',
             animationDelay: '-4s',
             filter: 'blur(22px)',
@@ -206,7 +206,7 @@
               left: ((i * 71) % 100) + '%',
               animation: `twinkle ${2 + (i % 4)}s ease-in-out infinite`,
               animationDelay: ((i * 0.13) % 3) + 's',
-              boxShadow: '0 0 10px rgba(255,255,255,0.95), 0 0 20px rgba(200,220,255,0.6)',
+              boxShadow: '0 0 10px rgba(255,255,255,0.95), 0 0 20px rgba(232, 217, 184,0.6)',
             }"
           ></div>
           <div
@@ -337,30 +337,30 @@
           height: (4 + (i%3)*3) + 'px',
           left: ((i*37.2) % 100) + '%',
           top: ((i*53.7) % 100) + '%',
-          background: `radial-gradient(circle, ${hexToRgba('#FDE68A', 1)} 0%, ${hexToRgba('#F59E0B', 0.95)} 50%, transparent 75%)`,
-          boxShadow: `0 0 ${10 + (i%4)*5}px ${hexToRgba('#FBBF24', 0.62)}`,
+          background: `radial-gradient(circle, ${hexToRgba('#e8d9b8', 1)} 0%, ${hexToRgba('#c2a068', 0.95)} 50%, transparent 75%)`,
+          boxShadow: `0 0 ${10 + (i%4)*5}px ${hexToRgba('#c2a068', 0.62)}`,
           opacity: (0.35 + ((i*7)%55)/100),
           animation: `fireflyFloat ${9 + (i%4)*2.4}s ease-in-out ${(i%8)*0.45}s infinite alternate, twinkle ${3 + (i%5)*0.5}s ease-in-out ${(i%6)*0.2}s infinite`,
         }"></div>
       </template>
-      <!-- NEW 10: Bokeh Dreamy Circles (blue/pink/green/yellow/purple) -->
+      <!-- NEW 10: Bokeh Dreamy Circles (brass glow) -->
       <template v-else-if="designSettings.bgAnimation === 'bokeh'">
-        <div class="pointer-events-none absolute rounded-full blur-[42px]" style="width:56%;height:56%;left:6%;top:12%;background:radial-gradient(circle,rgba(96,165,250,0.62) 0%,transparent 72%);"></div>
-        <div class="pointer-events-none absolute rounded-full blur-[48px]" style="width:62%;height:62%;right:2%;top:22%;background:radial-gradient(circle,rgba(244,114,182,0.58) 0%,transparent 72%);"></div>
-        <div class="pointer-events-none absolute rounded-full blur-[44px]" style="width:54%;height:54%;left:18%;bottom:4%;background:radial-gradient(circle,rgba(52,211,153,0.6) 0%,transparent 72%);"></div>
-        <div class="pointer-events-none absolute rounded-full blur-[50px]" style="width:58%;height:58%;right:10%;bottom:8%;background:radial-gradient(circle,rgba(250,204,21,0.55) 0%,transparent 72%);"></div>
-        <div class="pointer-events-none absolute rounded-full blur-[38px]" style="width:42%;height:42%;left:38%;top:36%;background:radial-gradient(circle,rgba(168,85,247,0.55) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[42px]" style="width:56%;height:56%;left:6%;top:12%;background:radial-gradient(circle,rgba(169, 133, 77,0.62) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[48px]" style="width:62%;height:62%;right:2%;top:22%;background:radial-gradient(circle,rgba(169, 133, 77,0.58) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[44px]" style="width:54%;height:54%;left:18%;bottom:4%;background:radial-gradient(circle,rgba(169, 133, 77,0.6) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[50px]" style="width:58%;height:58%;right:10%;bottom:8%;background:radial-gradient(circle,rgba(194, 160, 104,0.55) 0%,transparent 72%);"></div>
+        <div class="pointer-events-none absolute rounded-full blur-[38px]" style="width:42%;height:42%;left:38%;top:36%;background:radial-gradient(circle,rgba(169, 133, 77,0.55) 0%,transparent 72%);"></div>
       </template>
       <!-- NEW 11: Liquid Metaball Blobs (4 moving gradient ellipses + 4 sizes + keyframes drift) -->
       <template v-else-if="designSettings.bgAnimation === 'liquid-blobs'">
-        <div class="pointer-events-none absolute blur-[30px]" style="width:42%;height:34%;left:14%;top:14%;border-radius:56% 44% 60% 40%/52% 48% 52% 48%;background:radial-gradient(ellipse,rgba(244,114,182,0.72) 0%,transparent 70%);animation:liquidDriftA 22s ease-in-out infinite;"></div>
-        <div class="pointer-events-none absolute blur-[34px]" style="width:46%;height:38%;right:8%;bottom:10%;border-radius:42% 58% 46% 54%/48% 52% 48% 52%;background:radial-gradient(ellipse,rgba(34,211,238,0.68) 0%,transparent 70%);animation:liquidDriftB 26s ease-in-out infinite;"></div>
-        <div class="pointer-events-none absolute blur-[28px]" style="width:34%;height:28%;right:16%;top:10%;border-radius:50% 50% 42% 58%/56% 44% 56% 44%;background:radial-gradient(ellipse,rgba(168,85,247,0.65) 0%,transparent 70%);animation:liquidDriftA 19s ease-in-out -4s infinite reverse;"></div>
-        <div class="pointer-events-none absolute blur-[32px]" style="width:40%;height:32%;left:10%;bottom:16%;border-radius:48% 52% 54% 46%/44% 56% 44% 56%;background:radial-gradient(ellipse,rgba(250,204,21,0.62) 0%,transparent 70%);animation:liquidDriftB 24s ease-in-out -3s infinite reverse;"></div>
+        <div class="pointer-events-none absolute blur-[30px]" style="width:42%;height:34%;left:14%;top:14%;border-radius:56% 44% 60% 40%/52% 48% 52% 48%;background:radial-gradient(ellipse,rgba(169, 133, 77,0.72) 0%,transparent 70%);animation:liquidDriftA 22s ease-in-out infinite;"></div>
+        <div class="pointer-events-none absolute blur-[34px]" style="width:46%;height:38%;right:8%;bottom:10%;border-radius:42% 58% 46% 54%/48% 52% 48% 52%;background:radial-gradient(ellipse,rgba(194, 160, 104,0.68) 0%,transparent 70%);animation:liquidDriftB 26s ease-in-out infinite;"></div>
+        <div class="pointer-events-none absolute blur-[28px]" style="width:34%;height:28%;right:16%;top:10%;border-radius:50% 50% 42% 58%/56% 44% 56% 44%;background:radial-gradient(ellipse,rgba(169, 133, 77,0.65) 0%,transparent 70%);animation:liquidDriftA 19s ease-in-out -4s infinite reverse;"></div>
+        <div class="pointer-events-none absolute blur-[32px]" style="width:40%;height:32%;left:10%;bottom:16%;border-radius:48% 52% 54% 46%/44% 56% 44% 56%;background:radial-gradient(ellipse,rgba(194, 160, 104,0.62) 0%,transparent 70%);animation:liquidDriftB 24s ease-in-out -3s infinite reverse;"></div>
       </template>
-      <!-- NEW 12: Neon Diagonal Lines (cyan + magenta criss-cross) -->
+      <!-- NEW 12: Diagonal Brass Lines (criss-cross glow) -->
       <template v-else-if="designSettings.bgAnimation === 'neon-lines'">
-        <div class="pointer-events-none absolute inset-0 opacity-75" style="background:repeating-linear-gradient(125deg,transparent 0 44px,linear-gradient(90deg,rgba(34,211,238,0.0),rgba(34,211,238,0.45) 50%,rgba(34,211,238,0.0)) 44px 48px),repeating-linear-gradient(55deg,transparent 0 60px,linear-gradient(90deg,rgba(244,114,182,0.0),rgba(244,114,182,0.38) 50%,rgba(244,114,182,0.0)) 60px 64px);"></div>
+        <div class="pointer-events-none absolute inset-0 opacity-75" style="background:repeating-linear-gradient(125deg,transparent 0 44px,linear-gradient(90deg,rgba(194, 160, 104,0.0),rgba(194, 160, 104,0.45) 50%,rgba(194, 160, 104,0.0)) 44px 48px),repeating-linear-gradient(55deg,transparent 0 60px,linear-gradient(90deg,rgba(169, 133, 77,0.0),rgba(169, 133, 77,0.38) 50%,rgba(169, 133, 77,0.0)) 60px 64px);"></div>
         <div class="pointer-events-none absolute inset-0" style="background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.15) 45%,rgba(0,0,0,0.25) 100%);mask-image:radial-gradient(ellipse at center,black 35%,transparent 78%);-webkit-mask-image:radial-gradient(ellipse at center,black 35%,transparent 78%);"></div>
       </template>
       <!-- NEW 13: Snow Fall White (42 flakes 3 size tiers + fall keyframe) -->
@@ -377,10 +377,10 @@
       </template>
       <!-- NEW 14: Cosmic Dust Purple + mini star sparkle -->
       <template v-else-if="designSettings.bgAnimation === 'cosmic-dust'">
-        <div class="pointer-events-none absolute blur-[36px]" style="width:52%;height:52%;left:8%;top:10%;background:radial-gradient(circle,rgba(168,85,247,0.55) 0%,transparent 72%);animation:auroraShift 24s ease-in-out infinite alternate;"></div>
-        <div class="pointer-events-none absolute blur-[40px]" style="width:56%;height:56%;right:0%;top:22%;background:radial-gradient(circle,rgba(236,72,153,0.48) 0%,transparent 72%);animation:auroraShift 28s ease-in-out -3s infinite alternate-reverse;"></div>
-        <div class="pointer-events-none absolute blur-[34px]" style="width:48%;height:48%;left:22%;bottom:2%;background:radial-gradient(circle,rgba(99,102,241,0.55) 0%,transparent 72%);animation:auroraShift 22s ease-in-out -7s infinite alternate;"></div>
-        <div class="pointer-events-none absolute blur-[38px]" style="width:50%;height:50%;right:14%;bottom:6%;background:radial-gradient(circle,rgba(56,189,248,0.5) 0%,transparent 72%);animation:auroraShift 30s ease-in-out -11s infinite alternate-reverse;"></div>
+        <div class="pointer-events-none absolute blur-[36px]" style="width:52%;height:52%;left:8%;top:10%;background:radial-gradient(circle,rgba(169, 133, 77,0.55) 0%,transparent 72%);animation:auroraShift 24s ease-in-out infinite alternate;"></div>
+        <div class="pointer-events-none absolute blur-[40px]" style="width:56%;height:56%;right:0%;top:22%;background:radial-gradient(circle,rgba(138, 106, 51,0.48) 0%,transparent 72%);animation:auroraShift 28s ease-in-out -3s infinite alternate-reverse;"></div>
+        <div class="pointer-events-none absolute blur-[34px]" style="width:48%;height:48%;left:22%;bottom:2%;background:radial-gradient(circle,rgba(194, 160, 104,0.55) 0%,transparent 72%);animation:auroraShift 22s ease-in-out -7s infinite alternate;"></div>
+        <div class="pointer-events-none absolute blur-[38px]" style="width:50%;height:50%;right:14%;bottom:6%;background:radial-gradient(circle,rgba(169, 133, 77,0.5) 0%,transparent 72%);animation:auroraShift 30s ease-in-out -11s infinite alternate-reverse;"></div>
         <div v-for="(s,i) in 30" :key="'dusttwinkle'+i" class="pointer-events-none absolute rounded-full bg-white" :style="{
           width: (1.5 + (i%2)) + 'px', height: (1.5 + (i%2)) + 'px',
           left: ((i*61.3)%100)+'%', top: ((i*29.7)%100)+'%',
@@ -394,7 +394,7 @@
           width: (3 + (i%3)*2.2) + 'px', height: (6 + (i%4)*2) + 'px',
           left: ((i*31.7)%100) + '%',
           top: ((i*47.3)%100) + '%',
-          background: ['#EF4444','#F59E0B','#10B981','#22D3EE','#A855F7','#EC4899','#60A5FA','#FBBF24'][i%8],
+          background: ['#8a6a33','#c2a068','#a9854d','#c2a068','#a9854d','#8a6a33','#a9854d','#c2a068'][i%8],
           borderRadius: ((i%5)===0)?'50%':((i%3)===1)?'1px':'4px',
           transform: `rotate(${(i*19)%360}deg)`,
           opacity: (0.5 + ((i*17)%45)/100),
@@ -472,17 +472,17 @@
           alignItems: 'center',
           gap: isSmallMobile ? '6px' : isMobile ? '8px' : '10px',
           padding: isSmallMobile ? '8px 12px' : isMobile ? '10px 14px' : '12px 20px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           borderRadius: isMobile ? '12px' : '15px',
-          color: responsive.textPrimary,
+          color: '#1b1407',
           fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
           fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.3s',
-          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+          boxShadow: '0 4px 15px rgba(194, 160, 104, 0.4)',
           willChange: 'opacity, transform',
           maxWidth: `calc(50vw - ${isSmallMobile ? '16px' : isMobile ? '20px' : '40px'} - var(--sal, 0px) - var(--sar, 0px))`,
           overflow: 'hidden',
@@ -581,18 +581,18 @@
           @click="goToEditProfile"
           :style="{
             padding: '15px 30px',
-            background: 'linear-gradient(135deg, #667eea, #764ba2)',
-            color: responsive.textPrimary,
+            background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
+            color: '#1b1407',
             border: 'none',
             borderRadius: '50px',
             fontSize: responsive.bodySize,
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: 'pointer',
-            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+            boxShadow: '0 10px 30px -14px rgba(194, 160, 104, 0.7)',
             transition: 'all 0.3s',
           }"
-          @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.4)'; }"
-          @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)'; }"
+          @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 15px 40px rgba(194, 160, 104, 0.4)'; }"
+          @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 10px 30px rgba(194, 160, 104, 0.3)'; }"
         >
           Set Up Profile Now
           <Icon name="heroicons:arrow-right" class="w-4 h-4 inline-block align-[-0.2em]" aria-hidden="true" />
@@ -678,10 +678,21 @@
               }"
             />
           </div>
-
-          <!-- NFCGo Watermark (shown when Remove Branding is disabled) -->
+          <!-- Default hero backdrop — keeps the first screen art-directed when no cover image is uploaded -->
           <div
-            v-if="!isFeatureEnabled('remove_branding')"
+            v-else
+            aria-hidden="true"
+            :style="{
+              position: 'absolute',
+              inset: 0,
+              background: `radial-gradient(120% 90% at 50% -20%, ${hexToRgba(designSettings.accentColor, 0.26)} 0%, transparent 58%), radial-gradient(70% 60% at 86% 0%, ${hexToRgba(designSettings.accentColor, 0.14)} 0%, transparent 62%), linear-gradient(180deg, rgba(6, 9, 13, 0) 44%, rgba(6, 9, 13, 0.55) 100%)`,
+              pointerEvents: 'none',
+            }"
+          />
+
+          <!-- NFCGo Watermark (shown when the plan/admin policy includes branding) -->
+          <div
+            v-if="showNfcgoBranding"
             :style="{
               position: 'absolute',
               top: isSmallMobile ? '10px' : isMobile ? '12px' : '16px',
@@ -699,112 +710,184 @@
             <NFCGoLogo variant="light" :size="isSmallMobile ? 'xs' : 'sm'" />
           </div>
 
-          <!-- Hero Content - tiered responsive padding -->
+          <!-- Hero content — asymmetric editorial masthead -->
           <div
             :style="{
               padding:
-                isSmallMobile ? '56px 14px 28px'
-                : isPhablet ? '60px 18px 32px'
-                : isMobile ? '64px 24px 36px'
-                : isTablet ? '72px 40px 48px'
-                : isSmallLaptop ? '80px 48px 56px'
-                : '88px 56px 64px',
+                isSmallMobile ? '64px 16px 34px'
+                : isPhablet ? '68px 20px 38px'
+                : isMobile ? '74px 26px 42px'
+                : isTablet ? '86px 44px 54px'
+                : isSmallLaptop ? '94px 52px 62px'
+                : '106px 64px 70px',
               position: 'relative',
               zIndex: 1,
-              paddingTop: isFeatureEnabled('remove_branding')
-                ? (isSmallMobile ? '28px' : isPhablet ? '32px' : isMobile ? '36px' : isTablet ? '48px' : '56px')
+              paddingTop: !showNfcgoBranding
+                ? (isSmallMobile ? '32px' : isPhablet ? '36px' : isMobile ? '42px' : isTablet ? '54px' : '62px')
                 : undefined,
             }"
           >
-          <div :style="{ position: 'relative', zIndex: 2, textAlign: 'center' }">
+          <div
+            :style="{
+              position: 'relative',
+              zIndex: 2,
+              display: 'grid',
+              gridTemplateColumns: responsive.heroTwoCol ? 'minmax(0, 1.04fr) minmax(0, 0.96fr)' : 'minmax(0, 1fr)',
+              alignItems: 'center',
+              columnGap: isLargeDesktop ? '76px' : '52px',
+              rowGap: isSmallMobile ? '26px' : '34px',
+            }"
+          >
+            <!-- Portrait plate — a first-class art-directed element, never a small avatar -->
             <div
               :style="{
+                order: responsive.heroTwoCol ? 2 : 1,
+                gridColumn: responsive.heroTwoCol ? '2' : '1',
+                gridRow: 1,
                 position: 'relative',
-                width: responsive.profileSize,
-                height: responsive.profileSize,
-                margin: `0 auto ${isSmallMobile ? '24px' : isPhablet ? '28px' : isMobile ? '32px' : isTablet ? '36px' : '40px'}`,
+                width: responsive.portraitSize,
+                maxWidth: '82%',
+                aspectRatio: '1 / 1',
+                justifySelf: 'center',
                 cursor: 'pointer',
               }"
               @mouseenter="imageHover = true"
               @mouseleave="imageHover = false"
             >
+              <!-- soft brass halo behind the plate -->
               <div
+                aria-hidden="true"
                 :style="{
                   position: 'absolute',
-                  inset: '-10px',
+                  inset: '-14%',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
-                  animation: 'rotate 3s linear infinite',
-                  opacity: imageHover ? 1 : 0,
-                  transition: 'opacity 0.3s',
+                  background: `radial-gradient(circle at 50% 42%, ${hexToRgba(designSettings.accentColor, 0.28)} 0%, transparent 66%)`,
+                  filter: 'blur(26px)',
+                  opacity: imageHover ? 1 : 0.82,
+                  transition: 'opacity 0.4s ease',
+                  pointerEvents: 'none',
                 }"
               />
+              <!-- brass gradient ring -->
+              <div
+                aria-hidden="true"
+                :style="{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '50%',
+                  background: 'conic-gradient(from 205deg, #f7e2a1 0%, #c2a068 26%, #8a6a33 50%, #c2a068 74%, #f7e2a1 100%)',
+                  transform: imageHover ? 'rotate(12deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+                }"
+              />
+              <!-- inner ink disc that insets the portrait inside the ring -->
+              <div
+                aria-hidden="true"
+                :style="{ position: 'absolute', inset: '3px', borderRadius: '50%', background: '#0a0e14' }"
+              />
+              <!-- uploaded photo, or a designed monogram plate when no image exists -->
               <img
-                :src="profileImage"
-                alt="Profile"
+                v-if="heroPortrait"
+                :src="heroPortrait"
+                alt="Profile photo"
                 :style="{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
+                  position: 'absolute',
+                  inset: '11px',
+                  width: 'calc(100% - 22px)',
+                  height: 'calc(100% - 22px)',
                   borderRadius: '50%',
-                  border: responsive.profileBorder,
-                  transition: 'transform 0.3s',
-                  zIndex: 1,
-                  transform: imageHover ? 'scale(1.05)' : 'scale(1)',
+                  objectFit: 'cover',
+                  transform: imageHover ? 'scale(1.04)' : 'scale(1)',
+                  transition: 'transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)',
                 }"
               />
               <div
+                v-else
+                aria-hidden="true"
                 :style="{
                   position: 'absolute',
-                  bottom: '15px',
-                  right: '15px',
-                  width: '20px',
-                  height: '20px',
-                  background: '#00ff88',
-                  border: '3px solid rgba(255, 255, 255, 0.2)',
+                  inset: '11px',
                   borderRadius: '50%',
-                  zIndex: 2,
-                  animation: 'pulse-status 2s infinite',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: `radial-gradient(circle at 50% 28%, ${hexToRgba(designSettings.accentColor, 0.22)} 0%, rgba(10, 14, 20, 0.98) 64%)`,
                 }"
-              />
+              >
+                <span
+                  :style="{
+                    fontFamily: responsive.displayFont,
+                    fontStyle: 'italic',
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    letterSpacing: '0.02em',
+                    color: '#e8d9b8',
+                    fontSize: isSmallMobile ? '52px' : isPhablet ? '60px' : isMobile ? '70px' : isTablet ? '82px' : isLargeDesktop ? '112px' : '98px',
+                  }"
+                >{{ heroInitials }}</span>
+              </div>
             </div>
 
-            <h1
+            <!-- Text column -->
+            <div
               :style="{
-                fontSize: responsive.nameSize,
-                fontWeight: 800,
-                color: responsive.textPrimary,
-                marginBottom: isSmallMobile ? '18px' : isPhablet ? '22px' : isMobile ? '26px' : isTablet ? '28px' : '30px',
-                letterSpacing: isSmallMobile ? '0.5px' : isPhablet ? '1px' : isMobile ? '1.2px' : '2px',
-                lineHeight: 1.15,
-                overflowWrap: 'break-word',
-                wordBreak: 'break-word',
-                hyphens: 'auto',
-                padding: '0 4px',
+                order: responsive.heroTwoCol ? 1 : 2,
+                gridColumn: 1,
+                gridRow: responsive.heroTwoCol ? 1 : 2,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: responsive.heroTwoCol ? 'flex-start' : 'center',
+                textAlign: responsive.heroTwoCol ? 'left' : 'center',
+                minWidth: 0,
               }"
             >
-              <span
-                v-for="(char, i) in profile.name.split('')"
-                :key="i"
+              <h1
                 :style="{
-                  display: 'inline-block',
-                  animation: 'charBounce 0.5s ease-out forwards',
-                  opacity: 0,
-                  animationDelay: `${i * 0.05}s`,
+                  fontFamily: responsive.displayFont,
+                  fontSize: responsive.nameSize,
+                  fontWeight: 600,
+                  color: responsive.textPrimary,
+                  marginBottom: isSmallMobile ? '14px' : isMobile ? '18px' : '22px',
+                  letterSpacing: '-0.022em',
+                  lineHeight: 0.98,
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word',
+                  hyphens: 'auto',
+                  order: 1,
                   maxWidth: '100%',
                 }"
               >
-                {{ char === ' ' ? '\u00A0' : char }}
-              </span>
-            </h1>
+                <span
+                  v-if="heroNameLines.leading"
+                  :style="{
+                    display: 'block',
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    color: hexToRgba(designSettings.accentColor, 0.95),
+                    letterSpacing: '-0.01em',
+                  }"
+                >{{ heroNameLines.leading }}</span>
+                <span
+                  :style="{
+                    display: 'block',
+                    fontWeight: 600,
+                    backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #f7f5f0 46%, #e8d9b8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }"
+                >{{ heroNameLines.trailing || heroNameLines.leading }}</span>
+              </h1>
 
             <div
               :style="{
                 display: 'flex',
-                gap: responsive.flexGap,
-                justifyContent: 'center',
+                gap: isSmallMobile ? '8px' : '10px',
+                justifyContent: responsive.heroTwoCol ? 'flex-start' : 'center',
                 flexWrap: 'wrap',
                 rowGap: isSmallMobile ? '8px' : '10px',
+                order: 2,
+                maxWidth: '100%',
               }"
             >
               <div
@@ -819,8 +902,8 @@
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.38)}`,
+                  background: hexToRgba(designSettings.accentColor, 0.08),
                   color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
@@ -829,7 +912,7 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <Icon name="heroicons:academic-cap" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <Icon name="heroicons:academic-cap" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', color: designSettings.accentColor }" aria-hidden="true" />
                 <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.qualification }}</span>
               </div>
               <div
@@ -844,8 +927,8 @@
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3))',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.38)}`,
+                  background: hexToRgba(designSettings.accentColor, 0.08),
                   color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
@@ -854,7 +937,7 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <Icon name="heroicons:briefcase" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <Icon name="heroicons:briefcase" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', color: designSettings.accentColor }" aria-hidden="true" />
                 <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.position }}</span>
               </div>
               <!-- Pronouns Badge -->
@@ -870,8 +953,8 @@
                   fontWeight: 600,
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3))',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.38)}`,
+                  background: hexToRgba(designSettings.accentColor, 0.08),
                   color: responsive.textPrimary,
                   animation: 'fadeInUp 0.6s ease-out forwards',
                   opacity: 0,
@@ -880,11 +963,53 @@
                   overflowWrap: 'break-word',
                 }"
               >
-                <Icon name="heroicons:user" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px' }" aria-hidden="true" />
+                <Icon name="heroicons:user" class="flex-shrink-0" :style="{ width: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', height: isSmallMobile ? '14px' : isMobile ? '16px' : '18px', color: designSettings.accentColor }" aria-hidden="true" />
                 <span :style="{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }">{{ profile.pronouns }}</span>
               </div>
             </div>
-            
+
+            <!-- Hero identity meta — company · location -->
+            <div
+              v-if="heroMeta.length"
+              :style="{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: responsive.heroTwoCol ? 'flex-start' : 'center',
+                flexWrap: 'wrap',
+                gap: isSmallMobile ? '10px' : isPhablet ? '12px' : '14px',
+                marginTop: isSmallMobile ? '18px' : isPhablet ? '20px' : '24px',
+                marginBottom: isSmallMobile ? '6px' : isPhablet ? '8px' : '10px',
+                animation: 'fadeInUp 0.6s ease-out forwards',
+                opacity: 0,
+                animationDelay: '0.52s',
+                order: 3,
+              }"
+            >
+              <template v-for="(item, i) in heroMeta" :key="item.label">
+                <span
+                  v-if="i > 0"
+                  aria-hidden="true"
+                  :style="{ width: '4px', height: '4px', borderRadius: '50%', background: responsive.textMuted, opacity: 0.55 }"
+                />
+                <span
+                  :style="{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: responsive.textMuted,
+                    fontSize: responsive.smallSize,
+                    fontWeight: 500,
+                    letterSpacing: '0.2px',
+                    maxWidth: '100%',
+                    overflowWrap: 'break-word',
+                  }"
+                >
+                  <Icon :name="item.icon" :style="{ width: '14px', height: '14px', color: designSettings.accentColor }" aria-hidden="true" />
+                  {{ item.label }}
+                </span>
+              </template>
+            </div>
+
             <!-- Tagline -->
             <p
               v-if="profile.tagline"
@@ -893,45 +1018,90 @@
                 fontSize: responsive.bodySize,
                 fontStyle: 'italic',
                 marginTop: isSmallMobile ? '14px' : isPhablet ? '16px' : '20px',
-                textAlign: 'center',
+                textAlign: responsive.heroTwoCol ? 'left' : 'center',
                 animation: 'fadeInUp 0.6s ease-out forwards',
                 opacity: 0,
                 animationDelay: '0.6s',
                 lineHeight: 1.6,
                 overflowWrap: 'break-word',
                 wordBreak: 'break-word',
-                padding: '0 6px',
+                padding: responsive.heroTwoCol ? 0 : '0 6px',
+                maxWidth: responsive.heroTwoCol ? '46ch' : '100%',
+                order: 4,
               }"
             >
               "{{ profile.tagline }}"
             </p>
+
+            <!-- Hero primary action — the single most important contact gesture -->
+            <div
+              v-if="isFeatureEnabled('vcard_download') || isFeatureEnabled('social_sharing')"
+              :style="{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: isSmallMobile ? '10px' : '12px',
+                marginTop: isSmallMobile ? '22px' : '28px',
+                justifyContent: responsive.heroTwoCol ? 'flex-start' : 'center',
+                width: '100%',
+                animation: 'fadeInUp 0.6s ease-out forwards',
+                opacity: 0,
+                animationDelay: '0.68s',
+                order: 5,
+              }"
+            >
+              <button
+                v-if="isFeatureEnabled('vcard_download')"
+                @click="saveContact"
+                @mouseover="(e) => handleHoverTransform(e, 'translateY(-2px)')"
+                @mouseout="(e) => handleHoverTransform(e, 'translateY(0)')"
+                :style="{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: isMobile ? '14px 24px' : '15px 30px',
+                  borderRadius: '999px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
+                  color: '#1b1407',
+                  fontSize: isMobile ? '14px' : '15px',
+                  fontWeight: 700,
+                  letterSpacing: '0.01em',
+                  cursor: 'pointer',
+                  boxShadow: '0 16px 38px -12px rgba(194, 160, 104, 0.75)',
+                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                }"
+              >
+                <Icon name="heroicons:user-plus" :style="{ width: '18px', height: '18px' }" aria-hidden="true" />
+                Add to Contacts
+              </button>
+              <button
+                v-if="isFeatureEnabled('social_sharing')"
+                @click="showSocialShare = true"
+                @mouseover="(e) => handleHoverTransform(e, 'translateY(-2px)')"
+                @mouseout="(e) => handleHoverTransform(e, 'translateY(0)')"
+                :style="{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: isMobile ? '14px 22px' : '15px 26px',
+                  borderRadius: '999px',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`,
+                  color: responsive.textPrimary,
+                  fontSize: isMobile ? '14px' : '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease, background 0.25s ease',
+                }"
+              >
+                <Icon name="heroicons:share" :style="{ width: '17px', height: '17px', color: designSettings.accentColor }" aria-hidden="true" />
+                Share Profile
+              </button>
+            </div>
           </div>
 
-          <!-- Particles -->
-          <div
-            :style="{
-              position: 'absolute',
-              inset: 0,
-              overflow: 'hidden',
-              pointerEvents: 'none',
-            }"
-          >
-            <div
-              v-for="n in 20"
-              :key="n"
-              :style="{
-                position: 'absolute',
-                width: '4px',
-                height: '4px',
-                background: 'white',
-                borderRadius: '50%',
-                animation: 'particleFloat 3s infinite ease-in-out',
-                opacity: 0.3,
-                ...getParticleStyle(n),
-              }"
-            />
           </div>
-          </div>
+        </div>
         </div>
 
         <!-- Quick Actions -->
@@ -962,10 +1132,10 @@
               minWidth: isSmallMobile ? '62px' : isMobile ? '70px' : '80px',
               flex: isSmallMobile ? '1 1 calc(50% - 8px)' : undefined,
               maxWidth: isSmallMobile ? 'calc(50% - 8px)' : undefined,
-              background: 'rgba(255, 255, 255, 0.1)',
+              background: `linear-gradient(180deg, ${hexToRgba(designSettings.accentColor, 0.12)} 0%, ${hexToRgba(designSettings.accentColor, 0.04)} 100%)`,
               backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: `1px solid ${hexToRgba(designSettings.accentColor, 0.28)}`,
               borderRadius: isMobile ? '15px' : '20px',
               color: responsive.textPrimary,
               fontWeight: 600,
@@ -983,6 +1153,7 @@
                 height: responsive.actionIconSize,
                 lineHeight: 1,
                 flexShrink: 0,
+                color: designSettings.accentColor,
               }"
               aria-hidden="true"
             />
@@ -1024,28 +1195,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:building-office" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -1058,7 +1235,7 @@
             <div
               v-if="hasCompanyData"
               :style="{
-                marginBottom: showTeamSection ? '30px' : '0',
+                marginBottom: showTeamSection ? responsive.subSectionGap : '0',
               }"
             >
               <div
@@ -1088,8 +1265,8 @@
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      borderRadius: isMobile ? '15px' : '20px',
-                      border: '2px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: isMobile ? '15px' : '18px',
+                      border: `1px solid ${hexToRgba(designSettings.accentColor, 0.35)}`,
                     }"
                   />
                   <!-- Fallback to logo text -->
@@ -1098,24 +1275,22 @@
                       :style="{
                         position: 'absolute',
                         inset: 0,
-                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                        borderRadius: isMobile ? '15px' : '20px',
-                        animation: 'logoRotate 10s linear infinite',
-                      }"
-                    />
-                    <div
-                      :style="{
-                        position: 'absolute',
-                        inset: '3px',
-                        background: 'rgba(10, 14, 39, 0.95)',
-                        borderRadius: isMobile ? '13px' : '18px',
+                        background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.18)} 0%, rgba(10, 14, 20, 0.6) 100%)`,
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`,
+                        borderRadius: isMobile ? '15px' : '18px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: isMobile ? '24px' : '32px',
-                        fontWeight: 800,
-                        color: responsive.textPrimary,
+                        fontSize: isMobile ? '22px' : '28px',
+                        fontFamily: responsive.displayFont,
+                        fontWeight: 600,
+                        letterSpacing: '-0.01em',
+                        color: '#e8d9b8',
                         zIndex: 1,
+                        textAlign: 'center',
+                        padding: '6px',
+                        lineHeight: 1.1,
+                        overflowWrap: 'break-word',
                       }"
                     >
                       {{ company.logoText }}
@@ -1129,7 +1304,8 @@
                     v-if="company.name && isFieldVisible('companyTeam', 'companyName')"
                     :style="{
                       fontSize: responsive.h3Size,
-                      fontWeight: 800,
+                      fontWeight: 600,
+                      letterSpacing: '-0.01em',
                       color: responsive.textPrimary,
                       marginBottom: '10px',
                       overflowWrap: 'break-word',
@@ -1169,7 +1345,7 @@
                         alignItems: 'center',
                         gap: '5px',
                         padding: '4px 12px',
-                        background: 'rgba(102, 126, 234, 0.2)',
+                        background: 'rgba(194, 160, 104, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -1184,7 +1360,7 @@
                         alignItems: 'center',
                         gap: '5px',
                         padding: '4px 12px',
-                        background: 'rgba(240, 147, 251, 0.2)',
+                        background: 'rgba(232, 217, 184, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -1199,7 +1375,7 @@
                         alignItems: 'center',
                         gap: '5px',
                         padding: '4px 12px',
-                        background: 'rgba(79, 172, 254, 0.2)',
+                        background: 'rgba(169, 133, 77, 0.2)',
                         borderRadius: '12px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -1227,10 +1403,10 @@
                     :style="{
                       display: 'inline-block',
                       padding: isMobile ? '8px 16px' : '10px 20px',
-                      background: 'rgba(102, 126, 234, 0.2)',
-                      border: '1px solid rgba(102, 126, 234, 0.4)',
+                      background: 'rgba(194, 160, 104, 0.2)',
+                      border: '1px solid rgba(194, 160, 104, 0.4)',
                       borderRadius: '50px',
-                      color: '#a8b3ff',
+                      color: '#e8d9b8',
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
                       maxWidth: '100%',
@@ -1248,8 +1424,8 @@
             <div
               v-if="showTeamSection"
               :style="{
-                paddingTop: hasCompanyData ? '20px' : '0',
-                borderTop: hasCompanyData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                paddingTop: hasCompanyData ? responsive.subSectionGap : '0',
+                borderTop: hasCompanyData ? `1px solid ${hexToRgba(designSettings.accentColor, 0.14)}` : 'none',
               }"
             >
               <div
@@ -1264,8 +1440,10 @@
                   :style="{
                     width: isMobile ? '32px' : '40px',
                     height: isMobile ? '32px' : '40px',
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                    borderRadius: '12px',
+                    background: 'transparent',
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                    borderRadius: '11px',
+                    color: designSettings.accentColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1277,7 +1455,8 @@
                 <h3
                   :style="{
                     fontSize: responsive.h3Size,
-                    fontWeight: 700,
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em',
                     color: responsive.textPrimary,
                     margin: 0,
                   }"
@@ -1330,7 +1509,7 @@
                         position: 'absolute',
                         inset: '-4px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                        background: 'linear-gradient(135deg, #c2a068, #a9854d)',
                         opacity: activeTeam === idx ? 1 : 0,
                         transition: 'opacity 0.3s',
                         animation:
@@ -1351,7 +1530,7 @@
                         height: '100%',
                         borderRadius: '50%',
                         objectFit: 'cover',
-                        border: '2px solid rgba(10, 14, 39, 0.5)',
+                        border: '2px solid rgba(6, 9, 13, 0.5)',
                       }"
                     />
                     <div
@@ -1360,7 +1539,7 @@
                         position: 'absolute',
                         inset: 0,
                         background:
-                          'linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8))',
+                          'linear-gradient(135deg, rgba(194, 160, 104, 0.8), rgba(169, 133, 77, 0.8))',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -1368,7 +1547,7 @@
                         fontSize: isMobile ? '20px' : '28px',
                         fontWeight: 800,
                         color: responsive.textPrimary,
-                        border: '2px solid rgba(10, 14, 39, 0.5)',
+                        border: '2px solid rgba(6, 9, 13, 0.5)',
                       }"
                     >
                       {{ member.initials }}
@@ -1401,7 +1580,7 @@
                   <p
                     v-if="member.landing_page_url"
                     :style="{
-                      color: 'rgba(102, 126, 234, 0.8)',
+                      color: 'rgba(194, 160, 104, 0.8)',
                       fontSize: responsive.smallSize,
                       marginTop: '6px',
                       display: 'flex',
@@ -1435,28 +1614,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:sparkles" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -1466,20 +1651,36 @@
             </div>
             
             <!-- About Me Sub-section -->
-            <div v-if="hasAboutData" :style="{ marginBottom: (showEducationSection || showAwardsSection) ? '30px' : '0' }">
-              <p
+            <div v-if="hasAboutData" :style="{ marginBottom: (showEducationSection || showAwardsSection) ? responsive.subSectionGap : '0' }">
+              <div
                 v-if="profile.bio && isFieldVisible('profileAchievements', 'bio')"
-                :style="{
-                  color: responsive.textMuted,
-                  lineHeight: '1.8',
-                  whiteSpace: 'normal',
-                  overflowWrap: 'break-word',
-                  fontSize: responsive.bodySize,
-                  marginBottom: stats.length > 0 ? (isMobile ? '20px' : '30px') : '0',
-                }"
+                :style="{ marginBottom: stats.length > 0 ? (isMobile ? '24px' : '34px') : '0' }"
               >
-                {{ profile.bio }}
-              </p>
+                <span
+                  aria-hidden="true"
+                  :style="{
+                    display: 'block',
+                    width: '52px',
+                    height: '2px',
+                    background: `linear-gradient(90deg, ${designSettings.accentColor} 0%, transparent 100%)`,
+                    marginBottom: isMobile ? '14px' : '18px',
+                  }"
+                />
+                <p
+                  :style="{
+                    color: responsive.textPrimary,
+                    lineHeight: 1.72,
+                    whiteSpace: 'normal',
+                    overflowWrap: 'break-word',
+                    fontSize: isMobile ? '17px' : '20px',
+                    fontWeight: 400,
+                    letterSpacing: '-0.005em',
+                    maxWidth: '66ch',
+                  }"
+                >
+                  {{ profile.bio }}
+                </p>
+              </div>
               <div
                 v-if="stats.length > 0 && isFieldVisible('profileAchievements', 'profileStats')"
                 :style="{
@@ -1492,25 +1693,26 @@
                   v-for="(stat, idx) in stats"
                   :key="idx"
                   :style="{
-                    textAlign: 'center',
-                    padding: isMobile ? '15px' : '20px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '15px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    textAlign: 'left',
+                    padding: isMobile ? '14px 2px 2px' : '18px 8px 4px',
+                    background: 'transparent',
+                    borderTop: `1px solid ${hexToRgba(designSettings.accentColor, 0.4)}`,
                     transition: 'all 0.3s',
                     cursor: 'pointer',
                   }"
-                  @mouseover="(e) => handleHoverTransform(e, 'scale(1.05)')"
-                  @mouseout="(e) => handleHoverTransform(e, 'scale(1)')"
+                  @mouseover="(e) => handleHoverTransform(e, 'translateY(-3px)')"
+                  @mouseout="(e) => handleHoverTransform(e, 'translateY(0)')"
                 >
                   <div
                     :style="{
-                      fontSize: isMobile ? '28px' : '36px',
-                      fontWeight: 800,
-                      background: 'linear-gradient(135deg, #667eea, #f093fb)',
+                      fontFamily: responsive.displayFont,
+                      fontSize: isMobile ? '34px' : '48px',
+                      fontWeight: 500,
+                      lineHeight: 1,
+                      background: 'linear-gradient(135deg, #e8d9b8, #c2a068)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
-                      marginBottom: '8px',
+                      marginBottom: '10px',
                     }"
                   >
                     {{ stat.num }}
@@ -1519,7 +1721,9 @@
                     :style="{
                       color: responsive.textMuted,
                       fontSize: responsive.smallSize,
-                      fontWeight: 600,
+                      fontWeight: 500,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
                     }"
                   >
                     {{ stat.label }}
@@ -1532,9 +1736,9 @@
             <div
               v-if="showEducationSection"
               :style="{
-                marginBottom: showAwardsSection ? '30px' : '0',
-                paddingTop: hasAboutData ? '20px' : '0',
-                borderTop: hasAboutData ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                marginBottom: showAwardsSection ? responsive.subSectionGap : '0',
+                paddingTop: hasAboutData ? responsive.subSectionGap : '0',
+                borderTop: hasAboutData ? `1px solid ${hexToRgba(designSettings.accentColor, 0.14)}` : 'none',
               }"
             >
               <div
@@ -1549,8 +1753,10 @@
                   :style="{
                     width: isMobile ? '32px' : '40px',
                     height: isMobile ? '32px' : '40px',
-                    background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
-                    borderRadius: '12px',
+                    background: 'transparent',
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                    borderRadius: '11px',
+                    color: designSettings.accentColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1562,7 +1768,8 @@
                 <h3
                   :style="{
                     fontSize: responsive.h3Size,
-                    fontWeight: 700,
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em',
                     color: responsive.textPrimary,
                     margin: 0,
                   }"
@@ -1579,23 +1786,23 @@
                 </div>
                 <div :style="{ display: 'grid', gap: '16px', position: 'relative', paddingLeft: isMobile ? '0' : '20px' }">
                   <!-- Timeline line -->
-                  <div v-if="!isMobile" :style="{ position: 'absolute', left: '6px', top: '8px', bottom: '8px', width: '2px', background: 'linear-gradient(180deg, #4facfe, #00f2fe)', borderRadius: '2px' }" />
+                  <div v-if="!isMobile" :style="{ position: 'absolute', left: '6px', top: '8px', bottom: '8px', width: '2px', background: 'linear-gradient(180deg, #a9854d, #c2a068)', borderRadius: '2px' }" />
                   <div
                     v-for="(edu, idx) in profile.education"
                     :key="idx"
                     :style="{
                       position: 'relative',
                       padding: isMobile ? '16px' : '20px',
-                      background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05))',
+                      background: 'linear-gradient(135deg, rgba(169, 133, 77, 0.1), rgba(194, 160, 104, 0.05))',
                       borderRadius: '16px',
-                      border: '1px solid rgba(79, 172, 254, 0.2)',
+                      border: '1px solid rgba(169, 133, 77, 0.2)',
                       transition: 'all 0.3s ease',
                     }"
-                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateX(5px)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.4)'; }"
-                    @mouseout="(e) => { e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.2)'; }"
+                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateX(5px)'; e.currentTarget.style.borderColor = 'rgba(169, 133, 77, 0.4)'; }"
+                    @mouseout="(e) => { e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.borderColor = 'rgba(169, 133, 77, 0.2)'; }"
                   >
                     <!-- Timeline dot -->
-                    <div v-if="!isMobile" :style="{ position: 'absolute', left: '-26px', top: '24px', width: '12px', height: '12px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '50%', border: '2px solid rgba(10, 14, 39, 0.9)' }" />
+                    <div v-if="!isMobile" :style="{ position: 'absolute', left: '-26px', top: '24px', width: '12px', height: '12px', background: 'linear-gradient(135deg, #a9854d, #c2a068)', borderRadius: '50%', border: '2px solid rgba(6, 9, 13, 0.9)' }" />
                     <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }">
                       <div :style="{ flex: 1, minWidth: 0 }">
                         <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ edu.degree || edu.name }}</p>
@@ -1603,7 +1810,7 @@
                           <Icon name="heroicons:building-library" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ edu.institution }}
                         </p>
                       </div>
-                      <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(79, 172, 254, 0.2)', borderRadius: '20px', color: '#7dd3fc', fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
+                      <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(169, 133, 77, 0.2)', borderRadius: '20px', color: '#e8d9b8', fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
                     </div>
                   </div>
                 </div>
@@ -1621,19 +1828,19 @@
                     :key="idx"
                     :style="{
                       padding: isMobile ? '16px' : '20px',
-                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05))',
+                      background: 'linear-gradient(135deg, rgba(194, 160, 104, 0.1), rgba(169, 133, 77, 0.05))',
                       borderRadius: '16px',
-                      border: '1px solid rgba(102, 126, 234, 0.2)',
+                      border: '1px solid rgba(194, 160, 104, 0.2)',
                       transition: 'all 0.3s ease',
                       display: 'flex',
                       gap: '12px',
                       alignItems: 'flex-start',
                     }"
-                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.2)'; }"
+                    @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(194, 160, 104, 0.2)'; }"
                     @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }"
                   >
-                    <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
-                      <Icon name="heroicons:check-badge" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
+                    <div :style="{ width: '40px', height: '40px', background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`, border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
+                      <Icon name="heroicons:check-badge" :style="{ width: '20px', height: '20px', color: designSettings.accentColor }" aria-hidden="true" />
                     </div>
                     <div :style="{ flex: 1, minWidth: 0 }">
                       <p :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '4px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ cert.name }}</p>
@@ -1649,8 +1856,8 @@
             <div
               v-if="showAwardsSection"
               :style="{
-                paddingTop: (hasAboutData || showEducationSection) ? '20px' : '0',
-                borderTop: (hasAboutData || showEducationSection) ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                paddingTop: (hasAboutData || showEducationSection) ? responsive.subSectionGap : '0',
+                borderTop: (hasAboutData || showEducationSection) ? `1px solid ${hexToRgba(designSettings.accentColor, 0.14)}` : 'none',
               }"
             >
               <div
@@ -1665,8 +1872,10 @@
                   :style="{
                     width: isMobile ? '32px' : '40px',
                     height: isMobile ? '32px' : '40px',
-                    background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
-                    borderRadius: '12px',
+                    background: 'transparent',
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                    borderRadius: '11px',
+                    color: designSettings.accentColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1678,7 +1887,8 @@
                 <h3
                   :style="{
                     fontSize: responsive.h3Size,
-                    fontWeight: 700,
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em',
                     color: responsive.textPrimary,
                     margin: 0,
                   }"
@@ -1693,28 +1903,28 @@
                   :style="{
                     position: 'relative',
                     padding: isMobile ? '20px' : '24px',
-                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 237, 78, 0.05))',
+                    background: 'linear-gradient(135deg, rgba(194, 160, 104, 0.1), rgba(232, 217, 184, 0.05))',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255, 215, 0, 0.2)',
+                    border: '1px solid rgba(194, 160, 104, 0.2)',
                     transition: 'all 0.3s ease',
                     overflow: 'hidden',
                   }"
-                  @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(255, 215, 0, 0.15)'; e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.4)'; }"
-                  @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.2)'; }"
+                  @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 40px rgba(194, 160, 104, 0.15)'; e.currentTarget.style.borderColor = 'rgba(194, 160, 104, 0.4)'; }"
+                  @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(194, 160, 104, 0.2)'; }"
                 >
                   <!-- Trophy decoration -->
                   <div :style="{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.1, transform: 'rotate(15deg)' }"><Icon name="heroicons:trophy" :style="{ width: '60px', height: '60px' }" aria-hidden="true" /></div>
                   <div :style="{ position: 'relative', zIndex: 1 }">
                     <div :style="{ display: 'flex', alignItems: 'flex-start', gap: '14px' }">
-                      <div :style="{ width: '50px', height: '50px', background: 'linear-gradient(135deg, #ffd700, #ffed4e)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)' }">
-                        <Icon name="heroicons:trophy" :style="{ width: '24px', height: '24px' }" aria-hidden="true" />
+                      <div :style="{ width: '50px', height: '50px', background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`, border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
+                        <Icon name="heroicons:trophy" :style="{ width: '24px', height: '24px', color: designSettings.accentColor }" aria-hidden="true" />
                       </div>
                       <div :style="{ flex: 1, minWidth: 0 }">
-                        <p :style="{ color: '#ffd700', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ award.title || award.name }}</p>
+                        <p :style="{ color: '#c2a068', fontSize: responsive.bodySize, fontWeight: 700, marginBottom: '6px', textShadow: '0 0 20px rgba(194, 160, 104, 0.3)', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ award.title || award.name }}</p>
                         <p v-if="award.organization" :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
                           <Icon name="heroicons:building-library" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ award.organization }}
                         </p>
-                        <span v-if="award.year" :style="{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(255, 215, 0, 0.2)', borderRadius: '20px', color: '#ffd700', fontSize: responsive.smallSize, fontWeight: 600 }">{{ award.year }}</span>
+                        <span v-if="award.year" :style="{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(194, 160, 104, 0.2)', borderRadius: '20px', color: '#c2a068', fontSize: responsive.smallSize, fontWeight: 600 }">{{ award.year }}</span>
                       </div>
                     </div>
                   </div>
@@ -1740,28 +1950,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:rocket-launch" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -1786,9 +2002,12 @@
                 @click="handleServiceClick(service)"
                 :style="{
                   position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: isMobile ? '15px' : '20px',
+                  background: activeService === idx ? hexToRgba(designSettings.accentColor, 0.06) : 'rgba(255, 255, 255, 0.02)',
+                  borderTop: `1px solid ${activeService === idx ? hexToRgba(designSettings.accentColor, 0.42) : hexToRgba(designSettings.accentColor, 0.16)}`,
+                  borderRight: `1px solid ${activeService === idx ? hexToRgba(designSettings.accentColor, 0.42) : hexToRgba(designSettings.accentColor, 0.16)}`,
+                  borderBottom: `1px solid ${activeService === idx ? hexToRgba(designSettings.accentColor, 0.42) : hexToRgba(designSettings.accentColor, 0.16)}`,
+                  borderLeft: `1px solid ${activeService === idx ? hexToRgba(designSettings.accentColor, 0.42) : hexToRgba(designSettings.accentColor, 0.16)}`,
+                  borderRadius: '16px',
                   padding: isMobile ? '25px 15px' : '30px 20px',
                   textAlign: 'center',
                   cursor: 'pointer',
@@ -1796,12 +2015,12 @@
                   overflow: 'hidden',
                   transform:
                     activeService === idx
-                      ? 'translateY(-8px) scale(1.03)'
-                      : 'translateY(0) scale(1)',
+                      ? 'translateY(-6px)'
+                      : 'translateY(0)',
                   boxShadow:
                     activeService === idx
-                      ? '0 20px 50px rgba(102, 126, 234, 0.4)'
-                      : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                      ? `0 22px 48px -26px ${hexToRgba(designSettings.accentColor, 0.8)}`
+                      : 'none',
                 }"
               >
                 <div
@@ -1809,16 +2028,17 @@
                     width: responsive.serviceIconBox,
                     height: responsive.serviceIconBox,
                     margin: '0 auto 20px',
-                    background:
-                      'linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2))',
-                    borderRadius: isMobile ? '15px' : '20px',
+                    background: 'transparent',
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.42)}`,
+                    borderRadius: '14px',
+                    color: designSettings.accentColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     transition: 'all 0.3s',
                     transform:
                       activeService === idx
-                        ? 'scale(1.1) rotate(5deg)'
+                        ? 'scale(1.08)'
                         : 'scale(1)',
                   }"
                 >
@@ -1844,8 +2064,9 @@
                   :style="{
                     position: 'absolute',
                     inset: 0,
-                    background:
-                      'linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9))',
+                    background: 'rgba(6, 9, 13, 0.84)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1855,9 +2076,10 @@
                 >
                   <span
                     :style="{
-                      color: responsive.textPrimary,
+                      color: '#e8d9b8',
                       fontSize: responsive.bodySize,
-                      fontWeight: 700,
+                      fontWeight: 600,
+                      letterSpacing: '0.02em',
                     }"
                     >{{ service.linkType === 'Direct Link' && service.url ? 'Visit' : 'Explore' }} <Icon name="heroicons:arrow-right" class="w-4 h-4 inline-block align-[-0.2em]" aria-hidden="true" /></span>
                 </div>
@@ -1870,15 +2092,16 @@
               :style="{
                 marginTop: responsive.gridGap,
                 padding: responsive.cardPadding,
-                background: 'rgba(102, 126, 234, 0.1)',
+                background: 'rgba(194, 160, 104, 0.1)',
                 borderRadius: responsive.cardRadius,
-                border: '1px solid rgba(102, 126, 234, 0.2)',
+                border: '1px solid rgba(194, 160, 104, 0.2)',
               }"
             >
               <h3
                 :style="{
                   fontSize: responsive.h3Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
                   color: responsive.textPrimary,
                   marginBottom: '20px',
                 }"
@@ -1897,7 +2120,7 @@
                 }"
               >
                 <div v-if="serviceDetails.price && isFieldVisible('services', 'servicePrice')" :style="{ display: 'flex', alignItems: 'baseline', gap: '10px' }">
-                  <span :style="{ fontSize: responsive.h2Size, fontWeight: 800, color: '#00ff88' }">
+                  <span :style="{ fontSize: responsive.h2Size, fontWeight: 800, color: '#c2a068' }">
                     ${{ serviceDetails.price }}
                   </span>
                   <span
@@ -1944,7 +2167,7 @@
                       fontSize: responsive.bodySize,
                     }"
                   >
-                    <span :style="{ color: '#00ff88' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span> {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
+                    <span :style="{ color: '#c2a068' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span> {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
                   </li>
                 </ul>
               </div>
@@ -1957,11 +2180,11 @@
                     :key="idx"
                     :style="{
                       padding: '6px 14px',
-                      background: 'rgba(102, 126, 234, 0.3)',
-                      border: '1px solid rgba(102, 126, 234, 0.5)',
+                      background: 'rgba(194, 160, 104, 0.3)',
+                      border: '1px solid rgba(194, 160, 104, 0.5)',
                       borderRadius: '16px',
                       fontSize: responsive.smallSize,
-                      color: '#a8b3ff',
+                      color: '#e8d9b8',
                     }"
                   >
                     #{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}
@@ -1981,19 +2204,19 @@
                     alignItems: 'center',
                     gap: '8px',
                     padding: '12px 24px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '25px',
+                    background: 'transparent',
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.32)}`,
+                    borderRadius: '999px',
                     color: responsive.textPrimary,
                     fontSize: responsive.bodySize,
                     fontWeight: 600,
                     textDecoration: 'none',
                     transition: 'all 0.3s',
                   }"
-                  @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'"
-                  @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+                  @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1); e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.6); }"
+                  @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.32); }"
                 >
-                  <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download Brochure
+                  <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" :style="{ color: designSettings.accentColor }" aria-hidden="true" /> Download Brochure
                 </a>
                 
                 <!-- Booking Button -->
@@ -2006,17 +2229,17 @@
                     alignItems: 'center',
                     gap: '8px',
                     padding: '12px 24px',
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                    borderRadius: '25px',
-                    color: responsive.textPrimary,
+                    background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
+                    borderRadius: '999px',
+                    color: '#1b1407',
                     fontSize: responsive.bodySize,
-                    fontWeight: 600,
+                    fontWeight: 700,
                     textDecoration: 'none',
                     transition: 'all 0.3s',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                    boxShadow: '0 10px 26px -12px rgba(194, 160, 104, 0.7)',
                   }"
-                  @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
-                  @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
+                  @mouseover="(e) => e.currentTarget.style.transform = 'translateY(-2px)'"
+                  @mouseout="(e) => e.currentTarget.style.transform = 'translateY(0)'"
                 >
                   <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Book Now
                 </a>
@@ -2041,28 +2264,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:light-bulb" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2075,23 +2304,23 @@
                 v-for="(skill, idx) in expertise"
                 :key="idx"
                 :style="{
-                  padding: isMobile ? '15px' : '20px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '15px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  padding: isMobile ? '15px 2px' : '18px 2px',
+                  background: 'transparent',
+                  borderRadius: 0,
+                  borderBottom: `1px solid ${hexToRgba(designSettings.accentColor, 0.16)}`,
                 }"
               >
-                <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }">
-                  <span :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 600 }">{{ skill.name }}</span>
-                  <span :style="{ color: responsive.textMuted, fontSize: responsive.smallSize }">{{ skill.level }}%</span>
+                <div :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }">
+                  <span :style="{ color: responsive.textPrimary, fontSize: responsive.bodySize, fontWeight: 600, letterSpacing: '-0.01em' }">{{ skill.name }}</span>
+                  <span :style="{ color: designSettings.accentColor, fontSize: responsive.smallSize, fontWeight: 600 }">{{ skill.level }}%</span>
                 </div>
-                <div :style="{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }">
+                <div :style="{ width: '100%', height: '3px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }">
                   <div
                     :style="{
                       width: `${skill.level || 0}%`,
                       height: '100%',
-                      background: 'linear-gradient(90deg, #667eea, #764ba2)',
-                      borderRadius: '4px',
+                      background: 'linear-gradient(90deg, #c2a068, #e8d9b8)',
+                      borderRadius: '2px',
                       transition: 'width 0.5s ease-out',
                     }"
                   ></div>
@@ -2117,28 +2346,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:phone" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2160,11 +2395,11 @@
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: isSmallMobile ? '12px' : isMobile ? '15px' : '20px',
-                  padding: isSmallMobile ? '14px' : isMobile ? '18px' : '25px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: isMobile ? '15px' : '20px',
+                  gap: isSmallMobile ? '14px' : isMobile ? '16px' : '20px',
+                  padding: isSmallMobile ? '16px 6px' : isMobile ? '18px 8px' : '22px 10px',
+                  background: 'transparent',
+                  borderBottom: `1px solid ${hexToRgba(designSettings.accentColor, 0.16)}`,
+                  borderRadius: 0,
                   textDecoration: 'none',
                   transition: 'all 0.3s',
                   animation: 'slideInRight 0.6s ease-out backwards',
@@ -2177,19 +2412,20 @@
                   :style="{
                     width: responsive.contactIconBox,
                     height: responsive.contactIconBox,
-                    borderRadius: isSmallMobile ? '12px' : '15px',
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    background: contact.color,
+                    background: hexToRgba(designSettings.accentColor, 0.10),
+                    border: `1px solid ${hexToRgba(designSettings.accentColor, 0.42)}`,
                   }"
                 >
                   <svg
                     :style="{
                       width: responsive.contactIconSize,
                       height: responsive.contactIconSize,
-                      fill: 'white',
+                      fill: designSettings.accentColor,
                     }"
                     viewBox="0 0 24 24"
                   >
@@ -2257,28 +2493,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:map-pin" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2289,9 +2531,9 @@
             <div
               :style="{
                 padding: isMobile ? '20px' : '25px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '15px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: 'transparent',
+                borderRadius: '16px',
+                border: `1px solid ${hexToRgba(designSettings.accentColor, 0.16)}`,
                 marginBottom: isMobile ? '20px' : '25px',
               }"
             >
@@ -2300,7 +2542,8 @@
                 :style="{
                   color: responsive.textPrimary,
                   fontSize: responsive.h4Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
                   marginBottom: '15px',
                   overflowWrap: 'break-word',
                   wordBreak: 'break-word',
@@ -2336,14 +2579,15 @@
                 justifyContent: 'center',
                 gap: '10px',
                 padding: isMobile ? '15px' : '18px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                color: responsive.textPrimary,
+                background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
+                color: '#1b1407',
                 textDecoration: 'none',
-                borderRadius: '15px',
+                borderRadius: '14px',
                 fontWeight: 700,
                 fontSize: responsive.bodySize,
                 transition: 'all 0.3s',
                 overflow: 'hidden',
+                boxShadow: '0 16px 34px -16px rgba(194, 160, 104, 0.7)',
               }"
               @mouseover="handleMapButtonHoverIn"
               @mouseout="handleMapButtonHoverOut"
@@ -2370,28 +2614,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:globe-alt" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2480,28 +2730,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:clock" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2545,28 +2801,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:photo" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2624,28 +2886,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:briefcase" :style="{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2659,15 +2927,15 @@
                 :key="idx"
                 @click="openPortfolioModal(project)"
                 :style="{
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.05))',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(102, 126, 234, 0.15)',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: '18px',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.16)}`,
                   overflow: 'hidden',
                   transition: 'all 0.4s ease',
                   cursor: 'pointer',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(102, 126, 234, 0.2)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
-                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.15)'; }"
+                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = `0 24px 54px -28px ${hexToRgba(designSettings.accentColor, 0.6)}`; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.4); }"
+                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.16); }"
               >
                 <!-- Image with overlay -->
                 <div
@@ -2689,16 +2957,16 @@
                       transition: 'transform 0.4s ease',
                     }"
                   />
-                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.9) 0%, transparent 60%)' }" />
+                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6, 9, 13, 0.9) 0%, transparent 60%)' }" />
                   <!-- Project number badge -->
-                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '36px', height: '36px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: responsive.textPrimary, fontWeight: 700, fontSize: '14px' }">
+                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '40px', height: '40px', background: 'rgba(6, 9, 13, 0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.55)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e8d9b8', fontFamily: responsive.displayFont, fontWeight: 500, fontSize: '15px' }">
                     {{ String(idx + 1).padStart(2, '0') }}
                   </div>
                 </div>
                 
                 <!-- Content -->
                 <div :style="{ padding: isMobile ? '20px' : '24px' }">
-                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 700, marginBottom: '12px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ project.title }}</h3>
+                  <h3 :style="{ color: responsive.textPrimary, fontSize: responsive.h3Size, fontWeight: 600, letterSpacing: '-0.01em', marginBottom: '12px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ project.title }}</h3>
                   
                   <!-- Project Meta Info -->
                   <div
@@ -2717,7 +2985,8 @@
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
-                        background: 'rgba(255, 255, 255, 0.08)',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -2735,7 +3004,8 @@
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
-                        background: 'rgba(255, 255, 255, 0.08)',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -2753,7 +3023,8 @@
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
-                        background: 'rgba(255, 255, 255, 0.08)',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
                         borderRadius: '20px',
                         fontSize: responsive.smallSize,
                         color: responsive.textMuted,
@@ -2780,10 +3051,10 @@
                       :key="skillIdx"
                       :style="{
                         padding: '4px 10px',
-                        background: 'rgba(79, 172, 254, 0.2)',
-                        border: '1px solid rgba(79, 172, 254, 0.3)',
+                        background: 'rgba(169, 133, 77, 0.2)',
+                        border: '1px solid rgba(169, 133, 77, 0.3)',
                         borderRadius: '12px',
-                        color: '#7dd3fc',
+                        color: '#e8d9b8',
                         fontSize: responsive.smallSize,
                       }"
                     >{{ typeof skill === 'object' ? (skill.skill || skill.name || skill) : skill }}</span>
@@ -2797,10 +3068,10 @@
                     :key="tagIdx"
                     :style="{
                       padding: '6px 12px',
-                      background: 'rgba(102, 126, 234, 0.2)',
-                      border: '1px solid rgba(102, 126, 234, 0.4)',
+                      background: 'rgba(194, 160, 104, 0.2)',
+                      border: '1px solid rgba(194, 160, 104, 0.4)',
                       borderRadius: '50px',
-                      color: '#a8b3ff',
+                      color: '#e8d9b8',
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
                     }"
@@ -2816,20 +3087,19 @@
                         alignItems: 'center',
                         gap: '8px',
                         padding: '12px 20px',
-                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                        borderRadius: '25px',
-                        border: 'none',
+                        background: 'transparent',
+                        borderRadius: '999px',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`,
                         color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s',
-                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
                       }"
-                      @mouseover="(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)'; }"
-                      @mouseout="(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)'; }"
+                      @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1); e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.7); }"
+                      @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.45); }"
                     >
-                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> View Project
+                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" :style="{ color: designSettings.accentColor }" aria-hidden="true" /> View Project
                     </button>
                     <a
                       v-if="project.pdf_download && isFieldVisible('portfolio', 'pdfDownload')"
@@ -2840,17 +3110,17 @@
                         alignItems: 'center',
                         gap: '8px',
                         padding: '12px 20px',
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '25px',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.3)}`,
+                        borderRadius: '999px',
                         color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         textDecoration: 'none',
                         transition: 'all 0.3s',
                       }"
-                      @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)'; }"
-                      @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.08)'; e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'; }"
+                      @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1); e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.55); }"
+                      @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.3); }"
                     >
                       <Icon name="heroicons:arrow-down-tray" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download PDF
                     </a>
@@ -2877,28 +3147,34 @@
               :style="{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px',
-                marginBottom: isMobile ? '20px' : '30px',
+                gap: '14px',
+                marginBottom: isMobile ? '22px' : '32px',
+                paddingBottom: isMobile ? '14px' : '18px',
+                borderBottom: '1px solid rgba(194, 160, 104, 0.14)',
               }"
             >
               <div
                 :style="{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                  borderRadius: '15px',
+                  width: isMobile ? '38px' : '46px',
+                  height: isMobile ? '38px' : '46px',
+                  background: `linear-gradient(160deg, ${hexToRgba(designSettings.accentColor, 0.24)} 0%, rgba(10, 14, 20, 0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.5)}`,
+                  borderRadius: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: isMobile ? '20px' : '24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                 }"
               >
                 <Icon name="heroicons:document-text" :class="isMobile ? 'w-5 h-5' : 'w-6 h-6'" aria-hidden="true" />
               </div>
               <h2
                 :style="{
+                  fontFamily: responsive.displayFont,
                   fontSize: responsive.h2Size,
-                  fontWeight: 700,
+                  fontWeight: 600,
+                  letterSpacing: '-0.015em',
+                  lineHeight: 1.1,
                   color: responsive.textPrimary,
                   margin: 0,
                 }"
@@ -2911,14 +3187,14 @@
                 v-for="(post, idx) in blogPosts"
                 :key="idx"
                 :style="{
-                  background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.08), rgba(245, 87, 108, 0.05))',
+                  background: 'linear-gradient(135deg, rgba(232, 217, 184, 0.08), rgba(138, 106, 51, 0.05))',
                   borderRadius: '24px',
-                  border: '1px solid rgba(240, 147, 251, 0.15)',
+                  border: '1px solid rgba(232, 217, 184, 0.15)',
                   overflow: 'hidden',
                   transition: 'all 0.4s ease',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(240, 147, 251, 0.15)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.3)'; }"
-                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.15)'; }"
+                @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(232, 217, 184, 0.15)'; e.currentTarget.style.borderColor = 'rgba(232, 217, 184, 0.3)'; }"
+                @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(232, 217, 184, 0.15)'; }"
               >
                 <!-- Cover Image with overlay -->
                 <div
@@ -2940,9 +3216,9 @@
                       transition: 'transform 0.4s ease',
                     }"
                   />
-                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10, 14, 39, 0.95) 0%, transparent 70%)' }" />
+                  <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6, 9, 13, 0.95) 0%, transparent 70%)' }" />
                   <!-- Category badge on image -->
-                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '20px', color: responsive.textPrimary, fontSize: responsive.smallSize, fontWeight: 600 }">{{ post.category }}</span>
+                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'rgba(10, 14, 20, 0.82)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(194, 160, 104, 0.4)', borderRadius: '999px', color: '#e8d9b8', fontSize: responsive.smallSize, fontWeight: 600, letterSpacing: '0.04em' }">{{ post.category }}</span>
                 </div>
                 
                 <!-- Content -->
@@ -2965,8 +3241,8 @@
                       marginBottom: '14px',
                     }"
                   >
-                    <div :style="{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
-                      <Icon name="heroicons:pencil" :style="{ width: '14px', height: '14px' }" aria-hidden="true" />
+                    <div :style="{ width: '32px', height: '32px', background: hexToRgba(designSettings.accentColor, 0.16), border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+                      <Icon name="heroicons:pencil" :style="{ width: '14px', height: '14px', color: designSettings.accentColor }" aria-hidden="true" />
                     </div>
                     <span :style="{ color: responsive.textMuted, fontSize: responsive.smallSize, fontWeight: 500, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ post.author_name }}</span>
                   </div>
@@ -2980,10 +3256,10 @@
                       :key="tagIdx"
                       :style="{
                         padding: '5px 12px',
-                        background: 'rgba(240, 147, 251, 0.15)',
-                        border: '1px solid rgba(240, 147, 251, 0.25)',
+                        background: 'rgba(232, 217, 184, 0.15)',
+                        border: '1px solid rgba(232, 217, 184, 0.25)',
                         borderRadius: '15px',
-                        color: '#f0a3fb',
+                        color: '#e8d9b8',
                         fontSize: responsive.smallSize,
                         transition: 'all 0.2s',
                       }"
@@ -3000,20 +3276,19 @@
                         alignItems: 'center',
                         gap: '8px',
                         padding: '10px 20px',
-                        background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-                        border: 'none',
-                        borderRadius: '25px',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`,
+                        borderRadius: '999px',
                         color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s',
-                        boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)',
                       }"
-                      @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(240, 147, 251, 0.4)'; }"
-                      @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(240, 147, 251, 0.3)'; }"
+                      @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1); e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.7); }"
+                      @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.45); }"
                     >
-                      <Icon name="heroicons:book-open" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Read More
+                      <Icon name="heroicons:book-open" class="w-4 h-4 flex-shrink-0" :style="{ color: designSettings.accentColor }" aria-hidden="true" /> Read More
                     </button>
 
                     <!-- External Link (if available) -->
@@ -3026,19 +3301,19 @@
                         alignItems: 'center',
                         gap: '8px',
                         padding: '10px 20px',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '25px',
+                        background: 'transparent',
+                        border: `1px solid ${hexToRgba(designSettings.accentColor, 0.3)}`,
+                        borderRadius: '999px',
                         color: responsive.textPrimary,
                         fontSize: responsive.smallSize,
                         fontWeight: 600,
                         textDecoration: 'none',
                         transition: 'all 0.3s',
                       }"
-                      @mouseover="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.15)'; }"
-                      @mouseout="(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.1)'; }"
+                      @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1); e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.55); }"
+                      @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.3); }"
                     >
-                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Visit Link
+                      <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" :style="{ color: designSettings.accentColor }" aria-hidden="true" /> Visit Link
                     </a>
                   </div>
                 </div>
@@ -3048,10 +3323,11 @@
 
           <!-- Action Buttons Section -->
           <div v-if="hasQuickActions" :style="{ 
-            background: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: isSmallMobile ? '16px' : '20px',
-            padding: isSmallMobile ? '12px' : isMobile ? '16px' : '20px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'transparent',
+            borderRadius: 0,
+            padding: `0 ${responsive.cardPadding}`,
+            borderTop: `1px solid ${hexToRgba(designSettings.accentColor, 0.14)}`,
+            paddingTop: isSmallMobile ? '22px' : '28px',
           }">
             <!-- Section Title -->
             <div :style="{ 
@@ -3060,10 +3336,10 @@
               gap: isSmallMobile ? '6px' : '8px', 
               marginBottom: isSmallMobile ? '12px' : '16px',
               paddingBottom: isSmallMobile ? '10px' : '12px',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              borderBottom: 'none',
             }">
-              <Icon name="heroicons:bolt" :style="{ width: isSmallMobile ? '16px' : '18px', height: isSmallMobile ? '16px' : '18px' }" aria-hidden="true" />
-              <span :style="{ color: responsive.textPrimary, fontSize: isSmallMobile ? '13px' : '14px', fontWeight: 600, letterSpacing: '0.5px' }">Quick Actions</span>
+              <Icon name="heroicons:bolt" :style="{ width: isSmallMobile ? '15px' : '17px', height: isSmallMobile ? '15px' : '17px', color: designSettings.accentColor }" aria-hidden="true" />
+              <span :style="{ color: responsive.textMuted, fontSize: isSmallMobile ? '11px' : '12px', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase' }">Quick Actions</span>
             </div>
             
             <!-- Buttons Grid -->
@@ -3078,18 +3354,18 @@
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  padding: '16px 12px',
-                  background: 'rgba(102, 126, 234, 0.15)',
-                  border: '1px solid rgba(102, 126, 234, 0.3)',
-                  borderRadius: '16px',
+                  gap: '10px',
+                  padding: '20px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   transition: 'all 0.3s',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(102, 126, 234, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.5)'; }"
-                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(102, 126, 234, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(102, 126, 234, 0.3)'; }"
+                @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.07); e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.5); }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.22); }"
               >
-                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)' }">
+                <div :style="{ width: '46px', height: '46px', background: 'transparent', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: designSettings.accentColor }">
                   <Icon name="heroicons:arrow-down-tray" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Save Contact</span>
@@ -3104,18 +3380,18 @@
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  padding: '16px 12px',
-                  background: 'rgba(240, 147, 251, 0.15)',
-                  border: '1px solid rgba(240, 147, 251, 0.3)',
-                  borderRadius: '16px',
+                  gap: '10px',
+                  padding: '20px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   transition: 'all 0.3s',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(240, 147, 251, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.5)'; }"
-                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(240, 147, 251, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(240, 147, 251, 0.3)'; }"
+                @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.07); e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.5); }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.22); }"
               >
-                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(240, 147, 251, 0.4)' }">
+                <div :style="{ width: '46px', height: '46px', background: 'transparent', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: designSettings.accentColor }">
                   <Icon name="heroicons:envelope" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Message</span>
@@ -3130,18 +3406,18 @@
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  padding: '16px 12px',
-                  background: 'rgba(79, 172, 254, 0.15)',
-                  border: '1px solid rgba(79, 172, 254, 0.3)',
-                  borderRadius: '16px',
+                  gap: '10px',
+                  padding: '20px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   transition: 'all 0.3s',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(79, 172, 254, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.5)'; }"
-                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(79, 172, 254, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(79, 172, 254, 0.3)'; }"
+                @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.07); e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.5); }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.22); }"
               >
-                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)' }">
+                <div :style="{ width: '46px', height: '46px', background: 'transparent', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: designSettings.accentColor }">
                   <Icon name="heroicons:qr-code" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">QR Code</span>
@@ -3156,18 +3432,18 @@
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  padding: '16px 12px',
-                  background: 'rgba(56, 239, 125, 0.15)',
-                  border: '1px solid rgba(56, 239, 125, 0.3)',
-                  borderRadius: '16px',
+                  gap: '10px',
+                  padding: '20px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${hexToRgba(designSettings.accentColor, 0.22)}`,
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   transition: 'all 0.3s',
                 }"
-                @mouseover="(e) => { e.currentTarget.style.background = 'rgba(56, 239, 125, 0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(56, 239, 125, 0.5)'; }"
-                @mouseout="(e) => { e.currentTarget.style.background = 'rgba(56, 239, 125, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(56, 239, 125, 0.3)'; }"
+                @mouseover="(e) => { e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.07); e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.5); }"
+                @mouseout="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = hexToRgba(designSettings.accentColor, 0.22); }"
               >
-                <div :style="{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #11998e, #38ef7d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(56, 239, 125, 0.4)' }">
+                <div :style="{ width: '46px', height: '46px', background: 'transparent', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: designSettings.accentColor }">
                   <Icon name="heroicons:share" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
                 </div>
                 <span :style="{ color: responsive.textPrimary, fontSize: '13px', fontWeight: 600 }">Share</span>
@@ -3186,22 +3462,52 @@
                 gap: '12px',
                 marginTop: '12px',
                 padding: '14px 20px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
                 border: 'none',
                 borderRadius: '14px',
                 cursor: 'pointer',
                 transition: 'all 0.3s',
                 textDecoration: 'none',
-                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
+                boxShadow: '0 12px 30px -14px rgba(194, 160, 104, 0.7)',
               }"
-              @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.5)'; }"
-              @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.3)'; }"
+              @mouseover="(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 38px -14px rgba(194, 160, 104, 0.85)'; }"
+              @mouseout="(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 12px 30px -14px rgba(194, 160, 104, 0.7)'; }"
             >
-              <Icon name="heroicons:calendar" :style="{ width: '18px', height: '18px' }" aria-hidden="true" />
-              <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 600 }">Book Appointment</span>
+              <Icon name="heroicons:calendar" :style="{ width: '18px', height: '18px', color: '#1b1407' }" aria-hidden="true" />
+              <span :style="{ color: '#1b1407', fontSize: '14px', fontWeight: 700 }">Book Appointment</span>
             </a>
 
           </div>
+        </div>
+
+        <!-- ===================== NFCGo Signature Badge ===================== -->
+        <!-- Subtle, plan-gated credit line. Free/Basic profiles display it; the
+             plan + admin policy decides visibility (see show_nfcgo_branding). -->
+        <div
+          v-if="showNfcgoBranding"
+          :style="{
+            marginTop: responsive.sectionGap,
+            paddingTop: isMobile ? '20px' : '24px',
+            borderTop: '1px solid rgba(194, 160, 104, 0.16)',
+            display: 'flex',
+            justifyContent: 'center',
+          }"
+        >
+          <NuxtLink
+            to="/Homepage/cards"
+            :style="{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: isSmallMobile ? '8px' : '10px',
+              textDecoration: 'none',
+              opacity: 0.92,
+            }"
+          >
+            <NFCGoLogo variant="dark" :size="isSmallMobile ? 'xs' : 'sm'" />
+            <span :style="{ color: responsive.textMuted, fontSize: isSmallMobile ? '11px' : '12px', letterSpacing: '0.04em' }">
+              Powered by NFCGo
+            </span>
+          </NuxtLink>
         </div>
       </template>
     </div>
@@ -3216,13 +3522,13 @@
         right: isMobile ? '20px' : '30px',
         width: isMobile ? '50px' : '60px',
         height: isMobile ? '50px' : '60px',
-        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+        background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
         border: 'none',
         borderRadius: '50%',
-        color: responsive.textPrimary,
+        color: '#1b1407',
         fontSize: isMobile ? '20px' : '24px',
         cursor: 'pointer',
-        boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+        boxShadow: '0 10px 30px -12px rgba(194, 160, 104, 0.75)',
         transition: 'all 0.3s',
         zIndex: 1000,
         animation: 'fadeIn 0.3s',
@@ -3255,7 +3561,7 @@
         :style="{
           width: '100%',
           maxWidth: '500px',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.95), rgba(11, 16, 23, 0.98))',
           borderRadius: '24px',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           padding: isMobile ? '24px' : '32px',
@@ -3295,15 +3601,15 @@
           v-if="contactFormSuccess"
           :style="{
             padding: '20px',
-            background: 'rgba(34, 197, 94, 0.2)',
-            border: '1px solid rgba(34, 197, 94, 0.4)',
+            background: 'rgba(169, 133, 77, 0.2)',
+            border: '1px solid rgba(169, 133, 77, 0.4)',
             borderRadius: '16px',
             textAlign: 'center',
             marginBottom: '16px',
           }"
         >
           <div :style="{ fontSize: '40px', marginBottom: '8px' }"><Icon name="heroicons:check-circle" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
-          <p :style="{ color: '#22c55e', fontWeight: 600 }">Message sent successfully!</p>
+          <p :style="{ color: '#a9854d', fontWeight: 600 }">Message sent successfully!</p>
         </div>
 
         <!-- Form -->
@@ -3390,12 +3696,12 @@
             :style="{
               width: '100%',
               padding: '16px',
-              background: contactFormSubmitting ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #f093fb, #f5576c)',
+              background: contactFormSubmitting ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
               border: 'none',
               borderRadius: '12px',
-              color: responsive.textPrimary,
+              color: contactFormSubmitting ? responsive.textPrimary : '#1b1407',
               fontSize: '16px',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: contactFormSubmitting ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s',
             }"
@@ -3426,7 +3732,7 @@
         :style="{
           width: '100%',
           maxWidth: '400px',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.95), rgba(11, 16, 23, 0.98))',
           borderRadius: '24px',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           padding: isMobile ? '24px' : '32px',
@@ -3491,12 +3797,12 @@
           :style="{
             width: '100%',
             padding: '14px',
-            background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+            background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
             border: 'none',
             borderRadius: '12px',
-            color: responsive.textPrimary,
+            color: '#1b1407',
             fontSize: '15px',
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -3529,7 +3835,7 @@
         :style="{
           width: '100%',
           maxWidth: '400px',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 40, 0.98))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.95), rgba(11, 16, 23, 0.98))',
           borderRadius: '24px',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           padding: isMobile ? '24px' : '32px',
@@ -3573,7 +3879,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#1877f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:globe-alt" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:globe-alt" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Facebook</span>
           </a>
           <!-- Twitter/X -->
@@ -3582,7 +3888,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#000000', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:at-symbol" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:at-symbol" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">X</span>
           </a>
           <!-- LinkedIn -->
@@ -3591,7 +3897,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#0a66c2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:briefcase" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:briefcase" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">LinkedIn</span>
           </a>
           <!-- WhatsApp -->
@@ -3600,7 +3906,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#25d366', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:chat-bubble-left-right" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:chat-bubble-left-right" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">WhatsApp</span>
           </a>
           <!-- Telegram -->
@@ -3609,7 +3915,7 @@
             target="_blank"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#0088cc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:paper-airplane" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:paper-airplane" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Telegram</span>
           </a>
           <!-- Email -->
@@ -3617,7 +3923,7 @@
             :href="`mailto:?subject=${encodeURIComponent('Check out ' + profile.name)}&body=${encodeURIComponent('Here is ' + profile.name + '\'s profile: ' + currentUrl)}`"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#ea4335', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:envelope" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:envelope" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Email</span>
           </a>
           <!-- SMS -->
@@ -3625,7 +3931,7 @@
             :href="`sms:?body=${encodeURIComponent(profile.name + ' - ' + currentUrl)}`"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: '#34c759', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:device-phone-mobile" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:device-phone-mobile" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">SMS</span>
           </a>
           <!-- Copy Link -->
@@ -3633,8 +3939,16 @@
             @click="copyProfileLink"
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
           >
-            <div :style="{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:clipboard" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:clipboard" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
             <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Copy</span>
+          </button>
+          <!-- Native device share (falls back to copy when unsupported) -->
+          <button
+            @click="shareProfile"
+            :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
+          >
+            <div :style="{ width: '56px', height: '56px', background: 'rgba(194, 160, 104, 0.18)', border: '1px solid rgba(194, 160, 104, 0.4)', color: '#c2a068', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:share" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
+            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">More</span>
           </button>
         </div>
       </div>
@@ -3662,7 +3976,7 @@
           maxWidth: '600px',
           maxHeight: '85vh',
           overflowY: 'auto',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.98), rgba(11, 16, 23, 0.99))',
           borderRadius: '28px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           padding: isMobile ? '24px' : '32px',
@@ -3699,7 +4013,7 @@
             width: '80px', 
             height: '80px', 
             margin: '0 auto 16px', 
-            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))', 
+            background: 'linear-gradient(135deg, rgba(194, 160, 104, 0.3), rgba(169, 133, 77, 0.3))', 
             borderRadius: '24px', 
             display: 'flex', 
             alignItems: 'center', 
@@ -3714,10 +4028,10 @@
           <div v-if="selectedService.category" :style="{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }">
             <span :style="{ 
               padding: '6px 16px', 
-              background: 'rgba(102, 126, 234, 0.2)', 
-              border: '1px solid rgba(102, 126, 234, 0.4)',
+              background: 'rgba(194, 160, 104, 0.2)', 
+              border: '1px solid rgba(194, 160, 104, 0.4)',
               borderRadius: '20px', 
-              color: '#a8b3ff', 
+              color: '#e8d9b8', 
               fontSize: '13px',
               fontWeight: 500,
             }">
@@ -3725,10 +4039,10 @@
             </span>
             <span v-if="selectedService.duration" :style="{ 
               padding: '6px 16px', 
-              background: 'rgba(240, 147, 251, 0.15)', 
-              border: '1px solid rgba(240, 147, 251, 0.4)',
+              background: 'rgba(232, 217, 184, 0.15)', 
+              border: '1px solid rgba(232, 217, 184, 0.4)',
               borderRadius: '20px', 
-              color: '#f0a8ff', 
+              color: '#e8d9b8', 
               fontSize: '13px',
               fontWeight: 500,
             }">
@@ -3742,12 +4056,12 @@
           textAlign: 'center', 
           marginBottom: '24px',
           padding: '20px',
-          background: 'rgba(0, 255, 136, 0.1)',
+          background: 'rgba(194, 160, 104, 0.1)',
           borderRadius: '16px',
-          border: '1px solid rgba(0, 255, 136, 0.2)',
+          border: '1px solid rgba(194, 160, 104, 0.2)',
         }">
           <div :style="{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '12px' }">
-            <span :style="{ fontSize: '32px', fontWeight: 800, color: '#00ff88' }">
+            <span :style="{ fontSize: '32px', fontWeight: 800, color: '#c2a068' }">
               {{ selectedService.price }}
             </span>
             <span v-if="selectedService.oldPrice" :style="{ 
@@ -3797,7 +4111,7 @@
                 borderRadius: '10px',
               }"
             >
-              <span :style="{ color: '#00ff88', fontSize: '16px' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span>
+              <span :style="{ color: '#c2a068', fontSize: '16px' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span>
               <span :style="{ color: responsive.textPrimary, fontSize: '14px', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">
                 {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
               </span>
@@ -3817,10 +4131,10 @@
               :key="idx"
               :style="{
                 padding: '6px 14px',
-                background: 'rgba(102, 126, 234, 0.2)',
-                border: '1px solid rgba(102, 126, 234, 0.3)',
+                background: 'rgba(194, 160, 104, 0.2)',
+                border: '1px solid rgba(194, 160, 104, 0.3)',
                 borderRadius: '16px',
-                color: '#a8b3ff',
+                color: '#e8d9b8',
                 fontSize: '13px',
                 maxWidth: '100%',
                 overflowWrap: 'break-word',
@@ -3877,8 +4191,8 @@
               alignItems: 'center',
               gap: '12px',
               padding: '16px',
-              background: 'rgba(255, 0, 0, 0.1)',
-              border: '1px solid rgba(255, 0, 0, 0.2)',
+              background: 'rgba(138, 106, 51, 0.1)',
+              border: '1px solid rgba(138, 106, 51, 0.2)',
               borderRadius: '12px',
               textDecoration: 'none',
               transition: 'all 0.3s',
@@ -3904,8 +4218,8 @@
               justifyContent: 'center',
               gap: '10px',
               padding: '16px 24px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'transparent',
+              border: `1px solid ${hexToRgba(designSettings.accentColor, 0.32)}`,
               borderRadius: '14px',
               color: responsive.textPrimary,
               fontSize: '15px',
@@ -3913,10 +4227,10 @@
               textDecoration: 'none',
               transition: 'all 0.3s',
             }"
-            @mouseover="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'"
-            @mouseout="(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'"
+            @mouseover="(e) => e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.1)"
+            @mouseout="(e) => e.currentTarget.style.background = 'transparent'"
           >
-            <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Download Brochure
+            <Icon name="heroicons:document-text" class="w-4 h-4 flex-shrink-0" :style="{ color: designSettings.accentColor }" aria-hidden="true" /> Download Brochure
           </a>
 
           <!-- Booking Button -->
@@ -3932,17 +4246,17 @@
               justifyContent: 'center',
               gap: '10px',
               padding: '16px 24px',
-              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
               borderRadius: '14px',
-              color: responsive.textPrimary,
+              color: '#1b1407',
               fontSize: '15px',
-              fontWeight: 600,
+              fontWeight: 700,
               textDecoration: 'none',
               transition: 'all 0.3s',
-              boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+              boxShadow: '0 12px 28px -14px rgba(194, 160, 104, 0.7)',
             }"
-            @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
-            @mouseout="(e) => e.target.style.transform = 'translateY(0)'"
+            @mouseover="(e) => e.currentTarget.style.transform = 'translateY(-2px)'"
+            @mouseout="(e) => e.currentTarget.style.transform = 'translateY(0)'"
           >
             <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> Book Now
           </a>
@@ -3972,7 +4286,7 @@
           maxWidth: '800px',
           maxHeight: '90vh',
           overflowY: 'auto',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.98), rgba(11, 16, 23, 0.99))',
           borderRadius: '28px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           position: 'relative',
@@ -4022,7 +4336,7 @@
               objectFit: 'cover',
             }"
           />
-          <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(20, 20, 40, 1) 0%, transparent 60%)' }" />
+          <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11, 16, 23, 1) 0%, transparent 60%)' }" />
         </div>
 
         <!-- Content -->
@@ -4034,7 +4348,7 @@
 
           <!-- Meta Info -->
           <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }">
-            <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.4)', borderRadius: '20px', color: '#a8b3ff', fontSize: '13px' }">
+            <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(194, 160, 104, 0.2)', border: '1px solid rgba(194, 160, 104, 0.4)', borderRadius: '20px', color: '#e8d9b8', fontSize: '13px' }">
               {{ selectedProject.category }}
             </span>
             <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
@@ -4098,12 +4412,12 @@
               <span 
                 v-for="(skill, idx) in (selectedProject.skills_used || [])" 
                 :key="'skill-' + idx"
-                :style="{ padding: '6px 14px', background: 'rgba(79, 172, 254, 0.2)', border: '1px solid rgba(79, 172, 254, 0.3)', borderRadius: '16px', color: '#7dd3fc', fontSize: '13px' }"
+                :style="{ padding: '6px 14px', background: 'rgba(169, 133, 77, 0.2)', border: '1px solid rgba(169, 133, 77, 0.3)', borderRadius: '16px', color: '#e8d9b8', fontSize: '13px' }"
               >{{ typeof skill === 'object' ? (skill.skill || skill.name) : skill }}</span>
               <span 
                 v-for="(tag, idx) in (selectedProject.tags || [])" 
                 :key="'tag-' + idx"
-                :style="{ padding: '6px 14px', background: 'rgba(102, 126, 234, 0.2)', border: '1px solid rgba(102, 126, 234, 0.3)', borderRadius: '16px', color: '#a8b3ff', fontSize: '13px' }"
+                :style="{ padding: '6px 14px', background: 'rgba(194, 160, 104, 0.2)', border: '1px solid rgba(194, 160, 104, 0.3)', borderRadius: '16px', color: '#e8d9b8', fontSize: '13px' }"
               >#{{ typeof tag === 'object' ? (tag.tag || tag.name) : tag }}</span>
             </div>
           </div>
@@ -4122,14 +4436,14 @@
                 justifyContent: 'center',
                 gap: '10px',
                 padding: '16px 24px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
                 borderRadius: '14px',
-                color: responsive.textPrimary,
+                color: '#1b1407',
                 fontSize: '15px',
-                fontWeight: 600,
+                fontWeight: 700,
                 textDecoration: 'none',
                 transition: 'all 0.3s',
-                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                boxShadow: '0 12px 28px -14px rgba(194, 160, 104, 0.7)',
               }"
             >
               <Icon name="heroicons:link" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> View Project
@@ -4146,8 +4460,8 @@
                 justifyContent: 'center',
                 gap: '10px',
                 padding: '16px 24px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'transparent',
+                border: `1px solid ${hexToRgba(designSettings.accentColor, 0.32)}`,
                 borderRadius: '14px',
                 color: responsive.textPrimary,
                 fontSize: '15px',
@@ -4183,7 +4497,7 @@
           maxWidth: '800px',
           maxHeight: '90vh',
           overflowY: 'auto',
-          background: 'linear-gradient(135deg, rgba(30, 30, 60, 0.98), rgba(20, 20, 40, 0.99))',
+          background: 'linear-gradient(135deg, rgba(15, 22, 33, 0.98), rgba(11, 16, 23, 0.99))',
           borderRadius: '28px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           position: 'relative',
@@ -4261,14 +4575,14 @@
                     }"
                 />
             </div>
-             <div :style="{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to top, rgba(20, 20, 40, 1) 0%, transparent 100%)', pointerEvents: 'none' }" />
+             <div :style="{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to top, rgba(11, 16, 23, 1) 0%, transparent 100%)', pointerEvents: 'none' }" />
         </div>
 
         <!-- Content -->
         <div :style="{ padding: isMobile ? '24px' : '32px', position: 'relative', zIndex: 2 }">
           <!-- Meta Info Header -->
            <div :style="{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }">
-             <span v-if="selectedBlog.category" :style="{ padding: '6px 14px', background: 'rgba(240, 147, 251, 0.15)', border: '1px solid rgba(240, 147, 251, 0.3)', borderRadius: '20px', color: '#f0a3fb', fontSize: '13px', fontWeight: 600 }">
+             <span v-if="selectedBlog.category" :style="{ padding: '6px 14px', background: 'rgba(232, 217, 184, 0.15)', border: '1px solid rgba(232, 217, 184, 0.3)', borderRadius: '20px', color: '#e8d9b8', fontSize: '13px', fontWeight: 600 }">
               {{ selectedBlog.category }}
              </span>
              <span v-if="selectedBlog.published_date" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
@@ -4286,8 +4600,8 @@
 
           <!-- Author -->
           <div v-if="selectedBlog.author_name" :style="{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }">
-              <div :style="{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }">
-                  <Icon name="heroicons:pencil" :style="{ width: '20px', height: '20px' }" aria-hidden="true" />
+              <div :style="{ width: '40px', height: '40px', background: hexToRgba(designSettings.accentColor, 0.16), border: `1px solid ${hexToRgba(designSettings.accentColor, 0.45)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }">
+                  <Icon name="heroicons:pencil" :style="{ width: '20px', height: '20px', color: designSettings.accentColor }" aria-hidden="true" />
               </div>
               <div :style="{ minWidth: 0 }">
                   <div :style="{ color: responsive.textPrimary, fontWeight: 600, fontSize: '15px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ selectedBlog.author_name }}</div>
@@ -4336,13 +4650,13 @@
                   alignItems: 'center',
                   gap: '10px',
                   padding: '14px 32px',
-                  background: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                  background: 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
                   borderRadius: '30px',
-                  color: responsive.textPrimary,
+                  color: '#1b1407',
                   fontSize: '16px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   textDecoration: 'none',
-                  boxShadow: '0 8px 25px rgba(240, 147, 251, 0.4)',
+                  boxShadow: '0 12px 30px -14px rgba(194, 160, 104, 0.7)',
                   transition: 'all 0.3s'
                 }"
                 @mouseover="(e) => e.target.style.transform = 'translateY(-2px)'"
@@ -4445,7 +4759,7 @@ const responsive = computed(() => {
   };
   const textColorRaw = designSettings.textColor || '#FFFFFF';
   const eff = (alpha) => hexToRgba(textColorRaw.startsWith('#') ? textColorRaw : '#FFFFFF', alpha);
-  const effColorShadow = `0 0 36px ${hexToRgba(designSettings.cardEffectColor || designSettings.accentColor || '#22D3EE', 0.35)}`;
+  const effColorShadow = `0 0 36px ${hexToRgba(designSettings.cardEffectColor || designSettings.accentColor || '#c2a068', 0.35)}`;
 
   // Card style presets (mirrors CARD_STYLE_MAP + drives responsive fields)
   const cardPresets = {
@@ -4468,10 +4782,10 @@ const responsive = computed(() => {
       backdropBlur: '22px',
     },
     neumorph: {
-      cardBackground: 'linear-gradient(145deg, #e8ecf3, #ffffff)',
+      cardBackground: 'linear-gradient(145deg, #efece4, #ffffff)',
       cardBorder: '1px solid rgba(255,255,255,0.5)',
-      cardShadow: '14px 14px 30px rgba(163,177,198,0.24), -14px -14px 30px rgba(255,255,255,0.95)',
-      cardHoverShadow: '18px 18px 36px rgba(163,177,198,0.32), -18px -18px 36px rgba(255,255,255,1)',
+      cardShadow: '14px 14px 30px rgba(60, 70, 85,0.24), -14px -14px 30px rgba(255,255,255,0.95)',
+      cardHoverShadow: '18px 18px 36px rgba(60, 70, 85,0.32), -18px -18px 36px rgba(255,255,255,1)',
       borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '34px',
       cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '32px',
       backdropBlur: '0px',
@@ -4486,10 +4800,10 @@ const responsive = computed(() => {
       backdropBlur: '24px',
     },
     'neon-outline': {
-      cardBackground: 'rgba(6, 10, 24, 0.35)',
-      cardBorder: '1px solid rgba(34, 211, 238, 0.55)',
-      cardShadow: '0 0 0 1px rgba(34, 211, 238, 0.12), 0 10px 40px rgba(34, 211, 238, 0.22), 0 0 60px rgba(34,211,238,0.1)',
-      cardHoverShadow: '0 0 0 1px rgba(34, 211, 238, 0.2), 0 16px 50px rgba(34, 211, 238, 0.32), 0 0 80px rgba(34,211,238,0.18)',
+      cardBackground: 'rgba(6, 9, 13, 0.35)',
+      cardBorder: '1px solid rgba(194, 160, 104, 0.55)',
+      cardShadow: '0 0 0 1px rgba(194, 160, 104, 0.12), 0 10px 40px rgba(194, 160, 104, 0.22), 0 0 60px rgba(194, 160, 104,0.1)',
+      cardHoverShadow: '0 0 0 1px rgba(194, 160, 104, 0.2), 0 16px 50px rgba(194, 160, 104, 0.32), 0 0 80px rgba(194, 160, 104,0.18)',
       borderRadius: sm ? '22px' : mob ? '26px' : tab ? '30px' : '34px',
       cardRadius: sm ? '18px' : mob ? '22px' : tab ? '28px' : '32px',
       backdropBlur: '14px',
@@ -4505,7 +4819,7 @@ const responsive = computed(() => {
       filterSaturate: 'saturate(160%)',
     },
     'liquid-chrome': {
-      cardBackground: `linear-gradient(135deg, ${hexToRgba('#FFFFFF', 0.58)} 0%, ${hexToRgba('#E2E8F0', 0.3)} 35%, ${hexToRgba('#FFFFFF', 0.48)} 55%, ${hexToRgba('#94A3B8', 0.26)} 80%, ${hexToRgba('#FFFFFF', 0.52)} 100%)`,
+      cardBackground: `linear-gradient(135deg, ${hexToRgba('#FFFFFF', 0.58)} 0%, ${hexToRgba('#efece4', 0.3)} 35%, ${hexToRgba('#FFFFFF', 0.48)} 55%, ${hexToRgba('#a8a190', 0.26)} 80%, ${hexToRgba('#FFFFFF', 0.52)} 100%)`,
       cardBorder: `1px solid ${eff(0.52)}`,
       cardShadow: `0 22px 46px rgba(15, 23, 42, 0.32), inset 0 0 0 1px ${eff(0.42)}, inset 0 1px 0 rgba(255,255,255,0.55)`,
       cardHoverShadow: `0 32px 60px rgba(15, 23, 42, 0.38), ${effColorShadow}`,
@@ -4514,19 +4828,19 @@ const responsive = computed(() => {
       backdropBlur: '22px',
     },
     'aurora-tint': {
-      cardBackground: `linear-gradient(140deg, ${hexToRgba('#38BDF8', 0.35)} 0%, ${eff(0.3)} 42%, ${hexToRgba('#EC4899', 0.34)} 100%)`,
+      cardBackground: `linear-gradient(140deg, ${hexToRgba('#a9854d', 0.35)} 0%, ${eff(0.3)} 42%, ${hexToRgba('#8a6a33', 0.34)} 100%)`,
       cardBorder: `1px solid ${eff(0.42)}`,
-      cardShadow: `0 26px 60px rgba(168, 85, 247, 0.26), inset 0 1px 0 rgba(255,255,255,0.3)`,
-      cardHoverShadow: `0 36px 72px rgba(236, 72, 153, 0.3), ${effColorShadow}`,
+      cardShadow: `0 26px 60px rgba(169, 133, 77, 0.26), inset 0 1px 0 rgba(255,255,255,0.3)`,
+      cardHoverShadow: `0 36px 72px rgba(138, 106, 51, 0.3), ${effColorShadow}`,
       borderRadius: sm ? '24px' : mob ? '28px' : tab ? '32px' : '34px',
       cardRadius: sm ? '20px' : mob ? '24px' : tab ? '30px' : '32px',
       backdropBlur: '20px',
     },
     'cyber-lines': {
-      cardBackground: `linear-gradient(135deg, ${hexToRgba('#0B0F19', 0.9)} 0%, ${hexToRgba('#0B0F19', 0.6)} 100%)`,
-      cardBorder: `1.5px solid transparent; background-origin: padding-box, border-box; background-clip: padding-box, border-box; background-image: linear-gradient(135deg, ${hexToRgba('#0B0F19', 0.9)}, ${hexToRgba('#0B0F19', 0.55)}), linear-gradient(135deg, ${designSettings.cardEffectColor ?? '#22D3EE'} 0%, ${hexToRgba('#A855F7', 0.85)} 45%, ${hexToRgba('#F472B6', 0.85)} 100%);`,
-      cardShadow: `0 22px 46px rgba(34, 211, 238, 0.22), 0 0 0 1px ${eff(0.12)}`,
-      cardHoverShadow: `0 32px 64px rgba(34, 211, 238, 0.32), 0 0 28px ${eff(0.45)}`,
+      cardBackground: `linear-gradient(135deg, ${hexToRgba('#0b1017', 0.9)} 0%, ${hexToRgba('#0b1017', 0.6)} 100%)`,
+      cardBorder: `1.5px solid transparent; background-origin: padding-box, border-box; background-clip: padding-box, border-box; background-image: linear-gradient(135deg, ${hexToRgba('#0b1017', 0.9)}, ${hexToRgba('#0b1017', 0.55)}), linear-gradient(135deg, ${designSettings.cardEffectColor ?? '#c2a068'} 0%, ${hexToRgba('#a9854d', 0.85)} 45%, ${hexToRgba('#8a6a33', 0.85)} 100%);`,
+      cardShadow: `0 22px 46px rgba(194, 160, 104, 0.22), 0 0 0 1px ${eff(0.12)}`,
+      cardHoverShadow: `0 32px 64px rgba(194, 160, 104, 0.32), 0 0 28px ${eff(0.45)}`,
       borderRadius: sm ? '20px' : mob ? '24px' : tab ? '28px' : '30px',
       cardRadius: sm ? '16px' : mob ? '20px' : tab ? '26px' : '28px',
       backdropBlur: '16px',
@@ -4541,7 +4855,7 @@ const responsive = computed(() => {
       backdropBlur: '10px',
     },
     'velvet-matte': {
-      cardBackground: `linear-gradient(160deg, ${hexToRgba('#111827', 0.9)} 0%, ${hexToRgba('#1E293B', 0.82)} 100%)`,
+      cardBackground: `linear-gradient(160deg, ${hexToRgba('#0b1017', 0.9)} 0%, ${hexToRgba('#0f1621', 0.82)} 100%)`,
       cardBorder: `1px solid ${eff(0.28)}`,
       cardShadow: `0 26px 56px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06)`,
       cardHoverShadow: `0 36px 72px rgba(0, 0, 0, 0.48), ${effColorShadow}`,
@@ -4553,6 +4867,8 @@ const responsive = computed(() => {
   const cs = cardPresets[cardStyleId] || cardPresets.minimal;
 
   // === FORCE SOLID-COLOR CONTAINERS (gradient reserved ONLY for root page background) ===
+  // Ink & Brass: dark literals are flat ink surfaces with a warm brass hairline;
+  // light literals fall back to Paper.
   {
     const hx = (textColorRaw || '#FFFFFF').replace('#', '');
     const hex6 = hx.length === 3 ? hx.split('').map(c => c + c).join('') : hx.padEnd(6, '0');
@@ -4561,54 +4877,64 @@ const responsive = computed(() => {
     const b = parseInt(hex6.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     const isDarkTheme = luminance > 0.55;
-    // Solid flat background — no blur, no gradient, full opacity
-    cs.cardBackground = isDarkTheme ? '#111827' : '#FFFFFF';
+    // Ink gradient surface — flat enough to read as one panel, deep enough to feel premium
+    cs.cardBackground = isDarkTheme
+      ? 'linear-gradient(180deg, rgba(17, 22, 31, 0.86) 0%, rgba(9, 13, 19, 0.95) 100%)'
+      : '#f7f5f0';
     cs.backdropBlur = '0px';
-    // Neutral 1px solid border — no gradient, no dots, no multi-layer
-    cs.cardBorder = isDarkTheme ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.06)';
-    // Clean elevation shadow — no neon/aurora color shimmer
+    // Warm brass hairline instead of a neutral grey border
+    cs.cardBorder = isDarkTheme
+      ? '1px solid rgba(194, 160, 104, 0.14)'
+      : '1px solid rgba(138, 106, 51, 0.20)';
+    // Tighter, architectural radius — reads as an art-directed panel rather
+    // than a soft, generic "app card".
+    cs.cardRadius = sm ? '12px' : ph ? '14px' : mob ? '15px' : tab ? '16px' : '18px';
+    // Deep, diffuse elevation (not a flat drop shadow) — reads as engineered light
     cs.cardShadow = isDarkTheme
-      ? '0 10px 30px rgba(0,0,0,0.35)'
-      : '0 8px 24px rgba(15,23,42,0.08)';
+      ? '0 22px 48px -26px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(194, 160, 104, 0.18)'
+      : '0 16px 36px -22px rgba(28, 26, 21, 0.45), inset 0 1px 0 rgba(138, 106, 51, 0.18)';
     cs.cardHoverShadow = isDarkTheme
-      ? '0 16px 40px rgba(0,0,0,0.42)'
-      : '0 12px 32px rgba(15,23,42,0.12)';
+      ? '0 30px 64px -28px rgba(0, 0, 0, 0.98), 0 0 0 1px rgba(194, 160, 104, 0.18)'
+      : '0 24px 50px -24px rgba(28, 26, 21, 0.5)';
     if (cs.filterSaturate) delete cs.filterSaturate;
   }
 
   return {
-    // Container - always have horizontal breathing room on mobile
+    // Container — deliberate content width with generous, safe-area-aware
+    // horizontal gutters so content never touches the viewport edge.
+    // (Tiers sm / ph / tab / sl / ld are mutually exclusive; the previous
+    //  `mob` tier was shadowed by `ph` and never applied.)
     containerPadding: sm
-      ? "60px 12px 24px"
+      ? "60px 16px 28px"
       : ph
-        ? "64px 16px 28px"
-        : mob
-          ? "68px 20px 32px"
-          : tab
-            ? "72px 32px 40px"
-            : sl
-              ? "76px 40px 48px"
-              : "80px 48px 56px",
-    maxWidth: "1200px",
-    pageMaxWidth: sm
-      ? '100%'
-      : ph
-        ? '100%'
-        : mob
-          ? '100%'
-          : tab
-            ? '768px'
-            : '1200px',
+        ? "64px 20px 32px"
+        : tab
+          ? "72px 32px 40px"
+          : sl
+            ? "76px 40px 48px"
+            : "80px 48px 56px",
+    // sm / ph / mob are all < 640px, so the earlier tiers all collapse to the
+    // same full-width value — only the tablet and desktop tiers differ.
+    pageMaxWidth: mob ? '100%' : tab ? '768px' : '1200px',
 
-    // Profile image - scales gracefully
+    // Preview/editorial display face — the public profile pairs an editorial
+    // serif (Fraunces) for the masthead + section titles with Inter for body.
+    displayFont: '"Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif',
+
+    // Profile image - scales gracefully (legacy circle, still used by modals)
     profileSize: sm ? "112px" : ph ? "128px" : mob ? "148px" : tab ? "180px" : "208px",
     profileBorder: cardStyleId === 'minimal' || cardStyleId === 'neumorph'
       ? "4px solid #ffffff"
       : "4px solid rgba(255, 255, 255, 0.15)",
+    // Hero portrait plate — the portrait is a first-class art-directed element,
+    // never a small avatar, so it gets its own (larger) scale.
+    portraitSize: sm ? "176px" : ph ? "204px" : mob ? "240px" : tab ? "288px" : ld ? "404px" : "356px",
 
     // Typography - fluid modular scale
-    nameSize: sm ? "26px" : ph ? "30px" : mob ? "34px" : tab ? "46px" : ld ? "60px" : "54px",
-    h2Size: sm ? "20px" : ph ? "22px" : mob ? "24px" : tab ? "27px" : "31px",
+    nameSize: sm ? "42px" : ph ? "48px" : mob ? "56px" : tab ? "66px" : ld ? "92px" : "78px",
+    h2Size: sm ? "21px" : ph ? "22px" : mob ? "24px" : tab ? "26px" : "30px",
+    // Editorial eyebrow (small caps label set above titles / over sections)
+    eyebrowSize: sm ? "10px" : "11px",
     h3Size: sm ? "17px" : ph ? "18px" : mob ? "20px" : tab ? "23px" : "27px",
     h4Size: sm ? "14px" : ph ? "15px" : mob ? "16px" : tab ? "17px" : "19px",
     bodySize: sm ? "14px" : mob ? "15px" : "16px",
@@ -4664,9 +4990,17 @@ const responsive = computed(() => {
     flexGap: sm ? "8px" : mob ? "12px" : "20px",
     gridGap: sm ? "12px" : mob ? "16px" : "24px",
     sectionGap: sm ? "18px" : mob ? "24px" : tab ? "28px" : "32px",
+    // Internal sub-section rhythm for the combined cards (Company + Team,
+    // About + Education + Awards): the symmetric space above AND below each
+    // in-card divider, so the divider never sits closer to one side.
+    subSectionGap: sm ? "18px" : mob ? "22px" : tab ? "26px" : "30px",
 
     // Safe-area aware top offset for hero (avoids overlap with fixed buttons + iOS notch)
     heroTopOffset: sm ? "48px" : ph ? "52px" : mob ? "56px" : tab ? "60px" : "64px",
+
+    // Masthead switches to the asymmetric two-column composition from tablet up;
+    // phones keep a stacked (but art-directed) centre composition.
+    heroTwoCol: !sm && !ph && !mob,
   };
 });
 
@@ -4690,21 +5024,57 @@ const profile = ref({
 const coverBanner = ref(null); // Cover banner image
 
 const profileImage = ref(
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E?%3C/text%3E%3C/svg%3E"
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23c2a068'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E?%3C/text%3E%3C/svg%3E"
 );
+
+// ---- Hero masthead presentation helpers --------------------------------------
+// A real uploaded photo is presented as the large portrait plate. When a profile
+// has no image we render a designed monogram plate (initials on brass) instead of
+// a generic avatar, so the hero never reads as an unfinished placeholder.
+const heroPortrait = computed(() => {
+  const src = String(profileImage.value || "").trim();
+  return src.startsWith("data:image/svg+xml") ? "" : src;
+});
+
+const heroInitials = computed(() => {
+  const name = String(profile.value?.name || "").trim();
+  if (!name) return "";
+  const parts = name.split(/\s+/).filter(Boolean);
+  const letters =
+    parts.length === 1
+      ? parts[0].slice(0, 2)
+      : (parts[0][0] || "") + (parts[parts.length - 1][0] || "");
+  return letters.toUpperCase();
+});
+
+// Split the display name into an italic "given name" line + a bold "family name"
+// line, so the masthead reads like an editorial cover, not one bold string.
+const heroNameLines = computed(() => {
+  const name = String(profile.value?.name || "").trim();
+  if (!name) return { leading: "", trailing: "" };
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return { leading: "", trailing: parts[0] };
+  return { leading: parts[0], trailing: parts.slice(1).join(" ") };
+});
 
 // Added: Design config and visible fields control
 const visibleFieldsConfig = ref([]);
 const buttonClasses = ref('');
 const currentThemeConfig = ref(null);
 
+// Ink & Brass page backdrop — mirrors the public landing "ink-surface" glow.
+const INK_BRASS_BACKDROP =
+  'radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), ' +
+  'radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), ' +
+  '#06090d';
+
 // Design variables - for dynamic styling
 const designSettings = reactive({
-  backgroundColor: '#0a0e27',
-  textColor: '#ffffff',
-  accentColor: '#667eea',
-  bgGradient: null,
-  cardEffectColor: '#22D3EE',
+  backgroundColor: '#06090d',
+  textColor: '#f7f5f0',
+  accentColor: '#c2a068',
+  bgGradient: INK_BRASS_BACKDROP,
+  cardEffectColor: '#c2a068',
   cardEffectOpacity: 0.55,
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
   theme: 'default',
@@ -4712,6 +5082,18 @@ const designSettings = reactive({
   cardStyle: 'minimal',
   bgAnimation: 'none',
 });
+
+// System palette lock — the public profile always renders in "Ink & Brass"
+// regardless of any colour customisation saved in the Profile Builder, so every
+// card matches the landing page. Called after the API/preview data is applied.
+const applyInkBrassPalette = () => {
+  designSettings.backgroundColor = '#06090d';
+  designSettings.textColor = '#f7f5f0';
+  designSettings.accentColor = '#c2a068';
+  designSettings.cardEffectColor = '#c2a068';
+  designSettings.cardEffectOpacity = 0.55;
+  designSettings.bgGradient = INK_BRASS_BACKDROP;
+};
 
 // Loading skeleton bar colour - translucent so it never flashes a fixed colour
 // on the user's configured background. Light text => dark theme => translucent
@@ -4734,7 +5116,7 @@ const CARD_STYLE_MAP = {
   glass: 'bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl',
   neumorph: 'bg-gray-100 rounded-3xl shadow-[12px_12px_24px_rgba(0,0,0,0.06),-12px_-12px_24px_rgba(255,255,255,0.9)]',
   'frosted-bordered': 'bg-white/5 backdrop-blur-xl rounded-3xl border-[3px] border-white/40',
-  'neon-outline': 'bg-black/20 backdrop-blur-md rounded-3xl border border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.3)]',
+  'neon-outline': 'bg-black/20 backdrop-blur-md rounded-3xl border border-[#c2a068]/50 shadow-[0_0_30px_rgba(194,160,104,0.3)]',
 };
 const computedCardClass = computed(() => CARD_STYLE_MAP[designSettings.cardStyle] || CARD_STYLE_MAP.minimal);
 provide('cardStyleClass', computedCardClass);
@@ -4964,6 +5346,30 @@ const addressDisplayLines = computed(() => {
   return newFormat;
 });
 
+// Hero identity meta — a compact "company · location" line under the name.
+// Only surfaces high-signal identity data; never duplicates the position badge.
+const heroMeta = computed(() => {
+  const out = [];
+
+  // Company name (respects companyTeam > company field layout when configured)
+  const companyName = (company.value.name || "").trim();
+  if (companyName && isFieldVisible("companyTeam", "companyName")) {
+    out.push({ icon: "heroicons:building-office-2", label: companyName });
+  }
+
+  // Location — prefer city/country, fall back to first address display line
+  const locality = [
+    (address.value.cityState || "").trim(),
+    (address.value.country || "").trim(),
+  ].filter(Boolean).join(", ");
+  const locationLabel = locality || (addressDisplayLines.value?.[0] || "").trim();
+  if (locationLabel) {
+    out.push({ icon: "heroicons:map-pin", label: locationLabel });
+  }
+
+  return out;
+});
+
 // ==================== C. QUICK ACTIONS (dynamically generated) ====================
 // Quick Actions - dynamically generated from contactMethods (respects field visibility)
 const quickActions = computed(() => {
@@ -5025,35 +5431,35 @@ const contactMethods = ref([
     label: "Phone",
     subtitle: "",
     href: "tel:",
-    color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "linear-gradient(135deg, #c2a068 0%, #a9854d 100%)",
   },
   {
     icon: "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",
     label: "Email",
     subtitle: "",
     href: "mailto:",
-    color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    color: "linear-gradient(135deg, #e8d9b8 0%, #8a6a33 100%)",
   },
   {
     icon: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z",
     label: "WhatsApp",
     subtitle: "Chat with me",
     href: "",
-    color: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
+    color: "linear-gradient(135deg, #c2a068 0%, #c2a068 100%)",
   },
   {
     icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z",
     label: "Website",
     subtitle: "",
     href: "",
-    color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    color: "linear-gradient(135deg, #a9854d 0%, #c2a068 100%)",
   },
   {
     icon: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
     label: "Address",
     subtitle: "",
     href: "",
-    color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
+    color: "linear-gradient(135deg, #c2a068 0%, #c2a068 100%)",
   },
 ]);
 
@@ -5126,6 +5532,10 @@ const features = ref({
   booking_integration: true,  // Booking Integration
   social_sharing: true,       // Social Sharing buttons
 });
+
+// NFCGo branding visibility — resolved by the plan + admin policy on the API
+// response (show_nfcgo_branding). Preview mode falls back to the owner toggle.
+const showNfcgoBranding = ref(true);
 
 // Available features (assigned by admin) - if empty, all features are available
 const availableFeatures = ref([]);
@@ -5258,7 +5668,7 @@ const loadPreviewData = (data) => {
     profileImage.value = data.image;
   } else if (data.name) {
     const initials = data.name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
-    profileImage.value = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+    profileImage.value = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23c2a068'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
   }
 
   // Cover Banner
@@ -5568,6 +5978,10 @@ const loadPreviewData = (data) => {
   } else {
     console.log('No features in preview data, using defaults:', features.value);
   }
+
+  // Preview has no server-side plan policy — mirror the owner's branding toggle.
+  showNfcgoBranding.value = features.value.remove_branding !== true;
+
   if (data.featureOrder && Array.isArray(data.featureOrder)) {
     featureOrder.value = data.featureOrder;
     console.log('Feature order loaded from preview:', featureOrder.value);
@@ -5665,32 +6079,10 @@ const resolveServiceIcon = (icon) => {
   return SERVICE_EMOJI_ICON_MAP[icon] || "heroicons:sparkles";
 };
 
-const getPlatformColor = (platform) => {
-  const colorMap = {
-    instagram: "#e4405f",
-    facebook: "#1877f2",
-    tiktok: "#000000",
-    youtube: "#ff0000",
-    spotify: "#1db954",
-    whatsapp: "#25d366",
-    x: "#000000",
-    snapchat: "#fffc00",
-    linkedin: "#0a66c2",
-    telegram: "#0088cc",
-    website: "#667eea",
-    email: "#ea4335",
-    // New platforms
-    reddit: "#ff4500",
-    pinterest: "#e60023",
-    wechat: "#07c160",
-    douyin: "#000000",
-    discord: "#5865f2",
-    threads: "#000000",
-    xiaohongshu: "#fe2c55",
-    quora: "#b92b27",
-    custom: "#667eea",
-  };
-  return colorMap[platform?.toLowerCase()] || "#667eea";
+const getPlatformColor = () => {
+  // Monochrome brass — the system palette uses a single accent so every social
+  // tile stays on-brand instead of falling back to rainbow brand colours.
+  return "#c2a068";
 };
 
 // Load profile data from API
@@ -5799,7 +6191,7 @@ const loadProfileData = async () => {
           .join("")
           .substring(0, 2)
           .toUpperCase();
-        profileImage.value = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23667eea'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+        profileImage.value = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='75' fill='%23c2a068'/%3E%3Ctext x='75' y='95' font-size='60' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
       }
 
       // Company Info
@@ -6094,6 +6486,11 @@ const loadProfileData = async () => {
         console.log('Features loaded:', features.value);
       }
 
+      // Branding visibility is resolved server-side (plan + admin policy).
+      showNfcgoBranding.value = typeof response.show_nfcgo_branding === 'boolean'
+        ? response.show_nfcgo_branding
+        : features.value.remove_branding !== true;
+
       // Load available features (assigned by admin)
       // Backend does not persist available_features, so derive it from the user's
       // feature toggles. Any feature the user has a setting for is "available".
@@ -6149,6 +6546,8 @@ const loadProfileData = async () => {
       profileNotFound.value = true;
     }
   } finally {
+    // Lock the public profile to the system "Ink & Brass" palette.
+    applyInkBrassPalette();
     loading.value = false;
   }
 };
@@ -6279,14 +6678,6 @@ const shouldShowField = (fieldKey) => {
   
   return visibleFieldsConfig.value.some(f => f.field_key === fieldKey);
 };
-
-// Functions
-const getParticleStyle = (n) => ({
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-  animationDelay: `${Math.random() * 3}s`,
-  animationDuration: `${Math.random() * 3 + 2}s`,
-});
 
 // ==================== C. Handle Actions (using real data) ====================
 const handleAction = (action) => {
@@ -6464,6 +6855,25 @@ const copyProfileLink = async () => {
   }
 };
 
+// Native share (Web Share API) with graceful fallback to copy
+const shareProfile = async () => {
+  const shareData = {
+    title: seoTitle.value,
+    text: seoDescription.value,
+    url: currentUrl.value,
+  };
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      await navigator.share(shareData);
+      return;
+    }
+  } catch (err) {
+    // User dismissed the native share sheet — no fallback required
+    if (err && err.name === 'AbortError') return;
+  }
+  await copyProfileLink();
+};
+
 // Submit contact form
 const submitContactForm = async () => {
   try {
@@ -6551,15 +6961,17 @@ const handleHoverStyle = (e, styles) => {
 
 const handleContactHoverIn = (e) => {
   if (!isMobile.value) {
-    e.currentTarget.style.transform = "translateX(10px)";
-    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+    e.currentTarget.style.transform = "translateX(8px)";
+    e.currentTarget.style.background = hexToRgba(designSettings.accentColor, 0.06);
+    e.currentTarget.style.borderBottomColor = hexToRgba(designSettings.accentColor, 0.5);
   }
 };
 
 const handleContactHoverOut = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateX(0)";
-    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+    e.currentTarget.style.background = "transparent";
+    e.currentTarget.style.borderBottomColor = hexToRgba(designSettings.accentColor, 0.16);
   }
 };
 
@@ -6592,7 +7004,7 @@ const handleSocialHoverOut = (e) => {
 const handleVCardHoverIn = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateY(-3px)";
-    e.currentTarget.style.boxShadow = "0 15px 40px rgba(102, 126, 234, 0.5)";
+    e.currentTarget.style.boxShadow = "0 15px 40px rgba(194, 160, 104, 0.5)";
   }
 };
 
@@ -6606,14 +7018,14 @@ const handleVCardHoverOut = (e) => {
 const handleScrollButtonHoverIn = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateY(-5px)";
-    e.currentTarget.style.boxShadow = "0 15px 40px rgba(102, 126, 234, 0.6)";
+    e.currentTarget.style.boxShadow = "0 15px 40px rgba(194, 160, 104, 0.6)";
   }
 };
 
 const handleScrollButtonHoverOut = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = "0 10px 30px rgba(102, 126, 234, 0.4)";
+    e.currentTarget.style.boxShadow = "0 10px 30px rgba(194, 160, 104, 0.4)";
   }
 };
 
@@ -6636,14 +7048,14 @@ const handleBackButtonHoverOut = (e) => {
 const handleEditButtonHoverIn = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateY(-3px)";
-    e.currentTarget.style.boxShadow = "0 8px 25px rgba(102, 126, 234, 0.6)";
+    e.currentTarget.style.boxShadow = "0 8px 25px rgba(194, 160, 104, 0.6)";
   }
 };
 
 const handleEditButtonHoverOut = (e) => {
   if (!isMobile.value) {
     e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
+    e.currentTarget.style.boxShadow = "0 4px 15px rgba(194, 160, 104, 0.4)";
   }
 };
 

@@ -190,7 +190,6 @@
 <script setup>
 import { ref } from 'vue'
 import { usePayment } from '~/composables/usePayment'
-import { useToast } from '~/composables/useToast'
 
 const props = defineProps({
   amount: {
@@ -214,7 +213,7 @@ const props = defineProps({
 const emit = defineEmits(['payment-initiated', 'proof-uploaded', 'back'])
 
 const { initiatePayment, uploadPaymentProof, loading, error } = usePayment()
-const { showToast } = useToast()
+const { $toast } = useNuxtApp()
 
 const processing = ref(false)
 const uploading = ref(false)
@@ -245,7 +244,7 @@ const generateReference = async () => {
     if (response.success) {
       bankDetails.value = response.bank_details
       transactionId.value = response.transaction.transaction_id
-      showToast('Reference code generated successfully', 'success')
+      $toast.success('Reference code generated successfully')
       emit('payment-initiated', response.transaction)
     } else {
       throw new Error('Failed to generate reference code')
@@ -253,7 +252,7 @@ const generateReference = async () => {
   } catch (err) {
     console.error('Manual transfer error:', err)
     error.value = err.message || 'Failed to generate reference code'
-    showToast(error.value, 'error')
+    $toast.error(error.value)
   } finally {
     processing.value = false
   }
@@ -312,7 +311,7 @@ const uploadProof = async () => {
     const response = await uploadPaymentProof(transactionId.value, proofFile.value)
 
     if (response.success) {
-      showToast('Receipt uploaded successfully. We will verify your payment soon.', 'success')
+      $toast.success('Receipt uploaded successfully. We will verify your payment soon.')
       emit('proof-uploaded', response.transaction)
     } else {
       throw new Error('Failed to upload receipt')
@@ -320,7 +319,7 @@ const uploadProof = async () => {
   } catch (err) {
     console.error('Upload error:', err)
     error.value = err.message || 'Failed to upload receipt'
-    showToast(error.value, 'error')
+    $toast.error(error.value)
   } finally {
     uploading.value = false
   }
@@ -329,10 +328,10 @@ const uploadProof = async () => {
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
-    showToast('Copied to clipboard', 'success')
+    $toast.success('Copied to clipboard')
   } catch (err) {
     console.error('Failed to copy:', err)
-    showToast('Failed to copy', 'error')
+    $toast.error('Failed to copy')
   }
 }
 </script>

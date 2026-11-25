@@ -236,7 +236,7 @@
                       <button
                         @click="verifyNfcCardPayment(card)"
                         :disabled="actionLoading[card.id]?.verify"
-                        class="px-2 py-1 rounded text-micro bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-success-100 text-success-700 hover:bg-success-200 disabled:opacity-50"
                         title="Verify payment proof"
                       >
                         <span v-if="actionLoading[card.id]?.verify" class="spinner spinner-sm mr-1"></span>
@@ -246,7 +246,7 @@
                       <button
                         @click="rejectNfcCardPayment(card)"
                         :disabled="actionLoading[card.id]?.reject"
-                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-error-100 text-error-700 hover:bg-error-200 disabled:opacity-50"
                         title="Reject payment proof"
                       >
                         <Icon v-if="!actionLoading[card.id]?.reject" name="heroicons:x-circle" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -270,7 +270,7 @@
                       <button
                         @click="markNfcCardProcessing(card)"
                         :disabled="actionLoading[card.id]?.processing"
-                        class="px-2 py-1 rounded text-micro bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-primary-100 text-primary-700 hover:bg-primary-200 disabled:opacity-50"
                         title="Mark order as processing"
                       >
                         <span v-if="actionLoading[card.id]?.processing" class="spinner spinner-sm mr-1"></span>
@@ -280,7 +280,7 @@
                       <button
                         @click="cancelNfcCard(card)"
                         :disabled="actionLoading[card.id]?.cancel"
-                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-error-100 text-error-700 hover:bg-error-200 disabled:opacity-50"
                         title="Cancel order"
                       >
                         <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -294,7 +294,7 @@
                       <button
                         @click="openMarkShippedModal(card)"
                         :disabled="actionLoading[card.id]?.shipped"
-                        class="px-2 py-1 rounded text-micro bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-info-100 text-info-700 hover:bg-info-200 disabled:opacity-50"
                         title="Mark card as shipped"
                       >
                         <span v-if="actionLoading[card.id]?.shipped" class="spinner spinner-sm mr-1"></span>
@@ -304,7 +304,7 @@
                       <button
                         @click="cancelNfcCard(card)"
                         :disabled="actionLoading[card.id]?.cancel"
-                        class="px-2 py-1 rounded text-micro bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                        class="px-2 py-1 rounded text-micro bg-error-100 text-error-700 hover:bg-error-200 disabled:opacity-50"
                         title="Cancel order"
                       >
                         <Icon v-if="!actionLoading[card.id]?.cancel" name="heroicons:no-symbol" class="h-3.5 w-3.5 inline mr-0.5" />
@@ -315,7 +315,7 @@
 
                     <!-- shipped: END USER yang akan confirm received — Admin TIADA butang Mark Delivered, cuma show shipped badge + tracking info -->
                     <template v-else-if="card.status === 'shipped'">
-                      <div class="flex items-center gap-1 px-2 py-1 rounded text-micro bg-gray-100 text-gray-700 italic" title="Admin cannot mark delivered — End user must press 'I've Received The Card' in Card Management">
+                      <div class="flex items-center gap-1 px-2 py-1 rounded text-micro bg-secondary-100 text-secondary-700 italic" title="Admin cannot mark delivered — End user must press 'I've Received The Card' in Card Management">
                         <Icon name="heroicons:clock" class="h-3.5 w-3.5 inline mr-0.5" />
                         Waiting for user receipt
                       </div>
@@ -451,7 +451,7 @@
               placeholder="e.g., NFC-ABC123DEF456"
               :class="[
                 'input font-mono',
-                formErrors.nfc_card_id ? 'border-red-500 focus:ring-red-500' : ''
+                formErrors.nfc_card_id ? 'border-error-500 focus:ring-error-500' : ''
               ]"
             />
             <div class="flex justify-between mt-1">
@@ -478,7 +478,7 @@
               placeholder="Full name of card owner"
               :class="[
                 'input',
-                formErrors.card_owner ? 'border-red-500 focus:ring-red-500' : ''
+                formErrors.card_owner ? 'border-error-500 focus:ring-error-500' : ''
               ]"
             />
             <div class="flex justify-between mt-1">
@@ -545,7 +545,7 @@
                 placeholder="0"
                 :class="[
                   'input',
-                  formErrors.purchase_amount ? 'border-red-500 focus:ring-red-500' : ''
+                  formErrors.purchase_amount ? 'border-error-500 focus:ring-error-500' : ''
                 ]"
               />
               <p v-if="formErrors.purchase_amount" class="text-error mt-1">
@@ -834,10 +834,10 @@
           </button>
         </div>
         <form @submit.prevent="submitMarkShipped" class="p-6 space-y-4">
-          <div v-if="shippedForm.card" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p class="text-body text-blue-800">
+          <div v-if="shippedForm.card" class="bg-info-50 border border-info-200 rounded-lg p-3">
+            <p class="text-body text-info-800">
               <span class="font-semibold">{{ shippedForm.card.card_owner }}</span>
-              <span class="text-blue-600 text-caption block mt-0.5">
+              <span class="text-info-600 text-caption block mt-0.5">
                 Card ID: {{ shippedForm.card.card_id || shippedForm.card.nfc_card_id || shippedForm.card.id }}
               </span>
             </p>
@@ -1574,16 +1574,16 @@ const getCardStatusLabel = (status) => {
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    pending_payment: "bg-orange-100 text-orange-800",
-    awaiting_payment_verification: "bg-yellow-100 text-yellow-800",
-    payment_verified: "bg-emerald-100 text-emerald-800",
-    processing: "bg-purple-100 text-purple-800",
-    shipped: "bg-blue-100 text-blue-800",
-    delivered: "bg-green-100 text-green-800",
+    pending_payment: "bg-warning-100 text-warning-800",
+    awaiting_payment_verification: "bg-warning-100 text-warning-800",
+    payment_verified: "bg-success-100 text-success-800",
+    processing: "bg-primary-100 text-primary-800",
+    shipped: "bg-info-100 text-info-800",
+    delivered: "bg-success-100 text-success-800",
     active: "bg-success-100 text-success-800",
     inactive: "bg-secondary-100 text-secondary-800",
     expired: "bg-warning-100 text-warning-800",
-    cancelled: "bg-red-100 text-red-800",
+    cancelled: "bg-error-100 text-error-800",
     replacement: "bg-info-100 text-info-800",
   };
   return classes[status] || "bg-secondary-100 text-secondary-800";

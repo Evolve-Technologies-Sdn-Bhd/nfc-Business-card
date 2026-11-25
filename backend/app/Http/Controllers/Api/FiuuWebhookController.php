@@ -50,10 +50,23 @@ class FiuuWebhookController extends Controller
         $channel = $request->input('channel');
         $errorDesc = $request->input('error_desc');
 
-        // Verify signature
+        // Verify signature.
+        //
+        // The Return URL is a browser redirect and is therefore UNTRUSTED: anyone
+        // can hit it with hand-crafted query parameters. A payment may only be
+        // recorded as successful when the signature proves the callback really
+        // came from Fiuu. The server-to-server notification webhook remains the
+        // authoritative path whenever the signature cannot be verified.
         $isValid = false;
         if ($amount && $orderId && $skey) {
             $isValid = $this->paymentService->verifySkey((float) $amount, $orderId, $skey, $currency);
+        }
+
+        if (!$isValid) {
+            Log::warning('Fiuu return URL signature not verified — skipping status update', [
+                'order_id' => $orderId,
+                'status' => $status,
+            ]);
         }
 
         // Find transaction
@@ -68,8 +81,8 @@ class FiuuWebhookController extends Controller
             default => 'Unknown',
         };
 
-        // If payment successful, update transaction status and generate invoice
-        if ($status === '00' && $transaction) {
+        // If payment successful AND signature verified, update transaction status and generate invoice
+        if ($isValid && $status === '00' && $transaction) {
             // Update transaction status (in case notification webhook didn't reach)
             if ($transaction->status !== 'succeeded') {
                 $transaction->update([
@@ -183,9 +196,14 @@ class FiuuWebhookController extends Controller
                 return response('CBTOKEN:MPSUNK', 404);
             }
 
-            // Check if already processed with same status
+            // Check if already processed with same status.
+            // NOTE: the previous expression relied on `??` binding tighter than it
+            // does (it is LOWER precedence than `&&`), so the tranID comparison was
+            // silently dropped. Group explicitly so both status AND transaction id
+            // must match before treating the notification as a duplicate.
             $existingStatus = $transaction->metadata['fiuu_status_code'] ?? null;
-            if ($existingStatus === $status && $transaction->metadata['fiuu_tran_id'] ?? null === $tranId) {
+            $existingTranId = $transaction->metadata['fiuu_tran_id'] ?? null;
+            if ($existingStatus === $status && $existingTranId === $tranId) {
                 Log::warning('Duplicate Fiuu notification detected', [
                     'order_id' => $orderId,
                     'status' => $status,

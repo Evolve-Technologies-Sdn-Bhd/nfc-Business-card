@@ -69,6 +69,20 @@ class RefundController extends Controller
                 ], 400);
             }
 
+            // Duplicate guard: never allow a second refund request while one for
+            // the same transaction is already pending or being processed — that
+            // would let the same payment be refunded twice.
+            $existingRefund = Refund::where('transaction_id', $transaction->id)
+                ->whereIn('status', ['pending', 'processing'])
+                ->exists();
+
+            if ($existingRefund) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A refund for this transaction is already pending review',
+                ], 409);
+            }
+
             // Check if auto-approval or manual review required
             $autoApprovalLimit = config('payment.refunds.auto_approval_limit');
             $manualReviewRequired = config('payment.refunds.manual_review_required');

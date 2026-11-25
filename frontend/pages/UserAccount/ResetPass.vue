@@ -88,10 +88,11 @@
                 @click="showPassword = !showPassword"
                 class="absolute inset-y-0 right-0 pr-3 flex items-center"
                 :disabled="loading"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
               >
                 <Icon
                   :name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
-                  class="h-5 w-5 text-secondary-400"
+                  class="h-5 w-5 text-secondary-500"
                 />
               </button>
             </div>
@@ -143,6 +144,7 @@
                 @click="showPasswordConfirm = !showPasswordConfirm"
                 class="absolute inset-y-0 right-0 pr-3 flex items-center"
                 :disabled="loading"
+                :aria-label="showPasswordConfirm ? 'Hide password' : 'Show password'"
               >
                 <Icon
                   :name="
@@ -150,7 +152,7 @@
                       ? 'heroicons:eye-slash'
                       : 'heroicons:eye'
                   "
-                  class="h-5 w-5 text-secondary-400"
+                  class="h-5 w-5 text-secondary-500"
                 />
               </button>
             </div>

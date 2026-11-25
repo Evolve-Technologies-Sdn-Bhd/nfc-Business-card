@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BusinessPlanRequestMail;
 use App\Models\BusinessInquiry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -61,6 +63,8 @@ class BusinessInquiryController extends Controller
                 'status' => BusinessInquiry::STATUS_NEW,
             ]);
 
+            $this->notifySales($inquiry, $user);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Your enquiry has been received. Our team will contact you shortly.',
@@ -78,6 +82,36 @@ class BusinessInquiryController extends Controller
                 'success' => false,
                 'message' => 'Unable to submit your enquiry right now. Please try again later.',
             ], 500);
+        }
+    }
+
+    /**
+     * Email the sales inbox about a new Business enquiry (bulk NFC card orders,
+     * custom design templates, etc.). Never let a mail failure break the
+     * submission — the enquiry is already persisted and triaged in the admin.
+     */
+    private function notifySales(BusinessInquiry $inquiry, $user): void
+    {
+        try {
+            Mail::to(config('mail.business_inquiry.address'))
+                ->send(new BusinessPlanRequestMail([
+                    'company_name' => $inquiry->company_name,
+                    'company_address' => $inquiry->company_address,
+                    'quota' => $inquiry->quota,
+                    'contact_person' => $inquiry->contact_person,
+                    'email' => $inquiry->email,
+                    'phone' => $inquiry->phone,
+                    'notes' => $inquiry->notes,
+                    'user_id' => $user?->id,
+                    'user_name' => $user?->full_name ?: $inquiry->contact_person,
+                    'user_email' => $user?->email ?? $inquiry->email,
+                    'submitted_at' => optional($inquiry->created_at)->toDateTimeString(),
+                ]));
+        } catch (\Throwable $e) {
+            Log::error('Failed to email business inquiry to sales', [
+                'inquiry_id' => $inquiry->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

@@ -40,7 +40,7 @@ useHead({
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const { $toast } = useNuxtApp();
+const { $api, $toast } = useNuxtApp();
 
 const error = ref(false);
 const errorMessage = ref('');
@@ -78,116 +78,77 @@ onMounted(async () => {
     return;
   }
 
-  // Check for successful authentication (token in query or cookie)
-  const token = route.query.token || useCookie('auth-token').value;
-  
-  console.log('🔵 Callback page loaded');
-  console.log('📝 Token from URL:', route.query.token);
-  console.log('🍪 Token from cookie:', useCookie('auth-token').value);
-  
-  if (token) {
-    try {
-      // Save token to cookie if it's in the query
-      if (route.query.token) {
-        console.log('💾 Saving token to cookie...');
-        const tokenCookie = useCookie('auth-token', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-        });
-        tokenCookie.value = token;
-        console.log('✅ Token saved to cookie');
-        
-        // Set the token in the store directly
-        authStore.token = token;
-        console.log('✅ Token set in store');
-        
-        // Longer delay to ensure cookie is written and readable by Vue's reactivity
-        // This is critical for OAuth flow where the API plugin reads from the cookie
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Verify the cookie was set correctly
-        const savedToken = useCookie('auth-token').value;
-        console.log('🔍 Verifying saved token:', savedToken ? 'Token exists' : 'Token missing');
-        
-        if (!savedToken) {
-          console.error('❌ Cookie was not saved correctly, retrying...');
-          const tokenCookieRetry = useCookie('auth-token', {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7,
-          });
-          tokenCookieRetry.value = token;
-          await new Promise(resolve => setTimeout(resolve, 200));
-        }
-      }
-      
-      // Fetch user profile with the token
-      console.log('🔄 Fetching user profile...');
-      await authStore.fetchProfile();
-      
-      console.log('📊 Auth state:', {
-        isAuthenticated: authStore.isAuthenticated,
-        user: authStore.user
-      });
-      
-      if (authStore.isAuthenticated) {
-        const user = authStore.user;
-        
-        console.log('👤 User data:', user);
-        console.log('📦 Subscription plan:', user.subscription_plan);
-        console.log('🆕 Is new user from backend:', user.is_new_user);
-        console.log('🆕 Is new user from URL:', route.query.is_new_user);
-        console.log('📅 Created at:', user.created_at);
-        
-        // Check if user is marked as new from backend OR URL parameter
-        const isNewUserFromBackend = user.is_new_user === true;
-        const isNewUserFromUrl = route.query.is_new_user === 'true';
-        
-        // Determine if user already has a valid plan/subscription (onboarding effectively done)
-        const hasValidPlan =
-          user.subscription_plan &&
-          ["free", "basic", "premium", "business"].includes(
-            String(user.subscription_plan).toLowerCase()
-          );
-        const alreadySetup = user.subscription_active === true || hasValidPlan;
+  // The backend redirects here with a short-lived, single-use code.
+  // The Sanctum token is never placed in the URL — it is fetched below and
+  // stored in the auth-token cookie only.
+  const code = route.query.code;
 
-        // User is considered truly new (needs onboarding) ONLY if marked new AND not already setup
-        const isNewUserRequiringOnboarding =
-          (isNewUserFromBackend || isNewUserFromUrl) && !alreadySetup;
-        
-        console.log('🔍 Final is new user requiring onboarding decision:', isNewUserRequiringOnboarding);
-        
-        if (isNewUserRequiringOnboarding) {
-          // Truly new user with no plan yet - redirect to Plan Selection
-          console.log('➡️ Redirecting to Plan Selection...');
-          $toast.success('Welcome to NFCGo! Let\'s choose your plan.');
-          await router.push('/UserDashboard/PlanSelection');
-        } else {
-          // Existing user or user already has valid plan/subscription - go to appropriate dashboard
-          console.log('➡️ Redirecting to dashboard via getRedirectPathByPlan()...');
-          $toast.success('Successfully signed in!');
-          const redirectPath = authStore.getRedirectPathByPlan();
-          await router.push(redirectPath);
-        }
-      } else {
-        throw new Error('Failed to authenticate');
-      }
-    } catch (err) {
-      console.error('OAuth callback error:', err);
-      error.value = true;
-      errorMessage.value = 'Failed to complete authentication. Please try again.';
-      if ($toast && typeof $toast.error === 'function') {
-        $toast.error(errorMessage.value);
-      }
-    }
-  } else {
-    // No token found, something went wrong
+  if (!code) {
     error.value = true;
-    errorMessage.value = 'No authentication token received.';
+    errorMessage.value = 'No authentication code received.';
     $toast.error(errorMessage.value);
+    return;
+  }
+
+  try {
+    // Exchange the one-time code for a Sanctum token
+    const response = await $api.post('/auth/oauth/exchange', { code });
+
+    if (!response?.success || !response?.token) {
+      throw new Error(response?.message || 'Failed to complete authentication.');
+    }
+
+    const tokenCookie = useCookie('auth-token', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+    tokenCookie.value = response.token;
+
+    // Set the token in the store directly
+    authStore.token = response.token;
+
+    // Longer delay to ensure cookie is written and readable by Vue's reactivity
+    // This is critical for OAuth flow where the API plugin reads from the cookie
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Fetch user profile with the token
+    await authStore.fetchProfile();
+
+    if (!authStore.isAuthenticated) {
+      throw new Error('Failed to complete authentication.');
+    }
+
+    const user = authStore.user;
+
+    // Determine if user already has a valid plan/subscription (onboarding effectively done)
+    const hasValidPlan =
+      user.subscription_plan &&
+      ["free", "basic", "premium", "business"].includes(
+        String(user.subscription_plan).toLowerCase()
+      );
+    const alreadySetup = user.subscription_active === true || hasValidPlan;
+
+    // User is considered truly new (needs onboarding) ONLY if marked new AND not already setup
+    const isNewUserRequiringOnboarding = user.is_new_user === true && !alreadySetup;
+
+    if (isNewUserRequiringOnboarding) {
+      // Truly new user with no plan yet - redirect to Plan Selection
+      $toast.success('Welcome to NFCGo! Let\'s choose your plan.');
+      await router.push('/UserDashboard/PlanSelection');
+    } else {
+      // Existing user or user already has valid plan/subscription - go to appropriate dashboard
+      $toast.success('Successfully signed in!');
+      await router.push(authStore.getRedirectPathByPlan());
+    }
+  } catch (err) {
+    console.error('OAuth callback error:', err);
+    error.value = true;
+    errorMessage.value = err?.message || 'Failed to complete authentication. Please try again.';
+    if ($toast && typeof $toast.error === 'function') {
+      $toast.error(errorMessage.value);
+    }
   }
 });
 

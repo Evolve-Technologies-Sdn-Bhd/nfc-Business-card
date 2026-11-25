@@ -380,7 +380,7 @@ const getPlanBorderClass = (planType) => {
     case 'basic':
       return 'border-info-300 hover:border-info-400';
     case 'premium':
-      return 'border-purple-300 hover:border-purple-400';
+      return 'border-primary-300 hover:border-primary-400';
     case 'business':
       return 'border-success-300 hover:border-success-400';
     default:
@@ -393,7 +393,7 @@ const getPlanHeaderClass = (planType) => {
     case 'basic':
       return 'bg-gradient-to-r from-info-500 to-info-600';
     case 'premium':
-      return 'bg-gradient-to-r from-purple-500 to-purple-600';
+      return 'bg-gradient-to-r from-primary-500 to-primary-600';
     case 'business':
       return 'bg-gradient-to-r from-success-500 to-success-600';
     default:

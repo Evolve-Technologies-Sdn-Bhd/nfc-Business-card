@@ -53,7 +53,7 @@
                 {{ group.items[0].name }}
                 <span
                   v-if="group.items[0].badge && Number(group.items[0].badge) > 0"
-                  class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
+                  class="ml-auto inline-flex items-center justify-center rounded-full bg-error-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
                   :title="`${group.items[0].badge} unread`"
                 >
                   {{ group.items[0].badge }}
@@ -99,7 +99,7 @@
                       {{ item.name }}
                       <span
                         v-if="item.badge && Number(item.badge) > 0"
-                        class="ml-auto inline-flex items-center justify-center rounded-full bg-red-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
+                        class="ml-auto inline-flex items-center justify-center rounded-full bg-error-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
                         :title="`${item.badge} unread`"
                       >
                         {{ item.badge }}
@@ -158,7 +158,7 @@
                   <Icon name="heroicons:bell" class="h-5 w-5" />
                   <span
                     v-if="pendingNotificationCount > 0"
-                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-red-500 text-white ring-2 ring-white"
+                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-error-500 text-white ring-2 ring-white"
                   >
                     {{ pendingNotificationCount > 9 ? "9+" : pendingNotificationCount }}
                   </span>
@@ -173,7 +173,7 @@
                 <Icon name="heroicons:chat-bubble-left-right" class="h-5 w-5" />
                 <span
                   v-if="unreadFeedbackCount > 0"
-                  class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-amber-500 text-white ring-2 ring-white"
+                  class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-warning-500 text-white ring-2 ring-white"
                 >
                   {{ unreadFeedbackCount > 9 ? "9+" : unreadFeedbackCount }}
                 </span>
@@ -224,7 +224,7 @@
                     class="profile-dropdown absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-secondary-200 z-[90] overflow-hidden"
                   >
                     <!-- Admin Info Header -->
-                    <div class="p-5 bg-gradient-to-br from-red-50 to-secondary-50 border-b border-secondary-200">
+                    <div class="p-5 bg-gradient-to-br from-error-50 to-secondary-50 border-b border-secondary-200">
                       <div class="flex items-center gap-3">
                         <img
                           :src="user?.profile_image || '/default-avatar.png'"
@@ -242,7 +242,7 @@
                           <p class="text-caption text-secondary-500 truncate">
                             {{ user?.email || "admin@nfcgo.my" }}
                           </p>
-                          <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-badge font-bold bg-red-100 text-red-700">
+                          <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-badge font-bold bg-error-100 text-error-700">
                             {{ user?.admin_role_display || "Administrator" }}
                           </span>
                         </div>
@@ -283,11 +283,11 @@
                     <div class="py-2">
                       <button
                         @click="handleLogout"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-error-600 hover:bg-error-50 hover:text-error-700 transition-colors"
                       >
                         <Icon
                           name="heroicons:arrow-right-on-rectangle"
-                          class="h-5 w-5 text-red-400"
+                          class="h-5 w-5 text-error-400"
                         />
                         <span>Logout</span>
                       </button>
@@ -300,7 +300,9 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto bg-secondary-50 p-4 sm:p-6 lg:p-8">
+        <main
+          class="admin-main flex-1 overflow-y-auto bg-secondary-50 p-4 sm:p-6 lg:p-8"
+        >
           <slot />
         </main>
       </div>
@@ -353,11 +355,10 @@ const pendingNotificationCount = ref(0);
 const adminNotifications = ref([]);
 const adminNotifLoading = ref(false);
 
-// Brand settings (custom logo, app name, favicon)
+// Brand settings (custom logo, app name)
 const brandSettings = reactive({
   app_name: 'NFCGo',
   system_logo_url: '',
-  system_favicon_url: '',
 });
 const brandVersion = ref(Date.now());
 
@@ -384,13 +385,6 @@ const loadAdminBrandSettings = async () => {
             : '');
       brandSettings.system_logo_url = logoUrl;
 
-      let faviconUrl = response.data.system_favicon_public_url
-        ? String(response.data.system_favicon_public_url).trim()
-        : (response.data.system_favicon_url
-            ? String(response.data.system_favicon_url).trim()
-            : '');
-      brandSettings.system_favicon_url = faviconUrl;
-
       brandVersion.value = Date.now();
       applyFavicon();
       updateDocumentTitle();
@@ -400,17 +394,20 @@ const loadAdminBrandSettings = async () => {
   }
 };
 
+// Favicon is hardcoded to the official NFCGo system logo so it always
+// matches the system branding, regardless of admin-configured favicon.
+const SYSTEM_FAVICON_URL = '/nfcgo-app-icon.svg';
+
 const applyFavicon = () => {
   if (!process.client) return;
-  const url = brandSettings.system_favicon_url;
   let link = document.querySelector("link[rel~='icon']");
   if (!link) {
     link = document.createElement('link');
     link.rel = 'icon';
     document.getElementsByTagName('head')[0].appendChild(link);
   }
-  link.href = url ? (url + '?v=' + brandVersion.value) : '/favicon.ico';
-  link.type = url && url.endsWith('.svg') ? 'image/svg+xml' : (url && url.endsWith('.png') ? 'image/png' : 'image/x-icon');
+  link.href = SYSTEM_FAVICON_URL;
+  link.type = 'image/svg+xml';
 };
 
 const updateDocumentTitle = () => {
@@ -545,13 +542,43 @@ const navigation = computed(() => [
   },
 ]);
 
+// Flattened navigation for lookups (page title + active highlighting)
+const flatNavigation = computed(() =>
+  navigation.value.flatMap((group) => group.items)
+);
+
+// Resolve the navigation item for a path, preferring the most specific
+// (longest) matching href. This keeps nested routes such as
+// /AdminManagement/invoices/1 resolving to "Invoices" instead of the
+// parent "/AdminManagement" dashboard entry.
+const resolveNavItem = (path) => {
+  let match = null;
+  for (const item of flatNavigation.value) {
+    if (path === item.href || path.startsWith(item.href + "/")) {
+      if (!match || item.href.length > match.href.length) {
+        match = item;
+      }
+    }
+  }
+  return match;
+};
+
+// Currently active navigation item (also drives the top-bar page title)
+const activeNavItem = computed(() => resolveNavItem(route.path));
+
+// Page title based on current route
+const pageTitle = computed(() => activeNavItem.value?.name || "Admin Panel");
+
+// A nav link is active only if it is the most specific match
+const isActiveRoute = (href) => activeNavItem.value?.href === href;
+
 // Auto-expand group that contains the currently active route
 watch(
   () => route.path,
-  (path) => {
-    const activeGroup = navigation.value.find((g) =>
-      g.items.some((i) => i.href === path)
-    );
+  () => {
+    const active = activeNavItem.value;
+    if (!active) return;
+    const activeGroup = navigation.value.find((g) => g.items.includes(active));
     if (activeGroup) {
       const next = new Set(expandedGroups.value);
       next.add(activeGroup.category);
@@ -560,22 +587,6 @@ watch(
   },
   { immediate: true }
 );
-
-// Flattened navigation for pageTitle lookup
-const flatNavigation = computed(() =>
-  navigation.value.flatMap((group) => group.items)
-);
-
-// Page title based on current route
-const pageTitle = computed(() => {
-  const currentNav = flatNavigation.value.find((item) => item.href === route.path);
-  return currentNav ? currentNav.name : "Admin Panel";
-});
-
-// Check if route is active
-const isActiveRoute = (href) => {
-  return route.path === href;
-};
 
 // Fetch unread feedback count
 const loadUnreadFeedbackCount = async () => {
@@ -794,7 +805,7 @@ const adminClearRead = async () => {
 onMounted(() => {
   isMounted.value = true;
 
-  // Load admin brand (logo, favicon, app name)
+  // Load admin brand (logo, app name)
   loadAdminBrandSettings();
 
   // Load unread feedback count
@@ -890,5 +901,19 @@ watch(
 <style scoped>
 .border-l-3 {
   border-left-width: 3px;
+}
+
+/*
+  Page-level loaders inside this layout (NFCGoWaveLoader `.nfg-viewport`)
+  centre on the VISIBLE content area: subtract the sticky top bar (h-16 =
+  4rem) plus the main padding above + below (1rem / 2rem).
+*/
+.admin-main {
+  --nfg-viewport-offset: 6rem;
+}
+@media (min-width: 1024px) {
+  .admin-main {
+    --nfg-viewport-offset: 8rem;
+  }
 }
 </style>

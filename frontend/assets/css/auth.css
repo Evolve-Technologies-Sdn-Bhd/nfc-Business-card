@@ -137,29 +137,6 @@
   margin: -9rem 0 0 -9rem;
 }
 
-.lg-chip {
-  position: absolute;
-  z-index: 3;
-  font-size: var(--text-caption);
-  font-weight: var(--weight-semibold);
-}
-
-.lg-chip-ico {
-  width: 1rem;
-  height: 1rem;
-  color: var(--brass, #c2a068);
-}
-
-.lg-chip-1 {
-  top: 12%;
-  left: -2%;
-}
-
-.lg-chip-2 {
-  bottom: 16%;
-  right: -2%;
-}
-
 /* Trust ticks */
 .lg-ticks {
   display: flex;
@@ -205,6 +182,13 @@
   gap: 0.75rem;
 }
 
+/* `.btn-brass` / `.btn-ghost-light` define no flex gap, so the explore CTAs
+   (icon + label) need one or the icon sits flush against the text. */
+.lg-auth-root .btn-brass,
+.lg-auth-root .btn-ghost-light {
+  gap: 0.5rem;
+}
+
 .lg-explore-text {
   font-size: var(--text-body);
   font-weight: var(--weight-semibold);
@@ -230,6 +214,10 @@
 .lg-form-wrap {
   width: 100%;
   max-width: 25.5rem;
+  /* `margin-block: auto` centres the card vertically inside the form pane but,
+     unlike `align-items: center`, it never clips the top of a card that is
+     taller than the pane — the pane just scrolls to reveal the whole card. */
+  margin-block: auto;
 }
 
 /* The sign-up form runs two columns, so it needs a wider canvas than the
@@ -399,7 +387,7 @@
 }
 
 .lg-inline-link:hover {
-  color: var(--theme-accent, #5d8c87);
+  color: var(--brass-700, #8a6a33);
 }
 
 .lg-control {
@@ -413,7 +401,7 @@
   left: 0.9rem;
   width: 1.1rem;
   height: 1.1rem;
-  color: var(--theme-secondary-400, #a8a190);
+  color: var(--theme-secondary-500, #7f7763);
   pointer-events: none;
   transition: color 0.18s ease;
 }
@@ -436,7 +424,7 @@
 }
 
 .lg-input::placeholder {
-  color: var(--theme-secondary-400, #a8a190);
+  color: var(--theme-secondary-500, #7f7763);
 }
 
 .lg-input:hover:not(:disabled):not(:focus) {
@@ -658,7 +646,7 @@
 }
 
 .lg-register a:hover {
-  color: var(--theme-accent, #5d8c87);
+  color: var(--brass-700, #8a6a33);
 }
 
 /* Trust strip */
@@ -950,6 +938,106 @@
   }
 }
 
+/* ---- Height-aware compaction (sign-up only) ----
+   The sign-up card is the tallest form in the app (~935px). On laptop-height
+   viewports the full-height split would push it past the fold and force a
+   vertical scroll inside the form pane. These rules tighten the vertical
+   rhythm — only for the wide sign-up card — when there is not enough height,
+   so it keeps its airy spacing on tall screens but always fits, centred,
+   without a scrollbar on shorter ones. */
+@media (min-width: 1024px) and (max-height: 940px) {
+  .lg-form-side {
+    padding: 1.75rem 1.5rem;
+  }
+  .lg-form-wrap--wide .lg-card {
+    padding: 1.55rem 1.6rem;
+  }
+  .lg-form-wrap--wide .lg-card-head {
+    margin-bottom: 0.9rem;
+  }
+  .lg-form-wrap--wide .lg-form--two-col {
+    gap: 0.7rem 1rem;
+  }
+  .lg-form-wrap--wide .lg-label {
+    margin-bottom: 0.28rem;
+  }
+  .lg-form-wrap--wide .lg-input {
+    padding-top: 0.62rem;
+    padding-bottom: 0.62rem;
+  }
+  .lg-form-wrap--wide .lg-submit {
+    padding-top: 0.68rem;
+    padding-bottom: 0.68rem;
+  }
+  .lg-form-wrap--wide .lg-pill {
+    padding-top: 0.58rem;
+    padding-bottom: 0.58rem;
+  }
+  .lg-form-wrap--wide .lg-divider {
+    margin: 0.85rem 0 0.6rem;
+  }
+  .lg-form-wrap--wide .lg-register {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 820px) {
+  .lg-form-side {
+    padding: 1.1rem 1.4rem;
+  }
+  .lg-form-wrap--wide .lg-card {
+    padding: 1.15rem 1.5rem;
+  }
+  .lg-form-wrap--wide .lg-card-head {
+    margin-bottom: 0.7rem;
+  }
+  .lg-form-wrap--wide .lg-kicker {
+    font-size: 0.62rem;
+  }
+  .lg-form-wrap--wide .lg-title {
+    margin-top: 0.35rem;
+    font-size: 1.5rem;
+  }
+  .lg-form-wrap--wide .lg-subtitle {
+    margin-top: 0.2rem;
+    font-size: var(--text-body-sm);
+  }
+  .lg-form-wrap--wide .lg-form--two-col {
+    gap: 0.42rem 1rem;
+  }
+  .lg-form-wrap--wide .lg-label {
+    margin-bottom: 0.2rem;
+    font-size: var(--text-caption);
+  }
+  .lg-form-wrap--wide .lg-input {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: var(--text-body);
+  }
+  .lg-form-wrap--wide .lg-oauth-btn {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+  .lg-form-wrap--wide .lg-submit {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+  .lg-form-wrap--wide .lg-pill {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: var(--text-caption);
+  }
+  .lg-form-wrap--wide .lg-divider {
+    margin: 0.6rem 0 0.45rem;
+  }
+  .lg-form-wrap--wide .lg-register {
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    font-size: var(--text-body-sm);
+  }
+}
+
 /* ---- Password strength meter ---- */
 .lg-strength {
   display: flex;
@@ -1105,7 +1193,7 @@
 }
 
 .lg-link-btn:hover {
-  color: var(--theme-accent, #5d8c87);
+  color: var(--brass-700, #8a6a33);
 }
 
 .lg-link-btn:focus-visible {

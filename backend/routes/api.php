@@ -145,6 +145,9 @@ Route::prefix('auth')->group(function () {
     Route::get('{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('oauth.redirect');
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])->name('oauth.callback');
 
+    // One-time code exchange for the OAuth handoff (public, rate-limited)
+    Route::post('oauth/exchange', [SocialAuthController::class, 'exchange'])->middleware('throttle:10,1')->name('oauth.exchange');
+
     // Password Reset Routes
     Route::post('password-reset-request', [PasswordResetController::class, 'requestReset'])->name('oauth.password-reset-request');
     Route::post('password-reset', [PasswordResetController::class, 'resetPassword'])->name('oauth.password-reset');
@@ -194,6 +197,17 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->grou
     Route::put('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'updateLandingPage']);
 
     Route::get('/subscription/status', [NfcCardController::class, 'subscriptionStatus']);
+
+    // Subscription (read + cancel). The act of "subscribing" is the physical
+    // card checkout (/payment/initiate), so no self-serve create endpoint is
+    // exposed here — that would bypass payment verification.
+    Route::prefix('subscriptions')->group(function () {
+        Route::get('/active', [SubscriptionController::class, 'getActiveSubscription']);
+        Route::get('/history', [SubscriptionController::class, 'getSubscriptionHistory']);
+        Route::post('/{subscriptionId}/cancel', [SubscriptionController::class, 'cancel']);
+    });
+    // Convenience alias used by the dashboard: cancel my active subscription.
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancelActive']);
 
     // Business Team Members (for profile builder)
     Route::get('/business/team-members', [ProfileController::class, 'getBusinessTeamMembers']);
@@ -275,32 +289,42 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->grou
 
     // Payment Routes
     Route::prefix('payment')->group(function () {
-        Route::get('/rails', [PaymentController::class, 'getAvailableRails']);
+        Route::get('/rails', [PaymentController::class, 'getPaymentRails']);
         Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
         Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
         Route::post('/confirm/{transactionId}', [PaymentController::class, 'confirmPayment']);
-        Route::get('/transactions', [PaymentController::class, 'getTransactions']);
-        Route::get('/transactions/{transactionId}', [PaymentController::class, 'getTransactionDetails']);
+        Route::get('/transactions', [PaymentController::class, 'getTransactionHistory']);
+        Route::get('/transactions/{transactionId}', [PaymentController::class, 'getTransaction']);
         Route::post('/transactions/{transactionId}/upload-proof', [PaymentController::class, 'uploadPaymentProof']);
     });
 
     // Business Plan Routes (for Business accounts and employees)
     Route::prefix('business')->group(function () {
-        // Quota Information
+        // Quota Information (any Business user)
         Route::get('/card-quota', [QuotaController::class, 'getCardQuota']);
         Route::get('/can-order-card', [QuotaController::class, 'canOrderCard']);
 
-        // Employee Management (Business account owners only)
-        Route::get('/employees', [QuotaController::class, 'getEmployees']);
-        // Note: Employee creation is now handled by Super Admin via /admin/business-employees
-        // Route::post('/employees', [QuotaController::class, 'createEmployee']); // DEPRECATED
-        Route::delete('/employees/{id}', [QuotaController::class, 'deleteEmployee']);
+        // Employee Management — Business account owner or delegated manager
+        Route::middleware('business.manager')->group(function () {
+            // Note: Employee creation is now handled by Super Admin via /admin/business-employees
+            // Route::post('/employees', [QuotaController::class, 'createEmployee']); // DEPRECATED
+            Route::delete('/employees/{id}', [QuotaController::class, 'deleteEmployee']);
 
-        // Bulk Employee Data Upload & Card Orders (does NOT create employee accounts)
-        Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);
-        Route::post('/employees/{id}/reset-password', [EmployeeController::class, 'resetPassword']);
-        Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus']);
-        Route::get('/employees/{id}/details', [EmployeeController::class, 'getEmployeeDetails']);
+            // Bulk Employee Data Upload & Card Orders
+            Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);
+            Route::post('/employees/{id}/reset-password', [EmployeeController::class, 'resetPassword']);
+            Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus']);
+            Route::get('/employees/{id}/details', [EmployeeController::class, 'getEmployeeDetails']);
+            // Delegated role management (owner-only inside the controller)
+            Route::post('/employees/{id}/role', [EmployeeController::class, 'updateRole']);
+        });
+
+        // Card assignment — owner, delegated admin or card manager. The employee
+        // list is readable at this scope so card managers can pick an assignee.
+        Route::middleware('business.manager:cards')->group(function () {
+            Route::get('/employees', [QuotaController::class, 'getEmployees']);
+            Route::post('/cards/bulk-assign', [EmployeeController::class, 'bulkAssignCards']);
+        });
 
         // Activity Logs (Business Admin can view employee activities, read-only)
         Route::get('/activity-logs', [ActivityLogController::class, 'index']);
@@ -448,9 +472,11 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
 
     // ✅ Admin Payment Management
     Route::prefix('payments')->group(function () {
-        // Refund management
-        Route::get('/refunds/pending', [RefundController::class, 'getPendingRefunds']);
-        Route::post('/refunds/{refund}/process', [RefundController::class, 'processRefund']);
+        // Refund management (requires the billing.refunds admin permission)
+        Route::middleware('admin:billing.refunds')->group(function () {
+            Route::get('/refunds/pending', [RefundController::class, 'getPendingRefunds']);
+            Route::post('/refunds/{refund}/process', [RefundController::class, 'processRefund']);
+        });
 
         // Manual bank transfer verification
         Route::get('/manual-transfers/pending', [ManualBankTransferController::class, 'getPendingTransfers']);
@@ -458,8 +484,8 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::get('/manual-transfers', [ManualBankTransferController::class, 'getAllTransfers']);
     });
 
-    // ✅ Admin Invoice Management
-    Route::prefix('invoices')->group(function () {
+    // ✅ Admin Invoice Management (requires the billing.invoices admin permission)
+    Route::prefix('invoices')->middleware('admin:billing.invoices')->group(function () {
         Route::get('/', [AdminInvoiceController::class, 'index']);
         Route::get('/statistics', [AdminInvoiceController::class, 'statistics']);
         Route::get('/{invoice}', [AdminInvoiceController::class, 'show']);
@@ -472,8 +498,8 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::get('/{invoice}/preview', [AdminInvoiceController::class, 'preview']);
     });
 
-    // ✅ Plan Price Management
-    Route::prefix('plan-prices')->group(function () {
+    // ✅ Plan Price Management (requires the billing.prices admin permission)
+    Route::prefix('plan-prices')->middleware('admin:billing.prices')->group(function () {
         Route::get('/', [PlanPriceController::class, 'index']);
         Route::get('/{id}', [PlanPriceController::class, 'show']);
         Route::put('/{id}', [PlanPriceController::class, 'update']);
@@ -550,7 +576,7 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
     });
 
     // ✅ System Audit Log (Admin) — full filterable list + CSV export
-    Route::prefix('audit-logs')->group(function () {
+    Route::prefix('audit-logs')->middleware('admin:system.audit_log')->group(function () {
         Route::get('/', [AdminController::class, 'auditLogsIndex']);
         Route::get('/export-csv', [AdminController::class, 'auditLogsExportCsv']);
     });
@@ -563,8 +589,8 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::put('/{inquiry}', [AdminBusinessInquiryController::class, 'update']);
     });
 
-    // ✅ Admin System Settings
-    Route::prefix('system-settings')->group(function () {
+    // ✅ Admin System Settings (requires the system.settings admin permission)
+    Route::prefix('system-settings')->middleware('admin:system.settings')->group(function () {
         Route::get('/general', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getGeneralSettings']);
         Route::post('/general', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'saveGeneralSettings']);
         Route::get('/payment', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getPaymentSettings']);
@@ -591,6 +617,7 @@ Route::get('/plan-prices/public', [PlanPriceController::class, 'publicPrices']);
 // ✅ Public Payment Routes (for payment method selection on checkout)
 Route::prefix('payment')->group(function () {
     Route::get('/rails', [PaymentController::class, 'getPaymentRails']);
+    Route::get('/config', [PaymentController::class, 'getCheckoutConfig']);
     Route::post('/calculate-fees', [PaymentController::class, 'calculateFees']);
 });
 

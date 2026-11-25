@@ -108,7 +108,7 @@
                     >
                       {{ item.is_active ? "Active" : "Inactive" }}
                     </span>
-                    <span class="px-2 py-1 text-badge rounded-full bg-blue-100 text-blue-800">
+                    <span class="px-2 py-1 text-badge rounded-full bg-info-100 text-info-800">
                       Priority {{ item.priority }}
                     </span>
                     <span class="text-caption text-secondary-500">
@@ -178,8 +178,8 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-lg bg-blue-100">
-              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6 text-blue-600" />
+            <div class="p-3 rounded-lg bg-info-100">
+              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6 text-info-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label text-secondary-600">Total Feedback</p>
@@ -189,8 +189,8 @@
         </div>
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-lg bg-yellow-100">
-              <Icon name="heroicons:bell" class="h-6 w-6 text-yellow-600" />
+            <div class="p-3 rounded-lg bg-warning-100">
+              <Icon name="heroicons:bell" class="h-6 w-6 text-warning-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label text-secondary-600">Unread</p>
@@ -200,8 +200,8 @@
         </div>
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-lg bg-orange-100">
-              <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-orange-600" />
+            <div class="p-3 rounded-lg bg-warning-100">
+              <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-warning-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label text-secondary-600">Pending</p>
@@ -211,8 +211,8 @@
         </div>
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-lg bg-green-100">
-              <Icon name="heroicons:star" class="h-6 w-6 text-green-600" />
+            <div class="p-3 rounded-lg bg-success-100">
+              <Icon name="heroicons:star" class="h-6 w-6 text-success-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label text-secondary-600">Avg Rating</p>
@@ -238,7 +238,7 @@
               v-for="fb in feedbackList"
               :key="fb.id"
               class="border border-secondary-200 rounded-lg p-4"
-              :class="{ 'bg-blue-50': !fb.is_read }"
+              :class="{ 'bg-info-50': !fb.is_read }"
             >
               <div class="flex items-start justify-between gap-4">
                 <div class="flex-1 min-w-0">
@@ -251,7 +251,7 @@
                     >
                       {{ getStatusLabel(fb.status) }}
                     </span>
-                    <span v-if="!fb.is_read" class="px-2 py-1 text-badge bg-red-100 text-red-800 rounded-full">
+                    <span v-if="!fb.is_read" class="px-2 py-1 text-badge bg-error-100 text-error-800 rounded-full">
                       Unread
                     </span>
                   </div>
@@ -613,9 +613,9 @@ const deleteFeedback = async (fb) => {
 // ---- Helpers ----
 const getStatusBadgeClass = (status) => {
   const classes = {
-    pending: "bg-yellow-100 text-yellow-800",
-    in_progress: "bg-blue-100 text-blue-800",
-    resolved: "bg-green-100 text-green-800",
+    pending: "bg-warning-100 text-warning-800",
+    in_progress: "bg-info-100 text-info-800",
+    resolved: "bg-success-100 text-success-800",
   };
   return classes[status] || "bg-secondary-100 text-secondary-700";
 };
