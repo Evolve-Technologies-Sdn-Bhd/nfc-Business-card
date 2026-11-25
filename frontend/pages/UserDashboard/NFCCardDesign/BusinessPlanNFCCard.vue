@@ -1360,7 +1360,10 @@ const isFormValid = computed(() => {
 // Check if user is authenticated and load data
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
-    router.push("/UserAccount/login");
+    router.push({
+      path: "/UserAccount/login",
+      query: { redirect: "/UserDashboard/NFCCardDesign/BusinessPlanNFCCard" },
+    });
     return;
   }
 

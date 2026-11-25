@@ -168,13 +168,21 @@ useScrollReveal();
 
 const { contactSupport } = usePublicUi();
 
-// Paid plans (Basic / Premium) go straight to the checkout page with the
-// chosen plan. Free keeps its own route to the registration page.
+const authStore = useAuthStore();
+
+// Paid plans (Basic / Premium) must go through the full onboarding flow:
+// plan selection → card design → checkout. Jumping straight to the checkout
+// page skipped registration and left the order without any card details, so
+// we route guests to register and signed-in users to plan selection instead.
 const buyPlan = (plan) => {
   if (process.client) {
     sessionStorage.setItem("selectedPlan", plan);
   }
-  navigateTo("/UserDashboard/Payment");
+  if (authStore.isAuthenticated) {
+    navigateTo("/UserDashboard/PlanSelection");
+  } else {
+    navigateTo("/UserAccount/register");
+  }
 };
 
 // Plan prices from API

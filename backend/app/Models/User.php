@@ -102,6 +102,14 @@ class User extends Authenticatable implements MustVerifyEmail
                     trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''))
                 );
             }
+
+            // An account that becomes ACTIVE again (card fulfilled, subscription
+            // renewed, admin re-enable) must lose the auto-deactivation flag.
+            // Leaving it set would keep the account "reactivatable via register"
+            // — a takeover vector — and show a stale date in the admin panel.
+            if ($user->isDirty('subscription_active') && $user->subscription_active === true) {
+                $user->deactivated_at = null;
+            }
         });
     }
 

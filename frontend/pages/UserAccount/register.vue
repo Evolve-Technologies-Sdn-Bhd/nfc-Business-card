@@ -919,6 +919,13 @@ const handleRegister = async () => {
     if (response.requires_2fa) {
       show2FASetup.value = true;
     } else {
+      if (response.reactivated) {
+        // Auto-deactivated account (free window ended) was reactivated by this
+        // registration instead of creating a duplicate.
+        $toast.success(
+          "Welcome back! Your account has been reactivated. Please verify your email to continue."
+        );
+      }
       showSuccessModal.value = true;
     }
   } catch (error) {

@@ -761,7 +761,12 @@ const isFormValid = computed(() => {
 // Check if user is authenticated
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
-    await navigateTo("/UserAccount/login");
+    await navigateTo({
+      path: "/UserAccount/login",
+      query: {
+        redirect: "/UserDashboard/UserManagement/NFCCardDesignCustomization",
+      },
+    });
     return;
   }
 

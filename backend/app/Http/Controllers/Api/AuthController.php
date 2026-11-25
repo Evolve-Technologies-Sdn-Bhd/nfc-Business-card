@@ -32,7 +32,10 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            // NOTE: no `unique:users,email` here. Uniqueness is enforced manually
+            // below so that an AUTO-DEACTIVATED account (free window expired) can
+            // be REACTIVATED by registering again instead of being rejected.
+            'email' => 'required|email',
             'password' => [
                 'required',
                 'string',
@@ -43,7 +46,6 @@ class AuthController extends Controller
             'company' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
         ], [
-            'email.unique' => 'This email is already registered. Please login or use a different email.',
             'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).',
         ]);
 
@@ -54,6 +56,33 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $email = strtolower(trim((string) $request->email));
+        $existing = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+        if ($existing) {
+            // Only accounts switched off by the scheduler (free plan expired) may
+            // be reactivated here. A live or admin-managed account stays a plain
+            // "email already registered" error — nobody may claim it by signing up.
+            if ($this->isReactivatableAccount($existing)) {
+                return $this->reactivateAccount($request, $existing);
+            }
+
+            return response()->json([
+                'success' => false,
+                'errors' => [
+                    'email' => ['This email is already registered. Please login or use a different email.'],
+                ],
+            ], 422);
+        }
+
+        return $this->createNewAccount($request);
+    }
+
+    /**
+     * Create a brand-new account (first-time registration).
+     */
+    protected function createNewAccount(Request $request)
+    {
         try {
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -95,6 +124,70 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             \Log::error('Registration error: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * An account flagged by the free-plans:deactivate-expired scheduler job.
+     *
+     * `deactivated_at` is written ONLY by that job, so it is a safe, narrow
+     * signal: it never matches a live account, nor one an admin switched off.
+     */
+    protected function isReactivatableAccount(User $user): bool
+    {
+        return $user->deactivated_at !== null;
+    }
+
+    /**
+     * Reactivate an auto-deactivated account through the register form.
+     *
+     * The user proves nothing beyond "I know this email", so the reactivated
+     * account is left UNVERIFIED: the existing email-verification middleware
+     * blocks access until the code sent to that inbox is confirmed. That keeps
+     * the flow friction-free for the real owner while stopping a stranger who
+     * merely knows the address.
+     */
+    protected function reactivateAccount(Request $request, User $user)
+    {
+        try {
+            $user->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'password' => Hash::make($request->password),
+                'company' => $request->company ?: $user->company,
+                'job_title' => $request->job_title ?: $user->job_title,
+                'deactivated_at' => null,      // clear the auto-deactivation flag
+                'email_verified_at' => null,   // must re-confirm ownership of the inbox
+                'is_new_user' => true,         // send them back through plan selection
+            ]);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Exception $e) {
+                Log::warning('Failed to send verification link on reactivation: ' . $e->getMessage());
+            }
+
+            Log::info('Account reactivated via register', ['user_id' => $user->id]);
+
+            return response()->json([
+                'success' => true,
+                'reactivated' => true,
+                'user' => $user->fresh(),
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'needs_email_verification' => true,
+                'verification_email_sent' => true,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Account reactivation error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,

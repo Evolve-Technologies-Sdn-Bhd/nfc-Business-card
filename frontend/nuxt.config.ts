@@ -84,6 +84,9 @@ export default defineNuxtConfig({
           type: "image/svg+xml",
           href: "/nfcgo-app-icon.svg",
         },
+        // Same system logo as a raster fallback for browsers without SVG icons
+        // and for direct `/favicon.ico` requests.
+        { rel: "alternate icon", type: "image/x-icon", href: "/favicon.ico" },
       ],
     },
     pageTransition: { name: "page", mode: "out-in" },

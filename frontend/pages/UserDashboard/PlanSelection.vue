@@ -475,7 +475,12 @@ onMounted(async () => {
     }
 
     if (!authStore.isAuthenticated || !authStore.user) {
-      await navigateTo("/UserAccount/login");
+      // Bring the user back here after they sign in instead of dropping them
+      // on the generic dashboard.
+      await navigateTo({
+        path: "/UserAccount/login",
+        query: { redirect: "/UserDashboard/PlanSelection" },
+      });
       return;
     }
   }

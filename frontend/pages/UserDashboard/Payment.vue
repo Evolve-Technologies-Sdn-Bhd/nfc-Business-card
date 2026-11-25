@@ -605,6 +605,10 @@ import PaymentMethodSelector from '~/components/PaymentMethodSelector.vue';
 import FiuuPaymentForm from '~/components/FiuuPaymentForm.vue';
 import ManualBankTransfer from '~/components/ManualBankTransfer.vue';
 
+// Checkout is the final step of a gated flow, so require authentication here
+// as well (the onMounted guard below also covers the missing-step case).
+definePageMeta({ middleware: 'auth' });
+
 // Meta tags
 useHead({
   title: "Payment - NFCGo",
@@ -907,6 +911,21 @@ onMounted(async () => {
   
   if (!authStore.isAuthenticated) {
     await navigateTo("/UserAccount/login");
+    return;
+  }
+
+  // Guard against entering checkout directly. Checkout is the last step of the
+  // plan → design → pay flow, so if an earlier step was skipped we send the
+  // user back to the step they are missing rather than rendering an order with
+  // no plan or no card details.
+  if (!sessionStorage.getItem("selectedPlan")) {
+    $toast.error("Please choose a plan to continue.");
+    await navigateTo("/UserDashboard/PlanSelection");
+    return;
+  }
+  if (!sessionStorage.getItem("cardInfo")) {
+    $toast.error("Please design your NFC card before payment.");
+    await navigateTo("/UserDashboard/UserManagement/NFCCardDesignCustomization");
     return;
   }
 
