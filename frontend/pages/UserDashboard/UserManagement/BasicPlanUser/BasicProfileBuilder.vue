@@ -4928,8 +4928,9 @@ const closeUpgradeModal = () => {
 };
 
 const navigateToUpgrade = () => {
-  // Navigate to subscription/upgrade page
-  navigateTo('/UserDashboard/SubscriptionManagement');
+  // Plan selection is the real, working upgrade route (there is no
+  // /UserDashboard/SubscriptionManagement page).
+  navigateTo('/UserDashboard/PlanSelection');
 };
 
 // Reset profile data to defaults

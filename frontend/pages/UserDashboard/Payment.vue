@@ -910,7 +910,10 @@ onMounted(async () => {
   console.log('Order summary total:', orderSummary.value.total);
   
   if (!authStore.isAuthenticated) {
-    await navigateTo("/UserAccount/login");
+    await navigateTo({
+      path: "/UserAccount/login",
+      query: { redirect: "/UserDashboard/Payment" },
+    });
     return;
   }
 
