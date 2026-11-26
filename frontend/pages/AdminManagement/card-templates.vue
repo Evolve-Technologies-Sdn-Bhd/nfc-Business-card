@@ -1,546 +1,852 @@
 <!-- pages/AdminManagement/card-templates.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title text-secondary-900">Card Templates</h1>
-          <p class="mt-2 text-secondary-600">
-            Upload and manage NFC card design templates
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="openUploadModal" class="btn btn-primary">
-            <Icon name="heroicons:plus" class="h-5 w-5 mr-2" />
-            Upload Template
-          </button>
-        </div>
-      </div>
+    <AdminPageHeader
+      eyebrow="Design Library"
+      eyebrow-icon="heroicons:rectangle-stack"
+      title="Card Templates"
+      description="Upload and curate the NFC card designs customers can pick from — track processing status and publish at a glance."
+    >
+      <template #actions>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline"
+          :disabled="loading"
+          @click="loadTemplates"
+        >
+          <Icon
+            name="heroicons:arrow-path"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': loading }"
+          />
+          Refresh
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--primary"
+          @click="openUploadModal"
+        >
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          Upload Template
+        </button>
+      </template>
+    </AdminPageHeader>
+
+    <!-- Library summary -->
+    <div class="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <AdminStatTile
+        label="Total templates"
+        :value="templates.length"
+        icon="heroicons:rectangle-stack"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Active"
+        :value="activeCount"
+        icon="heroicons:check-circle"
+        icon-class="!bg-success-50 !text-success-600"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Processing"
+        :value="processingCount"
+        icon="heroicons:clock"
+        icon-class="!bg-warning-50 !text-warning-600"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Failed"
+        :value="failedCount"
+        icon="heroicons:x-circle"
+        icon-class="!bg-error-50 !text-error-600"
+        :loading="loading"
+      />
     </div>
 
     <!-- Filters -->
-    <div class="card mb-6">
-      <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Status</label>
-            <select v-model="currentFilter" class="input">
-              <option v-for="filter in filters" :key="filter.value" :value="filter.value">
-                {{ filter.label }}
-              </option>
-            </select>
-          </div>
-          <!-- Plan Filter -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Plan</label>
-            <select v-model="planFilter" class="input">
-              <option value="">All Plans</option>
-              <option value="basic">Basic</option>
-              <option value="premium">Premium</option>
-              <option value="business">Business</option>
-            </select>
-          </div>
-          <!-- Stats Summary -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Summary</label>
-            <div class="flex items-center gap-4 h-[42px]">
-              <span class="text-body">
-                <span class="font-semibold text-secondary-900">{{ templates.length }}</span>
-                <span class="text-secondary-500"> total</span>
-              </span>
-              <span class="text-body text-success-600">
-                <Icon name="heroicons:check-circle" class="h-4 w-4 inline" />
-                {{ activeCount }}
-              </span>
-              <span class="text-body text-warning-600">
-                <Icon name="heroicons:clock" class="h-4 w-4 inline" />
-                {{ processingCount }}
-              </span>
-              <span class="text-body text-error-600">
-                <Icon name="heroicons:x-circle" class="h-4 w-4 inline" />
-                {{ failedCount }}
-              </span>
-            </div>
+    <AdminFilterBar>
+      <template #search>
+        <div class="relative">
+          <label class="admin-label">Search</label>
+          <div class="relative">
+            <Icon
+              name="heroicons:magnifying-glass"
+              class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+            />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search template name…"
+              class="admin-field pl-9"
+            />
           </div>
         </div>
-        <div class="mt-4 flex justify-between items-center">
-          <button @click="clearFilters" class="btn btn-outline btn-sm">
-            Clear Filters
-          </button>
-          <div class="text-body text-secondary-500">
-            {{ filteredTemplates.length }} templates found
-          </div>
-        </div>
-      </div>
-    </div>
+      </template>
 
-    <!-- Templates Table/Grid -->
-    <div class="card">
-      <div class="card-body p-0">
-        <!-- Loading State -->
-        <div v-if="loading" class="flex justify-center py-12">
-          <div class="spinner"></div>
-        </div>
-
-        <!-- Templates Grid -->
-        <div v-else-if="filteredTemplates.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-          <div
-            v-for="template in filteredTemplates"
-            :key="template.id"
-            class="border border-secondary-200 rounded-lg overflow-hidden group hover:shadow-md transition-shadow"
+      <div class="min-w-[12rem]">
+        <label class="admin-label">Status</label>
+        <select v-model="currentFilter" class="admin-field">
+          <option
+            v-for="filter in filters"
+            :key="filter.value"
+            :value="filter.value"
           >
-            <!-- Template Image -->
-            <div class="relative aspect-[5/3] bg-secondary-100">
-              <img
-                v-if="template.front_image_url"
-                :src="getImageUrl(template.front_image_url)"
-                :alt="template.name"
-                class="w-full h-full object-cover"
-              />
-              <div v-else class="w-full h-full flex items-center justify-center">
-                <Icon name="heroicons:photo" class="h-12 w-12 text-secondary-300" />
-              </div>
+            {{ filter.label }}
+          </option>
+        </select>
+      </div>
 
-              <!-- Status Badge -->
-              <div class="absolute top-2 left-2">
-                <span :class="getStatusBadgeClass(template.processing_status)">
-                  {{ template.processing_status }}
-                </span>
-              </div>
+      <div class="min-w-[12rem]">
+        <label class="admin-label">Plan</label>
+        <select v-model="planFilter" class="admin-field">
+          <option value="">All Plans</option>
+          <option value="basic">Basic</option>
+          <option value="premium">Premium</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
 
-              <!-- Hidden Badge -->
-              <div v-if="template.is_hidden" class="absolute top-2 right-2">
-                <span class="px-2 py-1 text-badge rounded-full bg-secondary-800 text-white">
-                  Hidden
-                </span>
-              </div>
+      <template #actions>
+        <span class="text-body-sm text-secondary-500">
+          {{ filteredTemplates.length }} of {{ templates.length }} shown
+        </span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          @click="clearFilters"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          Clear filters
+        </button>
+      </template>
+    </AdminFilterBar>
 
-              <!-- Hover Actions -->
-              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <button
-                  @click="openEditModal(template)"
-                  class="p-2 rounded-full bg-white text-secondary-700 hover:bg-primary-50"
-                  title="Edit"
-                >
-                  <Icon name="heroicons:pencil" class="h-5 w-5" />
-                </button>
-                <button
-                  @click="toggleVisibility(template)"
-                  class="p-2 rounded-full bg-white text-secondary-700 hover:bg-warning-50"
-                  :title="template.is_hidden ? 'Show' : 'Hide'"
-                >
-                  <Icon :name="template.is_hidden ? 'heroicons:eye' : 'heroicons:eye-slash'" class="h-5 w-5" />
-                </button>
-                <button
-                  v-if="template.processing_status === 'failed'"
-                  @click="retryProcessing(template)"
-                  class="p-2 rounded-full bg-white text-warning-600 hover:bg-warning-50"
-                  title="Retry Processing"
-                >
-                  <Icon name="heroicons:arrow-path" class="h-5 w-5" />
-                </button>
-                <button
-                  @click="confirmDelete(template)"
-                  class="p-2 rounded-full bg-white text-error-600 hover:bg-error-50"
-                  title="Delete"
-                >
-                  <Icon name="heroicons:trash" class="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+    <!-- Template library -->
+    <AdminSectionCard flush>
+      <template #title>Template library</template>
+      <template #header-actions>
+        <span class="text-caption text-secondary-500">
+          {{ templates.length }} template{{ templates.length === 1 ? "" : "s" }}
+        </span>
+      </template>
 
-            <!-- Template Info -->
-            <div class="p-4">
-              <h3 class="font-semibold text-secondary-900 truncate">{{ template.name }}</h3>
-              <p class="card-subtitle mt-1 truncate">{{ template.description || 'No description' }}</p>
-              
-              <!-- Plan Types -->
-              <div class="flex flex-wrap gap-1 mt-3">
-                <span
-                  v-for="plan in template.plan_types || []"
-                  :key="plan"
-                  :class="getPlanBadgeClass(plan)"
-                >
-                  {{ plan }}
-                </span>
-              </div>
+      <!-- Loading -->
+      <AdminLoadingState v-if="loading" variant="cards" :rows="8" />
 
-              <!-- Error Message -->
-              <div v-if="template.processing_status === 'failed' && template.processing_error" class="mt-2">
-                <p class="text-error truncate" :title="template.processing_error">
-                  Error: {{ template.processing_error }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-else class="text-center py-12">
-          <Icon name="heroicons:photo" class="h-16 w-16 text-secondary-300 mx-auto mb-4" />
-          <h3 class="card-title text-secondary-900 mb-2">No templates found</h3>
-          <p class="text-body text-secondary-500 mb-4">
-            {{ currentFilter === 'all' && !planFilter ? 'Upload your first card template to get started.' : 'No templates match the current filters.' }}
-          </p>
-          <button v-if="currentFilter === 'all' && !planFilter" @click="openUploadModal" class="btn btn-primary">
-            <Icon name="heroicons:plus" class="h-5 w-5 mr-2" />
+      <!-- Empty -->
+      <AdminEmptyState
+        v-else-if="!filteredTemplates.length"
+        icon="heroicons:rectangle-stack"
+        title="No templates found"
+        :description="
+          currentFilter === 'all' && !planFilter && !searchQuery
+            ? 'Upload your first card template to get started.'
+            : 'No templates match the current filters or search.'
+        "
+      >
+        <template #actions>
+          <button
+            v-if="currentFilter === 'all' && !planFilter && !searchQuery"
+            type="button"
+            class="admin-btn admin-btn--primary"
+            @click="openUploadModal"
+          >
+            <Icon name="heroicons:plus" class="h-4 w-4" />
             Upload Template
           </button>
-        </div>
-      </div>
-    </div>
+        </template>
+      </AdminEmptyState>
 
-    <!-- Upload Modal -->
-    <Transition name="modal">
-      <div v-if="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center p-4">
-          <div class="fixed inset-0 bg-black/50" @click="showUploadModal = false"></div>
-          <div class="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="modal-title text-secondary-900">Upload New Template</h3>
-              <button @click="showUploadModal = false" class="text-secondary-400 hover:text-secondary-600">
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+      <!-- Grid -->
+      <div
+        v-else
+        class="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <article
+          v-for="template in filteredTemplates"
+          :key="template.id"
+          class="admin-panel group flex flex-col overflow-hidden"
+        >
+          <div class="relative aspect-[5/3] bg-secondary-100">
+            <img
+              v-if="template.front_image_url"
+              :src="getImageUrl(template.front_image_url)"
+              :alt="template.name"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div v-else class="flex h-full w-full flex-col items-center justify-center gap-2 text-secondary-400">
+              <Icon name="heroicons:photo" class="h-12 w-12" />
+              <span class="text-caption">No preview</span>
+            </div>
+
+            <!-- Status -->
+            <div class="absolute left-2 top-2">
+              <AdminStatusBadge
+                :status="template.processing_status"
+                :label="statusLabel(template.processing_status)"
+              />
+            </div>
+            <div v-if="template.is_hidden" class="absolute right-2 top-2">
+              <AdminStatusBadge tone="neutral" label="Hidden" />
+            </div>
+
+            <!-- Hover actions (desktop) -->
+            <div
+              class="absolute inset-0 hidden items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity focus-within:opacity-100 sm:flex group-hover:opacity-100"
+            >
+              <button
+                type="button"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-secondary-700 transition hover:bg-accent-100 hover:text-accent-700"
+                title="Edit"
+                @click="openEditModal(template)"
+              >
+                <Icon name="heroicons:pencil" class="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-secondary-700 transition hover:bg-warning-50 hover:text-warning-700"
+                :title="template.is_hidden ? 'Show' : 'Hide'"
+                @click="toggleVisibility(template)"
+              >
+                <Icon
+                  :name="template.is_hidden ? 'heroicons:eye' : 'heroicons:eye-slash'"
+                  class="h-5 w-5"
+                />
+              </button>
+              <button
+                v-if="template.processing_status === 'failed'"
+                type="button"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-warning-600 transition hover:bg-warning-50"
+                title="Retry Processing"
+                @click="retryProcessing(template)"
+              >
+                <Icon name="heroicons:arrow-path" class="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-error-600 transition hover:bg-error-50"
+                title="Delete"
+                @click="confirmDelete(template)"
+              >
+                <Icon name="heroicons:trash" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="flex flex-1 flex-col p-4">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="truncate font-semibold text-secondary-900">
+                {{ template.name }}
+              </h3>
+              <span
+                v-if="template.category"
+                class="admin-badge admin-badge--neutral admin-badge--plain shrink-0"
+              >
+                {{ template.category }}
+              </span>
+            </div>
+            <p class="mt-1 line-clamp-2 min-h-[2.5rem] text-caption text-secondary-500">
+              {{ template.description || 'No description' }}
+            </p>
+
+            <div class="mt-3 flex flex-wrap gap-1">
+              <AdminStatusBadge
+                v-for="plan in template.plan_types || []"
+                :key="plan"
+                :tone="planTone(plan)"
+                :label="plan"
+              />
+            </div>
+
+            <div
+              v-if="template.processing_status === 'failed' && template.processing_error"
+              class="mt-2"
+            >
+              <p class="truncate text-caption text-error-600" :title="template.processing_error">
+                Error: {{ template.processing_error }}
+              </p>
+            </div>
+
+            <!-- Mobile actions -->
+            <div class="mt-3 flex items-center gap-2 border-t border-secondary-100 pt-3 sm:hidden">
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm flex-1"
+                @click="openEditModal(template)"
+              >
+                <Icon name="heroicons:pencil" class="h-4 w-4" />
+                Edit
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm"
+                :title="template.is_hidden ? 'Show' : 'Hide'"
+                @click="toggleVisibility(template)"
+              >
+                <Icon
+                  :name="template.is_hidden ? 'heroicons:eye' : 'heroicons:eye-slash'"
+                  class="h-4 w-4"
+                />
+              </button>
+              <button
+                v-if="template.processing_status === 'failed'"
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm"
+                title="Retry"
+                @click="retryProcessing(template)"
+              >
+                <Icon name="heroicons:arrow-path" class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm text-error-600 hover:bg-error-50"
+                title="Delete"
+                @click="confirmDelete(template)"
+              >
+                <Icon name="heroicons:trash" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </AdminSectionCard>
+
+    <!-- Upload Template dialog -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div
+          v-if="showUploadModal"
+          class="admin-dialog-backdrop"
+          @click.self="showUploadModal = false"
+        >
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Upload new template"
+            style="width: min(44rem, 100%); margin-top: 5vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Upload new template</p>
+                  <p class="admin-panel-subtitle">
+                    Publish a fresh card design to the library.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="showUploadModal = false"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
 
-            <form @submit.prevent="uploadTemplate" class="space-y-6">
-              <!-- Template Name -->
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
-                <input
-                  v-model="uploadForm.name"
-                  type="text"
-                  placeholder="e.g. Emerald Executive, Navy Signature"
-                  class="input"
-                  maxlength="80"
-                />
-              </div>
-
-              <!-- Description -->
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Description</label>
-                <textarea
-                  v-model="uploadForm.description"
-                  rows="2"
-                  placeholder="Short description about this template design"
-                  class="input resize-none"
-                  maxlength="200"
-                ></textarea>
-              </div>
-
-              <!-- Category & Plan (2-column grid) -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Category -->
-                <div>
-                  <label class="block text-label text-secondary-700 mb-2">Category</label>
-                  <select v-model="uploadForm.category" class="input">
-                    <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
-                      {{ cat.label }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Plan (single select) -->
-                <div>
-                  <label class="block text-label text-secondary-700 mb-2">Plan *</label>
-                  <select v-model="uploadForm.plan" class="input">
-                    <option v-for="plan in planOptions" :key="plan.value" :value="plan.value">
-                      {{ plan.label }} — {{ plan.description }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Front Image Upload -->
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Front Design *</label>
-                <div
-                  class="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-secondary-400 transition-colors cursor-pointer"
-                  @click="$refs.frontInput.click()"
-                  @dragover.prevent
-                  @drop.prevent="handleDrop($event, 'front')"
-                >
-                  <input
-                    ref="frontInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleFileSelect($event, 'front')"
-                  />
-                  <div v-if="uploadForm.frontPreview" class="mb-3">
-                    <img :src="uploadForm.frontPreview" alt="Front Preview" class="max-h-32 mx-auto rounded" />
-                  </div>
-                  <Icon v-else name="heroicons:photo" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-body text-secondary-600">
-                    {{ uploadForm.frontFile ? uploadForm.frontFile.name : 'Click or drag to upload front design' }}
+            <form class="flex min-h-0 flex-1 flex-col" @submit.prevent="uploadTemplate">
+              <div class="admin-panel-body flex-1 space-y-6 overflow-y-auto">
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Details</p>
+                  <p class="admin-form-section-desc">
+                    Name the design and describe it for the team.
                   </p>
-                  <p class="text-helper mt-1">PNG, JPG up to 10MB. Recommended: 1050x630px (5:3 ratio)</p>
-                </div>
-              </div>
-
-              <!-- Back Image Upload (Optional) -->
-              <div v-if="uploadForm.plan !== 'basic'">
-                <label class="block text-label text-secondary-700 mb-2">Back Design (Optional)</label>
-                <div
-                  class="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-secondary-400 transition-colors cursor-pointer"
-                  @click="$refs.backInput.click()"
-                  @dragover.prevent
-                  @drop.prevent="handleDrop($event, 'back')"
-                >
-                  <input
-                    ref="backInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleFileSelect($event, 'back')"
-                  />
-                  <div v-if="uploadForm.backPreview" class="mb-3">
-                    <img :src="uploadForm.backPreview" alt="Back Preview" class="max-h-32 mx-auto rounded" />
+                  <div class="mt-4 space-y-4">
+                    <div>
+                      <label class="admin-label">
+                        Template name <span class="text-error-600">*</span>
+                      </label>
+                      <input
+                        v-model="uploadForm.name"
+                        type="text"
+                        placeholder="e.g. Emerald Executive, Navy Signature"
+                        class="admin-field"
+                        maxlength="80"
+                      />
+                    </div>
+                    <div>
+                      <label class="admin-label">Description</label>
+                      <textarea
+                        v-model="uploadForm.description"
+                        rows="2"
+                        placeholder="Short description about this template design"
+                        class="admin-field resize-none"
+                        maxlength="200"
+                      ></textarea>
+                    </div>
                   </div>
-                  <Icon v-else name="heroicons:photo" class="h-12 w-12 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-body text-secondary-600">
-                    {{ uploadForm.backFile ? uploadForm.backFile.name : 'Click or drag to upload back design' }}
+                </div>
+
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Category &amp; plan</p>
+                  <p class="admin-form-section-desc">
+                    Where it belongs and which tiers can use it.
                   </p>
+                  <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label class="admin-label">Category</label>
+                      <select v-model="uploadForm.category" class="admin-field">
+                        <option
+                          v-for="cat in categoryOptions"
+                          :key="cat.value"
+                          :value="cat.value"
+                        >
+                          {{ cat.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="admin-label">
+                        Plan <span class="text-error-600">*</span>
+                      </label>
+                      <select v-model="uploadForm.plan" class="admin-field">
+                        <option
+                          v-for="plan in planOptions"
+                          :key="plan.value"
+                          :value="plan.value"
+                        >
+                          {{ plan.label }} — {{ plan.description }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Cloudinary Upload Info -->
-              <div class="p-4 bg-success-50 border border-success-200 rounded-lg">
-                <div class="flex">
-                  <Icon name="heroicons:cloud-arrow-up" class="h-5 w-5 text-success-600 flex-shrink-0 mt-0.5" />
-                  <div class="ml-3">
-                    <p class="text-body text-success-800">
-                      Images will be uploaded to Cloudinary CDN for fast, worldwide delivery. 
-                      Your template will be available immediately after upload.
-                    </p>
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Artwork</p>
+                  <p class="admin-form-section-desc">
+                    PNG or JPG up to 10MB. Recommended 1050×630px (5:3).
+                  </p>
+
+                  <div class="mt-4 space-y-4">
+                    <div>
+                      <label class="admin-label">
+                        Front design <span class="text-error-600">*</span>
+                      </label>
+                      <div
+                        class="cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-6 text-center transition-colors hover:border-accent-400"
+                        @click="$refs.frontInput.click()"
+                        @dragover.prevent
+                        @drop.prevent="handleDrop($event, 'front')"
+                      >
+                        <input
+                          ref="frontInput"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="handleFileSelect($event, 'front')"
+                        />
+                        <div v-if="uploadForm.frontPreview" class="mb-3">
+                          <img
+                            :src="uploadForm.frontPreview"
+                            alt="Front Preview"
+                            class="mx-auto max-h-32 rounded"
+                          />
+                        </div>
+                        <Icon
+                          v-else
+                          name="heroicons:photo"
+                          class="mx-auto mb-2 h-12 w-12 text-secondary-400"
+                        />
+                        <p class="text-body text-secondary-600">
+                          {{
+                            uploadForm.frontFile
+                              ? uploadForm.frontFile.name
+                              : 'Click or drag to upload front design'
+                          }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div v-if="uploadForm.plan !== 'basic'">
+                      <label class="admin-label">
+                        Back design
+                        <span class="text-caption text-secondary-400">(optional)</span>
+                      </label>
+                      <div
+                        class="cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-6 text-center transition-colors hover:border-accent-400"
+                        @click="$refs.backInput.click()"
+                        @dragover.prevent
+                        @drop.prevent="handleDrop($event, 'back')"
+                      >
+                        <input
+                          ref="backInput"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="handleFileSelect($event, 'back')"
+                        />
+                        <div v-if="uploadForm.backPreview" class="mb-3">
+                          <img
+                            :src="uploadForm.backPreview"
+                            alt="Back Preview"
+                            class="mx-auto max-h-32 rounded"
+                          />
+                        </div>
+                        <Icon
+                          v-else
+                          name="heroicons:photo"
+                          class="mx-auto mb-2 h-12 w-12 text-secondary-400"
+                        />
+                        <p class="text-body text-secondary-600">
+                          {{
+                            uploadForm.backFile
+                              ? uploadForm.backFile.name
+                              : 'Click or drag to upload back design'
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 rounded-xl border border-success-200 bg-success-50 p-4">
+                    <div class="flex gap-3">
+                      <Icon
+                        name="heroicons:cloud-arrow-up"
+                        class="mt-0.5 h-5 w-5 shrink-0 text-success-600"
+                      />
+                      <p class="text-body text-success-800">
+                        Images upload to the Cloudinary CDN for fast worldwide delivery.
+                        Your template is available immediately after upload.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Submit Buttons -->
-              <div class="flex justify-end gap-3 pt-4">
-                <button type="button" @click="showUploadModal = false" class="btn btn-outline">
+              <div class="admin-dialog-foot">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  @click="showUploadModal = false"
+                >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  class="btn btn-primary"
+                  class="admin-btn admin-btn--primary"
                   :disabled="uploading || _uploadSubmitLock || !isUploadFormValid"
                   :aria-busy="uploading"
                 >
-                  <div v-if="uploading" class="spinner mr-2"></div>
-                  {{ uploading ? 'Uploading...' : 'Upload & Process' }}
+                  <Icon
+                    v-if="uploading"
+                    name="heroicons:arrow-path"
+                    class="h-4 w-4 animate-spin"
+                  />
+                  {{ uploading ? 'Uploading…' : 'Upload & Process' }}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
-    <!-- Edit Modal -->
-    <Transition name="modal">
-      <div v-if="showEditModal && editForm" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center p-4">
-          <div class="fixed inset-0 bg-black/50" @click="showEditModal = false"></div>
-          <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="modal-title text-secondary-900">Edit Template</h3>
-              <button @click="showEditModal = false" class="text-secondary-400 hover:text-secondary-600">
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+    <!-- Edit Template dialog -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div
+          v-if="showEditModal && editForm"
+          class="admin-dialog-backdrop"
+          @click.self="showEditModal = false"
+        >
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit template"
+            style="width: min(40rem, 100%); margin-top: 5vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:pencil-square" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Edit template</p>
+                  <p class="admin-panel-subtitle">{{ editForm.name }}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="showEditModal = false"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
 
-            <form @submit.prevent="saveEdit" class="space-y-4">
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
-                <input
-                  v-model="editForm.name"
-                  type="text"
-                  class="input"
-                  maxlength="80"
-                />
-              </div>
-
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Description</label>
-                <textarea
-                  v-model="editForm.description"
-                  rows="2"
-                  class="input resize-none"
-                  maxlength="200"
-                ></textarea>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-label text-secondary-700 mb-2">Category</label>
-                  <select v-model="editForm.category" class="input">
-                    <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
-                      {{ cat.label }}
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-label text-secondary-700 mb-2">Sort Order</label>
-                  <input
-                    v-model.number="editForm.sort_order"
-                    type="number"
-                    class="input"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Plan Types</label>
-                <div class="flex flex-wrap gap-3 p-3 border border-secondary-200 rounded-lg bg-secondary-50">
-                  <label
-                    v-for="plan in planOptions"
-                    :key="plan.value"
-                    class="flex items-center cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="plan.value"
-                      v-model="editForm.plan_types"
-                      class="h-4 w-4 text-primary-600 border-secondary-300 rounded"
-                    />
-                    <span class="ml-2 text-body text-secondary-700">{{ plan.label }}</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Front Image Edit -->
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="block text-label text-secondary-700">Front Design</label>
-                  <button
-                    v-if="editFrontFile || editForm._removeFront"
-                    type="button"
-                    @click="revertFrontImage"
-                    class="text-caption text-secondary-500 hover:text-error-600"
-                  >
-                    Revert to original
-                  </button>
-                </div>
-                <div
-                  class="border-2 border-dashed border-secondary-300 rounded-lg p-4 text-center hover:border-secondary-400 transition-colors cursor-pointer"
-                  @click="editFrontInput?.click()"
-                  @dragover.prevent
-                  @drop.prevent="handleEditDrop($event, 'front')"
-                >
-                  <input
-                    ref="editFrontInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleEditFileSelect($event, 'front')"
-                  />
-                  <div v-if="editFrontPreview" class="mb-3">
-                    <img :src="editFrontPreview" alt="Front Preview" class="max-h-28 mx-auto rounded" />
+            <form class="flex min-h-0 flex-1 flex-col" @submit.prevent="saveEdit">
+              <div class="admin-panel-body flex-1 space-y-6 overflow-y-auto">
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Details</p>
+                  <div class="mt-4 space-y-4">
+                    <div>
+                      <label class="admin-label">
+                        Template name <span class="text-error-600">*</span>
+                      </label>
+                      <input
+                        v-model="editForm.name"
+                        type="text"
+                        class="admin-field"
+                        maxlength="80"
+                      />
+                    </div>
+                    <div>
+                      <label class="admin-label">Description</label>
+                      <textarea
+                        v-model="editForm.description"
+                        rows="2"
+                        class="admin-field resize-none"
+                        maxlength="200"
+                      ></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label class="admin-label">Category</label>
+                        <select v-model="editForm.category" class="admin-field">
+                          <option
+                            v-for="cat in categoryOptions"
+                            :key="cat.value"
+                            :value="cat.value"
+                          >
+                            {{ cat.label }}
+                          </option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="admin-label">Sort order</label>
+                        <input
+                          v-model.number="editForm.sort_order"
+                          type="number"
+                          class="admin-field"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="admin-label">Plan types</label>
+                      <div
+                        class="flex flex-wrap gap-4 rounded-lg border border-secondary-200 bg-secondary-50 p-3"
+                      >
+                        <label
+                          v-for="plan in planOptions"
+                          :key="plan.value"
+                          class="flex cursor-pointer items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="plan.value"
+                            v-model="editForm.plan_types"
+                            class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                          />
+                          <span class="text-body text-secondary-700">{{ plan.label }}</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  <div v-else-if="editForm.front_image_url && !editForm._removeFront" class="mb-3">
-                    <img :src="getImageUrl(editForm.front_image_url)" alt="Current Front" class="max-h-28 mx-auto rounded opacity-70" />
-                  </div>
-                  <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-body text-secondary-600">
-                    {{ editFrontFile ? editFrontFile.name : (editForm._removeFront ? '(Image will be removed)' : 'Click or drag to replace front design (leave empty to keep)') }}
+                </div>
+
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Artwork</p>
+                  <p class="admin-form-section-desc">
+                    Leave empty to keep the current image.
                   </p>
-                  <p class="text-helper mt-1">PNG, JPG up to 10MB</p>
+
+                  <div class="mt-4 space-y-4">
+                    <!-- Front -->
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <label class="admin-label !mb-0">Front design</label>
+                        <button
+                          v-if="editFrontFile || editForm._removeFront"
+                          type="button"
+                          class="text-caption text-secondary-500 hover:text-error-600"
+                          @click="revertFrontImage"
+                        >
+                          Revert to original
+                        </button>
+                      </div>
+                      <div
+                        class="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-4 text-center transition-colors hover:border-accent-400"
+                        @click="editFrontInput?.click()"
+                        @dragover.prevent
+                        @drop.prevent="handleEditDrop($event, 'front')"
+                      >
+                        <input
+                          ref="editFrontInput"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="handleEditFileSelect($event, 'front')"
+                        />
+                        <div v-if="editFrontPreview" class="mb-3">
+                          <img
+                            :src="editFrontPreview"
+                            alt="Front Preview"
+                            class="mx-auto max-h-28 rounded"
+                          />
+                        </div>
+                        <div
+                          v-else-if="editForm.front_image_url && !editForm._removeFront"
+                          class="mb-3"
+                        >
+                          <img
+                            :src="getImageUrl(editForm.front_image_url)"
+                            alt="Current Front"
+                            class="mx-auto max-h-28 rounded opacity-70"
+                          />
+                        </div>
+                        <Icon
+                          v-else
+                          name="heroicons:photo"
+                          class="mx-auto mb-2 h-10 w-10 text-secondary-400"
+                        />
+                        <p class="text-body text-secondary-600">
+                          {{
+                            editFrontFile
+                              ? editFrontFile.name
+                              : (editForm._removeFront
+                                  ? '(Image will be removed)'
+                                  : 'Click or drag to replace front design')
+                          }}
+                        </p>
+                        <p class="text-helper mt-1">PNG, JPG up to 10MB</p>
+                      </div>
+                    </div>
+
+                    <!-- Back -->
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <label class="admin-label !mb-0">Back design</label>
+                        <button
+                          v-if="editBackFile || editForm._removeBack"
+                          type="button"
+                          class="text-caption text-secondary-500 hover:text-error-600"
+                          @click="revertBackImage"
+                        >
+                          Revert to original
+                        </button>
+                      </div>
+                      <div
+                        class="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-4 text-center transition-colors hover:border-accent-400"
+                        @click="editBackInput?.click()"
+                        @dragover.prevent
+                        @drop.prevent="handleEditDrop($event, 'back')"
+                      >
+                        <input
+                          ref="editBackInput"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="handleEditFileSelect($event, 'back')"
+                        />
+                        <div v-if="editBackPreview" class="mb-3">
+                          <img
+                            :src="editBackPreview"
+                            alt="Back Preview"
+                            class="mx-auto max-h-28 rounded"
+                          />
+                        </div>
+                        <div
+                          v-else-if="editForm.back_image_url && !editForm._removeBack"
+                          class="mb-3"
+                        >
+                          <img
+                            :src="getImageUrl(editForm.back_image_url)"
+                            alt="Current Back"
+                            class="mx-auto max-h-28 rounded opacity-70"
+                          />
+                        </div>
+                        <Icon
+                          v-else
+                          name="heroicons:photo"
+                          class="mx-auto mb-2 h-10 w-10 text-secondary-400"
+                        />
+                        <p class="text-body text-secondary-600">
+                          {{
+                            editBackFile
+                              ? editBackFile.name
+                              : (editForm._removeBack
+                                  ? '(Image will be removed)'
+                                  : 'Click or drag to replace back design')
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Visibility</p>
+                  <div class="mt-4 flex flex-wrap items-center gap-4">
+                    <label class="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        v-model="editForm.is_active"
+                        class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                      />
+                      <span class="text-body text-secondary-700">Active</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        v-model="editForm.is_hidden"
+                        class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                      />
+                      <span class="text-body text-secondary-700">Hidden</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <!-- Back Image Edit -->
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="block text-label text-secondary-700">Back Design</label>
-                  <button
-                    v-if="editBackFile || editForm._removeBack"
-                    type="button"
-                    @click="revertBackImage"
-                    class="text-caption text-secondary-500 hover:text-error-600"
-                  >
-                    Revert to original
-                  </button>
-                </div>
-                <div
-                  class="border-2 border-dashed border-secondary-300 rounded-lg p-4 text-center hover:border-secondary-400 transition-colors cursor-pointer"
-                  @click="editBackInput?.click()"
-                  @dragover.prevent
-                  @drop.prevent="handleEditDrop($event, 'back')"
+              <div class="admin-dialog-foot">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  @click="showEditModal = false"
                 >
-                  <input
-                    ref="editBackInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleEditFileSelect($event, 'back')"
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="admin-btn admin-btn--primary"
+                  :disabled="saving || !isEditFormValid"
+                >
+                  <Icon
+                    v-if="saving"
+                    name="heroicons:arrow-path"
+                    class="h-4 w-4 animate-spin"
                   />
-                  <div v-if="editBackPreview" class="mb-3">
-                    <img :src="editBackPreview" alt="Back Preview" class="max-h-28 mx-auto rounded" />
-                  </div>
-                  <div v-else-if="editForm.back_image_url && !editForm._removeBack" class="mb-3">
-                    <img :src="getImageUrl(editForm.back_image_url)" alt="Current Back" class="max-h-28 mx-auto rounded opacity-70" />
-                  </div>
-                  <Icon v-else name="heroicons:photo" class="h-10 w-10 text-secondary-400 mx-auto mb-2" />
-                  <p class="text-body text-secondary-600">
-                    {{ editBackFile ? editBackFile.name : (editForm._removeBack ? '(Image will be removed)' : 'Click or drag to replace back design (leave empty to keep)') }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="flex items-center cursor-pointer">
-                  <input type="checkbox" v-model="editForm.is_active" class="h-4 w-4 text-primary-600 border-secondary-300 rounded" />
-                  <span class="ml-2 text-body text-secondary-700">Active</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                  <input type="checkbox" v-model="editForm.is_hidden" class="h-4 w-4 text-primary-600 border-secondary-300 rounded" />
-                  <span class="ml-2 text-body text-secondary-700">Hidden</span>
-                </label>
-              </div>
-
-              <div class="flex justify-end gap-3 pt-4">
-                <button type="button" @click="showEditModal = false" class="btn btn-outline">Cancel</button>
-                <button type="submit" class="btn btn-primary" :disabled="saving || !isEditFormValid">
-                  <div v-if="saving" class="spinner mr-2"></div>
-                  {{ saving ? 'Saving...' : 'Save Changes' }}
+                  {{ saving ? 'Saving…' : 'Save changes' }}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
-    <!-- Delete Confirmation Modal -->
-    <Transition name="modal">
-      <div v-if="showDeleteModal && deleteTarget" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center p-4">
-          <div class="fixed inset-0 bg-black/50" @click="showDeleteModal = false"></div>
-          <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div class="text-center">
-              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-error-100 mb-4">
-                <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-error-600" />
-              </div>
-              <h3 class="modal-title text-secondary-900 mb-2">Delete Template</h3>
-              <p class="text-body text-secondary-500 mb-6">
-                Are you sure you want to delete "{{ deleteTarget.name }}"? This action cannot be undone.
-              </p>
-              <div class="flex justify-center gap-3">
-                <button @click="showDeleteModal = false" class="btn btn-outline">Cancel</button>
-                <button @click="deleteTemplate" class="btn bg-error-600 text-white hover:bg-error-700" :disabled="deleting">
-                  <div v-if="deleting" class="spinner mr-2"></div>
-                  {{ deleting ? 'Deleting...' : 'Delete' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
+    <!-- Shared confirmation dialog -->
+    <AdminConfirmDialog
+      v-model="confirmOpen"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-label="confirmConfig.confirmLabel"
+      :tone="confirmConfig.tone"
+      :loading="confirmBusy"
+      @confirm="runConfirm"
+    />
   </div>
 </template>
 
@@ -558,16 +864,43 @@ const config = useRuntimeConfig();
 // State
 const loading = ref(true);
 const templates = ref([]);
+const searchQuery = ref('');
 const currentFilter = ref('all');
 const planFilter = ref('');
 const showUploadModal = ref(false);
 const showEditModal = ref(false);
-const showDeleteModal = ref(false);
 const uploading = ref(false);
 const saving = ref(false);
-const deleting = ref(false);
 const editForm = ref(null);
-const deleteTarget = ref(null);
+
+// Confirmation dialog state
+const confirmOpen = ref(false);
+const confirmBusy = ref(false);
+const confirmConfig = ref({
+  title: '',
+  message: '',
+  confirmLabel: 'Delete',
+  tone: 'danger',
+});
+let confirmAction = null;
+
+const askConfirm = (config, action) => {
+  confirmConfig.value = { confirmLabel: 'Confirm', tone: 'primary', ...config };
+  confirmAction = action;
+  confirmOpen.value = true;
+};
+
+const runConfirm = async () => {
+  if (!confirmAction) return;
+  confirmBusy.value = true;
+  try {
+    await confirmAction();
+  } finally {
+    confirmBusy.value = false;
+    confirmOpen.value = false;
+    confirmAction = null;
+  }
+};
 
 // Upload form
 const uploadForm = reactive({
@@ -616,7 +949,16 @@ const planOptions = [
 // Computed
 const filteredTemplates = computed(() => {
   let result = templates.value;
-  
+
+  // Text search (name or description)
+  const q = searchQuery.value.trim().toLowerCase();
+  if (q) {
+    result = result.filter(t =>
+      (t.name || '').toLowerCase().includes(q) ||
+      (t.description || '').toLowerCase().includes(q)
+    );
+  }
+
   // Status filter
   if (currentFilter.value === 'active') {
     result = result.filter(t => !t.is_hidden && t.processing_status === 'completed');
@@ -627,17 +969,30 @@ const filteredTemplates = computed(() => {
   } else if (currentFilter.value === 'failed') {
     result = result.filter(t => t.processing_status === 'failed');
   }
-  
+
   // Plan filter
   if (planFilter.value) {
     result = result.filter(t => t.plan_types?.includes(planFilter.value));
   }
-  
+
   return result;
 });
 
+// Status label helper (title-case for readability)
+const statusLabel = (status) => {
+  if (!status) return '';
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};
+
+// Plan badge tone helper
+const planTone = (plan) => {
+  const map = { basic: 'neutral', premium: 'info', business: 'brass' };
+  return map[plan] || 'neutral';
+};
+
 // Clear all filters
 const clearFilters = () => {
+  searchQuery.value = '';
   currentFilter.value = 'all';
   planFilter.value = '';
 };
@@ -691,26 +1046,6 @@ const getImageUrl = (url) => {
     apiBase = "http://localhost:8000/api";
   }
   return `${apiBase.replace(/\/api\/?$/, '')}${url.startsWith('/') ? url : '/' + url}`;
-};
-
-const getStatusBadgeClass = (status) => {
-  const classes = {
-    completed: 'px-2 py-1 text-badge rounded-full bg-success-100 text-success-800',
-    processing: 'px-2 py-1 text-badge rounded-full bg-warning-100 text-warning-800',
-    pending: 'px-2 py-1 text-badge rounded-full bg-info-100 text-info-800',
-    failed: 'px-2 py-1 text-badge rounded-full bg-error-100 text-error-800',
-  };
-  return classes[status] || classes.pending;
-};
-
-const getPlanBadgeClass = (plan) => {
-  const classes = {
-    free: 'px-2 py-0.5 text-badge rounded-full bg-secondary-100 text-secondary-700',
-    basic: 'px-2 py-0.5 text-badge rounded-full bg-info-100 text-info-700',
-    premium: 'px-2 py-0.5 text-badge rounded-full bg-primary-100 text-primary-700',
-    business: 'px-2 py-0.5 text-badge rounded-full bg-primary-100 text-primary-700',
-  };
-  return classes[plan] || classes.free;
 };
 
 const openUploadModal = () => {
@@ -1023,28 +1358,26 @@ const retryProcessing = async (template) => {
 };
 
 const confirmDelete = (template) => {
-  deleteTarget.value = template;
-  showDeleteModal.value = true;
-};
-
-const deleteTemplate = async () => {
-  if (!deleteTarget.value) return;
-
-  deleting.value = true;
-  try {
-    const response = await $api.delete(`/admin/card-templates/${deleteTarget.value.id}`);
-    if (response.success) {
-      $toast.success('Template deleted');
-      showDeleteModal.value = false;
-      deleteTarget.value = null;
-      await loadTemplates();
+  askConfirm(
+    {
+      title: 'Delete template',
+      message: `Are you sure you want to delete "${template.name}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    },
+    async () => {
+      try {
+        const response = await $api.delete(`/admin/card-templates/${template.id}`);
+        if (response.success) {
+          $toast.success('Template deleted');
+          await loadTemplates();
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        $toast.error('Failed to delete template');
+      }
     }
-  } catch (error) {
-    console.error('Delete error:', error);
-    $toast.error('Failed to delete template');
-  } finally {
-    deleting.value = false;
-  }
+  );
 };
 
 // Lifecycle
@@ -1052,15 +1385,3 @@ onMounted(() => {
   loadTemplates();
 });
 </script>
-
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-</style>

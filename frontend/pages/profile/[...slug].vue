@@ -42,6 +42,32 @@
         .card-section { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .card-section:hover { transform: translateY(-4px); }
 
+        /* Edge-light glow — a warm brass rim that lets the panels catch light
+           rather than float flat on the ink. Kept low-alpha so it reads as
+           premium ambience, never neon. */
+        .profile-glow,
+        .section-grid > div {
+          transition: box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.45s ease;
+        }
+        .profile-glow:hover,
+        .section-grid > div:hover {
+          border-color: rgba(194, 160, 104, 0.34) !important;
+          box-shadow:
+            0 36px 72px -34px rgba(0, 0, 0, 0.98),
+            0 0 0 1px rgba(194, 160, 104, 0.24),
+            0 0 64px -14px rgba(194, 160, 104, 0.42),
+            inset 0 1px 0 rgba(194, 160, 104, 0.3) !important;
+        }
+        /* Section header icon chips carry a faint warm bloom at rest */
+        .section-grid > div > div:first-child > div:first-child {
+          box-shadow: 0 0 20px -7px rgba(194, 160, 104, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        }
+        /* Quick-action chips answer the cursor with a soft rim light */
+        .quick-actions > button:hover {
+          border-color: rgba(194, 160, 104, 0.55) !important;
+          box-shadow: 0 0 26px -8px rgba(194, 160, 104, 0.5) !important;
+        }
+
         :root {
           --sat: env(safe-area-inset-top, 0px);
           --sab: env(safe-area-inset-bottom, 0px);
@@ -644,6 +670,7 @@
       <template v-else>
         <!-- Hero Section - Enhanced -->
         <div
+          class="profile-glow"
           :style="{
             position: 'relative',
             background: responsive.cardBackground,
@@ -1107,6 +1134,7 @@
         <!-- Quick Actions -->
         <div
           v-if="quickActions.length > 0"
+          class="quick-actions"
           :style="{
             display: 'flex',
             justifyContent: 'center',
@@ -1171,7 +1199,7 @@
         </div>
 
         <!-- Main Content Grid -->
-        <div :style="{ display: 'grid', gap: responsive.sectionGap }">
+        <div class="section-grid" :style="{ display: 'grid', gap: responsive.sectionGap }">
           <!-- Company Card (Combined: Company Info + Team) -->
           <div
             v-if="showCompanySection || showTeamSection"
@@ -1607,7 +1635,7 @@
               borderRadius: responsive.cardRadius,
               padding: responsive.cardPadding,
               boxShadow: responsive.cardShadow,
-              transition: 'box-shadow 0.3s ease',
+              transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
             }"
           >
             <div
@@ -4890,9 +4918,10 @@ const responsive = computed(() => {
     // than a soft, generic "app card".
     cs.cardRadius = sm ? '12px' : ph ? '14px' : mob ? '15px' : tab ? '16px' : '18px';
     // Deep, diffuse elevation (not a flat drop shadow) — reads as engineered light
+    // plus a low-alpha brass rim so the panel edge catches the ambient glow.
     cs.cardShadow = isDarkTheme
-      ? '0 22px 48px -26px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(194, 160, 104, 0.18)'
-      : '0 16px 36px -22px rgba(28, 26, 21, 0.45), inset 0 1px 0 rgba(138, 106, 51, 0.18)';
+      ? '0 22px 48px -26px rgba(0, 0, 0, 0.92), 0 0 46px -14px rgba(194, 160, 104, 0.26), inset 0 1px 0 rgba(194, 160, 104, 0.18)'
+      : '0 16px 36px -22px rgba(28, 26, 21, 0.45), 0 0 40px -16px rgba(138, 106, 51, 0.22), inset 0 1px 0 rgba(138, 106, 51, 0.18)';
     cs.cardHoverShadow = isDarkTheme
       ? '0 30px 64px -28px rgba(0, 0, 0, 0.98), 0 0 0 1px rgba(194, 160, 104, 0.18)'
       : '0 24px 50px -24px rgba(28, 26, 21, 0.5)';

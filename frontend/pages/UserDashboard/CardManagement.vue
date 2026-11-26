@@ -148,24 +148,24 @@
                   <!-- Payment Instructions Panel: pending_payment only -->
                   <div
                     v-if="card.status === 'pending_payment'"
-                    class="border border-orange-200 bg-orange-50 rounded-lg p-5"
+                    class="border border-warning-200 bg-warning-50 rounded-lg p-5"
                   >
                     <div class="flex items-start space-x-4">
                       <div class="shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                        <div class="h-10 w-10 rounded-full bg-warning-100 flex items-center justify-center text-warning-600">
                           <Icon name="heroicons:banknotes" class="h-5 w-5" />
                         </div>
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="text-body font-semibold text-orange-900">
+                          <h4 class="text-body font-semibold text-warning-900">
                             Complete Payment — Awaiting Payment
                           </h4>
-                          <p class="text-body text-orange-800 mt-1">
+                          <p class="text-body text-warning-800 mt-1">
                             Please make payment for this order using the bank details below, then upload your payment proof.
                           </p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-lg border border-orange-100 p-4 text-body">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-lg border border-warning-100 p-4 text-body">
                           <div>
                             <p class="text-secondary-500">Bank Name</p>
                             <p class="font-medium text-secondary-900">Maybank Berhad</p>
@@ -207,20 +207,20 @@
                   <!-- Awaiting verification notice -->
                   <div
                     v-if="card.status === 'awaiting_payment_verification'"
-                    class="border border-yellow-200 bg-yellow-50 rounded-lg p-5"
+                    class="border border-warning-200 bg-warning-50 rounded-lg p-5"
                   >
                     <div class="flex items-start space-x-4">
                       <div class="shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700">
+                        <div class="h-10 w-10 rounded-full bg-warning-100 flex items-center justify-center text-warning-700">
                           <Icon name="heroicons:clock" class="h-5 w-5" />
                         </div>
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="text-body font-semibold text-yellow-900">
+                          <h4 class="text-body font-semibold text-warning-900">
                             Awaiting Payment Verification
                           </h4>
-                          <p class="text-body text-yellow-800 mt-1">
+                          <p class="text-body text-warning-800 mt-1">
                             Your payment proof is being reviewed by admin. You will receive a notification after verification is complete. You may upload a new proof if needed.
                           </p>
                         </div>
@@ -249,26 +249,26 @@
                   <!-- Confirm Received: shipped state prominent CTA -->
                   <div
                     v-if="card.status === 'shipped'"
-                    class="border border-blue-200 bg-blue-50 rounded-lg p-5"
+                    class="border border-info-200 bg-info-50 rounded-lg p-5"
                   >
                     <div class="flex items-start space-x-4">
                       <div class="shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
+                        <div class="h-10 w-10 rounded-full bg-info-100 flex items-center justify-center text-info-700">
                           <Icon name="heroicons:truck" class="h-5 w-5" />
                         </div>
                       </div>
                       <div class="flex-1 space-y-3">
                         <div>
-                          <h4 class="text-body font-semibold text-blue-900">
+                          <h4 class="text-body font-semibold text-info-900">
                             Card Has Been Shipped!
                           </h4>
-                          <p class="text-body text-blue-800 mt-1">
+                          <p class="text-body text-info-800 mt-1">
                             Your NFC card has been shipped. If you have physically received the card, please click the button below to confirm receipt and activate your subscription.
                           </p>
                         </div>
                         <div
                           v-if="card.tracking_number"
-                          class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-md border border-blue-100 p-4 text-body"
+                          class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-md border border-info-100 p-4 text-body"
                         >
                           <div>
                             <p class="text-secondary-500">Courier</p>
@@ -308,20 +308,20 @@
                   <!-- Cancelled notice -->
                   <div
                     v-if="card.status === 'cancelled'"
-                    class="border border-red-200 bg-red-50 rounded-lg p-5"
+                    class="border border-error-200 bg-error-50 rounded-lg p-5"
                   >
                     <div class="flex items-start space-x-4">
                       <div class="shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-700">
+                        <div class="h-10 w-10 rounded-full bg-error-100 flex items-center justify-center text-error-700">
                           <Icon name="heroicons:x-circle" class="h-5 w-5" />
                         </div>
                       </div>
                       <div class="flex-1">
-                        <h4 class="text-body font-semibold text-red-900">Order Cancelled</h4>
-                        <p class="text-body text-red-800 mt-1" v-if="card.cancelled_reason">
+                        <h4 class="text-body font-semibold text-error-900">Order Cancelled</h4>
+                        <p class="text-body text-error-800 mt-1" v-if="card.cancelled_reason">
                           Reason: {{ card.cancelled_reason }}
                         </p>
-                        <p class="text-body text-red-700 mt-1">
+                        <p class="text-body text-error-700 mt-1">
                           Please contact customer support if you believe this is a mistake.
                         </p>
                       </div>
@@ -1709,7 +1709,7 @@ const upgradeToPremium = () => {
   // Send the user to the real, working plan-selection / upgrade route.
   // (There is no dedicated /upgrade page.)
   $toast.info("Opening upgrade options...");
-  navigateTo("/UserDashboard/PlanSelection");
+  navigateTo("/Onboarding/plan");
 };
 
 const loadCardTemplates = async (plan) => {
@@ -1864,7 +1864,8 @@ const goToProfileBuilderForCard = (card) => {
     profileBuilderPath =
       "/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder";
   } else {
-    profileBuilderPath = "/UserDashboard/ProfileBuilder";
+    profileBuilderPath =
+      "/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder";
   }
 
   // Priority: nfcTag.id → nfc_card_id → card.id
@@ -2081,16 +2082,16 @@ const viewAnalytics = (card) => {
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    pending_payment: "bg-orange-100 text-orange-800",
-    awaiting_payment_verification: "bg-yellow-100 text-yellow-800",
-    payment_verified: "bg-emerald-100 text-emerald-800",
-    processing: "bg-purple-100 text-purple-800",
-    shipped: "bg-blue-100 text-blue-800",
-    delivered: "bg-green-100 text-green-800",
+    pending_payment: "bg-warning-100 text-warning-800",
+    awaiting_payment_verification: "bg-warning-100 text-warning-800",
+    payment_verified: "bg-success-100 text-success-800",
+    processing: "bg-primary-100 text-primary-800",
+    shipped: "bg-info-100 text-info-800",
+    delivered: "bg-success-100 text-success-800",
     active: "bg-success-100 text-success-800",
     inactive: "bg-secondary-100 text-secondary-800",
     expired: "bg-warning-100 text-warning-800",
-    cancelled: "bg-red-100 text-red-800",
+    cancelled: "bg-error-100 text-error-800",
     replacement: "bg-info-100 text-info-800",
   };
   return classes[status] || classes["inactive"];
@@ -2169,7 +2170,7 @@ onMounted(async () => {
       "🚫 Access denied: User is still in onboarding process (is_new_user=true, no active subscription, no valid plan, and no existing card orders)"
     );
     $toast.warning("Please complete plan selection and payment first.");
-    navigateTo("/UserDashboard/PlanSelection");
+    navigateTo("/Onboarding/plan");
     return;
   }
 

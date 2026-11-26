@@ -1,357 +1,617 @@
-<!-- pages/UserDashboard/index.vue - User Dashboard Landing Page -->
+<!-- pages/UserDashboard/index.vue — portal home for Free / Basic / Premium / Business.
+     Everything shown is real account state: plan + status from /me (auth store),
+     plan inclusions from /plan-prices/public, reach from the analytics endpoint
+     the user is entitled to, and team seats from /business/card-quota. -->
 <template>
-  <div class="relative">
-    <!-- Welcome Header -->
-    <div class="mb-8">
-      <h1 class="page-title text-secondary-900">
-        Welcome back, {{ displayName }}
-      </h1>
-      <p class="mt-2 text-secondary-600">
-        Here's what's happening with your NFC cards today.
-      </p>
-    </div>
+  <div>
+    <AdminPageHeader
+      :eyebrow="eyebrow"
+      eyebrow-icon="heroicons:sparkles"
+      :title="`Welcome back, ${firstName}`"
+      :description="headline"
+    >
+      <template #actions>
+        <!-- Mobile only: md+ uses the same button in the portal top bar.
+             The wrapper owns visibility because .admin-btn sets display. -->
+        <span v-if="publicProfileUrl" class="inline-flex md:hidden">
+          <a :href="publicProfileUrl" target="_blank" rel="noopener" class="admin-btn admin-btn--outline">
+            <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+            View public profile
+          </a>
+        </span>
+        <NuxtLink :to="primaryAction.to" class="admin-btn admin-btn--primary">
+          <Icon :name="primaryAction.icon" class="h-4 w-4" />
+          {{ primaryAction.label }}
+        </NuxtLink>
+      </template>
+    </AdminPageHeader>
 
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div v-for="stat in statsCards" :key="stat.name" class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div :class="['p-3 rounded-xl', stat.bgColor]">
-              <Icon :name="stat.icon" class="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">
-              {{ stat.name }}
-            </p>
-            <p class="stat-value text-secondary-900">
-              {{ stat.value }}
-            </p>
-          </div>
-          <div class="ml-auto">
-            <span v-if="stat.badge" :class="['px-2.5 py-1 text-badge rounded-full', stat.badgeClass]">
-              {{ stat.badge }}
-            </span>
-          </div>
+    <!-- Attention items (only real, actionable states) -->
+    <div v-if="alerts.length" class="mb-6 space-y-3">
+      <div
+        v-for="alert in alerts"
+        :key="alert.key"
+        class="portal-alert"
+        :class="`portal-alert--${alert.tone}`"
+        role="status"
+      >
+        <Icon :name="alert.icon" class="mt-0.5 h-5 w-5 shrink-0" />
+        <div class="min-w-0 flex-1">
+          <p class="text-body font-semibold">{{ alert.title }}</p>
+          <p class="text-body-sm opacity-90">{{ alert.text }}</p>
         </div>
-        <div class="mt-4">
-          <div class="h-2 bg-secondary-100 rounded-full overflow-hidden">
-            <div
-              :class="['h-full rounded-full transition-all duration-700', stat.progressColor]"
-              :style="{ width: stat.progress }"
-            ></div>
-          </div>
-          <p class="mt-2 text-helper">{{ stat.progressLabel }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="mb-8">
-      <h2 class="section-title text-secondary-900 mb-4">Quick Actions</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <NuxtLink
-          v-for="action in quickActions"
-          :key="action.label"
-          :to="action.href"
-          :class="[
-            'group card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col h-full',
-            action.disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : '',
-          ]"
-        >
-          <div :class="['inline-flex p-2.5 rounded-xl flex-shrink-0 w-fit', action.iconBg]">
-            <Icon :name="action.icon" :class="['h-5 w-5', action.iconText]" />
-          </div>
-          <div class="mt-4 flex-1 flex flex-col">
-            <h3 class="card-title text-secondary-900 leading-snug">{{ action.label }}</h3>
-            <p class="mt-1 text-helper leading-relaxed">{{ action.description }}</p>
-          </div>
-          <div v-if="action.disabled" class="mt-3 pt-3 border-t border-secondary-100">
-            <span class="text-micro leading-relaxed font-medium text-secondary-500 block">{{ action.disabledMessage }}</span>
-          </div>
+        <NuxtLink v-if="alert.to" :to="alert.to" class="admin-btn admin-btn--sm admin-btn--outline shrink-0 bg-white">
+          {{ alert.cta }}
         </NuxtLink>
       </div>
     </div>
 
-    <!-- Next Steps / Plan Info -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Current Plan Card -->
-      <div class="card p-6 lg:col-span-2">
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="card-title text-secondary-900">Current Plan</h3>
-            <p class="mt-1 card-subtitle">Your subscription details and status</p>
-          </div>
-          <span :class="['px-3 py-1 text-badge rounded-full uppercase tracking-wide', planBadgeClass]">
-            {{ planLabel }}
-          </span>
-        </div>
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="stat-label text-secondary-500">Subscription</p>
-            <p class="mt-1 stat-value text-secondary-900">{{ subscriptionStatus }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="stat-label text-secondary-500">Active Cards</p>
-            <p class="mt-1 stat-value text-secondary-900">{{ nfcCardsCount }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-secondary-50 border border-secondary-100">
-            <p class="stat-label text-secondary-500">Builder Access</p>
-            <p class="mt-1 stat-value text-secondary-900">{{ builderAccessStatus }}</p>
-          </div>
-        </div>
-        <div v-if="resolvedPlan !== 'business'" class="mt-6 pt-6 border-t border-secondary-100 flex items-center justify-between">
-          <div class="max-w-[62%]">
-            <p class="text-body font-semibold text-secondary-900">
-              {{ resolvedPlan === 'premium' ? 'Need more features?' : 'Ready to unlock more?'}}
-            </p>
-            <p class="mt-0.5 text-helper leading-relaxed">
-              {{ resolvedPlan === 'premium'
-                ? 'Upgrade to Business for team seats and full analytics.'
-                : 'Upgrade to Premium for Profile Builder, custom branding, and unlimited taps.' }}
-            </p>
-          </div>
-          <NuxtLink
-            to="/UserDashboard/PlanSelection"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-button text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm hover:shadow whitespace-nowrap flex-shrink-0"
-          >
-            <Icon name="heroicons:arrow-trending-up" class="h-4 w-4" />
-            <span class="truncate max-w-[180px]">
-              {{ resolvedPlan === 'premium' ? 'Upgrade to Business' : 'Upgrade to Premium' }}
-            </span>
-          </NuxtLink>
-        </div>
-      </div>
-
-      <!-- Getting Started -->
-      <div class="card p-6">
-        <h3 class="card-title text-secondary-900">Getting Started</h3>
-        <p class="mt-1 card-subtitle">Complete these steps</p>
-        <div class="mt-5 space-y-3">
-          <div v-for="(step, idx) in gettingStartedSteps" :key="idx" class="flex items-start gap-3">
-            <div :class="[
-              'flex-shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-badge',
-              step.completed ? 'bg-success-100 text-success-700' : 'bg-secondary-100 text-secondary-500'
-            ]">
-              <Icon v-if="step.completed" name="heroicons:check" class="h-3 w-3" />
-              <span v-else>{{ idx + 1 }}</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p :class="['text-body font-medium', step.completed ? 'text-secondary-500 line-through' : 'text-secondary-900']">
-                {{ step.label }}
-              </p>
-              <p v-if="step.description" class="text-helper mt-0.5">{{ step.description }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- KPIs -->
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <AdminStatTile
+        label="NFC cards"
+        :value="access.cards.length"
+        icon="heroicons:credit-card"
+        :hint="cardsHint"
+      />
+      <AdminStatTile
+        label="Profile Builder"
+        :value="access.can.builder ? 'Unlocked' : 'Locked'"
+        icon="heroicons:identification"
+        :hint="access.can.builder ? `${access.planLabel} builder` : 'Unlocks after payment is verified'"
+      />
+      <AdminStatTile
+        label="Taps · last 30 days"
+        :value="access.can.analytics ? formatNumber(reach.taps) : '—'"
+        icon="heroicons:cursor-arrow-rays"
+        :loading="access.can.analytics && reach.loading"
+        :hint="reachHint"
+      />
+      <AdminStatTile
+        v-if="access.canManageBusiness && team.loaded"
+        :label="team.total > 0 ? 'Team seats' : 'Team members'"
+        :value="team.total > 0 ? `${team.used}/${team.total}` : team.used"
+        icon="heroicons:users"
+        :hint="
+          team.total > 0
+            ? `${team.available} seat${team.available === 1 ? '' : 's'} available`
+            : 'No seat quota set on this account yet'
+        "
+      />
+      <AdminStatTile
+        v-else
+        label="Unread notifications"
+        :value="unreadCount"
+        icon="heroicons:bell"
+        :hint="unreadCount > 0 ? 'Open the bell to review' : 'You are all caught up'"
+      />
     </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Cards -->
+      <AdminSectionCard
+        class="lg:col-span-2"
+        :title="access.isBusiness ? 'Business cards' : 'Your cards'"
+        :subtitle="access.cards.length ? 'Status of every card on your account' : ''"
+        flush
+      >
+        <template v-if="access.cards.length" #header-actions>
+          <NuxtLink :to="access.routes.cards" class="admin-btn admin-btn--ghost admin-btn--sm">
+            Manage cards
+            <Icon name="heroicons:arrow-right" class="h-4 w-4" />
+          </NuxtLink>
+        </template>
+
+        <ul v-if="access.cards.length" class="divide-y divide-secondary-100">
+          <li v-for="card in visibleCards" :key="card.id" class="flex items-center gap-4 px-6 py-4">
+            <span class="portal-card-thumb" :class="`is-${String(card.subscription_plan || 'free').toLowerCase()}`">
+              <Icon name="heroicons:wifi" class="h-4 w-4 rotate-90" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-body font-semibold text-secondary-900">
+                {{ card.card_name || card.name || `Card #${card.card_number || card.id}` }}
+              </p>
+              <p class="truncate text-caption text-secondary-500">
+                {{ planName(card.subscription_plan) }} card
+                <template v-if="card.nfc_card_id"> · {{ card.nfc_card_id }}</template>
+              </p>
+            </div>
+            <AdminStatusBadge :status="String(card.status || '').toLowerCase()" :label="card.status_label || card.status" />
+          </li>
+        </ul>
+        <p
+          v-if="access.cards.length > visibleCards.length"
+          class="border-t border-secondary-100 px-6 py-3 text-caption text-secondary-500"
+        >
+          + {{ access.cards.length - visibleCards.length }} more on the
+          <NuxtLink :to="access.routes.cards" class="font-semibold text-primary-600">cards page</NuxtLink>
+        </p>
+
+        <AdminEmptyState
+          v-if="!access.cards.length"
+          icon="heroicons:credit-card"
+          title="No NFC card yet"
+          :description="
+            access.isFree
+              ? 'Your digital profile works without a card. Add a physical NFC card to share it with a single tap.'
+              : 'Order a card to start sharing your profile with a tap.'
+          "
+        >
+          <template #actions>
+            <NuxtLink v-if="access.can.builder" :to="access.routes.builder" class="admin-btn admin-btn--outline">
+              Edit my profile
+            </NuxtLink>
+            <NuxtLink :to="access.isBusiness ? access.routes.cards : '/Onboarding/plan'" class="admin-btn admin-btn--primary">
+              {{ access.isBusiness ? 'Order cards' : 'Get an NFC card' }}
+            </NuxtLink>
+          </template>
+        </AdminEmptyState>
+      </AdminSectionCard>
+
+      <!-- Plan -->
+      <AdminSectionCard title="Your plan" accent>
+        <template #header-actions>
+          <AdminStatusBadge :status="access.plan" :label="access.planLabel" />
+        </template>
+
+        <div class="flex items-center gap-2 text-body">
+          <span class="portal-dot" :class="`is-${planStatus.tone}`"></span>
+          <span class="font-medium text-secondary-800">{{ planStatus.label }}</span>
+        </div>
+
+        <p v-if="access.businessRole" class="mt-2 text-body-sm text-secondary-600">
+          Your role: <span class="font-semibold text-secondary-800">{{ roleLabel }}</span>
+          <template v-if="access.isBusinessEmployee"> in your company's Business account</template>
+        </p>
+
+        <div v-if="planFeatures.length" class="mt-5">
+          <p class="admin-kpi-label mb-2">Included</p>
+          <ul class="space-y-2">
+            <li v-for="feature in planFeatures" :key="feature" class="flex items-start gap-2 text-body text-secondary-700">
+              <Icon name="heroicons:check-circle" class="mt-0.5 h-4 w-4 shrink-0 text-accent-600" />
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+        </div>
+        <p v-else-if="access.isFree" class="mt-4 text-body text-secondary-600">
+          The Free plan gives you a digital profile you can share by link or QR code. Paid plans add a physical NFC card and more profile sections.
+        </p>
+
+        <template v-if="!access.isBusiness" #footer>
+          <NuxtLink to="/Onboarding/plan" class="admin-btn admin-btn--outline w-full justify-center">
+            <Icon name="heroicons:arrows-up-down" class="h-4 w-4" />
+            {{ access.isFree ? 'See paid plans' : 'Compare plans' }}
+          </NuxtLink>
+        </template>
+      </AdminSectionCard>
+    </div>
+
+    <!-- Shortcuts -->
+    <h2 class="admin-kpi-label mb-3 mt-8">Shortcuts</h2>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <component
+        :is="item.locked ? 'button' : NuxtLinkComp"
+        v-for="item in shortcuts"
+        :key="item.label"
+        v-bind="item.locked ? { type: 'button' } : { to: item.to }"
+        class="portal-shortcut"
+        :class="{ 'is-locked': item.locked }"
+        @click="item.locked && $toast.info(item.lockedMessage)"
+      >
+        <span class="admin-kpi-ico">
+          <Icon :name="item.locked ? 'heroicons:lock-closed' : item.icon" class="h-5 w-5" />
+        </span>
+        <span class="mt-3 block text-body font-semibold text-secondary-900">{{ item.label }}</span>
+        <span class="mt-0.5 block text-body-sm text-secondary-600">
+          {{ item.locked ? item.lockedMessage : item.description }}
+        </span>
+      </component>
+    </div>
+
+    <!-- Setup progress (hidden once everything is done) -->
+    <AdminSectionCard v-if="setupSteps.some((s) => !s.done)" class="mt-8" title="Set up your NFCGo" :subtitle="`${completedSteps} of ${setupSteps.length} done`">
+      <ol class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <li v-for="(step, idx) in setupSteps" :key="step.label" class="portal-step" :class="{ 'is-done': step.done }">
+          <span class="portal-step-num">
+            <Icon v-if="step.done" name="heroicons:check" class="h-3.5 w-3.5" />
+            <template v-else>{{ idx + 1 }}</template>
+          </span>
+          <div class="min-w-0">
+            <p class="text-body font-semibold text-secondary-900">{{ step.label }}</p>
+            <p class="text-body-sm text-secondary-600">{{ step.description }}</p>
+            <NuxtLink v-if="!step.done && step.to" :to="step.to" class="mt-1 inline-flex text-body-sm font-semibold text-primary-600">
+              {{ step.cta }} →
+            </NuxtLink>
+          </div>
+        </li>
+      </ol>
+    </AdminSectionCard>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from "~/stores/auth";
+import { resolveComponent } from "vue";
+import { PORTAL_ROUTES, portalPlanStatus } from "~/composables/usePortalAccess";
 
 definePageMeta({
   layout: "user-dashboard",
   middleware: ["auth"],
 });
 
+useHead({ title: "Dashboard — NFCGo" });
+
+const NuxtLinkComp = resolveComponent("NuxtLink");
+const { $api } = useNuxtApp();
 const authStore = useAuthStore();
-const router = useRouter();
+const access = usePortalAccess();
+const { planPrices, loadPrices } = usePlanPrices();
+const { unreadCount, loadUnreadCount } = useNotifications();
 
-const displayName = computed(() => {
+const PLAN_NAMES = { free: "Free", basic: "Basic", premium: "Premium", business: "Business" };
+const planName = (p) => PLAN_NAMES[String(p || "free").toLowerCase()] || "Free";
+const ROLE_LABELS = { owner: "Owner", admin: "Admin", card_manager: "Card manager", member: "Member" };
+
+const firstName = computed(() => {
   const u = authStore.user;
-  return u?.full_name || u?.name || u?.email?.split('@')[0] || 'User';
+  return u?.first_name || u?.full_name?.split(" ")[0] || u?.email?.split("@")[0] || "there";
 });
 
-const resolvedPlan = computed(() => authStore.resolvedSubscriptionPlan || 'free');
+const roleLabel = computed(() => ROLE_LABELS[access.value.businessRole] || "Member");
+const planStatus = computed(() => portalPlanStatus(access.value));
 
-const planLabel = computed(() => {
-  const p = resolvedPlan.value;
-  return p.charAt(0).toUpperCase() + p.slice(1);
+const eyebrow = computed(() =>
+  access.value.businessRole ? `Business · ${roleLabel.value}` : `${access.value.planLabel} plan`,
+);
+
+const headline = computed(() => {
+  const a = access.value;
+  if (a.isBusiness && a.canManageBusiness) return "Manage your team's cards, profiles and reach from one place.";
+  if (a.isBusiness) return "Keep your business profile up to date and track how it is being shared.";
+  if (!a.cards.length) return "Your digital profile is ready to build. Add an NFC card whenever you want to share it with a tap.";
+  return "Here is how your cards and profile are doing.";
 });
 
-const planBadgeClass = computed(() => {
-  const map = {
-    free: 'bg-secondary-100 text-secondary-700',
-    basic: 'bg-blue-100 text-blue-700',
-    premium: 'bg-purple-100 text-purple-700',
-    business: 'bg-green-100 text-green-700',
-  };
-  return map[resolvedPlan.value] || map.free;
+const cardsHint = computed(() => {
+  const a = access.value;
+  if (!a.cards.length) return "No card ordered yet";
+  const active = a.cards.filter((c) => String(c.status).toLowerCase() === "active").length;
+  return `${active} active${a.pendingCards.length ? ` · ${a.pendingCards.length} awaiting payment` : ""}`;
 });
 
-const nfcCardsCount = computed(() => {
-  const cards = authStore.user?.nfc_cards ?? authStore.user?.nfcCards;
-  return Array.isArray(cards) ? cards.length : 0;
+// Same URL rules as the portal shell's preview (first card)
+const publicProfileUrl = computed(() => {
+  const first = access.value.cards[0];
+  if (!first) return null;
+  return typeof first.public_url === "string" && first.public_url.startsWith("/profile/")
+    ? first.public_url
+    : null;
 });
 
-const subscriptionStatus = computed(() => {
-  if (authStore.user?.subscription_active === true) {
-    return 'Active';
+const visibleCards = computed(() => access.value.cards.slice(0, 5));
+
+const planFeatures = computed(() => {
+  const row = planPrices.value.find((p) => p.plan_type === access.value.plan);
+  return Array.isArray(row?.features) ? row.features.slice(0, 6) : [];
+});
+
+const primaryAction = computed(() => {
+  const a = access.value;
+  if (a.pendingCards.length) return { label: "Complete payment", to: a.routes.cards, icon: "heroicons:credit-card" };
+  if (a.can.builder) return { label: "Edit profile", to: a.routes.builder, icon: "heroicons:pencil-square" };
+  return { label: "Manage cards", to: a.routes.cards, icon: "heroicons:credit-card" };
+});
+
+// ---------------------------------------------------------------------------
+// Alerts — derived from card / subscription status only
+// ---------------------------------------------------------------------------
+const alerts = computed(() => {
+  const a = access.value;
+  const list = [];
+  if (a.deactivated) {
+    list.push({
+      key: "deactivated",
+      tone: "danger",
+      icon: "heroicons:exclamation-triangle",
+      title: "Your free window has ended",
+      text: "Your profile is no longer active. Choose a plan with an NFC card to reactivate it.",
+      to: "/Onboarding/plan",
+      cta: "Choose a plan",
+    });
   }
-  return authStore.hasAnyPhysicalNfcCard ? 'Pending Activation' : 'Not Started';
-});
-
-const builderAccessStatus = computed(() => {
-  if (authStore.canAccessPaidProfileBuilder()) {
-    return 'Unlocked';
+  const awaitingProof = a.cards.filter((c) => String(c.status).toLowerCase() === "pending_payment");
+  if (awaitingProof.length) {
+    list.push({
+      key: "pending",
+      tone: "warning",
+      icon: "heroicons:clock",
+      title: `${awaitingProof.length} card order${awaitingProof.length > 1 ? "s" : ""} waiting for payment`,
+      text: "Finish payment or upload your transfer receipt so we can verify it.",
+      to: a.routes.cards,
+      cta: "Go to cards",
+    });
   }
-  return 'Locked';
+  const verifying = a.cards.filter((c) => String(c.status).toLowerCase() === "awaiting_payment_verification");
+  if (verifying.length) {
+    list.push({
+      key: "verifying",
+      tone: "info",
+      icon: "heroicons:shield-check",
+      title: "Payment under review",
+      text: "We have your payment proof and will notify you once it is verified.",
+    });
+  }
+  const arrived = a.cards.filter((c) => ["shipped", "delivered"].includes(String(c.status).toLowerCase()));
+  if (arrived.length) {
+    list.push({
+      key: "arrived",
+      tone: "info",
+      icon: "heroicons:truck",
+      title: "Your card is on its way",
+      text: "Once it arrives, confirm receipt on the cards page to activate it.",
+      to: a.routes.cards,
+      cta: "Activate card",
+    });
+  }
+  return list;
 });
 
-const canAccessAnalytics = computed(() => {
-  return authStore.user?.subscription_active === true || authStore.hasAccessPaidBuilderCards;
-});
-
-const statsCards = computed(() => {
-  const cards = [
+// ---------------------------------------------------------------------------
+// Shortcuts — lock state comes from usePortalAccess
+// ---------------------------------------------------------------------------
+const shortcuts = computed(() => {
+  const a = access.value;
+  const items = [
     {
-      name: 'NFC Cards',
-      value: nfcCardsCount.value,
-      icon: 'heroicons:credit-card',
-      bgColor: 'bg-primary-500',
-      badge: nfcCardsCount.value > 0 ? 'On Track' : 'Start',
-      badgeClass: nfcCardsCount.value > 0 ? 'bg-success-100 text-success-700' : 'bg-warning-100 text-warning-700',
-      progress: nfcCardsCount.value > 0 ? '75%' : '10%',
-      progressColor: 'bg-primary-500',
-      progressLabel: nfcCardsCount.value > 0 ? `${nfcCardsCount.value} card(s) linked` : 'Order your first card',
+      label: "Profile Builder",
+      description: "Edit what people see when they tap your card",
+      icon: "heroicons:identification",
+      to: a.routes.builder,
+      locked: !a.can.builder,
+      lockedMessage: "Unlocks once your card payment is verified.",
     },
     {
-      name: 'Subscription',
-      value: planLabel.value,
-      icon: 'heroicons:sparkles',
-      bgColor: 'bg-success-500',
-      badge: authStore.user?.subscription_active ? 'Active' : (authStore.hasAnyPhysicalNfcCard ? 'Pending' : 'Inactive'),
-      badgeClass: authStore.user?.subscription_active ? 'bg-success-100 text-success-700' : (authStore.hasAnyPhysicalNfcCard ? 'bg-warning-100 text-warning-700' : 'bg-secondary-100 text-secondary-600'),
-      progress: authStore.user?.subscription_active ? '100%' : (authStore.hasAnyPhysicalNfcCard ? '50%' : '0%'),
-      progressColor: 'bg-success-500',
-      progressLabel: authStore.user?.subscription_active ? 'All features available' : (authStore.hasAnyPhysicalNfcCard ? 'Payment pending verification' : 'Choose a plan to start'),
-    },
-    {
-      name: 'Profile Builder',
-      value: authStore.canAccessPaidProfileBuilder() ? 'Ready' : 'Locked',
-      icon: 'heroicons:user',
-      bgColor: 'bg-warning-500',
-      badge: authStore.canAccessPaidProfileBuilder() ? 'Open' : 'Locked',
-      badgeClass: authStore.canAccessPaidProfileBuilder() ? 'bg-success-100 text-success-700' : 'bg-error-100 text-error-700',
-      progress: authStore.canAccessPaidProfileBuilder() ? '100%' : '0%',
-      progressColor: 'bg-warning-500',
-      progressLabel: authStore.canAccessPaidProfileBuilder() ? 'Customize your profile' : 'Verify payment first',
-    },
-    {
-      name: 'Analytics',
-      value: canAccessAnalytics.value ? 'Live' : 'Soon',
-      icon: 'heroicons:chart-bar',
-      bgColor: 'bg-info-500',
-      badge: canAccessAnalytics.value ? 'View' : 'Locked',
-      badgeClass: canAccessAnalytics.value ? 'bg-success-100 text-success-700' : 'bg-secondary-100 text-secondary-600',
-      progress: canAccessAnalytics.value ? '100%' : '0%',
-      progressColor: 'bg-info-500',
-      progressLabel: canAccessAnalytics.value ? 'Track profile visits & taps' : 'Activates after payment verified',
+      label: "Analytics",
+      description: "Taps, visitors and where they come from",
+      icon: "heroicons:chart-bar",
+      to: a.routes.analytics,
+      locked: !a.can.analytics,
+      lockedMessage: "Available once your plan is active.",
     },
   ];
-  return cards;
+  if (a.can.employees) {
+    items.push({
+      label: "Team Members",
+      description: "Add people, roles and card assignments",
+      icon: "heroicons:users",
+      to: PORTAL_ROUTES.employees,
+    });
+  } else {
+    items.push({
+      label: a.isBusiness ? "Business Cards" : "My Cards",
+      description: "Order, track and activate cards",
+      icon: "heroicons:credit-card",
+      to: a.routes.cards,
+    });
+  }
+  items.push({
+    label: "Settings",
+    description: "Account, security and notifications",
+    icon: "heroicons:cog-6-tooth",
+    to: PORTAL_ROUTES.settings,
+  });
+  return items;
 });
 
-const cardManagementHref = computed(() => {
-  return resolvedPlan.value === 'business'
-    ? '/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement'
-    : '/UserDashboard/CardManagement';
-});
-
-const profileBuilderHref = computed(() => {
-  const p = resolvedPlan.value;
-  if (p === 'business') return '/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder';
-  if (p === 'premium') return '/UserDashboard/UserManagement/PremiumPlanUser/PremiumProfileBuilder';
-  if (p === 'basic') return '/UserDashboard/UserManagement/BasicPlanUser/BasicProfileBuilder';
-  return '/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder';
-});
-
-const analyticsHref = computed(() => {
-  return resolvedPlan.value === 'business'
-    ? '/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics'
-    : resolvedPlan.value === 'premium'
-      ? '/UserDashboard/UserManagement/PremiumPlanUser/PremiumAnalytics'
-      : '/UserDashboard/Analytics';
-});
-
-const quickActions = computed(() => {
-  const actions = [
+// ---------------------------------------------------------------------------
+// Setup progress — each step reads a real field
+// ---------------------------------------------------------------------------
+const setupSteps = computed(() => {
+  const a = access.value;
+  const u = authStore.user || {};
+  const statuses = a.cards.map((c) => String(c.status).toLowerCase());
+  const steps = [
     {
-      label: 'Manage Cards',
-      description: 'Order, activate, track NFC cards',
-      icon: 'heroicons:credit-card',
-      iconBg: 'bg-primary-100',
-      iconText: 'text-primary-600',
-      href: cardManagementHref.value,
-      disabled: false,
-    },
-    {
-      label: 'Profile Builder',
-      description: 'Customize your landing page',
-      icon: 'heroicons:user',
-      iconBg: 'bg-success-100',
-      iconText: 'text-success-600',
-      href: profileBuilderHref.value,
-      disabled:
-        !authStore.canAccessPaidProfileBuilder() && resolvedPlan.value !== 'free',
-      disabledMessage: 'Complete payment first to unlock',
-    },
-    {
-      label: 'Analytics',
-      description: 'View visits, taps & insights',
-      icon: 'heroicons:chart-bar',
-      iconBg: 'bg-info-100',
-      iconText: 'text-info-600',
-      href: analyticsHref.value,
-      disabled: !canAccessAnalytics.value,
-      disabledMessage: 'Activates after card verified',
-    },
-    {
-      label: 'Settings',
-      description: 'Account & preferences',
-      icon: 'heroicons:cog-6-tooth',
-      iconBg: 'bg-secondary-100',
-      iconText: 'text-secondary-600',
-      href: '/UserDashboard/Settings',
-      disabled: false,
+      label: "Verify your email",
+      description: "Keeps your account secure",
+      done: !!u.email_verified_at,
+      to: PORTAL_ROUTES.settings,
+      cta: "Open settings",
     },
   ];
-  return actions;
+  if (!a.isBusinessEmployee) {
+    steps.push({
+      label: "Get an NFC card",
+      description: "Share your profile with a tap",
+      done: a.cards.length > 0,
+      to: a.isBusiness ? a.routes.cards : "/Onboarding/plan",
+      cta: "Choose a card",
+    });
+    steps.push({
+      label: "Payment verified",
+      description: "Unlocks your plan's Profile Builder",
+      done: a.entitledCards.length > 0,
+      to: a.cards.length ? a.routes.cards : null,
+      cta: "Check payment",
+    });
+  }
+  steps.push({
+    label: "Activate your card",
+    description: "Confirm it arrived and switch it on",
+    done: statuses.includes("active"),
+    to: a.cards.length ? a.routes.cards : null,
+    cta: "Activate",
+  });
+  return steps;
+});
+const completedSteps = computed(() => setupSteps.value.filter((s) => s.done).length);
+
+// ---------------------------------------------------------------------------
+// Live data
+// ---------------------------------------------------------------------------
+const reach = reactive({ taps: 0, visitors: 0, growth: null, loading: false });
+const team = reactive({ loaded: false, used: 0, total: 0, available: 0 });
+
+const formatNumber = (n) => Number(n || 0).toLocaleString();
+
+const reachHint = computed(() => {
+  if (!access.value.can.analytics) return "Available once your plan is active";
+  if (reach.loading) return "";
+  const v = `${formatNumber(reach.visitors)} unique visitor${reach.visitors === 1 ? "" : "s"}`;
+  return v;
 });
 
-const gettingStartedSteps = computed(() => {
-  const hasCard = authStore.hasAnyPhysicalNfcCard;
-  const paidBuilder = authStore.canAccessPaidProfileBuilder();
-  const subActive = authStore.user?.subscription_active === true;
-  return [
-    {
-      label: 'Choose a subscription plan',
-      description: 'Free, Basic, Premium, or Business',
-      completed: subActive || hasCard,
-    },
-    {
-      label: 'Order your NFC card',
-      description: 'Physical card shipped to you',
-      completed: hasCard,
-    },
-    {
-      label: 'Payment verified by admin',
-      description: 'Unlocks Profile Builder',
-      completed: paidBuilder,
-    },
-    {
-      label: 'Build your profile page',
-      description: 'Customize links, info & links',
-      completed: false,
-    },
-    {
-      label: 'Share & start networking',
-      description: 'Tap, share & track analytics',
-      completed: false,
-    },
-  ];
+const loadReach = async () => {
+  const a = access.value;
+  if (!a.can.analytics) return;
+  reach.loading = true;
+  try {
+    const endpoint =
+      a.routes.analytics === PORTAL_ROUTES.businessAnalytics ? "/analytics/business/overview" : "/analytics/user/overview";
+    const res = await $api.get(endpoint, { params: { period: "30d" } });
+    const d = res?.data || {};
+    reach.taps = d.total_taps ?? d.overview?.total_taps ?? 0;
+    reach.visitors = d.unique_visitors ?? d.overview?.unique_visitors ?? 0;
+  } catch (e) {
+    // Leave the tile at 0 — the analytics page shows the full error state.
+    console.warn("Dashboard reach unavailable:", e?.message || e);
+  } finally {
+    reach.loading = false;
+  }
+};
+
+const loadTeam = async () => {
+  if (!access.value.canManageBusiness) return;
+  try {
+    const res = await $api.get("/business/card-quota");
+    const d = res?.data;
+    const info = d?.account_info;
+    if (res?.success && info) {
+      // Same figures the Team Members page shows (QuotaController@getCardQuota)
+      team.used = info.employees_count ?? 0;
+      team.total = info.total_account_slots ?? d.total_card_quota ?? 0;
+      team.available = info.available_account_slots ?? Math.max(0, team.total - team.used);
+      team.loaded = true;
+    }
+  } catch (e) {
+    console.warn("Team quota unavailable:", e?.message || e);
+  }
+};
+
+onMounted(async () => {
+  // Refresh /me so card status changes made elsewhere (payment webhook,
+  // admin verification) show up without a full reload.
+  try {
+    await authStore.fetchProfile();
+  } catch {}
+  loadPrices();
+  loadUnreadCount();
+  loadReach();
+  loadTeam();
 });
 </script>
+
+<style scoped>
+.portal-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 1.1rem;
+  border-radius: var(--admin-radius);
+  border: 1px solid;
+}
+.portal-alert--warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.portal-alert--danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.portal-alert--info { background: #f7f3ea; border-color: var(--admin-border-strong); color: var(--admin-text); }
+
+.portal-card-thumb {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 3.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.55rem;
+  border-radius: 0.5rem;
+  color: rgba(245, 241, 232, 0.8);
+  background: linear-gradient(135deg, #252b38 0%, #171d2b 100%);
+  box-shadow: inset 0 0 0 1px rgba(194, 160, 104, 0.25);
+}
+.portal-card-thumb.is-premium,
+.portal-card-thumb.is-business {
+  color: #3a2c14;
+  background: linear-gradient(135deg, #dcc28a 0%, #a88750 100%);
+}
+.portal-card-thumb.is-free {
+  color: var(--admin-text-2);
+  background: var(--admin-paper);
+  box-shadow: inset 0 0 0 1px var(--admin-border);
+}
+
+.portal-dot {
+  height: 0.55rem;
+  width: 0.55rem;
+  border-radius: 9999px;
+  background: #9c988f;
+}
+.portal-dot.is-success { background: #16a34a; }
+.portal-dot.is-warning { background: #d97706; }
+.portal-dot.is-danger { background: #dc2626; }
+
+.portal-shortcut {
+  display: block;
+  text-align: left;
+  padding: 1.15rem 1.25rem;
+  border-radius: var(--admin-radius-lg);
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.portal-shortcut:hover:not(.is-locked) {
+  border-color: var(--admin-brass);
+  box-shadow: var(--admin-shadow-md);
+  transform: translateY(-1px);
+}
+.portal-shortcut:focus-visible {
+  outline: 2px solid var(--admin-brass);
+  outline-offset: 2px;
+}
+.portal-shortcut.is-locked {
+  cursor: not-allowed;
+  background: #fbfaf6;
+}
+.portal-shortcut.is-locked .admin-kpi-ico {
+  background: var(--admin-paper);
+  color: var(--admin-text-3);
+}
+
+.portal-step {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: var(--admin-radius);
+  border: 1px solid var(--admin-border);
+  background: #fbfaf6;
+}
+.portal-step.is-done {
+  background: var(--admin-surface);
+}
+.portal-step-num {
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--admin-paper);
+  color: var(--admin-text-2);
+  border: 1px solid var(--admin-border);
+}
+.portal-step.is-done .portal-step-num {
+  background: #dcfce7;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+</style>

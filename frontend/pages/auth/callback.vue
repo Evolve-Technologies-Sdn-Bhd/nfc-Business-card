@@ -136,7 +136,7 @@ onMounted(async () => {
     if (isNewUserRequiringOnboarding) {
       // Truly new user with no plan yet - redirect to Plan Selection
       $toast.success('Welcome to NFCGo! Let\'s choose your plan.');
-      await router.push('/UserDashboard/PlanSelection');
+      await router.push('/Onboarding/plan');
     } else {
       // Existing user or user already has valid plan/subscription - go to appropriate dashboard
       $toast.success('Successfully signed in!');

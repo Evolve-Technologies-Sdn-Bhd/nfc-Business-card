@@ -28,7 +28,7 @@ class HandleCors
 
         $response->headers->set('Access-Control-Allow-Origin', $origin);
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-Token-Auth, Authorization, Accept, Origin');
+        $response->headers->set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-Token-Auth, Authorization, Accept, Origin, X-Device-Id, X-XSRF-TOKEN');
         $response->headers->set('Access-Control-Allow-Credentials', 'false');
         $response->headers->set('Access-Control-Max-Age', '86400'); // 24 hours
 

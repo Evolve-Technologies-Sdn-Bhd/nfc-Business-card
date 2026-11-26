@@ -60,6 +60,15 @@ class AuthController extends Controller
         $existing = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if ($existing) {
+            // A guest-checkout placeholder that was never paid for is not a real
+            // account yet, so the person who owns the inbox must still be able to
+            // sign up. Claiming it overwrites the placeholder instead of failing —
+            // this is what stops a stranger squatting someone else's address by
+            // merely typing it into the guest checkout form.
+            if ($existing->isProvisionalGuest()) {
+                return $this->claimProvisionalGuestAccount($request, $existing);
+            }
+
             // Only accounts switched off by the scheduler (free plan expired) may
             // be reactivated here. A live or admin-managed account stays a plain
             // "email already registered" error — nobody may claim it by signing up.
@@ -100,7 +109,7 @@ class AuthController extends Controller
             try {
                 $this->notificationService->create($user, 'registration_success', [
                     'name' => $user->first_name,
-                    'profile_url' => config('app.frontend_url') . '/UserDashboard/PlanSelection',
+                    'profile_url' => config('app.frontend_url') . '/Onboarding/plan',
                 ]);
             } catch (\Exception $e) {
                 Log::error('Failed to send registration notification: ' . $e->getMessage());
@@ -129,6 +138,58 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Registration failed. Please try again.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Turn a guest-checkout placeholder into a real account.
+     *
+     * The placeholder has no password and was never paid for, so it holds
+     * nothing the real owner could lose. The row is reused — rather than deleted
+     * and recreated — so any order history already hanging off it survives.
+     */
+    protected function claimProvisionalGuestAccount(Request $request, User $user)
+    {
+        try {
+            $settings = (array) ($user->settings ?? []);
+            unset($settings['guest_checkout']);
+
+            $user->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'password' => Hash::make($request->password),
+                'company' => $request->company ?: $user->company,
+                'job_title' => $request->job_title ?: $user->job_title,
+                'is_new_user' => true,       // send them through plan selection
+                'email_verified_at' => null, // must re-confirm ownership of the inbox
+                'settings' => $settings,
+            ]);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Exception $e) {
+                Log::warning('Failed to send verification link on placeholder claim: ' . $e->getMessage());
+            }
+
+            Log::info('Guest checkout placeholder claimed via register', ['user_id' => $user->id]);
+
+            return response()->json([
+                'success' => true,
+                'user' => $user->fresh(),
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'needs_email_verification' => !$user->hasVerifiedEmail(),
+                'verification_email_sent' => true,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Provisional account claim failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed. Please try again.',
             ], 500);
         }
     }

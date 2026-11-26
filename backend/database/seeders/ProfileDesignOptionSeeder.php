@@ -13,15 +13,15 @@ class ProfileDesignOptionSeeder extends Seeder
             // ========== THEMES (12 premium presets) ==========
             [
                 'type' => 'theme',
-                'option_id' => 'minimal',
-                'name' => 'Minimal',
-                'description' => 'Clean white background with subtle contrast — perfect for professional use.',
+                'option_id' => 'ink-brass',
+                'name' => 'Ink & Brass',
+                'description' => 'Signature NFCGo palette — deep ink with brass accents on paper. The default theme.',
                 'config' => [
-                    'backgroundColor' => '#FFFFFF',
-                    'textColor' => '#111827',
-                    'accentColor' => '#1F2937',
-                    'previewCss' => 'background: #FFFFFF;',
-                    'bgGradient' => null,
+                    'backgroundColor' => '#06090d',
+                    'textColor' => '#f7f5f0',
+                    'accentColor' => '#c2a068',
+                    'previewCss' => 'background: linear-gradient(160deg, #0f1621 0%, #06090d 100%); border: 1px solid rgba(194,160,104,0.35);',
+                    'bgGradient' => 'radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), #06090d',
                 ],
                 'is_active' => true,
                 'is_default' => true,
@@ -324,6 +324,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'Full-color rounded pill button — high visibility.',
                 'config' => [
                     'class' => 'bg-foreground text-background font-semibold rounded-full',
+                    'previewCss' => 'background:#0F172A;color:#FFFFFF;border-radius:9999px;',
                 ],
                 'is_active' => true,
                 'is_default' => true,
@@ -337,6 +338,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'Bordered button with transparent background — understated.',
                 'config' => [
                     'class' => 'border-2 border-foreground text-foreground font-medium rounded-full',
+                    'previewCss' => 'background:transparent;color:#0F172A;border:2px solid #0F172A;border-radius:9999px;',
                 ],
                 'is_active' => true,
                 'is_default' => false,
@@ -350,6 +352,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'Muted surface tone with rounded corners — modern and gentle.',
                 'config' => [
                     'class' => 'bg-white/15 backdrop-blur-md text-foreground font-medium rounded-2xl border border-white/20',
+                    'previewCss' => 'background:rgba(15,23,42,0.08);color:#0F172A;border:1px solid rgba(15,23,42,0.15);border-radius:16px;backdrop-filter:blur(8px);',
                 ],
                 'is_active' => true,
                 'is_default' => false,
@@ -363,6 +366,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'White surface with soft drop shadow — elevated card style.',
                 'config' => [
                     'class' => 'bg-white text-gray-900 font-semibold rounded-2xl shadow-lg hover:shadow-xl',
+                    'previewCss' => 'background:#FFFFFF;color:#111827;border-radius:16px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1);',
                 ],
                 'is_active' => true,
                 'is_default' => false,
@@ -376,6 +380,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'Animated gradient pill with subtle glow — premium attention.',
                 'config' => [
                     'class' => 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-full shadow-lg shadow-purple-500/25',
+                    'previewCss' => 'background:linear-gradient(90deg,#6366F1,#A855F7,#EC4899);color:#FFFFFF;border-radius:9999px;box-shadow:0 10px 15px -3px rgba(168,85,247,0.35);',
                 ],
                 'is_active' => true,
                 'is_default' => false,
@@ -389,6 +394,7 @@ class ProfileDesignOptionSeeder extends Seeder
                 'description' => 'No-radius sharp corners — minimalist brutalist style.',
                 'config' => [
                     'class' => 'bg-foreground text-background font-semibold rounded-none',
+                    'previewCss' => 'background:#0F172A;color:#FFFFFF;border-radius:0;',
                 ],
                 'is_active' => true,
                 'is_default' => false,
@@ -627,6 +633,156 @@ class ProfileDesignOptionSeeder extends Seeder
                 'display_order' => 3,
             ],
 
+            // ========== COLOR SCHEMES ==========
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'default',
+                'name' => 'Default Ink & Brass',
+                'description' => 'Signature NFCGo palette — ink, brass accent on paper.',
+                'config' => [
+                    'primary' => '#06090d',
+                    'secondary' => '#c2a068',
+                    'accent' => '#f7f5f0',
+                ],
+                'is_active' => true,
+                'is_default' => true,
+                'available_plans' => ['basic', 'premium', 'business'],
+                'display_order' => 1,
+            ],
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'ocean',
+                'name' => 'Ocean Blue',
+                'description' => 'Calming blues with a teal accent — corporate and trustworthy.',
+                'config' => [
+                    'primary' => '#1E3A8A',
+                    'secondary' => '#3B82F6',
+                    'accent' => '#14B8A6',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['basic', 'premium', 'business'],
+                'display_order' => 2,
+            ],
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'forest',
+                'name' => 'Forest Green',
+                'description' => 'Deep evergreen with lime accent — eco and natural brands.',
+                'config' => [
+                    'primary' => '#14532D',
+                    'secondary' => '#16A34A',
+                    'accent' => '#84CC16',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 3,
+            ],
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'sunset',
+                'name' => 'Sunset Warm',
+                'description' => 'Rich burgundy with amber accent — energetic and premium.',
+                'config' => [
+                    'primary' => '#7C2D12',
+                    'secondary' => '#EA580C',
+                    'accent' => '#F59E0B',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 4,
+            ],
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'royal',
+                'name' => 'Royal Purple',
+                'description' => 'Luxurious violet with pink accent — creative and high-end.',
+                'config' => [
+                    'primary' => '#4C1D95',
+                    'secondary' => '#7C3AED',
+                    'accent' => '#EC4899',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 5,
+            ],
+            [
+                'type' => 'color_scheme',
+                'option_id' => 'mono',
+                'name' => 'Monochrome Slate',
+                'description' => 'Strict grayscale with a single cool accent — minimalist.',
+                'config' => [
+                    'primary' => '#0F172A',
+                    'secondary' => '#64748B',
+                    'accent' => '#0EA5E9',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 6,
+            ],
+
+            // ========== LAYOUTS ==========
+            [
+                'type' => 'layout',
+                'option_id' => 'narrow-center',
+                'name' => 'Narrow Center',
+                'description' => 'Compact centered column — focused and mobile-first.',
+                'config' => [
+                    'alignment' => 'center',
+                    'maxWidth' => '480px',
+                ],
+                'is_active' => true,
+                'is_default' => true,
+                'available_plans' => ['basic', 'premium', 'business'],
+                'display_order' => 1,
+            ],
+            [
+                'type' => 'layout',
+                'option_id' => 'standard-center',
+                'name' => 'Standard Center',
+                'description' => 'Balanced centered column — the versatile default.',
+                'config' => [
+                    'alignment' => 'center',
+                    'maxWidth' => '640px',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['basic', 'premium', 'business'],
+                'display_order' => 2,
+            ],
+            [
+                'type' => 'layout',
+                'option_id' => 'wide-left',
+                'name' => 'Wide Left',
+                'description' => 'Left-aligned wide column — editorial and document-like.',
+                'config' => [
+                    'alignment' => 'left',
+                    'maxWidth' => '800px',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 3,
+            ],
+            [
+                'type' => 'layout',
+                'option_id' => 'full-bleed',
+                'name' => 'Full Bleed',
+                'description' => 'Maximum width, edge-to-edge content — immersive layouts.',
+                'config' => [
+                    'alignment' => 'center',
+                    'maxWidth' => '100%',
+                ],
+                'is_active' => true,
+                'is_default' => false,
+                'available_plans' => ['premium', 'business'],
+                'display_order' => 4,
+            ],
+
             // ========== FEATURE TOGGLES ==========
             [
                 'type' => 'feature_toggle',
@@ -643,6 +799,9 @@ class ProfileDesignOptionSeeder extends Seeder
                 'display_order' => 100,
             ],
         ];
+
+        // Retire the old 'minimal' theme — replaced by the new default 'ink-brass' theme.
+        DB::table('profile_design_options')->where('type', 'theme')->where('option_id', 'minimal')->delete();
 
         foreach ($options as $option) {
             DB::table('profile_design_options')->updateOrInsert(

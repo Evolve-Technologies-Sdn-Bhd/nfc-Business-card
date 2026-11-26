@@ -278,16 +278,16 @@ class NfcCard extends Model
     public static function statusBadgeClasses(): array
     {
         return [
-            'pending_payment'                => 'bg-orange-100 text-orange-800',
-            'awaiting_payment_verification'  => 'bg-yellow-100 text-yellow-800',
-            'payment_verified'               => 'bg-emerald-100 text-emerald-800',
-            'processing'                     => 'bg-purple-100 text-purple-800',
-            'shipped'                        => 'bg-blue-100 text-blue-800',
-            'delivered'                      => 'bg-green-100 text-green-800',
+            'pending_payment'                => 'bg-warning-100 text-warning-800',
+            'awaiting_payment_verification'  => 'bg-warning-50 text-warning-700',
+            'payment_verified'               => 'bg-info-100 text-info-800',
+            'processing'                     => 'bg-info-50 text-info-700',
+            'shipped'                        => 'bg-info-100 text-info-800',
+            'delivered'                      => 'bg-success-50 text-success-700',
             'active'                         => 'bg-success-100 text-success-800',
             'inactive'                       => 'bg-secondary-100 text-secondary-800',
             'expired'                        => 'bg-warning-100 text-warning-800',
-            'cancelled'                      => 'bg-red-100 text-red-800',
+            'cancelled'                      => 'bg-error-100 text-error-800',
             'replacement'                    => 'bg-info-100 text-info-800',
         ];
     }

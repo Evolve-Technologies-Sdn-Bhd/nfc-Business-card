@@ -50,22 +50,22 @@
       <!-- Employee Filter Notice -->
       <div
         v-if="route.query.employee_id"
-        class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between"
+        class="bg-info-50 border border-info-200 rounded-lg p-4 mb-6 flex items-center justify-between"
       >
         <div class="flex items-center">
-          <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-600 mr-2" />
+          <Icon name="heroicons:information-circle" class="h-5 w-5 text-info-600 mr-2" />
           <div>
-            <p class="text-body font-medium text-blue-900">
+            <p class="text-body font-medium text-info-900">
               Viewing cards for: {{ route.query.employee_name || 'Selected Employee' }}
             </p>
-            <p class="text-caption text-blue-700 mt-1">
+            <p class="text-caption text-info-700 mt-1">
               You're viewing NFC cards for a specific employee
             </p>
           </div>
         </div>
         <button
           @click="clearEmployeeFilter"
-          class="text-navigation text-blue-600 hover:text-blue-800 flex items-center"
+          class="text-navigation text-info-600 hover:text-info-800 flex items-center"
         >
           <Icon name="heroicons:x-mark" class="h-4 w-4 mr-1" />
           View All Cards
@@ -1301,7 +1301,7 @@ const submitOrder = async () => {
           "Business Plan is not available. Redirecting to purchase page..."
         );
         setTimeout(() => {
-          navigateTo("/UserDashboard/PlanSelection");
+          navigateTo("/Onboarding/plan");
         }, 1500);
         return;
       }
@@ -1346,7 +1346,7 @@ const submitOrder = async () => {
       };
 
       const redirectPath =
-        planRoutes[selectedPlan] || "/UserDashboard/NFCCardDesign";
+        planRoutes[selectedPlan] || "/Onboarding/design";
 
       // Wait a moment for the toast to show, then redirect
       setTimeout(() => {
@@ -1369,7 +1369,7 @@ const submitOrder = async () => {
           "You are not authorized to use Business Plan. Redirecting to purchase page..."
       );
       setTimeout(() => {
-        navigateTo("/UserDashboard/PlanSelection");
+        navigateTo("/Onboarding/plan");
       }, 1500);
     } else {
       $toast.error("Failed to place order");
@@ -1450,7 +1450,10 @@ const deactivateCard = async (card) => {
 
 const viewAnalytics = (card) => {
   // Navigate to analytics page for this specific card
-  navigateTo(`/UserDashboard/card-management/${card.id}/analytics`);
+  navigateTo({
+    path: "/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics",
+    query: { cardId: String(card.id) },
+  });
 };
 
 const getStatusBadgeClass = (status) => {

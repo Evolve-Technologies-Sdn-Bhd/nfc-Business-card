@@ -1,17 +1,22 @@
 // middleware/guest.js
-export default defineNuxtRouteMiddleware((to, from) => {
+//
+// Guest-only access for the public marketing pages (/Homepage/*).
+// Signed-in visitors are never shown the public landing pages — they are sent
+// straight to their own area:
+//   • Admin                        -> /AdminManagement
+//   • Account still in onboarding  -> /Onboarding/plan
+//   • Everyone else                -> /UserDashboard
+export default defineNuxtRouteMiddleware(() => {
   const authStore = useAuthStore();
+  if (!authStore.isAuthenticated) return;
 
-  // Check if user is already authenticated
-  if (authStore.isAuthenticated) {
-    // Check if user has completed onboarding by looking for subscription plan
-    const user = authStore.user;
-    if (user && user.subscription_plan) {
-      // User has completed onboarding, redirect to dashboard
-      return navigateTo("/UserDashboard");
-    } else {
-      // User hasn't completed onboarding, let them continue with onboarding flow
-      // Don't redirect automatically
-    }
+  if (authStore.isAdmin()) {
+    return navigateTo("/AdminManagement");
   }
+
+  if (authStore.user?.is_new_user === true) {
+    return navigateTo("/Onboarding/plan");
+  }
+
+  return navigateTo("/UserDashboard");
 });

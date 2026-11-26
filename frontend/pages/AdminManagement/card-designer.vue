@@ -1,488 +1,837 @@
 <!-- pages/AdminManagement/card-designer.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 class="page-title text-secondary-900">Card Designer</h1>
-          <p class="mt-2 text-secondary-600">
-            Design NFC business card artwork — background, draggable placeholders, PDF export
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button @click="newDesign" class="btn btn-outline btn-sm">
-            <Icon name="heroicons:document-plus" class="h-4 w-4 mr-1.5" />
-            New
-          </button>
-          <button @click="saveDesign" :disabled="saving" class="btn btn-primary btn-sm">
-            <Icon v-if="saving" name="heroicons:arrow-path" class="h-4 w-4 mr-1.5 animate-spin" />
-            <Icon v-else name="heroicons:check" class="h-4 w-4 mr-1.5" />
-            {{ design.id ? 'Update' : 'Save' }}
-          </button>
-          <button @click="exportPdf" :disabled="exporting" class="btn btn-success btn-sm">
-            <Icon v-if="exporting" name="heroicons:arrow-path" class="h-4 w-4 mr-1.5 animate-spin" />
-            <Icon v-else name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1.5" />
-            Export PDF
-          </button>
-          <button @click="openTemplateModal" class="btn btn-outline btn-sm">
-            <Icon name="heroicons:rectangle-stack" class="h-4 w-4 mr-1.5" />
-            Save as Template
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Design Studio"
+      eyebrow-icon="heroicons:paint-brush"
+      title="Card Designer"
+      description="Compose NFC business card artwork — background, draggable placeholders, and PDF export."
+    >
+      <template #actions>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          @click="newDesign"
+        >
+          <Icon name="heroicons:document-plus" class="h-4 w-4" />
+          New
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--primary admin-btn--sm"
+          :disabled="saving"
+          @click="saveDesign"
+        >
+          <Icon
+            :name="saving ? 'heroicons:arrow-path' : 'heroicons:check'"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': saving }"
+          />
+          {{ design.id ? 'Update' : 'Save' }}
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          :disabled="exporting"
+          @click="exportPdf"
+        >
+          <Icon
+            :name="exporting ? 'heroicons:arrow-path' : 'heroicons:arrow-down-tray'"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': exporting }"
+          />
+          Export PDF
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          @click="openTemplateModal"
+        >
+          <Icon name="heroicons:rectangle-stack" class="h-4 w-4" />
+          Save as Template
+        </button>
+      </template>
+    </AdminPageHeader>
 
-    <!-- Design meta -->
-    <div class="card mb-6">
-      <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="md:col-span-2">
-            <label class="block text-label text-secondary-700 mb-1.5">Design Name</label>
-            <input v-model="design.name" type="text" class="input" placeholder="e.g. CEO Card - Front & Back" />
-          </div>
-          <div>
-            <label class="block text-label text-secondary-700 mb-1.5">Card Size</label>
-            <select v-model="design.card_size" class="input">
-              <option v-for="(s, key) in cardSizes" :key="key" :value="key">{{ s.label }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-label text-secondary-700 mb-1.5">3mm Bleed</label>
-            <label class="flex items-center gap-2 h-[42px] px-3 border border-secondary-300 rounded-lg cursor-pointer">
-              <input v-model="design.bleed" type="checkbox" class="rounded text-primary-600" />
-              <span class="text-body text-secondary-600">Include bleed area</span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)_300px] gap-6">
-      <!-- LEFT: palette + saved designs -->
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
+      <!-- LEFT: controls -->
       <div class="space-y-6">
-        <!-- Side switcher -->
-        <div class="card">
-          <div class="card-body">
-            <div class="grid grid-cols-2 gap-2">
+        <AdminSectionCard title="Design details" subtitle="Name the file and pick the finished stock size.">
+          <div class="space-y-4">
+            <div>
+              <label class="admin-label">Design name</label>
+              <input
+                v-model="design.name"
+                type="text"
+                class="admin-field"
+                placeholder="e.g. CEO Card - Front & Back"
+              />
+            </div>
+            <div>
+              <label class="admin-label">Card size</label>
+              <select v-model="design.card_size" class="admin-field">
+                <option v-for="(s, key) in cardSizes" :key="key" :value="key">
+                  {{ s.label }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="admin-label">3mm bleed</label>
+              <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2.5">
+                <input
+                  v-model="design.bleed"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                />
+                <span class="text-body text-secondary-600">Include bleed area</span>
+              </label>
+            </div>
+          </div>
+        </AdminSectionCard>
+
+        <AdminSectionCard title="Design controls" subtitle="Everything you can place on the card.">
+          <!-- Side switcher -->
+          <div class="admin-form-section">
+            <p class="admin-form-section-title">Card side</p>
+            <p class="admin-form-section-desc">Choose which face you are editing.</p>
+            <div class="mt-3 grid grid-cols-2 gap-2">
               <button
-                @click="activeSide = 'front'"
-                class="btn btn-sm"
-                :class="activeSide === 'front' ? 'btn-primary' : 'btn-outline'"
+                type="button"
+                class="admin-btn"
+                :class="activeSide === 'front' ? 'admin-btn--primary' : 'admin-btn--outline'"
+                @click="switchSide('front')"
               >
                 Front
               </button>
               <button
-                @click="activeSide = 'back'"
-                class="btn btn-sm"
-                :class="activeSide === 'back' ? 'btn-primary' : 'btn-outline'"
+                type="button"
+                class="admin-btn"
+                :class="activeSide === 'back' ? 'admin-btn--primary' : 'admin-btn--outline'"
+                @click="switchSide('back')"
               >
                 Back
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Background -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title text-secondary-900">Background ({{ activeSide }})</h3>
-          </div>
-          <div class="card-body space-y-3">
+          <!-- Background -->
+          <div class="admin-form-section">
+            <p class="admin-form-section-title">Background — {{ activeSide }}</p>
+            <p class="admin-form-section-desc">Upload a JPG, PNG or WEBP artwork.</p>
             <div
-              class="border-2 border-dashed border-secondary-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary-400"
+              class="mt-3 cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-4 text-center transition-colors hover:border-accent-400"
               @click="bgInput?.click()"
             >
-              <Icon name="heroicons:photo" class="h-6 w-6 mx-auto text-secondary-400" />
+              <Icon name="heroicons:photo" class="mx-auto h-6 w-6 text-secondary-400" />
               <p class="mt-1 text-helper">
-                {{ uploadingBg ? 'Uploading...' : 'Click to upload (JPG/PNG/WEBP)' }}
+                {{ uploadingBg ? 'Uploading…' : 'Click to upload (JPG/PNG/WEBP)' }}
               </p>
             </div>
             <input ref="bgInput" type="file" accept="image/*" class="hidden" @change="onBgFile" />
-            <div v-if="activeBgUrl" class="flex items-center gap-3">
-              <img :src="activeBgUrl" class="h-12 w-20 object-cover rounded border border-secondary-200" />
-              <button @click="removeBackground" class="btn btn-outline btn-sm text-error-600 border-error-300">
+            <div v-if="activeBgUrl" class="mt-3 flex items-center gap-3">
+              <img
+                :src="activeBgUrl"
+                class="h-12 w-20 rounded border border-secondary-200 object-cover"
+              />
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm !border-error-300 !text-error-600"
+                @click="removeBackground"
+              >
                 <Icon name="heroicons:trash" class="h-4 w-4" />
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Placeholders -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title text-secondary-900">Add Element</h3>
-          </div>
-          <div class="card-body">
-            <p class="text-helper mb-3">Click to add, or drag onto the card.</p>
-            <div class="grid grid-cols-2 gap-2">
+          <!-- Palette -->
+          <div class="admin-form-section">
+            <p class="admin-form-section-title">Add element</p>
+            <p class="admin-form-section-desc">Click to add, or drag onto the card.</p>
+            <div class="mt-3 grid grid-cols-2 gap-2">
               <button
                 v-for="p in palette"
                 :key="p.type"
-                class="flex flex-col items-center gap-1 p-3 rounded-lg border border-secondary-200 hover:border-primary-400 hover:bg-primary-50 cursor-grab"
+                type="button"
+                class="flex cursor-grab flex-col items-center gap-1 rounded-lg border border-secondary-200 p-3 transition hover:border-accent-400 hover:bg-accent-50"
                 draggable="true"
                 @click="addElement(p.type)"
                 @dragstart="onPaletteDragStart($event, p.type)"
               >
-                <Icon :name="p.icon" class="h-5 w-5 text-primary-600" />
+                <Icon :name="p.icon" class="h-5 w-5 text-accent-700" />
                 <span class="text-caption text-secondary-600">{{ p.label }}</span>
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Saved designs -->
-        <div class="card">
-          <div class="card-header flex items-center justify-between">
-            <h3 class="card-title text-secondary-900">Saved Designs</h3>
-            <button @click="loadDesigns" class="text-secondary-400 hover:text-primary-600">
-              <Icon name="heroicons:arrow-path" class="h-4 w-4" />
-            </button>
-          </div>
-          <div class="card-body">
-            <p v-if="loadingDesigns" class="text-caption text-secondary-500">Loading...</p>
-            <p v-else-if="!designs.length" class="text-caption text-secondary-500">No saved designs yet.</p>
-            <ul v-else class="space-y-1 max-h-64 overflow-y-auto">
-              <li
-                v-for="d in designs"
-                :key="d.id"
-                class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-secondary-100"
-                :class="design.id === d.id ? 'bg-primary-50' : ''"
-              >
-                <button class="text-left text-body text-secondary-700 truncate flex-1" @click="openDesign(d.id)">
-                  {{ d.name }}
-                </button>
-                <button class="text-secondary-400 hover:text-error-600" @click="deleteDesign(d)">
-                  <Icon name="heroicons:trash" class="h-4 w-4" />
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        </AdminSectionCard>
       </div>
 
       <!-- CENTER: canvas -->
       <div class="space-y-4">
-        <div class="card">
-          <div class="card-body flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-body text-secondary-600">
-                {{ activeSide === 'front' ? 'Front side' : 'Back side' }} ·
-                {{ cardSize.w }} × {{ cardSize.h }} mm
-                <span v-if="design.bleed" class="text-secondary-400">(+3mm bleed)</span>
-              </span>
-            </div>
+        <AdminSectionCard flush accent>
+          <template #title>
+            {{ activeSide === 'front' ? 'Front side' : 'Back side' }} preview
+          </template>
+          <template #header-actions>
+            <span class="text-caption text-secondary-500">
+              {{ cardSize.w }} × {{ cardSize.h }} mm
+              <span v-if="design.bleed" class="text-secondary-400">(+3mm bleed)</span>
+            </span>
             <div class="flex items-center gap-1">
-              <button class="btn btn-outline btn-sm" @click="zoom = Math.max(3, +(zoom - 1).toFixed(1))">−</button>
-              <span class="text-caption text-secondary-500 w-12 text-center">{{ zoom }}x</span>
-              <button class="btn btn-outline btn-sm" @click="zoom = Math.min(12, +(zoom + 1).toFixed(1))">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="card overflow-auto p-6 flex justify-center bg-secondary-100"
-          @click.self="selectedId = null"
-        >
-          <div
-            class="relative shadow-lg"
-            :style="{ width: pageW * zoom + 'px', height: pageH * zoom + 'px', background: '#ffffff' }"
-            @dragover.prevent
-            @drop="onCanvasDrop"
-          >
-            <!-- background -->
-            <img
-              v-if="activeBgUrl"
-              :src="activeBgUrl"
-              class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-              alt=""
-            />
-            <!-- bleed/trim guide -->
-            <div
-              v-if="design.bleed"
-              class="absolute border border-dashed border-primary-400 pointer-events-none"
-              :style="{ left: bleedPx + 'px', top: bleedPx + 'px', width: cardSize.w * zoom + 'px', height: cardSize.h * zoom + 'px' }"
-            ></div>
-
-            <!-- elements -->
-            <div
-              class="absolute"
-              :style="{ left: bleedPx + 'px', top: bleedPx + 'px', width: cardSize.w * zoom + 'px', height: cardSize.h * zoom + 'px' }"
-              @click.self="selectedId = null"
-            >
-              <div
-                v-for="el in elements"
-                :key="el.id"
-                class="absolute cursor-move"
-                :class="selectedId === el.id ? 'ring-2 ring-primary-500' : ''"
-                :style="elementStyle(el)"
-                @pointerdown="beginDrag($event, el, 'move')"
-                @click.stop="selectedId = el.id"
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
+                :disabled="zoom <= 3"
+                @click="zoom = Math.max(3, +(zoom - 1).toFixed(1))"
               >
-                <!-- text -->
-                <template v-if="el.type === 'text'">
-                  <div class="w-full h-full" :style="textInnerStyle(el)">{{ el.text }}</div>
-                </template>
-                <!-- image -->
-                <template v-else-if="el.type === 'image'">
-                  <img v-if="el.src" :src="el.src" class="w-full h-full pointer-events-none" :style="{ objectFit: el.fit, opacity: el.opacity }" />
-                  <div v-else class="w-full h-full bg-secondary-200 border border-secondary-300 flex items-center justify-center text-micro text-secondary-500">
-                    IMAGE
-                  </div>
-                </template>
-                <!-- qr -->
-                <template v-else-if="el.type === 'qr'">
-                  <img :src="qrUrl(el)" class="w-full h-full pointer-events-none" alt="QR" />
-                </template>
-                <!-- rect -->
-                <template v-else-if="el.type === 'rect'">
-                  <div class="w-full h-full" :style="rectStyle(el)"></div>
-                </template>
+                −
+              </button>
+              <span class="w-12 text-center text-caption text-secondary-500">{{ zoom }}x</span>
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
+                :disabled="zoom >= 12"
+                @click="zoom = Math.min(12, +(zoom + 1).toFixed(1))"
+              >
+                +
+              </button>
+            </div>
+          </template>
 
-                <!-- resize handle -->
+          <div
+            class="flex justify-center overflow-auto bg-secondary-50 p-6"
+            @click.self="selectedId = null"
+          >
+            <div
+              class="relative shadow-lg"
+              :style="{ width: pageW * zoom + 'px', height: pageH * zoom + 'px', background: '#ffffff' }"
+              @dragover.prevent
+              @drop="onCanvasDrop"
+            >
+              <!-- background -->
+              <img
+                v-if="activeBgUrl"
+                :src="activeBgUrl"
+                class="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
+                alt=""
+              />
+              <!-- bleed/trim guide -->
+              <div
+                v-if="design.bleed"
+                class="pointer-events-none absolute border border-dashed border-primary-400"
+                :style="{ left: bleedPx + 'px', top: bleedPx + 'px', width: cardSize.w * zoom + 'px', height: cardSize.h * zoom + 'px' }"
+              ></div>
+
+              <!-- elements -->
+              <div
+                class="absolute"
+                :style="{ left: bleedPx + 'px', top: bleedPx + 'px', width: cardSize.w * zoom + 'px', height: cardSize.h * zoom + 'px' }"
+                @click.self="selectedId = null"
+              >
                 <div
-                  v-if="selectedId === el.id"
-                  class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-primary-600 border border-white rounded-sm cursor-se-resize"
-                  @pointerdown.stop="beginDrag($event, el, 'resize')"
-                ></div>
+                  v-for="el in elements"
+                  :key="el.id"
+                  class="absolute cursor-move"
+                  :class="selectedId === el.id ? 'ring-2 ring-primary-500' : ''"
+                  :style="elementStyle(el)"
+                  @pointerdown="beginDrag($event, el, 'move')"
+                  @click.stop="selectedId = el.id"
+                >
+                  <!-- text -->
+                  <template v-if="el.type === 'text'">
+                    <div class="h-full w-full" :style="textInnerStyle(el)">{{ el.text }}</div>
+                  </template>
+                  <!-- image -->
+                  <template v-else-if="el.type === 'image'">
+                    <img
+                      v-if="el.src"
+                      :src="el.src"
+                      class="pointer-events-none h-full w-full"
+                      :style="{ objectFit: el.fit, opacity: el.opacity }"
+                    />
+                    <div
+                      v-else
+                      class="flex h-full w-full items-center justify-center border border-secondary-300 bg-secondary-200 text-micro text-secondary-500"
+                    >
+                      IMAGE
+                    </div>
+                  </template>
+                  <!-- qr -->
+                  <template v-else-if="el.type === 'qr'">
+                    <img :src="qrUrl(el)" class="pointer-events-none h-full w-full" alt="QR" />
+                  </template>
+                  <!-- rect -->
+                  <template v-else-if="el.type === 'rect'">
+                    <div class="h-full w-full" :style="rectStyle(el)"></div>
+                  </template>
+
+                  <!-- resize handle -->
+                  <div
+                    v-if="selectedId === el.id"
+                    class="absolute -bottom-1.5 -right-1.5 h-3 w-3 cursor-se-resize rounded-sm border border-white bg-primary-600"
+                    @pointerdown.stop="beginDrag($event, el, 'resize')"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </AdminSectionCard>
       </div>
 
       <!-- RIGHT: properties -->
       <div class="space-y-6">
-        <div class="card">
-          <div class="card-header flex items-center justify-between">
-            <h3 class="card-title text-secondary-900">Properties</h3>
-            <button v-if="selected" @click="deleteSelected" class="text-secondary-400 hover:text-error-600">
+        <AdminSectionCard title="Properties">
+          <template #header-actions>
+            <button
+              v-if="selected"
+              type="button"
+              class="admin-icon-btn !text-error-500"
+              title="Delete element"
+              @click="deleteSelected"
+            >
               <Icon name="heroicons:trash" class="h-4 w-4" />
             </button>
-          </div>
-          <div class="card-body">
-            <p v-if="!selected" class="text-body text-secondary-500">
-              Select an element on the card to edit its properties.
-            </p>
+          </template>
 
-            <div v-else class="space-y-4">
-              <!-- geometry -->
+          <p v-if="!selected" class="text-body text-secondary-500">
+            Select an element on the card to edit its properties.
+          </p>
+
+          <div v-else class="space-y-4">
+            <!-- geometry -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="admin-label">X (mm)</label>
+                <input v-model.number="selected.x" type="number" step="0.5" class="admin-field" />
+              </div>
+              <div>
+                <label class="admin-label">Y (mm)</label>
+                <input v-model.number="selected.y" type="number" step="0.5" class="admin-field" />
+              </div>
+              <div>
+                <label class="admin-label">Width (mm)</label>
+                <input v-model.number="selected.w" type="number" step="0.5" min="2" class="admin-field" />
+              </div>
+              <div>
+                <label class="admin-label">Height (mm)</label>
+                <input v-model.number="selected.h" type="number" step="0.5" min="2" class="admin-field" />
+              </div>
+              <div class="col-span-2">
+                <label class="admin-label">Rotation (°)</label>
+                <input
+                  v-model.number="selected.rotation"
+                  type="range"
+                  min="-45"
+                  max="45"
+                  step="1"
+                  class="admin-range w-full"
+                />
+                <span class="text-caption text-secondary-500">{{ selected.rotation }}°</span>
+              </div>
+            </div>
+
+            <hr class="border-secondary-200" />
+
+            <!-- text -->
+            <template v-if="selected.type === 'text'">
+              <div>
+                <label class="admin-label">Text</label>
+                <textarea v-model="selected.text" rows="2" class="admin-field"></textarea>
+              </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="form-label">X (mm)</label>
-                  <input v-model.number="selected.x" type="number" step="0.5" class="input" />
-                </div>
-                <div>
-                  <label class="form-label">Y (mm)</label>
-                  <input v-model.number="selected.y" type="number" step="0.5" class="input" />
-                </div>
-                <div>
-                  <label class="form-label">Width (mm)</label>
-                  <input v-model.number="selected.w" type="number" step="0.5" min="2" class="input" />
-                </div>
-                <div>
-                  <label class="form-label">Height (mm)</label>
-                  <input v-model.number="selected.h" type="number" step="0.5" min="2" class="input" />
-                </div>
-                <div class="col-span-2">
-                  <label class="form-label">Rotation (°)</label>
-                  <input v-model.number="selected.rotation" type="range" min="-45" max="45" step="1" class="w-full" />
-                  <span class="text-caption text-secondary-500">{{ selected.rotation }}°</span>
-                </div>
-              </div>
-
-              <hr class="border-secondary-200" />
-
-              <!-- text -->
-              <template v-if="selected.type === 'text'">
-                <div>
-                  <label class="form-label">Text</label>
-                  <textarea v-model="selected.text" rows="2" class="input"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="form-label">Font</label>
-                    <select v-model="selected.fontFamily" class="input">
-                      <option value="helvetica">Helvetica</option>
-                      <option value="times">Times</option>
-                      <option value="courier">Courier</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="form-label">Size (pt)</label>
-                    <input v-model.number="selected.fontSize" type="number" min="4" max="72" class="input" />
-                  </div>
-                  <div>
-                    <label class="form-label">Color</label>
-                    <input v-model="selected.color" type="color" class="input h-[38px] p-1" />
-                  </div>
-                  <div>
-                    <label class="form-label">Weight</label>
-                    <select v-model="selected.fontWeight" class="input">
-                      <option value="normal">Normal</option>
-                      <option value="bold">Bold</option>
-                    </select>
-                  </div>
-                  <div class="col-span-2">
-                    <label class="form-label">Align</label>
-                    <select v-model="selected.align" class="input">
-                      <option value="left">Left</option>
-                      <option value="center">Center</option>
-                      <option value="right">Right</option>
-                    </select>
-                  </div>
-                </div>
-              </template>
-
-              <!-- image -->
-              <template v-else-if="selected.type === 'image'">
-                <div>
-                  <label class="form-label">Image</label>
-                  <button class="btn btn-outline btn-sm w-full" @click="imgInput?.click()">
-                    <Icon name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1.5" />
-                    Upload image
-                  </button>
-                  <input ref="imgInput" type="file" accept="image/*" class="hidden" @change="onElementImage" />
-                </div>
-                <div>
-                  <label class="form-label">Fit</label>
-                  <select v-model="selected.fit" class="input">
-                    <option value="contain">Contain</option>
-                    <option value="cover">Cover</option>
+                  <label class="admin-label">Font</label>
+                  <select v-model="selected.fontFamily" class="admin-field">
+                    <option value="helvetica">Helvetica</option>
+                    <option value="times">Times</option>
+                    <option value="courier">Courier</option>
                   </select>
                 </div>
                 <div>
-                  <label class="form-label">Opacity ({{ selected.opacity }})</label>
-                  <input v-model.number="selected.opacity" type="range" min="0.1" max="1" step="0.1" class="w-full" />
+                  <label class="admin-label">Size (pt)</label>
+                  <input v-model.number="selected.fontSize" type="number" min="4" max="72" class="admin-field" />
                 </div>
-              </template>
-
-              <!-- qr -->
-              <template v-else-if="selected.type === 'qr'">
                 <div>
-                  <label class="form-label">QR content (URL / text)</label>
-                  <input v-model="selected.value" type="text" class="input" placeholder="https://..." />
+                  <label class="admin-label">Color</label>
+                  <input v-model="selected.color" type="color" class="admin-field !p-1" />
                 </div>
-              </template>
-
-              <!-- rect -->
-              <template v-else-if="selected.type === 'rect'">
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="form-label">Fill</label>
-                    <input v-model="selected.fill" type="color" class="input h-[38px] p-1" />
-                  </div>
-                  <div>
-                    <label class="form-label">Radius (mm)</label>
-                    <input v-model.number="selected.borderRadius" type="number" min="0" step="0.5" class="input" />
-                  </div>
-                  <div>
-                    <label class="form-label">Border</label>
-                    <input v-model.number="selected.borderWidth" type="number" min="0" step="0.1" class="input" />
-                  </div>
-                  <div>
-                    <label class="form-label">Border color</label>
-                    <input v-model="selected.borderColor" type="color" class="input h-[38px] p-1" />
-                  </div>
+                <div>
+                  <label class="admin-label">Weight</label>
+                  <select v-model="selected.fontWeight" class="admin-field">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                  </select>
                 </div>
-              </template>
+                <div class="col-span-2">
+                  <label class="admin-label">Align</label>
+                  <select v-model="selected.align" class="admin-field">
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+              </div>
+            </template>
 
-              <hr class="border-secondary-200" />
-              <div class="flex items-center justify-between gap-2">
-                <button class="btn btn-outline btn-sm" @click="duplicateSelected">
-                  <Icon name="heroicons:document-duplicate" class="h-4 w-4 mr-1" /> Duplicate
+            <!-- image -->
+            <template v-else-if="selected.type === 'image'">
+              <div>
+                <label class="admin-label">Image</label>
+                <button type="button" class="admin-btn admin-btn--outline admin-btn--sm w-full" @click="imgInput?.click()">
+                  <Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
+                  Upload image
                 </button>
-                <div class="flex gap-1">
-                  <button class="btn btn-outline btn-sm" title="Backward" @click="moveLayer(-1)">
-                    <Icon name="heroicons:chevron-down" class="h-4 w-4" />
-                  </button>
-                  <button class="btn btn-outline btn-sm" title="Forward" @click="moveLayer(1)">
-                    <Icon name="heroicons:chevron-up" class="h-4 w-4" />
-                  </button>
+                <input ref="imgInput" type="file" accept="image/*" class="hidden" @change="onElementImage" />
+              </div>
+              <div>
+                <label class="admin-label">Fit</label>
+                <select v-model="selected.fit" class="admin-field">
+                  <option value="contain">Contain</option>
+                  <option value="cover">Cover</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label">Opacity ({{ selected.opacity }})</label>
+                <input
+                  v-model.number="selected.opacity"
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  class="admin-range w-full"
+                />
+              </div>
+            </template>
+
+            <!-- qr -->
+            <template v-else-if="selected.type === 'qr'">
+              <div>
+                <label class="admin-label">QR content (URL / text)</label>
+                <input v-model="selected.value" type="text" class="admin-field" placeholder="https://..." />
+              </div>
+            </template>
+
+            <!-- rect -->
+            <template v-else-if="selected.type === 'rect'">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="admin-label">Fill</label>
+                  <input v-model="selected.fill" type="color" class="admin-field !p-1" />
                 </div>
+                <div>
+                  <label class="admin-label">Radius (mm)</label>
+                  <input v-model.number="selected.borderRadius" type="number" min="0" step="0.5" class="admin-field" />
+                </div>
+                <div>
+                  <label class="admin-label">Border</label>
+                  <input v-model.number="selected.borderWidth" type="number" min="0" step="0.1" class="admin-field" />
+                </div>
+                <div>
+                  <label class="admin-label">Border color</label>
+                  <input v-model="selected.borderColor" type="color" class="admin-field !p-1" />
+                </div>
+              </div>
+            </template>
+
+            <hr class="border-secondary-200" />
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" @click="duplicateSelected">
+                <Icon name="heroicons:document-duplicate" class="h-4 w-4" />
+                Duplicate
+              </button>
+              <div class="flex gap-1">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
+                  title="Backward"
+                  @click="moveLayer(-1)"
+                >
+                  <Icon name="heroicons:chevron-down" class="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
+                  title="Forward"
+                  @click="moveLayer(1)"
+                >
+                  <Icon name="heroicons:chevron-up" class="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </AdminSectionCard>
 
-        <div class="card">
-          <div class="card-body">
-            <label class="form-label">Notes</label>
-            <textarea v-model="design.notes" rows="3" class="input" placeholder="Internal notes (paper, finish, etc.)"></textarea>
-          </div>
-        </div>
+        <AdminSectionCard title="Internal notes">
+          <label class="admin-label">Notes</label>
+          <textarea
+            v-model="design.notes"
+            rows="3"
+            class="admin-field"
+            placeholder="Internal notes (paper, finish, etc.)"
+          ></textarea>
+        </AdminSectionCard>
       </div>
     </div>
 
-    <!-- Save as Template Modal -->
-    <Transition name="modal">
-      <div v-if="showTemplateModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center p-4">
-          <div class="fixed inset-0 bg-black/50" @click="closeTemplateModal"></div>
-          <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
-            <div class="flex items-start justify-between mb-6">
-              <div>
-                <h3 class="modal-title text-secondary-900">Save as Template</h3>
-                <p class="text-helper mt-1">Render the current design into a card template customers can pick.</p>
+    <!-- Design library -->
+    <AdminFilterBar class="mt-6" @submit="applyFilters">
+      <template #search>
+        <label class="admin-label">Search</label>
+        <div class="relative">
+          <Icon
+            name="heroicons:magnifying-glass"
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+          />
+          <input
+            v-model="filters.search"
+            type="text"
+            class="admin-field !pl-9"
+            placeholder="Search designs by name or notes…"
+            maxlength="150"
+            @input="onSearchInput"
+          />
+        </div>
+      </template>
+
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Status</label>
+        <select v-model="filters.status" class="admin-field" @change="applyFilters">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="min-w-[12rem]">
+        <label class="admin-label">Sort by</label>
+        <div class="flex gap-2">
+          <select v-model="filters.sort_by" class="admin-field" @change="applyFilters">
+            <option value="updated_at">Last updated</option>
+            <option value="created_at">Date created</option>
+            <option value="name">Name</option>
+          </select>
+          <button
+            type="button"
+            class="admin-btn admin-btn--outline admin-btn--icon shrink-0"
+            :title="`Sort ${filters.sort_order === 'asc' ? 'ascending' : 'descending'}`"
+            @click="toggleSortOrder"
+          >
+            <Icon
+              :name="filters.sort_order === 'asc' ? 'heroicons:arrow-small-up' : 'heroicons:arrow-small-down'"
+              class="h-4 w-4"
+            />
+          </button>
+        </div>
+      </div>
+
+      <template #actions>
+        <span class="w-full text-right text-body-sm text-secondary-500 sm:w-auto">
+          {{ pagination.total }} design{{ pagination.total === 1 ? '' : 's' }}
+        </span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          :disabled="!hasActiveFilters"
+          @click="clearFilters"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          Clear
+        </button>
+      </template>
+    </AdminFilterBar>
+
+    <AdminSectionCard flush>
+      <template #title>Design library</template>
+      <template #header-actions>
+        <button
+          type="button"
+          class="admin-icon-btn"
+          title="Refresh"
+          @click="loadDesigns()"
+        >
+          <Icon name="heroicons:arrow-path" :class="['h-4 w-4', loadingDesigns && 'animate-spin']" />
+        </button>
+        <button type="button" class="admin-btn admin-btn--primary admin-btn--sm" @click="newDesign">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          New design
+        </button>
+      </template>
+
+      <AdminLoadingState v-if="loadingDesigns" variant="table" :rows="5" :columns="6" />
+
+      <AdminEmptyState
+        v-else-if="!designs.length"
+        icon="heroicons:document-duplicate"
+        :title="hasActiveFilters ? 'No matching designs' : 'No saved designs yet'"
+        :description="
+          hasActiveFilters
+            ? 'Try adjusting the search or filters above.'
+            : 'Designs you save will appear in this library.'
+        "
+      />
+
+      <div v-else class="admin-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Design</th>
+              <th>Size</th>
+              <th>Content</th>
+              <th>Status</th>
+              <th>Updated</th>
+              <th class="admin-col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="d in designs"
+              :key="d.id"
+              :class="design.id === d.id ? 'bg-accent-50/70' : ''"
+            >
+              <td>
+                <div class="flex items-center gap-3">
+                  <span
+                    class="inline-flex h-9 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-secondary-200 bg-secondary-100"
+                  >
+                    <img
+                      v-if="d.background_front_url"
+                      :src="d.background_front_url"
+                      loading="lazy"
+                      alt=""
+                      class="h-full w-full object-cover"
+                    />
+                    <Icon v-else name="heroicons:photo" class="h-4 w-4 text-secondary-400" />
+                  </span>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="truncate text-body font-medium text-secondary-900">{{ d.name }}</span>
+                      <AdminStatusBadge
+                        v-if="design.id === d.id"
+                        status="editing"
+                        label="Editing"
+                        tone="brass"
+                      />
+                    </div>
+                    <div class="truncate text-caption text-secondary-500">
+                      {{ d.notes || creatorName(d.creator) }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="whitespace-nowrap">
+                <span class="text-body text-secondary-700">{{ sizeLabel(d.card_size) }}</span>
+                <span v-if="d.bleed" class="admin-badge admin-badge--neutral admin-badge--plain ml-1.5">
+                  Bleed
+                </span>
+              </td>
+              <td>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="admin-badge admin-badge--neutral admin-badge--plain">
+                    {{ (d.front_elements?.length || 0) }} front
+                  </span>
+                  <span class="admin-badge admin-badge--neutral admin-badge--plain">
+                    {{ (d.back_elements?.length || 0) }} back
+                  </span>
+                </div>
+              </td>
+              <td>
+                <AdminStatusBadge
+                  :status="d.is_active === false ? 'inactive' : 'active'"
+                  :label="d.is_active === false ? 'Inactive' : 'Active'"
+                />
+              </td>
+              <td class="whitespace-nowrap text-body text-secondary-600">
+                {{ formatDate(d.updated_at) }}
+              </td>
+              <td class="admin-col-actions">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--outline admin-btn--sm"
+                    @click="openDesign(d.id)"
+                  >
+                    <Icon name="heroicons:pencil-square" class="h-4 w-4" />
+                    Open
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-icon-btn !text-error-500"
+                    title="Delete design"
+                    @click="deleteDesign(d)"
+                  >
+                    <Icon name="heroicons:trash" class="h-4 w-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </AdminSectionCard>
+
+    <AdminPagination
+      v-if="!loadingDesigns && designs.length"
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="pagination.per_page"
+      :total="pagination.total"
+      item-label="designs"
+      @page-change="changePage"
+      @per-page-change="changePerPage"
+    />
+
+    <!-- Save as Template dialog -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div
+          v-if="showTemplateModal"
+          class="admin-dialog-backdrop"
+          @click.self="closeTemplateModal"
+        >
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Save as template"
+            style="width: min(38rem, 100%); margin-top: 6vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:rectangle-stack" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Save as template</p>
+                  <p class="admin-panel-subtitle">
+                    Render the current design into a pickable card template.
+                  </p>
+                </div>
               </div>
-              <button @click="closeTemplateModal" class="-mt-1 text-secondary-400 hover:text-secondary-600">
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="closeTemplateModal"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
 
-            <form @submit.prevent="promoteToTemplate" class="space-y-5">
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Template Name *</label>
-                <input v-model="templateForm.name" type="text" class="input" maxlength="80" placeholder="e.g. Emerald Executive" />
-              </div>
+            <form class="flex min-h-0 flex-1 flex-col" @submit.prevent="promoteToTemplate">
+              <div class="admin-panel-body flex-1 space-y-6 overflow-y-auto">
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Template details</p>
+                  <div class="mt-4 space-y-4">
+                    <div>
+                      <label class="admin-label">
+                        Template name <span class="text-error-600">*</span>
+                      </label>
+                      <input
+                        v-model="templateForm.name"
+                        type="text"
+                        class="admin-field"
+                        maxlength="80"
+                        placeholder="e.g. Emerald Executive"
+                      />
+                    </div>
+                    <div>
+                      <label class="admin-label">Description</label>
+                      <textarea
+                        v-model="templateForm.description"
+                        rows="2"
+                        class="admin-field resize-none"
+                        maxlength="200"
+                        placeholder="Short description about this template"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label class="admin-label">Category</label>
+                      <select v-model="templateForm.category" class="admin-field">
+                        <option value="business">Business</option>
+                        <option value="personal">Personal</option>
+                        <option value="creative">Creative</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="admin-label">
+                        Available plans <span class="text-error-600">*</span>
+                      </label>
+                      <div
+                        class="flex flex-wrap gap-4 rounded-lg border border-secondary-200 bg-secondary-50 p-3"
+                      >
+                        <label
+                          v-for="p in templatePlanOptions"
+                          :key="p.value"
+                          class="flex cursor-pointer items-center gap-2 text-body text-secondary-600"
+                        >
+                          <input
+                            type="checkbox"
+                            class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                            :value="p.value"
+                            v-model="templateForm.planTypes"
+                          />
+                          {{ p.label }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Description</label>
-                <textarea v-model="templateForm.description" rows="2" class="input resize-none" maxlength="200" placeholder="Short description about this template"></textarea>
-              </div>
-
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Category</label>
-                <select v-model="templateForm.category" class="input">
-                  <option value="business">Business</option>
-                  <option value="personal">Personal</option>
-                  <option value="creative">Creative</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-label text-secondary-700 mb-2">Available Plans *</label>
-                <div class="flex flex-wrap gap-4">
-                  <label v-for="p in templatePlanOptions" :key="p.value" class="flex items-center gap-2 text-body text-secondary-600 cursor-pointer">
-                    <input type="checkbox" class="rounded text-primary-600" :value="p.value" v-model="templateForm.planTypes" />
-                    {{ p.label }}
-                  </label>
+                <div
+                  class="flex items-center gap-2 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2"
+                >
+                  <Icon
+                    name="heroicons:information-circle"
+                    class="h-4 w-4 shrink-0 text-secondary-400"
+                  />
+                  <span class="text-helper">
+                    Front and back sides are rendered at {{ EXPORT_PX_PER_MM }}px/mm and saved as a
+                    new template.
+                  </span>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2">
-                <Icon name="heroicons:information-circle" class="h-4 w-4 text-secondary-400 shrink-0" />
-                <span class="text-helper">Front and back sides are rendered at {{ EXPORT_PX_PER_MM }}px/mm and saved as a new template.</span>
-              </div>
-
-              <div class="flex justify-end gap-2 pt-2">
-                <button type="button" class="btn btn-outline" @click="closeTemplateModal" :disabled="promoting">Cancel</button>
-                <button type="submit" class="btn btn-primary" :disabled="promoting">
-                  <Icon v-if="promoting" name="heroicons:arrow-path" class="h-4 w-4 mr-1.5 animate-spin" />
-                  <Icon v-else name="heroicons:check" class="h-4 w-4 mr-1.5" />
-                  {{ promoting ? 'Creating...' : 'Create Template' }}
+              <div class="admin-dialog-foot">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  @click="closeTemplateModal"
+                  :disabled="promoting"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="admin-btn admin-btn--primary" :disabled="promoting">
+                  <Icon
+                    v-if="promoting"
+                    name="heroicons:arrow-path"
+                    class="h-4 w-4 animate-spin"
+                  />
+                  <Icon v-else name="heroicons:check" class="h-4 w-4" />
+                  {{ promoting ? 'Creating…' : 'Create template' }}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
+
+    <!-- Shared confirmation dialog -->
+    <AdminConfirmDialog
+      v-model="confirmOpen"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-label="confirmConfig.confirmLabel"
+      :tone="confirmConfig.tone"
+      :loading="confirmBusy"
+      @confirm="runConfirm"
+    />
   </div>
 </template>
 
 <script setup>
-import { toRaw } from 'vue';
+import { onMounted, onBeforeUnmount, toRaw } from 'vue';
 
 definePageMeta({
   layout: 'admin-management',
@@ -518,6 +867,51 @@ const loadingDesigns = ref(false);
 const designs = ref([]);
 const bgInput = ref(null);
 const imgInput = ref(null);
+
+// Design library filters & pagination
+const filters = reactive({
+  search: '',
+  status: '',
+  sort_by: 'updated_at',
+  sort_order: 'desc',
+});
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+});
+const hasActiveFilters = computed(() => !!(filters.search || filters.status));
+let searchTimer = null;
+
+// Confirmation dialog state
+const confirmOpen = ref(false);
+const confirmBusy = ref(false);
+const confirmConfig = ref({
+  title: '',
+  message: '',
+  confirmLabel: 'Delete',
+  tone: 'danger',
+});
+let confirmAction = null;
+
+const askConfirm = (config, action) => {
+  confirmConfig.value = { confirmLabel: 'Confirm', tone: 'primary', ...config };
+  confirmAction = action;
+  confirmOpen.value = true;
+};
+
+const runConfirm = async () => {
+  if (!confirmAction) return;
+  confirmBusy.value = true;
+  try {
+    await confirmAction();
+  } finally {
+    confirmBusy.value = false;
+    confirmOpen.value = false;
+    confirmAction = null;
+  }
+};
 
 // "Save as Template" state
 const showTemplateModal = ref(false);
@@ -561,6 +955,26 @@ const selected = computed(() => elements.value.find((e) => e.id === selectedId.v
 const uid = () => 'el_' + Math.random().toString(36).slice(2, 9);
 const round = (v) => Math.round(v * 10) / 10;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+// ── Library formatting helpers ──────────────────────────────
+function sizeLabel(size) {
+  const label = cardSizes[size]?.label;
+  if (!label) return size || '—';
+  return label.split(' (')[0];
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function creatorName(creator) {
+  if (!creator) return '—';
+  const name = [creator.first_name, creator.last_name].filter(Boolean).join(' ').trim();
+  return name || creator.email || '—';
+}
 
 const qrUrl = (el) =>
   `${QR_ENDPOINT}?size=300x300&margin=0&data=${encodeURIComponent(el.value || '')}`;
@@ -742,16 +1156,68 @@ async function onElementImage(e) {
 }
 
 // ── Persistence ─────────────────────────────────────────────
-async function loadDesigns() {
+async function loadDesigns(page = 1) {
   loadingDesigns.value = true;
   try {
-    const res = await $api.get('/admin/card-designs');
-    if (res?.success) designs.value = res.data || [];
+    const res = await $api.get('/admin/card-designs', {
+      params: {
+        page,
+        per_page: pagination.per_page,
+        search: filters.search || undefined,
+        status: filters.status || undefined,
+        sort_by: filters.sort_by,
+        sort_order: filters.sort_order,
+      },
+    });
+    if (res?.success) {
+      const payload = res.data || {};
+      designs.value = payload.data || [];
+      pagination.current_page = payload.current_page ?? 1;
+      pagination.last_page = payload.last_page ?? 1;
+      pagination.per_page = payload.per_page ?? pagination.per_page;
+      pagination.total = payload.total ?? designs.value.length;
+    }
   } catch (err) {
     console.error(err);
   } finally {
     loadingDesigns.value = false;
   }
+}
+
+// ── Library filters & pagination ────────────────────────────
+function applyFilters() {
+  pagination.current_page = 1;
+  loadDesigns(1);
+}
+
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => applyFilters(), 400);
+}
+
+function toggleSortOrder() {
+  filters.sort_order = filters.sort_order === 'asc' ? 'desc' : 'asc';
+  applyFilters();
+}
+
+function clearFilters() {
+  filters.search = '';
+  filters.status = '';
+  filters.sort_by = 'updated_at';
+  filters.sort_order = 'desc';
+  applyFilters();
+}
+
+function changePage(page) {
+  const target = Math.min(Math.max(1, page), pagination.last_page || 1);
+  if (target === pagination.current_page) return;
+  loadDesigns(target);
+}
+
+function changePerPage(perPage) {
+  pagination.per_page = perPage;
+  pagination.current_page = 1;
+  loadDesigns(1);
 }
 
 function newDesign() {
@@ -830,17 +1296,27 @@ async function saveDesign() {
   }
 }
 
-async function deleteDesign(d) {
-  if (!confirm(`Delete design "${d.name}"?`)) return;
-  try {
-    await $api.delete(`/admin/card-designs/${d.id}`);
-    if (design.id === d.id) newDesign();
-    await loadDesigns();
-    $toast.success('Design deleted');
-  } catch (err) {
-    console.error(err);
-    $toast.error('Failed to delete design');
-  }
+function deleteDesign(d) {
+  askConfirm(
+    {
+      title: 'Delete design',
+      message: `Delete design "${d.name}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    },
+    async () => {
+      try {
+        await $api.delete(`/admin/card-designs/${d.id}`);
+        if (design.id === d.id) newDesign();
+        const back = pagination.current_page > 1 && designs.value.length === 1;
+        await loadDesigns(back ? pagination.current_page - 1 : pagination.current_page);
+        $toast.success('Design deleted');
+      } catch (err) {
+        console.error(err);
+        $toast.error('Failed to delete design');
+      }
+    }
+  );
 }
 
 // ── PDF export ──────────────────────────────────────────────
@@ -874,8 +1350,13 @@ async function urlToDataURL(url) {
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     return c.toDataURL('image/png');
   } catch (_) {
-    const res = await fetch(url, { mode: 'cors' });
-    const blob = await res.blob();
+    // Storage images are served directly by the web server, so they carry no
+    // CORS headers — the browser blocks canvas pixel access from another origin.
+    // Fetch the bytes through the CORS-enabled API instead.
+    const blob = await $api.get('/admin/card-designs/background-media', {
+      params: { url },
+      responseType: 'blob',
+    });
     return fileToDataURL(new File([blob], 'img.png', { type: blob.type || 'image/png' }));
   }
 }
@@ -1190,7 +1671,40 @@ async function promoteToTemplate() {
   }
 }
 
-// ── Lifecycle ───────────────────────────────────────────────
-onMounted(loadDesigns);
-onBeforeUnmount(endDrag);
+// ── Side switching helper ───────────────────────────────────────
+function switchSide(side) {
+  if (activeSide.value === side) return;
+  activeSide.value = side;
+  selectedId.value = null;
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────
+function onKeyDown(e) {
+  // Ignore when typing in an input / textarea / select
+  const tag = e.target?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return;
+
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (selected.value) {
+      e.preventDefault();
+      deleteSelected();
+    }
+  } else if (e.key === 'Escape') {
+    selectedId.value = null;
+  }
+}
+
+// ── Lifecycle ───────────────────────────────────────────
+onMounted(() => {
+  loadDesigns();
+  window.addEventListener('keydown', onKeyDown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown);
+  // Clean up drag listeners in case a drag is in progress
+  window.removeEventListener('pointermove', onDragMove);
+  window.removeEventListener('pointerup', endDrag);
+  if (searchTimer) clearTimeout(searchTimer);
+});
 </script>

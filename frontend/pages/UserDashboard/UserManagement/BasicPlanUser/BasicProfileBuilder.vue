@@ -4930,7 +4930,7 @@ const closeUpgradeModal = () => {
 const navigateToUpgrade = () => {
   // Plan selection is the real, working upgrade route (there is no
   // /UserDashboard/SubscriptionManagement page).
-  navigateTo('/UserDashboard/PlanSelection');
+  navigateTo('/Onboarding/plan');
 };
 
 // Reset profile data to defaults
@@ -5500,24 +5500,5 @@ select:focus {
 
 .sortable-drag {
   cursor: move;
-}
-
-/* Custom scrollbar for modal */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
 }
 </style>

@@ -1,40 +1,36 @@
 <!-- pages/UserDashboard/Settings.vue -->
 <template>
   <div>
-    <!-- Header Section -->
-    <div class="mb-8">
-      <h1 class="page-title text-secondary-900">
-        Account Settings
-      </h1>
-      <p class="mt-2 text-secondary-600">
-        Manage your account, security, and preferences
-      </p>
-    </div>
+    <AdminPageHeader
+      eyebrow="Account"
+      eyebrow-icon="heroicons:cog-6-tooth"
+      title="Settings"
+      description="Your account details, security, notifications and plan."
+    />
 
     <!-- Main Layout -->
     <div class="flex flex-col lg:flex-row gap-8">
-      <!-- Sidebar Navigation -->
-      <div class="w-full lg:w-64 flex-shrink-0">
-        <div class="card">
-          <div class="card-body">
-            <nav class="space-y-2">
-              <button
-                v-for="tab in settingsTabs"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
-                  'w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 flex items-center',
-                  activeTab === tab.id
-                    ? 'bg-primary-100 text-primary-700 font-medium'
-                    : 'text-secondary-700 hover:bg-secondary-50',
-                ]"
-              >
-                <Icon :name="tab.icon" class="h-5 w-5 mr-3" />
-                {{ tab.label }}
-              </button>
-            </nav>
-          </div>
-        </div>
+      <!-- Section navigation: horizontal scroller on mobile, rail on desktop -->
+      <div class="w-full lg:w-60 flex-shrink-0">
+        <nav class="admin-panel p-2 flex gap-1 overflow-x-auto lg:flex-col lg:sticky lg:top-0" aria-label="Settings sections">
+          <button
+            v-for="tab in settingsTabs"
+            :key="tab.id"
+            type="button"
+            @click="activeTab = tab.id"
+            :aria-current="activeTab === tab.id ? 'page' : undefined"
+            :class="[
+              'shrink-0 whitespace-nowrap text-left px-3 py-2 rounded-lg transition-colors duration-150 flex items-center text-navigation',
+              activeTab === tab.id
+                ? 'bg-accent-100 text-secondary-900 shadow-[inset_0_0_0_1px_rgba(194,160,104,0.35)]'
+                : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
+              tab.id === 'danger' && activeTab !== tab.id ? 'lg:mt-2 text-error-600 hover:text-error-700' : '',
+            ]"
+          >
+            <Icon :name="tab.icon" class="h-[18px] w-[18px] mr-2.5" :class="activeTab === tab.id ? 'text-accent-700' : ''" />
+            {{ tab.label }}
+          </button>
+        </nav>
       </div>
 
       <!-- Main Content Area -->
@@ -60,10 +56,10 @@
                     <div class="md:col-span-2">
                       <div class="flex items-center space-x-6">
                         <div class="shrink-0">
-                          <img 
-                            :src="personalInfoForm.account_image || '/default-avatar.png'" 
-                            :alt="`${personalInfoForm.first_name} ${personalInfoForm.last_name}`"
-                            class="h-16 w-16 object-cover rounded-full border-2 border-gray-300"
+                          <UserAvatar
+                            :src="personalInfoForm.account_image"
+                            :name="`${personalInfoForm.first_name} ${personalInfoForm.last_name}`"
+                            class="h-16 w-16 rounded-full border-2 border-secondary-300"
                           />
                         </div>
                         <div class="flex-1">
@@ -90,13 +86,13 @@
                               v-if="personalInfoForm.account_image"
                               type="button"
                               @click="removeImage"
-                              class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                              class="btn btn-outline btn-sm text-error-600 border-error-300 hover:bg-error-50"
                             >
                               <Icon name="heroicons:trash" class="h-4 w-4 mr-2" />
                               Remove
                             </button>
                           </div>
-                          <p class="text-helper text-gray-500 mt-1">JPG, PNG, GIF or WebP. Max 5MB</p>
+                          <p class="text-helper text-secondary-500 mt-1">JPG, PNG, GIF or WebP. Max 5MB</p>
                         </div>
                       </div>
                     </div>
@@ -200,7 +196,7 @@
                   <div 
                     v-for="card in userNfcCards" 
                     :key="card.id"
-                    class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
+                    class="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border"
                   >
                     <div class="flex-1">
                       <div class="flex items-center gap-3 mb-2">
@@ -208,13 +204,13 @@
                           {{ card.nfc_card_id || `Card #${card.id}` }}
                         </h3>
                         <span 
-                          :class="card.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                          :class="card.status === 'active' ? 'bg-success-100 text-success-800' : 'bg-secondary-100 text-secondary-800'"
                           class="px-2 py-1 text-badge rounded-full"
                         >
                           {{ card.status }}
                         </span>
                         <span 
-                          :class="card.has_landing_page ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'"
+                          :class="card.has_landing_page ? 'bg-info-100 text-info-800' : 'bg-warning-100 text-warning-800'"
                           class="px-2 py-1 text-badge rounded-full"
                         >
                           {{ card.has_landing_page ? 'Profile Ready' : 'Profile Needed' }}
@@ -222,21 +218,21 @@
                       </div>
                       <div class="space-y-1 mb-2">
                         <div class="flex items-center gap-2">
-                          <Icon name="heroicons:link" class="h-4 w-4 text-gray-400" />
-                          <span class="text-caption text-gray-500">Live URL:</span>
-                          <code class="text-body text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          <Icon name="heroicons:link" class="h-4 w-4 text-secondary-400" />
+                          <span class="text-caption text-secondary-500">Live URL:</span>
+                          <code class="text-body text-info-600 bg-info-50 px-2 py-1 rounded">
                             {{ getCardDisplayLiveUrl(card) }}
                           </code>
                         </div>
                         <div class="flex items-center gap-2">
-                          <Icon name="heroicons:eye" class="h-4 w-4 text-gray-400" />
-                          <span class="text-caption text-gray-500">Preview URL:</span>
-                          <code class="text-body text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                          <Icon name="heroicons:eye" class="h-4 w-4 text-secondary-400" />
+                          <span class="text-caption text-secondary-500">Preview URL:</span>
+                          <code class="text-body text-primary-600 bg-primary-50 px-2 py-1 rounded">
                             {{ getCardDisplayPreviewUrl(card) }}
                           </code>
                         </div>
                       </div>
-                      <p v-if="!card.has_landing_page" class="text-caption text-yellow-600">
+                      <p v-if="!card.has_landing_page" class="text-caption text-warning-600">
                         <Icon name="heroicons:exclamation-triangle" class="h-3 w-3 inline mr-1" />
                         This card needs a profile to display content
                       </p>
@@ -276,8 +272,8 @@
                   </div>
                 </div>
                 <div v-else class="text-center py-8">
-                  <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p class="text-body text-gray-500 mb-4">No NFC cards found</p>
+                  <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-secondary-300" />
+                  <p class="text-body text-secondary-500 mb-4">No NFC cards found</p>
                   <button
                     @click="navigateTo('/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement')"
                     class="btn btn-primary btn-sm"
@@ -309,7 +305,7 @@
                       >Account Status</label
                     >
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-green-100 text-green-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-success-100 text-success-800"
                     >
                       <Icon
                         name="heroicons:check-circle"
@@ -324,7 +320,7 @@
                       >Subscription Plan</label
                     >
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-blue-100 text-blue-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-info-100 text-info-800"
                     >
                       {{ user?.subscription_plan || "Free" }}
                     </span>
@@ -384,63 +380,6 @@
 
           <!-- Preferences Tab -->
           <div v-if="activeTab === 'preferences'" class="space-y-6">
-            <!-- Theme Selector Card -->
-            <div class="card">
-              <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Interface Theme
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Choose a color theme most comfortable for your eyes
-                </p>
-              </div>
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <button
-                    v-for="t in availableThemes"
-                    :key="t.key"
-                    type="button"
-                    @click="setTheme(t.key); saveLocalPref('theme', t.key);"
-                    :class="[
-                      'relative p-4 rounded-xl border-2 text-left transition-all duration-200 group',
-                      currentTheme === t.key
-                        ? 'border-primary-500 bg-primary-50/70 shadow-md'
-                        : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
-                    ]"
-                  >
-                    <div class="flex items-start justify-between mb-3">
-                      <div class="flex items-center gap-3">
-                        <div
-                          class="w-10 h-10 rounded-lg border border-secondary-200 flex items-center justify-center shadow-sm"
-                          :style="{ backgroundColor: t.previewColor + '1A' }"
-                        >
-                          <Icon :name="t.icon" class="h-5 w-5" :style="{ color: t.previewColor }" />
-                        </div>
-                        <div>
-                          <h4 class="text-label text-secondary-900">{{ t.name }}</h4>
-                          <div class="flex gap-1 mt-1">
-                            <span class="w-3 h-3 rounded-full border border-secondary-200" :style="{ backgroundColor: t.previewColor }"></span>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        v-if="currentTheme === t.key"
-                        class="w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center shadow flex-shrink-0"
-                      >
-                        <Icon name="heroicons:check" class="h-4 w-4" />
-                      </div>
-                    </div>
-                    <p class="text-caption text-secondary-600 leading-relaxed min-h-[32px]">
-                      {{ t.description }}
-                    </p>
-                  </button>
-                </div>
-                <div v-if="availableThemes.length === 0" class="text-center py-8 text-secondary-500 text-body">
-                  Unable to load theme list.
-                </div>
-              </div>
-            </div>
-
             <!-- Language & Region Card -->
             <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
@@ -623,13 +562,13 @@
                         </h3>
                         <span
                           v-if="user?.two_factor_enabled"
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-green-100 text-green-800"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-success-100 text-success-800"
                         >
                           Active
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-gray-100 text-gray-800"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-secondary-100 text-secondary-800"
                         >
                           Inactive
                         </span>
@@ -655,7 +594,7 @@
                       <button
                         @click="twoFactor.showDisable = true; twoFactor.passwordInput = ''; twoFactor.recoveryCodeInput = '';"
                         :disabled="twoFactor.loading"
-                        class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-60"
+                        class="btn btn-outline btn-sm text-error-600 border-error-300 hover:bg-error-50 disabled:opacity-60"
                       >
                         <Icon name="heroicons:shield-exclamation" class="h-4 w-4 mr-1" />
                         Disable 2FA
@@ -694,7 +633,7 @@
                       </div>
                       <div>
                         <h3 class="text-label text-secondary-900">Google</h3>
-                        <p v-if="linkedAccounts.google" class="text-body text-green-600">
+                        <p v-if="linkedAccounts.google" class="text-body text-success-600">
                           Connected as {{ linkedAccounts.google.email }}
                         </p>
                         <p v-else class="text-body text-secondary-500">
@@ -706,7 +645,7 @@
                       v-if="linkedAccounts.google"
                       @click="confirmUnlinkAccount('google')"
                       :disabled="unlinkingAccount"
-                      class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                      class="btn btn-outline btn-sm text-error-600 border-error-300 hover:bg-error-50"
                     >
                       <Icon name="heroicons:link-slash" class="h-4 w-4 mr-1" />
                       Unlink
@@ -730,7 +669,7 @@
                       </div>
                       <div>
                         <h3 class="text-label text-secondary-900">Apple</h3>
-                        <p v-if="linkedAccounts.apple" class="text-body text-green-600">
+                        <p v-if="linkedAccounts.apple" class="text-body text-success-600">
                           Connected as {{ linkedAccounts.apple.email || 'Private Email' }}
                         </p>
                         <p v-else class="text-body text-secondary-500">
@@ -742,7 +681,7 @@
                       v-if="linkedAccounts.apple"
                       @click="confirmUnlinkAccount('apple')"
                       :disabled="unlinkingAccount"
-                      class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50"
+                      class="btn btn-outline btn-sm text-error-600 border-error-300 hover:bg-error-50"
                     >
                       <Icon name="heroicons:link-slash" class="h-4 w-4 mr-1" />
                       Unlink
@@ -760,10 +699,10 @@
                 </div>
 
                 <!-- Info notice -->
-                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="mt-4 p-3 bg-info-50 border border-info-200 rounded-lg">
                   <div class="flex items-start">
-                    <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                    <p class="text-body text-blue-700">
+                    <Icon name="heroicons:information-circle" class="h-5 w-5 text-info-500 mt-0.5 mr-2 flex-shrink-0" />
+                    <p class="text-body text-info-700">
                       Linking accounts allows you to sign in with either your password or the linked provider. 
                       You must verify your password before linking a new account.
                     </p>
@@ -809,7 +748,7 @@
                         <Icon :name="showLinkAccountPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="h-5 w-5" />
                       </button>
                     </div>
-                    <p v-if="linkAccountError" class="text-error text-red-600 mt-1">
+                    <p v-if="linkAccountError" class="text-error text-error-600 mt-1">
                       {{ linkAccountError }}
                     </p>
                   </div>
@@ -857,11 +796,11 @@
                   >
                     <div class="flex items-center">
                       <div
-                        class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4"
+                        class="w-10 h-10 bg-info-100 rounded-lg flex items-center justify-center mr-4"
                       >
                         <Icon
                           :name="sessionDeviceIcon(session)"
-                          class="h-5 w-5 text-blue-600"
+                          class="h-5 w-5 text-info-600"
                         />
                       </div>
                       <div>
@@ -877,7 +816,7 @@
                     <div class="flex items-center space-x-2">
                       <span
                         v-if="session.is_current"
-                        class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-green-100 text-green-800"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-success-100 text-success-800"
                       >
                         Current Session
                       </span>
@@ -885,7 +824,7 @@
                         v-else
                         @click="revokeSession(session.id)"
                         :disabled="revokingSessionId === session.id"
-                        class="btn btn-outline btn-sm text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-50"
+                        class="btn btn-outline btn-sm text-error-600 border-error-300 hover:bg-error-50 disabled:opacity-50"
                       >
                         <span v-if="revokingSessionId === session.id" class="loading loading-spinner loading-xs mr-1"></span>
                         End Session
@@ -902,7 +841,7 @@
                   <button
                     @click="logoutEverywhere()"
                     :disabled="loadingLogoutEverywhere"
-                    class="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                    class="btn bg-error-600 text-white hover:bg-error-700 disabled:opacity-60"
                   >
                     <span v-if="loadingLogoutEverywhere" class="loading loading-spinner loading-xs mr-2"></span>
                     <Icon v-else name="heroicons:arrow-left-on-rectangle" class="h-4 w-4 mr-2" />
@@ -915,119 +854,42 @@
 
           <!-- Privacy Settings Tab -->
           <div v-if="activeTab === 'privacy'" class="space-y-6">
-            <!-- Profile Visibility Card -->
-            <div
-              class="card"
-            >
+            <!-- Profile visibility is a per-card setting (landing page active
+                 flag), so it is managed where the cards are — no duplicate
+                 account-wide toggle that nothing would read. -->
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Profile Visibility
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Control who can see your profile
-                </p>
+                <h2 class="card-title text-secondary-900">Profile visibility</h2>
+                <p class="card-subtitle text-secondary-600">Who can see your public profile</p>
               </div>
               <div class="p-6">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Public Profile
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Make your profile visible to everyone
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="privacySettings.public_profile"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updatePrivacySetting('public_profile')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Show in Search
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Allow search engines to index your profile
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="privacySettings.search_indexing"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updatePrivacySetting('search_indexing')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <p class="text-body text-secondary-700">
+                  Each NFC card has its own public profile. Deactivating a card on the cards page hides
+                  its profile from anyone who taps the card or opens its link; reactivate it at any time.
+                </p>
+                <NuxtLink :to="portalAccess.routes.cards" class="btn btn-outline mt-4 inline-flex items-center">
+                  <Icon name="heroicons:credit-card" class="h-4 w-4 mr-2" />
+                  Manage card visibility
+                </NuxtLink>
               </div>
             </div>
 
-            <!-- Analytics & Tracking Card -->
-            <div
-              class="card"
-            >
+            <!-- Export Data (moved here from Danger Zone: it is not destructive) -->
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Analytics & Tracking
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Manage data collection preferences
-                </p>
+                <h2 class="card-title text-secondary-900">Export your data</h2>
+                <p class="card-subtitle text-secondary-600">Download a copy of what NFCGo stores about you</p>
               </div>
               <div class="p-6">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Profile Analytics
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Track profile views and interactions
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="privacySettings.analytics_enabled"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updatePrivacySetting('analytics_enabled')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Location Tracking
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Track visitor locations for analytics
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="privacySettings.location_tracking"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updatePrivacySetting('location_tracking')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <p class="text-body text-secondary-700 mb-4">
+                  Includes your account details, NFC cards, profile pages, links, invoices and
+                  notification preferences, as a JSON file.
+                </p>
+                <button @click="exportData" :disabled="exportingData" class="btn btn-outline inline-flex items-center">
+                  <span v-if="exportingData" class="loading loading-spinner loading-sm mr-2"></span>
+                  <Icon v-else name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
+                  {{ exportingData ? "Preparing export…" : "Export my data" }}
+                </button>
               </div>
             </div>
           </div>
@@ -1197,15 +1059,17 @@
                     </div>
                   </div>
                   <div class="md:text-right bg-secondary-50 rounded-xl border border-secondary-200 p-5 min-w-[240px]">
+                    <!-- Same price the public pricing page shows (PlanPrice). The
+                         card checkout is a one-off payment, so no "/mo" or
+                         auto-charge wording here. -->
                     <p class="stat-label mb-2">
-                      Monthly Rate
+                      Plan price
                     </p>
                     <p class="stat-value text-secondary-900 leading-none mb-2">
                       {{ getSubscriptionPrice(user?.subscription_plan) }}
-                      <span class="text-body font-normal text-secondary-500 ml-1">/mo</span>
                     </p>
                     <p class="text-helper text-secondary-500">
-                      {{ user?.subscription_plan === 'free' ? "You haven't been charged — free plan" : 'Charged automatically every month' }}
+                      {{ user?.subscription_plan === 'free' ? "Free plan — nothing to pay" : 'Paid at card checkout' }}
                     </p>
                   </div>
                 </div>
@@ -1213,7 +1077,7 @@
                 <!-- Subscription Features -->
                 <div class="mb-8 p-5 bg-gradient-to-br from-secondary-50 to-white rounded-xl border border-secondary-200">
                   <h4 class="text-label text-secondary-900 mb-4 flex items-center gap-2">
-                    <Icon name="heroicons:check-circle" class="h-5 w-5 text-green-600" />
+                    <Icon name="heroicons:check-circle" class="h-5 w-5 text-success-600" />
                     Current Plan Features
                   </h4>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
@@ -1222,7 +1086,7 @@
                       :key="feature"
                       class="flex items-start text-body text-secondary-700"
                     >
-                      <Icon name="heroicons:check" class="h-4 w-4 text-green-500 mr-2.5 flex-shrink-0 mt-0.5" />
+                      <Icon name="heroicons:check" class="h-4 w-4 text-success-500 mr-2.5 flex-shrink-0 mt-0.5" />
                       <span>{{ feature }}</span>
                     </div>
                   </div>
@@ -1231,7 +1095,7 @@
                 <!-- Available Plans (if user is on free plan) -->
                 <div v-if="user?.subscription_plan === 'free' && planPrices.length > 1" class="mb-8">
                   <h4 class="text-label text-secondary-900 mb-4 flex items-center gap-2">
-                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-amber-500" />
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-warning-500" />
                     Available Plans to Upgrade
                   </h4>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1247,7 +1111,6 @@
                         </div>
                         <span class="card-title text-primary-600 whitespace-nowrap ml-3">
                           {{ plan.currency === 'MYR' ? 'RM' : plan.currency }} {{ plan.price }}
-                          <span class="text-caption font-normal text-secondary-500">/mo</span>
                         </span>
                       </div>
                       <div class="space-y-1.5 mb-4 pt-2 border-t border-secondary-100">
@@ -1256,7 +1119,7 @@
                           :key="feature"
                           class="flex items-start text-caption text-secondary-600"
                         >
-                          <Icon name="heroicons:check" class="h-3.5 w-3.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                          <Icon name="heroicons:check" class="h-3.5 w-3.5 text-success-500 mr-1.5 flex-shrink-0 mt-0.5" />
                           {{ feature }}
                         </div>
                         <div v-if="plan.features?.length > 4" class="text-helper text-secondary-500 pl-5">
@@ -1281,15 +1144,17 @@
                     class="btn btn-primary"
                   >
                     <Icon name="heroicons:arrow-trending-up" class="h-4 w-4 mr-2" />
-                    Upgrade to Business Plan
+                    Compare paid plans
                   </button>
-                  <button 
-                    v-else 
-                    @click="manageBilling" 
+                  <!-- Business is set up by NFCGo (enquiry-first), so there is no
+                       self-serve plan change for Business accounts. -->
+                  <button
+                    v-else-if="user?.subscription_plan !== 'business'"
+                    @click="manageBilling"
                     class="btn btn-outline"
                   >
-                    <Icon name="heroicons:credit-card" class="h-4 w-4 mr-2" />
-                    Manage Billing
+                    <Icon name="heroicons:arrows-up-down" class="h-4 w-4 mr-2" />
+                    Change plan
                   </button>
                   <button
                     v-if="user?.subscription_plan !== 'free'"
@@ -1302,7 +1167,7 @@
                   <button
                     v-if="user?.subscription_plan !== 'free'"
                     @click="cancelSubscription"
-                    class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50"
+                    class="btn btn-outline text-error-600 border-error-300 hover:bg-error-50"
                   >
                     <Icon name="heroicons:x-circle" class="h-4 w-4 mr-2" />
                     Cancel Subscription
@@ -1346,75 +1211,32 @@
 
           <!-- Danger Zone Tab -->
           <div v-if="activeTab === 'danger'" class="space-y-6">
-            <!-- Export Data Card -->
-            <div
-              class="card"
-            >
-              <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Export Data
-                </h2>
-                <p class="card-subtitle text-secondary-600">Download all your data</p>
+            <!-- There is no self-serve deletion endpoint: closing an account
+                 touches orders, invoices and (for Business) employee accounts,
+                 so it is handled by support. This card says so honestly
+                 instead of offering a button that always failed. -->
+            <div class="bg-white rounded-lg shadow-sm border border-error-200">
+              <div class="px-6 py-4 border-b border-error-200">
+                <h2 class="card-title text-error-900">Close your account</h2>
+                <p class="text-body text-error-600">Permanently remove your account and profiles</p>
               </div>
-              <div class="p-6">
-                <p class="card-subtitle text-secondary-600 mb-4">
-                  Export all your profile data, analytics, and settings in JSON
-                  format.
+              <div class="p-6 space-y-4">
+                <p class="text-body text-secondary-700">
+                  Account closure is handled by the NFCGo support team so that any card orders, invoices
+                  and linked team accounts are closed properly. Send the request from the e-mail address
+                  on this account and we will confirm with you before anything is deleted.
                 </p>
-                <button
-                  @click="exportData"
-                  :disabled="exportingData"
-                  class="btn btn-outline"
-                >
-                  <span
-                    v-if="exportingData"
-                    class="loading loading-spinner loading-sm mr-2"
-                  ></span>
-                  <Icon
-                    v-else
-                    name="heroicons:arrow-down-tray"
-                    class="h-4 w-4 mr-2"
-                  />
-                  {{ exportingData ? "Exporting..." : "Export My Data" }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Delete Account Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-red-200">
-              <div class="px-6 py-4 border-b border-red-200">
-                <h2 class="card-title text-red-900">
-                  Delete Account
-                </h2>
-                <p class="text-body text-red-600">
-                  Permanently delete your account and all data
+                <p class="text-body text-secondary-700">
+                  Before you go, you can
+                  <button type="button" class="font-semibold text-primary-600 underline" @click="activeTab = 'privacy'">export a copy of your data</button>.
                 </p>
-              </div>
-              <div class="p-6">
-                <div
-                  class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+                <a
+                  :href="closeAccountMailto"
+                  class="btn btn-outline inline-flex items-center text-error-600 border-error-300 hover:bg-error-50"
                 >
-                  <div class="flex">
-                    <Icon
-                      name="heroicons:exclamation-triangle"
-                      class="h-5 w-5 text-red-400 mr-3 mt-0.5"
-                    />
-                    <div>
-                      <h3 class="text-label text-red-800">Warning</h3>
-                      <p class="text-body text-red-700 mt-1">
-                        This action cannot be undone. All your data, profiles,
-                        and NFC tags will be permanently deleted.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  @click="showDeleteConfirmation = true"
-                  class="btn bg-red-600 text-white hover:bg-red-700"
-                >
-                  <Icon name="heroicons:trash" class="h-4 w-4 mr-2" />
-                  Delete My Account
-                </button>
+                  <Icon name="heroicons:envelope" class="h-4 w-4 mr-2" />
+                  Request account closure
+                </a>
               </div>
             </div>
           </div>
@@ -1428,8 +1250,8 @@
     >
       <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center mb-6">
-          <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mr-4">
-            <Icon name="heroicons:shield-check" class="h-6 w-6 text-teal-600" />
+          <div class="w-12 h-12 bg-info-100 rounded-full flex items-center justify-center mr-4">
+            <Icon name="heroicons:shield-check" class="h-6 w-6 text-info-600" />
           </div>
           <div>
             <h3 class="modal-title text-secondary-900">
@@ -1444,22 +1266,23 @@
         <!-- STEP 1: Scan QR Code -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-badge">1</span>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-info-600 text-white text-badge">1</span>
             <h4 class="text-label text-secondary-900">Scan QR Code with Authenticator App</h4>
           </div>
 
           <div class="bg-secondary-50 rounded-xl p-5 flex flex-col items-center border border-secondary-200">
-            <iframe
-              v-if="twoFactor.qrData"
-              :src="'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=1&data=' + encodeURIComponent(twoFactor.qrData)"
-              width="220"
-              height="220"
-              frameborder="0"
-              class="rounded-lg border-2 border-white shadow-sm"
-            ></iframe>
+            <!-- Rendered locally: the otpauth:// URI contains the 2FA secret and
+                 must never be sent to a third-party QR service. -->
+            <div
+              v-if="twoFactorQrSvg"
+              class="h-[220px] w-[220px] overflow-hidden rounded-lg border-2 border-white bg-white p-2 shadow-sm [&>svg]:h-full [&>svg]:w-full"
+              role="img"
+              aria-label="Two-factor authentication QR code"
+              v-html="twoFactorQrSvg"
+            ></div>
 
             <div v-else class="w-[220px] h-[220px] rounded-lg border-2 border-dashed border-secondary-300 flex items-center justify-center">
-              <span class="loading loading-spinner text-teal-600"></span>
+              <span class="loading loading-spinner text-info-600"></span>
             </div>
 
             <div class="mt-4 w-full">
@@ -1484,7 +1307,7 @@
         <!-- STEP 2: Enter OTP -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-badge">2</span>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-info-600 text-white text-badge">2</span>
             <h4 class="text-label text-secondary-900">Enter 6 Digit OTP Code</h4>
           </div>
           <p class="text-helper text-secondary-600 mb-2.5">
@@ -1504,16 +1327,16 @@
         <!-- STEP 3: Save Recovery Codes -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-badge">3</span>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-warning-500 text-white text-badge">3</span>
             <h4 class="text-label text-secondary-900">Save Recovery Codes (IMPORTANT!)</h4>
           </div>
 
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div class="bg-warning-50 border border-warning-200 rounded-xl p-4">
             <div class="flex gap-3">
-              <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-warning-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h5 class="text-label text-amber-900 mb-1">Save in a SAFE place</h5>
-                <p class="text-caption text-amber-800 leading-relaxed">
+                <h5 class="text-label text-warning-900 mb-1">Save in a SAFE place</h5>
+                <p class="text-caption text-warning-800 leading-relaxed">
                   The 8 recovery codes below can be used <strong>ONE TIME ONLY</strong> if you lose access to your phone / Authenticator app.
                   Do not share with anyone. If lost, you won't be able to log into your account.
                 </p>
@@ -1582,8 +1405,8 @@
     >
       <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
         <div class="flex items-center mb-6">
-          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-            <Icon name="heroicons:shield-exclamation" class="h-6 w-6 text-red-600" />
+          <div class="w-12 h-12 bg-error-100 rounded-full flex items-center justify-center mr-4">
+            <Icon name="heroicons:shield-exclamation" class="h-6 w-6 text-error-600" />
           </div>
           <div>
             <h3 class="modal-title text-secondary-900">
@@ -1659,7 +1482,7 @@
             type="button"
             @click="disable2FA()"
             :disabled="!twoFactor.passwordInput && !twoFactor.recoveryCodeInput || twoFactor.loading"
-            class="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+            class="btn bg-error-600 text-white hover:bg-error-700 disabled:opacity-50"
           >
             <span v-if="twoFactor.loading" class="loading loading-spinner loading-xs mr-2"></span>
             Confirm Disable
@@ -1669,88 +1492,28 @@
     </div>
     <!-- ================== END MODAL NYAHAKTIF 2FA ================== -->
 
-    <!-- Delete Account Confirmation Modal -->
-    <div
-      v-if="showDeleteConfirmation"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-        <div class="flex items-center mb-6">
-          <div
-            class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4"
-          >
-            <Icon
-              name="heroicons:exclamation-triangle"
-              class="h-6 w-6 text-red-600"
-            />
-          </div>
-          <div>
-            <h3 class="modal-title text-secondary-900">
-              Delete Account
-            </h3>
-            <p class="card-subtitle text-secondary-600">
-              This action cannot be undone
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-6">
-          <p class="text-body text-secondary-700 mb-4">
-            To confirm deletion, please type <strong>DELETE</strong> in the
-            field below:
-          </p>
-          <input
-            v-model="deleteConfirmation"
-            type="text"
-            class="input input-bordered w-full"
-            placeholder="Type DELETE to confirm"
-          />
-        </div>
-
-        <div class="flex justify-end space-x-3">
-          <button
-            @click="showDeleteConfirmation = false"
-            class="btn btn-outline"
-          >
-            Cancel
-          </button>
-          <button
-            @click="deleteAccount"
-            :disabled="deleteConfirmation !== 'DELETE' || deletingAccount"
-            class="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-          >
-            <span
-              v-if="deletingAccount"
-              class="loading loading-spinner loading-sm mr-2"
-            ></span>
-            {{ deletingAccount ? "Deleting..." : "Delete Account" }}
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Success Toast -->
     <div
       v-if="showSuccessToast"
-      class="fixed top-4 right-4 bg-green-100 border border-green-200 rounded-lg p-4 shadow-lg z-50"
+      class="fixed top-4 right-4 bg-success-100 border border-success-200 rounded-lg p-4 shadow-lg z-50"
     >
       <div class="flex items-center">
         <Icon
           name="heroicons:check-circle"
-          class="h-5 w-5 text-green-600 mr-3"
+          class="h-5 w-5 text-success-600 mr-3"
         />
-        <p class="text-body font-medium text-green-800">{{ successMessage }}</p>
+        <p class="text-body font-medium text-success-800">{{ successMessage }}</p>
       </div>
     </div>
 
     <!-- Error Toast -->
     <div
       v-if="showErrorToast"
-      class="fixed top-4 right-4 bg-red-100 border border-red-200 rounded-lg p-4 shadow-lg z-50"
+      class="fixed top-4 right-4 bg-error-100 border border-error-200 rounded-lg p-4 shadow-lg z-50"
     >
       <div class="flex items-center">
-        <Icon name="heroicons:x-circle" class="h-5 w-5 text-red-600 mr-3" />
-        <p class="text-body font-medium text-red-800">{{ errorMessage }}</p>
+        <Icon name="heroicons:x-circle" class="h-5 w-5 text-error-600 mr-3" />
+        <p class="text-body font-medium text-error-800">{{ errorMessage }}</p>
       </div>
     </div>
   </div>
@@ -1758,6 +1521,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
+import { renderSVG } from "uqr";
 import InvoiceList from "~/components/InvoiceList.vue";
 import InvoicePreviewModal from "~/components/InvoicePreviewModal.vue";
 
@@ -1765,20 +1529,6 @@ import InvoicePreviewModal from "~/components/InvoicePreviewModal.vue";
 definePageMeta({
   layout: "user-dashboard",
   middleware: ["auth"],
-});
-
-// Composables
-const theme = useTheme();
-const {
-  currentTheme,
-  setTheme,
-  getThemes,
-  getCurrentThemeInfo,
-  initTheme,
-} = theme;
-const availableThemes = typeof getThemes === 'function' ? getThemes() : [];
-const currentThemeInfo = computed(() => {
-  try { return getCurrentThemeInfo ? getCurrentThemeInfo() : null; } catch { return null; }
 });
 
 // Store
@@ -1822,7 +1572,11 @@ const timezoneOptions = [
 ];
 
 // Reactive data
-const activeTab = ref("account"); // Default to account tab
+// Deep-linkable: /UserDashboard/Settings?tab=billing opens that section.
+const SETTINGS_TAB_IDS = ["account", "preferences", "security", "privacy", "notifications", "billing", "danger"];
+const settingsRoute = useRoute();
+const initialTab = String(settingsRoute.query.tab || "");
+const activeTab = ref(SETTINGS_TAB_IDS.includes(initialTab) ? initialTab : "account");
 const user = computed(() => authStore.user); // Use user from authStore
 const accountImageTimestamp = ref(Date.now()); // Add timestamp to force image refresh
 const baseUrl = computed(() => {
@@ -1891,11 +1645,6 @@ const passwordForm = ref({
   confirm_password: "",
 });
 
-const securitySettings = ref({
-  two_factor_sms: false,
-  login_notifications: true,
-});
-
 // ---------------- 2FA / TOTP State ---------------- //
 const twoFactor = ref({
   loading: false,
@@ -1910,16 +1659,21 @@ const twoFactor = ref({
   recoveryCodesShown: false,
 });
 
+// QR for the authenticator app, generated in the browser from the otpauth URI.
+const twoFactorQrSvg = computed(() => {
+  const data = twoFactor.value.qrData;
+  if (!data) return "";
+  try {
+    return renderSVG(data, { border: 1 });
+  } catch (e) {
+    console.error("Failed to render 2FA QR code:", e);
+    return "";
+  }
+});
+
 const loadingSessions = ref(false);
 const loadingLogoutEverywhere = ref(false);
 const revokingSessionId = ref(null);
-
-const privacySettings = ref({
-  public_profile: true,
-  search_indexing: true,
-  analytics_enabled: true,
-  location_tracking: true,
-});
 
 const notificationSettings = ref({
   profile_views: true,
@@ -1948,17 +1702,25 @@ const unlinkingAccount = ref(false);
 const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
 const exportingData = ref(false);
-const deletingAccount = ref(false);
+
+// Plan / role-aware routes shared with the portal shell
+const portalAccess = usePortalAccess();
+
+// Account closure goes through support (no self-serve deletion endpoint).
+const supportEmail = ref("support@nfcgo.com");
+const closeAccountMailto = computed(() => {
+  const subject = encodeURIComponent("Account closure request");
+  const body = encodeURIComponent(
+    `Please close my NFCGo account.\n\nAccount e-mail: ${user.value?.email || ""}\n`,
+  );
+  return `mailto:${supportEmail.value}?subject=${subject}&body=${body}`;
+});
 
 // Password visibility toggles
 const showCurrentPassword = ref(false);
 const showNewPassword = ref(false);
 const showConfirmNewPassword = ref(false);
 const showLinkAccountPassword = ref(false);
-
-// Modal states
-const showDeleteConfirmation = ref(false);
-const deleteConfirmation = ref("");
 
 // Invoice preview modal state
 const showInvoicePreview = ref(false);
@@ -1983,12 +1745,12 @@ const settingsTabs = [
   { id: "account", label: "Account", icon: "heroicons:user-circle" },
   { id: "preferences", label: "Preferences", icon: "heroicons:adjustments-horizontal" },
   { id: "security", label: "Security", icon: "heroicons:shield-check" },
-  { id: "privacy", label: "Privacy", icon: "heroicons:eye-slash" },
+  { id: "privacy", label: "Privacy & Data", icon: "heroicons:eye-slash" },
   { id: "notifications", label: "Notifications", icon: "heroicons:bell" },
-  { id: "billing", label: "Billing & Subscription", icon: "heroicons:credit-card" },
+  { id: "billing", label: "Plan & Billing", icon: "heroicons:credit-card" },
   {
     id: "danger",
-    label: "Danger Zone",
+    label: "Close Account",
     icon: "heroicons:exclamation-triangle",
   },
 ];
@@ -2005,22 +1767,19 @@ const loadUserData = async () => {
   // This function is kept for loading additional settings if needed
   try {
     const { $api } = useNuxtApp();
-    const response = await $api.get("/user/settings");
+    // GET /api/settings → SettingsController@getSettings (persisted
+    // notification preferences). Was "/user/settings", which 404'd, so saved
+    // toggles always reloaded as the defaults.
+    const response = await $api.get("/settings");
 
-    // Load settings data if available
-    if (response?.security_settings) {
-      securitySettings.value = { ...response.security_settings };
-    }
-    if (response?.privacy_settings) {
-      privacySettings.value = { ...response.privacy_settings };
-    }
     if (response?.notification_settings) {
       notificationSettings.value = { ...response.notification_settings };
     }
-    console.log("✅ Loaded user settings");
+    if (response?.support_email) {
+      supportEmail.value = response.support_email;
+    }
   } catch (error) {
-    // Silently fail if settings endpoint doesn't exist yet
-    // User data is already loaded from authStore
+    // Keep defaults — user data itself is already loaded from authStore
     console.log("ℹ️ Settings endpoint not available, using defaults");
   }
 };
@@ -2643,42 +2402,6 @@ const editCardProfile = (nfcCardId) => {
   navigateTo(`/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?cardId=${nfcCardId}`);
 };
 
-const updateSecuritySetting = async (setting) => {
-  try {
-    const { $api } = useNuxtApp();
-    const response = await $api.put("/settings/security", {
-      [setting]: securitySettings.value[setting]
-    });
-    
-    if (response.success) {
-      showSuccess("Security settings updated");
-    } else {
-      showError(response.message || "Failed to update security settings");
-    }
-  } catch (error) {
-    console.error("Error updating security settings:", error);
-    showError(error.data?.message || "Failed to update security settings");
-  }
-};
-
-const updatePrivacySetting = async (setting) => {
-  try {
-    const { $api } = useNuxtApp();
-    const response = await $api.put("/settings/privacy", {
-      [setting]: privacySettings.value[setting]
-    });
-    
-    if (response.success) {
-      showSuccess("Privacy settings updated");
-    } else {
-      showError(response.message || "Failed to update privacy settings");
-    }
-  } catch (error) {
-    console.error("Error updating privacy settings:", error);
-    showError(error.data?.message || "Failed to update privacy settings");
-  }
-};
-
 const updateNotificationSetting = async (setting) => {
   try {
     const { $api } = useNuxtApp();
@@ -2705,12 +2428,12 @@ const updateNotificationSetting = async (setting) => {
 
 const upgradePlan = () => {
   // Redirect to plan selection page
-  navigateTo("/UserDashboard/PlanSelection");
+  navigateTo("/Onboarding/plan");
 };
 
 const manageBilling = () => {
   // Redirect to billing management
-  navigateTo("/UserDashboard/PlanSelection");
+  navigateTo("/Onboarding/plan");
 };
 
 const viewInvoices = () => {
@@ -2775,13 +2498,14 @@ const getSubscriptionPrice = (plan) => {
 
 const getSubscriptionBadgeClass = (plan) => {
   const classes = {
-    free: 'bg-gray-100 text-gray-800',
-    basic: 'bg-blue-100 text-blue-800',
-    business: 'bg-green-100 text-green-800',
-    premium: 'bg-purple-100 text-purple-800',
-    enterprise: 'bg-yellow-100 text-yellow-800'
+    free: 'bg-secondary-100 text-secondary-800',
+    basic: 'bg-info-100 text-info-800',
+    // Paid tiers carry the brass accent, matching the portal plan badges
+    business: 'bg-accent-100 text-accent-800',
+    premium: 'bg-accent-100 text-accent-800',
+    enterprise: 'bg-warning-100 text-warning-800'
   };
-  return classes[plan] || 'bg-gray-100 text-gray-800';
+  return classes[plan] || 'bg-secondary-100 text-secondary-800';
 };
 
 const getSubscriptionFeatures = (plan) => {
@@ -2869,27 +2593,6 @@ const exportData = async () => {
     showError(error.data?.message || "Failed to export data");
   } finally {
     exportingData.value = false;
-  }
-};
-
-const deleteAccount = async () => {
-  deletingAccount.value = true;
-  try {
-    const { $api } = useNuxtApp();
-    const response = await $api.delete("/settings/delete-account");
-
-    if (response.success) {
-      // Clear auth store and redirect
-      await authStore.logout();
-      await navigateTo("/goodbye");
-    } else {
-      showError(response.message || "Failed to delete account");
-      deletingAccount.value = false;
-    }
-  } catch (error) {
-    console.error("Error deleting account:", error);
-    showError(error.data?.message || "Failed to delete account");
-    deletingAccount.value = false;
   }
 };
 
@@ -3029,10 +2732,6 @@ const confirmUnlinkAccount = async (provider) => {
 
 // Lifecycle
 onMounted(async () => {
-  // Initialize theme & preferences FIRST (before any rendering flashes)
-  try {
-    if (typeof initTheme === 'function') initTheme();
-  } catch (e) { console.warn('Theme init failed:', e); }
   loadLocalPrefs();
 
   // Initialize form with user data

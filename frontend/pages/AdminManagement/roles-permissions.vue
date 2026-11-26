@@ -1,204 +1,372 @@
 <!-- pages/AdminManagement/roles-permissions.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title text-secondary-900">Roles &amp; Permissions</h1>
-          <p class="mt-2 text-secondary-600">
-            Manage admin roles and granular permissions across the platform
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="loadData" class="btn btn-outline" :disabled="loading">
-            <Icon name="heroicons:arrow-path" class="h-5 w-5 mr-2" />
-            Refresh
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Access Control"
+      eyebrow-icon="heroicons:shield-check"
+      title="Roles &amp; Permissions"
+      description="Manage admin roles and granular permissions across the platform."
+    >
+      <template #actions>
+        <NuxtLink
+          v-if="isSuperAdmin"
+          to="/AdminManagement/users"
+          class="admin-btn admin-btn--outline"
+        >
+          <Icon name="heroicons:user-plus" class="h-4 w-4" />
+          Add administrator
+        </NuxtLink>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline"
+          :disabled="loading"
+          @click="loadData"
+        >
+          <Icon
+            name="heroicons:arrow-path"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': loading }"
+          />
+          Refresh
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <!-- Super admin only notice -->
-    <div v-if="!loading && !isSuperAdmin" class="card mb-6 border-warning-300">
-      <div class="card-body flex items-start">
-        <Icon name="heroicons:shield-exclamation" class="h-6 w-6 text-warning-600 flex-shrink-0 mt-0.5" />
-        <div class="ml-3">
-          <h3 class="text-body font-semibold text-secondary-900">Read-only access</h3>
-          <p class="mt-1 text-body text-secondary-600">
-            Only a super admin can grant or modify admin roles and permissions.
-            You can view the current assignments below but cannot change them.
-          </p>
-        </div>
+    <div
+      v-if="!loading && !isSuperAdmin"
+      class="mb-5 flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-50 p-4"
+    >
+      <Icon
+        name="heroicons:shield-exclamation"
+        class="mt-0.5 h-5 w-5 shrink-0 text-warning-600"
+      />
+      <div>
+        <p class="text-body font-semibold text-secondary-900">
+          Read-only access
+        </p>
+        <p class="mt-0.5 text-body text-secondary-600">
+          Only a super admin can grant or modify admin roles and permissions.
+          You can view the current assignments below but cannot change them.
+        </p>
       </div>
     </div>
 
-    <!-- Admin list -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title text-secondary-900">
-          Administrators ({{ admins.length }})
-        </h3>
-      </div>
-      <div class="card-body p-0">
-        <div v-if="loading" class="flex justify-center py-12">
-          <div class="spinner text-primary-600"></div>
+    <!-- Administrator list -->
+    <AdminSectionCard flush>
+      <template #title>Administrators</template>
+      <template #header-actions>
+        <span class="text-caption text-secondary-500">
+          {{ admins.length }} total
+        </span>
+      </template>
+
+      <!-- Loading -->
+      <div
+        v-if="loading"
+        class="divide-y divide-secondary-100"
+        role="status"
+        aria-busy="true"
+      >
+        <div
+          v-for="i in 5"
+          :key="i"
+          class="flex items-center gap-4 px-5 py-4"
+        >
+          <span class="admin-skeleton h-10 w-10 shrink-0 rounded-full"></span>
+          <span class="admin-skeleton h-4 w-1/3"></span>
+          <span class="admin-skeleton ml-auto h-4 w-20"></span>
+          <span class="admin-skeleton h-8 w-16"></span>
         </div>
-        <div v-else-if="admins.length" class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-secondary-200">
-            <thead class="bg-secondary-50">
-              <tr>
-                <th class="px-3 sm:px-6 py-3 text-left table-head">Administrator</th>
-                <th class="px-3 sm:px-6 py-3 text-left table-head">Role</th>
-                <th class="px-3 sm:px-6 py-3 text-left table-head">Permissions</th>
-                <th class="px-3 sm:px-6 py-3 text-left table-head">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-secondary-200">
-              <tr v-for="admin in admins" :key="admin.id" class="hover:bg-secondary-50">
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="h-10 w-10 rounded-full bg-secondary-100 flex items-center justify-center flex-shrink-0">
-                      <Icon name="heroicons:user" class="h-5 w-5 text-secondary-500" />
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-body font-medium text-secondary-900">
+      </div>
+
+      <!-- Empty -->
+      <AdminEmptyState
+        v-else-if="!admins.length"
+        icon="heroicons:user-group"
+        title="No administrators found"
+        description="Administrators and their assigned roles will appear here."
+      />
+
+      <!-- Table -->
+      <div v-else class="admin-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Administrator</th>
+              <th>Role</th>
+              <th>Permissions</th>
+              <th class="admin-col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="admin in admins" :key="admin.id">
+              <td>
+                <div class="flex items-center gap-3">
+                  <UserAvatar
+                    :src="admin.profile_image"
+                    :name="admin.full_name"
+                    class="h-10 w-10 shrink-0 rounded-full ring-1 ring-secondary-200"
+                  />
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="truncate text-body font-semibold text-secondary-900">
                         {{ admin.full_name }}
-                        <span v-if="isCurrentUser(admin)" class="ml-2 px-2 py-0.5 text-badge bg-secondary-100 text-secondary-600 rounded-full">
-                          You
-                        </span>
-                      </div>
-                      <div class="card-subtitle">{{ admin.email }}</div>
+                      </span>
+                      <span
+                        v-if="isCurrentUser(admin)"
+                        class="admin-badge admin-badge--neutral admin-badge--plain"
+                      >
+                        You
+                      </span>
+                    </div>
+                    <div class="truncate text-caption text-secondary-500">
+                      {{ admin.email }}
                     </div>
                   </div>
-                </td>
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                  <span :class="['px-2 py-1 text-badge rounded-full', getRoleBadgeClass(admin.admin_role)]">
-                    {{ admin.admin_role_display }}
-                  </span>
-                </td>
-                <td class="px-3 sm:px-6 py-4 table-cell text-secondary-600">
-                  <span v-if="admin.admin_role === 'super_admin'" class="text-secondary-700 font-medium">
-                    All permissions
-                  </span>
-                  <span v-else-if="(admin.admin_permissions || []).length">
-                    {{ admin.admin_permissions.length }} assigned
-                  </span>
-                  <span v-else class="text-secondary-400">None</span>
-                </td>
-                <td class="px-3 sm:px-6 py-4 whitespace-nowrap table-cell font-medium">
-                  <button
-                    v-if="canEdit(admin)"
-                    @click="openEdit(admin)"
-                    class="btn btn-outline btn-sm"
-                  >
-                    <Icon name="heroicons:pencil" class="h-4 w-4 mr-1" />
-                    Edit
-                  </button>
-                  <span v-else class="text-caption text-secondary-400">Locked</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-else class="text-center py-12">
-          <Icon name="heroicons:user-group" class="h-12 w-12 mx-auto text-secondary-300 mb-4" />
-          <p class="text-secondary-500">No administrators found</p>
-        </div>
+                </div>
+              </td>
+              <td>
+                <AdminStatusBadge
+                  :tone="
+                    {
+                      super_admin: 'brass',
+                      admin: 'info',
+                      moderator: 'warning',
+                    }[admin.admin_role] || 'neutral'
+                  "
+                  :label="admin.admin_role_display"
+                />
+              </td>
+              <td>
+                <span
+                  v-if="admin.admin_role === 'super_admin'"
+                  class="admin-badge admin-badge--brass admin-badge--plain"
+                >
+                  All permissions
+                </span>
+                <span
+                  v-else-if="(admin.admin_permissions || []).length"
+                  class="admin-badge admin-badge--info admin-badge--plain"
+                >
+                  {{ admin.admin_permissions.length }} assigned
+                </span>
+                <span v-else class="text-caption text-secondary-400">None</span>
+              </td>
+              <td class="admin-col-actions">
+                <button
+                  v-if="canEdit(admin)"
+                  type="button"
+                  class="admin-btn admin-btn--outline admin-btn--sm"
+                  @click="openEdit(admin)"
+                >
+                  <Icon name="heroicons:pencil" class="h-4 w-4" />
+                  Edit
+                </button>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1.5 text-caption text-secondary-400"
+                >
+                  <Icon name="heroicons:lock-closed" class="h-3.5 w-3.5" />
+                  Locked
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
+    </AdminSectionCard>
 
     <!-- Permission catalogue reference -->
-    <div class="card mt-6">
-      <div class="card-header">
-        <h3 class="card-title text-secondary-900">Permission Catalogue</h3>
-      </div>
-      <div class="card-body grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="(domain, domainKey) in catalogue" :key="domainKey">
-          <h4 class="text-body font-semibold text-secondary-900 mb-2">{{ domain.label }}</h4>
-          <ul class="space-y-1">
+    <AdminSectionCard
+      v-if="Object.keys(catalogue).length"
+      class="mt-6"
+      title="Permission Catalogue"
+      subtitle="Every capability that can be assigned to an administrator role."
+      accent
+    >
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          v-for="(domain, domainKey) in catalogue"
+          :key="domainKey"
+          class="rounded-xl border border-secondary-200 p-4"
+        >
+          <p class="admin-form-section-title">{{ domain.label }}</p>
+          <ul class="mt-2 space-y-1.5">
             <li
               v-for="(label, permKey) in domain.permissions"
               :key="permKey"
-              class="text-caption text-secondary-600 flex items-start"
+              class="flex items-start gap-2 text-caption text-secondary-600"
             >
-              <Icon name="heroicons:check-circle" class="h-4 w-4 text-success-500 flex-shrink-0 mr-1.5" />
+              <Icon
+                name="heroicons:ellipsis-horizontal-circle"
+                class="mt-0.5 h-4 w-4 shrink-0 text-secondary-400"
+              />
               <span>{{ label }}</span>
             </li>
           </ul>
         </div>
       </div>
-    </div>
+    </AdminSectionCard>
 
-    <!-- Edit modal -->
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      @click.self="closeModal"
-    >
-      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="px-6 py-4 border-b border-secondary-200">
-          <h3 class="modal-title text-secondary-900">Edit Role &amp; Permissions</h3>
-          <p class="mt-1 card-subtitle">{{ selectedAdmin?.full_name }} — {{ selectedAdmin?.email }}</p>
-        </div>
-        <form @submit.prevent="handleSave" class="p-6 space-y-6">
-          <!-- Role -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Admin Role</label>
-            <select v-model="formRole" class="input">
-              <option v-for="role in roles" :key="role.value" :value="role.value">
-                {{ role.label }}
-              </option>
-            </select>
-            <p class="text-helper mt-1">
-              Super admins implicitly hold every permission.
-            </p>
-          </div>
-
-          <!-- Permissions -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <label class="block text-label text-secondary-700">Permissions</label>
-              <span class="text-caption text-secondary-500">{{ formPermissions.length }} selected</span>
-            </div>
-            <div
-              v-if="formRole === 'super_admin'"
-              class="bg-secondary-50 border border-secondary-200 rounded-lg p-3 mb-3 text-caption text-secondary-600"
-            >
-              Super admins automatically hold all permissions — individual selections are not required.
-            </div>
-            <div class="space-y-4 max-h-72 overflow-y-auto pr-1">
-              <div v-for="(domain, domainKey) in catalogue" :key="domainKey" class="border border-secondary-200 rounded-lg p-3">
-                <h4 class="text-body font-semibold text-secondary-800 mb-2">{{ domain.label }}</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <label
-                    v-for="(label, permKey) in domain.permissions"
-                    :key="permKey"
-                    class="flex items-start text-body text-secondary-700 cursor-pointer"
-                  >
-                    <input
-                      v-model="formPermissions"
-                      type="checkbox"
-                      :value="permKey"
-                      class="mt-0.5 mr-2 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span>{{ label }}</span>
-                  </label>
+    <!-- Edit dialog -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div
+          v-if="showEditModal"
+          class="admin-dialog-backdrop"
+          @click.self="closeModal"
+        >
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit role and permissions"
+            style="width: min(46rem, 100%); margin-top: 5vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:key" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Edit role &amp; permissions</p>
+                  <p class="admin-panel-subtitle">
+                    {{ selectedAdmin?.full_name }} — {{ selectedAdmin?.email }}
+                  </p>
                 </div>
               </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="closeModal"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
             </div>
-          </div>
 
-          <div class="flex justify-end space-x-3 pt-2">
-            <button type="button" @click="closeModal" class="btn btn-outline">Cancel</button>
-            <button type="submit" :disabled="submitting" class="btn btn-primary">
-              <div v-if="submitting" class="spinner mr-2"></div>
-              Save Changes
-            </button>
+            <form class="flex min-h-0 flex-1 flex-col" @submit.prevent="handleSave">
+              <div class="admin-panel-body flex-1 space-y-6 overflow-y-auto">
+                <!-- Role -->
+                <div class="admin-form-section">
+                  <p class="admin-form-section-title">Assigned role</p>
+                  <p class="admin-form-section-desc">
+                    Super admins implicitly hold every permission.
+                  </p>
+                  <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label class="admin-label">Admin role</label>
+                      <select v-model="formRole" class="admin-field">
+                        <option
+                          v-for="role in roles"
+                          :key="role.value"
+                          :value="role.value"
+                        >
+                          {{ role.label }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Permissions -->
+                <div class="admin-form-section">
+                  <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p class="admin-form-section-title">Permissions</p>
+                      <p class="admin-form-section-desc">
+                        Fine-grained capabilities granted to this administrator.
+                      </p>
+                    </div>
+                    <span class="admin-badge admin-badge--neutral admin-badge--plain">
+                      {{ formPermissions.length }} selected
+                    </span>
+                  </div>
+
+                  <div
+                    v-if="formRole === 'super_admin'"
+                    class="mt-4 flex items-start gap-3 rounded-xl border border-secondary-200 bg-secondary-50 p-3"
+                  >
+                    <Icon
+                      name="heroicons:information-circle"
+                      class="mt-0.5 h-5 w-5 shrink-0 text-info-600"
+                    />
+                    <p class="text-caption text-secondary-600">
+                      Super admins automatically hold all permissions —
+                      individual selections are not required.
+                    </p>
+                  </div>
+
+                  <div class="mt-4 space-y-4">
+                    <div
+                      v-for="(domain, domainKey) in catalogue"
+                      :key="domainKey"
+                      class="rounded-xl border border-secondary-200 p-4"
+                    >
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="admin-form-section-title">{{ domain.label }}</p>
+                        <label
+                          class="flex cursor-pointer items-center gap-2 text-caption font-medium text-secondary-600"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="isDomainFullySelected(domainKey)"
+                            :indeterminate.prop="isDomainPartiallySelected(domainKey)"
+                            @change="toggleDomainAll(domainKey)"
+                            class="rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                          />
+                          Select all
+                        </label>
+                      </div>
+                      <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <label
+                          v-for="(label, permKey) in domain.permissions"
+                          :key="permKey"
+                          class="flex cursor-pointer items-start gap-2 text-body text-secondary-700"
+                        >
+                          <input
+                            v-model="formPermissions"
+                            type="checkbox"
+                            :value="permKey"
+                            class="mt-0.5 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+                          />
+                          <span>{{ label }}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="admin-dialog-foot">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  @click="closeModal"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  :disabled="submitting"
+                  class="admin-btn admin-btn--primary"
+                >
+                  <Icon
+                    v-if="submitting"
+                    name="heroicons:arrow-path"
+                    class="h-4 w-4 animate-spin"
+                  />
+                  Save changes
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -235,13 +403,30 @@ const canEdit = (admin) => {
   return true;
 };
 
-const getRoleBadgeClass = (role) => {
-  const classes = {
-    super_admin: "bg-error-100 text-error-800",
-    admin: "bg-primary-100 text-primary-800",
-    moderator: "bg-warning-100 text-warning-800",
-  };
-  return classes[role] || "bg-secondary-100 text-secondary-700";
+const domainPermissionKeys = (domainKey) =>
+  catalogue.value[domainKey]
+    ? Object.keys(catalogue.value[domainKey].permissions)
+    : [];
+
+const isDomainFullySelected = (domainKey) => {
+  const keys = domainPermissionKeys(domainKey);
+  return keys.length > 0 && keys.every((k) => formPermissions.value.includes(k));
+};
+
+const isDomainPartiallySelected = (domainKey) => {
+  const keys = domainPermissionKeys(domainKey);
+  const selectedCount = keys.filter((k) => formPermissions.value.includes(k)).length;
+  return selectedCount > 0 && selectedCount < keys.length;
+};
+
+const toggleDomainAll = (domainKey) => {
+  const keys = domainPermissionKeys(domainKey);
+  if (isDomainFullySelected(domainKey)) {
+    formPermissions.value = formPermissions.value.filter((p) => !keys.includes(p));
+  } else {
+    const merged = new Set([...formPermissions.value, ...keys]);
+    formPermissions.value = Array.from(merged);
+  }
 };
 
 const loadData = async () => {

@@ -17,7 +17,6 @@ class RefundController extends Controller
 
     public function __construct(PaymentService $paymentService)
     {
-        $this->middleware('auth:sanctum');
         $this->paymentService = $paymentService;
     }
 
@@ -269,7 +268,8 @@ class RefundController extends Controller
             }
 
             if ($request->action === 'approve') {
-                // Process the refund
+                // Process the refund — pass the existing pending record so the
+                // service updates it instead of creating a duplicate.
                 $data = [
                     'amount' => $refund->amount,
                     'reason' => $refund->reason,
@@ -277,7 +277,7 @@ class RefundController extends Controller
                     'processed_by' => $admin->id,
                 ];
 
-                $refund = $this->paymentService->processRefund($refund->transaction, $data);
+                $refund = $this->paymentService->processRefund($refund->transaction, $data, $refund);
 
                 return response()->json([
                     'success' => true,
@@ -331,16 +331,35 @@ class RefundController extends Controller
                 ], 403);
             }
 
-            $perPage = $request->get('per_page', 20);
+            $perPage = (int) $request->get('per_page', 20);
+            $perPage = max(1, min(100, $perPage));
 
-            $refunds = Refund::where('status', 'pending')
-                ->with(['user', 'transaction'])
-                ->orderBy('created_at', 'asc')
-                ->paginate($perPage);
+            $query = Refund::where('status', 'pending')
+                ->with(['user', 'transaction']);
+
+            if ($search = $request->query('search')) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('refund_id', 'like', "%{$search}%")
+                        ->orWhere('reason', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($uq) use ($search) {
+                            $uq->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('transaction', function ($tq) use ($search) {
+                            $tq->where('transaction_id', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            $refunds = $query->orderBy('created_at', 'asc')->paginate($perPage);
+
+            $pendingTotal = (float) Refund::where('status', 'pending')->sum('amount');
 
             return response()->json([
                 'success' => true,
                 'refunds' => $refunds,
+                'pending_total' => $pendingTotal,
             ]);
 
         } catch (Exception $e) {

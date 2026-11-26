@@ -18,12 +18,36 @@ class CardDesignController extends Controller
 {
     /**
      * GET /api/admin/card-designs
+     *
+     * Paginated design library. Supports ?search, ?status, ?sort_by and
+     * ?sort_order so the designer's library table can filter and page through
+     * saved designs without loading every row at once.
      */
     public function index(Request $request)
     {
-        $designs = CardDesign::with('creator:id,first_name,last_name,email')
-            ->orderByDesc('updated_at')
-            ->get();
+        $query = CardDesign::with('creator:id,first_name,last_name,email');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->query('status') === 'active');
+        }
+
+        $sortBy = $request->query('sort_by', 'updated_at');
+        if (! in_array($sortBy, ['updated_at', 'created_at', 'name'], true)) {
+            $sortBy = 'updated_at';
+        }
+        $sortOrder = strtolower((string) $request->query('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $perPage = (int) $request->query('per_page', 10);
+        $perPage = max(1, min(100, $perPage));
+
+        $designs = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -128,6 +152,51 @@ class CardDesignController extends Controller
             'url' => asset('storage/' . $path),
             'path' => $path,
         ]);
+    }
+
+    /**
+     * GET /api/admin/card-designs/background-media?url=...
+     *
+     * Streams a stored design image back to the browser. Storage files are
+     * served directly by the web server and therefore bypass Laravel's CORS
+     * middleware, so the designer cannot read their pixels into a canvas from
+     * a different origin (e.g. backend :8000 vs frontend :3001). Routing the
+     * bytes through this CORS-enabled API endpoint keeps PNG/PDF export working
+     * in every environment.
+     */
+    public function backgroundMedia(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string|max:2048',
+        ]);
+
+        $url = $request->query('url');
+
+        // Only serve files that live on this application's own host.
+        $targetHost = parse_url($url, PHP_URL_HOST);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        if ($targetHost && $appHost && $targetHost !== $appHost) {
+            abort(403, 'Invalid media URL');
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+        $marker = '/storage/';
+        $pos = strpos($path, $marker);
+        if ($pos === false) {
+            abort(404);
+        }
+
+        $relative = ltrim(substr($path, $pos + strlen($marker)), '/');
+        if ($relative === '' || str_contains($relative, '..')) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+        if (! $disk->exists($relative)) {
+            abort(404);
+        }
+
+        return response()->file($disk->path($relative));
     }
 
     /**

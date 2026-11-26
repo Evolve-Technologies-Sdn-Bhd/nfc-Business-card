@@ -40,7 +40,7 @@
         </div>
       </div>
       <NuxtLink
-        to="/UserDashboard/PlanSelection"
+        to="/Onboarding/plan"
         class="btn btn-primary whitespace-nowrap flex-shrink-0 flex items-center gap-2"
       >
         <Icon name="heroicons:arrow-up-t-circle" class="h-5 w-5" />
@@ -4971,7 +4971,7 @@ const closeUpgradeModal = () => {
 
 const navigateToUpgrade = () => {
   // Navigate to the plan selection / upgrade page
-  navigateTo('/UserDashboard/PlanSelection');
+  navigateTo('/Onboarding/plan');
 };
 
 // Reset profile data to defaults
@@ -5541,24 +5541,5 @@ select:focus {
 
 .sortable-drag {
   cursor: move;
-}
-
-/* Custom scrollbar for modal */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
 }
 </style>

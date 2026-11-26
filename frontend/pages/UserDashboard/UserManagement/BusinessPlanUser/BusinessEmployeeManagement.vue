@@ -123,22 +123,22 @@
         </div>
 
         <!-- Info: Unified Quota Explanation -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="bg-info-50 border border-info-200 rounded-lg p-4">
           <div class="flex">
             <Icon
               name="heroicons:information-circle"
-              class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
+              class="h-5 w-5 text-info-600 mt-0.5 flex-shrink-0"
             />
             <div class="ml-3">
-              <h3 class="text-label text-blue-800">
+              <h3 class="text-label text-info-800">
                 Business Quota Information
               </h3>
-              <p class="text-body text-blue-700 mt-1">
+              <p class="text-body text-info-700 mt-1">
                 Your business has a total quota of
                 <strong>{{ totalQuota }}</strong> for both accounts and NFC
                 cards.
               </p>
-              <div class="text-body text-blue-700 mt-2 space-y-1">
+              <div class="text-body text-info-700 mt-2 space-y-1">
                 <p>📊 <strong>Current Usage:</strong></p>
                 <p class="ml-4">
                   • Accounts: {{ totalAccounts }} / {{ totalQuota }} (1 owner +
@@ -149,7 +149,7 @@
                 </p>
                 <p class="ml-4">• Available: {{ availableQuota }}</p>
               </div>
-              <p class="text-body text-blue-600 mt-2">
+              <p class="text-body text-info-600 mt-2">
                 💡 Employee accounts are created by Super Admin. You can upload
                 employee details and design their cards.
               </p>
@@ -293,9 +293,9 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span
-                      class="px-2 py-1 inline-flex text-badge rounded-full bg-primary-100 text-primary-800"
+                      class="px-2 py-1 inline-flex text-badge rounded-full bg-accent-100 text-accent-800 capitalize"
                     >
-                      {{ employee.subscription_plan || "Premium" }}
+                      {{ employee.subscription_plan || "Business" }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -429,8 +429,8 @@
                     :class="[
                       'inline-flex px-2 py-1 text-badge rounded-full',
                       selectedEmployee.subscription_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800',
+                        ? 'bg-success-100 text-success-800'
+                        : 'bg-error-100 text-error-800',
                     ]"
                   >
                     {{
@@ -519,14 +519,14 @@
             </div>
 
             <div v-if="selectedEmployee" class="space-y-4">
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div class="bg-warning-50 border border-warning-200 rounded-lg p-4">
                 <div class="flex">
                   <Icon
                     name="heroicons:exclamation-triangle"
-                    class="h-5 w-5 text-yellow-600 flex-shrink-0"
+                    class="h-5 w-5 text-warning-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-body text-yellow-700">
+                    <p class="text-body text-warning-700">
                       A new password will be generated and sent to
                       <strong>{{ selectedEmployee.email }}</strong>
                     </p>
@@ -584,14 +584,14 @@
             </div>
 
             <div class="space-y-4">
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="bg-info-50 border border-info-200 rounded-lg p-4">
                 <div class="flex">
                   <Icon
                     name="heroicons:information-circle"
-                    class="h-5 w-5 text-blue-600 flex-shrink-0"
+                    class="h-5 w-5 text-info-600 flex-shrink-0"
                   />
                   <div class="ml-3">
-                    <p class="text-body text-blue-700">
+                    <p class="text-body text-info-700">
                       Navigate to <strong>Card Design</strong> page to create
                       and manage NFC card templates for your employees.
                     </p>
@@ -652,7 +652,9 @@ const updatingRoleId = ref(null);
 const selectedEmployee = ref(null);
 
 // Company unified quota (for both accounts and cards)
-const totalQuota = ref(10); // Default: admin assigns 10 quota
+// Quota comes only from the API (assigned by NFCGo admin). No invented default:
+// a made-up 10 used to show free seats that did not exist.
+const totalQuota = ref(0);
 const totalAccounts = computed(() => 1 + employees.value.length); // 1 owner + employees
 const orderedCardsCount = ref(0); // Actual number of Business Plan cards ordered
 
@@ -716,7 +718,7 @@ const loadEmployees = async () => {
 
       const quotaInfo = response.data.quota_info || {};
       totalQuota.value =
-        quotaInfo.total_quota || quotaInfo.total_account_slots || 10;
+        quotaInfo.total_quota ?? quotaInfo.total_account_slots ?? 0;
       orderedCardsCount.value = quotaInfo.ordered_cards_count || 0;
     }
   } catch (error) {

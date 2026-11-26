@@ -207,6 +207,13 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  // Optional async hook run immediately BEFORE the reference is generated. Used
+  // by guest checkout to create the placeholder account first. Returning a
+  // falsy value (or throwing) aborts the request.
+  beforePay: {
+    type: Function,
+    default: null
   }
 })
 
@@ -233,6 +240,14 @@ const generateReference = async () => {
   error.value = null
 
   try {
+    // Guest checkout: the account must exist before /payment/initiate (every
+    // transaction needs an owner). A falsy result means "already reported the
+    // reason to the user" — stop here.
+    if (props.beforePay) {
+      const proceed = await props.beforePay()
+      if (!proceed) return
+    }
+
     const response = await initiatePayment({
       amount: props.amount,
       currency: 'MYR',

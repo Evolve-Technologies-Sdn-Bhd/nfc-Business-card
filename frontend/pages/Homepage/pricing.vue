@@ -48,7 +48,7 @@
             </li>
           </ul>
           <div class="price-card__cta">
-            <NuxtLink to="/UserAccount/register" class="btn-ghost-light w-full">
+            <NuxtLink :to="freeCta" class="btn-ghost-light w-full">
               Get Started Free
             </NuxtLink>
           </div>
@@ -156,7 +156,7 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'public' });
+definePageMeta({ layout: 'public', middleware: 'guest' });
 
 useSeoMeta({
   title: "Pricing - NFCGo Smart Digital Business Cards",
@@ -174,16 +174,25 @@ const authStore = useAuthStore();
 // plan selection → card design → checkout. Jumping straight to the checkout
 // page skipped registration and left the order without any card details, so
 // we route guests to register and signed-in users to plan selection instead.
+// The chosen plan rides along as ?plan= so /Onboarding/plan auto-advances and
+// the visitor never has to pick the same plan twice.
 const buyPlan = (plan) => {
   if (process.client) {
     sessionStorage.setItem("selectedPlan", plan);
   }
   if (authStore.isAuthenticated) {
-    navigateTo("/UserDashboard/PlanSelection");
+    navigateTo({ path: "/Onboarding/plan", query: { plan } });
   } else {
-    navigateTo("/UserAccount/register");
+    navigateTo({ path: "/UserAccount/register", query: { plan } });
   }
 };
+
+// Free skips the plan step: the choice is carried into the funnel the same way.
+const freeCta = computed(() =>
+  authStore.isAuthenticated
+    ? { path: "/Onboarding/plan", query: { plan: "free" } }
+    : { path: "/UserAccount/register", query: { plan: "free" } }
+);
 
 // Plan prices from API
 const { planPrices, loading: loadingPrices, loadPrices } = usePlanPrices();

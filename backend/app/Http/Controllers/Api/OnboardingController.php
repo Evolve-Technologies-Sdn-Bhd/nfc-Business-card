@@ -313,32 +313,34 @@ class OnboardingController extends Controller
     }
 
     /**
-     * Process payment and create order.
-     *
-     * This endpoint no longer simulates a successful payment. It hands off to the
-     * real Fiuu payment initiation path and returns a genuine gateway redirect URL.
-     * The order/card are created in a PRE-payment state and are only marked as paid
-     * by the trusted gateway webhook.
+     * Get the persisted onboarding funnel draft (null when none exists yet).
      */
-    public function processPayment(Request $request)
+    public function getDraft(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'success' => true,
+            'draft' => $user->settings['onboarding_draft'] ?? null,
+        ]);
+    }
+
+    /**
+     * Persist the onboarding funnel draft into users.settings.onboarding_draft.
+     *
+     * Only the keys actually present in the request are merged, so saving a single
+     * step never wipes data captured by earlier steps. All other settings keys are
+     * preserved.
+     */
+    public function saveDraft(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            // Payments are handled by the Fiuu gateway (card / FPX / e-wallet /
-            // manual bank transfer). The previous whitelist of "stripe,razorpay"
-            // rejected every real payment attempt, so it now accepts the actual
-            // gateway identifier/short code instead of hard-coding a dead list.
-            'payment_method' => 'required|string|max:50',
-            'billing_address' => 'required|array',
-            'billing_address.full_name' => 'required|string',
-            'billing_address.address' => 'required|string',
-            'billing_address.city' => 'required|string',
-            'billing_address.zip_code' => 'required|string',
-            'card_info' => 'required|array',
-            'card_info.name' => 'required|string',
-            'card_info.position' => 'required|string',
-            'card_info.contact_number' => 'required|string',
-            'card_info.email' => 'required|email',
-            'card_info.address' => 'required|string',
+            'plan' => 'nullable|string|in:free,basic,premium,business',
+            'cardInfo' => 'nullable|array',
+            'cardDesign' => 'nullable|array',
+            'selectedTemplate' => 'nullable|string',
+            'designMethod' => 'nullable|string',
+            'shipping' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -350,130 +352,40 @@ class OnboardingController extends Controller
 
         $user = $request->user();
 
-        // Get plan details
-        $plan = $user->subscription_plan;
-        $planPrices = [
-            'basic' => 9,
-            'premium' => 19,
-            'business' => 49
-        ];
-        $planPrice = $planPrices[$plan] ?? 0;
-        $cardPrice = 15; // Fixed card price
-        $shippingCost = 5; // Fixed shipping cost
-        $total = $planPrice + $cardPrice + $shippingCost;
+        $settings = $user->settings ?? [];
+        $draft = $settings['onboarding_draft'] ?? [];
 
-        // Determine business_account_id for Business plan orders
-        $businessAccountId = null;
-        if ($plan === 'business') {
-            if ($user->isBusinessAccount()) {
-                $businessAccountId = $user->id;
-            } elseif ($user->isBusinessEmployee()) {
-                $businessAccountId = $user->parent_business_id;
-            }
-
-            // Check quota for Business plan
-            $businessAccount = $businessAccountId ? User::find($businessAccountId) : null;
-            if ($businessAccount) {
-                $quotaInfo = $businessAccount->getQuotaInfo();
-                if ($quotaInfo['available_card_quota'] <= 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Card quota exceeded. Please contact admin to increase quota.',
-                        'quota_info' => $quotaInfo
-                    ], 403);
-                }
+        foreach (['plan', 'cardInfo', 'cardDesign', 'selectedTemplate', 'designMethod', 'shipping'] as $key) {
+            if ($request->has($key)) {
+                $draft[$key] = $request->input($key);
             }
         }
 
-        // Gateway availability gate — never claim success when the gateway is not configured.
-        $provider = config('payment.default_provider', 'fiuu');
-        $providerConfig = config("payment.providers.{$provider}", []);
-        $gatewayConfigured = !empty($providerConfig['enabled'])
-            && !empty($providerConfig['merchant_id'])
-            && !empty($providerConfig['verify_key']);
+        $settings['onboarding_draft'] = $draft;
 
-        if (!$gatewayConfigured) {
-            Log::warning('Onboarding payment attempted but gateway is not configured', [
-                'user_id' => $user->id,
-                'provider' => $provider,
-            ]);
+        $user->update(['settings' => $settings]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Online payment is currently unavailable. Please try again later or contact support.',
-            ], 503);
-        }
+        return response()->json([
+            'success' => true,
+            'draft' => $draft,
+        ]);
+    }
 
-        try {
-            // Create the NFC card order in the pre-payment state. It is NOT activated
-            // here — only the trusted gateway webhook may mark it as paid.
-            $nfcCard = NfcCard::create([
-                'user_id' => $user->id,
-                'business_account_id' => $businessAccountId,
-                'nfc_card_id' => 'NFC-' . strtoupper(Str::random(12)),
-                'card_owner' => $request->card_info['name'],
-                'billing_address' => json_encode($request->billing_address),
-                'contact_number' => $request->card_info['contact_number'],
-                'purchase_date' => now(),
-                'subscription_plan' => $plan,
-                'purchase_amount' => $total,
-                'payment_method' => $request->payment_method,
-                'shipping_address' => $request->card_info['address'],
-                'status' => 'pending_payment',
-                'notes' => 'Order created during onboarding (awaiting online payment)',
-            ]);
+    /**
+     * Remove the onboarding funnel draft while preserving all other settings keys.
+     */
+    public function clearDraft(Request $request)
+    {
+        $user = $request->user();
 
-            // Hand off to the real payment initiation path. This creates the
-            // Transaction + Order and returns a genuine gateway redirect URL.
-            $transaction = $this->paymentService->processCardPayment($user, [
-                'amount' => $total,
-                'currency' => 'MYR',
-                'payment_rail' => 'card',
-                'description' => 'NFC Card ' . strtoupper($plan) . ' order',
-                'metadata' => [
-                    'plan' => $plan,
-                    'card_type' => 'Standard',
-                    'shipping_cost' => $shippingCost,
-                    'billing_address' => $request->billing_address,
-                    'card_info' => $request->card_info,
-                    'source' => 'onboarding',
-                ],
-            ]);
+        $settings = $user->settings ?? [];
+        unset($settings['onboarding_draft']);
 
-            // Link the card <-> transaction so fulfilment can reuse this card.
-            $transaction->update(['nfc_card_id' => $nfcCard->id]);
-            $nfcCard->update(['transaction_id' => $transaction->id]);
+        $user->update(['settings' => $settings]);
 
-            $order = $transaction->order;
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment initiated. Please complete the payment on the gateway.',
-                'data' => [
-                    'order_id' => $nfcCard->id,
-                    'order_number' => $order?->order_number,
-                    'total_amount' => $total,
-                    'payment_status' => 'pending', // NOT 'completed' — awaiting gateway confirmation
-                    'card_status' => 'pending_payment',
-                    'transaction_id' => $transaction->transaction_id,
-                    'redirect_url' => $transaction->metadata['redirect_url'] ?? null,
-                    'payment_url' => $transaction->metadata['payment_url'] ?? null,
-                    'payment_form_data' => $transaction->metadata['payment_form_data'] ?? null,
-                    'estimated_delivery' => now()->addDays(7)->format('Y-m-d'),
-                ]
-            ], 201);
-
-        } catch (\Exception $e) {
-            Log::error('Payment processing failed', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment processing failed: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     /**

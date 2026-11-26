@@ -4,11 +4,11 @@
     <div class="flex items-center space-x-4">
       <div class="relative">
         <div v-if="imageUrl" class="relative">
-          <img
-            :src="imageUrl"
+          <UserAvatar
+            :src="imageUrl || ''"
             :alt="altText"
-            class="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-            @error="handleImageError"
+            :name="label"
+            class="w-20 h-20 rounded-full border-2 border-gray-200"
           />
           <button
             v-if="!uploading"
@@ -20,13 +20,9 @@
         </div>
         <div
           v-else
-          class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200"
+          class="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gray-200"
         >
-          <img
-            src="/default-avatar.png"
-            alt="Default avatar"
-            class="w-20 h-20 rounded-full object-cover"
-          />
+          <UserAvatar :name="label" class="h-20 w-20 rounded-full" />
         </div>
 
         <button
@@ -334,20 +330,6 @@ const uploadFile = async (file) => {
     if (fileInput.value) {
       fileInput.value.value = "";
     }
-  }
-};
-
-const handleImageError = (event) => {
-  console.error("Image failed to load:", imageUrl.value);
-  // Avoid triggering error loop: only flag error for the ORIGINAL image (not the fallback)
-  if (event.target.dataset.isFallback !== "true") {
-    event.target.dataset.isFallback = "true";
-    event.target.src = "/default-avatar.png";
-    error.value = "Failed to load image";
-  } else {
-    // Fallback also failed — stop trying and silently show placeholder.
-    // Do not re-set src on the failing element again.
-    console.warn("Fallback avatar also failed to load");
   }
 };
 

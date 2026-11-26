@@ -152,6 +152,20 @@ module.exports = {
           800: "#1e40af",
           900: "#1e3a8a",
         },
+        // Accent = BRASS (burnished gold) — brand highlight colour.
+        // CSS variables keep it theme-switchable (see composables/useTheme.js).
+        accent: {
+          50: "var(--theme-accent-50, #fbf8f1)",
+          100: "var(--theme-accent-100, #f5eedd)",
+          200: "var(--theme-accent-200, #e9d9b5)",
+          300: "var(--theme-accent-300, #dcc28a)",
+          400: "var(--theme-accent-400, #cda863)",
+          500: "var(--theme-accent-500, #c2a068)",
+          600: "var(--theme-accent-600, #a9854d)",
+          700: "var(--theme-accent-700, #8c6b3b)",
+          800: "var(--theme-accent-800, #6e5330)",
+          900: "var(--theme-accent-900, #523e26)",
+        },
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",
@@ -264,5 +278,10 @@ module.exports = {
       },
     },
   },
+  // Card status badge classes are sent by the API (NfcCard::statusBadgeClasses),
+  // which Tailwind cannot scan — keep them in the build.
+  safelist: [
+    { pattern: /^(bg|text)-(success|warning|error|info|secondary)-(50|100|700|800)$/ },
+  ],
   plugins: [],
 };

@@ -246,7 +246,7 @@
                     </div>
                     <span 
                       v-if="isAdminUser(log.user)"
-                      class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-blue-100 text-blue-800 border border-blue-200"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-info-100 text-info-800 border border-info-200"
                     >
                       Admin
                     </span>
@@ -686,18 +686,18 @@ const formatActionType = (actionType) => {
 // Get action class
 const getActionClass = (actionType) => {
   const classes = {
-    login: "bg-blue-100 text-blue-800",
-    logout: "bg-red-100 text-red-800",
-    profile_updated: "bg-orange-100 text-orange-800",
-    password_changed: "bg-purple-100 text-purple-800",
-    landing_page_updated: "bg-orange-100 text-orange-800",
-    link_created: "bg-green-100 text-green-800",
-    link_updated: "bg-orange-100 text-orange-800",
-    link_deleted: "bg-red-100 text-red-800",
-    nfc_card_activated: "bg-green-100 text-green-800",
-    nfc_card_deactivated: "bg-yellow-100 text-yellow-800",
-    image_uploaded: "bg-green-100 text-green-800",
-    settings_changed: "bg-orange-100 text-orange-800",
+    login: "bg-info-100 text-info-800",
+    logout: "bg-error-100 text-error-800",
+    profile_updated: "bg-warning-100 text-warning-800",
+    password_changed: "bg-primary-100 text-primary-800",
+    landing_page_updated: "bg-warning-100 text-warning-800",
+    link_created: "bg-success-100 text-success-800",
+    link_updated: "bg-warning-100 text-warning-800",
+    link_deleted: "bg-error-100 text-error-800",
+    nfc_card_activated: "bg-success-100 text-success-800",
+    nfc_card_deactivated: "bg-warning-100 text-warning-800",
+    image_uploaded: "bg-success-100 text-success-800",
+    settings_changed: "bg-warning-100 text-warning-800",
   };
   return classes[actionType] || "bg-secondary-100 text-secondary-800";
 };

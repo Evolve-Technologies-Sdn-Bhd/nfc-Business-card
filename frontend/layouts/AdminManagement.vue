@@ -1,215 +1,187 @@
-<!-- layouts/admin.vue -->
+<!-- layouts/AdminManagement.vue
+     NFCGo Administration shell — "Ink & Brass".
+     Deep-ink navigation rail + paper workspace + brass accents.
+     All original behaviour is preserved: brand settings, notification &
+     feedback counts (30s polling), notification drawer, profile menu,
+     logout and every navigation destination. -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
-    <!-- Desktop Layout Container -->
-    <div class="flex h-screen overflow-hidden">
-      <!-- Sidebar -->
-      <div
-        class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+  <div class="admin-shell h-screen overflow-hidden">
+    <div class="flex h-full overflow-hidden">
+      <!-- ============================ RAIL (desktop) ============================ -->
+      <aside
+        class="admin-rail hidden shrink-0 flex-col lg:flex"
+        :class="{ 'admin-rail--collapsed': railCollapsed }"
       >
-        <div class="flex flex-col h-full">
-          <!-- Logo -->
-          <div
-            class="flex items-center h-16 px-4 border-b border-secondary-200 flex-shrink-0"
-          >
-            <NuxtLink to="/" class="flex items-center w-full">
-              <template v-if="brandSettings.system_logo_url">
-                <img
-                  :src="brandSettings.system_logo_url + '?v=' + brandVersion"
-                  :alt="brandSettings.app_name || 'NFCGo'"
-                  class="h-12 max-h-12 max-w-[160px] object-contain flex-shrink-0"
-                />
-                <span class="ml-3 text-h5 text-secondary-900 whitespace-nowrap">{{ brandSettings.app_name || 'NFCGo' }}</span>
-              </template>
-              <template v-else>
-                <NFCGoLogo
-                  variant="light"
-                  size="md"
-                  :label="brandSettings.app_name || 'NFCGo'"
-                />
-              </template>
+        <!-- Brand -->
+        <div class="admin-rail-brand flex h-16 items-center px-4">
+          <NuxtLink to="/AdminManagement" class="flex min-w-0 items-center gap-3">
+            <template v-if="brandSettings.system_logo_url">
+              <img
+                :src="brandSettings.system_logo_url + '?v=' + brandVersion"
+                :alt="brandSettings.app_name || 'NFCGo'"
+                class="h-9 max-h-9 max-w-[46px] shrink-0 object-contain"
+              />
+              <span v-if="!railCollapsed" class="truncate text-h5 text-white">
+                {{ brandSettings.app_name || "NFCGo" }}
+              </span>
+            </template>
+            <NFCGoLogo
+              v-else
+              variant="dark"
+              size="sm"
+              :show-text="!railCollapsed"
+              :label="brandSettings.app_name || 'NFCGo'"
+            />
+          </NuxtLink>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="admin-scroll flex-1 overflow-y-auto px-3 py-5">
+          <div v-for="group in navigation" :key="group.category" class="admin-nav-group">
+            <p v-if="!railCollapsed" class="admin-rail-label px-3 pb-2">{{ group.category }}</p>
+            <NuxtLink
+              v-for="item in group.items"
+              :key="item.name"
+              :to="item.href"
+              class="admin-nav-link"
+              :class="{ 'is-active': isActiveRoute(item.href) }"
+              :title="railCollapsed ? item.name : ''"
+            >
+              <Icon :name="item.icon" class="admin-nav-ico h-[18px] w-[18px]" />
+              <span v-if="!railCollapsed" class="truncate">{{ item.name }}</span>
+              <span
+                v-if="!railCollapsed && item.badge && Number(item.badge) > 0"
+                class="ml-auto inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-error-500 px-1 text-badge text-white"
+                :title="`${item.badge} unread`"
+              >
+                {{ item.badge }}
+              </span>
             </NuxtLink>
           </div>
+        </nav>
 
-          <!-- Navigation - Scrollable -->
-          <nav class="flex-1 overflow-y-auto px-3 py-6 text-navigation text-secondary-700">
-            <div
-              v-for="(group, groupIndex) in navigation"
-              :key="group.category"
-              :class="groupIndex === 0 ? '' : 'mt-4'"
-            >
-              <!-- Single-item group: render as direct page link (no dropdown) -->
-              <NuxtLink
-                v-if="group.items.length === 1"
-                :to="group.items[0].href"
-                :class="[
-                  'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-colors duration-200 w-full text-left',
-                  isActiveRoute(group.items[0].href)
-                    ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
-                    : 'text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900',
-                ]"
-              >
-                {{ group.items[0].name }}
-                <span
-                  v-if="group.items[0].badge && Number(group.items[0].badge) > 0"
-                  class="ml-auto inline-flex items-center justify-center rounded-full bg-error-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
-                  :title="`${group.items[0].badge} unread`"
-                >
-                  {{ group.items[0].badge }}
-                </span>
-              </NuxtLink>
-
-              <!-- Multi-item group: collapsible dropdown -->
-              <template v-else>
-                <button
-                  type="button"
-                  @click.stop="toggleGroup(group.category)"
-                  class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-secondary-50 transition-colors group mb-1"
-                >
-                  <span class="text-label text-secondary-500 capitalize">
-                    {{ group.category }}
-                  </span>
-                  <Icon
-                    :name="isGroupExpanded(group.category) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
-                    class="h-4 w-4 text-secondary-400 group-hover:text-secondary-600 transition-colors"
-                  />
-                </button>
-
-                <Transition
-                  enter-active-class="transition ease-out duration-200"
-                  enter-from-class="opacity-0 -translate-y-1"
-                  enter-to-class="opacity-100 translate-y-0"
-                  leave-active-class="transition ease-in duration-150"
-                  leave-from-class="opacity-100 translate-y-0"
-                  leave-to-class="opacity-0 -translate-y-1"
-                >
-                  <div v-show="isGroupExpanded(group.category)" class="space-y-1 overflow-hidden">
-                    <NuxtLink
-                      v-for="item in group.items"
-                      :key="item.name"
-                      :to="item.href"
-                      :class="[
-                        'group flex items-center px-3 py-2.5 text-navigation rounded-lg transition-colors duration-200 w-full text-left',
-                        isActiveRoute(item.href)
-                          ? 'bg-primary-50 text-primary-700 border-l-3 border-primary-700'
-                          : 'text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900',
-                      ]"
-                    >
-                      {{ item.name }}
-                      <span
-                        v-if="item.badge && Number(item.badge) > 0"
-                        class="ml-auto inline-flex items-center justify-center rounded-full bg-error-500 text-white text-badge h-5 min-w-[1.25rem] px-1"
-                        :title="`${item.badge} unread`"
-                      >
-                        {{ item.badge }}
-                      </span>
-                    </NuxtLink>
-                  </div>
-                </Transition>
-              </template>
-            </div>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Main Content -->
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Top Bar -->
-        <header
-          class="bg-white shadow-sm border-b border-secondary-200 flex-shrink-0"
-        >
-          <div
-            class="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16"
+        <!-- Rail footer -->
+        <div class="admin-rail-foot flex items-center justify-center gap-2 px-3 py-3">
+          <button
+            type="button"
+            class="admin-icon-btn shrink-0 text-white/60 hover:bg-white/10 hover:text-white"
+            :aria-label="railCollapsed ? 'Expand navigation' : 'Collapse navigation'"
+            @click="toggleRail"
           >
-            <!-- Left: Mobile menu button + Page Title -->
-            <div class="flex items-center gap-3">
-              <button
-                @click="sidebarOpen = !sidebarOpen"
-                class="lg:hidden p-2 rounded-md text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 transition-colors"
-              >
-                <Icon
-                  :name="sidebarOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'"
-                  class="h-6 w-6"
-                />
-              </button>
-              <h1 class="text-h5 text-secondary-900">
-                {{ pageTitle }}
-              </h1>
+            <Icon
+              :name="railCollapsed ? 'heroicons:chevron-double-right' : 'heroicons:chevron-double-left'"
+              class="h-5 w-5"
+            />
+          </button>
+        </div>
+      </aside>
+
+      <!-- ============================ WORKSPACE ============================ -->
+      <div class="admin-workspace flex flex-1 flex-col overflow-hidden">
+        <!-- Topbar -->
+        <header class="admin-topbar relative z-30 shrink-0">
+          <div class="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <!-- Mobile menu -->
+            <button
+              type="button"
+              class="admin-icon-btn lg:hidden"
+              aria-label="Toggle navigation"
+              @click="mobileNavOpen = true"
+            >
+              <Icon name="heroicons:bars-3" class="h-6 w-6" />
+            </button>
+
+            <!-- Breadcrumb + title -->
+            <div class="flex min-w-0 flex-col">
+              <nav class="admin-crumb hidden items-center gap-1.5 sm:flex" aria-label="Breadcrumb">
+                <NuxtLink to="/AdminManagement">Administration</NuxtLink>
+                <span class="text-secondary-300">/</span>
+                <span>{{ pageTitle }}</span>
+              </nav>
+              <h1 class="truncate text-h5 leading-tight text-secondary-900">{{ pageTitle }}</h1>
             </div>
 
-            <!-- Right side actions -->
-            <div class="flex items-center gap-2 sm:gap-3">
-              <!-- Theme Switcher -->
-              <ThemeSwitcher />
+            <!-- Right actions -->
+            <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+              <!-- Command search -->
+              <button type="button" class="admin-search-trigger hidden md:inline-flex" @click="openCommand">
+                <Icon name="heroicons:magnifying-glass" class="h-4 w-4" />
+                <span>Search…</span>
+                <span class="admin-kbd ml-2">
+                  <Icon name="heroicons:command-line" class="h-3 w-3" />K
+                </span>
+              </button>
+              <button type="button" class="admin-icon-btn md:hidden" aria-label="Search" @click="openCommand">
+                <Icon name="heroicons:magnifying-glass" class="h-5 w-5" />
+              </button>
 
-              <!-- Admin Notifications Bell with Drawer -->
+              <!-- Admin notifications -->
               <div class="relative">
                 <button
                   ref="adminNotifButtonRef"
+                  type="button"
+                  class="admin-icon-btn relative"
+                  :class="{ 'bg-secondary-100 text-secondary-900': showAdminNotifications }"
+                  aria-label="Notifications"
                   @click="toggleAdminNotifications"
-                  :class="[
-                    'relative p-2 rounded-lg transition-colors',
-                    showAdminNotifications
-                      ? 'bg-primary-50 text-primary-600'
-                      : 'text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100',
-                  ]"
                 >
                   <Icon name="heroicons:bell" class="h-5 w-5" />
                   <span
                     v-if="pendingNotificationCount > 0"
-                    class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-error-500 text-white ring-2 ring-white"
+                    class="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-error-500 px-1 text-badge font-bold text-white ring-2 ring-white"
                   >
                     {{ pendingNotificationCount > 9 ? "9+" : pendingNotificationCount }}
                   </span>
                 </button>
               </div>
 
-              <!-- User Feedback Bell -->
+              <!-- Feedback -->
               <NuxtLink
                 to="/AdminManagement/feedback"
-                class="relative p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 transition-colors"
+                class="admin-icon-btn relative"
+                aria-label="User feedback"
               >
                 <Icon name="heroicons:chat-bubble-left-right" class="h-5 w-5" />
                 <span
                   v-if="unreadFeedbackCount > 0"
-                  class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1 rounded-full text-badge font-bold bg-warning-500 text-white ring-2 ring-white"
+                  class="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-warning-500 px-1 text-badge font-bold text-white ring-2 ring-white"
                 >
                   {{ unreadFeedbackCount > 9 ? "9+" : unreadFeedbackCount }}
                 </span>
               </NuxtLink>
 
-              <!-- Divider -->
-              <div class="w-px h-6 bg-secondary-200 mx-1 hidden sm:block"></div>
+              <div class="mx-1 hidden h-6 w-px bg-secondary-200 sm:block"></div>
 
-              <!-- Profile Menu -->
-              <div class="relative" ref="profileMenuWrapperRef">
+              <!-- Profile menu -->
+              <div ref="profileMenuWrapperRef" class="relative">
                 <button
+                  type="button"
+                  class="flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-secondary-100"
                   @click="toggleProfileMenu"
-                  class="flex items-center gap-2 sm:gap-3 p-1.5 rounded-xl hover:bg-secondary-50 transition-colors"
                 >
-                  <div class="hidden sm:block text-right leading-tight">
-                    <p class="text-body font-semibold text-secondary-900 truncate max-w-[140px]">
+                  <div class="hidden text-right leading-tight sm:block">
+                    <p class="max-w-[140px] truncate text-body font-semibold text-secondary-900">
                       {{
                         user?.first_name && user?.last_name
                           ? `${user.first_name} ${user.last_name}`
                           : user?.name || "Admin"
                       }}
                     </p>
-                    <p class="text-caption text-secondary-500 truncate max-w-[140px]">
+                    <p class="max-w-[140px] truncate text-caption text-secondary-500">
                       {{ user?.admin_role_display || "Administrator" }}
                     </p>
                   </div>
-                  <div class="flex-shrink-0">
-                    <img
-                      :src="user?.profile_image || '/default-avatar.png'"
-                      :alt="user?.name"
-                      class="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-sm"
-                    />
-                  </div>
+                  <UserAvatar
+                    :src="user?.profile_image"
+                    :name="
+                      user?.first_name && user?.last_name
+                        ? `${user.first_name} ${user.last_name}`
+                        : user?.name || 'Admin'
+                    "
+                    class="h-9 w-9 shrink-0 rounded-full shadow-sm ring-2 ring-white"
+                  />
                 </button>
 
-                <!-- Profile Dropdown -->
                 <Transition
                   enter-active-class="transition ease-out duration-200"
                   enter-from-class="opacity-0 translate-y-1"
@@ -221,74 +193,65 @@
                   <div
                     v-if="showProfileMenu"
                     ref="profileMenuPanelRef"
-                    class="profile-dropdown absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-secondary-200 z-[90] overflow-hidden"
+                    class="profile-dropdown absolute right-0 z-[90] mt-2 w-72 overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-xl"
                   >
-                    <!-- Admin Info Header -->
-                    <div class="p-5 bg-gradient-to-br from-error-50 to-secondary-50 border-b border-secondary-200">
+                    <div class="border-b border-secondary-200 bg-gradient-to-br from-accent-50 to-secondary-50 p-5">
                       <div class="flex items-center gap-3">
-                        <img
-                          :src="user?.profile_image || '/default-avatar.png'"
-                          :alt="user?.name"
-                          class="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+                        <UserAvatar
+                          :src="user?.profile_image"
+                          :name="
+                            user?.first_name && user?.last_name
+                              ? `${user.first_name} ${user.last_name}`
+                              : user?.name || 'Admin'
+                          "
+                          class="h-12 w-12 rounded-full shadow-sm ring-2 ring-white"
                         />
                         <div class="min-w-0 flex-1">
-                          <p class="text-body font-bold text-secondary-900 truncate">
+                          <p class="truncate text-body font-bold text-secondary-900">
                             {{
                               user?.first_name && user?.last_name
                                 ? `${user.first_name} ${user.last_name}`
                                 : user?.name || "Admin"
                             }}
                           </p>
-                          <p class="text-caption text-secondary-500 truncate">
+                          <p class="truncate text-caption text-secondary-500">
                             {{ user?.email || "admin@nfcgo.my" }}
                           </p>
-                          <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-badge font-bold bg-error-100 text-error-700">
+                          <span class="mt-1 inline-flex items-center rounded-full bg-accent-100 px-2 py-0.5 text-badge font-bold text-accent-800">
                             {{ user?.admin_role_display || "Administrator" }}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Menu Items -->
                     <div class="py-2">
                       <NuxtLink
                         to="/AdminManagement/profile-settings"
+                        class="flex w-full items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 transition-colors hover:bg-secondary-50 hover:text-secondary-900"
                         @click="showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
-                        <Icon
-                          name="heroicons:user-circle"
-                          class="h-5 w-5 text-secondary-400"
-                        />
+                        <Icon name="heroicons:user-circle" class="h-5 w-5 text-secondary-400" />
                         <span>Profile Setting</span>
                       </NuxtLink>
-
                       <NuxtLink
                         to="/AdminManagement/configuration"
+                        class="flex w-full items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 transition-colors hover:bg-secondary-50 hover:text-secondary-900"
                         @click="showProfileMenu = false"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
                       >
-                        <Icon
-                          name="heroicons:cog-6-tooth"
-                          class="h-5 w-5 text-secondary-400"
-                        />
+                        <Icon name="heroicons:cog-6-tooth" class="h-5 w-5 text-secondary-400" />
                         <span>Configuration</span>
                       </NuxtLink>
                     </div>
 
-                    <!-- Divider -->
                     <div class="border-t border-secondary-200"></div>
 
-                    <!-- Logout -->
                     <div class="py-2">
                       <button
+                        type="button"
+                        class="flex w-full items-center gap-3 px-4 py-2.5 text-navigation text-error-600 transition-colors hover:bg-error-50 hover:text-error-700"
                         @click="handleLogout"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-navigation text-error-600 hover:bg-error-50 hover:text-error-700 transition-colors"
                       >
-                        <Icon
-                          name="heroicons:arrow-right-on-rectangle"
-                          class="h-5 w-5 text-error-400"
-                        />
+                        <Icon name="heroicons:arrow-right-on-rectangle" class="h-5 w-5 text-error-400" />
                         <span>Logout</span>
                       </button>
                     </div>
@@ -299,23 +262,100 @@
           </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main
-          class="admin-main flex-1 overflow-y-auto bg-secondary-50 p-4 sm:p-6 lg:p-8"
-        >
-          <slot />
+        <!-- Content -->
+        <main class="admin-main flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div class="admin-container">
+            <slot />
+          </div>
         </main>
       </div>
     </div>
 
-    <!-- Mobile overlay -->
-    <div
-      v-if="sidebarOpen"
-      @click="sidebarOpen = false"
-      class="fixed inset-0 z-40 lg:hidden bg-black bg-opacity-50"
-    ></div>
+    <!-- ============================ MOBILE NAV ============================ -->
+    <Transition name="admin-fade">
+      <div v-if="mobileNavOpen" class="fixed inset-0 z-[110] lg:hidden">
+        <div class="absolute inset-0 bg-black/55" @click="mobileNavOpen = false"></div>
+        <aside class="admin-rail absolute inset-y-0 left-0 flex w-72 flex-col shadow-2xl">
+          <div class="admin-rail-brand flex h-16 items-center justify-between px-4">
+            <NuxtLink to="/AdminManagement" class="flex min-w-0 items-center gap-3" @click="mobileNavOpen = false">
+              <NFCGoLogo variant="dark" size="sm" :label="brandSettings.app_name || 'NFCGo'" />
+            </NuxtLink>
+            <button
+              type="button"
+              class="admin-icon-btn text-white/70 hover:bg-white/10 hover:text-white"
+              aria-label="Close navigation"
+              @click="mobileNavOpen = false"
+            >
+              <Icon name="heroicons:x-mark" class="h-5 w-5" />
+            </button>
+          </div>
+          <nav class="admin-scroll flex-1 overflow-y-auto px-3 py-5">
+            <div v-for="group in navigation" :key="group.category" class="admin-nav-group">
+              <p class="admin-rail-label px-3 pb-2">{{ group.category }}</p>
+              <NuxtLink
+                v-for="item in group.items"
+                :key="item.name"
+                :to="item.href"
+                class="admin-nav-link"
+                :class="{ 'is-active': isActiveRoute(item.href) }"
+                @click="mobileNavOpen = false"
+              >
+                <Icon :name="item.icon" class="admin-nav-ico h-[18px] w-[18px]" />
+                <span class="truncate">{{ item.name }}</span>
+                <span
+                  v-if="item.badge && Number(item.badge) > 0"
+                  class="ml-auto inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-error-500 px-1 text-badge text-white"
+                >
+                  {{ item.badge }}
+                </span>
+              </NuxtLink>
+            </div>
+          </nav>
+        </aside>
+      </div>
+    </Transition>
 
-    <!-- Admin Notification Drawer (Top 5, simple) -->
+    <!-- ============================ COMMAND PALETTE ============================ -->
+    <Transition name="admin-fade">
+      <div v-if="commandOpen" class="admin-cmdk-backdrop" @click.self="closeCommand">
+        <div class="admin-cmdk" role="dialog" aria-modal="true" aria-label="Search administration">
+          <div class="flex items-center gap-3 border-b border-secondary-200 px-4 py-3">
+            <Icon name="heroicons:magnifying-glass" class="h-5 w-5 text-secondary-400" />
+            <input
+              ref="commandInputRef"
+              v-model="commandQuery"
+              type="text"
+              class="w-full border-0 bg-transparent p-0 text-body text-secondary-900 placeholder-secondary-400 focus:outline-none focus:ring-0"
+              placeholder="Jump to a page…"
+              @keydown.down.prevent="moveCommand(1)"
+              @keydown.up.prevent="moveCommand(-1)"
+              @keydown.enter.prevent="runCommand"
+            />
+            <span class="admin-kbd">ESC</span>
+          </div>
+          <div class="admin-scroll max-h-[22rem] overflow-y-auto p-2">
+            <NuxtLink
+              v-for="(item, i) in filteredCommands"
+              :key="item.href"
+              :to="item.href"
+              class="admin-cmdk-item"
+              :class="{ 'is-active': i === commandIndex }"
+              @click="closeCommand"
+              @mouseenter="commandIndex = i"
+            >
+              <Icon :name="item.icon" class="h-[18px] w-[18px] text-secondary-500" />
+              <span class="flex-1 truncate">{{ item.name }}</span>
+              <span class="text-caption text-secondary-400">{{ item.category }}</span>
+            </NuxtLink>
+            <p v-if="filteredCommands.length === 0" class="px-3 py-8 text-center text-body text-secondary-500">
+              No pages match “{{ commandQuery }}”.
+            </p>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Notification drawer -->
     <NotificationDrawer
       :is-open="showAdminNotifications"
       :button-ref="adminNotifButtonRef"
@@ -344,7 +384,16 @@ const nuxtApp = useNuxtApp();
 const { $api, $toast } = nuxtApp;
 const user = computed(() => authStore.user);
 
-const sidebarOpen = ref(false);
+// Lock the viewport so the document never grows a scrollbar of its own.
+// All vertical scrolling is owned by <main class="admin-main"> inside this
+// shell. Without this, sub-pixel rounding of 100vh can leak 1px and the
+// browser paints a second (page-level) scrollbar next to the content one.
+useHead({
+  htmlAttrs: { class: "shell-scroll-lock" },
+});
+
+const mobileNavOpen = ref(false);
+const railCollapsed = ref(false);
 const showProfileMenu = ref(false);
 const showAdminNotifications = ref(false);
 const profileMenuWrapperRef = ref(null);
@@ -419,20 +468,13 @@ const updateDocumentTitle = () => {
   }
 };
 
-// Collapsible sidebar groups (key = category)
-const expandedGroups = ref(new Set(["Dashboard"]));
-
-const toggleGroup = (category) => {
-  const next = new Set(expandedGroups.value);
-  if (next.has(category)) {
-    next.delete(category);
-  } else {
-    next.add(category);
+// Rail collapse (desktop) — persisted so the choice survives reloads
+const toggleRail = () => {
+  railCollapsed.value = !railCollapsed.value;
+  if (process.client) {
+    localStorage.setItem('nfcgo.admin.railCollapsed', railCollapsed.value ? '1' : '0');
   }
-  expandedGroups.value = next;
 };
-
-const isGroupExpanded = (category) => expandedGroups.value.has(category);
 
 // Profile menu handlers
 const toggleProfileMenu = () => {
@@ -447,6 +489,7 @@ const navigation = computed(() => [
       {
         name: "Dashboard",
         href: "/AdminManagement",
+        icon: "heroicons:squares-2x2",
       },
     ],
   },
@@ -456,18 +499,22 @@ const navigation = computed(() => [
       {
         name: "User Management",
         href: "/AdminManagement/users",
+        icon: "heroicons:users",
       },
       {
         name: "Business Users",
         href: "/AdminManagement/business-users",
+        icon: "heroicons:briefcase",
       },
       {
         name: "Business Enquiries",
         href: "/AdminManagement/business-inquiries",
+        icon: "heroicons:envelope",
       },
       {
         name: "Roles & Permissions",
         href: "/AdminManagement/roles-permissions",
+        icon: "heroicons:shield-check",
       },
     ],
   },
@@ -477,26 +524,32 @@ const navigation = computed(() => [
       {
         name: "NFC Card Management",
         href: "/AdminManagement/nfc-cards",
+        icon: "heroicons:credit-card",
       },
       {
         name: "Card Templates",
         href: "/AdminManagement/card-templates",
+        icon: "heroicons:rectangle-stack",
       },
       {
         name: "Card Designer",
         href: "/AdminManagement/card-designer",
+        icon: "heroicons:paint-brush",
       },
       {
         name: "Profile Builder Design",
         href: "/AdminManagement/profile-builder-design",
+        icon: "heroicons:swatch",
       },
       {
         name: "Invoices",
         href: "/AdminManagement/invoices",
+        icon: "heroicons:document-text",
       },
       {
         name: "Refunds",
         href: "/AdminManagement/refunds",
+        icon: "heroicons:arrow-uturn-left",
       },
     ],
   },
@@ -506,24 +559,29 @@ const navigation = computed(() => [
       {
         name: "Analytics",
         href: "/AdminManagement/stats",
+        icon: "heroicons:chart-bar",
       },
       {
         name: "Notifications",
         href: "/AdminManagement/notifications",
+        icon: "heroicons:bell",
         badge: pendingNotificationCount.value,
       },
       {
         name: "User Feedback",
         href: "/AdminManagement/feedback",
+        icon: "heroicons:chat-bubble-left-right",
         badge: unreadFeedbackCount.value,
       },
       {
         name: "Chatbot FAQ",
         href: "/AdminManagement/chatbot-faq",
+        icon: "heroicons:question-mark-circle",
       },
       {
         name: "Audit Log",
         href: "/AdminManagement/SystemAuditLog",
+        icon: "heroicons:clipboard-document-list",
       },
     ],
   },
@@ -533,10 +591,12 @@ const navigation = computed(() => [
       {
         name: "Profile Setting",
         href: "/AdminManagement/profile-settings",
+        icon: "heroicons:user-circle",
       },
       {
         name: "Configuration",
         href: "/AdminManagement/configuration",
+        icon: "heroicons:cog-6-tooth",
       },
     ],
   },
@@ -544,7 +604,9 @@ const navigation = computed(() => [
 
 // Flattened navigation for lookups (page title + active highlighting)
 const flatNavigation = computed(() =>
-  navigation.value.flatMap((group) => group.items)
+  navigation.value.flatMap((group) =>
+    group.items.map((item) => ({ ...item, category: group.category })),
+  ),
 );
 
 // Resolve the navigation item for a path, preferring the most specific
@@ -572,21 +634,47 @@ const pageTitle = computed(() => activeNavItem.value?.name || "Admin Panel");
 // A nav link is active only if it is the most specific match
 const isActiveRoute = (href) => activeNavItem.value?.href === href;
 
-// Auto-expand group that contains the currently active route
-watch(
-  () => route.path,
-  () => {
-    const active = activeNavItem.value;
-    if (!active) return;
-    const activeGroup = navigation.value.find((g) => g.items.includes(active));
-    if (activeGroup) {
-      const next = new Set(expandedGroups.value);
-      next.add(activeGroup.category);
-      expandedGroups.value = next;
-    }
-  },
-  { immediate: true }
-);
+// ------------------------------------------------------------------
+// Command palette
+// ------------------------------------------------------------------
+const commandOpen = ref(false);
+const commandQuery = ref("");
+const commandIndex = ref(0);
+const commandInputRef = ref(null);
+
+const filteredCommands = computed(() => {
+  const q = commandQuery.value.trim().toLowerCase();
+  if (!q) return flatNavigation.value;
+  return flatNavigation.value.filter(
+    (item) =>
+      item.name.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q),
+  );
+});
+
+const openCommand = () => {
+  commandOpen.value = true;
+  commandQuery.value = "";
+  commandIndex.value = 0;
+  nextTick(() => commandInputRef.value?.focus());
+};
+
+const closeCommand = () => {
+  commandOpen.value = false;
+};
+
+const moveCommand = (delta) => {
+  const len = filteredCommands.value.length;
+  if (!len) return;
+  commandIndex.value = (commandIndex.value + delta + len) % len;
+};
+
+const runCommand = () => {
+  const item = filteredCommands.value[commandIndex.value];
+  if (!item) return;
+  closeCommand();
+  navigateTo(item.href);
+};
 
 // Fetch unread feedback count
 const loadUnreadFeedbackCount = async () => {
@@ -805,6 +893,11 @@ const adminClearRead = async () => {
 onMounted(() => {
   isMounted.value = true;
 
+  // Restore rail preference
+  if (process.client) {
+    railCollapsed.value = localStorage.getItem('nfcgo.admin.railCollapsed') === '1';
+  }
+
   // Load admin brand (logo, app name)
   loadAdminBrandSettings();
 
@@ -835,14 +928,21 @@ onMounted(() => {
     }
   };
 
-  // Escape key handler (drawer component handles its own Escape; sidebar + profile handled here)
-  const handleEscape = (e) => {
+  // Global keyboard shortcuts — Escape closes popovers; ⌘/Ctrl+K opens search
+  const handleKeydown = (e) => {
     if (!isMounted.value) return;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      commandOpen.value ? closeCommand() : openCommand();
+      return;
+    }
     if (e.key === "Escape") {
-      showProfileMenu.value = false;
-      if (window.innerWidth < 1024) {
-        sidebarOpen.value = false;
+      if (commandOpen.value) {
+        closeCommand();
+        return;
       }
+      showProfileMenu.value = false;
+      mobileNavOpen.value = false;
     }
   };
 
@@ -862,7 +962,7 @@ onMounted(() => {
   };
 
   document.addEventListener("click", handleClickOutside);
-  document.addEventListener("keydown", handleEscape);
+  document.addEventListener("keydown", handleKeydown);
 
   onBeforeUnmount(() => {
     // FIRST: prevent any further updates before DOM detaches
@@ -870,7 +970,7 @@ onMounted(() => {
     clearInterval(feedbackInterval);
     clearInterval(notificationInterval);
     document.removeEventListener("click", handleClickOutside);
-    document.removeEventListener("keydown", handleEscape);
+    document.removeEventListener("keydown", handleKeydown);
     window.removeEventListener("admin-feedback-updated", handleFeedbackUpdated);
     window.removeEventListener("admin-notifications-updated", handleNotifUpdated);
     window.removeEventListener("admin-brand-updated", handleBrandUpdated);
@@ -891,18 +991,15 @@ watch(
   () => route.path,
   () => {
     if (!isMounted.value) return;
-    sidebarOpen.value = false;
+    mobileNavOpen.value = false;
     showProfileMenu.value = false;
     showAdminNotifications.value = false;
+    commandOpen.value = false;
   }
 );
 </script>
 
 <style scoped>
-.border-l-3 {
-  border-left-width: 3px;
-}
-
 /*
   Page-level loaders inside this layout (NFCGoWaveLoader `.nfg-viewport`)
   centre on the VISIBLE content area: subtract the sticky top bar (h-16 =

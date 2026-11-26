@@ -52,6 +52,10 @@ Schedule::call(function () {
 // Daily 02:15 — clean up "remember me" tokens past their TTL
 Schedule::command('remember-tokens:cleanup')->dailyAt('02:15');
 
+// Daily 02:45 — purge guest-checkout placeholder accounts that were abandoned
+// before any order/transaction was recorded (they only hold an email address)
+Schedule::command('guest-checkouts:cleanup --hours=48')->dailyAt('02:45');
+
 // 1st of every month 03:00 — archive analytics >6 months old (archive + delete live)
 Schedule::command('analytics:cleanup-old --months=6')->monthlyOn(1, '03:00');
 

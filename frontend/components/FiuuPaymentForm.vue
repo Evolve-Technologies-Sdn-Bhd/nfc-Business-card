@@ -128,6 +128,13 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  // Optional async hook run immediately BEFORE the payment request. Used by
+  // guest checkout to create the placeholder account first. Returning a falsy
+  // value (or throwing) aborts the payment.
+  beforePay: {
+    type: Function,
+    default: null
   }
 })
 
@@ -163,6 +170,14 @@ const initiatePayment = async () => {
   errorMessage.value = null
   
   try {
+    // Guest checkout: the account must exist before /payment/initiate (every
+    // transaction needs an owner). A falsy result means "already reported the
+    // reason to the user" — stop here.
+    if (props.beforePay) {
+      const proceed = await props.beforePay()
+      if (!proceed) return
+    }
+
     const response = await apiInitiatePayment({
       amount: total.value,
       payment_rail: props.paymentRail,
