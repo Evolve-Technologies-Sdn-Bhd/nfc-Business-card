@@ -37,6 +37,17 @@ class UserNotificationPreference extends Model
         'product_updates' => 'boolean',
     ];
 
+    /**
+     * Is $key switched on for $user? Falls back to DEFAULTS when the user has
+     * never saved preferences.
+     */
+    public static function allows(User $user, string $key): bool
+    {
+        $value = static::where('user_id', $user->id)->value($key);
+
+        return $value === null ? (bool) (static::DEFAULTS[$key] ?? true) : (bool) $value;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

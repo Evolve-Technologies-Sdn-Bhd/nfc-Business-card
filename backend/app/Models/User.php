@@ -82,7 +82,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // `requires_password_setup` lets the frontend offer the "set your password"
     // step to a guest-checkout account that has paid but still has no password.
-    protected $appends = ['full_name', 'profile_image', 'requires_password_setup'];
+    // `has_local_password` lets Settings show "Set a password" (no current
+    // password field) to a Google/Apple-only account.
+    protected $appends = ['full_name', 'profile_image', 'requires_password_setup', 'has_local_password'];
 
     protected static function boot()
     {
@@ -721,6 +723,11 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+    public function getHasLocalPasswordAttribute(): bool
+    {
+        return $this->hasLocalPassword();
+    }
+
      * Get quota information for Business account
      * Note: total_account_slots serves as the unified quota for both accounts and cards
      * If admin assigns 10 slots, business can have max 10 accounts (including employees) and 10 cards total.

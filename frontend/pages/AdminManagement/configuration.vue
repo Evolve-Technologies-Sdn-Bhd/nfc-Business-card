@@ -2000,7 +2000,7 @@ const checkPdfStatus = async (type) => {
       const target = type === "terms" ? termsPdfStatus : privacyPdfStatus;
       Object.assign(target, { exists: response.exists, fileInfo: response.file_info });
     }
-  } catch (e) { console.error("Error checking PDF status:", e); }
+  } catch (e) { if (!e?.__aborted) console.error("Error checking PDF status:", e); }
 };
 
 const loadLegalDocuments = async () => {

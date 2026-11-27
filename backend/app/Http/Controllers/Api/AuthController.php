@@ -672,7 +672,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Incorrect password.',
-            ], 401);
+            ], 422);
         }
 
         return response()->json([
@@ -724,7 +724,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Incorrect password.',
-            ], 401);
+            ], 422);
         }
 
         // Generate a secure linking token that will be used to verify this is a link operation
@@ -855,7 +855,7 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
+            'current_password' => $user->hasLocalPassword() ? 'required|string' : 'nullable|string',
             'password' => 'required|string|min:8|max:255|confirmed',
         ]);
 
@@ -863,19 +863,22 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+        $user = $request->user();
+
+        // A Google/Apple-only account has no local password yet, so there is no
+        // "current password" to confirm when it sets its first one.
             ], 422);
         }
-
-        $user = $request->user();
 
         // Require current password UNLESS this is an OAuth-only user setting their first password
         if ($user->hasLocalPassword()) {
             if (!Hash::check($request->current_password, $user->password)) {
+                'message' => $validator->errors()->first(),
                 return response()->json([
                     'success' => false,
                     'message' => 'Current password is incorrect.',
                     'errors' => ['current_password' => ['Current password is incorrect.']],
-                ], 401);
+                ], 422);
             }
         }
 
@@ -1181,7 +1184,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Verification failed. Please enter your correct password or a valid recovery code.',
-            ], 401);
+            ], 422);
         }
 
         $user->update([

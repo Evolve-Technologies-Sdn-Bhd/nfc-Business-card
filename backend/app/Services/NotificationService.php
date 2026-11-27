@@ -10,6 +10,12 @@ class NotificationService
     /**
      * Notification type templates
      */
+    /**
+     * Activity about the user's public profile; the user can turn these off
+     * (UserNotificationPreference::profile_views).
+     */
+    public const PROFILE_ACTIVITY_TYPES = ['link_milestone', 'landing_page_viewed'];
+
     private const TEMPLATES = [
         'registration_success' => [
             'title' => 'Welcome to NFC GO!',
@@ -220,6 +226,14 @@ class NotificationService
 
         if (!$template) {
             throw new \InvalidArgumentException("Invalid notification type: {$type}");
+        }
+
+        // Settings → Notifications: "Profile activity" (profile_views) lets the
+        // user switch off activity alerts about their public profile. Account,
+        // order, payment and security notifications are never optional.
+        if (in_array($type, self::PROFILE_ACTIVITY_TYPES, true)
+            && !\App\Models\UserNotificationPreference::allows($user, 'profile_views')) {
+            return null;
         }
 
         // Replace placeholders in message
