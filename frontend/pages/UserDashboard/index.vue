@@ -532,14 +532,14 @@ onMounted(async () => {
   justify-content: flex-end;
   padding-right: 0.55rem;
   border-radius: 0.5rem;
-  color: rgba(245, 241, 232, 0.8);
-  background: linear-gradient(135deg, #252b38 0%, #171d2b 100%);
-  box-shadow: inset 0 0 0 1px rgba(194, 160, 104, 0.25);
+  color: color-mix(in srgb, var(--admin-paper) 80%, transparent);
+  background: linear-gradient(135deg, var(--admin-ink-soft) 0%, var(--admin-ink) 100%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 25%, transparent);
 }
 .portal-card-thumb.is-premium,
 .portal-card-thumb.is-business {
-  color: #3a2c14;
-  background: linear-gradient(135deg, #dcc28a 0%, #a88750 100%);
+  color: var(--admin-brass-ink);
+  background: linear-gradient(135deg, var(--admin-brass-soft) 0%, var(--admin-brass-deep) 100%);
 }
 .portal-card-thumb.is-free {
   color: var(--admin-text-2);
@@ -551,7 +551,7 @@ onMounted(async () => {
   height: 0.55rem;
   width: 0.55rem;
   border-radius: 9999px;
-  background: #9c988f;
+  background: var(--admin-text-3);
 }
 .portal-dot.is-success { background: #16a34a; }
 .portal-dot.is-warning { background: #d97706; }
@@ -577,7 +577,7 @@ onMounted(async () => {
 }
 .portal-shortcut.is-locked {
   cursor: not-allowed;
-  background: #fbfaf6;
+  background: color-mix(in srgb, var(--admin-paper) 40%, #ffffff);
 }
 .portal-shortcut.is-locked .admin-kpi-ico {
   background: var(--admin-paper);
@@ -590,7 +590,7 @@ onMounted(async () => {
   padding: 0.9rem;
   border-radius: var(--admin-radius);
   border: 1px solid var(--admin-border);
-  background: #fbfaf6;
+  background: color-mix(in srgb, var(--admin-paper) 40%, #ffffff);
 }
 .portal-step.is-done {
   background: var(--admin-surface);

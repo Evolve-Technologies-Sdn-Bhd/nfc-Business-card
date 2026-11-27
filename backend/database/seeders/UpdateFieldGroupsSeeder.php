@@ -14,11 +14,13 @@ class UpdateFieldGroupsSeeder extends Seeder
             // Basic Information
             ['keys' => ['name', 'position', 'pronouns', 'qualification', 'tagline'], 'group' => 'Basic Information', 'icon' => 'heroicons:user-circle', 'order' => 1],
             // About Me
-            ['keys' => ['bio'], 'group' => 'About Me', 'icon' => 'heroicons:document-text', 'order' => 2],
+            ['keys' => ['bio', 'introVideo'], 'group' => 'About Me', 'icon' => 'heroicons:document-text', 'order' => 2],
             // Contact
             ['keys' => ['contactNumber', 'emailAddress', 'website', 'address'], 'group' => 'Contact', 'icon' => 'heroicons:phone', 'order' => 3],
             // Background
             ['keys' => ['education', 'certifications', 'profileStats'], 'group' => 'Background', 'icon' => 'heroicons:academic-cap', 'order' => 4],
+            // Sharing & Contact (public profile actions)
+            ['keys' => ['vcardEnabled', 'qrCodeEnabled', 'contactFormEnabled', 'contactFormEmail'], 'group' => 'Sharing & Contact', 'icon' => 'heroicons:share', 'order' => 5],
         ];
 
         // Company tab groups

@@ -19,6 +19,9 @@ class CardTemplate extends Model
         'back_image_url',
         'original_front_url',
         'original_back_url',
+        'card_size',
+        'front_layout',
+        'back_layout',
         'category',
         'plan_types',
         'color_scheme',
@@ -33,6 +36,8 @@ class CardTemplate extends Model
     protected $casts = [
         'plan_types' => 'array',
         'color_scheme' => 'array',
+        'front_layout' => 'array',
+        'back_layout' => 'array',
         'is_active' => 'boolean',
         'is_hidden' => 'boolean',
     ];

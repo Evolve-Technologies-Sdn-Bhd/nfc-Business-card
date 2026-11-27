@@ -63,9 +63,11 @@ export function resolvePortalAccess(user, resolvedPlan) {
   const accountPlan = lower(user?.subscription_plan || "free");
   const subscriptionActive = user?.subscription_active === true;
 
-  const entitledCards = cards.filter((c) => ENTITLED_CARD_STATUSES.includes(lower(c.status)));
+  // Free-plan digital cards (is_digital) are never an entitlement or an order.
+  const physicalCards = cards.filter((c) => !c.is_digital);
+  const entitledCards = cards.filter((c) => !c.is_digital && ENTITLED_CARD_STATUSES.includes(lower(c.status)));
   // Orders still waiting on payment (NfcCard::isPendingPayment / isAwaitingVerification)
-  const pendingCards = cards.filter((c) =>
+  const pendingCards = physicalCards.filter((c) =>
     ["pending_payment", "awaiting_payment_verification"].includes(lower(c.status)),
   );
 
@@ -115,7 +117,7 @@ export function resolvePortalAccess(user, resolvedPlan) {
           : subscriptionActive || hasEligibleCard(),
     employees: canManageBusiness,
     activityLog: isBusinessOwner,
-    invoices: cards.length > 0 || PAID_PLANS.includes(accountPlan),
+    invoices: physicalCards.length > 0 || PAID_PLANS.includes(accountPlan),
   };
 
   const deactivated = !subscriptionActive && !!user?.deactivated_at;

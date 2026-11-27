@@ -20,7 +20,8 @@ class AdminExportController extends Controller
         // Set a longer timeout for large exports
         set_time_limit(60);
 
-        $nfcCards = NfcCard::with('user')
+        $nfcCards = NfcCard::physical()
+            ->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
 

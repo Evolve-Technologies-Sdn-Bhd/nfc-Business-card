@@ -82,7 +82,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // `requires_password_setup` lets the frontend offer the "set your password"
     // step to a guest-checkout account that has paid but still has no password.
-    protected $appends = ['full_name', 'profile_image', 'requires_password_setup'];
+    // `has_local_password` lets Settings show "Set a password" (no current
+    // password field) to a Google/Apple-only account.
+    protected $appends = ['full_name', 'profile_image', 'requires_password_setup', 'has_local_password'];
 
     protected static function boot()
     {
@@ -93,6 +95,15 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->name_slug = self::buildNameSlug(
                     $user->full_name ?: trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''))
                 );
+            }
+        });
+
+        // users.parent_business_id cascades on delete, so deleting a Business
+        // owner used to delete every member account (and their cards/profiles)
+        // with it. Detach the members first so their accounts survive.
+        static::deleting(function (User $user) {
+            if ($user->parent_business_id === null && $user->employees()->exists()) {
+                app(\App\Services\BusinessTenantService::class)->detachMembers($user);
             }
         });
 
@@ -468,7 +479,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasPhysicalCard()
     {
-        return $this->nfcCards()->whereIn('status', ['active', 'delivered', 'shipped', 'processing', 'payment_verified'])->exists();
+        return $this->nfcCards()->physical()->whereIn('status', ['active', 'delivered', 'shipped', 'processing', 'payment_verified'])->exists();
     }
 
     /**
@@ -581,6 +592,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function parentBusiness()
     {
         return $this->belongsTo(User::class, 'parent_business_id');
+    }
+
+    /**
+     * Company settings (shared + locked profile fields) of a Business owner.
+     */
+    public function businessSetting()
+    {
+        return $this->hasOne(BusinessSetting::class, 'owner_id');
     }
 
     /**
@@ -702,6 +721,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasLocalPassword(): bool
     {
         return !is_null($this->password) && $this->password !== '';
+    }
+
+    public function getHasLocalPasswordAttribute(): bool
+    {
+        return $this->hasLocalPassword();
     }
 
     /**

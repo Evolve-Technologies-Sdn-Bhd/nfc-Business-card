@@ -142,46 +142,14 @@
             </div>
 
             <!-- Card Preview -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-              <h2 class="section-title text-secondary-900 mb-6">
-                Your NFC Card
-              </h2>
-
-              <div class="flex justify-center">
-                <div class="relative" style="width: 180px; height: 108px">
-                  <!-- Front Side -->
-                  <div
-                    class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-lg"
-                  >
-                    <div class="absolute inset-0 p-3 text-white text-caption">
-                      <div class="flex items-center justify-between h-full">
-                        <div>
-                          <div class="font-bold">
-                            {{ cardInfo.name || "Your Name" }}
-                          </div>
-                          <div class="opacity-80">
-                            {{ cardInfo.position || "Position" }}
-                          </div>
-                          <div class="mt-1">
-                            {{ cardInfo.contactNumber || "Phone" }}
-                          </div>
-                          <div>{{ cardInfo.email || "Email" }}</div>
-                        </div>
-                        <div
-                          v-if="cardInfo.companyLogo"
-                          class="w-8 h-8 bg-white rounded"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 text-center">
-                <p class="card-subtitle">Card Size: 90mm x 54mm</p>
-                <p class="text-helper">Standard business card dimensions</p>
-              </div>
-            </div>
+            <CardExamples
+              view="both"
+              title="Your NFC Card"
+              :card-info="cardInfo"
+              :selected-template="selectedTemplateData"
+              :design-method="draft.designMethod || 'template'"
+              :custom-design="draft.cardDesign || {}"
+            />
           </div>
 
           <!-- Right Panel - Payment Form -->
@@ -771,6 +739,9 @@ const orderMetadata = computed(() => ({
   card_quantity: cardQuantity.value,
   shipping_cost: orderSummary.value.shippingCost,
   card_info: cardInfo.value,
+  // The server snapshots the template + layout from this id at fulfilment.
+  design_method: draft.value.designMethod || "template",
+  card_template_id: draft.value.designMethod === "custom" ? null : draft.value.selectedTemplate || null,
   billing_address: {
     full_name: billingAddress.fullName,
     email: billingAddress.email,
@@ -785,6 +756,21 @@ const orderMetadata = computed(() => ({
 
 // Card info from the onboarding draft
 const cardInfo = computed(() => draft.value.cardInfo || {});
+
+// The draft keeps only the template id; load the full template (images +
+// designer layout) so the preview shows the actual card being ordered.
+const selectedTemplateData = ref(null);
+const loadSelectedTemplate = async () => {
+  const id = draft.value.selectedTemplate;
+  if (!id || draft.value.designMethod === "custom") return;
+  try {
+    const { $api } = useNuxtApp();
+    const res = await $api.get(`/card-templates/${id}`);
+    if (res?.success) selectedTemplateData.value = res.data;
+  } catch (err) {
+    console.warn("Could not load the selected card template", err);
+  }
+};
 
 // Shipping address completeness. A guest has no account yet, so the email they
 // type here is what creates it — it is required for them, optional otherwise.
@@ -989,6 +975,9 @@ onMounted(async () => {
     await navigateTo(redirect, { replace: true });
     return;
   }
+
+  // Card preview: fetch the chosen template in the background
+  loadSelectedTemplate();
 
   // Load plan prices from API
   await loadPrices();

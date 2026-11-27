@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CardTemplate;
 use App\Models\LandingPage;
 use App\Models\NfcCard;
 use App\Models\Order;
@@ -69,6 +70,8 @@ class OrderFulfilmentService
             $preShipmentStatus = 'payment_verified';
             $cardAddress = $this->formatShippingAddress($order);
 
+            $designFields = $this->cardDesignFields($order, $user);
+
             $card = null;
             $existingCard = $transaction->nfc_card_id
                 ? NfcCard::find($transaction->nfc_card_id)
@@ -82,12 +85,15 @@ class OrderFulfilmentService
                         'order_confirmed_at' => $card->order_confirmed_at ?? now(),
                     ]);
                 }
+                if (empty($card->card_design)) {
+                    $card->update($designFields);
+                }
             } else {
                 $quantity = $this->resolveCardQuantity($order);
                 $perCardAmount = round($order->total / $quantity, 2);
 
                 for ($i = 0; $i < $quantity; $i++) {
-                    $newCard = NfcCard::create([
+                    $newCard = NfcCard::create($designFields + [
                         'user_id' => $user->id,
                         'nfc_card_id' => 'NFC-' . strtoupper(Str::random(12)),
                         'card_owner' => $user->full_name ?: ($user->name ?? 'Customer'),
@@ -137,6 +143,72 @@ class OrderFulfilmentService
                 'transaction_id' => $transaction->id,
             ]);
         });
+    }
+
+    /**
+     * The design the customer ordered, as NfcCard columns. The snapshot is
+     * built here from the template id (never trusted from the client) and the
+     * details typed at checkout, so the printed card matches the preview even
+     * if the template is edited or removed later.
+     */
+    protected function cardDesignFields(Order $order, User $user): array
+    {
+        $metadata = is_array($order->metadata) ? $order->metadata : [];
+        $info = is_array($metadata['card_info'] ?? null) ? $metadata['card_info'] : [];
+        $method = ($metadata['design_method'] ?? 'template') === 'custom' ? 'custom' : 'template';
+
+        $logo = $info['companyLogo'] ?? null;
+        $data = [
+            'name' => $info['name'] ?? ($user->full_name ?: null),
+            'position' => $info['position'] ?? null,
+            'company' => $info['companyName'] ?? ($user->company ?? null),
+            'phone' => $info['contactNumber'] ?? null,
+            'email' => $info['email'] ?? $user->email,
+            'website' => $info['website'] ?? null,
+            'address' => $info['address'] ?? null,
+            // Only keep a hosted URL; a data: URL never reached the server.
+            'logo' => is_string($logo) && preg_match('#^https?://#', $logo) ? $logo : null,
+        ];
+
+        if ($method === 'custom') {
+            $upload = $user->settings['card_design'] ?? [];
+            $front = $upload['front_design'] ?? null;
+            $back = $upload['back_design'] ?? null;
+
+            return [
+                'is_custom_design' => true,
+                'custom_design_front_url' => $front,
+                'custom_design_back_url' => $back,
+                'card_design' => [
+                    'method' => 'custom',
+                    'front_image_url' => $front,
+                    'back_image_url' => $back,
+                    'data' => $data,
+                    'captured_at' => now()->toISOString(),
+                ],
+            ];
+        }
+
+        $template = !empty($metadata['card_template_id'])
+            ? CardTemplate::find((int) $metadata['card_template_id'])
+            : null;
+
+        return [
+            'card_template_id' => $template?->id,
+            'is_custom_design' => false,
+            'card_design' => [
+                'method' => 'template',
+                'template_id' => $template?->id,
+                'template_name' => $template?->name,
+                'card_size' => $template?->card_size ?: '90x54',
+                'front_image_url' => $template?->front_image_url,
+                'back_image_url' => $template?->back_image_url,
+                'front_layout' => $template?->front_layout,
+                'back_layout' => $template?->back_layout,
+                'data' => $data,
+                'captured_at' => now()->toISOString(),
+            ],
+        ];
     }
 
     /**

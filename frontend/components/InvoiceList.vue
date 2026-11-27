@@ -254,7 +254,11 @@ const changePerPage = (perPage) => {
 };
 
 const loadInvoices = async () => {
-  await fetchInvoices(filters.value);
+  try {
+    await fetchInvoices(filters.value);
+  } catch {
+    // useInvoices already logged it and showed a toast; keep the list usable.
+  }
 };
 
 onMounted(() => {

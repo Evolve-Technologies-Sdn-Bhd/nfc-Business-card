@@ -1,23 +1,19 @@
-<!-- pages/UserDashboard/CardManagement.vue -->
+<!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title">Card Management</h1>
-          <p class="mt-2 text-secondary-600">
-            Manage Business Plan NFC cards for employees
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="goToDesignPage" class="btn btn-primary">
-            <Icon name="heroicons:plus" class="h-5 w-5 mr-2" />
-            Order New Card
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Business"
+      eyebrow-icon="heroicons:credit-card"
+      title="Business Cards"
+      description="Every card in your business: yours and your team's. Filter by person or status, then activate, assign or view reach."
+    >
+      <template #actions>
+        <button type="button" @click="goToDesignPage" class="admin-btn admin-btn--primary">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          Order cards
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <!-- Bulk Selection Toolbar -->
     <div
@@ -222,7 +218,7 @@
                     </p>
                     <p class="text-body text-secondary-900">
                       <strong>Amount:</strong>
-                      {{ card.formatted_purchase_amount }}
+                      {{ card.formatted_purchase_amount || "—" }}
                     </p>
                   </div>
                 </div>
@@ -368,7 +364,7 @@
                     </p>
                     <p class="text-body text-secondary-900">
                       <strong>Amount:</strong>
-                      {{ card.formatted_purchase_amount }}
+                      {{ card.formatted_purchase_amount || "—" }}
                     </p>
                   </div>
                 </div>
@@ -964,7 +960,7 @@
                 class="bg-warning-50 border border-warning-200 rounded-lg p-3"
               >
                 <p class="text-body text-warning-700">
-                  No employees found. Add employees from Employee Management first.
+                  No team members yet. NFCGo creates team accounts on request; they will appear here once added.
                 </p>
               </div>
 
@@ -991,6 +987,16 @@
         </div>
       </div>
     </Transition>
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :cancel-label="confirmState.cancelLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
@@ -1000,6 +1006,10 @@ definePageMeta({
   layout: "user-dashboard",
   middleware: ["auth"],
 });
+
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
+
 
 // Stores
 const authStore = useAuthStore();
@@ -1418,7 +1428,7 @@ const goToProfileBuilder = () => {
 const activateCard = async (card) => {
   try {
     const response = await $api.post(`/nfc-cards/${card.id}/activate`, {
-      nfc_id: `NFC-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      // No nfc_id: the backend keeps the card's existing tag ID (or issues one once).
       name: card.card_owner,
     });
 
@@ -1433,7 +1443,13 @@ const activateCard = async (card) => {
 };
 
 const deactivateCard = async (card) => {
-  if (!confirm("Are you sure you want to deactivate this card?")) return;
+  const ok = await askConfirm({
+    title: "Deactivate this card?",
+    message: "Its profile will stop opening when someone taps the card or visits its link. You can reactivate it at any time.",
+    confirmLabel: "Deactivate",
+    tone: "danger",
+  });
+  if (!ok) return;
 
   try {
     const response = await $api.post(`/nfc-cards/${card.id}/deactivate`);

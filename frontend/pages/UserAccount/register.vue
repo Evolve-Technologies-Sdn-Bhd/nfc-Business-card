@@ -22,10 +22,6 @@
 
           <!-- Brand message -->
           <div class="lg-hero-copy">
-            <span class="eyebrow-brass">
-              <span class="dot"></span>
-              Smart NFC Business Card
-            </span>
             <h1 class="lg-hero-title">
               Create your digital identity,
               <span class="brass-grad">ready in one tap</span>

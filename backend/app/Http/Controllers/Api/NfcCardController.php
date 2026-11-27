@@ -64,22 +64,32 @@ class NfcCardController extends Controller
         $user = $request->user();
         \Log::info('NFC Cards index called', ['user_id' => $user?->id, 'user_email' => $user?->email]);
 
+        // Free accounts that pre-date digital cards get theirs on first visit.
+        app(\App\Services\DigitalCardService::class)->ensureFor($user);
+
         $plan = $user->subscription_plan;
         $subActive = (bool) $user->subscription_active;
         $hasActiveAccess = in_array($plan, ['basic', 'premium', 'business'], true) && $subActive;
         if (!$hasActiveAccess) {
+            // A digital card is not an order, so it keeps upgrade_required = true.
             $hasActiveAccess = $user->nfcCards()
+                ->physical()
                 ->whereIn('status', ['payment_verified','processing','shipped','delivered','active','pending_payment','awaiting_payment_verification'])
                 ->exists();
         }
 
         if (!$hasActiveAccess) {
-            \Log::warning('User does not have active card access', ['user_id' => $user?->id]);
+            // Listing your own cards is not a privileged action: a Free user (or
+            // one whose cards have all expired/cancelled) simply gets their own
+            // list — usually empty — plus a flag the UI can use for upsell copy.
+            // Answering 403 here made every Free visit to My Cards / the builder
+            // log request failures.
             return response()->json([
-                'success' => false,
-                'message' => 'This feature requires an active Premium subscription or NFC card order',
-                'upgrade_required' => true
-            ], 403);
+                'success' => true,
+                'nfc_cards' => $user->nfcCards()->orderBy('created_at', 'desc')->get(),
+                'upgrade_required' => true,
+                'message' => 'Order an NFC card to manage it here.',
+            ]);
         }
 
         $eagerUser = 'user:id,first_name,last_name,email,job_title,name_slug';
@@ -405,8 +415,17 @@ class NfcCardController extends Controller
     {
         $user = $request->user();
 
+        // A card keeps ONE tag ID for life: the physical chip / printed QR can
+        // point at it, so re-activating a paused card must never mint a new ID.
+        $existingTag = NfcTag::where('nfc_card_id', $nfcCard->nfc_card_id)->first();
+
         $validator = Validator::make($request->all(), [
-            'nfc_id' => 'required|string|unique:nfc_tags,nfc_id',
+            'nfc_id' => [
+                'nullable',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('nfc_tags', 'nfc_id')->ignore($existingTag?->id),
+            ],
             'name' => 'nullable|string|max:255',
             'activation_code' => 'nullable|string|max:32',
         ]);
@@ -451,13 +470,17 @@ class NfcCardController extends Controller
             $nfcCard->update(['user_id' => $user->id]);
         }
 
-        // Create or update NFC tag
+        // Create or update NFC tag — existing tag ID wins; a new one is only
+        // issued (client-supplied or generated) the first time.
+        $nfcId = $existingTag?->nfc_id
+            ?: ($request->filled('nfc_id') ? $request->nfc_id : 'NFC-' . strtoupper(Str::random(9)));
+
         $nfcTag = NfcTag::updateOrCreate(
             ['nfc_card_id' => $nfcCard->nfc_card_id],
             [
                 'user_id' => $request->user()->id,
-                'nfc_id' => $request->nfc_id,
-                'name' => $request->name ?? 'Business Card',
+                'nfc_id' => $nfcId,
+                'name' => $request->name ?? $existingTag?->name ?? 'Business Card',
                 'status' => 'active',
             ]
         );
@@ -470,7 +493,7 @@ class NfcCardController extends Controller
         // Send NFC card activated notification
         $this->notificationService->create($request->user(), 'nfc_card_activated', [
             'card_id' => $nfcCard->nfc_card_id,
-            'nfc_id' => $request->nfc_id,
+            'nfc_id' => $nfcTag->nfc_id,
         ]);
 
         return response()->json([
@@ -952,6 +975,15 @@ class NfcCardController extends Controller
         // Public access - no authentication required
         // Anyone with the NFC card ID can view the landing page
         
+        // A Free digital card is withdrawn (inactive) when the free window ends;
+        // its public profile goes offline with it.
+        if ($nfcCard->is_digital && $nfcCard->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This profile is not available.'
+            ], 404);
+        }
+
         $landingPage = $nfcCard->landingPage;
 
         // Auto-create landing page if it doesn't exist (for all plan types)
@@ -980,6 +1012,8 @@ class NfcCardController extends Controller
             'success' => true,
             'landing_page' => $landingPage,
             'show_nfcgo_branding' => $this->shouldShowNfcgoBranding($nfcCard, $landingPage),
+            'effective_features' => $this->effectiveFeatures($nfcCard, $landingPage),
+            'videos' => $this->profileVideos($nfcCard, $landingPage),
         ]);
     }
 
@@ -1017,6 +1051,193 @@ class NfcCardController extends Controller
     }
 
     /**
+     * Profile features that show as actions on the public page (Save Contact,
+     * Message, QR Code, Share, Book), keyed by feature id.
+     *
+     * Each one is ON only when:
+     *   1. the admin feature toggle (profile_design_options, type feature_toggle)
+     *      is active and allowed for the card's plan — features without an
+     *      admin toggle (social_sharing) skip this check; and
+     *   2. the owner has not switched it off. The builders store the owner's
+     *      choice under two names (Features panel: `vcard_download`; Profile tab
+     *      toggle: `vcardEnabled`), so OFF under either name wins.
+     *
+     * Before this, the public page treated every feature as ON unless the
+     * `vcard_download`-style key was saved as false, so a disabled Profile-tab
+     * toggle or a plan that does not include the feature still showed the action.
+     */
+    /**
+     * Public contact form on a profile ("Message" action).
+     *
+     * POST /api/nfc-cards/{nfcCard}/contact
+     * Accepted only while the profile is online and its contact_form feature
+     * is on (plan + admin toggle + owner switch, see effectiveFeatures()). The
+     * owner gets an in-app notification and an e-mail at the address set in the
+     * builder (Contact Form e-mail), falling back to the account e-mail.
+     */
+    public function submitContactForm(Request $request, NfcCard $nfcCard)
+    {
+        $landingPage = $nfcCard->landingPage;
+
+        $offline = !$landingPage
+            || !$landingPage->is_active
+            || ($nfcCard->is_digital && $nfcCard->status !== 'active');
+
+        if ($offline || !($this->effectiveFeatures($nfcCard, $landingPage)['contact_form'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This profile is not accepting messages.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:120',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $data = $validator->validated();
+        $owner = $nfcCard->user;
+
+        if (!$owner) {
+            return response()->json(['success' => false, 'message' => 'This profile is not accepting messages.'], 403);
+        }
+
+        try {
+            $this->notificationService->create($owner, 'contact_request', [
+                'name' => $data['name'],
+                'sender_email' => $data['email'],
+                'sender_phone' => $data['phone'] ?? null,
+                'sender_message' => $data['message'],
+                'nfc_card_id' => $nfcCard->id,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('Contact form notification failed', ['card' => $nfcCard->id, 'error' => $e->getMessage()]);
+        }
+
+        $features = is_array($landingPage->features) ? $landingPage->features : [];
+        $to = $features['contact_form_email'] ?? $features['contactFormEmail'] ?? null;
+        $to = filter_var($to, FILTER_VALIDATE_EMAIL) ? $to : $owner->email;
+
+        if ($to) {
+            try {
+                $body = "New message from your NFCGo profile\n\n"
+                    . "Name: {$data['name']}\n"
+                    . "E-mail: {$data['email']}\n"
+                    . (!empty($data['phone']) ? "Phone: {$data['phone']}\n" : '')
+                    . "\n{$data['message']}\n";
+
+                \Illuminate\Support\Facades\Mail::raw($body, function ($mail) use ($to, $data) {
+                    $mail->to($to)
+                        ->replyTo($data['email'], $data['name'])
+                        ->subject('[NFC Go] New message from ' . $data['name']);
+                });
+            } catch (\Throwable $e) {
+                \Log::warning('Contact form e-mail failed', ['card' => $nfcCard->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent.',
+        ]);
+    }
+
+    /**
+     * Player URLs for the profile videos, or null when there is none or the
+     * card's plan does not include the field (Introduction Video: as set on
+     * the introVideo builder field, Premium/Business by default; Company
+     * Video: companyVideo, Business by default). Only YouTube/Vimeo links
+     * become players (App\Support\VideoEmbed).
+     */
+    private function profileVideos(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+
+        $allowed = \App\Models\ProfileBuilderField::query()
+            ->whereIn('field_key', ['introVideo', 'companyVideo'])
+            ->get(['field_key', 'available_plans', 'is_visible'])
+            ->mapWithKeys(function ($field) use ($plan) {
+                $plans = $field->available_plans;
+                if (is_string($plans)) {
+                    $plans = json_decode($plans, true);
+                }
+                $ok = $field->is_visible && (empty($plans) || in_array($plan, (array) $plans, true));
+                return [$field->field_key => $ok];
+            });
+
+        return [
+            'intro' => ($allowed['introVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->intro_video) : null,
+            'company' => ($allowed['companyVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->company_video) : null,
+        ];
+    }
+
+    public const PROFILE_ACTION_FEATURES = [
+        'vcard_download' => 'vcardEnabled',
+        'contact_form' => 'contactFormEnabled',
+        'qr_code' => 'qrCodeEnabled',
+        'booking_integration' => null,
+        'social_sharing' => null,
+    ];
+
+    private function effectiveFeatures(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+        $saved = is_array($landingPage->features) ? $landingPage->features : [];
+
+        $adminToggles = ProfileDesignOption::query()
+            ->where('type', 'feature_toggle')
+            ->whereIn('option_id', array_keys(self::PROFILE_ACTION_FEATURES))
+            ->get()
+            ->keyBy('option_id');
+
+        $result = [];
+        foreach (self::PROFILE_ACTION_FEATURES as $key => $alias) {
+            $toggle = $adminToggles->get($key);
+            $allowedByPlan = !$toggle || ($toggle->is_active && $toggle->isAvailableForPlan($plan));
+
+            $ownerOn = ($saved[$key] ?? true) !== false
+                && ($alias === null || ($saved[$alias] ?? true) !== false);
+
+            $result[$key] = $allowedByPlan && $ownerOn;
+        }
+
+        return $result + self::linkSettings($nfcCard, $landingPage);
+    }
+
+    /**
+     * Link options from the builder's Links tab, resolved for the public page:
+     *  - open_new_tab   (owner "Open in New Tab", default on)
+     *  - click_tracking (admin click_tracking toggle for the plan AND owner
+     *                    "Enable Click Analytics", default on)
+     */
+    public static function linkSettings(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+        $saved = is_array($landingPage->features) ? $landingPage->features : [];
+
+        $toggle = ProfileDesignOption::query()
+            ->where('type', 'feature_toggle')
+            ->where('option_id', 'click_tracking')
+            ->first();
+        $trackingAllowed = !$toggle || ($toggle->is_active && $toggle->isAvailableForPlan($plan));
+
+        return [
+            'open_new_tab' => ($saved['openNewTab'] ?? true) !== false,
+            'click_tracking' => $trackingAllowed && ($saved['clickTracking'] ?? true) !== false,
+        ];
+    }
+
+    /**
      * Update or create landing page for an NFC card
      */
     public function updateLandingPage(Request $request, NfcCard $nfcCard)
@@ -1029,6 +1250,15 @@ class NfcCardController extends Controller
             ], 403);
         }
 
+        // A withdrawn Free digital card (free window ended) is read-only.
+        if ($nfcCard->is_digital && $nfcCard->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'code' => 'FREE_WINDOW_ENDED',
+                'message' => 'Your free trial has ended. Get an NFC card to save your profile.',
+            ], 403);
+        }
+
         // Validate request
         $validator = Validator::make($request->all(), [
             // Basic Info
@@ -1037,6 +1267,7 @@ class NfcCardController extends Controller
             'pronouns' => 'nullable|string|max:50',
             'qualification' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
+            'intro_video' => ['nullable', 'string', 'max:500', \App\Support\VideoEmbed::rule()],
             'tagline' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|string|max:255', // Changed from email to string to allow empty
@@ -1111,7 +1342,7 @@ class NfcCardController extends Controller
             
             // Company additional
             'company_description' => 'nullable|string',
-            'company_video' => 'nullable|string|max:500',
+            'company_video' => ['nullable', 'string', 'max:500', \App\Support\VideoEmbed::rule()],
             'industry' => 'nullable|string|max:100',
             'established_year' => 'nullable', // Allow string or number
             'employee_count' => 'nullable', // Allow string or number
@@ -1192,6 +1423,23 @@ class NfcCardController extends Controller
 
         // Update or create landing page
         $landingPageData = $request->except('links'); // Exclude links from direct save
+
+        // Business members: company fields the owner locked are enforced here,
+        // not only greyed out in the builder (a crafted request used to be able
+        // to overwrite the company name, logo or branding).
+        $tenant = app(\App\Services\BusinessTenantService::class);
+        $editor = $request->user();
+        if ($editor->isBusinessEmployee()) {
+            if (!$tenant->memberHasAccess($editor)) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 'BUSINESS_ACCESS_INACTIVE',
+                    'message' => 'Your company Business plan or your seat is not active. Contact your company administrator.',
+                ], 403);
+            }
+            [$landingPageData, $lockedOverrides] = $tenant->applyLocks($editor, $landingPageData);
+        }
+
         $landingPage = LandingPage::updateOrCreate(
             ['nfc_card_id' => $nfcCard->id],
             $landingPageData
@@ -1245,6 +1493,8 @@ class NfcCardController extends Controller
         return response()->json([
             'success' => true,
             'landing_page' => $landingPage,
+            // Fields kept at the company value because the Business owner locked them.
+            'locked_overrides' => $lockedOverrides ?? [],
             'message' => 'Landing page saved successfully'
         ]);
     }

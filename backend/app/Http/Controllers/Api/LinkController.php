@@ -182,6 +182,30 @@ class LinkController extends Controller
         ]);
     }
 
+    /**
+     * POST /api/links/{link}/click — public, from a visitor on the profile page.
+     * Counted only for an active link on an online profile whose Click
+     * Analytics is on (plan + owner switch); otherwise a quiet no-op.
+     */
+    public function trackPublicClick(Request $request, SocialLink $link)
+    {
+        $landingPage = $link->landingPage;
+        $card = $landingPage?->nfcCard;
+
+        $countable = $link->is_active
+            && $landingPage && $landingPage->is_active
+            && $card && !($card->is_digital && $card->status !== 'active')
+            && \App\Http\Controllers\Api\NfcCardController::linkSettings($card, $landingPage)['click_tracking'];
+
+        if (!$countable) {
+            return response()->json(['success' => true, 'tracked' => false]);
+        }
+
+        $this->trackClick($request, $link);
+
+        return response()->json(['success' => true, 'tracked' => true]);
+    }
+
     public function trackClick(Request $request, SocialLink $link)
     {
         // Increment click count

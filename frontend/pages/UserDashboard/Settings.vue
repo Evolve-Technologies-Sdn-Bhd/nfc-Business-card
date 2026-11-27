@@ -22,7 +22,7 @@
             :class="[
               'shrink-0 whitespace-nowrap text-left px-3 py-2 rounded-lg transition-colors duration-150 flex items-center text-navigation',
               activeTab === tab.id
-                ? 'bg-accent-100 text-secondary-900 shadow-[inset_0_0_0_1px_rgba(194,160,104,0.35)]'
+                ? 'bg-accent-100 text-secondary-900 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brass)_35%,transparent)]'
                 : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
               tab.id === 'danger' && activeTab !== tab.id ? 'lg:mt-2 text-error-600 hover:text-error-700' : '',
             ]"
@@ -140,6 +140,12 @@
                         class="input input-bordered w-full"
                         placeholder="Enter your email"
                       />
+                      <p v-if="emailChanged" class="text-helper text-warning-700 mt-1">
+                        You'll need to verify the new address — we'll e-mail you a link.
+                      </p>
+                      <p v-else-if="user && !user.email_verified_at" class="text-helper text-warning-700 mt-1">
+                        Not verified yet — check your inbox for the verification link.
+                      </p>
                     </div>
 
                     <!-- Phone -->
@@ -179,150 +185,92 @@
               </div>
             </div>
 
-            <!-- Profile URLs Card -->
-            <div
-              class="card"
-            >
+            <!-- Profile links (one per card the user owns) -->
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Profile URLs
-                </h2>
+                <h2 class="card-title text-secondary-900">Profile links</h2>
                 <p class="card-subtitle text-secondary-600">
-                  Your NFC card profile URLs
+                  The public link each of your cards opens
                 </p>
               </div>
               <div class="p-6">
-                <div v-if="userNfcCards && userNfcCards.length > 0" class="space-y-4">
-                  <div 
-                    v-for="card in userNfcCards" 
+                <div v-if="userNfcCards.length > 0" class="space-y-3">
+                  <div
+                    v-for="card in userNfcCards"
                     :key="card.id"
-                    class="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border"
+                    class="p-4 bg-secondary-50 rounded-lg border border-secondary-200"
                   >
-                    <div class="flex-1">
-                      <div class="flex items-center gap-3 mb-2">
-                        <h3 class="text-label text-secondary-900">
-                          {{ card.nfc_card_id || `Card #${card.id}` }}
-                        </h3>
-                        <span 
-                          :class="card.status === 'active' ? 'bg-success-100 text-success-800' : 'bg-secondary-100 text-secondary-800'"
-                          class="px-2 py-1 text-badge rounded-full"
-                        >
-                          {{ card.status }}
-                        </span>
-                        <span 
-                          :class="card.has_landing_page ? 'bg-info-100 text-info-800' : 'bg-warning-100 text-warning-800'"
-                          class="px-2 py-1 text-badge rounded-full"
-                        >
-                          {{ card.has_landing_page ? 'Profile Ready' : 'Profile Needed' }}
-                        </span>
-                      </div>
-                      <div class="space-y-1 mb-2">
-                        <div class="flex items-center gap-2">
-                          <Icon name="heroicons:link" class="h-4 w-4 text-secondary-400" />
-                          <span class="text-caption text-secondary-500">Live URL:</span>
-                          <code class="text-body text-info-600 bg-info-50 px-2 py-1 rounded">
-                            {{ getCardDisplayLiveUrl(card) }}
-                          </code>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <Icon name="heroicons:eye" class="h-4 w-4 text-secondary-400" />
-                          <span class="text-caption text-secondary-500">Preview URL:</span>
-                          <code class="text-body text-primary-600 bg-primary-50 px-2 py-1 rounded">
-                            {{ getCardDisplayPreviewUrl(card) }}
-                          </code>
-                        </div>
-                      </div>
-                      <p v-if="!card.has_landing_page" class="text-caption text-warning-600">
-                        <Icon name="heroicons:exclamation-triangle" class="h-3 w-3 inline mr-1" />
-                        This card needs a profile to display content
-                      </p>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <Icon
+                        :name="card.is_digital ? 'heroicons:device-phone-mobile' : 'heroicons:credit-card'"
+                        class="h-4 w-4 text-secondary-500"
+                      />
+                      <h3 class="text-label text-secondary-900">
+                        {{ card.is_digital ? "Digital card" : card.nfc_card_id || `Card #${card.id}` }}
+                      </h3>
+                      <span
+                        :class="card.status_badge_class || 'bg-secondary-100 text-secondary-800'"
+                        class="px-2 py-0.5 text-badge rounded-full"
+                      >
+                        {{ card.status_label || card.status }}
+                      </span>
                     </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <div class="dropdown dropdown-top">
-                        <button tabindex="0" class="btn btn-outline btn-sm" title="Copy URL">
-                          <Icon name="heroicons:clipboard" class="h-4 w-4" />
-                        </button>
-                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                          <li><a @click="copyProfileUrl(card, false)">Copy Live URL</a></li>
-                          <li><a @click="copyProfileUrl(card, true)">Copy Preview URL</a></li>
-                        </ul>
-                      </div>
-                      <button
-                        @click="openProfileUrl(card)"
-                        class="btn btn-outline btn-sm"
-                        title="Open in new tab"
-                      >
-                        <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+                    <code class="block text-caption text-info-700 bg-white border border-secondary-200 px-2 py-1.5 rounded break-all">
+                      {{ getCardDisplayLiveUrl(card) }}
+                    </code>
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                      <button type="button" @click="copyProfileUrl(card)" class="btn btn-outline btn-sm">
+                        <Icon name="heroicons:clipboard-document" class="h-4 w-4 mr-1.5" />
+                        Copy link
                       </button>
-                      <button
-                        @click="openProfilePreview(card)"
-                        class="btn btn-outline btn-sm"
-                        title="Preview mode"
-                      >
-                        <Icon name="heroicons:eye" class="h-4 w-4" />
+                      <button type="button" @click="openProfileUrl(card)" class="btn btn-outline btn-sm">
+                        <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4 mr-1.5" />
+                        Open
                       </button>
-                      <button
-                        @click="editCardProfile(card.nfc_card_id)"
-                        class="btn btn-primary btn-sm"
-                        title="Edit profile"
-                      >
-                        <Icon name="heroicons:pencil" class="h-4 w-4" />
-                      </button>
+                      <NuxtLink :to="portalAccess.routes.builder" class="btn btn-primary btn-sm">
+                        <Icon name="heroicons:pencil-square" class="h-4 w-4 mr-1.5" />
+                        Edit profile
+                      </NuxtLink>
                     </div>
                   </div>
                 </div>
                 <div v-else class="text-center py-8">
                   <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-secondary-300" />
-                  <p class="text-body text-secondary-500 mb-4">No NFC cards found</p>
-                  <button
-                    @click="navigateTo('/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement')"
-                    class="btn btn-primary btn-sm"
-                  >
+                  <p class="text-body text-secondary-500 mb-4">
+                    {{ portalAccess.deactivated ? "Your free profile is offline." : "You don't have a card yet." }}
+                  </p>
+                  <NuxtLink to="/Onboarding/plan" class="btn btn-primary btn-sm">
                     <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-                    Order NFC Cards
-                  </button>
+                    Get an NFC card
+                  </NuxtLink>
                 </div>
               </div>
             </div>
 
             <!-- Account Information Card -->
-            <div
-              class="card"
-            >
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Account Information
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  View and manage your account details
-                </p>
+                <h2 class="card-title text-secondary-900">Account information</h2>
               </div>
               <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label
-                      class="block text-label text-secondary-700 mb-1"
-                      >Account Status</label
-                    >
+                    <label class="block text-label text-secondary-700 mb-1">Status</label>
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-success-100 text-success-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge"
+                      :class="statusBadgeClass"
                     >
-                      <Icon
-                        name="heroicons:check-circle"
-                        class="h-3 w-3 mr-1"
-                      />
-                      Active
+                      {{ accountStatus.label }}
                     </span>
                   </div>
                   <div>
-                    <label
-                      class="block text-label text-secondary-700 mb-1"
-                      >Subscription Plan</label
-                    >
+                    <label class="block text-label text-secondary-700 mb-1">Plan</label>
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge bg-info-100 text-info-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge"
+                      :class="getSubscriptionBadgeClass(portalAccess.accountPlan)"
                     >
-                      {{ user?.subscription_plan || "Free" }}
+                      {{ getSubscriptionDisplayName(portalAccess.accountPlan) }}
+                      <template v-if="portalAccess.isBusinessEmployee"> · team member</template>
                     </span>
                   </div>
                   <div>
@@ -347,96 +295,6 @@
               </div>
             </div>
 
-            <!-- Subscription Info Card (moved to Billing tab) -->
-            <div class="card border-primary-100 bg-primary-50/50">
-              <div class="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex items-start gap-4">
-                  <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
-                    <Icon name="heroicons:credit-card" class="h-6 w-6 text-primary-600" />
-                  </div>
-                  <div>
-                    <h3 class="card-title text-secondary-900 mb-1">
-                      Subscription & Billing management has been moved
-                    </h3>
-                    <p class="card-subtitle text-secondary-600 leading-relaxed">
-                      Current plan:
-                      <span class="font-semibold text-secondary-900">{{ getSubscriptionDisplayName(user?.subscription_plan) }}</span>
-                      <span v-if="user?.subscription_expires_at && user?.subscription_plan !== 'free'" class="ml-2">
-                        · Expires: {{ formatDate(user.subscription_expires_at) }}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <button
-                  @click="activeTab = 'billing'"
-                  class="btn btn-primary btn-sm md:btn-md"
-                >
-                  <Icon name="heroicons:arrow-right" class="h-4 w-4 mr-2" />
-                  Open Billing & Subscription
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Preferences Tab -->
-          <div v-if="activeTab === 'preferences'" class="space-y-6">
-            <!-- Language & Region Card -->
-            <div class="card">
-              <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Language & Region
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Set your preferred interface language and timezone
-                </p>
-              </div>
-              <div class="p-6 space-y-5">
-                <div class="form-group">
-                  <label class="block text-label text-secondary-700 mb-2">
-                    Interface Language
-                  </label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
-                    <button
-                      v-for="lang in languageOptions"
-                      :key="lang.code"
-                      type="button"
-                      @click="uiLanguage = lang.code; saveLocalPref('language', lang.code); showSuccess(`Language changed to ${lang.label}`);"
-                      :class="[
-                        'p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center justify-between',
-                        uiLanguage === lang.code
-                          ? 'border-primary-500 bg-primary-50/70'
-                          : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
-                      ]"
-                    >
-                      <span class="font-medium text-secondary-900 text-body">{{ lang.label }}</span>
-                      <Icon v-if="uiLanguage === lang.code" name="heroicons:check" class="h-5 w-5 text-primary-600" />
-                    </button>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="block text-label text-secondary-700 mb-2">
-                    Timezone
-                  </label>
-                  <select
-                    v-model="uiTimezone"
-                    @change="saveLocalPref('timezone', uiTimezone)"
-                    class="input input-bordered w-full max-w-xl"
-                  >
-                    <option
-                      v-for="tz in timezoneOptions"
-                      :key="tz.value"
-                      :value="tz.value"
-                    >
-                      {{ tz.label }}
-                    </option>
-                  </select>
-                  <p class="text-helper text-secondary-500 mt-2">
-                    Timezone is used to display analytics dates and times, invoices, and activity logs.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Security Settings Tab -->
@@ -447,16 +305,20 @@
             >
               <div class="px-6 py-4 border-b border-secondary-200">
                 <h2 class="card-title text-secondary-900">
-                  Change Password
+                  {{ hasLocalPassword ? "Change password" : "Set a password" }}
                 </h2>
                 <p class="card-subtitle text-secondary-600">
-                  Update your account password
+                  {{
+                    hasLocalPassword
+                      ? "Update your account password"
+                      : "You sign in with Google or Apple. Add a password to also sign in with your e-mail."
+                  }}
                 </p>
               </div>
               <div class="p-6">
                 <form @submit.prevent="changePassword">
                   <div class="space-y-4">
-                    <div>
+                    <div v-if="hasLocalPassword">
                       <label
                         class="block text-label text-secondary-700 mb-2"
                         >Current Password</label
@@ -488,8 +350,10 @@
                           v-model="passwordForm.new_password"
                           :type="showNewPassword ? 'text' : 'password'"
                           required
+                          minlength="8"
+                          autocomplete="new-password"
                           class="input input-bordered w-full pr-10"
-                          placeholder="Enter new password"
+                          placeholder="At least 8 characters"
                         />
                         <button
                           type="button"
@@ -533,7 +397,7 @@
                         v-if="changingPassword"
                         class="loading loading-spinner loading-sm mr-2"
                       ></span>
-                      {{ changingPassword ? "Updating..." : "Change Password" }}
+                      {{ changingPassword ? "Saving..." : hasLocalPassword ? "Change password" : "Set password" }}
                     </button>
                   </div>
                 </form>
@@ -664,8 +528,8 @@
                   <!-- Apple Account -->
                   <div class="flex items-center justify-between p-4 border border-secondary-200 rounded-lg">
                     <div class="flex items-center">
-                      <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center mr-4">
-                        <Icon name="logos:apple" class="h-5 w-5 text-white" />
+                      <div class="w-10 h-10 bg-white border border-secondary-200 rounded-lg flex items-center justify-center mr-4">
+                        <Icon name="logos:apple" class="h-5 w-5" />
                       </div>
                       <div>
                         <h3 class="text-label text-secondary-900">Apple</h3>
@@ -805,11 +669,11 @@
                       </div>
                       <div>
                         <p class="text-body font-medium text-secondary-900">
-                          {{ session.name || (session.device + (session.browser ? ' · ' + session.browser : '')) }}
+                          {{ sessionLabel(session) }}
                         </p>
                         <p class="text-helper text-secondary-600">
-                          {{ session.ip_address || 'Unknown IP' }} •
-                          {{ formatDate(session.last_seen_at) }}
+                          <template v-if="session.ip_address">{{ session.ip_address }} · </template>
+                          Last active {{ formatDate(session.last_seen_at) }}
                         </p>
                       </div>
                     </div>
@@ -896,100 +760,46 @@
 
           <!-- Notifications Tab -->
           <div v-if="activeTab === 'notifications'" class="space-y-6">
-            <!-- Email Notifications Card -->
-            <div
-              class="card"
-            >
+            <!-- Only settings the backend actually honours are offered here
+                 (NotificationService::PROFILE_ACTIVITY_TYPES). -->
+            <div class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Email Notifications
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Choose what email notifications you receive
-                </p>
+                <h2 class="card-title text-secondary-900">Notifications</h2>
+                <p class="card-subtitle text-secondary-600">Choose which alerts you receive</p>
               </div>
-              <div class="p-6">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Profile Views
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Get notified when someone views your profile
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="notificationSettings.profile_views"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateNotificationSetting('profile_views')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        NFC Taps
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Get notified when someone taps your NFC card
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="notificationSettings.nfc_taps"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateNotificationSetting('nfc_taps')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Weekly Reports
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Receive weekly analytics summaries
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="notificationSettings.weekly_reports"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateNotificationSetting('weekly_reports')"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h3 class="text-label text-secondary-900">
-                        Product Updates
-                      </h3>
-                      <p class="card-subtitle text-secondary-600">
-                        Get notified about new features and updates
-                      </p>
-                    </div>
-                    <div class="form-control">
-                      <label class="label cursor-pointer">
-                        <input
-                          v-model="notificationSettings.product_updates"
-                          type="checkbox"
-                          class="toggle toggle-primary"
-                          @change="updateNotificationSetting('product_updates')"
-                        />
-                      </label>
-                    </div>
-                  </div>
+              <div class="p-6 space-y-5">
+                <label class="flex items-start justify-between gap-4 cursor-pointer">
+                  <span>
+                    <span class="block text-label text-secondary-900">Profile activity</span>
+                    <span class="block card-subtitle text-secondary-600">
+                      Alerts when your profile and links reach view milestones.
+                    </span>
+                  </span>
+                  <span class="relative shrink-0 mt-0.5">
+                    <input
+                      v-model="notificationSettings.profile_views"
+                      type="checkbox"
+                      class="sr-only peer"
+                      @change="updateNotificationSetting('profile_views')"
+                    />
+                    <span class="block w-10 h-6 rounded-full bg-secondary-300 transition-colors peer-checked:bg-primary-600 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-400 peer-focus-visible:ring-offset-2"></span>
+                    <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4"></span>
+                  </span>
+                </label>
+
+                <div class="rounded-lg border border-secondary-200 bg-secondary-50 p-4">
+                  <p class="text-label text-secondary-900 flex items-center gap-2">
+                    <Icon name="heroicons:lock-closed" class="h-4 w-4 text-secondary-500" />
+                    Always on
+                  </p>
+                  <p class="card-subtitle text-secondary-600 mt-1">
+                    Account, security, payment and card-order updates are always sent in the app,
+                    and important ones (payments, shipping, security) are also e-mailed to you.
+                  </p>
+                  <NuxtLink :to="'/UserDashboard/Notifications'" class="inline-flex items-center mt-3 text-navigation text-primary-700 hover:text-primary-800">
+                    View all notifications
+                    <Icon name="heroicons:arrow-right" class="ml-1 h-4 w-4" />
+                  </NuxtLink>
                 </div>
               </div>
             </div>
@@ -997,8 +807,25 @@
 
           <!-- Billing & Subscription Tab -->
           <div v-if="activeTab === 'billing'" class="space-y-6">
-            <!-- Subscription Management Card (moved from Account tab) -->
-            <div class="card">
+            <!-- Business team members: the plan and its invoices belong to the
+                 business owner, so there is nothing to manage here. -->
+            <div v-if="portalAccess.isBusinessEmployee" class="card">
+              <div class="p-6 flex items-start gap-4">
+                <div class="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center shrink-0">
+                  <Icon name="heroicons:building-office-2" class="h-5 w-5 text-accent-700" />
+                </div>
+                <div>
+                  <h2 class="card-title text-secondary-900">Business plan — provided by your company</h2>
+                  <p class="card-subtitle text-secondary-600 mt-1">
+                    Your account is part of a Business team. The plan, cards and invoices are
+                    managed by your business owner, so contact them for any plan or billing change.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subscription Management Card -->
+            <div v-else class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                   <div>
@@ -1009,13 +836,6 @@
                       Manage your NFCGo Business Card subscription
                     </p>
                   </div>
-                  <button
-                    @click="activeTab = 'account'"
-                    class="btn btn-outline btn-sm"
-                  >
-                    <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-2" />
-                    Back to Account
-                  </button>
                 </div>
               </div>
               <div class="p-6">
@@ -1036,15 +856,17 @@
                       {{ getSubscriptionDescription(user?.subscription_plan) }}
                     </p>
                     <div class="card-subtitle text-secondary-600 space-y-1.5">
-                      <p v-if="user?.subscription_expires_at" class="flex items-center gap-2">
+                      <p
+                        class="flex items-center gap-2"
+                        :class="accountStatus.tone === 'danger' ? 'text-error-700' : ''"
+                      >
+                        <Icon name="heroicons:information-circle" class="h-4 w-4 text-secondary-400" />
+                        {{ accountStatus.label }}
+                      </p>
+                      <p v-if="user?.subscription_end_date && user?.subscription_plan !== 'free'" class="flex items-center gap-2">
                         <Icon name="heroicons:calendar-days" class="h-4 w-4 text-secondary-400" />
-                        <template v-if="user?.subscription_plan === 'free'">
-                          No expiry date for free plan
-                        </template>
-                        <template v-else>
-                          Subscription expiry date:
-                          <strong class="text-secondary-900">{{ formatDate(user.subscription_expires_at) }}</strong>
-                        </template>
+                        Plan valid until
+                        <strong class="text-secondary-900">{{ formatDate(user.subscription_end_date) }}</strong>
                       </p>
                       <p v-if="user?.subscription_plan !== 'free' && user?.subscription_status" class="flex items-center gap-2">
                         <Icon name="heroicons:information-circle" class="h-4 w-4 text-secondary-400" />
@@ -1075,7 +897,10 @@
                 </div>
 
                 <!-- Subscription Features -->
-                <div class="mb-8 p-5 bg-gradient-to-br from-secondary-50 to-white rounded-xl border border-secondary-200">
+                <div
+                  v-if="getSubscriptionFeatures(user?.subscription_plan).length"
+                  class="mb-8 p-5 bg-gradient-to-br from-secondary-50 to-white rounded-xl border border-secondary-200"
+                >
                   <h4 class="text-label text-secondary-900 mb-4 flex items-center gap-2">
                     <Icon name="heroicons:check-circle" class="h-5 w-5 text-success-600" />
                     Current Plan Features
@@ -1177,7 +1002,7 @@
             </div>
 
             <!-- Billing & Invoice History — driven by the real invoice records -->
-            <div class="card">
+            <div v-if="!portalAccess.isBusinessEmployee" class="card">
               <div class="px-6 py-4 border-b border-secondary-200">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                   <div>
@@ -1516,14 +1341,26 @@
         <p class="text-body font-medium text-error-800">{{ errorMessage }}</p>
       </div>
     </div>
+
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :cancel-label="confirmState.cancelLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, computed, watch, onBeforeUnmount } from "vue";
 import { renderSVG } from "uqr";
 import InvoiceList from "~/components/InvoiceList.vue";
 import InvoicePreviewModal from "~/components/InvoicePreviewModal.vue";
+import { portalPlanStatus } from "~/composables/usePortalAccess";
 
 // Meta
 definePageMeta({
@@ -1536,49 +1373,13 @@ const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
-// ---------------- Preferences State ---------------- //
-const PREFS_STORAGE_PREFIX = 'nfcgo-user-prefs:';
-const uiLanguage = ref('en');
-const uiTimezone = ref('Asia/Kuala_Lumpur');
-const loadingPrefs = ref(false);
-
-const loadLocalPrefs = () => {
-  if (!process.client) return;
-  try {
-    const lang = localStorage.getItem(`${PREFS_STORAGE_PREFIX}language`);
-    const tz = localStorage.getItem(`${PREFS_STORAGE_PREFIX}timezone`);
-    if (lang) uiLanguage.value = lang;
-    if (tz) uiTimezone.value = tz;
-  } catch {}
-};
-const saveLocalPref = (key, value) => {
-  if (!process.client) return;
-  try { localStorage.setItem(`${PREFS_STORAGE_PREFIX}${key}`, value); } catch {}
-};
-
-const languageOptions = [
-  { code: 'ms', label: 'Bahasa Melayu', flag: '🇲🇾' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-];
-const timezoneOptions = [
-  { value: 'Asia/Kuala_Lumpur', label: '(GMT+8) Kuala Lumpur, Singapore' },
-  { value: 'Asia/Jakarta', label: '(GMT+7) Jakarta, Indonesia' },
-  { value: 'Asia/Bangkok', label: '(GMT+7) Bangkok, Thailand' },
-  { value: 'Asia/Hong_Kong', label: '(GMT+8) Hong Kong' },
-  { value: 'Asia/Tokyo', label: '(GMT+9) Tokyo, Japan' },
-  { value: 'Europe/London', label: '(GMT+0) London, UK' },
-  { value: 'America/New_York', label: '(GMT-5) New York, USA' },
-  { value: 'Australia/Sydney', label: '(GMT+11) Sydney, Australia' },
-];
-
 // Reactive data
 // Deep-linkable: /UserDashboard/Settings?tab=billing opens that section.
-const SETTINGS_TAB_IDS = ["account", "preferences", "security", "privacy", "notifications", "billing", "danger"];
+const SETTINGS_TAB_IDS = ["account", "security", "privacy", "notifications", "billing", "danger"];
 const settingsRoute = useRoute();
 const initialTab = String(settingsRoute.query.tab || "");
 const activeTab = ref(SETTINGS_TAB_IDS.includes(initialTab) ? initialTab : "account");
 const user = computed(() => authStore.user); // Use user from authStore
-const accountImageTimestamp = ref(Date.now()); // Add timestamp to force image refresh
 const baseUrl = computed(() => {
   if (process.client) {
     return window.location.origin;
@@ -1586,39 +1387,20 @@ const baseUrl = computed(() => {
   return 'https://nfccard.app'; // fallback for SSR
 });
 
-// Development mode check
-const isDevelopment = computed(() => {
-  if (process.client) {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('192.168') || window.location.hostname.includes('172.19');
-  }
-  return false;
-});
+// The session lives in the `auth-token` cookie (stores/auth.js). This page
+// used to look for a token in localStorage, found none, and so never loaded
+// saved notification settings or the real session list.
+const isSignedIn = computed(() => !!authStore.isAuthenticated && !!authStore.user);
 
-// Auth token check
-const authToken = computed(() => {
-  if (process.client) {
-    // Check multiple possible token storage locations
-    return localStorage.getItem('auth_token') || 
-           localStorage.getItem('token') || 
-           localStorage.getItem('access_token') ||
-           sessionStorage.getItem('auth_token') ||
-           sessionStorage.getItem('token');
-  }
-  return null;
-});
+// Google/Apple-only accounts have no password yet: they "set" one instead of
+// "changing" it (backend: User::has_local_password).
+const hasLocalPassword = computed(() => user.value?.has_local_password !== false);
 
-// Safe storage status check for template
-const getStorageStatus = (storageType, key) => {
-  if (process.client) {
-    try {
-      const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
-      return storage.getItem(key) ? '✅' : '❌';
-    } catch (error) {
-      return '❌';
-    }
-  }
-  return 'SSR';
-};
+const emailChanged = computed(() => {
+  const current = String(user.value?.email || "").toLowerCase();
+  const typed = String(personalInfoForm.value.email || "").trim().toLowerCase();
+  return !!current && !!typed && current !== typed;
+});
 
 // Image upload
 const imageInput = ref(null);
@@ -1675,11 +1457,10 @@ const loadingSessions = ref(false);
 const loadingLogoutEverywhere = ref(false);
 const revokingSessionId = ref(null);
 
+// Only `profile_views` ("Profile activity") is offered: it is the one
+// preference NotificationService honours.
 const notificationSettings = ref({
   profile_views: true,
-  nfc_taps: true,
-  weekly_reports: true,
-  product_updates: false,
 });
 
 const activeSessions = ref([]);
@@ -1703,8 +1484,20 @@ const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
 const exportingData = ref(false);
 
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
+
 // Plan / role-aware routes shared with the portal shell
 const portalAccess = usePortalAccess();
+
+// Same status wording as the sidebar plan chip (Active / free window ends /
+// inactive), instead of a hard-coded "Active".
+const accountStatus = computed(() => portalPlanStatus(portalAccess.value));
+const statusBadgeClass = computed(() => ({
+  success: "bg-success-100 text-success-800",
+  warning: "bg-warning-100 text-warning-800",
+  danger: "bg-error-100 text-error-800",
+}[accountStatus.value.tone] || "bg-secondary-100 text-secondary-800"));
 
 // Account closure goes through support (no self-serve deletion endpoint).
 const supportEmail = ref("support@nfcgo.com");
@@ -1743,7 +1536,6 @@ const errorMessage = ref("");
 // Settings tabs (removed separate profile tab, integrated with account)
 const settingsTabs = [
   { id: "account", label: "Account", icon: "heroicons:user-circle" },
-  { id: "preferences", label: "Preferences", icon: "heroicons:adjustments-horizontal" },
   { id: "security", label: "Security", icon: "heroicons:shield-check" },
   { id: "privacy", label: "Privacy & Data", icon: "heroicons:eye-slash" },
   { id: "notifications", label: "Notifications", icon: "heroicons:bell" },
@@ -1757,14 +1549,8 @@ const settingsTabs = [
 
 // Methods
 const loadUserData = async () => {
-  // Skip API calls if no auth token to avoid permission errors
-  if (!authToken.value) {
-    console.log("⚠️ No auth token, using default settings");
-    return;
-  }
+  if (!isSignedIn.value) return;
 
-  // User data is loaded via authStore and watch
-  // This function is kept for loading additional settings if needed
   try {
     const { $api } = useNuxtApp();
     // GET /api/settings → SettingsController@getSettings (persisted
@@ -1773,23 +1559,17 @@ const loadUserData = async () => {
     const response = await $api.get("/settings");
 
     if (response?.notification_settings) {
-      notificationSettings.value = { ...response.notification_settings };
+      notificationSettings.value = {
+        profile_views: response.notification_settings.profile_views !== false,
+      };
     }
     if (response?.support_email) {
       supportEmail.value = response.support_email;
     }
   } catch (error) {
     // Keep defaults — user data itself is already loaded from authStore
-    console.log("ℹ️ Settings endpoint not available, using defaults");
+    console.warn("Could not load settings; using defaults", error);
   }
-};
-
-// Helper function to get account image URL with cache-busting timestamp
-const getAccountImageUrl = (imageUrl) => {
-  if (!imageUrl) return "";
-  // Add timestamp to force browser to reload the image
-  const separator = imageUrl.includes("?") ? "&" : "?";
-  return `${imageUrl}${separator}t=${accountImageTimestamp.value}`;
 };
 
 const updatePersonalInfo = async () => {
@@ -1807,13 +1587,13 @@ const updatePersonalInfo = async () => {
 
     // Update authStore user with new data
     if (response.success && response.user) {
-      authStore.user = response.user;
+      authStore.user = { ...authStore.user, ...response.user };
     } else {
       // Refresh user data from server
       await authStore.fetchProfile();
     }
 
-    showSuccess("Personal information updated successfully");
+    showSuccess(response.message || "Personal information updated successfully");
   } catch (error) {
     console.error("Error updating personal info:", error);
 
@@ -1867,16 +1647,20 @@ const handleImageUpload = async (event) => {
       },
     });
 
-    if (response.success && response.url) {
-      personalInfoForm.value.account_image = response.url;
+    // SettingsController::uploadUserAccountImage answers `account_image`
+    // (this used to read `response.url`, so a successful upload never showed).
+    const imageUrl = response?.account_image || response?.url;
+    if (response?.success && imageUrl) {
+      personalInfoForm.value.account_image = imageUrl;
       if (authStore.user) {
         authStore.user = {
           ...authStore.user,
-          account_image: response.url,
+          account_image: imageUrl,
         };
       }
-      accountImageTimestamp.value = Date.now();
       showSuccess('Profile picture updated successfully');
+    } else {
+      showError(response?.message || 'Failed to upload image');
     }
   } catch (error) {
     console.error('Error uploading image:', error);
@@ -1910,43 +1694,8 @@ const removeImage = async () => {
   }
 };
 
-// Check if user is authenticated and has proper access
-const checkUserPermissions = () => {
-  if (!authStore.user) {
-    console.log("❌ User not authenticated in authStore");
-    
-    // Check if we have a token but no user data
-    if (authToken.value) {
-      console.log("🔄 Token exists but no user data - may need to refresh user info");
-      // Don't show error immediately, user data might be loading
-      return true;
-    } else {
-      console.log("❌ No authentication token found");
-      showError("Please log in to access this page");
-      return false;
-    }
-  }
-  
-  console.log("✅ User authenticated:", authStore.user.email);
-  return true;
-};
-
 const loadActiveSessions = async () => {
-  if (!authStore.user || !authToken.value) {
-    activeSessions.value = [
-      {
-        id: 1,
-        name: 'Current Session',
-        device: 'Current Device',
-        platform: null,
-        browser: null,
-        ip_address: null,
-        last_seen_at: new Date().toISOString(),
-        is_current: true,
-      },
-    ];
-    return;
-  }
+  if (!isSignedIn.value) return;
 
   loadingSessions.value = true;
   try {
@@ -1955,7 +1704,6 @@ const loadActiveSessions = async () => {
 
     if (response?.success && Array.isArray(response.sessions)) {
       activeSessions.value = response.sessions;
-      console.log("✅ Loaded active sessions:", activeSessions.value.length);
     } else {
       throw new Error("Invalid response format");
     }
@@ -1979,6 +1727,16 @@ const loadActiveSessions = async () => {
   } finally {
     loadingSessions.value = false;
   }
+};
+
+// Readable name for a session. Sanctum tokens carry an internal name such as
+// "auth_token", which means nothing to the user, so show the device instead.
+const sessionLabel = (session) => {
+  const known = (v) => v && !/^unknown/i.test(String(v));
+  const parts = [session.device, session.browser, session.platform].filter(known);
+  if (parts.length) return [...new Set(parts)].join(" · ");
+  if (session.type === "remember") return "Remembered browser";
+  return session.is_current ? "This device" : "Signed-in device";
 };
 
 /**
@@ -2017,7 +1775,7 @@ const revokeSession = async (sessionId) => {
 
 const logoutEverywhere = async () => {
   if (loadingLogoutEverywhere.value) return;
-  if (!confirm('Log out from ALL devices? You will need to log in again on this device.')) return;
+  if (!(await askConfirm({ title: "Sign out of all devices?", message: "Every session, including this one, will be signed out. You will need to sign in again.", confirmLabel: "Sign out everywhere", tone: "danger" }))) return;
   loadingLogoutEverywhere.value = true;
   try {
     const { $api } = useNuxtApp();
@@ -2181,7 +1939,7 @@ const disable2FA = async () => {
 };
 
 const regenerateRecoveryCodes = async () => {
-  if (!confirm('Regenerate 8 new recovery codes? All existing recovery codes will be revoked immediately.')) return;
+  if (!(await askConfirm({ title: "Generate new recovery codes?", message: "You will get 8 new codes and your current recovery codes will stop working immediately.", confirmLabel: "Generate new codes" }))) return;
   twoFactor.value.loading = true;
   try {
     const { $api } = useNuxtApp();
@@ -2210,8 +1968,9 @@ const changePassword = async () => {
   changingPassword.value = true;
   try {
     const { $api } = useNuxtApp();
+    const settingFirstPassword = !hasLocalPassword.value;
     const payload = {
-      current_password: passwordForm.value.current_password,
+      current_password: settingFirstPassword ? null : passwordForm.value.current_password,
       password: passwordForm.value.new_password,
       password_confirmation: passwordForm.value.confirm_password,
     };
@@ -2223,7 +1982,10 @@ const changePassword = async () => {
         new_password: "",
         confirm_password: "",
       };
-      showSuccess(response.message || "Password updated successfully.");
+      if (settingFirstPassword && authStore.user) {
+        authStore.user = { ...authStore.user, has_local_password: true };
+      }
+      showSuccess(settingFirstPassword ? "Password set. You can now also sign in with your e-mail." : response.message || "Password updated successfully.");
     } else {
       showError(response?.message || "Failed to change password.");
     }
@@ -2247,42 +2009,15 @@ const loadUserNfcCards = async () => {
   try {
     const { $api } = useNuxtApp();
     const response = await $api.get("/nfc-cards");
-    
-    if (response.success && response.nfc_cards) {
-      // Filter to show only user's own cards (not employee cards)
-      const currentUserId = authStore.user?.id;
-      console.log("🔍 Filtering cards for user ID:", currentUserId);
-      console.log("📦 Total cards from API:", response.nfc_cards.length);
-      
-      const userCards = response.nfc_cards.filter(card => {
-        const isOwnCard = card.user_id === currentUserId;
-        if (!isOwnCard) {
-          console.log(`⏭️ Skipping card ${card.nfc_card_id} (belongs to user ${card.user_id})`);
-        }
-        return isOwnCard;
-      });
 
-      console.log("✅ User's own cards:", userCards.length);
-
-      // Add cards and assume they have landing pages (since user saved in ProfileBuilder)
-      const cardsWithStatus = userCards.map(card => ({
-        ...card,
-        has_landing_page: true // Assume true since user has been using ProfileBuilder
-      }));
-
-      userNfcCards.value = cardsWithStatus;
-      console.log("✅ Loaded NFC cards for Settings:", userNfcCards.value.length);
-    } else {
-      console.log("ℹ️ No cards returned from API");
-      userNfcCards.value = [];
-    }
+    // Own cards only (a Business owner's list also contains employee cards).
+    // Cards still awaiting payment have no live profile yet.
+    const currentUserId = authStore.user?.id;
+    userNfcCards.value = (response?.success && Array.isArray(response.nfc_cards) ? response.nfc_cards : [])
+      .filter((card) => card.user_id === currentUserId)
+      .filter((card) => !["pending_payment", "awaiting_payment_verification", "cancelled"].includes(card.status));
   } catch (error) {
     console.error("Error loading NFC cards:", error);
-    
-    // Don't show errors to user, just log them
-    console.log("⚠️ Failed to load cards, but continuing...");
-    
-    // If API fails but we know user exists, show empty state
     userNfcCards.value = [];
   }
 };
@@ -2294,21 +2029,9 @@ const loadPlanPrices = async () => {
   // Guard: avoid duplicate load if already successfully loaded + populated
   if (_planPricesLoaded.value && planPrices.value?.length > 0) return;
 
-  console.log("🔄 [User Settings] Loading plan prices (PUBLIC route only)...");
-
-  // ── Layer 1: Static fallback (always available even before any API call) ──
-  const STATIC_FALLBACK = [
-    { id: 1, plan_type: 'free', price: 0, currency: 'MYR', description: 'Free Plan', features: ['Digital business card', 'Basic analytics', 'Up to 5 social links'], is_active: true },
-    { id: 2, plan_type: 'basic', price: 29.00, currency: 'MYR', description: 'Basic NFC Card Plan', features: ['One NFC card', 'Basic profile', 'Contact sharing', 'Basic analytics'], is_active: true },
-    { id: 3, plan_type: 'premium', price: 99.00, currency: 'MYR', description: 'Premium NFC Card Plan', features: ['One premium NFC card', 'Advanced profile customization', 'Social media integration', 'Advanced analytics', 'Priority support'], is_active: true },
-    { id: 4, plan_type: 'business', price: 299.00, currency: 'MYR', description: 'Business NFC Card Plan', features: ['Multiple NFC cards', 'Employee management', 'Bulk ordering', 'Business analytics', 'Dedicated support'], is_active: true }
-  ];
-  planPrices.value = STATIC_FALLBACK.slice();
-  console.log("✅ [User Settings] Static fallback plan prices ready:", planPrices.value.length, "plans");
-
-  // ── Layer 2: Try PUBLIC user-safe endpoint (/plan-prices/public) ──
-  //    NOTE: We NEVER call /admin/plan-prices here — that route is for Admin Dashboard ONLY.
-  //    Non-admin guard in api.client.js will BLOCK /admin/* calls automatically anyway.
+  // Prices come only from the public plan-price list the pricing page uses.
+  // There is deliberately no hard-coded fallback: it showed invented prices
+  // that disagreed with the real ones. Never call /admin/plan-prices here.
   try {
     const { $api } = useNuxtApp();
     const response = await $api.get("/plan-prices/public", { _skipAbort: false, timeout: 15000 });
@@ -2317,21 +2040,13 @@ const loadPlanPrices = async () => {
       if (activePlans.length > 0) {
         planPrices.value = activePlans;
         _planPricesLoaded.value = true;
-        console.log("✅ [User Settings] Plan prices loaded from PUBLIC API:", planPrices.value.length, "plans");
         return;
       }
     }
   } catch (error) {
-    const code = error?.response?.status ?? error?.status ?? 'network';
-    const blocked = error?.response?.data?.blocked_by_guard;
-    if (blocked) {
-      console.warn("ℹ️  [User Settings] Admin guard blocked a plan-price call — check for stale /admin/* URL in user pages.");
-    } else {
-      console.log("ℹ️  [User Settings] Public plan prices endpoint failed (" + code + "), keeping static fallback.");
-    }
+    console.warn("Could not load plan prices", error?.response?.status ?? error);
   }
 
-  // Mark loaded so we don't spam the API; fallback list is already in place.
   _planPricesLoaded.value = true;
 };
 
@@ -2375,31 +2090,19 @@ const getCardPublicUrl = (card, opts = {}) => {
 };
 
 const getCardDisplayLiveUrl = (card) => `${baseUrl.value}${getCardPublicUrl(card)}`;
-const getCardDisplayPreviewUrl = (card) => `${baseUrl.value}${getCardPublicUrl(card, { preview: true })}`;
 
-const copyProfileUrl = async (card, isPreview = false) => {
-  const url = isPreview ? getCardDisplayPreviewUrl(card) : getCardDisplayLiveUrl(card);
+const copyProfileUrl = async (card) => {
   try {
-    await navigator.clipboard.writeText(url);
-    const urlType = isPreview ? "Preview URL" : "Live URL";
-    showSuccess(`${urlType} copied to clipboard`);
+    await navigator.clipboard.writeText(getCardDisplayLiveUrl(card));
+    showSuccess("Link copied to clipboard");
   } catch (error) {
     console.error("Error copying to clipboard:", error);
-    showError("Failed to copy URL");
+    showError("Failed to copy link");
   }
 };
 
 const openProfileUrl = (card) => {
-  window.open(getCardDisplayLiveUrl(card), '_blank');
-};
-
-const openProfilePreview = (card) => {
-  window.open(getCardDisplayPreviewUrl(card), '_blank');
-};
-
-const editCardProfile = (nfcCardId) => {
-  // Navigate to BusinessProfileBuilder with the ORIGINAL nfc_card_id (internal routing)
-  navigateTo(`/UserDashboard/UserManagement/BusinessPlanUser/BusinessProfileBuilder?cardId=${nfcCardId}`);
+  window.open(getCardDisplayLiveUrl(card), '_blank', 'noopener');
 };
 
 const updateNotificationSetting = async (setting) => {
@@ -2487,13 +2190,8 @@ const getSubscriptionPrice = (plan) => {
     return planData.price === 0 ? 'Free' : `${currency} ${planData.price}`;
   }
   
-  // Fallback prices - match database plan_prices table
-  const prices = {
-    basic: 'RM 99.00',
-    premium: 'RM 199.00',
-    business: 'RM 299.00'
-  };
-  return prices[plan] || 'Contact Sales';
+  if (plan === 'free') return 'Free';
+  return plan === 'business' ? 'Contact sales' : '—';
 };
 
 const getSubscriptionBadgeClass = (plan) => {
@@ -2514,34 +2212,12 @@ const getSubscriptionFeatures = (plan) => {
     return planData.features;
   }
   
-  // Fallback features - match database plan_prices table
-  const features = {
-    basic: [
-      'One NFC card',
-      'Basic profile',
-      'Contact sharing',
-      'Basic analytics'
-    ],
-    premium: [
-      'One premium NFC card',
-      'Advanced profile customization',
-      'Social media integration',
-      'Advanced analytics',
-      'Priority support'
-    ],
-    business: [
-      'Multiple NFC cards',
-      'Employee management',
-      'Bulk ordering',
-      'Business analytics',
-      'Dedicated support'
-    ]
-  };
-  return features[plan] || ['Contact sales for details'];
+  // No invented fallback: the features shown are the admin-managed ones.
+  return [];
 };
 
 const cancelSubscription = async () => {
-  if (!confirm("Are you sure you want to cancel your subscription?")) return;
+  if (!(await askConfirm({ title: "Cancel your subscription?", message: "Your plan stays active until the end of the current paid period, then it will not renew.", confirmLabel: "Cancel subscription", cancelLabel: "Keep subscription", tone: "danger" }))) return;
 
   try {
     const { $api } = useNuxtApp();
@@ -2596,14 +2272,6 @@ const exportData = async () => {
   }
 };
 
-const getDeviceIcon = (deviceType) => {
-  const icons = {
-    desktop: "heroicons:computer-desktop",
-    mobile: "heroicons:device-phone-mobile",
-    tablet: "heroicons:device-tablet",
-  };
-  return icons[deviceType] || "heroicons:computer-desktop";
-};
 
 const formatDate = (date) => {
   if (!date) return "Never";
@@ -2706,7 +2374,7 @@ const linkAccount = async () => {
 const confirmUnlinkAccount = async (provider) => {
   const providerName = provider === 'google' ? 'Google' : 'Apple';
   
-  if (!confirm(`Are you sure you want to unlink your ${providerName} account? You will no longer be able to sign in with ${providerName}.`)) {
+  if (!(await askConfirm({ title: `Unlink ${providerName}?`, message: `You will no longer be able to sign in with ${providerName}. Make sure you can still sign in with your password.`, confirmLabel: "Unlink", tone: "danger" }))) {
     return;
   }
 
@@ -2732,8 +2400,6 @@ const confirmUnlinkAccount = async (provider) => {
 
 // Lifecycle
 onMounted(async () => {
-  loadLocalPrefs();
-
   // Initialize form with user data
   if (user.value) {
     personalInfoForm.value = {
@@ -2837,33 +2503,6 @@ watch(
   @apply border-secondary-300;
 }
 
-.toggle {
-  @apply relative inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-  background-color: #d1d5db;
-}
-
-.toggle:checked {
-  @apply bg-primary-600;
-}
-
-.toggle::before {
-  @apply inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out;
-  content: "";
-  transform: translateX(0);
-}
-
-.toggle:checked::before {
-  transform: translateX(20px);
-}
-
-.toggle-primary:checked {
-  @apply bg-primary-600;
-}
-
-.form-control .label {
-  @apply cursor-pointer;
-}
-
 .loading {
   @apply animate-spin;
 }
@@ -2874,5 +2513,9 @@ watch(
 
 .loading-sm {
   @apply w-4 h-4;
+}
+
+.loading-xs {
+  @apply w-3 h-3;
 }
 </style>

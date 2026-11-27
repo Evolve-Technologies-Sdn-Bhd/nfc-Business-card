@@ -1240,6 +1240,19 @@
               v-if="selectedCard"
               class="admin-panel-body flex-1 space-y-6 overflow-y-auto"
             >
+              <!-- What production prints: frozen at purchase -->
+              <CardExamples
+                v-if="selectedCard.card_design"
+                view="both"
+                title="Card to print"
+                :subtitle="`Design captured at purchase${selectedCard.card_design.template_name ? ' · ' + selectedCard.card_design.template_name : ''}.`"
+                :card-info="designCardInfo(selectedCard.card_design)"
+                :selected-template="designTemplate(selectedCard.card_design)"
+                :design-method="selectedCard.card_design.method"
+                :custom-design="{ front: selectedCard.card_design.front_image_url, back: selectedCard.card_design.back_image_url }"
+                class="!p-0 !shadow-none"
+              />
+
               <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div>
                   <p class="admin-form-section-title">Card information</p>
@@ -1524,6 +1537,32 @@ const showEditModal = ref(false);
 const showCardModal = ref(false);
 const showMarkShippedModal = ref(false);
 const selectedCard = ref(null);
+
+// Map the card's purchase-time design snapshot onto the CardExamples props.
+const designCardInfo = (d) => {
+  const v = d?.data || {};
+  return {
+    name: v.name,
+    position: v.position,
+    companyName: v.company,
+    contactNumber: v.phone,
+    email: v.email,
+    website: v.website,
+    address: v.address,
+    companyLogo: v.logo,
+  };
+};
+const designTemplate = (d) =>
+  d?.method === "template"
+    ? {
+        name: d.template_name,
+        card_size: d.card_size,
+        front_image_url: d.front_image_url,
+        back_image_url: d.back_image_url,
+        front_layout: d.front_layout,
+        back_layout: d.back_layout,
+      }
+    : null;
 const submitting = ref(false);
 
 // Confirmation dialog state

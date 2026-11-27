@@ -177,6 +177,14 @@ class SocialAuthController extends Controller
             ], 401);
         }
 
+        if (app(\App\Services\BusinessTenantService::class)->isSuspendedMember($user)) {
+            return response()->json([
+                'success' => false,
+                'code' => 'BUSINESS_SEAT_DEACTIVATED',
+                'message' => 'Your account has been deactivated by your company administrator.',
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'token' => $user->createToken('oauth-token')->plainTextToken,

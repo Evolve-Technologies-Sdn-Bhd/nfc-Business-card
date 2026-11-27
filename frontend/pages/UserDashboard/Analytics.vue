@@ -1,67 +1,62 @@
 <!-- pages/UserDashboard/Analytics.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-secondary-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-4">
-            <div>
-              <h1 class="page-title text-secondary-900">
-                {{ cardTitle }}
-              </h1>
-              <p class="card-subtitle">{{ cardSubtitle }}</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div v-if="loading" class="spinner h-5 w-5" aria-hidden="true"></div>
-            <select
-              v-model="selectedPeriod"
-              @change="loadAnalytics"
-              class="input text-input"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
-            <button
-              @click="exportAnalytics"
-              class="btn btn-outline btn-sm"
-              :disabled="!selectedCardId || loading"
-            >
-              <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
-              Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <AdminPageHeader
+      eyebrow="Analytics"
+      eyebrow-icon="heroicons:chart-bar"
+      :title="cardTitle"
+      :description="noCard ? 'See who taps your card and opens your profile.' : cardSubtitle"
+    >
+      <template v-if="!noCard" #actions>
+        <select
+          v-model="selectedPeriod"
+          @change="loadAnalytics"
+          class="admin-field w-auto"
+          aria-label="Time period"
+        >
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="1y">Last year</option>
+        </select>
+        <button
+          type="button"
+          @click="exportAnalytics"
+          class="admin-btn admin-btn--outline"
+          :disabled="!selectedCardId || loading"
+        >
+          <Icon :name="loading ? 'heroicons:arrow-path' : 'heroicons:arrow-down-tray'" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
+          Export CSV
+        </button>
+      </template>
+    </AdminPageHeader>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Subscription Notice for Free Users -->
-      <div v-if="!hasPremiumSubscription" class="mb-6">
-        <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-          <div class="flex items-center">
-            <Icon
-              name="heroicons:information-circle"
-              class="h-5 w-5 text-info-400 mr-2"
-            />
-            <div class="flex-1">
-              <h3 class="text-body font-medium text-info-800">
-                Free Plan Analytics
-              </h3>
-              <p class="text-body text-info-700 mt-1">
-                You're viewing basic analytics. Upgrade to Premium for detailed
-                insights, device breakdowns, geographic data, and more.
-              </p>
-            </div>
-            <button @click="upgradeToPremium" class="btn btn-primary btn-sm">
-              <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-              Upgrade to Premium
-            </button>
-          </div>
+    <div>
+      <!-- No card on the account: analytics are per card -->
+      <div v-if="noCard" class="admin-panel">
+        <AdminEmptyState
+          icon="heroicons:chart-bar"
+          title="Analytics start with your first card"
+          description="Taps, visitors, devices and locations are tracked per NFC card. Once you have a card, its numbers appear here."
+        >
+          <template #actions>
+            <NuxtLink to="/UserDashboard/CardManagement" class="admin-btn admin-btn--outline">My cards</NuxtLink>
+            <NuxtLink to="/Onboarding/plan" class="admin-btn admin-btn--primary">Get an NFC card</NuxtLink>
+          </template>
+        </AdminEmptyState>
+      </div>
+
+      <template v-else>
+      <!-- One plan notice for Free users (instead of an upgrade button per panel) -->
+      <div v-if="!hasPremiumSubscription" class="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-secondary-200 bg-white p-4">
+        <span class="admin-kpi-ico"><Icon name="heroicons:sparkles" class="h-5 w-5" /></span>
+        <div class="min-w-0 flex-1">
+          <p class="text-body font-semibold text-secondary-900">You're seeing the Free plan summary</p>
+          <p class="text-body-sm text-secondary-600">Paid plans add tap charts, device, location and peak-time breakdowns.</p>
         </div>
+        <button type="button" @click="upgradeToPremium" class="admin-btn admin-btn--primary admin-btn--sm">
+          See paid plans
+        </button>
       </div>
 
       <!-- Error state with retry -->
@@ -228,15 +223,8 @@
                     class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                   />
                   <p class="text-secondary-600">
-                    Detailed charts available with Premium subscription
+                    Detailed charts included with paid plans
                   </p>
-                  <button
-                    @click="upgradeToPremium"
-                    class="btn btn-primary btn-sm mt-2"
-                  >
-                    <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                    Upgrade to Premium
-                  </button>
                 </div>
               </div>
               <AnalyticsChart
@@ -265,15 +253,8 @@
                   class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                 />
                 <p class="text-secondary-600">
-                  Device breakdown available with Premium subscription
+                  Device breakdown included with paid plans
                 </p>
-                <button
-                  @click="upgradeToPremium"
-                  class="btn btn-primary btn-sm mt-2"
-                >
-                  <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                  Upgrade to Premium
-                </button>
               </div>
               <AnalyticsChart
                 v-else
@@ -316,15 +297,8 @@
                     class="h-12 w-12 mx-auto mb-3"
                   />
                   <p class="text-body font-medium">
-                    Recent taps available with Premium subscription
+                    Recent taps included with paid plans
                   </p>
-                  <button
-                    @click="upgradeToPremium"
-                    class="btn btn-primary btn-sm mt-2"
-                  >
-                    <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                    Upgrade to Premium
-                  </button>
                 </div>
                 <div
                   v-else-if="recentTaps.length === 0"
@@ -399,15 +373,8 @@
                     class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                   />
                   <p class="text-secondary-600">
-                    Geographic data available with Premium subscription
+                    Geographic data included with paid plans
                   </p>
-                  <button
-                    @click="upgradeToPremium"
-                    class="btn btn-primary btn-sm mt-2"
-                  >
-                    <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                    Upgrade to Premium
-                  </button>
                 </div>
                 <div
                   v-else-if="analytics.topLocations.length === 0"
@@ -453,15 +420,8 @@
                     class="h-12 w-12 text-secondary-400 mx-auto mb-2"
                   />
                   <p class="text-secondary-600">
-                    Time analytics available with Premium subscription
+                    Time analytics included with paid plans
                   </p>
-                  <button
-                    @click="upgradeToPremium"
-                    class="btn btn-primary btn-sm mt-2"
-                  >
-                    <Icon name="heroicons:star" class="h-4 w-4 mr-1" />
-                    Upgrade to Premium
-                  </button>
                 </div>
                 <div
                   v-else-if="analytics.peakHours.length === 0"
@@ -521,7 +481,7 @@
                       stroke-width="3"
                       fill="none"
                       stroke-linecap="round"
-                      :stroke-dasharray="`${analytics.performanceScore}, 100`"
+                      :stroke-dasharray="`${analytics.totalTaps > 0 ? analytics.performanceScore : 0}, 100`"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                   </svg>
@@ -529,7 +489,7 @@
                     class="absolute inset-0 flex items-center justify-center"
                   >
                     <span class="stat-value text-secondary-900"
-                      >{{ analytics.performanceScore }}%</span
+                      >{{ analytics.totalTaps > 0 ? analytics.performanceScore + "%" : "—" }}</span
                     >
                   </div>
                 </div>
@@ -540,6 +500,7 @@
             </div>
           </div>
         </div>
+      </template>
       </template>
     </div>
   </div>
@@ -593,8 +554,11 @@ const cardTitle = computed(
   () =>
     cardInfo.value?.card_owner ||
     selectedCard.value?.card_owner ||
-    "Link Analytics"
+    "Analytics"
 );
+
+// Analytics are per card; with no card on the account show the empty state.
+const noCard = computed(() => userCards.value.length === 0);
 
 const cardSubtitle = computed(() => {
   const info = cardInfo.value || selectedCard.value;
@@ -701,8 +665,8 @@ const loadAnalytics = async () => {
   const { $api } = useNuxtApp();
 
   if (!selectedCardId.value) {
-    error.value =
-      "No NFC card found for your account. Add a card to see its analytics.";
+    // No card: the page shows its empty state (noCard) instead of an error.
+    error.value = null;
     loading.value = false;
     return;
   }

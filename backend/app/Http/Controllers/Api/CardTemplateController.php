@@ -129,6 +129,9 @@ class CardTemplateController extends Controller
             'plan_types.*' => 'string|in:basic,premium,business', // Free plan doesn't have NFC cards
             'front_image' => 'required|image|max:10240', // 10MB
             'back_image' => 'nullable|image|max:10240',
+            'card_size' => 'nullable|string|max:20',
+            'front_layout' => 'nullable|json',
+            'back_layout' => 'nullable|json',
         ]);
 
         try {
@@ -174,6 +177,9 @@ class CardTemplateController extends Controller
                 'front_image_url' => $frontImageUrl,
                 'back_image_url' => $backImageUrl,
                 'thumbnail_url' => $thumbnailUrl,
+                'card_size' => $request->card_size,
+                'front_layout' => $request->filled('front_layout') ? json_decode($request->front_layout, true) : null,
+                'back_layout' => $request->filled('back_layout') ? json_decode($request->back_layout, true) : null,
                 'processing_status' => 'completed', // Immediately completed
                 'created_by' => auth()->id(),
             ]);

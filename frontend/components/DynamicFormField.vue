@@ -121,19 +121,35 @@
     <!-- Toggle Switch -->
     <label
       v-else-if="field.field_type === 'toggle'"
-      class="flex items-center cursor-pointer"
+      class="flex items-center justify-between gap-3 w-full min-h-[42px] px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+      :class="modelValue[field.field_key]
+        ? 'border-success-200 bg-success-50/50'
+        : 'border-gray-300 bg-white hover:bg-gray-50'"
     >
-      <div class="relative">
+      <span class="flex items-center gap-2 min-w-0">
+        <span
+          class="w-2 h-2 shrink-0 rounded-full transition-colors"
+          :class="modelValue[field.field_key] ? 'bg-success-500' : 'bg-gray-300'"
+        ></span>
+        <span
+          class="text-input truncate transition-colors"
+          :class="modelValue[field.field_key] ? 'text-gray-800' : 'text-gray-500'"
+        >
+          {{ modelValue[field.field_key]
+            ? (field.config?.onLabel || 'Enabled')
+            : (field.config?.offLabel || 'Disabled') }}
+        </span>
+      </span>
+      <span class="relative shrink-0">
         <input
           type="checkbox"
           v-model="modelValue[field.field_key]"
           class="sr-only peer"
+          :aria-label="field.label"
           @change="$emit('update:modelValue', modelValue)"
         />
-        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-      </div>
-      <span class="ml-3 text-navigation text-gray-700">
-        {{ field.config?.onLabel || 'Enabled' }}
+        <span class="block w-10 h-6 rounded-full bg-gray-300 transition-colors peer-checked:bg-success-600 peer-focus-visible:ring-2 peer-focus-visible:ring-success-400 peer-focus-visible:ring-offset-2"></span>
+        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4"></span>
       </span>
     </label>
 

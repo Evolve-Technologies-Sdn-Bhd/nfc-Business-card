@@ -25,9 +25,9 @@
 
           <!-- Brand message -->
           <div class="lg-hero-copy">
-            <span class="eyebrow-brass">
+            <span v-if="isAdminLogin" class="eyebrow-brass">
               <span class="dot"></span>
-              {{ isAdminLogin ? 'Administration Console' : 'Smart NFC Business Card' }}
+              Administration Console
             </span>
             <h1 class="lg-hero-title">
               {{ isAdminLogin ? 'Manage your platform,' : 'Your digital identity,' }}
@@ -587,7 +587,8 @@ const checkEmailAuthMethod = async (email) => {
       oauthBlocked.value = false;
     }
   } catch (error) {
-    console.error('Email check error:', error);
+    // Superseded (cancelled) lookups are expected while the user is typing.
+    if (!error?.__aborted) console.error('Email check error:', error);
     // On error, don't block OAuth (fail open for UX)
     emailHasPassword.value = false;
     oauthBlocked.value = false;

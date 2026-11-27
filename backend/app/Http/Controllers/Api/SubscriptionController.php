@@ -17,7 +17,8 @@ class SubscriptionController extends Controller
 
     public function __construct(PaymentService $paymentService)
     {
-        $this->middleware('auth:sanctum');
+        // Auth is enforced by the auth:sanctum route group (routes/api.php);
+        // Laravel 12 base controllers have no middleware() method.
         $this->paymentService = $paymentService;
     }
 

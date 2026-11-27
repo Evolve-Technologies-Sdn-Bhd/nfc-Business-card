@@ -39,14 +39,17 @@ class NfcCard extends Model
         'user_received_confirmed_at',
         'cancelled_by',
         'cancelled_reason',
+        'is_digital',
         'is_custom_design',
         'custom_design_front_url',
         'custom_design_back_url',
         'design_notes',
+        'card_design',
         'notes',
     ];
 
     protected $casts = [
+        'card_design' => 'array',
         'purchase_date' => 'date',
         'expiry_date' => 'date',
         'shipped_date' => 'date',
@@ -56,6 +59,7 @@ class NfcCard extends Model
         'order_confirmed_at' => 'datetime',
         'user_received_confirmed_at' => 'datetime',
         'is_custom_design' => 'boolean',
+        'is_digital' => 'boolean',
     ];
 
     protected $appends = ['card_number', 'public_url', 'status_label', 'status_badge_class', 'can_access_profile_builder', 'timeline'];
@@ -150,6 +154,20 @@ class NfcCard extends Model
     public function scopeActive($query)
     {
         return $query->whereIn('status', ['active', 'delivered', 'payment_verified', 'processing', 'shipped']);
+    }
+
+    /**
+     * Real, orderable cards only (excludes Free-plan digital cards). Use this for
+     * orders, fulfilment, entitlement and admin card statistics.
+     */
+    public function scopePhysical($query)
+    {
+        return $query->where('is_digital', false);
+    }
+
+    public function scopeDigital($query)
+    {
+        return $query->where('is_digital', true);
     }
 
     public function scopeByPlan($query, $plan)
@@ -459,9 +477,15 @@ class NfcCard extends Model
             return null;
         }
 
-        $matches = self::where(function ($q) use ($variations) {
+        // Digits-only form of contact_number. SQLite (local dev) has no
+        // REGEXP_REPLACE, so strip the usual phone punctuation there instead.
+        $digitsOnly = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+            ? "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(contact_number, ''), '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', '')"
+            : "REGEXP_REPLACE(COALESCE(contact_number, ''), '[^0-9]', '')";
+
+        $matches = self::where(function ($q) use ($variations, $digitsOnly) {
                 foreach ($variations as $v) {
-                    $q->orWhereRaw("REGEXP_REPLACE(COALESCE(contact_number, ''), '[^0-9]', '') = ?", [$v]);
+                    $q->orWhereRaw("{$digitsOnly} = ?", [$v]);
                 }
             })
             ->with('landingPage')

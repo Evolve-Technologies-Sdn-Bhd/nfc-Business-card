@@ -54,42 +54,53 @@ class SettingsController extends Controller
             ], 422);
         }
 
-        DB::beginTransaction();
-
         try {
-            // Update user table
-            $user->update([
+            $emailChanged = strcasecmp((string) $user->email, (string) $request->email) !== 0;
+
+            // Account details only. Public profiles keep their own contact
+            // details (edited in the Profile Builder); this used to overwrite
+            // the first card's profile name/email/phone as a side effect.
+            $user->fill([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
             ]);
 
-            // Also update landing page if exists
-            $nfcCard = $user->nfcCards()->first();
-            if ($nfcCard && $nfcCard->landingPage) {
-                $nfcCard->landingPage->update([
-                    'name' => $request->first_name . ' ' . $request->last_name,
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                ]);
+            // A new address must be verified before it is trusted: otherwise an
+            // account could carry an e-mail its owner never proved they control.
+            if ($emailChanged) {
+                $user->email_verified_at = null;
             }
 
-            DB::commit();
+            $user->save();
 
-            // Send notification
-            $this->notificationService->create($user, 'profile_updated', []);
+            if ($emailChanged) {
+                try {
+                    $user->sendEmailVerificationNotification();
+                } catch (\Throwable $e) {
+                    Log::warning('Verification e-mail for changed address failed', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
-            // Refresh user data
+            try {
+                $this->notificationService->create($user, 'profile_updated', []);
+            } catch (\Throwable) { /* non-critical */ }
+
             $user->refresh();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Personal information updated successfully',
+                'message' => $emailChanged
+                    ? 'Saved. We sent a verification link to your new e-mail address.'
+                    : 'Personal information updated successfully',
+                'email_verification_required' => $emailChanged,
                 'user' => $user
             ]);
         } catch (\Exception $e) {
-            DB::rollback();
             Log::error('Failed to update user personal info', [
                 'error' => $e->getMessage(),
                 'user_id' => $user->id
@@ -97,63 +108,7 @@ class SettingsController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update personal information: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Change user password
-     */
-    public function changePassword(Request $request)
-    {
-        $user = $request->user();
-
-        $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Check current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Current password is incorrect'
-            ], 422);
-        }
-
-        try {
-            // Update password
-            $user->update([
-                'password' => Hash::make($request->new_password)
-            ]);
-
-            // Send notification
-            $this->notificationService->create($user, 'password_changed', [
-                'time' => now()->format('Y-m-d H:i:s'),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Password changed successfully'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to change password', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to change password: ' . $e->getMessage()
+                'message' => 'Failed to update personal information. Please try again.'
             ], 500);
         }
     }
@@ -373,7 +328,7 @@ class SettingsController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload image: ' . $e->getMessage()
+                'message' => 'Failed to upload image. Please try again.'
             ], 500);
         }
     }
@@ -419,7 +374,7 @@ class SettingsController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to remove image: ' . $e->getMessage()
+                'message' => 'Failed to remove image. Please try again.'
             ], 500);
         }
     }

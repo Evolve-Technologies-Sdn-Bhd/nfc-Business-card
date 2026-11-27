@@ -53,126 +53,107 @@
       </template>
     </AdminPageHeader>
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
-      <!-- LEFT: controls -->
-      <div class="space-y-6">
-        <AdminSectionCard title="Design details" subtitle="Name the file and pick the finished stock size.">
-          <div class="space-y-4">
-            <div>
-              <label class="admin-label">Design name</label>
-              <input
-                v-model="design.name"
-                type="text"
-                class="admin-field"
-                placeholder="e.g. CEO Card - Front & Back"
-              />
-            </div>
-            <div>
-              <label class="admin-label">Card size</label>
-              <select v-model="design.card_size" class="admin-field">
-                <option v-for="(s, key) in cardSizes" :key="key" :value="key">
-                  {{ s.label }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="admin-label">3mm bleed</label>
-              <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2.5">
-                <input
-                  v-model="design.bleed"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
-                />
-                <span class="text-body text-secondary-600">Include bleed area</span>
-              </label>
-            </div>
-          </div>
-        </AdminSectionCard>
-
-        <AdminSectionCard title="Design controls" subtitle="Everything you can place on the card.">
-          <!-- Side switcher -->
-          <div class="admin-form-section">
-            <p class="admin-form-section-title">Card side</p>
-            <p class="admin-form-section-desc">Choose which face you are editing.</p>
-            <div class="mt-3 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                class="admin-btn"
-                :class="activeSide === 'front' ? 'admin-btn--primary' : 'admin-btn--outline'"
-                @click="switchSide('front')"
-              >
-                Front
-              </button>
-              <button
-                type="button"
-                class="admin-btn"
-                :class="activeSide === 'back' ? 'admin-btn--primary' : 'admin-btn--outline'"
-                @click="switchSide('back')"
-              >
-                Back
-              </button>
-            </div>
-          </div>
-
-          <!-- Background -->
-          <div class="admin-form-section">
-            <p class="admin-form-section-title">Background — {{ activeSide }}</p>
-            <p class="admin-form-section-desc">Upload a JPG, PNG or WEBP artwork.</p>
-            <div
-              class="mt-3 cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-4 text-center transition-colors hover:border-accent-400"
-              @click="bgInput?.click()"
+    <!-- TOP: design details -->
+    <AdminSectionCard class="mb-6">
+      <div class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto_auto]">
+        <div>
+          <label class="admin-label">Design name</label>
+          <input
+            v-model="design.name"
+            type="text"
+            class="admin-field"
+            placeholder="e.g. CEO Card - Front & Back"
+          />
+        </div>
+        <div>
+          <label class="admin-label">Card size</label>
+          <select v-model="design.card_size" class="admin-field">
+            <option v-for="(s, key) in cardSizes" :key="key" :value="key">
+              {{ s.label }}
+            </option>
+          </select>
+        </div>
+        <label class="flex h-[42px] cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg border border-secondary-200 bg-secondary-50 px-3">
+          <input
+            v-model="design.bleed"
+            type="checkbox"
+            class="h-4 w-4 rounded border-secondary-300 text-accent-600 focus:ring-accent-500"
+          />
+          <span class="text-body text-secondary-600">3mm bleed</span>
+        </label>
+        <div>
+          <label class="admin-label">Editing side</label>
+          <div class="inline-flex rounded-lg border border-secondary-200 bg-secondary-50 p-1" role="tablist">
+            <button
+              v-for="s in ['front', 'back']"
+              :key="s"
+              type="button"
+              role="tab"
+              :aria-selected="activeSide === s"
+              class="rounded-md px-4 py-1.5 text-body-sm font-semibold capitalize transition-colors"
+              :class="activeSide === s ? 'bg-primary-900 text-white shadow-sm' : 'text-secondary-600 hover:text-secondary-900'"
+              @click="switchSide(s)"
             >
-              <Icon name="heroicons:photo" class="mx-auto h-6 w-6 text-secondary-400" />
-              <p class="mt-1 text-helper">
-                {{ uploadingBg ? 'Uploading…' : 'Click to upload (JPG/PNG/WEBP)' }}
-              </p>
-            </div>
-            <input ref="bgInput" type="file" accept="image/*" class="hidden" @change="onBgFile" />
-            <div v-if="activeBgUrl" class="mt-3 flex items-center gap-3">
-              <img
-                :src="activeBgUrl"
-                class="h-12 w-20 rounded border border-secondary-200 object-cover"
-              />
-              <button
-                type="button"
-                class="admin-btn admin-btn--outline admin-btn--sm !border-error-300 !text-error-600"
-                @click="removeBackground"
-              >
-                <Icon name="heroicons:trash" class="h-4 w-4" />
-              </button>
-            </div>
+              {{ s }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </AdminSectionCard>
+
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_300px]">
+      <!-- LEFT: tools -->
+      <div class="lg:sticky lg:top-24">
+        <AdminSectionCard title="Add element">
+          <p class="-mt-1 mb-3 text-caption text-secondary-500">Click, or drag onto the card.</p>
+
+          <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary-400">Basic</p>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button
+              v-for="p in palette"
+              :key="p.type"
+              type="button"
+              class="flex cursor-grab flex-col items-center gap-1 whitespace-nowrap rounded-lg border border-secondary-200 px-1 py-2.5 transition hover:border-accent-400 hover:bg-accent-50"
+              draggable="true"
+              @click="addElement(p.type)"
+              @dragstart="onPaletteDragStart($event, p.type)"
+            >
+              <Icon :name="p.icon" class="h-5 w-5 text-accent-700" />
+              <span class="text-[11px] text-secondary-600">{{ p.label }}</span>
+            </button>
           </div>
 
-          <!-- Palette -->
-          <div class="admin-form-section">
-            <p class="admin-form-section-title">Add element</p>
-            <p class="admin-form-section-desc">Click to add, or drag onto the card.</p>
-            <div class="mt-3 grid grid-cols-2 gap-2">
-              <button
-                v-for="p in palette"
-                :key="p.type"
-                type="button"
-                class="flex cursor-grab flex-col items-center gap-1 rounded-lg border border-secondary-200 p-3 transition hover:border-accent-400 hover:bg-accent-50"
-                draggable="true"
-                @click="addElement(p.type)"
-                @dragstart="onPaletteDragStart($event, p.type)"
-              >
-                <Icon :name="p.icon" class="h-5 w-5 text-accent-700" />
-                <span class="text-caption text-secondary-600">{{ p.label }}</span>
-              </button>
-            </div>
+          <p class="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary-400">Customer data</p>
+          <p class="-mt-1 mb-2 text-caption text-secondary-500">Filled with each customer's own details.</p>
+          <div class="flex flex-col gap-1.5">
+            <button
+              v-for="f in DATA_PALETTE"
+              :key="f.field"
+              type="button"
+              class="flex cursor-grab items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-caption transition"
+              :class="fieldOnSide(f.field)
+                ? 'border-primary-200 bg-primary-50 text-primary-800'
+                : 'border-secondary-200 text-secondary-700 hover:border-accent-400 hover:bg-accent-50'"
+              draggable="true"
+              @click="addDataElement(f.field)"
+              @dragstart="onPaletteDragStart($event, 'data:' + f.field)"
+            >
+              <Icon :name="f.icon" class="h-4 w-4 shrink-0 text-accent-700" />
+              <span class="flex-1 truncate">{{ f.label }}</span>
+              <Icon v-if="fieldOnSide(f.field)" name="heroicons:check-circle" class="h-4 w-4 shrink-0 text-primary-600" />
+            </button>
           </div>
         </AdminSectionCard>
       </div>
 
       <!-- CENTER: canvas -->
-      <div class="space-y-4">
+      <div class="min-w-0 space-y-4">
         <AdminSectionCard flush accent>
           <template #title>
-            {{ activeSide === 'front' ? 'Front side' : 'Back side' }} preview
+            <span class="whitespace-nowrap">{{ activeSide === 'front' ? 'Front side' : 'Back side' }}</span>
           </template>
           <template #header-actions>
-            <span class="text-caption text-secondary-500">
+            <span class="hidden whitespace-nowrap text-caption text-secondary-500 2xl:inline">
               {{ cardSize.w }} × {{ cardSize.h }} mm
               <span v-if="design.bleed" class="text-secondary-400">(+3mm bleed)</span>
             </span>
@@ -181,7 +162,7 @@
                 type="button"
                 class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
                 :disabled="zoom <= 3"
-                @click="zoom = Math.max(3, +(zoom - 1).toFixed(1))"
+                @click="autoFit = false; zoom = Math.max(3, +(zoom - 1).toFixed(1))"
               >
                 −
               </button>
@@ -190,15 +171,25 @@
                 type="button"
                 class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon"
                 :disabled="zoom >= 12"
-                @click="zoom = Math.min(12, +(zoom + 1).toFixed(1))"
+                @click="autoFit = false; zoom = Math.min(12, +(zoom + 1).toFixed(1))"
               >
                 +
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--sm"
+                :class="autoFit ? 'admin-btn--primary' : 'admin-btn--outline'"
+                title="Fit the card to the available space"
+                @click="autoFit = true; fitZoom()"
+              >
+                Fit
               </button>
             </div>
           </template>
 
           <div
-            class="flex justify-center overflow-auto bg-secondary-50 p-6"
+            ref="stageEl"
+            class="flex min-h-[420px] items-center justify-center overflow-auto bg-secondary-50 p-6"
             @click.self="selectedId = null"
           >
             <div
@@ -251,8 +242,9 @@
                     <div
                       v-else
                       class="flex h-full w-full items-center justify-center border border-secondary-300 bg-secondary-200 text-micro text-secondary-500"
+                      :class="{ 'border-dashed !border-primary-400 !bg-primary-50 !text-primary-700': el.field === 'logo' }"
                     >
-                      IMAGE
+                      {{ el.field === 'logo' ? 'LOGO' : 'IMAGE' }}
                     </div>
                   </template>
                   <!-- qr -->
@@ -263,6 +255,12 @@
                   <template v-else-if="el.type === 'rect'">
                     <div class="h-full w-full" :style="rectStyle(el)"></div>
                   </template>
+
+                  <!-- data-bound badge -->
+                  <span
+                    v-if="el.field"
+                    class="pointer-events-none absolute -top-2 left-0 rounded bg-primary-600 px-1 text-[9px] font-semibold leading-[14px] text-white"
+                  >{{ fieldLabel(el.field) }}</span>
 
                   <!-- resize handle -->
                   <div
@@ -278,7 +276,45 @@
       </div>
 
       <!-- RIGHT: properties -->
-      <div class="space-y-6">
+      <div class="space-y-6 lg:col-span-2 xl:sticky xl:top-24 xl:col-span-1">
+        <AdminSectionCard>
+          <template #title>Background <span class="font-normal capitalize text-secondary-500">· {{ activeSide }}</span></template>
+          <div
+            v-if="activeBgUrl"
+            class="group relative overflow-hidden rounded-lg border border-secondary-200"
+          >
+            <img :src="activeBgUrl" class="aspect-[5/3] w-full object-cover" alt="" />
+            <div class="absolute inset-x-0 bottom-0 flex gap-1 bg-gradient-to-t from-black/60 to-transparent p-2">
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm flex-1 !bg-white"
+                @click="bgInput?.click()"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline admin-btn--sm admin-btn--icon !border-error-300 !bg-white !text-error-600"
+                title="Remove background"
+                @click="removeBackground"
+              >
+                <Icon name="heroicons:trash" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div
+            v-else
+            class="cursor-pointer rounded-lg border-2 border-dashed border-secondary-300 p-4 text-center transition-colors hover:border-accent-400"
+            @click="bgInput?.click()"
+          >
+            <Icon name="heroicons:photo" class="mx-auto h-6 w-6 text-secondary-400" />
+            <p class="mt-1 text-helper">
+              {{ uploadingBg ? 'Uploading…' : 'Upload JPG, PNG or WEBP' }}
+            </p>
+          </div>
+          <input ref="bgInput" type="file" accept="image/*" class="hidden" @change="onBgFile" />
+        </AdminSectionCard>
+
         <AdminSectionCard title="Properties">
           <template #header-actions>
             <button
@@ -334,7 +370,22 @@
             <!-- text -->
             <template v-if="selected.type === 'text'">
               <div>
-                <label class="admin-label">Text</label>
+                <label class="admin-label">Data field</label>
+                <select
+                  :value="selected.field || ''"
+                  class="admin-field"
+                  @change="setElementField(selected, $event.target.value)"
+                >
+                  <option v-for="f in TEXT_FIELDS" :key="f.value" :value="f.value">{{ f.label }}</option>
+                </select>
+                <p class="mt-1 text-caption text-secondary-500">
+                  {{ selected.field
+                    ? "Filled with the customer's own details. Left out of the template image."
+                    : 'Fixed text, printed the same on every card.' }}
+                </p>
+              </div>
+              <div>
+                <label class="admin-label">{{ selected.field ? 'Sample text (designer only)' : 'Text' }}</label>
                 <textarea v-model="selected.text" rows="2" class="admin-field"></textarea>
               </div>
               <div class="grid grid-cols-2 gap-3">
@@ -375,6 +426,16 @@
             <!-- image -->
             <template v-else-if="selected.type === 'image'">
               <div>
+                <label class="admin-label">Data field</label>
+                <select
+                  :value="selected.field || ''"
+                  class="admin-field"
+                  @change="setElementField(selected, $event.target.value)"
+                >
+                  <option v-for="f in IMAGE_FIELDS" :key="f.value" :value="f.value">{{ f.label }}</option>
+                </select>
+              </div>
+              <div v-if="!selected.field">
                 <label class="admin-label">Image</label>
                 <button type="button" class="admin-btn admin-btn--outline admin-btn--sm w-full" @click="imgInput?.click()">
                   <Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
@@ -473,7 +534,18 @@
     </div>
 
     <!-- Design library -->
-    <AdminFilterBar class="mt-6" @submit="applyFilters">
+    <div class="mb-4 mt-10 flex flex-wrap items-end justify-between gap-3 border-t border-secondary-200 pt-8">
+      <div>
+        <h2 class="section-title">Design library</h2>
+        <p class="mt-1 text-body-sm text-secondary-500">Open a saved design to keep editing it.</p>
+      </div>
+      <button type="button" class="admin-btn admin-btn--primary admin-btn--sm" @click="newDesign">
+        <Icon name="heroicons:plus" class="h-4 w-4" />
+        New design
+      </button>
+    </div>
+
+    <AdminFilterBar @submit="applyFilters">
       <template #search>
         <label class="admin-label">Search</label>
         <div class="relative">
@@ -540,7 +612,7 @@
     </AdminFilterBar>
 
     <AdminSectionCard flush>
-      <template #title>Design library</template>
+      <template #title>Saved designs</template>
       <template #header-actions>
         <button
           type="button"
@@ -549,10 +621,6 @@
           @click="loadDesigns()"
         >
           <Icon name="heroicons:arrow-path" :class="['h-4 w-4', loadingDesigns && 'animate-spin']" />
-        </button>
-        <button type="button" class="admin-btn admin-btn--primary admin-btn--sm" @click="newDesign">
-          <Icon name="heroicons:plus" class="h-4 w-4" />
-          New design
         </button>
       </template>
 
@@ -849,11 +917,80 @@ const PT_TO_MM = 0.352778;
 const BLEED_MM = 3;
 const QR_ENDPOINT = 'https://api.qrserver.com/v1/create-qr-code/';
 
+// Customer data an element can be bound to. Bound elements are left out of the
+// template image and drawn live from the customer's details (see CardExamples.vue).
+const TEXT_FIELDS = [
+  { value: '', label: 'None (fixed text)' },
+  { value: 'name', label: 'Full name', sample: 'John Doe' },
+  { value: 'position', label: 'Job title', sample: 'Marketing Director' },
+  { value: 'company', label: 'Company name', sample: 'Company Sdn Bhd' },
+  { value: 'phone', label: 'Phone number', sample: '012-345 6789' },
+  { value: 'email', label: 'Email', sample: 'john@company.com' },
+  { value: 'website', label: 'Website', sample: 'company.com' },
+  { value: 'address', label: 'Address', sample: 'Kuala Lumpur, Malaysia' },
+];
+const IMAGE_FIELDS = [
+  { value: '', label: 'None (fixed image)' },
+  { value: 'logo', label: 'Company logo' },
+];
+const fieldLabel = (value) =>
+  [...TEXT_FIELDS, ...IMAGE_FIELDS].find((f) => f.value === value)?.label || value;
+
+// One-click data elements for the "Customer data" palette, with sensible
+// default size and type per field.
+const DATA_PALETTE = [
+  { field: 'name', label: 'Full name', icon: 'heroicons:user', w: 45, h: 7, fontSize: 13, fontWeight: 'bold' },
+  { field: 'position', label: 'Job title', icon: 'heroicons:briefcase', w: 45, h: 5, fontSize: 8 },
+  { field: 'company', label: 'Company name', icon: 'heroicons:building-office', w: 45, h: 5, fontSize: 9, fontWeight: 'bold' },
+  { field: 'phone', label: 'Phone number', icon: 'heroicons:phone', w: 40, h: 4.5, fontSize: 7.5 },
+  { field: 'email', label: 'Email', icon: 'heroicons:envelope', w: 45, h: 4.5, fontSize: 7.5 },
+  { field: 'website', label: 'Website', icon: 'heroicons:globe-alt', w: 40, h: 4.5, fontSize: 7.5 },
+  { field: 'address', label: 'Address', icon: 'heroicons:map-pin', w: 50, h: 8, fontSize: 7 },
+  { field: 'logo', label: 'Company logo', icon: 'heroicons:photo', image: true },
+];
+
+const fieldOnSide = (field) => elements.value.some((el) => el.field === field);
+
+function makeDataElement(field, x, y) {
+  const spec = DATA_PALETTE.find((f) => f.field === field);
+  if (spec?.image) {
+    return { ...makeElement('image', x, y), w: 16, h: 16, field, fit: 'contain' };
+  }
+  const el = makeElement('text', x, y);
+  return {
+    ...el,
+    field,
+    w: spec?.w ?? el.w,
+    h: spec?.h ?? el.h,
+    fontSize: spec?.fontSize ?? el.fontSize,
+    fontWeight: spec?.fontWeight ?? 'normal',
+    text: TEXT_FIELDS.find((f) => f.value === field)?.sample || el.text,
+  };
+}
+
+function addDataElement(field) {
+  const spec = DATA_PALETTE.find((f) => f.field === field);
+  const w = spec?.image ? 16 : spec?.w ?? 40;
+  const h = spec?.image ? 16 : spec?.h ?? 8;
+  pushElement(makeDataElement(field, round((cardSize.value.w - w) / 2), round((cardSize.value.h - h) / 2)));
+}
+
+function setElementField(el, value) {
+  const prevSample = TEXT_FIELDS.find((f) => f.value === el.field)?.sample;
+  el.field = value || undefined;
+  if (el.type !== 'text') return;
+  const sample = TEXT_FIELDS.find((f) => f.value === value)?.sample;
+  // Swap in a sample only if the admin hasn't typed their own text.
+  if (sample && (!el.text || el.text === 'Your Name' || el.text === prevSample)) el.text = sample;
+}
+
 const palette = [
   { type: 'text', label: 'Text', icon: 'heroicons:language' },
   { type: 'image', label: 'Image', icon: 'heroicons:photo' },
   { type: 'qr', label: 'QR Code', icon: 'heroicons:qr-code' },
   { type: 'rect', label: 'Shape', icon: 'heroicons:square-2-stack' },
+  { type: 'line', label: 'Line', icon: 'heroicons:minus' },
+  { type: 'circle', label: 'Circle', icon: 'heroicons:stop-circle' },
 ];
 
 // ── State ───────────────────────────────────────────────────
@@ -983,8 +1120,8 @@ function elementStyle(el) {
   return {
     left: el.x * zoom.value + 'px',
     top: el.y * zoom.value + 'px',
-    width: Math.max(el.w * zoom.value, 6) + 'px',
-    height: Math.max(el.h * zoom.value, 6) + 'px',
+    width: Math.max(el.w * zoom.value, el.shape === 'line' ? 2 : 6) + 'px',
+    height: Math.max(el.h * zoom.value, el.shape === 'line' ? 2 : 6) + 'px',
     transform: `rotate(${el.rotation || 0}deg)`,
   };
 }
@@ -1020,6 +1157,11 @@ function makeElement(type, x = 8, y = 8) {
   if (type === 'image') return { ...base, w: 20, h: 20, src: '', fit: 'contain', opacity: 1 };
   if (type === 'qr') return { ...base, w: 18, h: 18, value: 'https://nfcgo.clbgroups.com' };
   if (type === 'rect') return { ...base, w: 30, h: 12, fill: '#3d496a', borderRadius: 1, borderWidth: 0, borderColor: '#000000', opacity: 1 };
+  // Line and circle are rect presets, so they render, export and print like shapes.
+  if (type === 'line')
+    return { ...base, type: 'rect', shape: 'line', w: 40, h: 0.4, fill: '#c2a068', borderRadius: 0, borderWidth: 0, borderColor: '#000000', opacity: 1 };
+  if (type === 'circle')
+    return { ...base, type: 'rect', shape: 'circle', w: 14, h: 14, fill: '#c2a068', borderRadius: 7, borderWidth: 0, borderColor: '#000000', opacity: 1 };
   return base;
 }
 
@@ -1090,8 +1232,13 @@ function onDragMove(e) {
     el.x = round(clamp(orig.x + dx, 0, cw - el.w));
     el.y = round(clamp(orig.y + dy, 0, ch - el.h));
   } else {
-    el.w = round(clamp(orig.w + dx, 3, cw - el.x));
-    el.h = round(clamp(orig.h + dy, 3, ch - el.y));
+    el.w = round(clamp(orig.w + dx, el.shape === 'line' ? 1 : 3, cw - el.x));
+    el.h = round(clamp(orig.h + dy, el.shape === 'line' ? 0.2 : 3, ch - el.y));
+    // A circle stays round while it is resized.
+    if (el.shape === 'circle') {
+      el.h = el.w = round(Math.min(el.w, ch - el.y));
+      el.borderRadius = round(el.w / 2);
+    }
   }
 }
 
@@ -1113,6 +1260,10 @@ function onCanvasDrop(e) {
   const rect = e.currentTarget.getBoundingClientRect();
   const x = round(clamp((e.clientX - rect.left) / zoom.value - bleedMm.value, 0, cardSize.value.w - 5));
   const y = round(clamp((e.clientY - rect.top) / zoom.value - bleedMm.value, 0, cardSize.value.h - 5));
+  if (type.startsWith('data:')) {
+    pushElement(makeDataElement(type.slice(5), x, y));
+    return;
+  }
   pushElement(makeElement(type, x, y));
 }
 
@@ -1599,7 +1750,9 @@ async function drawElementOnCanvas(ctx, el, bleedMm, pxPerMm) {
   }
 }
 
-// Render one full side (background + elements) into a PNG data URL.
+// Render one side into a PNG data URL, trimmed to the card size (no bleed) so
+// it lines up with the trim-relative layout coordinates. Data-bound elements
+// are skipped: the preview draws them from the customer's own details.
 async function renderSideToDataURL(side) {
   const pxPerMm = EXPORT_PX_PER_MM;
   const b = design.bleed ? BLEED_MM : 0;
@@ -1607,8 +1760,8 @@ async function renderSideToDataURL(side) {
   const ph = cardSize.value.h + b * 2;
 
   const canvas = document.createElement('canvas');
-  canvas.width = Math.round(pw * pxPerMm);
-  canvas.height = Math.round(ph * pxPerMm);
+  canvas.width = Math.round(cardSize.value.w * pxPerMm);
+  canvas.height = Math.round(cardSize.value.h * pxPerMm);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1617,17 +1770,40 @@ async function renderSideToDataURL(side) {
   if (bgUrl) {
     try {
       const bgImg = await loadImage(await urlToDataURL(bgUrl));
-      drawCover(ctx, bgImg, 0, 0, canvas.width, canvas.height);
+      // Cover the full bleed page, then shift so the trim area lands at 0,0.
+      drawCover(ctx, bgImg, -b * pxPerMm, -b * pxPerMm, pw * pxPerMm, ph * pxPerMm);
     } catch (err) {
       console.warn('Template background render skipped', err);
     }
   }
 
   for (const el of design[`${side}_elements`] || []) {
-    await drawElementOnCanvas(ctx, el, b, pxPerMm);
+    if (el.field) continue;
+    await drawElementOnCanvas(ctx, el, 0, pxPerMm);
   }
 
   return canvas.toDataURL('image/png');
+}
+
+// Data-bound elements of one side, positioned in mm relative to the trim edge.
+function boundLayout(side) {
+  return (design[`${side}_elements`] || [])
+    .filter((el) => el.field)
+    .map((el) => {
+      const base = { field: el.field, type: el.type, x: el.x, y: el.y, w: el.w, h: el.h, rotation: el.rotation || 0 };
+      if (el.type === 'text') {
+        return {
+          ...base,
+          fontFamily: el.fontFamily,
+          fontSize: el.fontSize,
+          fontWeight: el.fontWeight,
+          color: el.color,
+          align: el.align,
+          lineHeight: el.lineHeight || 1.2,
+        };
+      }
+      return { ...base, fit: el.fit || 'contain', opacity: el.opacity ?? 1 };
+    });
 }
 
 async function promoteToTemplate() {
@@ -1655,6 +1831,9 @@ async function promoteToTemplate() {
       const backData = await renderSideToDataURL('back');
       fd.append('back_image', dataURLtoBlob(backData), 'back.png');
     }
+    fd.append('card_size', design.card_size);
+    fd.append('front_layout', JSON.stringify(boundLayout('front')));
+    fd.append('back_layout', JSON.stringify(boundLayout('back')));
 
     const res = await $api.post('/admin/card-templates', fd);
     if (res?.success) {
@@ -1695,12 +1874,33 @@ function onKeyDown(e) {
 }
 
 // ── Lifecycle ───────────────────────────────────────────
+// ── Auto-fit zoom: size the card to the canvas column ─────────────
+const stageEl = ref(null);
+const autoFit = ref(true);
+let stageObserver = null;
+
+function fitZoom() {
+  const el = stageEl.value;
+  if (!el) return;
+  const avail = el.clientWidth - 48; // p-6 on both sides
+  const z = Math.floor((avail / pageW.value) * 2) / 2; // 0.5 steps
+  zoom.value = clamp(z, 3, 12);
+}
+
+watch(pageW, () => autoFit.value && fitZoom());
+
 onMounted(() => {
   loadDesigns();
   window.addEventListener('keydown', onKeyDown);
+  if (typeof ResizeObserver !== 'undefined' && stageEl.value) {
+    stageObserver = new ResizeObserver(() => autoFit.value && fitZoom());
+    stageObserver.observe(stageEl.value);
+  }
+  fitZoom();
 });
 
 onBeforeUnmount(() => {
+  stageObserver?.disconnect();
   window.removeEventListener('keydown', onKeyDown);
   // Clean up drag listeners in case a drag is in progress
   window.removeEventListener('pointermove', onDragMove);

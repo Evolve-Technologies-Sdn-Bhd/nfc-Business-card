@@ -707,7 +707,7 @@ const checkPdfStatus = async (type) => {
       }
     }
   } catch (error) {
-    console.error("Error checking PDF status:", error);
+    if (!error?.__aborted) console.error("Error checking PDF status:", error);
   }
 };
 

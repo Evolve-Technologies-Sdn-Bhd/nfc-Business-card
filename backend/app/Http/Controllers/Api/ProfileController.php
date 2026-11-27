@@ -154,6 +154,10 @@ class ProfileController extends Controller
             'profile_style' => $data['profileStyle'] ?? $landingPage->profile_style,
         ];
 
+        // Business members cannot change the company fields their owner locked.
+        [$mappedData] = app(\App\Services\BusinessTenantService::class)
+            ->applyLocks($request->user(), $mappedData);
+
         $landingPage->update($mappedData);
 
         // Send landing page updated notification
@@ -310,6 +314,10 @@ class ProfileController extends Controller
 
     public function uploadCompanyLogo(Request $request)
     {
+        if ($locked = app(\App\Services\BusinessTenantService::class)->denyIfLocked($request->user(), 'company_logo')) {
+            return $locked;
+        }
+
         Log::info('Company logo upload started', [
             'user_id' => $request->user()->id,
             'has_file' => $request->hasFile('logo'),
@@ -488,6 +496,10 @@ class ProfileController extends Controller
 
     public function deleteCompanyLogo(Request $request)
     {
+        if ($locked = app(\App\Services\BusinessTenantService::class)->denyIfLocked($request->user(), 'company_logo')) {
+            return $locked;
+        }
+
         DB::beginTransaction();
 
         try {
@@ -528,6 +540,10 @@ class ProfileController extends Controller
 
     public function uploadCoverBanner(Request $request)
     {
+        if ($locked = app(\App\Services\BusinessTenantService::class)->denyIfLocked($request->user(), 'cover_banner')) {
+            return $locked;
+        }
+
         Log::info('Cover banner upload started', [
             'user_id' => $request->user()->id,
             'has_file' => $request->hasFile('image'),
@@ -624,6 +640,10 @@ class ProfileController extends Controller
 
     public function deleteCoverBanner(Request $request)
     {
+        if ($locked = app(\App\Services\BusinessTenantService::class)->denyIfLocked($request->user(), 'cover_banner')) {
+            return $locked;
+        }
+
         DB::beginTransaction();
 
         try {

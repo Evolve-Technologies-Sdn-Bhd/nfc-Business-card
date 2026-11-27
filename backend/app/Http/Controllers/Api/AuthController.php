@@ -290,6 +290,15 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // A Business member whose seat the company admin switched off.
+        if (app(\App\Services\BusinessTenantService::class)->isSuspendedMember($user)) {
+            return response()->json([
+                'success' => false,
+                'code' => 'BUSINESS_SEAT_DEACTIVATED',
+                'message' => 'Your account has been deactivated by your company administrator.',
+            ], 403);
+        }
+
         $user->update(['last_login_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -672,7 +681,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Incorrect password.',
-            ], 401);
+            ], 422);
         }
 
         return response()->json([
@@ -724,7 +733,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Incorrect password.',
-            ], 401);
+            ], 422);
         }
 
         // Generate a secure linking token that will be used to verify this is a link operation
@@ -854,19 +863,22 @@ class AuthController extends Controller
      */
     public function changePassword(Request $request)
     {
+        $user = $request->user();
+
+        // A Google/Apple-only account has no local password yet, so there is no
+        // "current password" to confirm when it sets its first one.
         $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
+            'current_password' => $user->hasLocalPassword() ? 'required|string' : 'nullable|string',
             'password' => 'required|string|min:8|max:255|confirmed',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
             ], 422);
         }
-
-        $user = $request->user();
 
         // Require current password UNLESS this is an OAuth-only user setting their first password
         if ($user->hasLocalPassword()) {
@@ -875,7 +887,7 @@ class AuthController extends Controller
                     'success' => false,
                     'message' => 'Current password is incorrect.',
                     'errors' => ['current_password' => ['Current password is incorrect.']],
-                ], 401);
+                ], 422);
             }
         }
 
@@ -1181,7 +1193,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Verification failed. Please enter your correct password or a valid recovery code.',
-            ], 401);
+            ], 422);
         }
 
         $user->update([

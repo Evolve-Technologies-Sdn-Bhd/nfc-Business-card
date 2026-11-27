@@ -252,7 +252,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           const userIsAdmin = Boolean(
             authStore?.user?.is_admin ||
             authStore?.user?.admin_role ||
-            authStore?.isAdmin
+            authStore?.isAdmin?.()
           );
           if (!userIsAdmin) {
             // REJECT THE REQUEST BEFORE IT LEAVES THE BROWSER
@@ -486,7 +486,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         try {
           const authStore = useAuthStore();
-          userIsAdmin = Boolean(authStore?.user?.is_admin || authStore?.user?.admin_role || authStore?.isAdmin);
+          userIsAdmin = Boolean(authStore?.user?.is_admin || authStore?.user?.admin_role || authStore?.isAdmin?.());
         } catch (_) { /* store unavailable */ }
 
         if (isAdminRoute && !userIsAdmin) {

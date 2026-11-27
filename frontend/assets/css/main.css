@@ -1022,7 +1022,7 @@
   background: linear-gradient(150deg, var(--cb-ink-700) 0%, var(--cb-ink) 100%) !important;
   color: var(--cb-brass) !important;
   border: 1px solid color-mix(in srgb, var(--cb-brass) 45%, transparent) !important;
-  box-shadow: 0 10px 26px rgba(11, 16, 23, 0.35) !important;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--ink-900) 35%, transparent) !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
@@ -1036,7 +1036,7 @@
 .chatbot-float-button:hover {
   transform: translateY(-2px) scale(1.04) !important;
   box-shadow:
-    0 14px 32px rgba(11, 16, 23, 0.42),
+    0 14px 32px color-mix(in srgb, var(--ink-900) 42%, transparent),
     0 0 0 6px color-mix(in srgb, var(--cb-brass) 16%, transparent) !important;
 }
 
@@ -1065,8 +1065,8 @@
   border: 1px solid var(--cb-line);
   border-radius: 18px;
   box-shadow:
-    0 24px 60px rgba(11, 16, 23, 0.22),
-    0 4px 14px rgba(11, 16, 23, 0.1);
+    0 24px 60px color-mix(in srgb, var(--ink-900) 22%, transparent),
+    0 4px 14px color-mix(in srgb, var(--ink-900) 10%, transparent);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1991,8 +1991,8 @@
   gap: 0.5rem;
   padding: 0.4rem 0.9rem 0.4rem 0.6rem;
   border-radius: 999px;
-  border: 1px solid rgba(194, 160, 104, 0.42);
-  background: rgba(194, 160, 104, 0.1);
+  border: 1px solid color-mix(in srgb, var(--brass) 42%, transparent);
+  background: color-mix(in srgb, var(--brass) 10%, transparent);
   color: var(--brass-200);
   font-size: 0.74rem;
   font-weight: 600;
@@ -2004,7 +2004,7 @@
   height: 0.5rem;
   border-radius: 999px;
   background: var(--brass);
-  box-shadow: 0 0 0 4px rgba(194, 160, 104, 0.18);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass) 18%, transparent);
 }
 
 /* --- Buttons --- */
@@ -2014,19 +2014,19 @@
   background-image: linear-gradient(180deg, #f0dcaf 0%, var(--brass) 52%, var(--brass-600) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 14px 30px -14px rgba(194, 160, 104, 0.75);
+    0 14px 30px -14px color-mix(in srgb, var(--brass) 75%, transparent);
 }
 .btn-brass:hover {
   transform: translateY(-1px);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 20px 40px -16px rgba(194, 160, 104, 0.85);
+    0 20px 40px -16px color-mix(in srgb, var(--brass) 85%, transparent);
 }
 
 .btn-ghost-light {
   @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200;
   color: var(--paper, #f7f5f0);
-  border: 1px solid rgba(194, 160, 104, 0.28);
+  border: 1px solid color-mix(in srgb, var(--brass) 28%, transparent);
   background: rgba(255, 255, 255, 0.04);
 }
 .btn-ghost-light:hover {
@@ -2311,7 +2311,7 @@
 .admin-workspace {
   background-color: var(--admin-paper);
   background-image:
-    radial-gradient(60% 40% at 100% 0%, rgba(194, 160, 104, 0.07) 0%, transparent 60%);
+    radial-gradient(60% 40% at 100% 0%, color-mix(in srgb, var(--brass) 7%, transparent) 0%, transparent 60%);
 }
 .admin-container {
   width: 100%;
@@ -2325,9 +2325,9 @@
   --admin-rail-w: 17rem;
   width: var(--admin-rail-w);
   background:
-    radial-gradient(120% 60% at 0% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 55%),
+    radial-gradient(120% 60% at 0% 0%, color-mix(in srgb, var(--brass) 10%, transparent) 0%, transparent 55%),
     linear-gradient(184deg, var(--admin-ink) 0%, #121722 100%);
-  border-right: 1px solid rgba(194, 160, 104, 0.16);
+  border-right: 1px solid color-mix(in srgb, var(--brass) 16%, transparent);
   color: var(--admin-paper);
   transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -2335,7 +2335,7 @@
   --admin-rail-w: 5.25rem;
 }
 .admin-rail-brand {
-  border-bottom: 1px solid rgba(194, 160, 104, 0.14);
+  border-bottom: 1px solid color-mix(in srgb, var(--brass) 14%, transparent);
 }
 .admin-rail--collapsed .admin-rail-brand {
   justify-content: center;
@@ -2347,7 +2347,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(245, 241, 232, 0.42);
+  color: color-mix(in srgb, var(--admin-paper) 42%, transparent);
 }
 .admin-nav-group + .admin-nav-group {
   margin-top: 1.35rem;
@@ -2362,7 +2362,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.25rem;
-  color: rgba(245, 241, 232, 0.68);
+  color: color-mix(in srgb, var(--admin-paper) 68%, transparent);
   transition: background-color 160ms ease, color 160ms ease;
 }
 .admin-nav-link:hover {
@@ -2371,7 +2371,7 @@
 }
 .admin-nav-link .admin-nav-ico {
   flex: 0 0 auto;
-  color: rgba(245, 241, 232, 0.55);
+  color: color-mix(in srgb, var(--admin-paper) 55%, transparent);
   transition: color 160ms ease;
 }
 .admin-nav-link:hover .admin-nav-ico {
@@ -2381,11 +2381,11 @@
   color: #ffffff;
   background: linear-gradient(
     90deg,
-    rgba(194, 160, 104, 0.24) 0%,
-    rgba(194, 160, 104, 0.06) 70%,
+    color-mix(in srgb, var(--brass) 24%, transparent) 0%,
+    color-mix(in srgb, var(--brass) 6%, transparent) 70%,
     transparent 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(194, 160, 104, 0.22);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 22%, transparent);
 }
 .admin-nav-link.is-active .admin-nav-ico {
   color: var(--admin-brass);
@@ -2400,7 +2400,7 @@
   width: 3px;
   border-radius: 9999px;
   background: var(--admin-brass);
-  box-shadow: 0 0 12px rgba(194, 160, 104, 0.75);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brass) 75%, transparent);
 }
 .admin-rail--collapsed .admin-nav-link {
   justify-content: center;
@@ -2408,7 +2408,7 @@
   padding-right: 0;
 }
 .admin-rail-foot {
-  border-top: 1px solid rgba(194, 160, 104, 0.14);
+  border-top: 1px solid color-mix(in srgb, var(--brass) 14%, transparent);
   background: rgba(0, 0, 0, 0.18);
 }
 
@@ -2422,7 +2422,7 @@
   content: "";
   display: block;
   height: 2px;
-  background: linear-gradient(90deg, var(--admin-brass) 0%, rgba(194, 160, 104, 0) 34%);
+  background: linear-gradient(90deg, var(--admin-brass) 0%, color-mix(in srgb, var(--brass) 0%, transparent) 34%);
 }
 .admin-icon-btn {
   display: inline-flex;
@@ -2550,7 +2550,7 @@
   padding: 0;
 }
 .admin-panel-accent {
-  border-top: 2px solid rgba(194, 160, 104, 0.55);
+  border-top: 2px solid color-mix(in srgb, var(--brass) 55%, transparent);
 }
 
 /* ---------- Toolbar / filters ---------- */
@@ -2578,7 +2578,7 @@
 .admin-field:focus {
   outline: none;
   border-color: var(--admin-brass);
-  box-shadow: 0 0 0 3px rgba(194, 160, 104, 0.18);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 18%, transparent);
 }
 textarea.admin-field {
   height: auto;
@@ -2635,7 +2635,7 @@ textarea.admin-field {
   outline: none;
 }
 .admin-range:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(194, 160, 104, 0.3);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 30%, transparent);
 }
 
 /* ---------- Buttons ---------- */
@@ -2661,7 +2661,7 @@ textarea.admin-field {
 .admin-btn--primary {
   color: var(--admin-brass-ink);
   background: linear-gradient(180deg, var(--admin-brass-soft) 0%, var(--admin-brass) 100%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 22px -14px rgba(194, 160, 104, 0.9);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 22px -14px color-mix(in srgb, var(--brass) 90%, transparent);
 }
 .admin-btn--primary:hover:not(:disabled) {
   background: linear-gradient(180deg, var(--admin-brass) 0%, var(--admin-brass-deep) 100%);
@@ -2774,8 +2774,8 @@ textarea.admin-field {
   background: currentColor;
   opacity: 0.85;
 }
-.admin-badge--neutral { color: #57534e; background: #f3f1ea; border-color: #e6e0d5; }
-.admin-badge--brass { color: #7a5c26; background: rgba(194, 160, 104, 0.16); border-color: rgba(194, 160, 104, 0.34); }
+.admin-badge--neutral { color: #57534e; background: #f3f1ea; border-color: var(--admin-border, #e6e0d5); }
+.admin-badge--brass { color: #7a5c26; background: color-mix(in srgb, var(--brass) 16%, transparent); border-color: color-mix(in srgb, var(--brass) 34%, transparent); }
 .admin-badge--success { color: #15803d; background: #f0fdf4; border-color: #bbf7d0; }
 .admin-badge--warning { color: #b45309; background: #fffbeb; border-color: #fde68a; }
 .admin-badge--danger { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
@@ -2814,7 +2814,7 @@ textarea.admin-field {
   height: 2.4rem;
   width: 2.4rem;
   border-radius: 0.75rem;
-  background: rgba(194, 160, 104, 0.14);
+  background: color-mix(in srgb, var(--brass) 14%, transparent);
   color: var(--admin-brass-deep);
 }
 
@@ -2831,8 +2831,8 @@ textarea.admin-field {
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .admin-kpi-tile-btn:hover .admin-kpi {
-  border-color: rgba(194, 160, 104, 0.45);
-  box-shadow: 0 1px 2px rgba(23, 29, 43, 0.04);
+  border-color: color-mix(in srgb, var(--brass) 45%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--admin-ink) 4%, transparent);
 }
 .admin-kpi-tile-btn:focus-visible {
   outline: 2px solid var(--admin-brass);
@@ -2840,10 +2840,10 @@ textarea.admin-field {
 }
 .admin-kpi-tile-btn.is-active .admin-kpi {
   border-color: var(--admin-brass);
-  box-shadow: 0 0 0 2px rgba(194, 160, 104, 0.18);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brass) 18%, transparent);
 }
 .admin-kpi-tile-btn.is-active .admin-kpi-ico {
-  background: rgba(194, 160, 104, 0.28);
+  background: color-mix(in srgb, var(--brass) 28%, transparent);
   color: var(--admin-brass-deep);
 }
 .admin-kpi-tile-btn.is-active .admin-kpi-label {
@@ -2912,7 +2912,7 @@ textarea.admin-field {
   position: fixed;
   inset: 0;
   z-index: 120;
-  background: rgba(11, 16, 23, 0.55);
+  background: color-mix(in srgb, var(--ink-900) 55%, transparent);
   backdrop-filter: blur(3px);
 }
 .admin-cmdk {
@@ -2948,7 +2948,7 @@ textarea.admin-field {
   align-items: flex-start;
   justify-content: center;
   padding: 1rem;
-  background: rgba(11, 16, 23, 0.55);
+  background: color-mix(in srgb, var(--ink-900) 55%, transparent);
   backdrop-filter: blur(3px);
 }
 .admin-dialog {
@@ -3037,7 +3037,7 @@ textarea.admin-field {
 }
 .admin-shell .input:focus {
   border-color: var(--admin-brass);
-  box-shadow: 0 0 0 3px rgba(194, 160, 104, 0.18);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 18%, transparent);
   --tw-ring-color: rgba(194, 160, 104, 0.35);
 }
 .admin-shell .page-title {
@@ -3047,7 +3047,7 @@ textarea.admin-field {
 .admin-shell .text-primary-600,
 .admin-shell a.text-primary-500,
 .admin-shell a.text-primary-600 {
-  color: #8a6a33;
+  color: var(--brass-700, #8a6a33);
 }
 .admin-shell a.text-primary-500:hover,
 .admin-shell a.text-primary-600:hover {

@@ -187,7 +187,7 @@ const setPassword = async () => {
 
 const accent = computed(() => {
   if (isFree.value || status.value === "pending") return "#5d8c87";
-  return "#c2a068";
+  return "var(--brass)"; // follows the admin-selected theme
 });
 
 const icon = computed(() => {
