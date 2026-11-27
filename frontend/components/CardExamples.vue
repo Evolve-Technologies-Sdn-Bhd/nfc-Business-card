@@ -305,20 +305,20 @@ const designLabel = computed(() => {
   display: inline-flex;
   padding: 0.2rem;
   border-radius: 9999px;
-  background: #f3efe6;
-  border: 1px solid #e6e0d5;
+  background: var(--admin-paper);
+  border: 1px solid var(--admin-border);
 }
 .preview-switch button {
   padding: 0.35rem 0.9rem;
   border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #77746d;
+  color: var(--admin-text-2);
   transition: background-color 150ms ease, color 150ms ease;
 }
 .preview-switch button.is-active {
-  background: #171d2b;
-  color: #f5f1e8;
+  background: var(--admin-ink);
+  color: var(--admin-paper);
 }
 
 /* Stage: soft paper backdrop so the card reads as a physical object */
@@ -328,8 +328,8 @@ const designLabel = computed(() => {
   padding: 1.75rem 1rem;
   border-radius: 1rem;
   background:
-    radial-gradient(70% 60% at 50% 40%, rgba(194, 160, 104, 0.12) 0%, transparent 70%),
-    #f8f5ee;
+    radial-gradient(70% 60% at 50% 40%, color-mix(in srgb, var(--brass) 12%, transparent) 0%, transparent 70%),
+    color-mix(in srgb, var(--admin-paper) 70%, #ffffff);
   perspective: 1200px;
 }
 
@@ -371,10 +371,10 @@ const designLabel = computed(() => {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9c988f;
+  color: var(--admin-text-3);
 }
 .preview-card:focus-visible {
-  outline: 3px solid rgba(194, 160, 104, 0.6);
+  outline: 3px solid color-mix(in srgb, var(--brass) 60%, transparent);
   outline-offset: 4px;
 }
 
@@ -388,8 +388,8 @@ const designLabel = computed(() => {
   -webkit-backface-visibility: hidden;
   color: #ffffff;
   box-shadow:
-    0 22px 40px -22px rgba(23, 29, 43, 0.55),
-    0 2px 6px rgba(23, 29, 43, 0.12);
+    0 22px 40px -22px color-mix(in srgb, var(--admin-ink) 55%, transparent),
+    0 2px 6px color-mix(in srgb, var(--admin-ink) 12%, transparent);
 }
 .preview-face--back {
   transform: rotateY(180deg);
@@ -404,14 +404,14 @@ const designLabel = computed(() => {
 }
 .preview-bg--default {
   background:
-    radial-gradient(90% 70% at 100% 0%, rgba(194, 160, 104, 0.35) 0%, transparent 55%),
-    linear-gradient(140deg, #252b38 0%, #171d2b 100%);
+    radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--brass) 35%, transparent) 0%, transparent 55%),
+    linear-gradient(140deg, var(--admin-ink-soft) 0%, var(--admin-ink) 100%);
 }
 /* Keeps overlaid text legible on light template artwork */
 .preview-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(10, 13, 20, 0.45) 0%, rgba(10, 13, 20, 0.08) 65%, transparent 100%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ink-950) 45%, transparent) 0%, color-mix(in srgb, var(--ink-950) 8%, transparent) 65%, transparent 100%);
 }
 
 .preview-layout {
@@ -495,14 +495,14 @@ const designLabel = computed(() => {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1.5px solid rgba(220, 194, 138, 0.8);
-  color: #dcc28a;
+  border: 1.5px solid color-mix(in srgb, var(--admin-brass-soft) 80%, transparent);
+  color: var(--admin-brass-soft);
 }
 
 .preview-spec {
   border-radius: 0.75rem;
-  border: 1px solid #e6e0d5;
-  background: #fbfaf6;
+  border: 1px solid var(--admin-border);
+  background: color-mix(in srgb, var(--admin-paper) 40%, #ffffff);
   padding: 0.6rem 0.8rem;
 }
 .preview-spec dt {
@@ -510,13 +510,13 @@ const designLabel = computed(() => {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9c988f;
+  color: var(--admin-text-3);
 }
 .preview-spec dd {
   margin-top: 0.15rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #252b38;
+  color: var(--admin-ink-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

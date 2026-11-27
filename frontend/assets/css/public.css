@@ -278,7 +278,7 @@
   overflow: hidden;
   transform: rotate(-2deg);
   box-shadow:
-    0 22px 44px -24px rgba(35, 41, 59, 0.6),
+    0 22px 44px -24px color-mix(in srgb, var(--admin-ink-soft) 60%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
 }
@@ -292,7 +292,7 @@
 }
 .group:hover .lp-mini-card {
   transform: rotate(0deg) translateY(-6px);
-  box-shadow: 0 30px 55px -26px rgba(35, 41, 59, 0.7);
+  box-shadow: 0 30px 55px -26px color-mix(in srgb, var(--admin-ink-soft) 70%, transparent);
 }
 .lp-mini-card-top,
 .lp-mini-card-bottom {
@@ -343,7 +343,7 @@
   height: 1.9rem;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.92);
-  color: #1c1a15;
+  color: var(--theme-secondary-900, #1c1a15);
 }
 .lp-face-pvc {
   background: linear-gradient(135deg, #ffffff, #eef1f6 55%, #dde3ec);
@@ -369,12 +369,12 @@
   padding: 0.7rem 0.85rem;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 16px 30px -20px rgba(35, 41, 59, 0.55);
+  box-shadow: 0 16px 30px -20px color-mix(in srgb, var(--admin-ink-soft) 55%, transparent);
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
 }
 .group:hover .lp-design {
   transform: translateY(-6px);
-  box-shadow: 0 24px 40px -22px rgba(35, 41, 59, 0.65);
+  box-shadow: 0 24px 40px -22px color-mix(in srgb, var(--admin-ink-soft) 65%, transparent);
 }
 .lp-design-brand {
   font-size: 0.6rem;
@@ -391,7 +391,7 @@
   height: 1.1rem;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.85);
-  color: #1c1a15;
+  color: var(--theme-secondary-900, #1c1a15);
 }
 .lp-design-name {
   font-size: 0.72rem;
@@ -402,7 +402,7 @@
   font-size: 0.58rem;
   opacity: 0.75;
 }
-.lp-design-minimal { background: linear-gradient(135deg, #ffffff, #eef1f6); color: #1c1a15; }
+.lp-design-minimal { background: linear-gradient(135deg, #ffffff, #eef1f6); color: var(--theme-secondary-900, #1c1a15); }
 .lp-design-creative { background: linear-gradient(135deg, #a78bfa, #f0abfc); color: #ffffff; }
 .lp-design-professional { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: #ffffff; }
 .lp-design-bold { background: linear-gradient(135deg, #f97316, #dc2626); color: #ffffff; }
@@ -1024,10 +1024,10 @@
 .hero-card {
   border-radius: 1.1rem;
   box-shadow:
-    0 0 0 1px rgba(247, 245, 240, 0.16),
-    0 0 26px 0 rgba(247, 245, 240, 0.26),
-    0 0 72px 10px rgba(194, 160, 104, 0.42),
-    0 0 150px 44px rgba(194, 160, 104, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--paper) 16%, transparent),
+    0 0 26px 0 color-mix(in srgb, var(--paper) 26%, transparent),
+    0 0 72px 10px color-mix(in srgb, var(--brass) 42%, transparent),
+    0 0 150px 44px color-mix(in srgb, var(--brass) 20%, transparent),
     0 48px 80px -32px rgba(0, 0, 0, 0.85);
 }
 .hero-chip {
@@ -1143,7 +1143,7 @@
 }
 .feature-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.5);
+  box-shadow: 0 26px 50px -30px color-mix(in srgb, var(--ink-800) 50%, transparent);
   border-color: color-mix(in srgb, var(--brass, #c2a068) 50%, transparent);
 }
 .feature-card__ico {
@@ -1239,7 +1239,7 @@
 }
 .use-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  box-shadow: 0 26px 50px -30px color-mix(in srgb, var(--ink-800) 45%, transparent);
   border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
 }
 
@@ -1291,7 +1291,7 @@
 }
 .why-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  box-shadow: 0 26px 50px -30px color-mix(in srgb, var(--ink-800) 45%, transparent);
   border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
 }
 
@@ -1475,7 +1475,7 @@
 }
 .faq-item--open {
   border-color: color-mix(in srgb, var(--brass, #c2a068) 50%, transparent);
-  box-shadow: 0 22px 44px -32px rgba(20, 29, 43, 0.5);
+  box-shadow: 0 22px 44px -32px color-mix(in srgb, var(--ink-800) 50%, transparent);
 }
 .faq-item__head {
   width: 100%;
@@ -1533,7 +1533,7 @@
 }
 .ship-step:hover {
   transform: translateY(-6px);
-  box-shadow: 0 26px 50px -30px rgba(20, 29, 43, 0.45);
+  box-shadow: 0 26px 50px -30px color-mix(in srgb, var(--ink-800) 45%, transparent);
   border-color: color-mix(in srgb, var(--brass, #c2a068) 45%, transparent);
 }
 .ship-step__marker {

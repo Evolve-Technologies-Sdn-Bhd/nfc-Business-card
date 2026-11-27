@@ -322,11 +322,18 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->grou
         Route::get('/card-quota', [QuotaController::class, 'getCardQuota']);
         Route::get('/can-order-card', [QuotaController::class, 'canOrderCard']);
 
+        // Role, seat state and shared/locked company fields (any signed-in user)
+        Route::get('/context', [\App\Http\Controllers\Api\Business\CompanySettingsController::class, 'context']);
+
         // Employee Management — Business account owner or delegated manager
         Route::middleware('business.manager')->group(function () {
-            // Note: Employee creation is now handled by Super Admin via /admin/business-employees
-            // Route::post('/employees', [QuotaController::class, 'createEmployee']); // DEPRECATED
+            // Add a member (seat-limited; they get a set-password e-mail).
+            // Super Admin can still create members via /admin/business-employees.
+            Route::post('/employees', [EmployeeController::class, 'inviteEmployee'])->middleware('throttle:30,1');
             Route::delete('/employees/{id}', [QuotaController::class, 'deleteEmployee']);
+
+            // Company settings: shared company data + fields members cannot edit
+            Route::put('/settings', [\App\Http\Controllers\Api\Business\CompanySettingsController::class, 'update']);
 
             // Bulk Employee Data Upload & Card Orders
             Route::post('/employees/upload', [EmployeeController::class, 'uploadEmployees']);

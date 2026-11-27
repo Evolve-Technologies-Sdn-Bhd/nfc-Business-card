@@ -1426,6 +1426,14 @@
                     }"
                     v-html="company.description"
                   />
+                  <!-- Company Video (Business plan; YouTube/Vimeo) -->
+                  <ProfileVideo
+                    v-if="companyVideoEmbed && isFieldVisible('companyTeam', 'companyVideo')"
+                    :src="companyVideoEmbed"
+                    :title="`${company.name || 'Company'} video`"
+                    :border-color="hexToRgba(designSettings.accentColor, 0.35)"
+                    :style="{ margin: '6px 0 16px' }"
+                  />
                   <div
                     v-if="company.department"
                     :style="{
@@ -1709,6 +1717,14 @@
                   {{ profile.bio }}
                 </p>
               </div>
+              <!-- Introduction Video (Premium/Business; YouTube/Vimeo) -->
+              <ProfileVideo
+                v-if="introVideoEmbed"
+                :src="introVideoEmbed"
+                :title="`${profile.name || 'Profile'} introduction video`"
+                :border-color="hexToRgba(designSettings.accentColor, 0.35)"
+                :style="{ marginBottom: stats.length > 0 ? (isMobile ? '24px' : '34px') : '0', maxWidth: '720px' }"
+              />
               <div
                 v-if="stats.length > 0 && isFieldVisible('profileAchievements', 'profileStats')"
                 :style="{
@@ -4705,6 +4721,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
+import { videoEmbedUrl } from "~/utils/videoEmbed";
 
 // Composables
 const { $api } = useNuxtApp();
@@ -5237,12 +5254,17 @@ const isFieldVisible = (sectionId, fieldKey) => {
 // These computed properties check if a section has data to display
 // Sections only show if: 1) they have data AND 2) they're enabled in layout
 
+// Profile videos: player URLs from the API (`videos`, plan-gated server-side)
+// or, in Live Preview, built locally from the builder's links.
+const introVideoEmbed = ref(null);
+const companyVideoEmbed = ref(null);
+
 const hasCompanyData = computed(() => {
-  return !!(company.value.name || company.value.department || company.value.logo || company.value.logoText);
+  return !!(company.value.name || company.value.department || company.value.logo || company.value.logoText || companyVideoEmbed.value);
 });
 
 const hasAboutData = computed(() => {
-  return !!(profile.value.bio || stats.value.length > 0);
+  return !!(profile.value.bio || stats.value.length > 0 || introVideoEmbed.value);
 });
 
 const hasServicesData = computed(() => {
@@ -6031,6 +6053,8 @@ const loadPreviewData = (data) => {
     console.log('No features in preview data, using defaults:', features.value);
   }
   applyPreviewFeatureRules(data);
+  introVideoEmbed.value = videoEmbedUrl(data.introVideo);
+  companyVideoEmbed.value = videoEmbedUrl(data.companyVideo);
 
   // Preview has no server-side plan policy — mirror the owner's branding toggle.
   showNfcgoBranding.value = features.value.remove_branding !== true;
@@ -6542,6 +6566,8 @@ const loadProfileData = async () => {
       if (response.effective_features && typeof response.effective_features === 'object') {
         features.value = { ...features.value, ...response.effective_features };
       }
+      introVideoEmbed.value = response.videos?.intro || null;
+      companyVideoEmbed.value = response.videos?.company || null;
 
       // Branding visibility is resolved server-side (plan + admin policy).
       showNfcgoBranding.value = typeof response.show_nfcgo_branding === 'boolean'

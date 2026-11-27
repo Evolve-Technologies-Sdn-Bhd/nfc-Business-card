@@ -5,9 +5,20 @@
       eyebrow="Team"
       eyebrow-icon="heroicons:users"
       title="Team Members"
-      description="People on your Business account: their roles, account status and cards. New accounts are created by NFCGo on request."
+      description="People on your Business account: add or remove members, set their role and status, and choose the company details they share."
     >
       <template #actions>
+        <button
+          v-if="canManageCompany"
+          type="button"
+          @click="openAddMember"
+          class="admin-btn admin-btn--ink"
+          :disabled="availableAccountSlots <= 0"
+          :title="availableAccountSlots <= 0 ? 'All seats are in use' : 'Add a team member'"
+        >
+          <Icon name="heroicons:user-plus" class="h-4 w-4" />
+          Add member
+        </button>
         <button type="button" @click="showCardDesignModal = true" class="admin-btn admin-btn--primary">
           <Icon name="heroicons:paint-brush" class="h-4 w-4" />
           Design team cards
@@ -149,8 +160,7 @@
                 <p class="ml-4">• Available: {{ availableQuota }}</p>
               </div>
               <p class="text-body text-info-600 mt-2">
-                💡 Employee accounts are created by Super Admin. You can upload
-                employee details and design their cards.
+                💡 Use <strong>Add member</strong> to give someone a seat. They get an e-mail to set their password. Removing a member frees the seat and returns their company cards to you.
               </p>
             </div>
           </div>
@@ -213,7 +223,7 @@
               {{
                 searchQuery
                   ? "No employees match your search criteria."
-                  : "No employees found. Employee accounts are created by Super Admin."
+                  : "No team members yet. Use Add member to give someone a seat."
               }}
             </p>
           </div>
@@ -378,6 +388,15 @@
                       >
                         <Icon name="heroicons:credit-card" class="h-5 w-5" />
                       </button>
+                      <!-- Remove member (owner: anyone; company admin: not other admins) -->
+                      <button
+                        v-if="canActOn(employee)"
+                        @click="removeEmployee(employee)"
+                        class="text-error-600 hover:text-error-900"
+                        title="Remove member"
+                      >
+                        <Icon name="heroicons:user-minus" class="h-5 w-5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -386,6 +405,51 @@
           </div>
         </div>
       </div>
+
+    <!-- Company data shared with members + which fields they cannot change -->
+    <div class="mt-8">
+      <BusinessCompanySettings v-if="!loading" :can-manage="canManageCompany" />
+    </div>
+
+    <!-- Add Member Modal -->
+    <Transition name="modal">
+      <div v-if="showAddMemberModal" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showAddMemberModal = false"></div>
+          <form
+            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl space-y-4"
+            @submit.prevent="submitAddMember"
+          >
+            <div class="flex items-center justify-between">
+              <h3 class="modal-title">Add team member</h3>
+              <button type="button" @click="showAddMemberModal = false" class="text-secondary-400 hover:text-secondary-600">
+                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              </button>
+            </div>
+            <p class="text-body text-secondary-600">
+              Uses 1 of {{ availableAccountSlots }} free seat(s). We e-mail them a link to set their password.
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+              <input v-model.trim="newMember.first_name" required placeholder="First name" class="px-3 py-2 border border-secondary-300 rounded-lg text-input" />
+              <input v-model.trim="newMember.last_name" required placeholder="Last name" class="px-3 py-2 border border-secondary-300 rounded-lg text-input" />
+            </div>
+            <input v-model.trim="newMember.email" type="email" required placeholder="Work e-mail" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input" />
+            <input v-model.trim="newMember.job_title" placeholder="Job title (optional)" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input" />
+            <select v-model="newMember.role" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input">
+              <option value="member">Member — edits own profile</option>
+              <option value="card_manager">Card Manager — also assigns company cards</option>
+              <option v-if="isOwnerViewer" value="admin">Admin — manages the team and company settings</option>
+            </select>
+            <div class="flex items-center justify-end gap-3 pt-2">
+              <button type="button" class="btn btn-outline" @click="showAddMemberModal = false">Cancel</button>
+              <button type="submit" class="btn btn-primary" :disabled="addMemberLoading">
+                {{ addMemberLoading ? "Adding..." : "Add member" }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
 
     <!-- View Employee Details Modal -->
     <Transition name="modal">
@@ -526,7 +590,7 @@
                   />
                   <div class="ml-3">
                     <p class="text-body text-warning-700">
-                      A new password will be generated and sent to
+                      A link to set a new password (valid for 1 hour) will be sent to
                       <strong>{{ selectedEmployee.email }}</strong>
                     </p>
                   </div>
@@ -653,6 +717,18 @@ const resetPasswordLoading = ref(false);
 
 // Role management — only the account owner may reassign delegated roles
 const isOwnerViewer = ref(false);
+const viewerRole = ref(null);
+// Owner and company admins add/remove members and edit company settings.
+const canManageCompany = computed(() => ["owner", "admin"].includes(viewerRole.value));
+// A company admin may not act on another admin (the API enforces the same rule).
+const canActOn = (employee) =>
+  isOwnerViewer.value || (viewerRole.value === "admin" && employee.business_role !== "admin");
+
+// Add member
+const showAddMemberModal = ref(false);
+const addMemberLoading = ref(false);
+const blankMember = () => ({ first_name: "", last_name: "", email: "", job_title: "", role: "member" });
+const newMember = ref(blankMember());
 const roleLabels = {
   owner: "Owner",
   admin: "Admin",
@@ -682,6 +758,53 @@ const availableQuota = computed(() => {
   );
   return Math.min(accountsRemaining, cardsRemaining);
 });
+
+// Seats left for new accounts (owner counts as one).
+const availableAccountSlots = computed(() => Math.max(0, totalQuota.value - totalAccounts.value));
+
+const openAddMember = () => {
+  newMember.value = blankMember();
+  showAddMemberModal.value = true;
+};
+
+const submitAddMember = async () => {
+  addMemberLoading.value = true;
+  try {
+    const response = await $api.post("/business/employees", newMember.value);
+    if (response.success) {
+      $toast.success(response.message || "Member added");
+      showAddMemberModal.value = false;
+      await loadEmployees();
+    }
+  } catch (error) {
+    const errors = error?.data?.errors;
+    $toast.error(
+      (errors && Object.values(errors)[0]?.[0]) || error?.data?.message || "Failed to add member"
+    );
+  } finally {
+    addMemberLoading.value = false;
+  }
+};
+
+const removeEmployee = async (employee) => {
+  const ok = await askConfirm({
+    title: `Remove ${employee.name}?`,
+    message:
+      "Their account is deleted and the seat is freed. Company cards they hold come back to you and their public profile goes offline until you reassign the card.",
+    confirmLabel: "Remove member",
+    tone: "danger",
+  });
+  if (!ok) return;
+  try {
+    const response = await $api.delete(`/business/employees/${employee.id}`);
+    if (response.success) {
+      $toast.success(response.message || "Member removed");
+      await loadEmployees();
+    }
+  } catch (error) {
+    $toast.error(error?.data?.message || "Failed to remove member");
+  }
+};
 
 // Computed
 const activeEmployeesCount = computed(() => {
@@ -728,6 +851,7 @@ const loadEmployees = async () => {
 
       // Only the owner sees role selectors
       isOwnerViewer.value = response.data.is_owner === true;
+      viewerRole.value = response.data.viewer_role || null;
 
       const quotaInfo = response.data.quota_info || {};
       totalQuota.value =

@@ -21,6 +21,31 @@
       </div>
     </Transition>
 
+    <!-- Business member: seat inactive (owner plan lapsed or seat switched off) -->
+    <div
+      v-if="businessContext && !businessContext.is_owner && businessContext.has_access === false"
+      class="mb-4 rounded-lg border border-error-200 bg-error-50 p-4 flex gap-3"
+    >
+      <Icon name="heroicons:no-symbol" class="h-5 w-5 text-error-600 shrink-0 mt-0.5" />
+      <p class="text-body text-error-700">
+        Your company's Business plan or your seat is not active, so changes cannot be saved.
+        Contact {{ businessContext.company?.owner_name || "your company administrator" }}.
+      </p>
+    </div>
+
+    <!-- Business member: fields the company admin locked -->
+    <div
+      v-else-if="businessLockedLabels.length"
+      class="mb-4 rounded-lg border border-info-200 bg-info-50 p-4 flex gap-3"
+    >
+      <Icon name="heroicons:lock-closed" class="h-5 w-5 text-info-600 shrink-0 mt-0.5" />
+      <p class="text-body text-info-700">
+        Managed by {{ businessContext.company?.name || "your company" }}:
+        <strong>{{ businessLockedLabels.join(", ") }}</strong>.
+        These are kept as your admin set them, even if you change them here.
+      </p>
+    </div>
+
     <!-- Header -->
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -1866,6 +1891,7 @@
 <script setup>
 // import ProfileImageUpload from '~/components/ProfileImageUpload.vue'
 import DynamicFormField from '~/components/DynamicFormField.vue';
+import { isValidVideoUrl } from "~/utils/videoEmbed";
 import LayoutDesigner from '~/components/LayoutDesigner.vue';
 import { useAuthStore } from "~/stores/auth";
 import draggable from "vuedraggable";
@@ -2030,6 +2056,12 @@ const SERVICE_ICONS = [
 
 // Profile data - field keys match backend ProfileBuilderField.field_key
 const profileData = reactive({
+  // Public profile action switches (Sharing & Contact). ON by default, the
+  // same default the public page and the Features panel use; saved values
+  // override them on load, and the plan rules are applied on the server.
+  vcardEnabled: true,
+  qrCodeEnabled: true,
+  contactFormEnabled: true,
   // ============ PROFILE TAB ============
   profilePicture: null,       // Profile Photo (image)
   coverBanner: null,          // Top Cover Banner (image)
@@ -2055,6 +2087,7 @@ const profileData = reactive({
   companyDepartment: "",      // Department
   companyDescription: "",     // Company Description (richtext)
   companyVideo: "",           // Company Video URL
+  introVideo: "",             // Introduction Video URL (YouTube/Vimeo)
   industry: "",               // Industry Type (select)
   establishedYear: "",        // Year Founded
   employeeCount: "",          // Number of Employees
@@ -3311,10 +3344,17 @@ const getVisibleFields = (fields) => {
   );
 };
 
+// "Contact Form Email" only matters while the Contact Form is on (and not
+// plan-locked: the form's own lock card already explains the upgrade).
+const hideDependentField = (fieldKey) =>
+  fieldKey === 'contactFormEmail' &&
+  profileData.contactFormEnabled === false;
+
 // Group fields by field_group from backend (fully dynamic)
 const getGroupedFields = (fields) => {
   const visible = fields.filter(field => 
     field.field_type !== 'image' && shouldShowField(field.field_key)
+    && !hideDependentField(field.field_key)
   );
   
   // Group by field_group, sorted by group_order
@@ -3926,6 +3966,15 @@ const saveProfile = async () => {
     return;
   }
 
+  // Only YouTube/Vimeo links can be shown on the profile (the server checks
+  // too); say which field to fix instead of failing the whole save.
+  for (const [key, label] of [["introVideo", "Introduction Video"], ["companyVideo", "Company Video"]]) {
+    if (!isValidVideoUrl(profileData[key])) {
+      $toast.error(`${label}: use a YouTube or Vimeo link, or clear the field.`);
+      return;
+    }
+  }
+
   saving.value = true;
   try {
     // 0. Auto-add pending form data before saving
@@ -4130,7 +4179,8 @@ const saveProfile = async () => {
       company_registration_no: profileData.companyRegistrationNo,
       company_department: profileData.companyDepartment,
       company_description: profileData.companyDescription,
-      company_video: profileData.companyVideo,
+      company_video: profileData.companyVideo || null,
+      intro_video: profileData.introVideo || null,
       industry: profileData.industry,
       established_year: profileData.establishedYear,
       employee_count: profileData.employeeCount,
@@ -4294,7 +4344,14 @@ const saveProfile = async () => {
       console.log("🔗 Saved card nfc_card_id:", getSelectedCard()?.nfc_card_id);
       
       $toast.success("Landing page and links saved successfully!");
-      
+
+      // Company-locked fields were kept at the company value by the server:
+      // say so and reload, so the form shows what was actually saved.
+      if (Array.isArray(response.locked_overrides) && response.locked_overrides.length) {
+        $toast.info("Some fields are managed by your company and were kept as set by your admin.");
+        await loadProfile();
+      }
+
       // Update links with backend IDs (remove _isNew flag)
       if (response.landing_page && response.landing_page.social_links) {
         links.value = response.landing_page.social_links.map(link => ({
@@ -4455,6 +4512,34 @@ const loadAllEmployeeCards = async () => {
   }
 };
 
+// ─── Business tenant context: role, seat status, company-locked fields ───
+// Locks are enforced by the API on save; this only tells the member up front.
+const businessContext = ref(null);
+const BUSINESS_LOCK_LABELS = {
+  company_name: "Company name", company_logo: "Company logo", company_logo_text: "Logo text",
+  company_registration_no: "Registration no.", company_description: "Company description",
+  industry: "Industry", website: "Website", website_url: "Website button",
+  address: "Address", address_name: "Address name", address_street: "Street", address_area: "Area",
+  address_city_state: "City / state", address_country: "Country", address_map_url: "Map link",
+  postal_code: "Postal code", profile_style: "Profile style", theme: "Theme",
+  background_color: "Background colour", text_color: "Text colour", accent_color: "Accent colour",
+  bg_gradient: "Background gradient", card_style: "Card style", button_style: "Button style",
+  color_scheme: "Colour scheme", font: "Font", layout: "Layout", cover_banner: "Cover banner",
+};
+const businessLockedLabels = computed(() =>
+  (businessContext.value?.my_locked_fields || [])
+    .filter((k) => k !== "card_template")
+    .map((k) => BUSINESS_LOCK_LABELS[k] || k)
+);
+const loadBusinessContext = async () => {
+  try {
+    const res = await $api.get("/business/context");
+    businessContext.value = res?.data?.is_business ? res.data : null;
+  } catch (_) {
+    businessContext.value = null;
+  }
+};
+
 const loadProfile = async () => {
   if (!selectedNfcCardId.value) {
     console.log("No card selected, skipping profile load");
@@ -4521,6 +4606,7 @@ const loadProfile = async () => {
       profileData.companyDepartment = landingPage.company_department || "";
       profileData.companyDescription = landingPage.company_description || "";
       profileData.companyVideo = landingPage.company_video || "";
+      profileData.introVideo = landingPage.intro_video || "";
       profileData.industry = landingPage.industry || "";
       profileData.establishedYear = landingPage.established_year || "";
       profileData.employeeCount = landingPage.employee_count || "";
@@ -4795,6 +4881,9 @@ const loadProfile = async () => {
 
 // Reset profile data to defaults
 const resetProfileData = () => {
+  profileData.vcardEnabled = true;
+  profileData.qrCodeEnabled = true;
+  profileData.contactFormEnabled = true;
   // Basic Info
   profileData.name = "";
   profileData.position = "";
@@ -4820,6 +4909,7 @@ const resetProfileData = () => {
   profileData.companyDepartment = "";
   profileData.companyDescription = "";
   profileData.companyVideo = "";
+  profileData.introVideo = "";
   profileData.industry = "";
   profileData.establishedYear = "";
   profileData.employeeCount = "";
@@ -5234,6 +5324,7 @@ const openSavedLandingPage = () => {
 onMounted(async () => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+  loadBusinessContext();
   const uid = authStore.user?.id;
   const planType = 'business';
 

@@ -43,7 +43,7 @@
           <!-- Collapsed rail: unread badge becomes a dot on the icon -->
           <span
             v-else-if="item.badge && collapsed"
-            class="absolute right-3 top-2 h-2 w-2 rounded-full bg-error-500 ring-2 ring-[#171d2b]"
+            class="absolute right-3 top-2 h-2 w-2 rounded-full bg-error-500 ring-2 ring-[color:var(--admin-ink)]"
           ></span>
         </NuxtLink>
       </template>
@@ -64,11 +64,11 @@ defineEmits(["locked", "navigate"]);
 
 <style scoped>
 .portal-nav-locked {
-  color: rgba(245, 241, 232, 0.4);
+  color: color-mix(in srgb, var(--admin-paper) 40%, transparent);
   cursor: not-allowed;
 }
 .portal-nav-locked:hover {
-  color: rgba(245, 241, 232, 0.55);
+  color: color-mix(in srgb, var(--admin-paper) 55%, transparent);
   background: rgba(255, 255, 255, 0.03);
 }
 </style>

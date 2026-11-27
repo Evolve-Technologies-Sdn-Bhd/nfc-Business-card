@@ -13,7 +13,7 @@
     <NuxtLink
       v-if="!access.isBusiness"
       to="/Onboarding/plan"
-      class="mt-2.5 inline-flex items-center gap-1 text-caption font-semibold text-[#dcc28a] hover:text-white"
+      class="mt-2.5 inline-flex items-center gap-1 text-caption font-semibold text-[color:var(--admin-brass-soft)] hover:text-white"
     >
       {{ access.isFree ? "Upgrade plan" : "Compare plans" }}
       <Icon name="heroicons:arrow-right" class="h-3.5 w-3.5" />
@@ -36,13 +36,13 @@ const status = computed(() => portalPlanStatus(props.access));
   border-radius: 0.8rem;
   padding: 0.75rem 0.85rem;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(194, 160, 104, 0.18);
+  border: 1px solid color-mix(in srgb, var(--brass) 18%, transparent);
 }
 .portal-plan-dot {
   height: 0.5rem;
   width: 0.5rem;
   border-radius: 9999px;
-  background: #9c988f;
+  background: var(--admin-text-3);
 }
 .portal-plan-dot.is-success { background: #4ade80; box-shadow: 0 0 8px rgba(74, 222, 128, 0.6); }
 .portal-plan-dot.is-warning { background: #fbbf24; }

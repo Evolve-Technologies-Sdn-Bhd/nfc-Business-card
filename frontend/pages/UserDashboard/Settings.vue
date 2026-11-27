@@ -22,7 +22,7 @@
             :class="[
               'shrink-0 whitespace-nowrap text-left px-3 py-2 rounded-lg transition-colors duration-150 flex items-center text-navigation',
               activeTab === tab.id
-                ? 'bg-accent-100 text-secondary-900 shadow-[inset_0_0_0_1px_rgba(194,160,104,0.35)]'
+                ? 'bg-accent-100 text-secondary-900 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brass)_35%,transparent)]'
                 : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900',
               tab.id === 'danger' && activeTab !== tab.id ? 'lg:mt-2 text-error-600 hover:text-error-700' : '',
             ]"

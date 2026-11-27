@@ -244,6 +244,86 @@ const buildAccentScale = (accent, accentSecondary) => ({
   accent900: mix(accent, -0.6),
 });
 
+// ---------------------------------------------------------------------------
+// Design-system role tokens
+// The Ink & Brass design (admin shell, user portal, public site, auth pages)
+// is written against role tokens — --ink-*, --brass*, --paper*, --admin-* —
+// not against the Tailwind palette. Setting them here makes the admin's theme
+// choice reach EVERY part of the system, not just `primary-*` utilities.
+//   - Ink & Brass (default) keeps its exact hand-tuned values.
+//   - Every other theme derives its roles from its own palette:
+//       ink   = dark structure (rails, hero surfaces) from primary-900
+//       brass = accent ramp
+//       paper = warm/cool neutral from secondary-50/100
+// The same names are declared in main.css as first-paint fallbacks.
+// ---------------------------------------------------------------------------
+const INK_AND_BRASS_ROLES = {
+  '--ink-950': '#06090d',
+  '--ink-900': '#0b1017',
+  '--ink-850': '#0f1621',
+  '--ink-800': '#141d2b',
+  '--ink-700': '#1d2839',
+  '--ink-600': '#2a3648',
+  '--paper': '#f7f5f0',
+  '--paper-2': '#efece4',
+  '--brass': '#c2a068',
+  '--brass-600': '#a9854d',
+  '--brass-200': '#e8d9b8',
+  '--brass-700': '#8a6a33',
+  '--admin-ink': '#171d2b',
+  '--admin-ink-soft': '#252b38',
+  '--admin-ink-raise': '#1f2634',
+  '--admin-brass': '#c2a068',
+  '--admin-brass-deep': '#a88750',
+  '--admin-brass-soft': '#dcc28a',
+  '--admin-brass-ink': '#3a2c14',
+  '--admin-paper': '#f5f1e8',
+  '--admin-border': '#e6e0d5',
+  '--admin-border-strong': '#d7cfbf',
+  '--admin-text': '#252b38',
+  '--admin-text-2': '#77746d',
+  '--admin-text-3': '#9c988f',
+};
+
+const buildRoleTokens = (themeName, colors, accentScale) => {
+  if (themeName === 'zoraPro') return INK_AND_BRASS_ROLES;
+
+  const deep = colors.primary900;
+  return {
+    // Dark structure — always dark enough for light text (AA on rails/heroes)
+    '--ink-950': mix(deep, -0.72),
+    '--ink-900': mix(deep, -0.58),
+    '--ink-850': mix(deep, -0.5),
+    '--ink-800': mix(deep, -0.42),
+    '--ink-700': mix(deep, -0.28),
+    '--ink-600': mix(deep, -0.14),
+    // Paper — page backgrounds
+    '--paper': colors.secondary50,
+    '--paper-2': colors.secondary100,
+    // Accent family
+    '--brass': accentScale.accent500,
+    '--brass-600': accentScale.accent600,
+    '--brass-200': accentScale.accent200,
+    // Small accent text on light surfaces needs the darker step to stay AA
+    '--brass-700': accentScale.accent800,
+    // Admin / portal shell
+    '--admin-ink': mix(deep, -0.4),
+    '--admin-ink-soft': mix(deep, -0.2),
+    '--admin-ink-raise': mix(deep, -0.3),
+    '--admin-brass': accentScale.accent500,
+    '--admin-brass-deep': accentScale.accent600,
+    '--admin-brass-soft': accentScale.accent300,
+    // Text placed ON an accent button / badge
+    '--admin-brass-ink': mix(accentScale.accent500, -0.72),
+    '--admin-paper': colors.secondary100,
+    '--admin-border': colors.secondary200,
+    '--admin-border-strong': colors.secondary300,
+    '--admin-text': colors.secondary800,
+    '--admin-text-2': colors.secondary500,
+    '--admin-text-3': colors.secondary400,
+  };
+};
+
 // Shared state (singleton pattern for SSR compatibility)
 let currentTheme = null;
 let themeRef = null;
@@ -294,6 +374,12 @@ export function useTheme() {
     root.style.setProperty('--theme-secondary-700', colors.secondary700);
     root.style.setProperty('--theme-secondary-800', colors.secondary800);
     root.style.setProperty('--theme-secondary-900', colors.secondary900);
+
+    // Role tokens used by the Ink & Brass design system (admin, portal,
+    // public site, auth) so they follow the admin's theme choice too.
+    Object.entries(buildRoleTokens(themeName, colors, accentScale)).forEach(([prop, value]) => {
+      root.style.setProperty(prop, value);
+    });
 
     // Also set data attribute for potential CSS selectors
     root.setAttribute('data-theme', themeName);
@@ -350,13 +436,26 @@ export function useTheme() {
 
   // Get all available themes for the UI
   const getThemes = () => {
-    return Object.entries(themes).map(([key, value]) => ({
-      key,
-      name: value.name,
-      description: value.description,
-      icon: value.icon,
-      previewColor: value.colors.primary500
-    }));
+    return Object.entries(themes).map(([key, value]) => {
+      const roles = buildRoleTokens(
+        key,
+        value.colors,
+        buildAccentScale(value.colors.accent, value.colors.accentSecondary),
+      );
+      return {
+        key,
+        name: value.name,
+        description: value.description,
+        icon: value.icon,
+        previewColor: value.colors.primary500,
+        // What the admin shell / portal / public site will actually use
+        swatches: {
+          ink: roles['--admin-ink'],
+          accent: roles['--admin-brass'],
+          paper: roles['--admin-paper'],
+        },
+      };
+    });
   };
 
   // Get current theme info

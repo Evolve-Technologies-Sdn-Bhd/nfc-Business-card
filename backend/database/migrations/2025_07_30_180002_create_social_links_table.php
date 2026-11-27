@@ -1,4 +1,3 @@
-// database/migrations/xxxx_create_social_links_table.php
 <?php
 
 use Illuminate\Database\Migrations\Migration;

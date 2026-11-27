@@ -25,9 +25,9 @@
 
           <!-- Brand message -->
           <div class="lg-hero-copy">
-            <span class="eyebrow-brass">
+            <span v-if="isAdminLogin" class="eyebrow-brass">
               <span class="dot"></span>
-              {{ isAdminLogin ? 'Administration Console' : 'Smart NFC Business Card' }}
+              Administration Console
             </span>
             <h1 class="lg-hero-title">
               {{ isAdminLogin ? 'Manage your platform,' : 'Your digital identity,' }}

@@ -2175,14 +2175,14 @@ onMounted(async () => {
   justify-content: flex-end;
   padding-right: 0.55rem;
   border-radius: 0.5rem;
-  color: rgba(245, 241, 232, 0.8);
-  background: linear-gradient(135deg, #252b38 0%, #171d2b 100%);
-  box-shadow: inset 0 0 0 1px rgba(194, 160, 104, 0.25);
+  color: color-mix(in srgb, var(--admin-paper) 80%, transparent);
+  background: linear-gradient(135deg, var(--admin-ink-soft) 0%, var(--admin-ink) 100%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 25%, transparent);
 }
 .portal-card-chip.is-premium,
 .portal-card-chip.is-business {
-  color: #3a2c14;
-  background: linear-gradient(135deg, #dcc28a 0%, #a88750 100%);
+  color: var(--admin-brass-ink);
+  background: linear-gradient(135deg, var(--admin-brass-soft) 0%, var(--admin-brass-deep) 100%);
 }
 .modal-enter-active,
 .modal-leave-active {

@@ -31,6 +31,161 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Who may act on which member. The owner may act on anyone in the tenant; a
+     * delegated admin may only act on card managers and plain members, never on
+     * another admin or on themself (no peer lock-out, no self-escalation).
+     * Returns a 403 response when the action is not allowed, null otherwise.
+     */
+    public static function denyUnlessCanActOn(User $actor, User $target)
+    {
+        if ($actor->isBusinessAccount()) {
+            return null;
+        }
+
+        if ($actor->id === $target->id || $target->businessRole() === User::BUSINESS_ROLE_ADMIN) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the Business account owner can manage company admins or their own account.',
+            ], 403);
+        }
+
+        return null;
+    }
+
+    /**
+     * Add a member to the Business account (owner or delegated admin).
+     *
+     * POST /business/employees
+     * The member gets a seat in the owner's plan, inherits the company name and
+     * receives an e-mail link to set their own password — no password is chosen
+     * by, or shown to, the admin. Seat limit: total_account_slots counts the
+     * owner plus every member.
+     */
+    public function inviteEmployee(Request $request)
+    {
+        $actor = $request->user();
+        $businessAccount = $this->resolveBusinessAccount($request);
+
+        if (!$businessAccount || !$businessAccount->isBusinessAccount()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your company does not have an active Business plan.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:50',
+            'job_title' => 'nullable|string|max:255',
+            'role' => 'nullable|in:' . implode(',', User::BUSINESS_EMPLOYEE_ROLES),
+        ]);
+
+        $role = $validated['role'] ?? User::BUSINESS_ROLE_MEMBER;
+
+        // Only the owner may create another company admin.
+        if ($role === User::BUSINESS_ROLE_ADMIN && !$actor->isBusinessAccount()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the Business account owner can add company admins.',
+            ], 403);
+        }
+
+        $employee = DB::transaction(function () use ($businessAccount, $validated, $role) {
+            // Serialise seat allocation per tenant so two concurrent invites
+            // cannot both take the last seat.
+            $owner = User::whereKey($businessAccount->id)->lockForUpdate()->first();
+
+            if ($owner->getQuotaInfo(false)['available_account_slots'] <= 0) {
+                return null;
+            }
+
+            $shared = app(\App\Services\BusinessTenantService::class)->settingsFor($owner)->shared_fields ?? [];
+
+            return User::create([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'email' => strtolower($validated['email']),
+                'phone' => $validated['phone'] ?? null,
+                'job_title' => $validated['job_title'] ?? null,
+                // Unknown random password: the member sets their own via the e-mailed link.
+                'password' => bcrypt(bin2hex(random_bytes(24))),
+                'subscription_plan' => 'business',
+                'subscription_active' => true,
+                'parent_business_id' => $owner->id,
+                'business_role' => $role,
+                'company' => $shared['company_name'] ?? $owner->company,
+                'is_admin' => false,
+                // Invited by their company: the address is the one the admin entered,
+                // and the set-password link proves they own it.
+                'email_verified_at' => now(),
+            ]);
+        });
+
+        if (!$employee) {
+            $quota = $businessAccount->getQuotaInfo(false);
+            return response()->json([
+                'success' => false,
+                'code' => 'SEAT_LIMIT_REACHED',
+                'message' => 'All seats are in use. Remove a member or ask NFCGo to add more seats.',
+                'data' => [
+                    'total_account_slots' => $quota['total_account_slots'],
+                    'total_accounts' => $quota['total_accounts'],
+                ],
+            ], 403);
+        }
+
+        $this->sendSetPasswordLink($employee, $request);
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$employee->full_name} was added. We e-mailed them a link to set their password.",
+            'data' => [
+                'employee' => [
+                    'id' => $employee->id,
+                    'full_name' => $employee->full_name,
+                    'email' => $employee->email,
+                    'job_title' => $employee->job_title,
+                    'business_role' => $employee->businessRole(),
+                    'subscription_active' => true,
+                ],
+                'quota_info' => $businessAccount->getQuotaInfo(false),
+            ],
+        ], 201);
+    }
+
+    /**
+     * Issue a one-time password link (1 hour) and e-mail it to the member.
+     */
+    private function sendSetPasswordLink(User $employee, Request $request): void
+    {
+        $rawToken = bin2hex(random_bytes(48));
+
+        PasswordReset::invalidateUserTokens($employee->id);
+
+        PasswordReset::create([
+            'user_id' => $employee->id,
+            'token_hash' => hash_hmac('sha256', $rawToken, config('app.key')),
+            'used' => false,
+            'expires_at' => Carbon::now()->addHour(),
+            'request_ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        try {
+            Mail::to($employee->email)->send(
+                new PasswordResetMail($employee, $rawToken, $request->ip())
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send employee password e-mail', [
+                'employee_id' => $employee->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Upload employee data (CSV/XLSX) and create bulk NFC card orders.
      *
      * Cards are created against the Business account and automatically assigned
@@ -97,6 +252,19 @@ class EmployeeController extends Controller
 
             // Resolve design assets once — they apply to every card in the batch.
             $design = $this->resolveDesignPayload($request);
+
+            // Company card template locked by the owner: every card uses it.
+            $settings = app(\App\Services\BusinessTenantService::class)->settingsFor($businessAccount);
+            if ($settings->card_template_id
+                && in_array(\App\Services\BusinessTenantService::CARD_TEMPLATE_LOCK, $settings->locked_fields ?? [], true)) {
+                $design = [
+                    'is_custom_design' => false,
+                    'front_url' => null,
+                    'back_url' => null,
+                    'card_template_id' => $settings->card_template_id,
+                    'design_notes' => null,
+                ];
+            }
 
             $createdCards = [];
             $errors = [];
@@ -562,34 +730,14 @@ class EmployeeController extends Controller
             ], 404);
         }
 
+        if ($denied = self::denyUnlessCanActOn($request->user(), $employee)) {
+            return $denied;
+        }
+
         // Issue a one-time password-reset token and email the employee a link to
         // set their own password. We deliberately do NOT email a plaintext
         // password, and we do not return one in the API response.
-        $rawToken = bin2hex(random_bytes(48));
-        $tokenHash = hash_hmac('sha256', $rawToken, config('app.key'));
-
-        // Invalidate any existing unused reset tokens for this employee.
-        PasswordReset::invalidateUserTokens($employee->id);
-
-        PasswordReset::create([
-            'user_id' => $employee->id,
-            'token_hash' => $tokenHash,
-            'used' => false,
-            'expires_at' => Carbon::now()->addHour(),
-            'request_ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        try {
-            Mail::to($employee->email)->send(
-                new PasswordResetMail($employee, $rawToken, $request->ip())
-            );
-        } catch (\Exception $e) {
-            \Log::error('Failed to send employee password reset email', [
-                'employee_id' => $employee->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->sendSetPasswordLink($employee, $request);
 
         return response()->json([
             'success' => true,
@@ -697,9 +845,20 @@ class EmployeeController extends Controller
             'subscription_active' => 'required|boolean'
         ]);
 
-        // Update status
-        $employee->subscription_active = $request->subscription_active;
+        if ($denied = self::denyUnlessCanActOn($request->user(), $employee)) {
+            return $denied;
+        }
+
+        // Update status (the member's seat switch)
+        $employee->subscription_active = $request->boolean('subscription_active');
         $employee->save();
+
+        // Deactivating must actually end access: login now refuses a switched-off
+        // seat, and existing sessions are revoked here.
+        if (!$employee->subscription_active) {
+            $employee->tokens()->delete();
+            $employee->rememberTokens()->delete();
+        }
 
         return response()->json([
             'success' => true,

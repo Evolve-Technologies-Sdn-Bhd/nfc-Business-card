@@ -1013,6 +1013,7 @@ class NfcCardController extends Controller
             'landing_page' => $landingPage,
             'show_nfcgo_branding' => $this->shouldShowNfcgoBranding($nfcCard, $landingPage),
             'effective_features' => $this->effectiveFeatures($nfcCard, $landingPage),
+            'videos' => $this->profileVideos($nfcCard, $landingPage),
         ]);
     }
 
@@ -1151,6 +1152,35 @@ class NfcCardController extends Controller
         ]);
     }
 
+    /**
+     * Player URLs for the profile videos, or null when there is none or the
+     * card's plan does not include the field (Introduction Video: as set on
+     * the introVideo builder field, Premium/Business by default; Company
+     * Video: companyVideo, Business by default). Only YouTube/Vimeo links
+     * become players (App\Support\VideoEmbed).
+     */
+    private function profileVideos(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+
+        $allowed = \App\Models\ProfileBuilderField::query()
+            ->whereIn('field_key', ['introVideo', 'companyVideo'])
+            ->get(['field_key', 'available_plans', 'is_visible'])
+            ->mapWithKeys(function ($field) use ($plan) {
+                $plans = $field->available_plans;
+                if (is_string($plans)) {
+                    $plans = json_decode($plans, true);
+                }
+                $ok = $field->is_visible && (empty($plans) || in_array($plan, (array) $plans, true));
+                return [$field->field_key => $ok];
+            });
+
+        return [
+            'intro' => ($allowed['introVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->intro_video) : null,
+            'company' => ($allowed['companyVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->company_video) : null,
+        ];
+    }
+
     public const PROFILE_ACTION_FEATURES = [
         'vcard_download' => 'vcardEnabled',
         'contact_form' => 'contactFormEnabled',
@@ -1237,6 +1267,7 @@ class NfcCardController extends Controller
             'pronouns' => 'nullable|string|max:50',
             'qualification' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
+            'intro_video' => ['nullable', 'string', 'max:500', \App\Support\VideoEmbed::rule()],
             'tagline' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|string|max:255', // Changed from email to string to allow empty
@@ -1311,7 +1342,7 @@ class NfcCardController extends Controller
             
             // Company additional
             'company_description' => 'nullable|string',
-            'company_video' => 'nullable|string|max:500',
+            'company_video' => ['nullable', 'string', 'max:500', \App\Support\VideoEmbed::rule()],
             'industry' => 'nullable|string|max:100',
             'established_year' => 'nullable', // Allow string or number
             'employee_count' => 'nullable', // Allow string or number
@@ -1392,6 +1423,23 @@ class NfcCardController extends Controller
 
         // Update or create landing page
         $landingPageData = $request->except('links'); // Exclude links from direct save
+
+        // Business members: company fields the owner locked are enforced here,
+        // not only greyed out in the builder (a crafted request used to be able
+        // to overwrite the company name, logo or branding).
+        $tenant = app(\App\Services\BusinessTenantService::class);
+        $editor = $request->user();
+        if ($editor->isBusinessEmployee()) {
+            if (!$tenant->memberHasAccess($editor)) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 'BUSINESS_ACCESS_INACTIVE',
+                    'message' => 'Your company Business plan or your seat is not active. Contact your company administrator.',
+                ], 403);
+            }
+            [$landingPageData, $lockedOverrides] = $tenant->applyLocks($editor, $landingPageData);
+        }
+
         $landingPage = LandingPage::updateOrCreate(
             ['nfc_card_id' => $nfcCard->id],
             $landingPageData
@@ -1445,6 +1493,8 @@ class NfcCardController extends Controller
         return response()->json([
             'success' => true,
             'landing_page' => $landingPage,
+            // Fields kept at the company value because the Business owner locked them.
+            'locked_overrides' => $lockedOverrides ?? [],
             'message' => 'Landing page saved successfully'
         ]);
     }

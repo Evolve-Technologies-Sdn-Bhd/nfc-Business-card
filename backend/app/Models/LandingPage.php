@@ -90,6 +90,7 @@ class LandingPage extends Model
         // Company additional
         'company_description',
         'company_video',
+        'intro_video',
         'industry',
         'established_year',
         'employee_count',

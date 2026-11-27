@@ -224,23 +224,52 @@ class QuotaController extends Controller
             ], 404);
         }
 
-        // Check if employee has ordered cards
-        $hasCards = NfcCard::where('user_id', $employee->id)->exists();
+        if ($denied = EmployeeController::denyUnlessCanActOn($request->user(), $employee)) {
+            return $denied;
+        }
 
-        if ($hasCards) {
+        // Cards the member bought themself (not company cards) still block the
+        // removal: those belong to the person, not to the company.
+        $hasPersonalCards = NfcCard::where('user_id', $employee->id)
+            ->where(function ($q) use ($businessAccount) {
+                $q->whereNull('business_account_id')
+                  ->orWhere('business_account_id', '!=', $businessAccount->id);
+            })
+            ->exists();
+
+        if ($hasPersonalCards) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete employee. Employee has assigned NFC cards. Please reassign them first.'
+                'message' => 'This member has NFC cards that do not belong to the company. Ask NFCGo support to move them first.'
             ], 403);
         }
 
-        // Deleting an employee frees their account slot (business_role rows are
-        // removed with the account).
-        $employee->delete();
+        // Company cards go back to the owner, with the member's public profile
+        // taken offline so their details stop showing on a card they no longer hold.
+        $returnedCards = \Illuminate\Support\Facades\DB::transaction(function () use ($employee, $businessAccount) {
+            $cardIds = NfcCard::where('user_id', $employee->id)
+                ->where('business_account_id', $businessAccount->id)
+                ->pluck('id');
+
+            NfcCard::whereIn('id', $cardIds)->update(['user_id' => $businessAccount->id]);
+            \App\Models\LandingPage::whereIn('nfc_card_id', $cardIds)->update(['is_active' => false]);
+
+            $employee->tokens()->delete();
+            // Deleting an employee frees their account slot.
+            $employee->delete();
+
+            return $cardIds->count();
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Employee deleted successfully'
+            'message' => $returnedCards > 0
+                ? "Member removed. {$returnedCards} company card(s) returned to you for reassignment."
+                : 'Member removed.',
+            'data' => [
+                'returned_cards' => $returnedCards,
+                'quota_info' => $businessAccount->getQuotaInfo(false),
+            ],
         ]);
     }
 

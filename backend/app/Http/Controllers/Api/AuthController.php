@@ -290,6 +290,15 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // A Business member whose seat the company admin switched off.
+        if (app(\App\Services\BusinessTenantService::class)->isSuspendedMember($user)) {
+            return response()->json([
+                'success' => false,
+                'code' => 'BUSINESS_SEAT_DEACTIVATED',
+                'message' => 'Your account has been deactivated by your company administrator.',
+            ], 403);
+        }
+
         $user->update(['last_login_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -854,6 +863,10 @@ class AuthController extends Controller
      */
     public function changePassword(Request $request)
     {
+        $user = $request->user();
+
+        // A Google/Apple-only account has no local password yet, so there is no
+        // "current password" to confirm when it sets its first one.
         $validator = Validator::make($request->all(), [
             'current_password' => $user->hasLocalPassword() ? 'required|string' : 'nullable|string',
             'password' => 'required|string|min:8|max:255|confirmed',
@@ -862,18 +875,14 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
-        $user = $request->user();
-
-        // A Google/Apple-only account has no local password yet, so there is no
-        // "current password" to confirm when it sets its first one.
             ], 422);
         }
 
         // Require current password UNLESS this is an OAuth-only user setting their first password
         if ($user->hasLocalPassword()) {
             if (!Hash::check($request->current_password, $user->password)) {
-                'message' => $validator->errors()->first(),
                 return response()->json([
                     'success' => false,
                     'message' => 'Current password is incorrect.',

@@ -2164,6 +2164,12 @@ const loadingCards = ref(false);
 
 // Profile data - field keys match backend ProfileBuilderField.field_key
 const profileData = reactive({
+  // Public profile action switches (Sharing & Contact). ON by default, the
+  // same default the public page and the Features panel use; saved values
+  // override them on load, and the plan rules are applied on the server.
+  vcardEnabled: true,
+  qrCodeEnabled: true,
+  contactFormEnabled: true,
   // ============ PROFILE TAB ============
   profilePicture: null,       // Profile Photo (image)
   coverBanner: null,          // Top Cover Banner (image)
@@ -3440,10 +3446,17 @@ const getVisibleFields = (fields) => {
   );
 };
 
+// "Contact Form Email" only matters while the Contact Form is on (and not
+// plan-locked: the form's own lock card already explains the upgrade).
+const hideDependentField = (fieldKey) =>
+  fieldKey === 'contactFormEmail' &&
+  (profileData.contactFormEnabled === false || isFieldRestricted("contactFormEnabled"));
+
 // Group fields by field_group from backend (fully dynamic)
 const getGroupedFields = (fields) => {
   const visible = fields.filter(field => 
     field.field_type !== 'image' && shouldShowField(field.field_key)
+    && !hideDependentField(field.field_key)
   );
   
   // Group by field_group, sorted by group_order
@@ -4952,6 +4965,9 @@ const navigateToUpgrade = () => {
 
 // Reset profile data to defaults
 const resetProfileData = () => {
+  profileData.vcardEnabled = true;
+  profileData.qrCodeEnabled = true;
+  profileData.contactFormEnabled = true;
   // Basic Info
   profileData.name = "";
   profileData.position = "";

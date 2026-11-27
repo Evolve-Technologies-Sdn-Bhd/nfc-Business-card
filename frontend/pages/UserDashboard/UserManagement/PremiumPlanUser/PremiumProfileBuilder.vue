@@ -1974,6 +1974,7 @@
 <script setup>
 // import ProfileImageUpload from '~/components/ProfileImageUpload.vue'
 import DynamicFormField from '~/components/DynamicFormField.vue';
+import { isValidVideoUrl } from "~/utils/videoEmbed";
 import LayoutDesigner from '~/components/LayoutDesigner.vue';
 import { useAuthStore } from "~/stores/auth";
 import draggable from "vuedraggable";
@@ -2174,6 +2175,12 @@ const loadingCards = ref(false);
 
 // Profile data - field keys match backend ProfileBuilderField.field_key
 const profileData = reactive({
+  // Public profile action switches (Sharing & Contact). ON by default, the
+  // same default the public page and the Features panel use; saved values
+  // override them on load, and the plan rules are applied on the server.
+  vcardEnabled: true,
+  qrCodeEnabled: true,
+  contactFormEnabled: true,
   // ============ PROFILE TAB ============
   profilePicture: null,       // Profile Photo (image)
   coverBanner: null,          // Top Cover Banner (image)
@@ -2200,6 +2207,7 @@ const profileData = reactive({
   companySlogan: "",          // Company Slogan (Premium)
   companyDescription: "",     // Company Description (richtext)
   companyVideo: "",           // Company Video URL
+  introVideo: "",             // Introduction Video URL (YouTube/Vimeo)
   industry: "",               // Industry Type (select)
   establishedYear: "",        // Year Founded
   employeeCount: "",          // Number of Employees
@@ -3640,10 +3648,17 @@ const getVisibleFields = (fields) => {
   );
 };
 
+// "Contact Form Email" only matters while the Contact Form is on (and not
+// plan-locked: the form's own lock card already explains the upgrade).
+const hideDependentField = (fieldKey) =>
+  fieldKey === 'contactFormEmail' &&
+  (profileData.contactFormEnabled === false || isFieldRestricted("contactFormEnabled"));
+
 // Group fields by field_group from backend (fully dynamic)
 const getGroupedFields = (fields) => {
   const visible = fields.filter(field => 
     field.field_type !== 'image' && shouldShowField(field.field_key)
+    && !hideDependentField(field.field_key)
   );
   
   // Group by field_group, sorted by group_order
@@ -4304,6 +4319,15 @@ const saveProfile = async () => {
     return;
   }
 
+  // Only YouTube/Vimeo links can be shown on the profile (the server checks
+  // too); say which field to fix instead of failing the whole save.
+  for (const [key, label] of [["introVideo", "Introduction Video"]]) {
+    if (!isValidVideoUrl(profileData[key])) {
+      $toast.error(`${label}: use a YouTube or Vimeo link, or clear the field.`);
+      return;
+    }
+  }
+
   // Premium Plan: Validate bio length (500 char max)
   if (profileData.bio && profileData.bio.length > PREMIUM_MAX_BIO_LENGTH) {
     $toast.error(`Bio exceeds ${PREMIUM_MAX_BIO_LENGTH} characters. Premium plan limit.`);
@@ -4532,7 +4556,10 @@ const saveProfile = async () => {
       company_registration_no: profileData.companyRegistrationNo,
       company_department: profileData.companyDepartment,
       company_description: profileData.companyDescription,
-      company_video: profileData.companyVideo,
+      // Company Video is a Business field Premium cannot edit: never send an
+      // unusable old value that would fail validation and block the save.
+      company_video: isValidVideoUrl(profileData.companyVideo) ? (profileData.companyVideo || null) : undefined,
+      intro_video: profileData.introVideo || null,
       industry: profileData.industry,
       established_year: profileData.establishedYear,
       employee_count: profileData.employeeCount,
@@ -4930,6 +4957,7 @@ const loadProfile = async () => {
       profileData.companyDepartment = landingPage.company_department || "";
       profileData.companyDescription = landingPage.company_description || "";
       profileData.companyVideo = landingPage.company_video || "";
+      profileData.introVideo = landingPage.intro_video || "";
       profileData.industry = landingPage.industry || "";
       profileData.establishedYear = landingPage.established_year || "";
       profileData.employeeCount = landingPage.employee_count || "";
@@ -5211,6 +5239,9 @@ const loadProfile = async () => {
 
 // Reset profile data to defaults
 const resetProfileData = () => {
+  profileData.vcardEnabled = true;
+  profileData.qrCodeEnabled = true;
+  profileData.contactFormEnabled = true;
   // Basic Info
   profileData.name = "";
   profileData.position = "";
@@ -5236,6 +5267,7 @@ const resetProfileData = () => {
   profileData.companyDepartment = "";
   profileData.companyDescription = "";
   profileData.companyVideo = "";
+  profileData.introVideo = "";
   profileData.industry = "";
   profileData.establishedYear = "";
   profileData.employeeCount = "";

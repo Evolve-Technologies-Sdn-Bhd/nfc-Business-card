@@ -79,6 +79,10 @@ class EntitlementService
      */
     public function hasPaidAccess(User $user, ?array $plans = null): bool
     {
+        if ($user->isBusinessEmployee()) {
+            return $this->memberAccess($user, $plans);
+        }
+
         return $this->hasActiveSubscription($user, $plans)
             || $this->hasEligibleCard($user, $plans);
     }
@@ -88,6 +92,10 @@ class EntitlementService
      */
     public function hasBusinessAccess(User $user): bool
     {
+        if ($user->isBusinessEmployee()) {
+            return $this->memberAccess($user, ['business']);
+        }
+
         return $this->hasActiveSubscription($user, ['business'])
             || $this->hasEligibleCard($user, ['business']);
     }
@@ -100,15 +108,35 @@ class EntitlementService
      */
     public function canAccessPaidProfileBuilder(User $user, ?string $plan = null): bool
     {
+        $planMatch = $plan === null
+            ? null
+            : (in_array($plan, ['premium', 'business'], true) ? [$plan] : self::PAID_PLANS);
+
+        if ($user->isBusinessEmployee()) {
+            return $this->memberAccess($user, $planMatch);
+        }
+
         if ($plan === null) {
             return (bool) $user->subscription_active || $this->hasEligibleCard($user);
         }
 
-        $planMatch = in_array($plan, ['premium', 'business'], true)
-            ? [$plan]
-            : self::PAID_PLANS;
-
         return $this->hasActiveSubscription($user, $planMatch)
             || $this->hasEligibleCard($user, $planMatch);
+    }
+
+    /**
+     * Business members do not own a plan: they hold a seat in the owner's
+     * Business plan. Before this, a member kept full Business access from the
+     * `subscription_active` flag set when the account was created (and from any
+     * card assigned to them), even after the owner's plan lapsed or was
+     * downgraded.
+     */
+    private function memberAccess(User $member, ?array $plans): bool
+    {
+        if ($plans !== null && !in_array('business', $plans, true)) {
+            return false;
+        }
+
+        return app(BusinessTenantService::class)->memberHasAccess($member);
     }
 }

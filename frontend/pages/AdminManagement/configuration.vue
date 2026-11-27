@@ -374,10 +374,12 @@
                   </div>
                   <div>
                     <h4 class="text-label text-secondary-900">{{ t.name }}</h4>
-                    <div class="mt-1 flex gap-1">
+                    <div class="mt-1 flex gap-1" :title="`Navigation ${t.swatches.ink} · Accent ${t.swatches.accent} · Background ${t.swatches.paper}`">
                       <span
+                        v-for="(colour, role) in t.swatches"
+                        :key="role"
                         class="h-3 w-3 rounded-full border border-secondary-200"
-                        :style="{ backgroundColor: t.previewColor }"
+                        :style="{ backgroundColor: colour }"
                       ></span>
                     </div>
                   </div>
@@ -400,6 +402,19 @@
             class="py-8 text-center text-body text-secondary-500"
           >
             Unable to load the theme list.
+          </div>
+
+          <div class="mt-5 rounded-xl border border-secondary-200 bg-secondary-50 p-4 text-caption leading-relaxed text-secondary-600">
+            <p class="font-semibold text-secondary-800">Where the theme applies</p>
+            <p class="mt-1">
+              Admin panel, user portal (all plans), homepage and public pages, sign in / sign up,
+              onboarding and checkout, notifications and the chatbot.
+            </p>
+            <p class="mt-1">
+              Stays fixed on purpose: the NFCGo logo, status colours (success, warning, error),
+              and each user's own public profile, which uses the profile theme they pick in the
+              Profile Builder.
+            </p>
           </div>
         </AdminSectionCard>
 

@@ -98,6 +98,15 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         });
 
+        // users.parent_business_id cascades on delete, so deleting a Business
+        // owner used to delete every member account (and their cards/profiles)
+        // with it. Detach the members first so their accounts survive.
+        static::deleting(function (User $user) {
+            if ($user->parent_business_id === null && $user->employees()->exists()) {
+                app(\App\Services\BusinessTenantService::class)->detachMembers($user);
+            }
+        });
+
         static::updating(function (User $user) {
             $nameChanged =
                 $user->isDirty('first_name') || $user->isDirty('last_name');
@@ -586,6 +595,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Company settings (shared + locked profile fields) of a Business owner.
+     */
+    public function businessSetting()
+    {
+        return $this->hasOne(BusinessSetting::class, 'owner_id');
+    }
+
+    /**
      * Get custom field/feature assignment for Business user
      */
     public function businessUserAssignment()
@@ -706,6 +723,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return !is_null($this->password) && $this->password !== '';
     }
 
+    public function getHasLocalPasswordAttribute(): bool
+    {
+        return $this->hasLocalPassword();
+    }
+
     /**
      * Get the OAuth provider name for display purposes.
      */
@@ -723,11 +745,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-    public function getHasLocalPasswordAttribute(): bool
-    {
-        return $this->hasLocalPassword();
-    }
-
      * Get quota information for Business account
      * Note: total_account_slots serves as the unified quota for both accounts and cards
      * If admin assigns 10 slots, business can have max 10 accounts (including employees) and 10 cards total.

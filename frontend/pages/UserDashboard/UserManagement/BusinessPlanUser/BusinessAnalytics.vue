@@ -18,7 +18,7 @@
     <!-- Filters -->
     <div class="card mb-6">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- NFC Card Selector -->
           <div>
             <label class="block text-label text-secondary-700 mb-2">Select Card</label>
@@ -72,78 +72,23 @@
         </div>
       </div>
     </div>
-      <!-- Overview Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="card p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 bg-primary-100 p-3 rounded-lg">
-              <Icon name="heroicons:cursor-arrow-ripple" class="h-6 w-6 text-primary-600" />
-            </div>
-            <div class="ml-4">
-              <p class="stat-label">Total Taps</p>
-              <p class="stat-value">
-                {{ analytics.totalTaps }}
-              </p>
-              <p :class="analytics.tapGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
-                {{ analytics.tapGrowth >= 0 ? '+' : '' }}{{ analytics.tapGrowth }}% from last period
-              </p>
-            </div>
+      <!-- Overview Stats: label + icon on one line, value full width, so long
+           values ("Kuala Lumpur") never get clipped on narrower screens. -->
+      <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        <div v-for="stat in overviewStats" :key="stat.label" class="card p-5">
+          <div class="flex items-center justify-between gap-2">
+            <p class="stat-label">{{ stat.label }}</p>
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0" :class="stat.tone">
+              <Icon :name="stat.icon" class="h-4 w-4" />
+            </span>
           </div>
-        </div>
-
-        <div class="card p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 bg-info-100 p-3 rounded-lg">
-              <Icon name="heroicons:users" class="h-6 w-6 text-info-600" />
-            </div>
-            <div class="ml-4">
-              <p class="stat-label">
-                Unique Visitors
-              </p>
-              <p class="stat-value">
-                {{ analytics.uniqueVisitors }}
-              </p>
-              <p :class="analytics.visitorGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
-                {{ analytics.visitorGrowth >= 0 ? '+' : '' }}{{ analytics.visitorGrowth }}% from last period
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 bg-success-100 p-3 rounded-lg">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-success-600" />
-            </div>
-            <div class="ml-4">
-              <p class="stat-label">
-                Avg. Engagement
-              </p>
-              <p class="stat-value">
-                {{ analytics.avgEngagement }}s
-              </p>
-              <p :class="analytics.engagementGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
-                {{ analytics.engagementGrowth >= 0 ? '+' : '' }}{{ analytics.engagementGrowth }}% from last period
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 bg-warning-100 p-3 rounded-lg">
-              <Icon name="heroicons:map-pin" class="h-6 w-6 text-warning-600" />
-            </div>
-            <div class="ml-4">
-              <p class="stat-label">Top Location</p>
-              <p class="stat-value">
-                {{ analytics.topLocation }}
-              </p>
-              <p class="text-body text-secondary-600">
-                {{ analytics.topLocationTaps }} taps
-              </p>
-            </div>
-          </div>
+          <p class="stat-value mt-2 truncate" :title="String(stat.value)">{{ stat.value }}</p>
+          <p
+            class="text-caption mt-1"
+            :class="stat.growth === undefined ? 'text-secondary-500' : stat.growth >= 0 ? 'text-success-700' : 'text-error-700'"
+          >
+            {{ stat.note }}
+          </p>
         </div>
       </div>
 
@@ -151,12 +96,14 @@
         <!-- Taps Over Time Chart -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">
+            <div>
+              <h3 class="card-title">
               Taps Over Time
             </h3>
-            <p class="card-subtitle">
+              <p class="card-subtitle">
               Daily tap count for the selected period
             </p>
+            </div>
           </div>
           <div class="card-body">
             <div v-if="dailyTaps.length === 0" class="h-64 bg-secondary-50 rounded-lg flex items-center justify-center">
@@ -197,8 +144,10 @@
         <!-- Device Types -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Device Types</h3>
-            <p class="card-subtitle">Breakdown by device type</p>
+            <div>
+              <h3 class="card-title">Device Types</h3>
+              <p class="card-subtitle">Breakdown by device type</p>
+            </div>
           </div>
           <div class="card-body">
             <div
@@ -243,204 +192,170 @@
         </div>
       </div>
 
-      <!-- Detailed Analytics -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Recent Taps -->
-        <div class="lg:col-span-2">
-          <div class="card">
-            <div class="card-header">
-              <div class="flex items-center justify-between">
-                <h3 class="card-title">
-                  Recent Taps
-                </h3>
-                <button @click="refreshTaps" class="btn btn-sm btn-ghost">
-                  <Icon name="heroicons:arrow-path" class="h-4 w-4" />
-                </button>
-              </div>
+      <!-- Detailed Analytics: three compact summaries in one row, then the
+           full-width tap log (the old 2/3 + stacked 1/3 split left a large
+           empty area whenever there was little data). -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Top Locations -->
+        <div class="card flex flex-col">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Top locations</h3>
+              <p class="card-subtitle">Where your cards are tapped</p>
             </div>
-            <div class="card-body">
-              <div v-if="loading" class="flex items-center justify-center py-8">
-                <div class="spinner mr-3"></div>
-                <span class="text-secondary-600">Loading recent taps...</span>
-              </div>
-
-              <div
-                v-else-if="recentTaps.length === 0"
-                class="text-center py-8 text-secondary-500"
+          </div>
+          <div class="card-body flex-1">
+            <div v-if="analytics.topLocations.length === 0" class="analytics-empty">
+              <Icon name="heroicons:map-pin" class="analytics-empty__icon" />
+              <p>No location data yet</p>
+            </div>
+            <ul v-else class="space-y-3">
+              <li
+                v-for="location in analytics.topLocations"
+                :key="location.name"
+                class="flex items-center justify-between gap-3"
               >
-                <Icon
-                  name="heroicons:cursor-arrow-ripple"
-                  class="h-12 w-12 mx-auto mb-3"
-                />
-                <p class="card-title">No taps recorded yet</p>
-                <p class="text-body">
-                  Taps will appear here when people interact with your NFC tag
-                </p>
-              </div>
-
-              <div v-else class="space-y-3">
-                <div
-                  v-for="tap in recentTaps"
-                  :key="tap.id"
-                  class="flex items-center justify-between p-3 bg-secondary-50 rounded-lg"
-                >
-                  <div class="flex items-center space-x-3">
-                    <div
-                      class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center"
-                    >
-                      <Icon
-                        name="heroicons:cursor-arrow-ripple"
-                        class="h-5 w-5 text-primary-600"
-                      />
-                    </div>
-                    <div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-body font-medium text-secondary-900">{{
-                          tap.location || "Unknown Location"
-                        }}</span>
-                        <span class="text-caption text-secondary-500">•</span>
-                        <span class="text-caption text-secondary-500">{{
-                          tap.device || "Unknown Device"
-                        }}</span>
-                      </div>
-                      <p class="text-caption text-secondary-600">
-                        {{ formatDateTime(tap.timestamp) }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-body text-secondary-900">
-                      {{ tap.duration || 0 }}s
-                    </p>
-                    <p class="text-caption text-secondary-500">duration</p>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="recentTaps.length >= 10" class="mt-4 text-center">
-                <button @click="loadMoreTaps" class="btn btn-sm btn-outline">
-                  Load More
-                </button>
-              </div>
-            </div>
+                <span class="flex items-center min-w-0 text-body text-secondary-900">
+                  <Icon name="heroicons:map-pin" class="h-4 w-4 text-secondary-400 mr-2 shrink-0" />
+                  <span class="truncate">{{ location.name }}</span>
+                </span>
+                <span class="text-body font-medium text-secondary-600 tabular-nums">{{ location.taps }}</span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <!-- Analytics Summary -->
-        <div class="space-y-6">
-          <!-- Geographic Data -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">
-                Top Locations
-              </h3>
+        <!-- Peak Hours -->
+        <div class="card flex flex-col">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Peak hours</h3>
+              <p class="card-subtitle">When people tap most</p>
             </div>
-            <div class="card-body">
-              <div
-                v-if="analytics.topLocations.length === 0"
-                class="text-center py-8 text-secondary-500"
+          </div>
+          <div class="card-body flex-1">
+            <div v-if="analytics.peakHours.length === 0" class="analytics-empty">
+              <Icon name="heroicons:clock" class="analytics-empty__icon" />
+              <p>No time data yet</p>
+            </div>
+            <ul v-else class="space-y-3">
+              <li
+                v-for="hour in analytics.peakHours"
+                :key="hour.time"
+                class="flex items-center justify-between gap-3"
               >
-                <Icon name="heroicons:map-pin" class="h-12 w-12 mx-auto mb-2" />
-                <p>No location data available yet</p>
+                <span class="text-body text-secondary-900">{{ hour.time }}</span>
+                <span class="flex items-center gap-2">
+                  <span class="w-16 bg-secondary-200 rounded-full h-2">
+                    <span class="block bg-accent-500 h-2 rounded-full" :style="{ width: `${hour.percentage}%` }"></span>
+                  </span>
+                  <span class="text-body text-secondary-600 tabular-nums w-6 text-right">{{ hour.taps }}</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Performance Score -->
+        <div class="card flex flex-col">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Performance score</h3>
+              <p class="card-subtitle">Tap frequency and engagement</p>
+            </div>
+          </div>
+          <div class="card-body flex-1 flex flex-col items-center justify-center">
+            <div class="relative w-24 h-24">
+              <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+                <path
+                  class="text-secondary-200"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  v-if="analytics.totalTaps > 0"
+                  class="text-primary-600"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  fill="none"
+                  stroke-linecap="round"
+                  :stroke-dasharray="`${analytics.performanceScore}, 100`"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="stat-value">{{ analytics.totalTaps > 0 ? analytics.performanceScore + "%" : "—" }}</span>
               </div>
-              <div v-else class="space-y-3">
-                <div
-                  v-for="location in analytics.topLocations"
-                  :key="location.name"
-                  class="flex items-center justify-between"
-                >
-                  <div class="flex items-center">
-                    <Icon
-                      name="heroicons:map-pin"
-                      class="h-4 w-4 text-secondary-400 mr-2"
-                    />
-                    <span class="text-body text-secondary-900">{{
-                      location.name
-                    }}</span>
-                  </div>
-                  <span class="text-body font-medium text-secondary-600">{{
-                    location.taps
-                  }}</span>
+            </div>
+            <p v-if="analytics.totalTaps === 0" class="text-helper text-secondary-500 mt-3">
+              Appears after the first taps
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Taps (full width) -->
+      <div class="card">
+        <div class="card-header flex items-center justify-between gap-3">
+          <div>
+            <h3 class="card-title">Recent taps</h3>
+            <p class="card-subtitle">The latest interactions with your cards</p>
+          </div>
+          <button
+            type="button"
+            @click="refreshTaps"
+            :disabled="loading"
+            class="admin-btn admin-btn--outline"
+            title="Refresh"
+            aria-label="Refresh recent taps"
+          >
+            <Icon name="heroicons:arrow-path" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
+        <div class="card-body">
+          <div v-if="loading" class="flex items-center justify-center py-8">
+            <div class="spinner mr-3"></div>
+            <span class="text-secondary-600">Loading recent taps...</span>
+          </div>
+
+          <div v-else-if="recentTaps.length === 0" class="analytics-empty">
+            <Icon name="heroicons:cursor-arrow-ripple" class="analytics-empty__icon" />
+            <p class="text-label text-secondary-800">No taps recorded yet</p>
+            <p>Taps appear here when someone taps one of your cards or opens its link.</p>
+          </div>
+
+          <div v-else class="divide-y divide-secondary-100">
+            <div
+              v-for="tap in recentTaps"
+              :key="tap.id"
+              class="flex items-center justify-between gap-3 py-3"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
+                  <Icon name="heroicons:cursor-arrow-ripple" class="h-4 w-4 text-primary-600" />
                 </div>
+                <div class="min-w-0">
+                  <p class="text-body font-medium text-secondary-900 truncate">
+                    {{ tap.location || "Unknown location" }}
+                    <span class="text-caption text-secondary-500 font-normal">· {{ tap.device || "Unknown device" }}</span>
+                  </p>
+                  <p class="text-caption text-secondary-600">{{ formatDateTime(tap.timestamp) }}</p>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-body text-secondary-900 tabular-nums">{{ tap.duration || 0 }}s</p>
+                <p class="text-caption text-secondary-500">duration</p>
               </div>
             </div>
           </div>
 
-          <!-- Time Distribution -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Peak Hours</h3>
-            </div>
-            <div class="card-body">
-              <div
-                v-if="analytics.peakHours.length === 0"
-                class="text-center py-8 text-secondary-500"
-              >
-                <Icon name="heroicons:clock" class="h-12 w-12 mx-auto mb-2" />
-                <p>No time data available yet</p>
-              </div>
-              <div v-else class="space-y-3">
-                <div
-                  v-for="hour in analytics.peakHours"
-                  :key="hour.time"
-                  class="flex items-center justify-between"
-                >
-                  <span class="text-body text-secondary-900">{{
-                    hour.time
-                  }}</span>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-16 bg-secondary-200 rounded-full h-2">
-                      <div
-                        class="bg-warning-500 h-2 rounded-full"
-                        :style="{ width: `${hour.percentage}%` }"
-                      ></div>
-                    </div>
-                    <span class="text-body text-secondary-600">{{
-                      hour.taps
-                    }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Performance Score -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">
-                Performance Score
-              </h3>
-            </div>
-            <div class="card-body text-center">
-              <div class="relative w-24 h-24 mx-auto mb-4">
-                <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    class="text-secondary-200"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    class="text-primary-600"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    fill="none"
-                    stroke-linecap="round"
-                    :stroke-dasharray="`${analytics.totalTaps > 0 ? analytics.performanceScore : 0}, 100`"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <span class="stat-value"
-                    >{{ analytics.totalTaps > 0 ? analytics.performanceScore + "%" : "—" }}</span
-                  >
-                </div>
-              </div>
-              <p class="card-subtitle">
-                Based on tap frequency and engagement
-              </p>
-            </div>
+          <div v-if="recentTaps.length >= 10" class="mt-4 text-center">
+            <button type="button" @click="loadMoreTaps" class="admin-btn admin-btn--outline">
+              Load more
+            </button>
           </div>
         </div>
       </div>
@@ -482,6 +397,20 @@ const analytics = reactive({
   deviceTypes: [],
   topLocations: [],
   peakHours: [],
+});
+
+const growthNote = (value) => `${value >= 0 ? "+" : ""}${value}% vs previous period`;
+
+// Overview tiles. "Unknown" location is shown as a dash rather than a word
+// that reads like real data.
+const overviewStats = computed(() => {
+  const hasLocation = analytics.topLocation && analytics.topLocation !== "Unknown";
+  return [
+    { label: "Total taps", value: analytics.totalTaps, icon: "heroicons:cursor-arrow-ripple", tone: "bg-primary-100 text-primary-700", growth: analytics.tapGrowth, note: growthNote(analytics.tapGrowth) },
+    { label: "Unique visitors", value: analytics.uniqueVisitors, icon: "heroicons:users", tone: "bg-info-100 text-info-700", growth: analytics.visitorGrowth, note: growthNote(analytics.visitorGrowth) },
+    { label: "Avg. engagement", value: `${analytics.avgEngagement}s`, icon: "heroicons:clock", tone: "bg-success-100 text-success-700", growth: analytics.engagementGrowth, note: growthNote(analytics.engagementGrowth) },
+    { label: "Top location", value: hasLocation ? analytics.topLocation : "—", icon: "heroicons:map-pin", tone: "bg-accent-100 text-accent-700", growth: undefined, note: hasLocation ? `${analytics.topLocationTaps} taps` : "No location data yet" },
+  ];
 });
 
 const recentTaps = ref([]);
@@ -698,3 +627,13 @@ onMounted(async () => {
   await Promise.all([loadNfcCards(), loadEmployees()]);
 });
 </script>
+
+<style scoped>
+/* Compact, consistent empty state for the analytics cards. */
+.analytics-empty {
+  @apply flex flex-col items-center justify-center text-center gap-1 py-6 text-body text-secondary-500;
+}
+.analytics-empty__icon {
+  @apply h-8 w-8 text-secondary-300 mb-1;
+}
+</style>
