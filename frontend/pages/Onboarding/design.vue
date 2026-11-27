@@ -35,6 +35,15 @@
               Card Information
             </h2>
 
+            <p
+              v-if="printedFieldLabels.length"
+              class="mb-5 rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 text-body-sm text-primary-800"
+            >
+              <Icon name="heroicons:sparkles" class="mr-1 inline h-4 w-4 align-[-3px]" />
+              This design prints your <strong>{{ printedFieldLabels.join(", ") }}</strong> on the card.
+              Fill them in and check the live preview.
+            </p>
+
             <form @submit.prevent="saveCardInfo" class="space-y-6">
               <!-- Basic Information -->
               <div class="space-y-4">
@@ -46,7 +55,7 @@
                   <div>
                     <label
                       class="block text-label text-secondary-700 mb-1"
-                      >Name *</label
+                      >Name * <span v-if="onCard('name')" class="on-card-badge">On card</span></label
                     >
                     <input
                       v-model="cardInfo.name"
@@ -59,7 +68,7 @@
                   <div>
                     <label
                       class="block text-label text-secondary-700 mb-1"
-                      >Position *</label
+                      >Position * <span v-if="onCard('position')" class="on-card-badge">On card</span></label
                     >
                     <input
                       v-model="cardInfo.position"
@@ -74,7 +83,20 @@
                 <div>
                   <label
                     class="block text-label text-secondary-700 mb-1"
-                    >Contact Number *</label
+                    >Company Name <span v-if="onCard('company')" class="on-card-badge">On card</span></label
+                  >
+                  <input
+                    v-model="cardInfo.companyName"
+                    type="text"
+                    class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Your company"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-label text-secondary-700 mb-1"
+                    >Contact Number * <span v-if="onCard('phone')" class="on-card-badge">On card</span></label
                   >
                   <input
                     v-model="cardInfo.contactNumber"
@@ -88,7 +110,7 @@
                 <div>
                   <label
                     class="block text-label text-secondary-700 mb-1"
-                    >Email Address *</label
+                    >Email Address * <span v-if="onCard('email')" class="on-card-badge">On card</span></label
                   >
                   <input
                     v-model="cardInfo.email"
@@ -102,7 +124,7 @@
                 <div>
                   <label
                     class="block text-label text-secondary-700 mb-1"
-                    >Website</label
+                    >Website <span v-if="onCard('website')" class="on-card-badge">On card</span></label
                   >
                   <input
                     v-model="cardInfo.website"
@@ -115,7 +137,7 @@
                 <div>
                   <label
                     class="block text-label text-secondary-700 mb-1"
-                    >Address *</label
+                    >Address * <span v-if="onCard('address')" class="on-card-badge">On card</span></label
                   >
                   <textarea
                     v-model="cardInfo.address"
@@ -129,7 +151,7 @@
                 <div>
                   <label
                     class="block text-label text-secondary-700 mb-1"
-                    >Company Logo (Optional)</label
+                    >Company Logo {{ onCard('logo') ? '' : '(Optional)' }} <span v-if="onCard('logo')" class="on-card-badge">On card</span></label
                   >
                   <div
                     class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-lg hover:border-secondary-400 transition-colors"
@@ -242,18 +264,19 @@
               </button>
             </form>
           </div>
+        </div>
 
-          <!-- Card Examples -->
+        <!-- Right Panel - Card Design -->
+        <div class="space-y-8">
+          <!-- Live card preview: sits above the design choices so every
+               template / upload change is visible straight away -->
           <CardExamples
             :card-info="cardInfo"
             :selected-template="selectedTemplateData"
             :design-method="designMethod"
             :custom-design="cardDesign"
           />
-        </div>
 
-        <!-- Right Panel - Card Design -->
-        <div class="space-y-8">
           <!-- Design Options -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
             <h2 class="section-title mb-6">
@@ -479,84 +502,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Card Preview -->
-          <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="section-title mb-6">
-              Card Preview
-            </h2>
-
-            <div class="flex justify-center">
-              <div class="relative">
-                <!-- Card Container -->
-                <div class="relative" style="width: 180px; height: 108px">
-                  <!-- Front Side -->
-                  <div
-                    class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-lg transform rotate-y-0 transition-transform duration-500"
-                    :class="{ 'rotate-y-180': showBack }"
-                  >
-                    <div class="absolute inset-0 p-3 text-white text-caption">
-                      <div class="flex items-center justify-between h-full">
-                        <div>
-                          <div class="font-bold">
-                            {{ cardInfo.name || "Your Name" }}
-                          </div>
-                          <div class="opacity-80">
-                            {{ cardInfo.position || "Position" }}
-                          </div>
-                          <div class="mt-1">
-                            {{ cardInfo.contactNumber || "Phone" }}
-                          </div>
-                          <div>{{ cardInfo.email || "Email" }}</div>
-                        </div>
-                        <div
-                          v-if="cardInfo.companyLogo"
-                          class="w-8 h-8 bg-white rounded"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Back Side (Premium only) -->
-                  <div
-                    v-if="isPremiumPlan"
-                    class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-lg transform rotate-y-180 transition-transform duration-500"
-                    :class="{ 'rotate-y-0': showBack }"
-                  >
-                    <div class="absolute inset-0 p-3 text-white text-caption">
-                      <div class="h-full flex flex-col justify-between">
-                        <div>
-                          <div class="font-bold mb-1">Services</div>
-                          <div class="opacity-80 text-caption">
-                            {{ cardInfo.services || "Services" }}
-                          </div>
-                        </div>
-                        <div class="text-center">
-                          <div class="font-bold">Your Company</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Flip Button (Premium only) -->
-                <button
-                  v-if="isPremiumPlan"
-                  @click="showBack = !showBack"
-                  class="mt-4 w-full py-2 px-4 bg-secondary-100 text-secondary-700 rounded-lg text-button hover:bg-secondary-200 transition-colors"
-                >
-                  {{ showBack ? "Show Front" : "Show Back" }}
-                </button>
-              </div>
-            </div>
-
-            <div class="mt-6 text-center">
-              <p class="text-body text-secondary-600">Card Size: 90mm x 54mm</p>
-              <p class="text-helper">
-                Standard business card dimensions
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -614,7 +559,6 @@ const { draft, planForDesign, hydrate, patchDraft, saveDraft, guardFor, isGuest,
 const designMethod = ref("template");
 const selectedTemplate = ref(null);
 const selectedTemplateData = ref(null);
-const showBack = ref(false);
 
 // Template fetching state
 const apiTemplates = ref([]);
@@ -625,6 +569,7 @@ const templatesError = ref(null);
 const cardInfo = reactive({
   name: "",
   position: "",
+  companyName: "",
   contactNumber: "",
   email: "",
   website: "",
@@ -638,6 +583,26 @@ const cardInfo = reactive({
   facebook: "",
   instagram: "",
 });
+
+// Fields the chosen template prints (set in the admin card designer)
+const FIELD_LABELS = {
+  name: "name",
+  position: "job title",
+  company: "company name",
+  phone: "phone number",
+  email: "email",
+  website: "website",
+  address: "address",
+  logo: "company logo",
+};
+const printedFields = computed(() => {
+  if (designMethod.value !== "template" || !selectedTemplateData.value) return [];
+  const t = selectedTemplateData.value;
+  const fields = [...(t.front_layout || []), ...(t.back_layout || [])].map((el) => el.field);
+  return Object.keys(FIELD_LABELS).filter((f) => fields.includes(f));
+});
+const printedFieldLabels = computed(() => printedFields.value.map((f) => FIELD_LABELS[f]));
+const onCard = (field) => printedFields.value.includes(field);
 
 // Card design
 const cardDesign = reactive({
@@ -999,6 +964,18 @@ const proceedToPayment = async () => {
 </script>
 
 <style scoped>
+.on-card-badge {
+  margin-left: 0.35rem;
+  border-radius: 9999px;
+  background: #eef1f8;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3d496a;
+  vertical-align: 1px;
+}
 .rotate-y-0 {
   transform: rotateY(0deg);
 }

@@ -44,10 +44,12 @@ class NfcCard extends Model
         'custom_design_back_url',
         'design_notes',
         'notes',
+        'card_design',
     ];
 
     protected $casts = [
         'purchase_date' => 'date',
+        'card_design' => 'array',
         'expiry_date' => 'date',
         'shipped_date' => 'date',
         'delivered_date' => 'date',
