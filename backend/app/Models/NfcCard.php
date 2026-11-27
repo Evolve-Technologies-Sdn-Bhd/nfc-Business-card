@@ -39,17 +39,18 @@ class NfcCard extends Model
         'user_received_confirmed_at',
         'cancelled_by',
         'cancelled_reason',
+        'is_digital',
         'is_custom_design',
         'custom_design_front_url',
         'custom_design_back_url',
         'design_notes',
-        'notes',
         'card_design',
+        'notes',
     ];
 
     protected $casts = [
-        'purchase_date' => 'date',
         'card_design' => 'array',
+        'purchase_date' => 'date',
         'expiry_date' => 'date',
         'shipped_date' => 'date',
         'delivered_date' => 'date',
@@ -58,6 +59,7 @@ class NfcCard extends Model
         'order_confirmed_at' => 'datetime',
         'user_received_confirmed_at' => 'datetime',
         'is_custom_design' => 'boolean',
+        'is_digital' => 'boolean',
     ];
 
     protected $appends = ['card_number', 'public_url', 'status_label', 'status_badge_class', 'can_access_profile_builder', 'timeline'];
@@ -152,6 +154,20 @@ class NfcCard extends Model
     public function scopeActive($query)
     {
         return $query->whereIn('status', ['active', 'delivered', 'payment_verified', 'processing', 'shipped']);
+    }
+
+    /**
+     * Real, orderable cards only (excludes Free-plan digital cards). Use this for
+     * orders, fulfilment, entitlement and admin card statistics.
+     */
+    public function scopePhysical($query)
+    {
+        return $query->where('is_digital', false);
+    }
+
+    public function scopeDigital($query)
+    {
+        return $query->where('is_digital', true);
     }
 
     public function scopeByPlan($query, $plan)

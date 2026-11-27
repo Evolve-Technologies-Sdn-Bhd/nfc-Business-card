@@ -62,11 +62,14 @@
             <span class="text-caption text-secondary-700 font-medium">Free Trial: basic features</span>
           </div>
           <p
-            v-if="!loadingCards && userNfcCards.length === 0"
-            class="mt-2 text-caption text-warning-700"
+            v-if="!loadingCards && getSelectedCard()?.is_digital"
+            class="mt-2 text-caption text-secondary-600"
           >
-            No NFC card yet — design and preview your profile now, then activate a
-            card to save it.
+            Your profile lives on a free digital card — share it by link or QR code.
+            <NuxtLink to="/Onboarding/plan" class="font-semibold text-warning-700 hover:text-warning-800">
+              Get a physical NFC card
+            </NuxtLink>
+            to share with a tap.
           </p>
         </div>
         <div class="mt-4 sm:mt-0 flex items-center gap-2 sm:gap-3">
@@ -82,8 +85,9 @@
                 <span v-else-if="userNfcCards.length === 0">No Cards</span>
                 <span v-else-if="getSelectedCard()">
                   {{
-                    getSelectedCard().nfc_card_id ||
-                    "Card #" + getSelectedCard().id
+                    getSelectedCard().is_digital
+                      ? "Digital Card"
+                      : getSelectedCard().nfc_card_id || "Card #" + getSelectedCard().id
                   }}
                 </span>
                 <span v-else>Select Card</span>
@@ -116,7 +120,7 @@
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                           <Icon
-                            name="heroicons:credit-card-solid"
+                            :name="card.is_digital ? 'heroicons:device-phone-mobile-solid' : 'heroicons:credit-card-solid'"
                             :class="[
                               'w-5 h-5',
                               selectedNfcCardId === card.id
@@ -125,7 +129,7 @@
                             ]"
                           />
                           <p class="text-body font-bold text-secondary-900 truncate">
-                            {{ card.nfc_card_id || "Card #" + card.id }}
+                            {{ card.is_digital ? "Digital Card" : card.nfc_card_id || "Card #" + card.id }}
                           </p>
                         </div>
 
@@ -183,7 +187,7 @@
             <!-- Save Button -->
             <button
               @click="saveProfile"
-              :disabled="saving || !selectedNfcCardId"
+              :disabled="saving || !selectedNfcCardId || freeProfileOffline"
               class="btn btn-primary"
             >
               <Icon v-if="saving" name="heroicons:arrow-path" class="h-5 w-5 mr-2 animate-spin" />
@@ -321,7 +325,7 @@
             <div v-if="activeTab === 'profile'" class="space-y-4 sm:space-y-6">
               <!-- No Cards Warning (only show if no cards and not loading) -->
               <div
-                v-if="!loadingCards && userNfcCards.length === 0"
+                v-if="freeProfileOffline"
                 class="bg-warning-50 border border-warning-200 rounded-lg p-4"
               >
                 <div class="flex">
@@ -330,18 +334,20 @@
                     class="h-5 w-5 text-warning-400"
                   />
                   <div class="ml-3">
+                    <!-- Free accounts get a digital card automatically, so an
+                         empty list means the free window has ended. -->
                     <h3 class="card-title text-warning-800">
-                      No NFC Cards Found
+                      Your free profile is offline
                     </h3>
                     <p class="text-body text-warning-700 mt-1">
-                      You need to order an NFC card before creating a profile.
-                      Go to Card Management to order your card.
+                      Your free trial has ended. Choose a plan and get an NFC card
+                      to save your profile and share it again.
                     </p>
                     <NuxtLink
-                      to="/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
+                      to="/Onboarding/plan"
                       class="inline-flex items-center mt-2 text-navigation text-warning-800 hover:text-warning-900"
                     >
-                      Go to Card Management
+                      View plans
                       <Icon name="heroicons:arrow-right" class="ml-1 h-4 w-4" />
                     </NuxtLink>
                   </div>
@@ -388,31 +394,20 @@
                   <div
                     v-for="field in group.fields"
                     :key="field.field_key"
-                    class="relative"
+                    class="relative empty:hidden"
                   >
+                    <!-- Locked field for lower plans: compact, same footprint as an input -->
+                    <LockedFormField
+                      v-if="isFieldRestricted(field.field_key)"
+                      :label="field.label"
+                      @upgrade="showUpgradeModal"
+                    />
                     <DynamicFormField
+                      v-else
                       :field="field"
                       v-model="profileData"
                       :user-plan="builderPlan"
-                      :disabled="isFieldRestricted(field.field_key)"
                     />
-                    <!-- Locked Field Overlay for Basic Plan -->
-                    <div
-                      v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
-                    >
-                      <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
-                        <button
-                          @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
-                        >
-                          Upgrade Now
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -437,17 +432,23 @@
                 <!-- Locked Overlay for Company Logo -->
                 <div
                   v-if="isFieldRestricted('companyLogo')"
-                  class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
+                  class="absolute inset-0 bg-white/85 backdrop-blur-[2px] rounded-lg border border-dashed border-warning-300 flex items-center justify-center"
                 >
-                  <div class="text-center p-4">
-                    <Icon name="heroicons:lock-closed-solid" class="w-10 h-10 text-warning-500 mx-auto mb-2" />
-                    <p class="text-body font-semibold text-secondary-900 mb-1">Company Logo</p>
-                    <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
+                  <div class="flex flex-col items-center text-center gap-2 p-4">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-warning-100 text-warning-600">
+                      <Icon name="heroicons:lock-closed-solid" class="w-5 h-5" />
+                    </span>
+                    <div>
+                      <p class="text-label text-gray-800">Company Logo</p>
+                      <p class="text-caption text-gray-500">Available on higher plans</p>
+                    </div>
                     <button
+                      type="button"
                       @click="showUpgradeModal"
-                      class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                      class="inline-flex items-center gap-1 text-sm font-semibold text-warning-700 hover:text-warning-800 px-3 py-1.5 rounded-lg border border-warning-200 bg-warning-50 hover:bg-warning-100 transition-colors"
                     >
-                      Upgrade to Unlock
+                      Upgrade to unlock
+                      <Icon name="heroicons:arrow-right" class="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -467,31 +468,20 @@
                   <div
                     v-for="field in group.fields"
                     :key="field.field_key"
-                    class="relative"
+                    class="relative empty:hidden"
                   >
+                    <!-- Locked field for lower plans: compact, same footprint as an input -->
+                    <LockedFormField
+                      v-if="isFieldRestricted(field.field_key)"
+                      :label="field.label"
+                      @upgrade="showUpgradeModal"
+                    />
                     <DynamicFormField
+                      v-else
                       :field="field"
                       v-model="profileData"
                       :user-plan="builderPlan"
-                      :disabled="isFieldRestricted(field.field_key)"
                     />
-                    <!-- Locked Field Overlay for Basic Plan -->
-                    <div
-                      v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
-                    >
-                      <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
-                        <button
-                          @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
-                        >
-                          Upgrade Now
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -2380,6 +2370,16 @@ const sampleLinks = computed(() => [
 const getSelectedCard = () => {
   return userNfcCards.value.find(card => card.id === selectedNfcCardId.value);
 };
+
+// Free accounts get a digital card automatically (backend DigitalCardService).
+// The profile is offline when there is no card at all, or when the digital card
+// was withdrawn because the free window ended.
+const freeProfileOffline = computed(() => {
+  if (loadingCards.value) return false;
+  if (userNfcCards.value.length === 0) return true;
+  const card = getSelectedCard();
+  return !!card?.is_digital && card.status !== "active";
+});
 
 /**
  * Resolve the PRETTIEST public profile URL for a given card object.

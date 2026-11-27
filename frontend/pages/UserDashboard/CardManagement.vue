@@ -1568,7 +1568,9 @@ const loadNfcCards = async () => {
   try {
     const response = await _getNfcCardsCached();
     if (response.success) {
-      nfcCards.value = (response.nfc_cards || []).map((card) => {
+      // My Cards tracks physical orders (payment → shipping → activation). The
+      // Free plan's digital card has none of that; it is managed in the builder.
+      nfcCards.value = (response.nfc_cards || []).filter((card) => !card.is_digital).map((card) => {
         const planFallback = card.subscription_plan || subscriptionData.value?.subscription_plan || "basic";
         // Prefer the backend timeline (NfcCard::getTimelineAttribute: real dates,
         // cancellation aware); the local builder is only a fallback.

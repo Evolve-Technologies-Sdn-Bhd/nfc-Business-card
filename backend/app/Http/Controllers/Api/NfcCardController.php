@@ -64,11 +64,16 @@ class NfcCardController extends Controller
         $user = $request->user();
         \Log::info('NFC Cards index called', ['user_id' => $user?->id, 'user_email' => $user?->email]);
 
+        // Free accounts that pre-date digital cards get theirs on first visit.
+        app(\App\Services\DigitalCardService::class)->ensureFor($user);
+
         $plan = $user->subscription_plan;
         $subActive = (bool) $user->subscription_active;
         $hasActiveAccess = in_array($plan, ['basic', 'premium', 'business'], true) && $subActive;
         if (!$hasActiveAccess) {
+            // A digital card is not an order, so it keeps upgrade_required = true.
             $hasActiveAccess = $user->nfcCards()
+                ->physical()
                 ->whereIn('status', ['payment_verified','processing','shipped','delivered','active','pending_payment','awaiting_payment_verification'])
                 ->exists();
         }
@@ -970,6 +975,15 @@ class NfcCardController extends Controller
         // Public access - no authentication required
         // Anyone with the NFC card ID can view the landing page
         
+        // A Free digital card is withdrawn (inactive) when the free window ends;
+        // its public profile goes offline with it.
+        if ($nfcCard->is_digital && $nfcCard->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This profile is not available.'
+            ], 404);
+        }
+
         $landingPage = $nfcCard->landingPage;
 
         // Auto-create landing page if it doesn't exist (for all plan types)
@@ -1044,6 +1058,15 @@ class NfcCardController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // A withdrawn Free digital card (free window ended) is read-only.
+        if ($nfcCard->is_digital && $nfcCard->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'code' => 'FREE_WINDOW_ENDED',
+                'message' => 'Your free trial has ended. Get an NFC card to save your profile.',
             ], 403);
         }
 

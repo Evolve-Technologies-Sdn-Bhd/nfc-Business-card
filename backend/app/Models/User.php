@@ -468,7 +468,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasPhysicalCard()
     {
-        return $this->nfcCards()->whereIn('status', ['active', 'delivered', 'shipped', 'processing', 'payment_verified'])->exists();
+        return $this->nfcCards()->physical()->whereIn('status', ['active', 'delivered', 'shipped', 'processing', 'payment_verified'])->exists();
     }
 
     /**

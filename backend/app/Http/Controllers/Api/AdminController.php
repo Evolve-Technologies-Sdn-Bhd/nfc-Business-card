@@ -74,7 +74,7 @@ class AdminController extends Controller
 
         $usersStats      = $counts(User::query());
         $profilesStats   = $counts(LandingPage::query());
-        $nfcCardsStats   = $counts(NfcCard::query());
+        $nfcCardsStats   = $counts(NfcCard::physical());
         $analyticsStats  = $counts(Analytics::query());
 
         // =========================================================
@@ -1058,7 +1058,9 @@ class AdminController extends Controller
      */
     public function getNfcCards(Request $request)
     {
-        $query = NfcCard::with(['user', 'nfcTag', 'transaction', 'cancelledBy'])
+        // Card management is orders + fulfilment: Free digital cards are not orders.
+        $query = NfcCard::physical()
+            ->with(['user', 'nfcTag', 'transaction', 'cancelledBy'])
             ->withCount('analytics');
 
         // Apply filters
@@ -1694,7 +1696,7 @@ class AdminController extends Controller
             ->whereMonth('created_at', $currentMonth)
             ->count('id');
 
-        $cardsAgg = (array) NfcCard::query()
+        $cardsAgg = (array) NfcCard::physical()
             ->selectRaw('COUNT(*) AS total')
             ->selectRaw("COUNT(CASE WHEN status = 'active' THEN 1 END) AS active")
             ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
@@ -1767,7 +1769,7 @@ class AdminController extends Controller
         return [
             'users' => User::count(),
             'profiles' => LandingPage::count(),
-            'nfc_cards' => NfcCard::count(),
+            'nfc_cards' => NfcCard::physical()->count(),
             'nfc_tags' => NfcTag::count(),
             'analytics' => Analytics::count(),
         ];

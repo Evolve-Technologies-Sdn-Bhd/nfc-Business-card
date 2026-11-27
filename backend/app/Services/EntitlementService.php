@@ -43,13 +43,16 @@ class EntitlementService
     {
         // Fast path: if the caller has already eager-loaded the cards we can
         // resolve the answer in memory without an extra query.
+        // Free-plan digital cards are never an entitlement: they exist only so a
+        // Free account has somewhere to store its profile (DigitalCardService).
         if ($plans === null && $user->relationLoaded('nfcCards')) {
             return $user->getRelation('nfcCards')->contains(
-                fn ($card) => in_array($card->status, self::CARD_ENTITLEMENT_STATUSES, true)
+                fn ($card) => !$card->is_digital
+                    && in_array($card->status, self::CARD_ENTITLEMENT_STATUSES, true)
             );
         }
 
-        $query = $user->nfcCards()->whereIn('status', self::CARD_ENTITLEMENT_STATUSES);
+        $query = $user->nfcCards()->physical()->whereIn('status', self::CARD_ENTITLEMENT_STATUSES);
 
         if ($plans !== null) {
             $query->whereIn('subscription_plan', $plans);

@@ -98,6 +98,11 @@ class OnboardingController extends Controller
                 // Stamp the permanent ledger so this person cannot claim another
                 // free trial later (even with a different alias email).
                 $this->freeTrialGuard->claim($request, $user);
+
+                // Give the Free account its digital card, so the profile it
+                // builds can be saved, previewed and shared (link + QR) without
+                // a physical card. See DigitalCardService.
+                $digitalCard = app(\App\Services\DigitalCardService::class)->ensureFor($user->refresh());
             } else {
                 // PAID plans (basic / premium / business) are NOT activated here.
                 //
@@ -126,7 +131,7 @@ class OnboardingController extends Controller
                     'plan' => $plan,
                     'subscription_active' => (bool) $user->subscription_active,
                     'subscription_end_date' => $user->subscription_end_date,
-                    'nfc_card' => null,
+                    'nfc_card' => $digitalCard ?? null,
                 ]
             ]);
         } catch (\Exception $e) {

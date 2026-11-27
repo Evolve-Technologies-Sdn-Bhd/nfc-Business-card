@@ -77,6 +77,10 @@ class DeactivateExpiredFreePlans extends Command
                         'deactivated_at' => now(),
                     ]);
 
+                    // The free digital card (and its public profile) ends with
+                    // the free window.
+                    app(\App\Services\DigitalCardService::class)->deactivateFor($user);
+
                     try {
                         $this->notifications->create($user, 'free_plan_deactivated', [
                             'trial_days' => $trialDays,

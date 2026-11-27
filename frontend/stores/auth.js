@@ -33,7 +33,7 @@ export const useAuthStore = defineStore("auth", {
 
   getters: {
     hasAnyPhysicalNfcCard() {
-      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      const cards = (this.user?.nfc_cards ?? this.user?.nfcCards ?? []).filter?.(c => !c.is_digital); // digital (Free) cards are not physical/entitled
       return Array.isArray(cards) && cards.length > 0;
     },
 
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     hasAccessPaidBuilderCards() {
-      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      const cards = (this.user?.nfc_cards ?? this.user?.nfcCards ?? []).filter?.(c => !c.is_digital); // digital (Free) cards are not physical/entitled
       if (!Array.isArray(cards) || cards.length === 0) return false;
       const ok = this.eligibleBuilderStatuses;
       return cards.some(card => ok.includes(String(card.status || '').toLowerCase()));
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore("auth", {
           const matchPlan = ['premium','business'].includes(plan) ? [plan] : ['basic','premium','business'];
           if (matchPlan.includes(userPlan)) return true;
         }
-        const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+        const cards = (this.user?.nfc_cards ?? this.user?.nfcCards ?? []).filter?.(c => !c.is_digital); // digital (Free) cards are not physical/entitled
         if (Array.isArray(cards) && cards.length > 0) {
           if (plan === null) return cards.some(c => ok.includes(String(c.status || '')));
           const matchPlan = ['premium','business'].includes(plan) ? [plan] : ['basic','premium','business'];
@@ -87,7 +87,7 @@ export const useAuthStore = defineStore("auth", {
         return String(this.user.subscription_plan || 'free').toLowerCase();
       }
       const ok = this.eligibleBuilderStatuses;
-      const cards = this.user?.nfc_cards ?? this.user?.nfcCards;
+      const cards = (this.user?.nfc_cards ?? this.user?.nfcCards ?? []).filter?.(c => !c.is_digital); // digital (Free) cards are not physical/entitled
       if (Array.isArray(cards) && cards.length > 0) {
         const eligible = cards.find(c => ok.includes(String(c.status || '')));
         if (eligible?.subscription_plan) return String(eligible.subscription_plan).toLowerCase();
