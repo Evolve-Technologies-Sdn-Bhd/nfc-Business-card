@@ -353,31 +353,21 @@
                   <div
                     v-for="field in group.fields"
                     :key="field.field_key"
-                    class="relative"
+                    class="relative empty:hidden"
                   >
+                    <!-- Locked field for lower plans: compact, same footprint as an input -->
+                    <LockedFormField
+                      v-if="isFieldRestricted(field.field_key)"
+                      :label="field.label"
+                      badge="Business"
+                      @upgrade="showUpgradeModal"
+                    />
                     <DynamicFormField
+                      v-else
                       :field="field"
                       v-model="profileData"
                       :user-plan="authStore.user?.subscription_plan || 'basic'"
-                      :disabled="isFieldRestricted(field.field_key)"
                     />
-                    <!-- Locked Field Overlay for Basic Plan -->
-                    <div
-                      v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
-                    >
-                      <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-secondary-600 mb-3">Available in Business Plan</p>
-                        <button
-                          @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
-                        >
-                          Upgrade Now
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -402,17 +392,23 @@
                 <!-- Locked Overlay for Company Logo -->
                 <div
                   v-if="isFieldRestricted('companyLogo')"
-                  class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
+                  class="absolute inset-0 bg-white/85 backdrop-blur-[2px] rounded-lg border border-dashed border-warning-300 flex items-center justify-center"
                 >
-                  <div class="text-center p-4">
-                    <Icon name="heroicons:lock-closed-solid" class="w-10 h-10 text-warning-500 mx-auto mb-2" />
-                    <p class="text-body font-semibold text-secondary-900 mb-1">Company Logo</p>
-                    <p class="text-caption text-secondary-600 mb-3">Available in Business Plan</p>
+                  <div class="flex flex-col items-center text-center gap-2 p-4">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-warning-100 text-warning-600">
+                      <Icon name="heroicons:lock-closed-solid" class="w-5 h-5" />
+                    </span>
+                    <div>
+                      <p class="text-label text-gray-800">Company Logo</p>
+                      <p class="text-caption text-gray-500">Available in Business Plan</p>
+                    </div>
                     <button
+                      type="button"
                       @click="showUpgradeModal"
-                      class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                      class="inline-flex items-center gap-1 text-sm font-semibold text-warning-700 hover:text-warning-800 px-3 py-1.5 rounded-lg border border-warning-200 bg-warning-50 hover:bg-warning-100 transition-colors"
                     >
-                      Upgrade to Unlock
+                      Upgrade to unlock
+                      <Icon name="heroicons:arrow-right" class="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -432,31 +428,21 @@
                   <div
                     v-for="field in group.fields"
                     :key="field.field_key"
-                    class="relative"
+                    class="relative empty:hidden"
                   >
+                    <!-- Locked field for lower plans: compact, same footprint as an input -->
+                    <LockedFormField
+                      v-if="isFieldRestricted(field.field_key)"
+                      :label="field.label"
+                      badge="Business"
+                      @upgrade="showUpgradeModal"
+                    />
                     <DynamicFormField
+                      v-else
                       :field="field"
                       v-model="profileData"
                       :user-plan="authStore.user?.subscription_plan || 'basic'"
-                      :disabled="isFieldRestricted(field.field_key)"
                     />
-                    <!-- Locked Field Overlay for Basic Plan -->
-                    <div
-                      v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
-                    >
-                      <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-secondary-600 mb-3">Available in Business Plan</p>
-                        <button
-                          @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
-                        >
-                          Upgrade Now
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>

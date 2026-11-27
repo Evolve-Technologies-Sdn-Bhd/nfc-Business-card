@@ -386,24 +386,20 @@
                   <div
                     v-for="field in group.fields"
                     :key="field.field_key"
-                    :class="isFieldRestricted(field.field_key) ? 'relative' : ''"
+                    class="empty:hidden"
                   >
-                    <!-- Restriction Overlay for Premium Plan -->
-                    <div
+                    <!-- Locked field for lower plans: compact, same footprint as an input -->
+                    <LockedFormField
                       v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center border-2 border-warning-300"
-                    >
-                      <div class="text-center px-4">
-                        <Icon name="heroicons:lock-closed" class="w-8 h-8 mx-auto mb-2 text-warning-600" />
-                        <p class="text-body font-semibold text-secondary-900 mb-1">Business Plan Feature</p>
-                        <p class="text-caption text-secondary-600">Upgrade to access this field</p>
-                      </div>
-                    </div>
+                      :label="field.label"
+                      badge="Business"
+                      @upgrade="navigateTo('/Onboarding/plan')"
+                    />
                     <DynamicFormField
+                      v-else
                       :field="field"
                       v-model="profileData"
                       :user-plan="authStore.user?.subscription_plan || 'premium'"
-                      :disabled="isFieldRestricted(field.field_key)"
                     />
                   </div>
                 </div>
