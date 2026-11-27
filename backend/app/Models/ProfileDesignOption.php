@@ -74,9 +74,15 @@ class ProfileDesignOption extends Model
      */
     public function isAvailableForPlan($plan)
     {
-        if (empty($this->available_plans)) {
+        $plans = $this->available_plans;
+        // Tolerate a double-encoded JSON string (older seeders json_encode()d
+        // into this array-cast column).
+        if (is_string($plans)) {
+            $plans = json_decode($plans, true);
+        }
+        if (empty($plans) || !is_array($plans)) {
             return true; // null means available for all plans
         }
-        return in_array($plan, $this->available_plans);
+        return in_array($plan, $plans, true);
     }
 }

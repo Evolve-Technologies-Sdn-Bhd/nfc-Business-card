@@ -2324,6 +2324,9 @@
                 v-for="(social, idx) in socialLinks"
                 :key="idx"
                 :href="social.href"
+                :target="linkTarget"
+                :rel="linkTarget === '_blank' ? 'noopener noreferrer' : undefined"
+                @click="trackLinkClick(social)"
                 :style="{
                   position: 'relative',
                   display: 'flex',
@@ -5092,12 +5095,29 @@ const closePortfolioModal = () => {
 // Check if a feature is enabled based on the user's toggle setting.
 // Backend does not persist available_features, so we rely solely on the user's
 // feature toggles (features[featureKey] !== false means enabled).
-const isFeatureEnabled = (featureKey) => {
-  const isEnabled = features.value[featureKey] !== false;
-  if (typeof window !== 'undefined') {
-    console.log(`🔍 isFeatureEnabled("${featureKey}"): enabled=${isEnabled}`);
+const isFeatureEnabled = (featureKey) => features.value[featureKey] !== false;
+
+// Links tab options (server: NfcCardController::linkSettings → effective_features).
+const linkTarget = computed(() => (features.value.open_new_tab === false ? '_self' : '_blank'));
+const trackLinkClick = (social) => {
+  if (isPreviewMode.value || !social?.id || features.value.click_tracking === false) return;
+  $api.post(`/links/${social.id}/click`).catch(() => {});
+};
+
+// Preview (builder → localStorage) mirrors the server's effective_features
+// rules (NfcCardController::effectiveFeatures), since it never hits the API.
+const PREVIEW_FEATURE_ALIASES = { vcard_download: 'vcardEnabled', contact_form: 'contactFormEnabled', qr_code: 'qrCodeEnabled' };
+const ADMIN_CONTROLLED_ACTIONS = ['vcard_download', 'contact_form', 'qr_code', 'booking_integration'];
+const applyPreviewFeatureRules = (data) => {
+  Object.entries(PREVIEW_FEATURE_ALIASES).forEach(([key, alias]) => {
+    if (data?.[alias] === false || data?.features?.[alias] === false) features.value[key] = false;
+  });
+  if (data?.openNewTab === false || data?.features?.openNewTab === false) features.value.open_new_tab = false;
+  if (Array.isArray(data?.availableFeatures) && data.availableFeatures.length > 0) {
+    ADMIN_CONTROLLED_ACTIONS.forEach((key) => {
+      if (!data.availableFeatures.includes(key)) features.value[key] = false;
+    });
   }
-  return isEnabled;
 };
 
 // Whether the Quick Actions section should be shown (any quick-action feature enabled)
@@ -5441,6 +5461,7 @@ const loadPreviewData = (data) => {
   } else {
     console.log('⚠️ No features in preview data, using defaults:', features.value);
   }
+  applyPreviewFeatureRules(data);
 
   // Preview has no server-side plan policy — mirror the owner's branding toggle.
   showNfcgoBranding.value = features.value.remove_branding !== true;
@@ -5902,7 +5923,11 @@ const loadProfileData = async () => {
       // Load user feature toggles first (needed to derive availableFeatures below)
       if (data.features && typeof data.features === 'object') {
         features.value = { ...features.value, ...data.features };
-        console.log('✨ Features loaded:', features.value);
+      }
+      // Server-resolved on/off for the public actions (plan + admin toggle +
+      // owner switch). Authoritative over the raw saved flags above.
+      if (response.effective_features && typeof response.effective_features === 'object') {
+        features.value = { ...features.value, ...response.effective_features };
       }
 
       // Branding visibility is resolved server-side (plan + admin policy).
@@ -6236,17 +6261,13 @@ const submitContactForm = async () => {
     const cardId = route.params.id;
     
     // Send the contact form data to backend
-    const response = await $api(`/contact-form`, {
-      method: 'POST',
-      body: {
-        nfc_card_id: cardId,
-        name: contactForm.value.name,
-        email: contactForm.value.email,
-        phone: contactForm.value.phone,
-        message: contactForm.value.message,
-        profile_name: profile.value.name,
-        profile_email: profile.value.email,
-      },
+    // POST /api/nfc-cards/{card}/contact (NfcCardController::submitContactForm).
+    // The old /contact-form route never existed, and axios ignores `body`.
+    await $api.post(`/nfc-cards/${encodeURIComponent(cardId)}/contact`, {
+      name: contactForm.value.name,
+      email: contactForm.value.email,
+      phone: contactForm.value.phone,
+      message: contactForm.value.message,
     });
     
     // Show success state
@@ -6261,7 +6282,7 @@ const submitContactForm = async () => {
     
   } catch (error) {
     console.error('Error submitting contact form:', error);
-    alert('Failed to send message. Please try again.');
+    alert(error?.data?.message || 'Failed to send message. Please try again.');
   } finally {
     contactFormSubmitting.value = false;
   }

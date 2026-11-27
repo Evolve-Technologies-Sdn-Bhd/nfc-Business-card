@@ -126,6 +126,10 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
 // scraping and analytics spam. Values are conservative per-minute limits.
 Route::get('/nfc-cards/{nfcCard}/landing-page', [NfcCardController::class, 'getLandingPage'])->middleware('throttle:60,1'); // 60 reads per minute
 Route::post('/nfc-cards/{nfcCard}/track-tap', [NfcCardController::class, 'trackTap'])->middleware('throttle:30,1'); // 30 writes per minute
+// Public link click from a profile visitor (counted only when the owner's Click Analytics is on).
+Route::post('/links/{link}/click', [LinkController::class, 'trackPublicClick'])->middleware('throttle:30,1');
+// Public "Message" action on a profile (contact_form feature). Tight limit: it e-mails the owner.
+Route::post('/nfc-cards/{nfcCard}/contact', [NfcCardController::class, 'submitContactForm'])->middleware('throttle:5,1');
 Route::post('/analytics/track', [AnalyticsController::class, 'track'])->middleware('throttle:30,1'); // 30 writes per minute
 Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap'])->middleware('throttle:30,1'); // 30 writes per minute
 

@@ -1592,7 +1592,7 @@
       </div>
 
       <!-- Right Panel - Embedded Landing Page Preview -->
-      <div class="md:col-span-3 md:sticky md:top-20 h-fit">
+      <div class="md:col-span-3 md:sticky md:top-0 h-fit self-start">
           <div class="card">
             <div class="card-body">
               <!-- Preview Header -->
@@ -1621,7 +1621,7 @@
               </div>
               
               <!-- iPhone 15 Mockup - Real Proportions (9:19.5 aspect ratio) -->
-              <div class="w-full max-w-[360px] mx-auto">
+              <div class="w-full max-w-[360px] md:max-w-[min(360px,calc((100vh_-_15rem)*0.4615))] mx-auto">
                 <div class="relative aspect-[9/19.5] w-full rounded-[54px] bg-secondary-900 shadow-2xl p-[10px] ring-[2px] ring-secondary-700">
                   <!-- Outer Frame Gradient for Titanium Effect -->
                   <div class="absolute inset-0 rounded-[54px] bg-gradient-to-b from-secondary-700 via-secondary-800 to-secondary-900 pointer-events-none"></div>
@@ -3744,6 +3744,14 @@ const getFeatureValue = (featureKey) => {
       : (profileData.features?.[featureKey] ?? true);
   }
   
+  // The Profile tab has its own switch for some features (vcardEnabled…).
+  // It and this Features-panel switch are the same setting: read it first so
+  // the preview and this panel match what will be saved.
+  const toggleAlias = { vcard_download: "vcardEnabled", contact_form: "contactFormEnabled", qr_code: "qrCodeEnabled" }[featureKey];
+  if (toggleAlias && typeof profileData[toggleAlias] === "boolean") {
+    return profileData[toggleAlias];
+  }
+
   // Check if feature has explicit value
   if (profileData.features?.hasOwnProperty(featureKey)) {
     return profileData.features[featureKey];
@@ -3769,6 +3777,10 @@ const toggleFeature = (featureKey) => {
   // Get current value (use default if not set)
   const currentValue = getFeatureValue(featureKey);
   profileData.features[featureKey] = !currentValue;
+  // Keep the Profile-tab switch for the same feature in step (it overrides
+  // features on save).
+  const toggleAlias = { vcard_download: "vcardEnabled", contact_form: "contactFormEnabled", qr_code: "qrCodeEnabled" }[featureKey];
+  if (toggleAlias) profileData[toggleAlias] = profileData.features[featureKey];
   
   // For backward compatibility with showWatermark
   if (featureKey === 'watermark' || featureKey === 'show_watermark') {

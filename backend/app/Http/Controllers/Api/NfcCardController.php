@@ -1012,6 +1012,7 @@ class NfcCardController extends Controller
             'success' => true,
             'landing_page' => $landingPage,
             'show_nfcgo_branding' => $this->shouldShowNfcgoBranding($nfcCard, $landingPage),
+            'effective_features' => $this->effectiveFeatures($nfcCard, $landingPage),
         ]);
     }
 
@@ -1046,6 +1047,164 @@ class NfcCardController extends Controller
         $features = $landingPage->features ?? [];
 
         return ($features['remove_branding'] ?? false) !== true;
+    }
+
+    /**
+     * Profile features that show as actions on the public page (Save Contact,
+     * Message, QR Code, Share, Book), keyed by feature id.
+     *
+     * Each one is ON only when:
+     *   1. the admin feature toggle (profile_design_options, type feature_toggle)
+     *      is active and allowed for the card's plan — features without an
+     *      admin toggle (social_sharing) skip this check; and
+     *   2. the owner has not switched it off. The builders store the owner's
+     *      choice under two names (Features panel: `vcard_download`; Profile tab
+     *      toggle: `vcardEnabled`), so OFF under either name wins.
+     *
+     * Before this, the public page treated every feature as ON unless the
+     * `vcard_download`-style key was saved as false, so a disabled Profile-tab
+     * toggle or a plan that does not include the feature still showed the action.
+     */
+    /**
+     * Public contact form on a profile ("Message" action).
+     *
+     * POST /api/nfc-cards/{nfcCard}/contact
+     * Accepted only while the profile is online and its contact_form feature
+     * is on (plan + admin toggle + owner switch, see effectiveFeatures()). The
+     * owner gets an in-app notification and an e-mail at the address set in the
+     * builder (Contact Form e-mail), falling back to the account e-mail.
+     */
+    public function submitContactForm(Request $request, NfcCard $nfcCard)
+    {
+        $landingPage = $nfcCard->landingPage;
+
+        $offline = !$landingPage
+            || !$landingPage->is_active
+            || ($nfcCard->is_digital && $nfcCard->status !== 'active');
+
+        if ($offline || !($this->effectiveFeatures($nfcCard, $landingPage)['contact_form'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This profile is not accepting messages.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:120',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $data = $validator->validated();
+        $owner = $nfcCard->user;
+
+        if (!$owner) {
+            return response()->json(['success' => false, 'message' => 'This profile is not accepting messages.'], 403);
+        }
+
+        try {
+            $this->notificationService->create($owner, 'contact_request', [
+                'name' => $data['name'],
+                'sender_email' => $data['email'],
+                'sender_phone' => $data['phone'] ?? null,
+                'sender_message' => $data['message'],
+                'nfc_card_id' => $nfcCard->id,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('Contact form notification failed', ['card' => $nfcCard->id, 'error' => $e->getMessage()]);
+        }
+
+        $features = is_array($landingPage->features) ? $landingPage->features : [];
+        $to = $features['contact_form_email'] ?? $features['contactFormEmail'] ?? null;
+        $to = filter_var($to, FILTER_VALIDATE_EMAIL) ? $to : $owner->email;
+
+        if ($to) {
+            try {
+                $body = "New message from your NFCGo profile\n\n"
+                    . "Name: {$data['name']}\n"
+                    . "E-mail: {$data['email']}\n"
+                    . (!empty($data['phone']) ? "Phone: {$data['phone']}\n" : '')
+                    . "\n{$data['message']}\n";
+
+                \Illuminate\Support\Facades\Mail::raw($body, function ($mail) use ($to, $data) {
+                    $mail->to($to)
+                        ->replyTo($data['email'], $data['name'])
+                        ->subject('[NFC Go] New message from ' . $data['name']);
+                });
+            } catch (\Throwable $e) {
+                \Log::warning('Contact form e-mail failed', ['card' => $nfcCard->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent.',
+        ]);
+    }
+
+    public const PROFILE_ACTION_FEATURES = [
+        'vcard_download' => 'vcardEnabled',
+        'contact_form' => 'contactFormEnabled',
+        'qr_code' => 'qrCodeEnabled',
+        'booking_integration' => null,
+        'social_sharing' => null,
+    ];
+
+    private function effectiveFeatures(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+        $saved = is_array($landingPage->features) ? $landingPage->features : [];
+
+        $adminToggles = ProfileDesignOption::query()
+            ->where('type', 'feature_toggle')
+            ->whereIn('option_id', array_keys(self::PROFILE_ACTION_FEATURES))
+            ->get()
+            ->keyBy('option_id');
+
+        $result = [];
+        foreach (self::PROFILE_ACTION_FEATURES as $key => $alias) {
+            $toggle = $adminToggles->get($key);
+            $allowedByPlan = !$toggle || ($toggle->is_active && $toggle->isAvailableForPlan($plan));
+
+            $ownerOn = ($saved[$key] ?? true) !== false
+                && ($alias === null || ($saved[$alias] ?? true) !== false);
+
+            $result[$key] = $allowedByPlan && $ownerOn;
+        }
+
+        return $result + self::linkSettings($nfcCard, $landingPage);
+    }
+
+    /**
+     * Link options from the builder's Links tab, resolved for the public page:
+     *  - open_new_tab   (owner "Open in New Tab", default on)
+     *  - click_tracking (admin click_tracking toggle for the plan AND owner
+     *                    "Enable Click Analytics", default on)
+     */
+    public static function linkSettings(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+        $saved = is_array($landingPage->features) ? $landingPage->features : [];
+
+        $toggle = ProfileDesignOption::query()
+            ->where('type', 'feature_toggle')
+            ->where('option_id', 'click_tracking')
+            ->first();
+        $trackingAllowed = !$toggle || ($toggle->is_active && $toggle->isAvailableForPlan($plan));
+
+        return [
+            'open_new_tab' => ($saved['openNewTab'] ?? true) !== false,
+            'click_tracking' => $trackingAllowed && ($saved['clickTracking'] ?? true) !== false,
+        ];
     }
 
     /**
