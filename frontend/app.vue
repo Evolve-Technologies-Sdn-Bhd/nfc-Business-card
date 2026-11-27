@@ -53,7 +53,7 @@ import { onMounted, ref } from 'vue';
 import { useTheme } from '~/composables/useTheme';
 
 const appBootLoading = ref(true);
-const { initTheme } = useTheme();
+const { initTheme, applySystemTheme } = useTheme();
 
 // The browser favicon is hardcoded to the official NFCGo system logo so it
 // always matches the system branding, regardless of admin-configured values.
@@ -74,10 +74,33 @@ const applySystemFavicon = () => {
   link.type = "image/svg+xml";
 };
 
+// Fetch the system theme chosen by the admin and apply it globally.
+// Fire-and-forget: never blocks the boot sequence, and silently falls back
+// to the cached/default (Ink & Brass) palette if the request fails.
+const syncSystemTheme = async () => {
+  try {
+    const { $api } = useNuxtApp();
+    if (!$api) return;
+
+    const res = await $api.get("/system-settings/brand/public");
+    const theme = res?.data?.system_theme;
+    if (theme) {
+      applySystemTheme(theme);
+    }
+  } catch (_) {
+    // Offline / API unavailable — keep the cached or default palette.
+  }
+};
+
 onMounted(() => {
   initTheme();
 
   applySystemFavicon();
+
+  // Pull the admin-controlled system theme from the server and apply it to
+  // every visitor. initTheme() above already painted the cached/default
+  // palette (no flash), so this is a non-blocking reconcile.
+  syncSystemTheme();
 
   // Minimum visible duration for the branded NFCGo logo-draw loader.
   // The animation completes one full cycle every 2s, so we keep the
@@ -108,7 +131,9 @@ onMounted(() => {
 .app-root {
   width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* `clip` keeps horizontal overflow hidden without making `.app-root` a
+     scroll container (which `hidden` would, adding a second scrollbar). */
+  overflow-x: clip;
   position: relative;
 }
 
@@ -118,7 +143,7 @@ onMounted(() => {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 

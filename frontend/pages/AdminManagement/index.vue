@@ -1,13 +1,12 @@
-<!-- pages/AdminManagement/index.vue -->
+<!-- pages/AdminManagement/index.vue
+     Administration dashboard — "Ink & Brass" information architecture.
+     Overview KPIs → operational KPIs → revenue trend → pending items →
+     recent users / activity → subscription mix → system health.
+     Every value comes from /admin/dashboard (no mock data). -->
 <template>
-  <div class="relative">
-    <!-- ==============================================
-         FULL-PAGE INITIAL LOADING
-         Show when: dashboard belum fetch lagi (null) OR API still loading.
-         The loader centres itself on the visible viewport (see
-         NFCGoWaveLoader `.nfg-viewport`) — no wrapper height needed.
-         ============================================== -->
-    <div v-if="dashboard === null || loading" class="w-full">
+  <div>
+    <!-- Full-page loader — only on the very first paint -->
+    <div v-if="dashboard === null && !error" class="w-full">
       <NFCGoWaveLoader
         variant="wave"
         size="lg"
@@ -17,316 +16,369 @@
       />
     </div>
 
-    <!-- ==============================================
-         MAIN CONTENT (only after dashboard loaded)
-         ============================================== -->
-    <div v-else>
-      <div class="mb-8">
-        <h1 class="page-title text-secondary-900">Admin Dashboard</h1>
-        <p class="mt-2 text-secondary-600">
-          Monitor and manage your NFC business card platform
-        </p>
-      </div>
-
-      <!-- Stats Overview -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div v-for="stat in statsCards" :key="stat.name" class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div :class="['p-3 rounded-lg', stat.bgColor]">
-              <Icon :name="stat.icon" class="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">
-              {{ stat.name }}
-            </p>
-            <p class="stat-value text-secondary-900">
-              {{ stat.value }}
-            </p>
-          </div>
-        </div>
-        <div class="mt-4">
-          <div class="flex items-center text-body">
-            <Icon
-              :name="
-                stat.trend === 'up'
-                  ? 'heroicons:arrow-trending-up'
-                  : 'heroicons:arrow-trending-down'
-              "
-              :class="[
-                'h-4 w-4 mr-1',
-                stat.trend === 'up' ? 'text-success-500' : 'text-error-500',
-              ]"
-            />
-            <span
-              :class="[
-                stat.trend === 'up' ? 'text-success-600' : 'text-error-600',
-              ]"
-            >
-              {{ stat.change }}
-            </span>
-            <span class="text-secondary-500 ml-1">from last month</span>
-          </div>
-        </div>
+    <!-- Error state with retry -->
+    <div v-else-if="error && !dashboard" class="mx-auto max-w-md py-16 text-center">
+      <div class="rounded-2xl border border-secondary-200 bg-white p-8 shadow-sm">
+        <span class="admin-kpi-ico mx-auto">
+          <Icon name="heroicons:exclamation-triangle" class="h-6 w-6" />
+        </span>
+        <h3 class="mt-4 text-h6 font-semibold text-secondary-900">Couldn't load dashboard</h3>
+        <p class="mt-2 text-body text-secondary-500">{{ error }}</p>
+        <button
+          type="button"
+          class="admin-btn admin-btn--primary mt-5"
+          @click="refresh"
+        >
+          <Icon name="heroicons:arrow-path" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
+          Retry
+        </button>
       </div>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Recent Users -->
-      <div class="card">
-        <div class="card-header flex flex-wrap items-center justify-between gap-2 w-full">
-          <h3 class="card-title text-secondary-900 whitespace-nowrap">Recent Users</h3>
-          <NuxtLink
-            to="/AdminManagement/users"
-            class="text-body text-primary-600 hover:text-primary-500 whitespace-nowrap"
-          >
-            View all
-          </NuxtLink>
-        </div>
-        <div class="card-body">
-          <div v-if="loading" class="flex justify-center py-10">
-            <NFCGoWaveLoader
-              variant="dotPulse"
-              size="sm"
-              :showText="true"
-              labelText="NFCGo"
-              :showHintText="false"
-              inline
-            />
-          </div>
-          <div v-else-if="dashboard?.recent_users?.length" class="space-y-4">
-            <div
-              v-for="user in dashboard.recent_users"
-              :key="user.id"
-              class="flex items-center space-x-3"
-            >
-              <img
-                :src="user.profile?.profile_image || '/default-avatar.png'"
-                :alt="user.full_name"
-                class="h-10 w-10 rounded-full object-cover"
-              />
-              <div class="flex-1 min-w-0">
-                <p class="text-body font-medium text-secondary-900 truncate">
-                  {{ user.full_name }}
-                </p>
-                <p class="text-caption text-secondary-500 truncate">
-                  {{ user.email }}
-                </p>
-              </div>
-              <div class="flex items-center space-x-2">
-                <span
-                  :class="[
-                    'px-2 py-1 text-badge rounded-full',
-                    getSubscriptionBadgeClass(user.subscription_plan),
-                  ]"
-                >
-                  {{ String(user.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
-                </span>
-                <span
-                  v-if="user.is_admin"
-                  class="px-2 py-1 text-badge bg-error-100 text-error-800 rounded-full"
-                >
-                  Admin
-                </span>
-              </div>
+    <div v-else>
+      <AdminPageHeader
+        eyebrow="Overview"
+        eyebrow-icon="heroicons:squares-2x2"
+        title="Dashboard"
+        description="Monitor platform health, user growth and recent activity across NFCGo."
+      >
+        <template #actions>
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Period selector -->
+            <div class="flex items-center gap-1 rounded-lg border border-secondary-200 bg-white p-0.5">
+              <button
+                v-for="p in periodOptions"
+                :key="p.value"
+                type="button"
+                class="rounded-md px-2.5 py-1 text-caption font-medium transition-colors"
+                :class="period === p.value
+                  ? 'bg-ink text-paper'
+                  : 'text-secondary-500 hover:bg-secondary-100'"
+                @click="changePeriod(p.value)"
+              >
+                {{ p.label }}
+              </button>
             </div>
+
+            <!-- Last updated + pause toggle -->
+            <div class="hidden items-center gap-2 md:flex">
+              <span class="text-caption text-secondary-400">
+                {{ lastUpdatedLabel }}
+              </span>
+              <button
+                type="button"
+                class="admin-btn admin-btn--ghost admin-btn--sm"
+                :title="autoRefreshPaused ? 'Resume auto-refresh' : 'Pause auto-refresh'"
+                @click="toggleAutoRefresh"
+              >
+                <Icon
+                  :name="autoRefreshPaused ? 'heroicons:play' : 'heroicons:pause'"
+                  class="h-4 w-4"
+                />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              class="admin-btn admin-btn--outline admin-btn--sm"
+              :disabled="loading"
+              @click="refresh"
+            >
+              <Icon
+                name="heroicons:arrow-path"
+                class="h-4 w-4"
+                :class="{ 'animate-spin': loading }"
+              />
+              Refresh
+            </button>
+            <NuxtLink to="/AdminManagement/users" class="admin-btn admin-btn--primary admin-btn--sm">
+              <Icon name="heroicons:users" class="h-4 w-4" />
+              Manage users
+            </NuxtLink>
           </div>
-          <div v-else class="text-center py-8 text-secondary-500">
-            <Icon
-              name="heroicons:users"
-              class="h-12 w-12 mx-auto text-secondary-300 mb-4"
-            />
-            <p>No recent users</p>
-          </div>
-        </div>
+        </template>
+      </AdminPageHeader>
+
+      <!-- ===================== QUICK ACTIONS ===================== -->
+      <div class="mb-6 flex flex-wrap gap-2">
+        <NuxtLink
+          v-for="qa in quickActions"
+          :key="qa.to"
+          :to="qa.to"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+        >
+          <Icon :name="qa.icon" class="h-4 w-4" />
+          {{ qa.label }}
+        </NuxtLink>
       </div>
 
-      <!-- Recent Activity -->
-      <div class="card">
-        <div class="card-header flex flex-wrap items-center justify-between gap-2 w-full">
-          <h3 class="card-title text-secondary-900 whitespace-nowrap">
-            Recent Activity
-          </h3>
-          <NuxtLink
-            to="/AdminManagement/SystemAuditLog"
-            class="text-body text-primary-600 hover:text-primary-500 whitespace-nowrap"
-          >
-            View all
-          </NuxtLink>
-        </div>
-        <div class="card-body">
-          <div v-if="loading" class="flex justify-center py-10">
-            <NFCGoWaveLoader
-              variant="dotPulse"
-              size="sm"
-              :showText="true"
-              labelText="NFCGo"
-              :showHintText="false"
-              inline
-            />
-          </div>
-          <div v-else-if="dashboard?.recent_activity?.length" class="space-y-4">
-            <div
-              v-for="activity in dashboard.recent_activity"
-              :key="activity.id"
-              class="flex items-start space-x-3"
+      <!-- ============================ KPI ROW ============================ -->
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <button
+          v-for="stat in statsCards"
+          :key="stat.name"
+          type="button"
+          class="text-left"
+          @click="stat.to && navigateTo(stat.to)"
+        >
+          <AdminStatTile
+            :label="stat.name"
+            :value="stat.value"
+            :icon="stat.icon"
+            :trend="stat.trend"
+            :trend-value="stat.change"
+            :hint="stat.hint"
+            :loading="loading && !dashboard"
+          />
+        </button>
+      </div>
+
+      <!-- ===================== OPERATIONAL KPIs ===================== -->
+      <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <button
+          v-for="kpi in operationalCards"
+          :key="kpi.name"
+          type="button"
+          class="text-left"
+          @click="kpi.to && navigateTo(kpi.to)"
+        >
+          <AdminStatTile
+            :label="kpi.name"
+            :value="kpi.value"
+            :icon="kpi.icon"
+            :trend="kpi.trend"
+            :trend-value="kpi.change"
+            :hint="kpi.hint"
+            :loading="loading && !dashboard"
+          />
+        </button>
+      </div>
+
+      <!-- ===================== REVENUE TREND + PENDING ITEMS ===================== -->
+      <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <!-- Revenue trend chart -->
+        <AdminSectionCard
+          title="Revenue Trend"
+          :subtitle="`Succeeded transactions over the last ${period} days`"
+          class="xl:col-span-2"
+        >
+          <AnalyticsChart
+            type="area"
+            :data="revenueChartData"
+            :height="220"
+            title="Revenue trend"
+            :value-formatter="formatCurrency"
+            empty-message="No revenue in this period yet"
+          />
+        </AdminSectionCard>
+
+        <!-- Pending items widget -->
+        <AdminSectionCard title="Pending Actions" subtitle="Items needing admin attention">
+          <div v-if="hasPendingItems" class="space-y-3">
+            <NuxtLink
+              v-if="pendingVerificationCards.length"
+              to="/AdminManagement/nfc-cards?status=awaiting_payment_verification"
+              class="flex items-center justify-between rounded-xl border border-warning-200 bg-warning-50/60 p-3 hover:bg-warning-50"
             >
-              <div class="flex-shrink-0 mt-0.5">
-                <div
-                  :class="[
-                    'p-2 rounded-lg',
-                    getActivityIconClass(activity.action),
-                  ]"
-                >
-                  <Icon
-                    :name="getActivityIcon(activity.action)"
-                    class="h-4 w-4 text-white"
-                  />
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-warning-100">
+                  <Icon name="heroicons:credit-card" class="h-5 w-5 text-warning-600" />
+                </span>
+                <div>
+                  <p class="text-body font-medium text-secondary-900">Payment verifications</p>
+                  <p class="text-caption text-secondary-500">Cards awaiting manual review</p>
                 </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-body font-medium text-secondary-900 leading-snug">
+              <span class="text-h6 font-bold text-warning-600">{{ pendingVerificationCards.length }}</span>
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="pendingRefunds.length"
+              to="/AdminManagement/refunds?status=pending"
+              class="flex items-center justify-between rounded-xl border border-error-200 bg-error-50/60 p-3 hover:bg-error-50"
+            >
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-error-100">
+                  <Icon name="heroicons:arrow-uturn-left" class="h-5 w-5 text-error-600" />
+                </span>
+                <div>
+                  <p class="text-body font-medium text-secondary-900">Pending refunds</p>
+                  <p class="text-caption text-secondary-500">Refund requests to process</p>
+                </div>
+              </div>
+              <span class="text-h6 font-bold text-error-600">{{ pendingRefunds.length }}</span>
+            </NuxtLink>
+          </div>
+          <AdminEmptyState
+            v-else
+            icon="heroicons:check-badge"
+            title="All caught up"
+            description="No pending actions require your attention."
+          />
+        </AdminSectionCard>
+      </div>
+
+      <!-- ===================== USERS + ACTIVITY ===================== -->
+      <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <!-- Recent users -->
+        <AdminSectionCard title="Recent Users" subtitle="Newest accounts on the platform" flush>
+          <template #header-actions>
+            <NuxtLink to="/AdminManagement/users" class="admin-btn admin-btn--ghost admin-btn--sm">
+              View all
+              <Icon name="heroicons:arrow-right" class="h-4 w-4" />
+            </NuxtLink>
+          </template>
+
+          <div v-if="loading && !dashboard?.recent_users" class="p-4">
+            <AdminLoadingState variant="block" />
+          </div>
+          <ul v-else-if="dashboard?.recent_users?.length" class="divide-y divide-secondary-100">
+            <li
+              v-for="u in dashboard.recent_users"
+              :key="u.id"
+              class="flex cursor-pointer items-center gap-3 px-6 py-3.5 transition-colors hover:bg-secondary-50"
+              @click="navigateTo(`/AdminManagement/users?open=${u.id}`)"
+            >
+              <UserAvatar
+                :src="u.profile_image"
+                :name="u.full_name"
+                class="h-10 w-10 shrink-0 rounded-full ring-1 ring-secondary-200"
+              />
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-body font-semibold text-secondary-900">{{ u.full_name }}</p>
+                <p class="truncate text-caption text-secondary-500">{{ u.email }}</p>
+              </div>
+              <div class="flex shrink-0 items-center gap-2">
+                <AdminStatusBadge :status="u.subscription_plan" :label="planLabel(u.subscription_plan)" />
+                <AdminStatusBadge v-if="u.is_admin" tone="danger" label="Admin" />
+              </div>
+            </li>
+          </ul>
+          <AdminEmptyState
+            v-else
+            icon="heroicons:users"
+            title="No recent users"
+            description="New sign-ups will appear here."
+          />
+        </AdminSectionCard>
+
+        <!-- Recent activity -->
+        <AdminSectionCard title="Recent Activity" subtitle="Latest events across the platform" flush>
+          <template #header-actions>
+            <NuxtLink to="/AdminManagement/SystemAuditLog" class="admin-btn admin-btn--ghost admin-btn--sm">
+              View all
+              <Icon name="heroicons:arrow-right" class="h-4 w-4" />
+            </NuxtLink>
+          </template>
+
+          <div v-if="loading && !dashboard?.recent_activity" class="p-4">
+            <AdminLoadingState variant="block" />
+          </div>
+          <ul v-else-if="dashboard?.recent_activity?.length" class="divide-y divide-secondary-100">
+            <li
+              v-for="activity in dashboard.recent_activity"
+              :key="activity.id"
+              class="flex cursor-pointer items-start gap-3 px-6 py-3.5 transition-colors hover:bg-secondary-50"
+              @click="openActivityEntity(activity)"
+            >
+              <span
+                :class="['mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', getActivityIconClass(activity.action)]"
+              >
+                <Icon :name="getActivityIcon(activity.action)" class="h-4 w-4 text-white" />
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-body font-medium leading-snug text-secondary-900">
                   {{ getActivityTitle(activity) }}
                 </p>
                 <p
                   v-if="getActivityContext(activity)"
-                  class="text-caption text-secondary-500 mt-1 truncate"
+                  class="mt-0.5 truncate text-caption text-secondary-500"
                   :title="getActivityContext(activity)"
                 >
                   {{ getActivityContext(activity) }}
                 </p>
-                <p class="text-caption text-secondary-400 mt-1">
+                <p class="mt-0.5 text-caption text-secondary-400">
                   {{ formatTimeAgo(activity.created_at) }}
                 </p>
               </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8 text-secondary-500">
-            <Icon
-              name="heroicons:clock"
-              class="h-12 w-12 mx-auto text-secondary-300 mb-4"
-            />
-            <p>No recent activity</p>
-          </div>
-        </div>
+            </li>
+          </ul>
+          <AdminEmptyState
+            v-else
+            icon="heroicons:clock"
+            title="No recent activity"
+            description="Platform events will show up here."
+          />
+        </AdminSectionCard>
       </div>
-    </div>
 
-    <!-- Subscription Breakdown -->
-    <div class="mt-8">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title text-secondary-900">
-            Subscription Breakdown
-          </h3>
-        </div>
-        <div class="card-body">
-          <div v-if="loading" class="flex justify-center py-10">
-            <NFCGoWaveLoader
-              variant="dotPulse"
-              size="sm"
-              :showText="true"
-              labelText="NFCGo"
-              :showHintText="false"
-              inline
-            />
-          </div>
-          <div
-            v-else-if="dashboard?.subscription_breakdown?.length"
-            class="grid grid-cols-1 md:grid-cols-4 gap-4"
-          >
-            <div
-              v-for="plan in dashboard.subscription_breakdown"
-              :key="plan.subscription_plan"
-              class="text-center p-4 rounded-lg bg-secondary-50"
-            >
-              <h4 class="card-title text-secondary-900">
-                {{ String(plan.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
-              </h4>
-              <p class="stat-value text-primary-600">
-                {{ plan.count }}
-              </p>
-              <p class="stat-label text-secondary-500">users</p>
+      <!-- ============ SUBSCRIPTION MIX + SYSTEM HEALTH ============ -->
+      <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <!-- Subscription breakdown -->
+        <AdminSectionCard title="Subscription Breakdown" subtitle="Distribution of user plans (active / total)">
+          <div v-if="subscriptionRows.length" class="space-y-4">
+            <div v-for="row in subscriptionRows" :key="row.plan">
+              <div class="mb-1.5 flex items-center justify-between">
+                <span class="text-body font-medium text-secondary-900">{{ row.label }}</span>
+                <span class="text-body tabular-nums text-secondary-600">
+                  {{ row.active }}<span class="text-secondary-400">/{{ row.count }} active</span>
+                  <span class="text-secondary-400"> · {{ row.pct }}%</span>
+                </span>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-secondary-100">
+                <div
+                  class="h-full rounded-full"
+                  :style="{ width: row.pct + '%', background: 'linear-gradient(90deg, var(--admin-brass-soft), var(--admin-brass-deep))' }"
+                ></div>
+              </div>
             </div>
           </div>
-          <div v-else class="text-center py-8 text-secondary-500">
-            <p>No subscription data available</p>
-          </div>
-        </div>
-      </div>
-    </div>
+          <AdminEmptyState
+            v-else
+            icon="heroicons:chart-pie"
+            title="No subscription data"
+            description="Plan distribution will appear once users subscribe."
+          />
+        </AdminSectionCard>
 
-    <!-- System Stats -->
-    <div class="mt-8">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title text-secondary-900">
-            System Information
-          </h3>
-        </div>
-        <div class="card-body">
-          <div v-if="loading" class="flex justify-center py-10">
-            <NFCGoWaveLoader
-              variant="dotPulse"
-              size="sm"
-              :showText="true"
-              labelText="NFCGo"
-              :showHintText="false"
-              inline
-            />
-          </div>
-          <div
-            v-else-if="dashboard?.system_stats"
-            class="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <div class="text-center">
-              <Icon
-                name="heroicons:server"
-                class="h-8 w-8 mx-auto text-primary-500 mb-2"
-              />
-              <h4 class="text-body font-medium text-secondary-900">
-                Storage Used
-              </h4>
+        <!-- System health -->
+        <AdminSectionCard title="System Information" subtitle="Platform storage and session health">
+          <div v-if="dashboard?.system_stats" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4 text-center">
+              <span class="admin-kpi-ico mx-auto">
+                <Icon name="heroicons:server" class="h-5 w-5" />
+              </span>
+              <p class="mt-2 text-caption uppercase tracking-wide text-secondary-500">Storage Used</p>
               <p class="text-h5 text-secondary-900">
-                {{
-                  dashboard.system_stats.total_storage_used?.formatted || "0 B"
-                }}
+                {{ dashboard.system_stats.total_storage_used?.formatted || "0 B" }}
               </p>
             </div>
-            <div class="text-center">
-              <Icon
-                name="heroicons:signal"
-                class="h-8 w-8 mx-auto text-primary-500 mb-2"
-              />
-              <h4 class="text-body font-medium text-secondary-900">
-                Active Sessions
-              </h4>
-              <p class="text-h5 text-secondary-900">
-                {{ dashboard.system_stats.active_sessions || 0 }}
-              </p>
+            <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4 text-center">
+              <span class="admin-kpi-ico mx-auto">
+                <Icon name="heroicons:signal" class="h-5 w-5" />
+              </span>
+              <p class="mt-2 text-caption uppercase tracking-wide text-secondary-500">Active Sessions</p>
+              <p class="text-h5 text-secondary-900">{{ dashboard.system_stats.active_sessions || 0 }}</p>
             </div>
-            <div class="text-center">
-              <Icon
-                name="heroicons:clock"
-                class="h-8 w-8 mx-auto text-primary-500 mb-2"
-              />
-              <h4 class="text-body font-medium text-secondary-900">
-                Last Backup
-              </h4>
+            <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4 text-center">
+              <span class="admin-kpi-ico mx-auto">
+                <Icon name="heroicons:clock" class="h-5 w-5" />
+              </span>
+              <p class="mt-2 text-caption uppercase tracking-wide text-secondary-500">Last Backup</p>
               <p class="text-h5 text-secondary-900">
-                {{ formatDate(dashboard.system_stats.last_backup) }}
+                {{ dashboard.system_stats.last_backup ? formatDate(dashboard.system_stats.last_backup) : "Not configured" }}
               </p>
             </div>
           </div>
-          <div v-else class="text-center py-8 text-secondary-500">
-            <p>No system information available</p>
-          </div>
-        </div>
+          <AdminEmptyState
+            v-else
+            icon="heroicons:server"
+            title="No system information"
+            description="Health metrics will appear once available."
+          />
+        </AdminSectionCard>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -337,12 +389,44 @@ definePageMeta({
 });
 
 const adminStore = useAdminStore();
-const { dashboard, loading } = storeToRefs(adminStore);
+const { dashboard, loading, error } = storeToRefs(adminStore);
 
 const isMounted = ref(false);
+const period = ref(30);
+const autoRefreshPaused = ref(false);
+const lastUpdated = ref(null);
 
-// Helper to build a single stat card entry from real overview.trends data
-const buildStatCard = (key, name, icon, bgColor) => {
+const periodOptions = [
+  { label: "7D", value: 7 },
+  { label: "30D", value: 30 },
+  { label: "90D", value: 90 },
+];
+
+const quickActions = [
+  { label: "Add User", icon: "heroicons:user-plus", to: "/AdminManagement/users" },
+  { label: "Register NFC Card", icon: "heroicons:credit-card", to: "/AdminManagement/nfc-cards" },
+  { label: "Card Templates", icon: "heroicons:document-duplicate", to: "/AdminManagement/card-templates" },
+  { label: "Notifications", icon: "heroicons:bell", to: "/AdminManagement/notifications" },
+  { label: "Audit Log", icon: "heroicons:clipboard-document-list", to: "/AdminManagement/SystemAuditLog" },
+];
+
+const refresh = () => {
+  adminStore.fetchDashboard(period.value).then(() => {
+    lastUpdated.value = new Date();
+  });
+};
+
+const changePeriod = (days) => {
+  period.value = days;
+  refresh();
+};
+
+const toggleAutoRefresh = () => {
+  autoRefreshPaused.value = !autoRefreshPaused.value;
+};
+
+// Helper to build a single stat entry from real overview.trends data
+const buildStatCard = (key, name, icon, to, hint = "vs previous period") => {
   const overview = dashboard.value?.overview || {};
   const trends = overview?.trends?.[key] || {};
   const direction = trends.direction || "up";
@@ -352,33 +436,131 @@ const buildStatCard = (key, name, icon, bgColor) => {
     name,
     value: overview?.[key] ?? 0,
     icon,
-    bgColor,
     trend: direction,
     change: `${sign}${Math.abs(pct)}%`,
+    hint,
+    to,
   };
 };
 
-// Stats cards data — values & trends come from the API (no hardcoded fakes)
+// Stats tiles — values & trends come from the API (no hardcoded fakes)
 const statsCards = computed(() => [
-  buildStatCard("total_users", "Total Users", "heroicons:users", "bg-primary-500"),
-  buildStatCard("total_profiles", "Total Profiles", "heroicons:identification", "bg-success-500"),
-  buildStatCard("total_nfc_cards", "NFC Cards", "heroicons:credit-card", "bg-warning-500"),
-  buildStatCard("total_analytics", "Total Analytics", "heroicons:chart-bar", "bg-info-500"),
+  buildStatCard("total_users", "Total Users", "heroicons:users", "/AdminManagement/users"),
+  buildStatCard("total_profiles", "Total Profiles", "heroicons:identification", "/AdminManagement/profile-builder-design"),
+  buildStatCard("total_nfc_cards", "NFC Cards", "heroicons:credit-card", "/AdminManagement/nfc-cards"),
+  buildStatCard("total_analytics", "Total Analytics", "heroicons:chart-bar", "/AdminManagement/stats"),
 ]);
 
-// Fetch dashboard data on mount + set up live auto-refresh every 30s
+// Operational KPI tiles
+const operationalCards = computed(() => {
+  const op = dashboard.value?.operational || {};
+  const revChange = Number(op.revenue_change_pct ?? 0);
+  const revSign = revChange >= 0 ? "+" : "-";
+  return [
+    {
+      name: "Revenue",
+      value: formatCurrency(op.revenue_this_period || 0),
+      icon: "heroicons:banknotes",
+      trend: revChange >= 0 ? "up" : "down",
+      change: `${revSign}${Math.abs(revChange)}%`,
+      hint: "vs previous period",
+      to: "/AdminManagement/invoices",
+    },
+    {
+      name: "Pending Payments",
+      value: op.pending_payments ?? 0,
+      icon: "heroicons:clock",
+      trend: "neutral",
+      change: "",
+      hint: "awaiting processing",
+      to: "/AdminManagement/invoices?status=pending",
+    },
+    {
+      name: "Pending Orders",
+      value: op.pending_orders ?? 0,
+      icon: "heroicons:shopping-bag",
+      trend: "neutral",
+      change: "",
+      hint: "awaiting review",
+      to: "/AdminManagement/nfc-cards?status=pending",
+    },
+    {
+      name: "Pending Refunds",
+      value: op.pending_refunds ?? 0,
+      icon: "heroicons:arrow-uturn-left",
+      trend: "neutral",
+      change: "",
+      hint: "to be processed",
+      to: "/AdminManagement/refunds?status=pending",
+    },
+  ];
+});
+
+// Revenue chart data
+const revenueChartData = computed(() =>
+  (dashboard.value?.revenue_trend || []).map((r) => ({
+    label: r.date ? new Date(r.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "",
+    value: r.total || 0,
+  }))
+);
+
+// Pending items
+const pendingVerificationCards = computed(() =>
+  dashboard.value?.pending_items?.cards_awaiting_verification || []
+);
+const pendingRefunds = computed(() => dashboard.value?.pending_items?.pending_refunds || []);
+const hasPendingItems = computed(() =>
+  pendingVerificationCards.value.length > 0 || pendingRefunds.value.length > 0
+);
+
+// Subscription breakdown with computed share percentages
+const subscriptionRows = computed(() => {
+  const list = dashboard.value?.subscription_breakdown || [];
+  const total = list.reduce((sum, p) => sum + Number(p.count || 0), 0);
+  return list.map((p) => ({
+    plan: p.subscription_plan,
+    label: planLabel(p.subscription_plan),
+    count: Number(p.count || 0),
+    active: Number(p.active || 0),
+    pct: total > 0 ? Math.round((Number(p.count || 0) / total) * 100) : 0,
+  }));
+});
+
+const planLabel = (plan) =>
+  String(plan || "free").replace(/\b\w/g, (c) => c.toUpperCase());
+
+const formatCurrency = (value) => {
+  const num = Number(value) || 0;
+  return new Intl.NumberFormat("en-MY", {
+    style: "currency",
+    currency: "MYR",
+    maximumFractionDigits: 0,
+  }).format(num);
+};
+
+const lastUpdatedLabel = computed(() => {
+  if (!lastUpdated.value) return "Updated just now";
+  const diff = Math.floor((Date.now() - new Date(lastUpdated.value).getTime()) / 1000);
+  if (diff < 5) return "Updated just now";
+  if (diff < 60) return `Updated ${diff}s ago`;
+  return `Updated ${Math.floor(diff / 60)}m ago`;
+});
+
+// Fetch dashboard data on mount + set up live auto-refresh every 60s
 onMounted(async () => {
   isMounted.value = true;
-  await adminStore.fetchDashboard();
+  await adminStore.fetchDashboard(period.value);
+  lastUpdated.value = new Date();
 
   const intervalId = setInterval(async () => {
-    if (!isMounted.value) return;
+    if (!isMounted.value || autoRefreshPaused.value) return;
     try {
-      await adminStore.fetchDashboard();
+      await adminStore.fetchDashboard(period.value);
+      lastUpdated.value = new Date();
     } catch (_) {
       /* ignore transient network errors during silent refresh */
     }
-  }, 30000);
+  }, 60000);
 
   onBeforeUnmount(() => {
     isMounted.value = false;
@@ -386,15 +568,34 @@ onMounted(async () => {
   });
 });
 
-// Helper functions
-const getSubscriptionBadgeClass = (plan) => {
-  const classes = {
-    free: "bg-secondary-100 text-secondary-800",
-    basic: "bg-info-100 text-info-800",
-    premium: "bg-primary-100 text-primary-800",
-    business: "bg-success-100 text-success-800",
-  };
-  return classes[plan] || classes.free;
+// Navigate to the entity related to an activity event
+const openActivityEntity = (activity) => {
+  const trackableType = activity.trackable_type;
+  const trackableId = activity.trackable_id;
+  const ownerId = activity.owner?.user_id || activity.actor?.user_id;
+
+  // Card-related activity → NFC card management
+  if (trackableType === "App\\Models\\NfcCard" || trackableType === "App\\Models\\NfcTag" || trackableType === "App\\Models\\LandingPage") {
+    navigateTo("/AdminManagement/nfc-cards");
+    return;
+  }
+  // Payment / order / refund activity → invoices
+  if (["payment_created", "payment_succeeded", "payment_failed", "payment_verified", "order_placed", "nfc_order_placed", "order_approved", "order_rejected", "order_shipped", "order_delivered", "subscription_activated", "subscription_cancelled", "subscription_paused", "subscription_renewed"].includes(activity.action)) {
+    navigateTo("/AdminManagement/invoices");
+    return;
+  }
+  // Refund activity → refunds
+  if (activity.action.includes("refund")) {
+    navigateTo("/AdminManagement/refunds");
+    return;
+  }
+  // Fallback: if there's an owner/actor, go to their user record
+  if (ownerId) {
+    navigateTo(`/AdminManagement/users?open=${ownerId}`);
+    return;
+  }
+  // Otherwise open the audit log
+  navigateTo("/AdminManagement/SystemAuditLog");
 };
 
 const getActivityIcon = (action) => {
@@ -559,7 +760,6 @@ const getActivityTitle = (activity) => {
   const trackable = activity.trackable;
   const actorName = getActorName(activity);
 
-  // ------- If description exists from ActivityLog, prefer it for rich context, fall through to structured for short -------
   const rawDescription = activity.description;
   const useDescForActivity = [
     "user_profile_updated", "profile_updated", "admin_updated_config", "admin_updated_branding",
@@ -573,7 +773,6 @@ const getActivityTitle = (activity) => {
     return rawDescription;
   }
 
-  // ------- Analytics (card interactions) -------
   switch (action) {
     case "nfc_tap": {
       const cardId =
@@ -582,8 +781,7 @@ const getActivityTitle = (activity) => {
         activity?.data?.nfc_id ||
         null;
       const cardNum = card?.card_number ? `#${card.card_number}` : "";
-      const ownerName =
-        actorName || card?.card_owner || trackable?.name || null;
+      const ownerName = actorName || card?.card_owner || trackable?.name || null;
       const parts = [];
       if (cardId) parts.push(`NFC ${cardId}${cardNum ? ` (${cardNum})` : ""}`);
       else parts.push("NFC tag");
@@ -605,7 +803,6 @@ const getActivityTitle = (activity) => {
       return parts.join(" ");
     }
 
-    // ------- Auth / session -------
     case "user_logged_in":
     case "user_login_success":
       return `${actorName || "A user"} logged in`;
@@ -625,7 +822,6 @@ const getActivityTitle = (activity) => {
     case "password_reset_completed":
       return `${actorName || "A user"} password reset completed`;
 
-    // ------- 2FA / security -------
     case "two_fa_enabled":
     case "2fa_enabled":
       return `${actorName || "A user"} enabled 2FA security`;
@@ -637,7 +833,6 @@ const getActivityTitle = (activity) => {
     case "2fa_recovery_codes_rotated":
       return `${actorName || "A user"} regenerated 2FA recovery codes`;
 
-    // ------- Payments / orders -------
     case "payment_created":
       return `Payment initiated by ${actorName || "a user"}`;
     case "payment_succeeded":
@@ -667,7 +862,6 @@ const getActivityTitle = (activity) => {
     case "subscription_renewed":
       return `${actorName || "A user"} subscription renewed`;
 
-    // ------- Cards / profile -------
     case "card_activated":
     case "nfc_card_activated": {
       const cid = card?.card_id || activity?.data?.card_id || "a card";
@@ -693,7 +887,6 @@ const getActivityTitle = (activity) => {
     case "theme_changed":
       return `${actorName || "A user"} changed profile theme`;
 
-    // ------- Admin actions -------
     case "admin_approved_user":
       return `Admin approved user: ${actorName || activity?.data?.user_email || "N/A"}`;
     case "admin_rejected_user":
@@ -711,7 +904,6 @@ const getActivityTitle = (activity) => {
     case "admin_deleted_user":
       return `Admin deleted user: ${actorName || activity?.data?.user_email || "N/A"}`;
 
-    // ------- Business -------
     case "business_created":
       return `${actorName || "A user"} created a Business account`;
     case "business_employee_added":
@@ -729,6 +921,21 @@ const getActivityTitle = (activity) => {
   }
 };
 
+// Mask IP addresses — show only the first two octets for privacy
+const maskIp = (ip) => {
+  if (!ip) return null;
+  const parts = String(ip).split(".");
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}.x.x`;
+  }
+  // IPv6: show only the first 2 groups
+  const v6parts = String(ip).split(":");
+  if (v6parts.length >= 3) {
+    return `${v6parts[0]}:${v6parts[1]}::`;
+  }
+  return "x.x.x.x";
+};
+
 const getActivityContext = (activity) => {
   const parts = [];
   if (activity.location) parts.push(activity.location);
@@ -738,7 +945,7 @@ const getActivityContext = (activity) => {
       .join(" · ");
     if (dev) parts.push(dev);
   }
-  if (activity.ip_address) parts.push(`IP ${activity.ip_address}`);
+  if (activity.ip_address) parts.push(`IP ${maskIp(activity.ip_address)}`);
   return parts.join("  •  ");
 };
 

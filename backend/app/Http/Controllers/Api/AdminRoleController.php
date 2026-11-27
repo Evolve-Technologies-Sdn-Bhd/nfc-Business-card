@@ -128,10 +128,14 @@ class AdminRoleController extends Controller
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'email' => $user->email,
+                        'profile_image' => $user->profile_image,
                         'is_admin' => (bool) $user->is_admin,
                         'admin_role' => $user->admin_role,
                         'admin_role_display' => $user->admin_role_display,
-                        'admin_permissions' => $user->admin_permissions ?? [],
+                        'admin_permissions' => array_values(array_intersect(
+                            $user->admin_permissions ?? [],
+                            self::allPermissionKeys()
+                        )),
                         'last_admin_action_at' => $user->last_admin_action_at,
                         'created_at' => $user->created_at,
                     ];

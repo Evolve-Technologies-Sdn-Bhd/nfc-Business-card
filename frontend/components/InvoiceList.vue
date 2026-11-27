@@ -1,162 +1,172 @@
+<!-- components/InvoiceList.vue
+     Shared invoice list with filters, table, pagination and preview.
+     Used by both admin and user invoice pages. -->
 <template>
   <div>
-    <!-- Header with filters -->
-    <div class="mb-6">
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
-        <h3 class="card-title text-secondary-900">Invoices</h3>
-
-        <!-- Filters -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <!-- Status filter -->
-          <select v-model="filters.status" @change="applyFilters" class="input">
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="issued">Issued</option>
-            <option value="paid">Paid</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
-          </select>
-
-          <!-- Search -->
+    <!-- Filter bar -->
+    <AdminFilterBar @submit="applyFilters">
+      <template #search>
+        <label class="admin-label">Search</label>
+        <div class="relative">
+          <Icon
+            name="heroicons:magnifying-glass"
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+          />
           <input
             v-model="filters.search"
-            @input="debounceSearch"
             type="text"
-            placeholder="Search invoice number..."
-            class="input"
+            placeholder="Search invoice number or customer…"
+            class="admin-field !pl-9"
+            maxlength="150"
+            @input="debounceSearch"
           />
         </div>
+      </template>
+
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Status</label>
+        <select v-model="filters.status" class="admin-field" @change="applyFilters">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="issued">Issued</option>
+          <option value="paid">Paid</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="refunded">Refunded</option>
+        </select>
       </div>
-    </div>
+
+      <div class="min-w-[9rem]">
+        <label class="admin-label">From</label>
+        <input
+          v-model="filters.from_date"
+          type="date"
+          class="admin-field"
+          @change="applyFilters"
+        />
+      </div>
+
+      <div class="min-w-[9rem]">
+        <label class="admin-label">To</label>
+        <input
+          v-model="filters.to_date"
+          type="date"
+          class="admin-field"
+          @change="applyFilters"
+        />
+      </div>
+
+      <template #actions>
+        <span class="w-full text-right text-body-sm text-secondary-500 sm:w-auto">
+          {{ pagination.total }} invoice{{ pagination.total === 1 ? '' : 's' }}
+        </span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          :disabled="!hasActiveFilters"
+          @click="clearFilters"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          Clear
+        </button>
+      </template>
+    </AdminFilterBar>
 
     <!-- Loading state -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <div class="spinner"></div>
-      <p class="ml-3 text-body text-secondary-500">Loading invoices...</p>
-    </div>
+    <AdminLoadingState v-if="loading" variant="table" :rows="6" :columns="5" />
 
     <!-- Empty state -->
-    <div v-else-if="invoices.length === 0" class="text-center py-12">
-      <Icon
-        name="heroicons:document-text"
-        class="mx-auto h-12 w-12 text-secondary-400"
-      />
-      <h3 class="mt-2 card-title text-secondary-900">No invoices</h3>
-      <p class="mt-1 text-body text-secondary-500">
-        {{
-          filters.search || filters.status
-            ? "No invoices match your filters."
-            : "Your invoices will appear here."
-        }}
-      </p>
-    </div>
+    <AdminEmptyState
+      v-else-if="invoices.length === 0"
+      icon="heroicons:document-text"
+      :title="hasActiveFilters ? 'No matching invoices' : 'No invoices yet'"
+      :description="
+        hasActiveFilters
+          ? 'Try adjusting the search, status or date filters above.'
+          : 'Invoices issued on the platform will appear here.'
+      "
+    />
 
     <!-- Invoices table -->
-    <div v-else class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-secondary-200">
-        <thead class="bg-secondary-50">
-          <tr>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left table-head"
-            >
-              Invoice #
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left table-head"
-            >
-              Date
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left table-head"
-            >
-              Amount
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left table-head"
-            >
-              Status
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-right table-head"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-secondary-200">
-          <tr
-            v-for="invoice in invoices"
-            :key="invoice.id"
-            class="hover:bg-secondary-50"
-          >
-            <td
-              class="px-6 py-4 whitespace-nowrap table-cell font-medium text-secondary-900"
-            >
-              {{ invoice.invoice_number }}
-              <span
-                v-if="invoice.version > 1"
-                class="ml-2 text-caption text-secondary-500"
-              >
-                (v{{ invoice.version }})
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap table-cell text-secondary-500">
-              {{ formatDate(invoice.created_at) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap table-cell text-secondary-900">
-              {{ formatCurrency(invoice.total_amount, invoice.currency) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                :class="getStatusBadgeClass(invoice.status)"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge"
-              >
-                {{ getStatusLabel(invoice.status) }}
-              </span>
-            </td>
-            <td
-              class="px-6 py-4 whitespace-nowrap text-right table-cell font-medium"
-            >
-              <button
-                @click="$emit('preview', invoice)"
-                class="text-primary-600 hover:text-primary-900 mr-4"
-              >
-                View
-              </button>
-              <InvoiceDownloadButton :invoice="invoice" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="admin-panel overflow-hidden">
+      <div class="admin-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th class="text-right">Amount</th>
+              <th>Status</th>
+              <th class="admin-col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="invoice in invoices" :key="invoice.id">
+              <td>
+                <div class="flex flex-col">
+                  <span class="font-medium text-secondary-900">
+                    {{ invoice.invoice_number }}
+                  </span>
+                  <span v-if="invoice.version > 1" class="text-caption text-secondary-500">
+                    v{{ invoice.version }}
+                  </span>
+                </div>
+              </td>
+              <td class="text-secondary-700">
+                {{ customerName(invoice) }}
+              </td>
+              <td class="whitespace-nowrap text-secondary-600">
+                {{ formatDate(invoice.created_at) }}
+              </td>
+              <td class="whitespace-nowrap text-right font-medium text-secondary-900">
+                {{ formatCurrency(invoice.total_amount, invoice.currency) }}
+              </td>
+              <td>
+                <AdminStatusBadge
+                  :status="invoice.status"
+                  :label="getStatusLabel(invoice.status)"
+                  :tone="statusTone(invoice.status)"
+                />
+              </td>
+              <td class="admin-col-actions">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--outline admin-btn--sm"
+                    @click="$emit('preview', invoice)"
+                  >
+                    <Icon name="heroicons:eye" class="h-4 w-4" />
+                    View
+                  </button>
+                  <InvoiceDownloadButton :invoice="invoice" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Pagination -->
     <AdminPagination
-      v-if="pagination.last_page > 1"
+      v-if="!loading && invoices.length > 0"
       :current-page="pagination.current_page"
       :last-page="pagination.last_page"
       :per-page="pagination.per_page"
       :total="pagination.total"
-      item-label="results"
+      item-label="invoices"
       @page-change="changePage"
-      @per-page-change="() => {}"
+      @per-page-change="changePerPage"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useInvoices } from "~/composables/useInvoices";
-import InvoiceDownloadButton from "./InvoiceDownloadButton.vue";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useInvoices } from '~/composables/useInvoices';
+import InvoiceDownloadButton from './InvoiceDownloadButton.vue';
 
-const emit = defineEmits(["preview"]);
+const emit = defineEmits(['preview']);
 
 const {
   invoices,
@@ -165,62 +175,81 @@ const {
   fetchInvoices,
   formatCurrency,
   formatDate,
-  getStatusBadgeClass,
   getStatusLabel,
 } = useInvoices();
 
 const filters = ref({
-  status: "",
-  search: "",
+  status: '',
+  search: '',
+  from_date: '',
+  to_date: '',
   page: 1,
+  per_page: pagination.value.per_page,
 });
+
+const hasActiveFilters = computed(
+  () => !!(filters.value.search || filters.value.status || filters.value.from_date || filters.value.to_date)
+);
 
 let searchTimeout = null;
 
-const visiblePages = computed(() => {
-  const current = pagination.value.current_page;
-  const last = pagination.value.last_page;
-  const delta = 2;
-  const range = [];
-
-  for (
-    let i = Math.max(2, current - delta);
-    i <= Math.min(last - 1, current + delta);
-    i++
-  ) {
-    range.push(i);
+const statusTone = (status) => {
+  switch (status) {
+    case 'paid':
+      return 'success';
+    case 'issued':
+      return 'info';
+    case 'draft':
+      return 'neutral';
+    case 'cancelled':
+      return 'danger';
+    case 'refunded':
+      return 'warning';
+    default:
+      return 'neutral';
   }
+};
 
-  if (current - delta > 2) {
-    range.unshift("...");
-  }
-  if (current + delta < last - 1) {
-    range.push("...");
-  }
-
-  range.unshift(1);
-  if (last > 1) {
-    range.push(last);
-  }
-
-  return range.filter((v, i, a) => a.indexOf(v) === i);
-});
+const customerName = (invoice) => {
+  const user = invoice.user;
+  if (!user) return '—';
+  const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+  return name || user.name || user.email || '—';
+};
 
 const applyFilters = () => {
   filters.value.page = 1;
   loadInvoices();
 };
 
+const clearFilters = () => {
+  filters.value = {
+    status: '',
+    search: '',
+    from_date: '',
+    to_date: '',
+    page: 1,
+    per_page: pagination.value.per_page,
+  };
+  loadInvoices();
+};
+
 const debounceSearch = () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    applyFilters();
-  }, 500);
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => applyFilters(), 400);
 };
 
 const changePage = (page) => {
-  if (page < 1 || page > pagination.value.last_page) return;
-  filters.value.page = page;
+  const last = pagination.value.last_page || 1;
+  const target = Math.min(Math.max(1, page), last);
+  if (target === filters.value.page) return;
+  filters.value.page = target;
+  loadInvoices();
+};
+
+const changePerPage = (perPage) => {
+  filters.value.per_page = perPage;
+  filters.value.page = 1;
   loadInvoices();
 };
 
@@ -230,5 +259,9 @@ const loadInvoices = async () => {
 
 onMounted(() => {
   loadInvoices();
+});
+
+onBeforeUnmount(() => {
+  if (searchTimeout) clearTimeout(searchTimeout);
 });
 </script>

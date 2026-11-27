@@ -80,15 +80,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="flex-shrink-0 bg-purple-100 p-3 rounded-lg">
-              <Icon name="heroicons:cursor-arrow-ripple" class="h-6 w-6 text-purple-600" />
+            <div class="flex-shrink-0 bg-primary-100 p-3 rounded-lg">
+              <Icon name="heroicons:cursor-arrow-ripple" class="h-6 w-6 text-primary-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label">Total Taps</p>
               <p class="stat-value">
                 {{ analytics.totalTaps }}
               </p>
-              <p :class="analytics.tapGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
+              <p :class="analytics.tapGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
                 {{ analytics.tapGrowth >= 0 ? '+' : '' }}{{ analytics.tapGrowth }}% from last period
               </p>
             </div>
@@ -97,8 +97,8 @@
 
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="flex-shrink-0 bg-blue-100 p-3 rounded-lg">
-              <Icon name="heroicons:users" class="h-6 w-6 text-blue-600" />
+            <div class="flex-shrink-0 bg-info-100 p-3 rounded-lg">
+              <Icon name="heroicons:users" class="h-6 w-6 text-info-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label">
@@ -107,7 +107,7 @@
               <p class="stat-value">
                 {{ analytics.uniqueVisitors }}
               </p>
-              <p :class="analytics.visitorGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
+              <p :class="analytics.visitorGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
                 {{ analytics.visitorGrowth >= 0 ? '+' : '' }}{{ analytics.visitorGrowth }}% from last period
               </p>
             </div>
@@ -116,8 +116,8 @@
 
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="flex-shrink-0 bg-green-100 p-3 rounded-lg">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-green-600" />
+            <div class="flex-shrink-0 bg-success-100 p-3 rounded-lg">
+              <Icon name="heroicons:clock" class="h-6 w-6 text-success-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label">
@@ -126,7 +126,7 @@
               <p class="stat-value">
                 {{ analytics.avgEngagement }}s
               </p>
-              <p :class="analytics.engagementGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-red-600'">
+              <p :class="analytics.engagementGrowth >= 0 ? 'text-body text-success-600' : 'text-body text-error-600'">
                 {{ analytics.engagementGrowth >= 0 ? '+' : '' }}{{ analytics.engagementGrowth }}% from last period
               </p>
             </div>
@@ -135,8 +135,8 @@
 
         <div class="card p-6">
           <div class="flex items-center">
-            <div class="flex-shrink-0 bg-orange-100 p-3 rounded-lg">
-              <Icon name="heroicons:map-pin" class="h-6 w-6 text-orange-600" />
+            <div class="flex-shrink-0 bg-warning-100 p-3 rounded-lg">
+              <Icon name="heroicons:map-pin" class="h-6 w-6 text-warning-600" />
             </div>
             <div class="ml-4">
               <p class="stat-label">Top Location</p>
@@ -290,11 +290,11 @@
                 >
                   <div class="flex items-center space-x-3">
                     <div
-                      class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"
+                      class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center"
                     >
                       <Icon
                         name="heroicons:cursor-arrow-ripple"
-                        class="h-5 w-5 text-purple-600"
+                        class="h-5 w-5 text-primary-600"
                       />
                     </div>
                     <div>
@@ -395,7 +395,7 @@
                   <div class="flex items-center space-x-2">
                     <div class="w-16 bg-secondary-200 rounded-full h-2">
                       <div
-                        class="bg-orange-500 h-2 rounded-full"
+                        class="bg-warning-500 h-2 rounded-full"
                         :style="{ width: `${hour.percentage}%` }"
                       ></div>
                     </div>
@@ -497,7 +497,12 @@ const loadNfcCards = async () => {
     const response = await $api.get("/nfc-cards");
     if (response.success) {
       nfcCards.value = response.nfc_cards || [];
-      // Load analytics for default "All Cards" selection
+      // Deep link from Business Cards ("View analytics") preselects that card
+      const requested = String(route.query.cardId || "");
+      if (requested && nfcCards.value.some((c) => String(c.id) === requested)) {
+        selectedCardId.value = requested;
+      }
+      // Load analytics for the selected card (default "All Cards")
       if (nfcCards.value.length > 0) {
         await loadAnalytics();
       }

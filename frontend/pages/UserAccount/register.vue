@@ -990,9 +990,15 @@ const goToPlanSelection = () => {
   // Close the modal immediately
   showSuccessModal.value = false;
 
-  // Use window.location for hard navigation to ensure clean page transition
-  console.log("Navigating to /UserDashboard/PlanSelection...");
-  window.location.href = "/UserDashboard/PlanSelection";
+  // Use window.location for hard navigation to ensure clean page transition.
+  // Carry the plan picked on the pricing page so /Onboarding/plan can
+  // auto-advance instead of asking for the same choice a second time.
+  const plan = String(route.query.plan || "").toLowerCase();
+  const target = ["free", "basic", "premium"].includes(plan)
+    ? `/Onboarding/plan?plan=${plan}`
+    : "/Onboarding/plan";
+  console.log(`Navigating to ${target}...`);
+  window.location.href = target;
 };
 
 // Load legal documents

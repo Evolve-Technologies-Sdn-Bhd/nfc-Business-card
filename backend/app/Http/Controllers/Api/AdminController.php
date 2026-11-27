@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\AdminRoleController;
 use App\Models\User;
 use App\Models\Subscription;
 use App\Models\LandingPage;
@@ -10,8 +11,11 @@ use App\Models\NfcCard;
 use App\Models\NfcTag;
 use App\Models\Analytics;
 use App\Models\Transaction;
+use App\Models\Order;
+use App\Models\Refund;
 use App\Models\ActivityLog;
 use App\Services\NotificationService;
+use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -25,10 +29,12 @@ use Carbon\Carbon;
 class AdminController extends Controller
 {
     protected NotificationService $notificationService;
+    protected FileUploadService $fileUploadService;
 
-    public function __construct(NotificationService $notificationService)
+    public function __construct(NotificationService $notificationService, FileUploadService $fileUploadService)
     {
         $this->notificationService = $notificationService;
+        $this->fileUploadService = $fileUploadService;
     }
 
     /**
@@ -39,16 +45,22 @@ class AdminController extends Controller
         $user = $request->user();
 
         // =========================================================
-        // 1. TIME RANGES — current month vs previous month (real trends, not hardcoded)
+        // 0. TIME RANGE — configurable period (default 30 days)
+        //    Accepts ?period=7|30|90. Trends compare the period vs the
+        //    immediately preceding period of the same length.
         // =========================================================
-        $thisMonthStart = now()->startOfMonth();
-        $prevMonthStart = now()->subMonthNoOverflow()->startOfMonth();
-        $prevMonthEnd   = now()->subMonthNoOverflow()->endOfMonth();
+        $periodDays = (int) $request->input('period', 30);
+        if (!in_array($periodDays, [7, 30, 90], true)) {
+            $periodDays = 30;
+        }
+        $currentStart = now()->subDays($periodDays - 1)->startOfDay();
+        $previousStart = now()->subDays(($periodDays * 2) - 1)->startOfDay();
+        $previousEnd = now()->subDays($periodDays)->endOfDay();
 
-        $counts = function ($query) use ($thisMonthStart, $prevMonthStart, $prevMonthEnd) {
+        $counts = function ($query) use ($currentStart, $previousStart, $previousEnd) {
             return [
-                'current' => (clone $query)->where('created_at', '>=', $thisMonthStart)->count(),
-                'previous' => (clone $query)->whereBetween('created_at', [$prevMonthStart, $prevMonthEnd])->count(),
+                'current' => (clone $query)->where('created_at', '>=', $currentStart)->count(),
+                'previous' => (clone $query)->whereBetween('created_at', [$previousStart, $previousEnd])->count(),
                 'all_time' => (clone $query)->count(),
             ];
         };
@@ -74,9 +86,12 @@ class AdminController extends Controller
             ->get();
 
         // =========================================================
-        // 3. Subscription breakdown
+        // 3. Subscription breakdown — plan distribution with active vs total
         // =========================================================
-        $subscriptionBreakdown = User::selectRaw('subscription_plan, COUNT(*) as count')
+        $subscriptionBreakdown = User::selectRaw(
+            'subscription_plan, COUNT(*) as count, '
+            . 'SUM(CASE WHEN subscription_active = 1 THEN 1 ELSE 0 END) as active'
+        )
             ->groupBy('subscription_plan')
             ->get();
 
@@ -248,17 +263,70 @@ class AdminController extends Controller
             ->all();
 
         // =========================================================
-        // 5. System stats
+        // 5. System stats — no fabricated values; last_backup is null
+        //    until real backup telemetry is wired in.
         // =========================================================
         $systemStats = [
             'total_storage_used' => $this->getStorageUsage(),
             'active_sessions'    => DB::table('sessions')->count(),
-            'last_backup'        => now()->subDays(2)->format('Y-m-d H:i:s'),
+            'last_backup'        => null,
+        ];
+
+        // =========================================================
+        // 6. Operational KPIs — revenue + pending items
+        // =========================================================
+        $revenueThisPeriod = (float) Transaction::where('status', 'succeeded')
+            ->where('created_at', '>=', $currentStart)
+            ->sum('amount');
+        $revenuePrevPeriod = (float) Transaction::where('status', 'succeeded')
+            ->whereBetween('created_at', [$previousStart, $previousEnd])
+            ->sum('amount');
+
+        $operational = [
+            'revenue_this_period' => $revenueThisPeriod,
+            'revenue_previous_period' => $revenuePrevPeriod,
+            'revenue_change_pct' => $safePercentChange($revenueThisPeriod, $revenuePrevPeriod),
+            'pending_payments' => Transaction::whereIn('status', ['pending', 'processing'])->count(),
+            'pending_orders' => Order::whereIn('status', [
+                Order::STATUS_PENDING,
+                Order::STATUS_AWAITING_PAYMENT_VERIFICATION,
+            ])->count(),
+            'pending_refunds' => Refund::where('status', 'pending')->count(),
+            'pending_payment_verifications' => NfcCard::where('status', 'awaiting_payment_verification')->count(),
+        ];
+
+        // Revenue trend — daily succeeded transaction totals for the period
+        $revenueTrend = Transaction::selectRaw('DATE(created_at) as date, SUM(amount) as total')
+            ->where('status', 'succeeded')
+            ->where('created_at', '>=', $currentStart)
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => [
+                'date' => $row->date,
+                'total' => (float) $row->total,
+            ])
+            ->values()
+            ->all();
+
+        // Pending items — actionable records for the quick-jump widget
+        $pendingItems = [
+            'cards_awaiting_verification' => NfcCard::with('user:id,first_name,last_name,email')
+                ->where('status', 'awaiting_payment_verification')
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get(['id', 'card_id', 'card_number', 'user_id', 'status', 'created_at']),
+            'pending_refunds' => Refund::with(['user:id,first_name,last_name,email', 'transaction'])
+                ->where('status', 'pending')
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get(),
         ];
 
         return response()->json([
             'success' => true,
             'data' => [
+                'period_days' => $periodDays,
                 'overview' => [
                     'total_users'           => $usersStats['all_time'],
                     'total_profiles'        => $profilesStats['all_time'],
@@ -293,6 +361,9 @@ class AdminController extends Controller
                         ],
                     ],
                 ],
+                'operational' => $operational,
+                'revenue_trend' => $revenueTrend,
+                'pending_items' => $pendingItems,
                 'recent_users' => $recentUsers,
                 'subscription_breakdown' => $subscriptionBreakdown,
                 'recent_activity' => $recentActivity,
@@ -535,6 +606,36 @@ class AdminController extends Controller
             ], 422);
         }
 
+        // Only a super admin may create accounts with admin privileges.
+        $wantsAdmin = $request->boolean('is_admin');
+        if ($wantsAdmin && !$request->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only a super admin can create administrator accounts.',
+            ], 403);
+        }
+
+        // When creating a regular (non-admin) user, never persist admin fields.
+        $adminRole = $wantsAdmin ? $request->admin_role : null;
+        $adminPermissions = [];
+        if ($wantsAdmin) {
+            $submitted = $request->input('admin_permissions', []);
+            $submitted = is_array($submitted) ? array_values($submitted) : [];
+            $allowed = AdminRoleController::allPermissionKeys();
+            $invalid = array_values(array_diff($submitted, $allowed));
+            if (!empty($invalid)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'One or more permissions are not part of the permission catalogue.',
+                    'errors' => ['admin_permissions' => $invalid],
+                ], 422);
+            }
+            // Super admins implicitly hold every permission.
+            $adminPermissions = $adminRole === 'super_admin'
+                ? array_values($allowed)
+                : array_values(array_unique($submitted));
+        }
+
         DB::beginTransaction();
 
         try {
@@ -562,9 +663,9 @@ class AdminController extends Controller
                 'subscription_active' => $subscriptionActive,
                 'subscription_start_date' => $startDate,
                 'subscription_end_date' => $endDate,
-                'is_admin' => $request->boolean('is_admin'),
-                'admin_role' => $request->admin_role,
-                'admin_permissions' => $request->admin_permissions,
+                'is_admin' => $wantsAdmin,
+                'admin_role' => $adminRole,
+                'admin_permissions' => $adminPermissions,
                 'total_account_slots' => $isBusinessPlan ? ($request->total_account_slots ?? 10) : 0,
                 'total_card_quota' => $isBusinessPlan ? ($request->total_card_quota ?? 10) : 0,
             ]);
@@ -690,6 +791,35 @@ class AdminController extends Controller
             ], 403);
         }
 
+        // Only a super admin may change admin privileges (role / permissions).
+        $changingAdmin = $request->has('is_admin') || $request->has('admin_role') || $request->has('admin_permissions');
+        if ($changingAdmin && !$request->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only a super admin can modify admin roles and permissions.',
+            ], 403);
+        }
+
+        // Validate submitted permissions against the canonical catalogue.
+        $adminPermissions = null;
+        if ($request->has('admin_permissions')) {
+            $submitted = $request->input('admin_permissions', []);
+            $submitted = is_array($submitted) ? array_values($submitted) : [];
+            $allowed = AdminRoleController::allPermissionKeys();
+            $invalid = array_values(array_diff($submitted, $allowed));
+            if (!empty($invalid)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'One or more permissions are not part of the permission catalogue.',
+                    'errors' => ['admin_permissions' => $invalid],
+                ], 422);
+            }
+            $newRole = $request->input('admin_role', $user->admin_role);
+            $adminPermissions = $newRole === 'super_admin'
+                ? array_values($allowed)
+                : array_values(array_unique($submitted));
+        }
+
         DB::beginTransaction();
         try {
             // Handle Business Plan quota updates
@@ -765,8 +895,14 @@ class AdminController extends Controller
                 'total_account_slots', 'total_card_quota',
                 'subscription_plan', 'subscription_active',
                 'subscription_start_date', 'subscription_end_date',
+                'admin_permissions',
             ]);
             $user->fill($fieldsToUpdate);
+
+            // Override with the sanitized permission set (null = unchanged).
+            if ($adminPermissions !== null) {
+                $user->admin_permissions = $adminPermissions;
+            }
 
             // =========================================================================
             // SINGLE SOURCE OF TRUTH: write changes to subscriptions table FIRST
@@ -1328,6 +1464,18 @@ class AdminController extends Controller
             ], 422);
         }
 
+        // Prevent dispatch to an unverified inbox. Guest checkout creates the
+        // account from an email typed at the checkout, so a confirmed address is
+        // the only proof the card will reach someone who actually asked for it.
+        $owner = $nfcCard->user;
+        if ($owner && !$owner->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'code' => 'EMAIL_NOT_VERIFIED',
+                'message' => 'The customer has not verified their email address yet. Ask them to confirm their email before this card can be marked as shipped.'
+            ], 422);
+        }
+
         $nfcCard->update([
             'status' => 'shipped',
             'tracking_number' => $request->tracking_number,
@@ -1570,9 +1718,11 @@ class AdminController extends Controller
 
         $toInt = static fn ($v) => (int) ($v ?? 0);
 
+        $coreCounts = $this->getCoreCounts();
+
         $stats = [
             'users' => [
-                'total'           => $toInt($usersAgg['total'] ?? null),
+                'total'           => $coreCounts['users'],
                 'active'          => $toInt($usersAgg['active'] ?? null),
                 'admin'           => $toInt($usersAgg['admin'] ?? null),
                 'new_this_month'  => $newThisMonth,
@@ -1584,21 +1734,21 @@ class AdminController extends Controller
                 'business' => $toInt($usersAgg['business'] ?? null),
             ],
             'nfc_cards' => [
-                'total'   => $toInt($cardsAgg['total'] ?? null),
+                'total'   => $coreCounts['nfc_cards'],
                 'active'  => $toInt($cardsAgg['active'] ?? null),
                 'pending' => $toInt($cardsAgg['pending'] ?? null),
                 'shipped' => $toInt($cardsAgg['shipped'] ?? null),
             ],
             'analytics' => [
-                'total_tracks'  => $toInt($analyticsAgg['total_tracks'] ?? null),
+                'total_tracks'  => $coreCounts['analytics'],
                 'profile_views' => $toInt($analyticsAgg['profile_views'] ?? null),
                 'nfc_taps'      => $toInt($analyticsAgg['nfc_taps'] ?? null),
                 'link_clicks'   => $toInt($analyticsAgg['link_clicks'] ?? null),
             ],
             'storage' => [
-                'total_used'    => $this->getStorageUsage(),
-                'landing_pages' => $toInt($lpAgg['landing_pages'] ?? null),
-                'logos'         => $toInt($lpAgg['logos'] ?? null),
+                'total_used' => $this->getStorageUsage(),
+                'profiles'   => $toInt($lpAgg['landing_pages'] ?? null),
+                'logos'      => $toInt($lpAgg['logos'] ?? null),
             ],
         ];
 
@@ -1609,37 +1759,47 @@ class AdminController extends Controller
     }
 
     /**
-     * Get storage usage
+     * Shared core counts — used by both dashboard() and getSystemStats() so the
+     * headline numbers never drift between the two endpoints.
+     */
+    private function getCoreCounts(): array
+    {
+        return [
+            'users' => User::count(),
+            'profiles' => LandingPage::count(),
+            'nfc_cards' => NfcCard::count(),
+            'nfc_tags' => NfcTag::count(),
+            'analytics' => Analytics::count(),
+        ];
+    }
+
+    /**
+     * Get storage usage — recursively sum all files inside each media folder.
+     * Storage::size() on a directory only returns the inode size (~4KB), so we
+     * iterate every file to get a real total.
      */
     private function getStorageUsage()
     {
+        $disk = Storage::disk('public');
+        $folders = ['profile-images', 'company-logos', 'card-designs'];
         $totalBytes = 0;
 
-        try {
-            if (Storage::disk('public')->exists('profile-images')) {
-                $profileImages = Storage::disk('public')->size('profile-images');
-                $totalBytes += $profileImages;
+        foreach ($folders as $folder) {
+            try {
+                if (!$disk->exists($folder)) {
+                    continue;
+                }
+                $files = $disk->allFiles($folder);
+                foreach ($files as $file) {
+                    try {
+                        $totalBytes += (int) $disk->size($file);
+                    } catch (\Exception $e) {
+                        // Skip unreadable files
+                    }
+                }
+            } catch (\Exception $e) {
+                // Folder doesn't exist or can't be accessed
             }
-        } catch (\Exception $e) {
-            // Directory doesn't exist or can't be accessed
-        }
-
-        try {
-            if (Storage::disk('public')->exists('company-logos')) {
-                $companyLogos = Storage::disk('public')->size('company-logos');
-                $totalBytes += $companyLogos;
-            }
-        } catch (\Exception $e) {
-            // Directory doesn't exist or can't be accessed
-        }
-
-        try {
-            if (Storage::disk('public')->exists('card-designs')) {
-                $cardDesigns = Storage::disk('public')->size('card-designs');
-                $totalBytes += $cardDesigns;
-            }
-        } catch (\Exception $e) {
-            // Directory doesn't exist or can't be accessed
         }
 
         return [
@@ -1707,6 +1867,7 @@ class AdminController extends Controller
             'entity_type' => 'sometimes|string|max:100',
             'entity_id' => 'sometimes|string',
             'actor_id' => 'sometimes|integer',
+            'actor_search' => 'sometimes|string|max:100',
             'date_from' => 'sometimes|date',
             'date_to' => 'sometimes|date|after_or_equal:date_from',
             'search' => 'sometimes|string|max:255',
@@ -1732,6 +1893,14 @@ class AdminController extends Controller
         if ($request->filled('actor_id')) {
             $query->where('user_id', (int) $request->actor_id);
         }
+        if ($request->filled('actor_search')) {
+            $term = '%' . $request->actor_search . '%';
+            $query->whereHas('user', function ($q) use ($term) {
+                $q->where('first_name', 'like', $term)
+                  ->orWhere('last_name', 'like', $term)
+                  ->orWhere('email', 'like', $term);
+            });
+        }
         if ($request->filled('date_from')) {
             $query->where('created_at', '>=', Carbon::parse($request->date_from)->startOfDay());
         }
@@ -1749,6 +1918,16 @@ class AdminController extends Controller
             });
         }
 
+        // ─── Summary stats (computed from the FULL filtered set, not the page) ───
+        $statsQuery = clone $query;
+        $todayStart = Carbon::today()->startOfDay();
+        $sevenDaysAgo = Carbon::today()->subDays(6)->startOfDay();
+        $statsToday = (clone $statsQuery)->where('created_at', '>=', $todayStart)->count();
+        $statsLast7Days = (clone $statsQuery)->where('created_at', '>=', $sevenDaysAgo)->count();
+        $statsAdminActions = (clone $statsQuery)->whereHas('user', function ($q) {
+            $q->where('is_admin', true)->orWhereNotNull('admin_role');
+        })->count();
+
         $perPage = (int) $request->input('per_page', 25);
         $logs = $query->paginate($perPage);
 
@@ -1758,6 +1937,14 @@ class AdminController extends Controller
             ->orderBy('action_type')
             ->limit(100)
             ->pluck('action_type');
+
+        // Distinct entity types for filter dropdown
+        $distinctEntityTypes = \App\Models\ActivityLog::query()
+            ->distinct()
+            ->whereNotNull('entity_type')
+            ->orderBy('entity_type')
+            ->limit(100)
+            ->pluck('entity_type');
 
         $logs->getCollection()->transform(function (\App\Models\ActivityLog $log) {
             return [
@@ -1785,8 +1972,14 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'logs' => $logs,
+            'stats' => [
+                'today' => $statsToday,
+                'last_7_days' => $statsLast7Days,
+                'admin_actions' => $statsAdminActions,
+            ],
             'meta' => [
                 'available_action_types' => $distinctActionTypes->values()->all(),
+                'available_entity_types' => $distinctEntityTypes->values()->all(),
                 'total_count' => $logs->total(),
             ],
         ]);
@@ -1800,7 +1993,7 @@ class AdminController extends Controller
     public function auditLogsExportCsv(Request $request)
     {
         // Reuse same filters from index
-        $filters = $request->only(['action_type', 'entity_type', 'entity_id', 'actor_id', 'date_from', 'date_to', 'search']);
+        $filters = $request->only(['action_type', 'entity_type', 'entity_id', 'actor_id', 'actor_search', 'date_from', 'date_to', 'search']);
         $internalRequest = Request::create('/internal/audit-export', 'GET', $filters + ['per_page' => 5000]);
         $indexResponse = $this->auditLogsIndex($internalRequest);
 
@@ -1849,5 +2042,174 @@ class AdminController extends Controller
             'Content-Type' => 'text/csv; charset=utf-8',
             'X-Accel-Buffering' => 'no',
         ]);
+    }
+
+    /**
+     * Update the authenticated admin's own profile information.
+     *
+     * POST /admin/profile/update
+     *
+     * Accepts: first_name, last_name, email, phone (strings), and optionally
+     * profile_image as a multipart file upload.
+     */
+    public function updateAdminProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|unique:users,email,' . $user->id,
+            'phone'      => 'nullable|string|max:20',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ], [
+            'email.unique' => 'This email is already registered. Please use a different email address.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $data = [
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name,
+                'email'      => $request->email,
+                'phone'      => $request->phone,
+            ];
+
+            // Handle profile image upload (stored in account_image column)
+            if ($request->hasFile('profile_image')) {
+                // Delete old image if it exists
+                if ($user->account_image) {
+                    try {
+                        $oldPath = str_replace(url('storage/'), '', $user->account_image);
+                        $this->fileUploadService->deleteFile($oldPath);
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to delete old admin account image', ['error' => $e->getMessage()]);
+                    }
+                }
+
+                $uploadResult = $this->fileUploadService->uploadProfileImage(
+                    $request->file('profile_image'),
+                    $user->id
+                );
+                $data['account_image'] = $uploadResult['url'];
+            }
+
+            $user->update($data);
+            $user->refresh();
+
+            DB::commit();
+
+            // Notify the admin that their profile was updated
+            try {
+                $this->notificationService->create($user, 'profile_updated', []);
+            } catch (\Throwable $e) {
+                Log::warning('Admin profile update notification failed', ['error' => $e->getMessage()]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'data' => [
+                    'user' => $user,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollback();
+            Log::error('Admin profile update failed', [
+                'error'   => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Change the authenticated admin's own password.
+     *
+     * POST /admin/profile/change-password
+     *
+     * Accepts: current_password, new_password, new_password_confirmation
+     */
+    public function changeAdminPassword(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'current_password'          => 'required|string',
+            'new_password'              => 'required|string|min:8|max:255|confirmed',
+        ], [
+            'new_password.confirmed' => 'The new password confirmation does not match.',
+            'new_password.min'       => 'The new password must be at least 8 characters.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        // Verify current password (skip for OAuth-only users setting first password)
+        if ($user->hasLocalPassword()) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password is incorrect.',
+                    'errors'  => ['current_password' => ['Current password is incorrect.']],
+                ], 422);
+            }
+        }
+
+        try {
+            $user->update([
+                'password' => Hash::make($request->new_password),
+            ]);
+
+            ActivityLog::logActivity(
+                $user,
+                'password_changed',
+                'Admin changed their own password',
+                [
+                    'metadata' => [
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ],
+                ],
+            );
+
+            try {
+                $this->notificationService->create($user, 'password_changed', []);
+            } catch (\Throwable $e) {
+                Log::warning('Admin password change notification failed', ['error' => $e->getMessage()]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Admin password change failed', [
+                'error'   => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to change password: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

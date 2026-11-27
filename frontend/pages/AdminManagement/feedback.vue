@@ -1,449 +1,478 @@
 <!-- pages/AdminManagement/feedback.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="page-title text-secondary-900">Feedback Management</h1>
-      <p class="mt-2 text-secondary-600">
-        View and manage user feedback and reports
-      </p>
+    <AdminPageHeader
+      eyebrow="Voice of Customer"
+      eyebrow-icon="heroicons:chat-bubble-left-right"
+      title="Feedback Management"
+      description="Triage every user report in one queue — mark items read, track their status and record internal notes."
+    />
+
+    <!-- KPI row -->
+    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <AdminStatTile
+        label="Total feedback"
+        :value="statistics?.total_feedback || 0"
+        icon="heroicons:chat-bubble-left-right"
+        :loading="loadingStats"
+      />
+      <AdminStatTile
+        label="Unread"
+        :value="statistics?.unread_feedback || 0"
+        icon="heroicons:bell"
+        :loading="loadingStats"
+      />
+      <AdminStatTile
+        label="Pending"
+        :value="statistics?.pending_feedback || 0"
+        icon="heroicons:exclamation-triangle"
+        :loading="loadingStats"
+      />
+      <AdminStatTile
+        label="Average rating"
+        :value="`${statistics?.average_rating || '0'} / 5`"
+        icon="heroicons:star"
+        :loading="loadingStats"
+      />
     </div>
 
-    <!-- Statistics Cards -->
-    <div v-if="!loadingStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-info-100">
-              <Icon name="heroicons:chat-bubble-left-right" class="h-6 w-6 text-info-600" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">Total Feedback</p>
-            <p class="stat-value text-secondary-900">
-              {{ statistics?.total_feedback || 0 }}
-            </p>
-          </div>
+    <!-- Filters -->
+    <AdminFilterBar @submit="applyFilters">
+      <template #search>
+        <div class="mb-[0.35rem] flex items-baseline justify-between gap-2">
+          <label class="admin-label !mb-0">Search</label>
+          <span class="text-helper text-secondary-400">
+            {{ filters.search.length }}/150
+          </span>
         </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-warning-100">
-              <Icon name="heroicons:bell" class="h-6 w-6 text-warning-600" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">Unread</p>
-            <p class="stat-value text-secondary-900">
-              {{ statistics?.unread_feedback || 0 }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-warning-100">
-              <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-warning-600" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">Pending</p>
-            <p class="stat-value text-secondary-900">
-              {{ statistics?.pending_feedback || 0 }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-lg bg-success-100">
-              <Icon name="heroicons:star" class="h-6 w-6 text-success-600" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="stat-label text-secondary-600">Avg Rating</p>
-            <p class="stat-value text-secondary-900">
-              {{ statistics?.average_rating || '0' }} / 5
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="card p-6 mb-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Search -->
-        <div>
-          <label class="block text-label text-secondary-700 mb-2">Search</label>
+        <div class="relative">
+          <Icon
+            name="heroicons:magnifying-glass"
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+          />
           <input
             v-model="filters.search"
             type="text"
             maxlength="150"
-            placeholder="Search by name, email..."
-            class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            @input="applyFilters"
+            placeholder="Search by name or email…"
+            class="admin-field !pl-9 !pr-9"
+            @input="onSearchInput"
           />
-          <p class="text-helper mt-1">{{ filters.search.length }}/150</p>
-        </div>
-
-        <!-- Status Filter -->
-        <div>
-          <label class="block text-label text-secondary-700 mb-2">Status</label>
-          <select
-            v-model="filters.status"
-            class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            @change="applyFilters"
-          >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-          </select>
-        </div>
-
-        <!-- Category Filter -->
-        <div>
-          <label class="block text-label text-secondary-700 mb-2">Category</label>
-          <select
-            v-model="filters.category"
-            class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            @change="applyFilters"
-          >
-            <option value="all">All</option>
-            <option value="bug">🐛 Bug Report</option>
-            <option value="feature">💡 Feature Request</option>
-            <option value="question">❓ Question</option>
-            <option value="complaint">😞 Complaint</option>
-            <option value="suggestion">💭 Suggestion</option>
-            <option value="other">📝 Other</option>
-          </select>
-        </div>
-
-        <!-- Read Status Filter -->
-        <div>
-          <label class="block text-label text-secondary-700 mb-2">Read Status</label>
-          <select
-            v-model="filters.is_read"
-            class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            @change="applyFilters"
-          >
-            <option value="">All</option>
-            <option value="true">Read</option>
-            <option value="false">Unread</option>
-          </select>
-        </div>
-
-        <!-- Reset Filters -->
-        <div class="flex items-end">
           <button
-            @click="resetFilters"
-            class="w-full py-2 px-4 bg-secondary-200 text-secondary-700 rounded-lg font-medium hover:bg-secondary-300 transition-colors"
+            v-if="filters.search"
+            type="button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-secondary-400 transition hover:bg-secondary-100 hover:text-secondary-600"
+            aria-label="Clear search"
+            @click="clearSearch"
           >
-            Reset Filters
+            <Icon name="heroicons:x-mark" class="h-4 w-4" />
           </button>
         </div>
+      </template>
+
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Status</label>
+        <select
+          v-model="filters.status"
+          class="admin-field"
+          @change="applyFilters"
+        >
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
       </div>
-    </div>
 
-    <!-- Feedback List -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title text-secondary-900">
-          Feedback Items ({{ pagination.total }})
-        </h3>
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Category</label>
+        <select
+          v-model="filters.category"
+          class="admin-field"
+          @change="applyFilters"
+        >
+          <option value="all">All categories</option>
+          <option value="bug">Bug Report</option>
+          <option value="feature">Feature Request</option>
+          <option value="question">Question</option>
+          <option value="complaint">Complaint</option>
+          <option value="suggestion">Suggestion</option>
+          <option value="other">Other</option>
+        </select>
       </div>
 
-      <div class="card-body">
-        <div v-if="loading" class="flex justify-center py-8">
-          <div class="spinner"></div>
-        </div>
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Read status</label>
+        <select
+          v-model="filters.is_read"
+          class="admin-field"
+          @change="applyFilters"
+        >
+          <option value="">All</option>
+          <option value="true">Read</option>
+          <option value="false">Unread</option>
+        </select>
+      </div>
 
-        <div v-else-if="feedbackList.length">
-          <div class="space-y-4">
-            <div
-              v-for="feedback in feedbackList"
-              :key="feedback.id"
-              class="border border-secondary-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              :class="{ 'bg-info-50': !feedback.is_read }"
+      <template #actions>
+        <span class="w-full text-right text-body-sm text-secondary-500 sm:w-auto">
+          {{ pagination.total }} found
+        </span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          @click="resetFilters"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          Reset
+        </button>
+      </template>
+    </AdminFilterBar>
+
+    <!-- Feedback list -->
+    <AdminSectionCard>
+      <template #title>Feedback inbox</template>
+      <template #header-actions>
+        <span class="text-caption text-secondary-500">
+          {{ pagination.total }} item{{ pagination.total === 1 ? "" : "s" }}
+        </span>
+      </template>
+
+      <!-- Loading -->
+      <AdminLoadingState v-if="loading" variant="cards" :rows="6" />
+
+      <!-- Empty -->
+      <AdminEmptyState
+        v-else-if="!feedbackList.length"
+        icon="heroicons:chat-bubble-left-right"
+        title="No feedback found"
+        description="Nothing matches the current filters. Adjust or reset them to see more."
+      />
+
+      <!-- Cards -->
+      <div
+        v-else
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      >
+        <article
+          v-for="feedback in feedbackList"
+          :key="feedback.id"
+          class="admin-panel flex flex-col p-5"
+          :class="{ 'admin-panel-accent': !feedback.is_read }"
+        >
+          <div class="flex flex-wrap items-center gap-2">
+            <AdminStatusBadge
+              :tone="categoryTone(feedback.category)"
+              :label="getCategoryLabel(feedback.category)"
+            />
+            <AdminStatusBadge
+              :tone="statusTone(feedback.status)"
+              :label="getStatusLabel(feedback.status)"
+            />
+            <AdminStatusBadge
+              v-if="!feedback.is_read"
+              tone="danger"
+              label="Unread"
+            />
+            <span
+              v-if="feedback.rating"
+              class="ml-auto text-warning-500"
+              :title="`${feedback.rating} / 5`"
             >
-              <!-- Header -->
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex-1">
-                  <div class="flex items-center space-x-3 mb-2">
-                    <!-- Category Badge -->
-                    <span
-                      :class="[
-                        'px-3 py-1 text-badge rounded-full',
-                        getCategoryBadgeClass(feedback.category),
-                      ]"
-                    >
-                      {{ getCategoryLabel(feedback.category) }}
-                    </span>
-
-                    <!-- Status Badge -->
-                    <span
-                      :class="[
-                        'px-3 py-1 text-badge rounded-full',
-                        getStatusBadgeClass(feedback.status),
-                      ]"
-                    >
-                      {{ getStatusLabel(feedback.status) }}
-                    </span>
-
-                    <!-- Unread Badge -->
-                    <span
-                      v-if="!feedback.is_read"
-                      class="px-3 py-1 text-badge bg-error-100 text-error-800 rounded-full"
-                    >
-                      Unread
-                    </span>
-
-                    <!-- Rating -->
-                    <span v-if="feedback.rating" class="text-warning-500">
-                      {{ '⭐'.repeat(feedback.rating) }}
-                    </span>
-                  </div>
-
-                  <h4 class="font-semibold text-secondary-900">
-                    {{ feedback.user_name || 'Anonymous' }}
-                  </h4>
-                  <p class="card-subtitle">
-                    {{ feedback.user_email || 'No email provided' }}
-                  </p>
-                </div>
-
-                <button
-                  @click="selectedFeedback = feedback"
-                  class="px-4 py-2 text-button text-primary-600 hover:text-primary-700 transition-colors"
-                >
-                  View Details
-                </button>
-              </div>
-
-              <!-- Message Preview -->
-              <p class="text-secondary-700 mb-3 line-clamp-2">
-                {{ feedback.user_message }}
-              </p>
-
-              <!-- Footer -->
-              <div class="flex items-center justify-between text-caption text-secondary-500">
-                <span>{{ formatDate(feedback.created_at) }}</span>
-                <span>{{ formatTime(feedback.created_at) }}</span>
-              </div>
-            </div>
+              {{ "★".repeat(feedback.rating) }}
+            </span>
           </div>
 
-          <!-- Pagination -->
-          <AdminPagination
-            :current-page="pagination.current_page"
-            :last-page="pagination.last_page"
-            :per-page="pagination.per_page"
-            :total="pagination.total"
-            item-label="results"
-            @page-change="changePage"
-            @per-page-change="changeItemsPerPage"
-          />
-        </div>
-
-        <div v-else class="text-center py-12">
-          <Icon name="heroicons:chat-bubble-left-right" class="h-12 w-12 mx-auto text-secondary-300 mb-4" />
-          <p class="text-secondary-600">No feedback found</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Feedback Detail Modal -->
-    <div
-      v-if="selectedFeedback"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      @click="selectedFeedback = null"
-    >
-      <div
-        class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-        @click.stop
-      >
-        <!-- Modal Header -->
-        <div class="p-6 border-b border-secondary-200 flex items-center justify-between">
-          <div>
-            <h3 class="modal-title text-secondary-900">Feedback Details</h3>
-            <p class="text-body text-secondary-600 mt-1">
-              {{ formatDate(selectedFeedback.created_at) }} at {{ formatTime(selectedFeedback.created_at) }}
+          <div class="mt-3">
+            <p class="text-body font-semibold text-secondary-900">
+              {{ feedback.user_name || "Anonymous" }}
+            </p>
+            <p class="truncate text-caption text-secondary-500">
+              {{ feedback.user_email || "No email provided" }}
             </p>
           </div>
-          <button
-            @click="selectedFeedback = null"
-            class="p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 rounded-lg transition-colors"
+
+          <p class="mt-3 line-clamp-2 text-body text-secondary-700">
+            {{ feedback.user_message }}
+          </p>
+
+          <div
+            class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4"
           >
-            <Icon name="heroicons:x-mark" class="h-6 w-6" />
-          </button>
-        </div>
-
-        <!-- Modal Body -->
-        <div class="p-6 space-y-6">
-          <!-- User Information -->
-          <div>
-            <h4 class="text-body font-semibold text-secondary-700 mb-2">User Information</h4>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-caption text-secondary-600">Name</p>
-                <p class="text-body font-medium text-secondary-900">
-                  {{ selectedFeedback.user_name || 'Anonymous' }}
-                </p>
-              </div>
-              <div>
-                <p class="text-caption text-secondary-600">Email</p>
-                <p class="text-body font-medium text-secondary-900">
-                  {{ selectedFeedback.user_email || 'Not provided' }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Feedback Details -->
-          <div>
-            <h4 class="text-body font-semibold text-secondary-700 mb-2">Feedback Details</h4>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-caption text-secondary-600">Category</p>
-                <p class="text-body font-medium text-secondary-900">
-                  {{ getCategoryLabel(selectedFeedback.category) }}
-                </p>
-              </div>
-              <div>
-                <p class="text-caption text-secondary-600">Status</p>
-                <p class="text-body font-medium text-secondary-900 capitalize">
-                  {{ selectedFeedback.status }}
-                </p>
-              </div>
-              <div v-if="selectedFeedback.rating">
-                <p class="text-caption text-secondary-600">Rating</p>
-                <p class="text-body font-medium text-warning-500">
-                  {{ '⭐'.repeat(selectedFeedback.rating) }} ({{ selectedFeedback.rating }}/5)
-                </p>
-              </div>
-              <div>
-                <p class="text-caption text-secondary-600">Read Status</p>
-                <p class="text-body font-medium text-secondary-900">
-                  {{ selectedFeedback.is_read ? 'Read' : 'Unread' }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Message Context -->
-          <div v-if="selectedFeedback.user_question || selectedFeedback.bot_response" class="grid grid-cols-1 gap-4">
-            <div v-if="selectedFeedback.user_question">
-               <h4 class="text-body font-semibold text-secondary-700 mb-2">User Question</h4>
-               <div class="bg-secondary-50 p-3 rounded-lg text-body text-secondary-700">
-                  {{ selectedFeedback.user_question }}
-               </div>
-            </div>
-            <div v-if="selectedFeedback.bot_response">
-               <h4 class="text-body font-semibold text-secondary-700 mb-2">Bot Response</h4>
-               <div class="bg-info-50 p-3 rounded-lg text-body text-secondary-700 border-l-4 border-info-400">
-                  {{ selectedFeedback.bot_response }}
-               </div>
-            </div>
-          </div>
-
-          <!-- User Feedback Message -->
-          <div v-if="selectedFeedback.user_message">
-            <h4 class="text-body font-semibold text-secondary-700 mb-2">Feedback Message</h4>
-            <div class="bg-secondary-50 p-4 rounded-lg">
-              <div class="flex items-center gap-2 mb-2" v-if="selectedFeedback.feedback_type">
-                  <span class="text-caption font-bold uppercase tracking-wide text-secondary-500">
-                    Type: {{ selectedFeedback.feedback_type === 'thumbs_up' ? '👍 Positive' : (selectedFeedback.feedback_type === 'thumbs_down' ? '👎 Negative' : '💬 Comment') }}
-                  </span>
-              </div>
-              <p class="text-secondary-800 whitespace-pre-wrap">
-                {{ selectedFeedback.user_message }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Admin Notes -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Admin Notes</label>
-            <textarea
-              v-model="adminNotes"
-              rows="3"
-              placeholder="Add your notes here..."
-              class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            ></textarea>
-          </div>
-
-          <!-- Status Update -->
-          <div>
-            <label class="block text-label text-secondary-700 mb-2">Update Status</label>
-            <select
-              v-model="newStatus"
-              class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            <span class="text-caption text-secondary-500">
+              {{ formatDate(feedback.created_at) }} ·
+              {{ formatTime(feedback.created_at) }}
+            </span>
+            <button
+              type="button"
+              class="admin-btn admin-btn--outline admin-btn--sm"
+              @click="selectedFeedback = feedback"
             >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-            </select>
+              <Icon name="heroicons:eye" class="h-4 w-4" />
+              Details
+            </button>
           </div>
-
-          <!-- IP Address -->
-          <div v-if="selectedFeedback.ip_address" class="pt-4 border-t border-secondary-200">
-            <p class="text-caption text-secondary-600">IP Address</p>
-            <p class="text-body font-mono text-secondary-900">{{ selectedFeedback.ip_address }}</p>
-          </div>
-        </div>
-
-        <!-- Modal Actions -->
-        <div class="p-6 border-t border-secondary-200 flex space-x-3">
-          <button
-            v-if="!selectedFeedback.is_read"
-            @click="markAsRead"
-            :disabled="updatingFeedback"
-            class="flex-1 py-2 px-4 bg-info-600 text-white rounded-lg font-medium hover:bg-info-700 transition-colors disabled:opacity-50"
-          >
-            {{ updatingFeedback ? 'Updating...' : 'Mark as Read' }}
-          </button>
-
-          <button
-            @click="updateFeedbackStatus"
-            :disabled="updatingFeedback || newStatus === selectedFeedback.status"
-            class="flex-1 py-2 px-4 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
-          >
-            {{ updatingFeedback ? 'Updating...' : 'Update Status' }}
-          </button>
-
-          <button
-            @click="deleteFeedback"
-            :disabled="updatingFeedback"
-            class="py-2 px-4 bg-error-600 text-white rounded-lg font-medium hover:bg-error-700 transition-colors disabled:opacity-50"
-          >
-            {{ updatingFeedback ? '...' : 'Delete' }}
-          </button>
-
-          <button
-            @click="selectedFeedback = null"
-            class="py-2 px-4 bg-secondary-200 text-secondary-700 rounded-lg font-medium hover:bg-secondary-300 transition-colors"
-          >
-            Close
-          </button>
-        </div>
+        </article>
       </div>
-    </div>
+    </AdminSectionCard>
+
+    <AdminPagination
+      v-if="feedbackList.length > 0"
+      :current-page="pagination.current_page"
+      :last-page="pagination.last_page"
+      :per-page="itemsPerPage"
+      :total="pagination.total"
+      item-label="results"
+      @page-change="changePage"
+      @per-page-change="changeItemsPerPage"
+    />
+
+    <!-- Feedback detail dialog -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div
+          v-if="selectedFeedback"
+          class="admin-dialog-backdrop"
+          @click.self="selectedFeedback = null"
+        >
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Feedback details"
+            style="width: min(44rem, 100%); margin-top: 5vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:chat-bubble-left-right" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Feedback details</p>
+                  <p class="admin-panel-subtitle">
+                    {{ formatDate(selectedFeedback.created_at) }} ·
+                    {{ formatTime(selectedFeedback.created_at) }}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="selectedFeedback = null"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+
+            <div class="admin-panel-body flex-1 space-y-6 overflow-y-auto">
+              <!-- From -->
+              <div>
+                <p class="admin-form-section-title">From</p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <p class="text-caption text-secondary-500">Name</p>
+                    <p class="text-body font-medium text-secondary-900">
+                      {{ selectedFeedback.user_name || "Anonymous" }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-caption text-secondary-500">Email</p>
+                    <p class="text-body font-medium break-all text-secondary-900">
+                      {{ selectedFeedback.user_email || "Not provided" }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Classification -->
+              <div>
+                <p class="admin-form-section-title">Classification</p>
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                  <AdminStatusBadge
+                    :tone="categoryTone(selectedFeedback.category)"
+                    :label="getCategoryLabel(selectedFeedback.category)"
+                  />
+                  <AdminStatusBadge
+                    :tone="statusTone(selectedFeedback.status)"
+                    :label="getStatusLabel(selectedFeedback.status)"
+                  />
+                  <AdminStatusBadge
+                    :tone="selectedFeedback.is_read ? 'success' : 'danger'"
+                    :label="selectedFeedback.is_read ? 'Read' : 'Unread'"
+                  />
+                  <AdminStatusBadge
+                    v-if="selectedFeedback.rating"
+                    tone="warning"
+                    :label="`${selectedFeedback.rating} / 5 ★`"
+                  />
+                </div>
+              </div>
+
+              <!-- Conversation context -->
+              <div
+                v-if="
+                  selectedFeedback.user_question || selectedFeedback.bot_response
+                "
+              >
+                <p class="admin-form-section-title">Conversation context</p>
+                <div class="mt-4 space-y-4">
+                  <div v-if="selectedFeedback.user_question">
+                    <p class="text-caption font-medium text-secondary-500">
+                      User question
+                    </p>
+                    <div
+                      class="mt-1.5 rounded-xl border border-secondary-200 bg-secondary-50 p-3 text-body text-secondary-700"
+                    >
+                      {{ selectedFeedback.user_question }}
+                    </div>
+                  </div>
+                  <div v-if="selectedFeedback.bot_response">
+                    <p class="text-caption font-medium text-secondary-500">
+                      Bot response
+                    </p>
+                    <div
+                      class="mt-1.5 rounded-xl border border-info-200 border-l-4 border-l-info-400 bg-info-50 p-3 text-body text-secondary-700"
+                    >
+                      {{ selectedFeedback.bot_response }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message -->
+              <div v-if="selectedFeedback.user_message">
+                <p class="admin-form-section-title">Message</p>
+                <div
+                  class="mt-4 rounded-xl border border-secondary-200 bg-secondary-50 p-4"
+                >
+                  <span
+                    v-if="selectedFeedback.feedback_type"
+                    class="admin-badge admin-badge--neutral admin-badge--plain"
+                  >
+                    {{
+                      selectedFeedback.feedback_type === "thumbs_up"
+                        ? "Positive"
+                        : selectedFeedback.feedback_type === "thumbs_down"
+                        ? "Negative"
+                        : "Comment"
+                    }}
+                  </span>
+                  <p class="mt-2 whitespace-pre-wrap text-body text-secondary-800">
+                    {{ selectedFeedback.user_message }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Handling -->
+              <div>
+                <p class="admin-form-section-title">Handling</p>
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="admin-label">Update status</label>
+                    <select v-model="newStatus" class="admin-field">
+                      <option value="pending">Pending</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                    <p class="admin-hint">
+                      Changes apply immediately once saved.
+                    </p>
+                  </div>
+                  <div>
+                    <label class="admin-label">Admin notes</label>
+                    <textarea
+                      v-model="adminNotes"
+                      rows="3"
+                      placeholder="Internal notes…"
+                      class="admin-field"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Origin -->
+              <div v-if="selectedFeedback.ip_address">
+                <p class="admin-form-section-title">Origin</p>
+                <p class="mt-2 font-mono text-body text-secondary-900">
+                  {{ selectedFeedback.ip_address }}
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-dialog-foot">
+              <button
+                type="button"
+                class="admin-btn admin-btn--danger mr-auto"
+                :disabled="updatingFeedback"
+                @click="deleteFeedback"
+              >
+                <Icon name="heroicons:trash" class="h-4 w-4" />
+                Delete
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--ghost"
+                @click="selectedFeedback = null"
+              >
+                Close
+              </button>
+              <button
+                v-if="!selectedFeedback.is_read"
+                type="button"
+                class="admin-btn admin-btn--outline"
+                :disabled="updatingFeedback"
+                @click="markAsRead"
+              >
+                <Icon
+                  v-if="updatingFeedback"
+                  name="heroicons:arrow-path"
+                  class="h-4 w-4 animate-spin"
+                />
+                Mark as read
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--primary"
+                :disabled="
+                  updatingFeedback || newStatus === selectedFeedback.status
+                "
+                @click="updateFeedbackStatus"
+              >
+                <Icon
+                  v-if="updatingFeedback"
+                  name="heroicons:arrow-path"
+                  class="h-4 w-4 animate-spin"
+                />
+                Update status
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Shared confirmation dialog -->
+    <AdminConfirmDialog
+      v-model="confirmOpen"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-label="confirmConfig.confirmLabel"
+      :tone="confirmConfig.tone"
+      :loading="confirmBusy"
+      @confirm="runConfirm"
+    />
   </div>
 </template>
 
 <script setup>
 definePageMeta({
   layout: "admin-management",
+  middleware: ["auth", "admin"],
 });
 
-const route = useRoute();
 const { $api, $toast } = useNuxtApp();
 
 const loading = ref(false);
@@ -472,6 +501,35 @@ const pagination = ref({
   current_page: 1,
   last_page: 1,
 });
+
+// Confirmation dialog state
+const confirmOpen = ref(false);
+const confirmBusy = ref(false);
+const confirmConfig = ref({
+  title: "",
+  message: "",
+  confirmLabel: "Confirm",
+  tone: "primary",
+});
+let confirmAction = null;
+
+const askConfirm = (config, action) => {
+  confirmConfig.value = { confirmLabel: "Confirm", tone: "primary", ...config };
+  confirmAction = action;
+  confirmOpen.value = true;
+};
+
+const runConfirm = async () => {
+  if (!confirmAction) return;
+  confirmBusy.value = true;
+  try {
+    await confirmAction();
+  } finally {
+    confirmBusy.value = false;
+    confirmOpen.value = false;
+    confirmAction = null;
+  }
+};
 
 // Load feedback data
 const loadFeedback = async () => {
@@ -517,9 +575,29 @@ const loadStatistics = async () => {
 };
 
 // Apply filters
+let searchTimer = null;
 const applyFilters = () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = null;
+  }
   filters.value.currentPage = 1;
   loadFeedback();
+};
+
+// Debounced search input (400ms)
+const onSearchInput = () => {
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchTimer = null;
+    applyFilters();
+  }, 400);
+};
+
+// Clear the search box immediately
+const clearSearch = () => {
+  filters.value.search = '';
+  applyFilters();
 };
 
 // Reset filters
@@ -543,31 +621,11 @@ const changePage = (page) => {
   }
 };
 
-const changeItemsPerPage = () => {
+const changeItemsPerPage = (val) => {
+  itemsPerPage.value = val;
   filters.value.currentPage = 1;
   loadFeedback();
 };
-
-// Compute visible page numbers
-const visiblePages = computed(() => {
-  const total = pagination.value.last_page || 1;
-  const current = pagination.value.current_page || 1;
-  const pages = [];
-  
-  let start = Math.max(1, current - 2);
-  let end = Math.min(total, start + 4);
-  
-  // Adjust start if we're near the end
-  if (end - start < 4) {
-    start = Math.max(1, end - 4);
-  }
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-  
-  return pages;
-});
 
 // Mark as read
 const markAsRead = async () => {
@@ -617,27 +675,36 @@ const updateFeedbackStatus = async () => {
 };
 
 // Delete feedback
-const deleteFeedback = async () => {
-  if (!confirm('Are you sure you want to delete this feedback?')) return;
+const deleteFeedback = () => {
+  askConfirm(
+    {
+      title: "Delete feedback",
+      message:
+        "Are you sure you want to delete this feedback? This action cannot be undone.",
+      confirmLabel: "Delete",
+      tone: "danger",
+    },
+    async () => {
+      updatingFeedback.value = true;
+      try {
+        const response = await $api.delete(`/admin/chatbot/feedback/${selectedFeedback.value.id}`);
 
-  updatingFeedback.value = true;
-  try {
-    const response = await $api.delete(`/admin/chatbot/feedback/${selectedFeedback.value.id}`);
-
-    if (response.success) {
-      $toast.success('Feedback deleted');
-      selectedFeedback.value = null;
-      loadFeedback();
-      loadStatistics();
-      // Notify layout to update unread badge immediately
-      window.dispatchEvent(new CustomEvent('admin-feedback-updated'));
+        if (response.success) {
+          $toast.success('Feedback deleted');
+          selectedFeedback.value = null;
+          loadFeedback();
+          loadStatistics();
+          // Notify layout to update unread badge immediately
+          window.dispatchEvent(new CustomEvent('admin-feedback-updated'));
+        }
+      } catch (error) {
+        console.error('Failed to delete feedback:', error);
+        $toast.error('Failed to delete feedback');
+      } finally {
+        updatingFeedback.value = false;
+      }
     }
-  } catch (error) {
-    console.error('Failed to delete feedback:', error);
-    $toast.error('Failed to delete feedback');
-  } finally {
-    updatingFeedback.value = false;
-  }
+  );
 };
 
 // Watchers
@@ -651,36 +718,25 @@ watch(selectedFeedback, (newFeedback) => {
 // Helper functions
 const getCategoryLabel = (category) => {
   const labels = {
-    bug: '🐛 Bug Report',
-    feature: '💡 Feature Request',
-    question: '❓ Question',
-    complaint: '😞 Complaint',
-    suggestion: '💭 Suggestion',
-    other: '📝 Other',
+    bug: 'Bug Report',
+    feature: 'Feature Request',
+    question: 'Question',
+    complaint: 'Complaint',
+    suggestion: 'Suggestion',
+    other: 'Other',
   };
   return labels[category] || category;
 };
 
-const getCategoryBadgeClass = (category) => {
-  const classes = {
-    bug: 'bg-error-100 text-error-800',
-    feature: 'bg-primary-100 text-primary-800',
-    question: 'bg-info-100 text-info-800',
-    complaint: 'bg-warning-100 text-warning-800',
-    suggestion: 'bg-success-100 text-success-800',
-    other: 'bg-secondary-100 text-secondary-800',
-  };
-  return classes[category] || 'bg-secondary-100 text-secondary-800';
+const CATEGORY_TONES = {
+  bug: 'danger',
+  feature: 'brass',
+  question: 'info',
+  complaint: 'warning',
+  suggestion: 'success',
+  other: 'neutral',
 };
-
-const getStatusBadgeClass = (status) => {
-  const classes = {
-    pending: 'bg-warning-100 text-warning-800',
-    in_progress: 'bg-info-100 text-info-800',
-    resolved: 'bg-success-100 text-success-800',
-  };
-  return classes[status] || 'bg-secondary-100 text-secondary-800';
-};
+const categoryTone = (category) => CATEGORY_TONES[category] || 'neutral';
 
 const getStatusLabel = (status) => {
   const labels = {
@@ -700,6 +756,16 @@ const getStatusLabel = (status) => {
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim() || 'Unknown';
 };
+
+const STATUS_TONES = {
+  pending: 'warning',
+  in_progress: 'info',
+  resolved: 'success',
+  new: 'info',
+  open: 'info',
+  closed: 'neutral',
+};
+const statusTone = (status) => STATUS_TONES[status] || 'neutral';
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -724,34 +790,9 @@ onMounted(() => {
 
   // Refresh statistics every 30 seconds
   const interval = setInterval(loadStatistics, 30000);
-  onBeforeUnmount(() => clearInterval(interval));
+  onBeforeUnmount(() => {
+    clearInterval(interval);
+    if (searchTimer) clearTimeout(searchTimer);
+  });
 });
 </script>
-
-<style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #3b82f6;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-</style>

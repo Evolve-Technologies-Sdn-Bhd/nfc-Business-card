@@ -80,7 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_new_user' => 'boolean',
     ];
 
-    protected $appends = ['full_name'];
+    // `requires_password_setup` lets the frontend offer the "set your password"
+    // step to a guest-checkout account that has paid but still has no password.
+    protected $appends = ['full_name', 'profile_image', 'requires_password_setup'];
 
     protected static function boot()
     {
@@ -203,6 +205,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getFullNameAttribute()
     {
         return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
+     * Profile image URL — backed by the user's account_image column.
+     * Exposed so admin dashboards and the topbar can render avatars without
+     * reaching through the LandingPage relationship.
+     */
+    public function getProfileImageAttribute()
+    {
+        return $this->account_image ?: null;
     }
 
     // =========================================================================
@@ -356,6 +368,63 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Payment transactions belonging to this user.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * A "guest checkout" placeholder account: created at the moment a guest
+     * presses Pay, with no password and no verified email yet.
+     *
+     * It becomes a normal account the moment it is paid for (a successful
+     * transaction) or a password is set. Until then it is:
+     *   • not login-able (password is null), and
+     *   • reclaimable by whoever actually owns the email address, so a stranger
+     *     cannot permanently block a real sign-up by typing someone else's email.
+     */
+    public function isProvisionalGuest(): bool
+    {
+        if ($this->password !== null || $this->provider !== null) {
+            return false;
+        }
+
+        if ($this->subscription_active) {
+            return false;
+        }
+
+        if ($this->relationLoaded('transactions')) {
+            return !$this->transactions->contains(
+                fn ($transaction) => $transaction->status === 'succeeded'
+            );
+        }
+
+        return !$this->transactions()->where('status', 'succeeded')->exists();
+    }
+
+    /**
+     * Whether this account still has no way to log in.
+     *
+     * Unlike isProvisionalGuest() this stays true AFTER a successful payment, so
+     * the freshly-paid guest can still be offered the "set your password" step.
+     */
+    public function requiresPasswordSetup(): bool
+    {
+        return $this->password === null && $this->provider === null;
+    }
+
+    /**
+     * Serialise the flag so the frontend can offer the "set your password" step
+     * on a guest-checkout account (see $appends).
+     */
+    public function getRequiresPasswordSetupAttribute(): bool
+    {
+        return $this->requiresPasswordSetup();
     }
 
     // Profile relationship removed - using landing_pages instead

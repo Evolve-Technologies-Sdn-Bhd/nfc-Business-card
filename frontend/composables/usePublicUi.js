@@ -61,12 +61,8 @@ export const usePublicUi = () => {
   });
 
   const contactSupport = () => {
-    if (!authStore.isAuthenticated) {
-      $toast.error("Please login or register to request a Business Plan");
-      navigateTo("/UserAccount/login");
-      return;
-    }
-
+    // Open the modal for everyone — anonymous visitors can submit an enquiry
+    // too. Signed-in users get their name/email pre-filled.
     Object.assign(businessForm.value, knownContact());
     showBusinessModal.value = true;
   };

@@ -33,18 +33,21 @@ export const useAdminStore = defineStore("admin", {
   }),
 
   actions: {
-    async fetchDashboard() {
+    async fetchDashboard(period = 30) {
       try {
         this.loading = true;
         const $api = getApi();
-        const response = await $api.get("/admin/dashboard");
+        const response = await $api.get("/admin/dashboard", {
+          params: { period },
+        });
 
         if (response.success) {
           this.dashboard = response.data;
+          this.error = null;
         }
       } catch (error) {
         console.error("Failed to fetch dashboard:", error);
-        this.error = error.message;
+        this.error = error.message || "Failed to load dashboard";
       } finally {
         this.loading = false;
       }

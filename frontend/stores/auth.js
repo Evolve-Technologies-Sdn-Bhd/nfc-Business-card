@@ -176,6 +176,16 @@ export const useAuthStore = defineStore("auth", {
     },
 
     /**
+     * Update the stored user object (e.g. after profile update).
+     * Performs a shallow merge so existing keys not in the payload are preserved.
+     */
+    setUser(userData) {
+      if (!userData) return;
+      this.user = { ...(this.user || {}), ...userData };
+      this.isAuthenticated = true;
+    },
+
+    /**
      * Fetch user profile
      */
     async fetchProfile() {
@@ -283,16 +293,16 @@ export const useAuthStore = defineStore("auth", {
      */
     getRedirectPathByPlan() {
       if (!this.user) {
-        return "/UserDashboard/";
+        return "/UserDashboard";
       }
 
       // Admin users go to admin dashboard
       if (this.isAdmin()) {
-        return "/AdminManagement/";
+        return "/AdminManagement";
       }
 
       // All regular users (Free, Basic, Premium, Business) go to their main dashboard first
-      return "/UserDashboard/";
+      return "/UserDashboard";
     },
 
     /**

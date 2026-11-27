@@ -5378,23 +5378,4 @@ select:focus {
 .sortable-drag {
   cursor: move;
 }
-
-/* Custom scrollbar for modal */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
 </style>

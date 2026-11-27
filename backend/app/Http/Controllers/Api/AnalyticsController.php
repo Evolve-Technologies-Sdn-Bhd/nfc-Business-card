@@ -658,7 +658,7 @@ class AnalyticsController extends Controller
         $peakHours = Analytics::where('trackable_type', \App\Models\NfcCard::class)
             ->whereIn('trackable_id', $cardIds)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as taps')
+            ->selectRaw($this->hourExpression() . ' as hour, COUNT(*) as taps')
             ->groupBy('hour')
             ->orderByDesc('taps')
             ->limit(5)
@@ -878,5 +878,16 @@ class AnalyticsController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="user_analytics_' . date('Y-m-d') . '.csv"',
         ]);
+    }
+
+    /**
+     * SQL for "hour of day" that works on every supported driver
+     * (MySQL in production, SQLite in local development).
+     */
+    private function hourExpression(): string
+    {
+        return \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%H', created_at) AS INTEGER)"
+            : 'HOUR(created_at)';
     }
 }

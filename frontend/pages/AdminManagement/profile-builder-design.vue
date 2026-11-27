@@ -1,114 +1,89 @@
 <template>
   <div>
-    <!-- Page Header with Title & Breadcrumb Context -->
-    <div class="mb-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-          <span class="text-badge text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
-            <Icon name="heroicons:sparkles" class="w-3 h-3 inline mr-1" />
-            Admin Module
-          </span>
-          </div>
-          <h1 class="page-title text-secondary-900 tracking-tight">Profile Builder Design</h1>
-          <p class="mt-2 text-body text-secondary-600 max-w-2xl leading-relaxed">
-            Configure plan entitlements, field visibility, and design system options across all three subscription tiers.
-            Every change here instantly reflects in your users' Profile Builder experience.
-          </p>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Design System"
+      eyebrow-icon="heroicons:swatch"
+      title="Profile Builder Design"
+      description="Configure plan entitlements, field visibility, and design system options across all three subscription tiers. Every change here instantly reflects in your users' Profile Builder experience."
+    />
 
     <!-- Overview Stat Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="card p-5 bg-gradient-to-br from-white to-info-50/30 border-info-100">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-info-500/10 flex items-center justify-center">
-            <Icon name="heroicons:rectangle-stack" class="w-6 h-6 text-info-600" />
-          </div>
-          <span class="text-badge text-info-700 bg-info-100 px-2 py-1 rounded-md">Sections</span>
-        </div>
-        <div class="stat-value text-secondary-900 mb-1">{{ totalSections }}</div>
-        <div class="stat-label text-secondary-500">Active profile sections</div>
-      </div>
-
-      <div class="card p-5 bg-gradient-to-br from-white to-primary-50/30 border-primary-100">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-primary-500/10 flex items-center justify-center">
-            <Icon name="heroicons:queue-list" class="w-6 h-6 text-primary-600" />
-          </div>
-          <span class="text-badge text-primary-700 bg-primary-100 px-2 py-1 rounded-md">Fields</span>
-        </div>
-        <div class="stat-value text-secondary-900 mb-1">{{ totalFields }}</div>
-        <div class="stat-label text-secondary-500">Configurable input fields</div>
-      </div>
-
-      <div class="card p-5 bg-gradient-to-br from-white to-success-50/30 border-success-100">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-success-500/10 flex items-center justify-center">
-            <Icon name="heroicons:paint-brush" class="w-6 h-6 text-success-600" />
-          </div>
-          <span class="text-badge text-success-700 bg-success-100 px-2 py-1 rounded-md">Designs</span>
-        </div>
-        <div class="stat-value text-secondary-900 mb-1">{{ totalDesignOptions }}</div>
-        <div class="stat-label text-secondary-500">Themes, fonts & styles</div>
-      </div>
-
-      <div class="card p-5 bg-gradient-to-br from-white to-warning-50/30 border-warning-100">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-warning-500/10 flex items-center justify-center">
-            <Icon name="heroicons:rocket-launch" class="w-6 h-6 text-warning-600" />
-          </div>
-          <span class="text-badge text-warning-700 bg-warning-100 px-2 py-1 rounded-md">Features</span>
-        </div>
-        <div class="stat-value text-secondary-900 mb-1">{{ totalFeatures }}</div>
-        <div class="stat-label text-secondary-500">Feature toggles available</div>
-      </div>
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <AdminStatTile
+        label="Active profile sections"
+        :value="totalSections"
+        icon="heroicons:rectangle-stack"
+        hint="Sections"
+      />
+      <AdminStatTile
+        label="Configurable input fields"
+        :value="totalFields"
+        icon="heroicons:queue-list"
+        hint="Fields"
+      />
+      <AdminStatTile
+        label="Themes, fonts & styles"
+        :value="totalDesignOptions"
+        icon="heroicons:paint-brush"
+        hint="Designs"
+      />
+      <AdminStatTile
+        label="Feature toggles available"
+        :value="totalFeatures"
+        icon="heroicons:rocket-launch"
+        hint="Features"
+      />
     </div>
 
     <!-- Plan Entitlement Snapshot -->
-    <div class="card mb-6 p-5 bg-gradient-to-r from-secondary-50/50 to-white">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h3 class="card-title text-secondary-900">
-            Plan Entitlement Snapshot
-          </h3>
-          <p class="text-helper mt-0.5">Real-time breakdown of items enabled features across each tier</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div v-for="stat in planStatsList" :key="stat.id"
-             :class="[
-               'p-4 rounded-xl border-2 transition-all',
-               stat.id === 'free' ? 'border-secondary-200 bg-secondary-50/40' :
-               stat.id === 'basic' ? 'border-info-200 bg-info-50/40' :
-               stat.id === 'premium' ? 'border-primary-200 bg-primary-50/40' :
-               'border-warning-200 bg-warning-50/40'
-             ]">
-          <div class="flex items-center justify-between mb-3">
+    <AdminSectionCard
+      title="Plan entitlement snapshot"
+      subtitle="Real-time breakdown of enabled items across each tier."
+      class="mb-6"
+    >
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div
+          v-for="stat in planStatsList"
+          :key="stat.id"
+          :class="[
+            'rounded-xl border-2 p-4 transition-all',
+            stat.id === 'free' ? 'border-secondary-200 bg-secondary-50/40' :
+            stat.id === 'basic' ? 'border-info-200 bg-info-50/40' :
+            stat.id === 'premium' ? 'border-primary-200 bg-primary-50/40' :
+            'border-warning-200 bg-warning-50/40'
+          ]"
+        >
+          <div class="mb-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-              <div :class="[
-                'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-body',
-                stat.id === 'free' ? 'bg-secondary-500' :
-                stat.id === 'basic' ? 'bg-info-500' :
-                stat.id === 'premium' ? 'bg-primary-500' :
-                'bg-warning-500'
-              ]">
-                <Icon :name="stat.id === 'business' ? 'heroicons:building-office' : stat.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-4 h-4" />
+              <div
+                :class="[
+                  'flex h-8 w-8 items-center justify-center rounded-lg text-white',
+                  stat.id === 'free' ? 'bg-secondary-500' :
+                  stat.id === 'basic' ? 'bg-info-500' :
+                  stat.id === 'premium' ? 'bg-primary-500' :
+                  'bg-warning-500'
+                ]"
+              >
+                <Icon
+                  :name="stat.id === 'business' ? 'heroicons:building-office' : stat.id === 'premium' ? 'heroicons:star' : 'heroicons:user'"
+                  class="h-4 w-4"
+                />
               </div>
-              <span class="font-bold text-secondary-900">{{ stat.name }}</span>
+              <span class="text-body font-semibold text-secondary-900">{{ stat.name }}</span>
             </div>
-            <div :class="[
-              'text-body font-bold px-2.5 py-1 rounded-md',
-              stat.id === 'free' ? 'bg-secondary-500 text-white' :
-              stat.id === 'basic' ? 'bg-info-500 text-white' :
-              stat.id === 'premium' ? 'bg-primary-500 text-white' :
-              'bg-warning-500 text-white'
-            ]">
+            <div
+              :class="[
+                'rounded-md px-2.5 py-1 text-body font-bold',
+                stat.id === 'free' ? 'bg-secondary-500 text-white' :
+                stat.id === 'basic' ? 'bg-info-500 text-white' :
+                stat.id === 'premium' ? 'bg-primary-500 text-white' :
+                'bg-warning-500 text-white'
+              ]"
+            >
               {{ stat.percentage }}%
             </div>
           </div>
-          <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden mb-3 border border-white">
+          <div class="mb-3 h-2 w-full overflow-hidden rounded-full border border-white bg-white/60">
             <div
               :class="[
                 'h-full rounded-full transition-all duration-700',
@@ -121,83 +96,70 @@
             ></div>
           </div>
           <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+            <div class="rounded-lg bg-white/70 px-1 py-1.5">
               <div class="text-caption font-bold text-secondary-900">{{ stat.fieldsCount }}</div>
-              <div class="text-micro text-secondary-500 uppercase tracking-wide">Fields</div>
+              <div class="text-micro uppercase tracking-wide text-secondary-500">Fields</div>
             </div>
-            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+            <div class="rounded-lg bg-white/70 px-1 py-1.5">
               <div class="text-caption font-bold text-secondary-900">{{ stat.designsCount }}</div>
-              <div class="text-micro text-secondary-500 uppercase tracking-wide">Designs</div>
+              <div class="text-micro uppercase tracking-wide text-secondary-500">Designs</div>
             </div>
-            <div class="bg-white/70 rounded-lg py-1.5 px-1">
+            <div class="rounded-lg bg-white/70 px-1 py-1.5">
               <div class="text-caption font-bold text-secondary-900">{{ stat.featuresCount }}</div>
-              <div class="text-micro text-secondary-500 uppercase tracking-wide">Features</div>
+              <div class="text-micro uppercase tracking-wide text-secondary-500">Features</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </AdminSectionCard>
 
-    <!-- View Navigation Pills -->
-    <div class="mb-6">
-      <div class="overflow-x-auto rounded-xl scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-transparent">
-        <div class="flex gap-2 p-1.5 bg-secondary-100/70 rounded-xl w-fit min-w-max">
+    <!-- Workspace view switcher -->
+    <div class="admin-toolbar mb-6">
+      <div class="admin-scroll rounded-xl border border-secondary-200 bg-white p-1 shadow-sm">
+        <div class="flex min-w-max gap-1">
           <button
+            type="button"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-navigation transition-all"
+            :class="activeView === 'assignments' ? 'bg-primary-700 text-white shadow-sm' : 'text-secondary-600 hover:bg-secondary-100 hover:text-secondary-900'"
             @click="activeView = 'assignments'"
-            :class="[
-              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
-              activeView === 'assignments'
-                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
-                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
-            ]"
           >
-            <Icon name="heroicons:clipboard-document-check" class="w-4 h-4 flex-shrink-0" />
-            Plan Assignments
+            <Icon name="heroicons:clipboard-document-check" class="h-4 w-4 shrink-0" />
+            Plan assignments
           </button>
           <button
+            type="button"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-navigation transition-all"
+            :class="activeView === 'sections' ? 'bg-primary-700 text-white shadow-sm' : 'text-secondary-600 hover:bg-secondary-100 hover:text-secondary-900'"
             @click="activeView = 'sections'"
-            :class="[
-              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
-              activeView === 'sections'
-                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
-                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
-            ]"
           >
-            <Icon name="heroicons:rectangle-stack" class="w-4 h-4 flex-shrink-0" />
-            Field Sections
+            <Icon name="heroicons:rectangle-stack" class="h-4 w-4 shrink-0" />
+            Field sections
           </button>
           <button
+            type="button"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-navigation transition-all"
+            :class="activeView === 'catalog' ? 'bg-primary-700 text-white shadow-sm' : 'text-secondary-600 hover:bg-secondary-100 hover:text-secondary-900'"
             @click="activeView = 'catalog'"
-            :class="[
-              'px-5 py-2.5 rounded-lg text-navigation transition-all flex items-center gap-2 whitespace-nowrap',
-              activeView === 'catalog'
-                ? 'bg-white text-primary-700 shadow-sm shadow-secondary-200'
-                : 'text-secondary-600 hover:text-secondary-800 hover:bg-white/50'
-            ]"
           >
-            <Icon name="heroicons:squares-2x2" class="w-4 h-4 flex-shrink-0" />
-            Design Catalog
+            <Icon name="heroicons:squares-2x2" class="h-4 w-4 shrink-0" />
+            Design catalog
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Plan Accordions -->
-    <div v-show="activeView === 'assignments'" class="card mb-6 p-5">
-      <div class="flex items-center justify-between mb-4 pb-4 border-b border-secondary-200">
-        <div>
-          <h2 class="section-title text-secondary-900 flex items-center">
-            <Icon name="heroicons:clipboard-document-check" class="w-5 h-5 mr-2 text-primary-600" />
-            Plan Field Assignments
-          </h2>
-          <p class="card-subtitle mt-1">Configure which fields and features are available for each plan</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-badge text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
-            {{ generalTabs.length }} sections • {{ Object.values(fields).flat().length }} fields • {{ filteredOptionsFeatureToggles.length }} features
-          </span>
-        </div>
-      </div>
+    <!-- Plan Assignments Workspace -->
+    <AdminSectionCard
+      v-show="activeView === 'assignments'"
+      title="Plan field assignments"
+      subtitle="Choose which fields, design options and features unlock for each subscription tier."
+      class="mb-6"
+    >
+      <template #header-actions>
+        <span class="admin-badge admin-badge--neutral">
+          {{ generalTabs.length }} sections · {{ Object.values(fields).flat().length }} fields · {{ filteredOptionsFeatureToggles.length }} features
+        </span>
+      </template>
 
       <div class="space-y-3">
         <div
@@ -234,7 +196,7 @@
                 <Icon :name="plan.id === 'business' ? 'heroicons:building-office' : plan.id === 'premium' ? 'heroicons:star' : 'heroicons:user'" class="w-5 h-5" />
               </div>
               <div class="text-left">
-                <span class="card-title text-secondary-900">{{ plan.name }}</span>
+                <span class="text-body font-semibold text-secondary-900">{{ plan.name }}</span>
                 <div class="flex items-center gap-2 mt-0.5">
                   <span :class="[
                     'text-badge px-2 py-0.5 rounded-full',
@@ -353,7 +315,7 @@
                 
                 <!-- Column 1: Data Fields -->
                 <div class="space-y-3">
-                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="flex items-center border-b border-secondary-200 pb-2 text-body font-semibold text-secondary-900">
                     <Icon name="heroicons:rectangle-stack" class="w-4 h-4 mr-2 text-info-600" />
                     Data Fields
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ generalTabs.length }} sections</span>
@@ -407,7 +369,7 @@
 
                 <!-- Column 2: Design Options -->
                 <div class="space-y-3">
-                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="flex items-center border-b border-secondary-200 pb-2 text-body font-semibold text-secondary-900">
                     <Icon name="heroicons:paint-brush" class="w-4 h-4 mr-2 text-primary-600" />
                     Design Options
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ getDesignCategoryItemCount(['theme', 'font', 'button_style', 'color_scheme', 'layout']) }} items</span>
@@ -461,7 +423,7 @@
 
                 <!-- Column 3: Features -->
                 <div class="space-y-3">
-                  <h3 class="card-title text-secondary-900 flex items-center pb-2 border-b border-secondary-200">
+                  <h3 class="flex items-center border-b border-secondary-200 pb-2 text-body font-semibold text-secondary-900">
                     <Icon name="heroicons:sparkles" class="w-4 h-4 mr-2 text-warning-600" />
                     Features
                     <span class="ml-auto text-caption font-normal text-secondary-500">{{ filteredOptionsFeatureToggles.length }} toggles</span>
@@ -518,42 +480,35 @@
           </div>
         </div>
       </div>
-    </div>
+    </AdminSectionCard>
 
     <!-- Section Management -->
-    <div v-show="activeView === 'sections'" class="card mb-6 p-5">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
-        <div>
-          <h2 class="section-title text-secondary-900 flex items-center">
-            <Icon name="heroicons:rectangle-stack" class="w-5 h-5 mr-2 text-primary-600" />
-            Manage Field Sections
-          </h2>
-          <p class="card-subtitle mt-1">
-            Create and organize profile sections • {{ generalSections.length }} sections
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            @click="loadSections"
-            :disabled="sectionsLoading"
-            class="p-2 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 rounded-lg transition-colors"
-            title="Refresh Sections"
-          >
-            <Icon 
-              name="heroicons:arrow-path" 
-              :class="['w-5 h-5', sectionsLoading && 'animate-spin']" 
-            />
-          </button>
-          <button
-            @click="openSectionModal('add')"
-            class="btn btn-primary flex items-center gap-2"
-          >
-            <Icon name="heroicons:plus" class="w-4 h-4" />
-            Add Section
-          </button>
-        </div>
-      </div>
+    <AdminSectionCard
+      v-show="activeView === 'sections'"
+      title="Manage field sections"
+      subtitle="Create and organize the profile sections shown to your users."
+      class="mb-6"
+    >
+      <template #header-actions>
+        <span class="admin-badge admin-badge--neutral">{{ generalSections.length }} sections</span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--ghost admin-btn--icon"
+          :disabled="sectionsLoading"
+          title="Refresh sections"
+          @click="loadSections"
+        >
+          <Icon name="heroicons:arrow-path" :class="['h-4 w-4', sectionsLoading && 'animate-spin']" />
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--primary"
+          @click="openSectionModal('add')"
+        >
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          Add section
+        </button>
+      </template>
 
       <!-- Loading State -->
       <div v-if="sectionsLoading" class="flex items-center justify-center py-12">
@@ -572,17 +527,11 @@
             'relative rounded-xl overflow-hidden transition-all duration-300 group',
             'bg-gradient-to-br from-white to-secondary-50',
             'border-2 hover:shadow-xl hover:-translate-y-1',
-            section.is_active !== false ? 'border-secondary-200 hover:border-primary-400 hover:shadow-primary-100/40' : 'border-secondary-200 opacity-70 grayscale-[40%]'
+            section.is_active !== false ? 'border-secondary-200 hover:border-accent-400 hover:shadow-accent-100/40' : 'border-secondary-200 opacity-70 grayscale-[40%]'
           ]"
         >
           <!-- Accent Border -->
-          <div :class="[
-            'absolute top-0 left-0 right-0 h-1',
-            index % 4 === 0 ? 'bg-gradient-to-r from-info-400 to-info-500' :
-            index % 4 === 1 ? 'bg-gradient-to-r from-primary-400 to-primary-500' :
-            index % 4 === 2 ? 'bg-gradient-to-r from-warning-400 to-warning-500' :
-            'bg-gradient-to-r from-success-400 to-success-500'
-          ]"></div>
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-300 via-accent-500 to-accent-400"></div>
 
           <!-- Status Badge -->
           <div class="absolute top-3 right-3 z-10 flex gap-1.5">
@@ -602,11 +551,7 @@
               <div 
                 :class="[
                   'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm',
-                  'bg-gradient-to-br',
-                  index % 4 === 0 ? 'from-info-100 to-info-200 text-info-600' :
-                  index % 4 === 1 ? 'from-primary-100 to-primary-200 text-primary-600' :
-                  index % 4 === 2 ? 'from-warning-100 to-warning-200 text-warning-600' :
-                  'from-success-100 to-success-200 text-success-600'
+                  'bg-gradient-to-br from-accent-50 to-accent-100 text-accent-600'
                 ]"
               >
                 <Icon 
@@ -615,7 +560,7 @@
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="card-title text-secondary-900 truncate group-hover:text-primary-700 transition-colors">{{ section.name }}</h3>
+                <h3 class="text-body font-semibold text-secondary-900 truncate group-hover:text-primary-700 transition-colors">{{ section.name }}</h3>
                 <code class="text-micro text-secondary-400 bg-secondary-100/70 px-1.5 py-0.5 rounded font-mono mt-1 inline-block border border-secondary-200/50">{{ section.key }}</code>
               </div>
             </div>
@@ -641,7 +586,7 @@
               </div>
               <div class="w-full h-1.5 bg-secondary-100 rounded-full overflow-hidden">
                 <div
-                  class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-info-500 via-primary-500 to-warning-500"
+                  class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-accent-400 to-accent-600"
                   :style="{ width: Math.round((getSectionPlans(section.key).length / 4) * 100) + '%' }"
                 ></div>
               </div>
@@ -715,7 +660,7 @@
             <Icon name="heroicons:plus" class="w-8 h-8 text-secondary-400 group-hover:text-primary-600 transition-colors" />
           </div>
           <div class="text-center px-4">
-            <p class="card-title text-secondary-700 group-hover:text-primary-700 transition-colors mb-1">Create New Section</p>
+            <p class="text-body font-semibold text-secondary-700 group-hover:text-primary-700 transition-colors mb-1">Create New Section</p>
             <p class="text-caption text-secondary-400 group-hover:text-secondary-500">Add a custom profile category</p>
           </div>
         </button>
@@ -728,34 +673,35 @@
           <div class="w-24 h-24 bg-primary-50/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <Icon name="heroicons:folder-open" class="w-12 h-12 text-primary-400" />
           </div>
-          <h3 class="card-title text-secondary-800 mb-2">Welcome to Profile Sections</h3>
+          <h3 class="text-body font-semibold text-secondary-800 mb-2">Welcome to Profile Sections</h3>
           <p class="text-body text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
             Organize your user profile into logical sections like Personal Info, Company, Services, and more. 
             Each section can contain multiple fields and be restricted by subscription plan.
           </p>
           <button
+            type="button"
+            class="admin-btn admin-btn--primary"
             @click="openSectionModal('add')"
-            class="btn btn-primary px-6 py-2.5 text-button"
           >
             <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
             Create Your First Section
           </button>
         </div>
       </div>
+    </AdminSectionCard>
+
+    <!-- Catalog intro -->
+    <div v-show="activeView === 'catalog'" class="mb-5">
+      <h2 class="text-lg font-semibold tracking-tight text-secondary-900">Design &amp; field catalog</h2>
+      <p class="mt-1 text-body text-secondary-600">Master catalog: view, edit, and manage every configurable option across the system. Use the plan filter to quickly audit what each tier gets.</p>
     </div>
 
-    <!-- Apply Designs Header -->
-    <div v-show="activeView === 'catalog'" class="mb-6">
-      <h2 class="page-title text-secondary-900 tracking-tight">Design & Field Catalog</h2>
-      <p class="text-body text-secondary-600 mt-1">Master catalog: view, edit, and manage every configurable option across the system. Use the plan filter to quickly audit what each tier gets.</p>
-    </div>
-
-    <!-- Main Content Card -->
-    <div v-show="activeView === 'catalog'" class="card">
+    <!-- Catalog content -->
+    <AdminSectionCard v-show="activeView === 'catalog'" flush>
       <!-- Tabs Navigation -->
       <div class="border-b border-secondary-200">
         <nav 
-          class="-mb-px flex gap-1 overflow-x-auto overflow-y-hidden px-6 scroll-smooth [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-secondary-200 [&::-webkit-scrollbar-thumb]:rounded-full" 
+          class="-mb-px flex gap-1 overflow-x-auto overflow-y-hidden px-6 scroll-smooth [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[color:var(--brass)] [&::-webkit-scrollbar-thumb]:rounded-full" 
           aria-label="Tabs"
         >
           <button
@@ -783,7 +729,7 @@
         </nav>
       </div>
 
-      <div class="card-body">
+      <div class="admin-panel-body">
         <!-- Action Bar -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 pb-4 border-b border-secondary-200">
           <div class="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -880,7 +826,7 @@
 
             <button
               @click="openAddModal"
-              class="btn btn-primary"
+              class="admin-btn admin-btn--primary"
             >
               <Icon name="heroicons:plus" class="h-4 w-4 mr-1.5" />
               Add {{ currentTabName }}
@@ -899,7 +845,7 @@
           <div class="w-20 h-20 bg-secondary-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <Icon name="heroicons:inbox" class="w-10 h-10 text-secondary-300" />
           </div>
-          <p class="card-title text-secondary-900 mb-1">
+          <p class="text-body font-semibold text-secondary-900 mb-1">
             {{ selectedPlanFilter ? `No ${currentTabName.toLowerCase()} for ${selectedPlanFilter.charAt(0).toUpperCase() + selectedPlanFilter.slice(1)} plan` : fieldsSearchQuery ? 'No matching fields found' : `No ${currentTabName.toLowerCase()} yet` }}
           </p>
           <p class="text-body text-secondary-500 mb-6 max-w-md mx-auto leading-relaxed">
@@ -916,8 +862,9 @@
           </div>
           <button
             v-if="!fieldsSearchQuery"
+            type="button"
+            class="admin-btn admin-btn--primary"
             @click="openAddModal"
-            class="btn btn-primary"
           >
             <Icon name="heroicons:plus" class="h-4 w-4 mr-1.5" />
             Add {{ currentTabName }}
@@ -926,29 +873,29 @@
 
         <!-- Fields Table View -->
         <div v-else-if="isFieldTab" class="overflow-hidden rounded-xl border border-secondary-200">
-          <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+          <div class="admin-scroll max-h-[600px] overflow-y-auto">
             <table class="min-w-full divide-y divide-secondary-200">
               <thead class="sticky top-0 z-10">
                 <tr class="bg-gradient-to-r from-secondary-50 to-white">
-                  <th scope="col" class="px-4 py-3.5 text-left table-head">
+                  <th scope="col" class="px-4 py-3.5 text-left text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Field
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left table-head">
+                  <th scope="col" class="px-4 py-3.5 text-left text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Type
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-left table-head">
+                  <th scope="col" class="px-4 py-3.5 text-left text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Group
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center table-head">
+                  <th scope="col" class="px-4 py-3.5 text-center text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Order
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center table-head w-[280px]">
+                  <th scope="col" class="px-4 py-3.5 text-center text-micro font-semibold uppercase tracking-wider text-secondary-500 w-[280px]">
                     Plan Availability
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center table-head">
+                  <th scope="col" class="px-4 py-3.5 text-center text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Status
                   </th>
-                  <th scope="col" class="px-4 py-3.5 text-center table-head">
+                  <th scope="col" class="px-4 py-3.5 text-center text-micro font-semibold uppercase tracking-wider text-secondary-500">
                     Actions
                   </th>
                 </tr>
@@ -956,7 +903,7 @@
               <tbody class="bg-white divide-y divide-secondary-100">
                 <tr v-for="field in filteredFieldsTable" :key="field.id" class="hover:bg-primary-50/30 transition-colors group">
                   <td class="px-4 py-4">
-                    <div class="table-cell font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ field.label }}</div>
+                    <div class="text-body font-semibold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ field.label }}</div>
                     <div class="text-caption text-secondary-500 font-mono mt-0.5 flex items-center gap-1">
                       <Icon name="heroicons:hashtag" class="w-3 h-3 opacity-50" />
                       {{ field.field_key }}
@@ -1169,7 +1116,11 @@
               <!-- Preview Section -->
               <div class="mb-4 p-4 bg-gradient-to-br from-secondary-50/80 to-white rounded-xl border border-secondary-100 shadow-inner group-hover:shadow-md transition-all">
                 <!-- Theme Preview -->
-                <div v-if="currentTab === 'theme'" :class="['w-full h-24 rounded-lg shadow-sm group-hover:scale-[1.02] transition-transform origin-center', option.config?.preview]"></div>
+                <div v-if="currentTab === 'theme'" 
+                  class="w-full h-24 rounded-lg shadow-sm ring-1 ring-black/5 group-hover:scale-[1.02] transition-transform origin-center overflow-hidden"
+                  :class="option.config?.preview"
+                  :style="option.config?.previewCss ? option.config.previewCss : { background: option.config?.bgGradient || option.config?.backgroundColor || '#ffffff' }"
+                ></div>
                 
                 <!-- Font Preview -->
                 <div v-else-if="currentTab === 'font'" class="text-center py-2">
@@ -1184,7 +1135,9 @@
                 <!-- Button Style Preview -->
                 <div v-else-if="currentTab === 'button_style'" class="flex justify-center py-1">
                   <button
-                    :class="['w-auto min-w-[180px] py-2.5 px-6 text-button shadow-sm', option.config?.class]"
+                    class="w-auto min-w-[180px] py-2.5 px-6 text-button font-semibold shadow-sm ring-1 ring-black/5"
+                    :class="option.config?.class"
+                    :style="option.config?.previewCss"
                     disabled
                   >
                     <Icon name="heroicons:bolt" class="w-4 h-4 inline mr-1.5" />
@@ -1192,9 +1145,100 @@
                   </button>
                 </div>
                 
+                <!-- Card Style Preview -->
+                <div v-else-if="currentTab === 'card_style'" class="flex justify-center py-1">
+                  <div
+                    class="w-full h-20 rounded-2xl ring-1 ring-black/5"
+                    :class="option.config?.class"
+                    :style="option.config?.previewCss"
+                  ></div>
+                </div>
+                
+                <!-- Background Animation Preview -->
+                <div v-else-if="currentTab === 'bg_animation'" class="flex justify-center py-1">
+                  <div class="relative isolate w-full h-20 rounded-xl ring-1 ring-black/10 overflow-hidden bg-[#06090d]">
+                    <div
+                      class="absolute inset-0"
+                      :style="option.config?.previewCss || ''"
+                      aria-hidden="true"
+                    ></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#06090d]/25 via-transparent to-[#06090d]/10" aria-hidden="true"></div>
+                    <div v-if="option.option_id === 'particles'" class="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
+                      <span class="bg-effect-preview-particle absolute left-[62%] top-[18%] h-1.5 w-1.5 rounded-full bg-[#f7f5f0] shadow-[0_0_9px_3px_rgba(247,245,240,0.75)]"></span>
+                      <span class="bg-effect-preview-particle absolute left-[75%] top-[72%] h-2 w-2 rounded-full bg-[#c2a068] shadow-[0_0_10px_3px_rgba(194,160,104,0.8)]"></span>
+                      <span class="bg-effect-preview-particle absolute left-[87%] top-[22%] h-1.5 w-1.5 rounded-full bg-[#f7f5f0] shadow-[0_0_9px_3px_rgba(247,245,240,0.7)]"></span>
+                    </div>
+                    <div v-else-if="option.option_id === 'starfield'" class="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
+                      <span class="absolute left-[12%] top-[20%] h-1 w-1 rounded-full bg-[#f7f5f0] shadow-[0_0_6px_2px_rgba(247,245,240,0.75)]"></span>
+                      <span class="absolute left-[28%] top-[74%] h-1.5 w-1.5 rounded-full bg-[#c2a068] shadow-[0_0_7px_2px_rgba(194,160,104,0.8)]"></span>
+                      <span class="absolute left-[43%] top-[15%] h-1 w-1 rounded-full bg-[#f7f5f0] shadow-[0_0_6px_2px_rgba(247,245,240,0.75)]"></span>
+                      <span class="absolute left-[59%] top-[78%] h-1 w-1 rounded-full bg-[#f7f5f0] shadow-[0_0_6px_2px_rgba(247,245,240,0.7)]"></span>
+                      <span class="absolute left-[74%] top-[16%] h-1.5 w-1.5 rounded-full bg-[#c2a068] shadow-[0_0_7px_2px_rgba(194,160,104,0.8)]"></span>
+                      <span class="absolute left-[91%] top-[68%] h-1 w-1 rounded-full bg-[#f7f5f0] shadow-[0_0_6px_2px_rgba(247,245,240,0.75)]"></span>
+                    </div>
+                    <svg v-else-if="option.option_id === 'slow-waves'" class="pointer-events-none absolute inset-0 z-10 h-full w-full" viewBox="0 0 320 80" preserveAspectRatio="none" aria-hidden="true">
+                      <path d="M-10 18 C45 2 70 34 125 18 S205 2 260 18 S315 34 340 18" fill="none" stroke="#c2a068" stroke-opacity=".65" stroke-width="1.5" />
+                      <path d="M-10 39 C45 23 70 55 125 39 S205 23 260 39 S315 55 340 39" fill="none" stroke="#f7f5f0" stroke-opacity=".32" stroke-width="1" />
+                      <path d="M-10 61 C45 45 70 77 125 61 S205 45 260 61 S315 77 340 61" fill="none" stroke="#c2a068" stroke-opacity=".45" stroke-width="1.5" />
+                    </svg>
+                    <div v-else-if="option.option_id === 'sparkle'" class="pointer-events-none absolute inset-0 z-10 text-[#f7f5f0]" aria-hidden="true">
+                      <Icon name="heroicons:sparkles" class="bg-effect-preview-sparkle absolute left-[18%] top-[18%] h-5 w-5 text-[#c2a068]" />
+                      <Icon name="heroicons:sparkles" class="bg-effect-preview-sparkle absolute left-[44%] top-[62%] h-4 w-4" />
+                      <Icon name="heroicons:sparkles" class="bg-effect-preview-sparkle absolute left-[72%] top-[14%] h-5 w-5 text-[#c2a068]" />
+                      <Icon name="heroicons:sparkles" class="bg-effect-preview-sparkle absolute left-[88%] top-[66%] h-4 w-4" />
+                    </div>
+                    <div
+                      v-else-if="option.option_id === 'grid-dots'"
+                      class="pointer-events-none absolute inset-0 z-10"
+                      :style="{ backgroundImage: 'radial-gradient(rgba(194,160,104,0.48) 1px, transparent 1.5px)', backgroundSize: '16px 16px' }"
+                      aria-hidden="true"
+                    ></div>
+                    <div class="relative z-20 flex h-full items-center gap-3 px-4">
+                      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c2a068]/70 bg-[#c2a068]/15 text-[#c2a068] shadow-sm">
+                        <Icon name="heroicons:user" class="h-5 w-5" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-semibold text-[#f7f5f0]">Alex Morgan</p>
+                        <p class="truncate text-xs text-[#f7f5f0]/70">Product Designer</p>
+                        <div class="mt-2 flex items-center gap-1.5" aria-hidden="true">
+                          <span class="h-1 w-10 rounded-full bg-[#c2a068]/80"></span>
+                          <span class="h-1 w-6 rounded-full bg-[#f7f5f0]/45"></span>
+                          <span class="h-1 w-4 rounded-full bg-[#f7f5f0]/25"></span>
+                        </div>
+                      </div>
+                      <span class="shrink-0 rounded-full border border-[#c2a068]/50 bg-[#06090d]/40 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-[#c2a068]">CONNECT</span>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Profile Style Preview -->
                 <div v-else-if="currentTab === 'profile_style'" class="flex justify-center py-2">
-                  <div class="w-20 h-20 bg-gradient-to-br from-secondary-200 via-secondary-300 to-secondary-400 rounded-full shadow-md group-hover:scale-110 transition-transform"></div>
+                  <div class="w-full max-w-[220px] bg-white rounded-xl border border-secondary-200 shadow-sm overflow-hidden">
+                    <template v-if="option.config?.layout === 'cover'">
+                      <div class="h-8 bg-gradient-to-r from-secondary-300 to-secondary-400"></div>
+                      <div class="flex flex-col items-center px-3 pb-3 -mt-5">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-secondary-200 to-secondary-400 border-2 border-white shadow"></div>
+                        <div class="mt-1.5 h-1.5 w-16 bg-secondary-300 rounded-full"></div>
+                        <div class="mt-1 h-1.5 w-10 bg-secondary-200 rounded-full"></div>
+                      </div>
+                    </template>
+                    <template v-else-if="option.config?.layout === 'horizontal'">
+                      <div class="flex items-center gap-2.5 p-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-secondary-200 to-secondary-400 flex-shrink-0"></div>
+                        <div class="flex flex-col gap-1 flex-1">
+                          <div class="h-1.5 w-16 bg-secondary-300 rounded-full"></div>
+                          <div class="h-1.5 w-10 bg-secondary-200 rounded-full"></div>
+                        </div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="flex flex-col items-center px-3 py-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-secondary-200 to-secondary-400"></div>
+                        <div class="mt-1.5 h-1.5 w-16 bg-secondary-300 rounded-full"></div>
+                        <div class="mt-1 h-1.5 w-10 bg-secondary-200 rounded-full"></div>
+                      </div>
+                    </template>
+                  </div>
                 </div>
                 
                 <!-- Color Scheme Preview -->
@@ -1223,12 +1267,13 @@
                 <!-- Layout Preview -->
                 <div v-else-if="currentTab === 'layout'" class="py-1">
                   <div :class="[
-                    'h-16 bg-white rounded-xl border-2 border-dashed border-secondary-300 flex items-center justify-center relative',
+                    'h-16 bg-white rounded-xl border-2 border-dashed border-secondary-300 flex items-center relative',
                     option.config?.alignment === 'left' ? 'justify-start pl-4' :
                     option.config?.alignment === 'right' ? 'justify-end pr-4' :
                     'justify-center'
                   ]">
-                    <div class="flex flex-col gap-1.5 w-2/3" :class="[
+                    <div class="flex flex-col gap-1.5" :style="{ maxWidth: option.config?.maxWidth || '60%' }" :class="[
+                      'w-full',
                       option.config?.alignment === 'left' ? 'items-start' :
                       option.config?.alignment === 'right' ? 'items-end' :
                       'items-center'
@@ -1242,45 +1287,29 @@
                   </div>
                 </div>
                 
-                <!-- Tab Control Preview -->
-                <div v-else-if="currentTab === 'tab_control'" class="flex flex-wrap gap-1.5 justify-center py-2">
-                  <span 
-                    v-for="(tab, idx) in (option.config?.tabs || [])" 
-                    :key="tab"
-                    :class="[
-                      'px-3 py-1.5 text-badge rounded-md transition-all',
-                      idx === 0 
-                        ? 'bg-primary-500 text-white shadow-sm shadow-primary-200' 
-                        : 'bg-white border border-secondary-200 text-secondary-700 hover:bg-secondary-50'
-                    ]"
-                  >
-                    {{ tab }}
-                  </span>
-                </div>
-                
                 <!-- Feature Toggle Preview -->
                 <div v-else-if="currentTab === 'feature_toggle'" class="flex flex-col items-center justify-center py-2 gap-2">
                   <div :class="[
                     'w-16 h-8 rounded-full p-1 transition-all relative',
-                    option.config?.enabled ? 'bg-success-500' : 'bg-secondary-300'
+                    option.is_default ? 'bg-success-500' : 'bg-secondary-300'
                   ]">
                     <div :class="[
                       'absolute w-6 h-6 bg-white rounded-full shadow-md transition-all top-1',
-                      option.config?.enabled ? 'right-1' : 'left-1'
+                      option.is_default ? 'right-1' : 'left-1'
                     ]"></div>
                   </div>
                   <span :class="[
                     'text-caption font-bold uppercase tracking-wider',
-                    option.config?.enabled ? 'text-success-700' : 'text-secondary-500'
+                    option.is_default ? 'text-success-700' : 'text-secondary-500'
                   ]">
-                    {{ option.config?.enabled ? 'Enabled' : 'Disabled' }} by default
+                    {{ option.is_default ? 'Enabled' : 'Disabled' }} by default
                   </span>
                 </div>
               </div>
 
               <!-- Info -->
               <div class="mb-4">
-                <h3 class="card-title text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
+                <h3 class="text-body font-semibold text-secondary-900 mb-1 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
                   {{ option.name }}
                   <Icon v-if="option.is_default" name="heroicons:star-solid" class="w-3.5 h-3.5 text-warning-500" />
                 </h3>
@@ -1332,45 +1361,32 @@
           </div>
         </div>
       </div>
-    </div>
+    </AdminSectionCard>
 
     <!-- Add/Edit Modal -->
-    <TransitionRoot as="template" :show="showModal">
-      <Dialog as="div" class="relative z-50" @close="closeModal">
-        <TransitionChild
-          as="template"
-          enter="ease-out duration-300"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="ease-in duration-200"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-secondary-900/75 backdrop-blur-sm transition-opacity" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-          <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <TransitionChild
-              as="template"
-              enter="ease-out duration-300"
-              enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enter-to="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leave-from="opacity-100 translate-y-0 sm:scale-100"
-              leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                <!-- Modal Header -->
-                <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200">
-                  <DialogTitle as="h3" class="modal-title text-secondary-900">
-                    {{ modalMode === 'add' ? 'Add New' : 'Edit' }} {{ currentTabName }}
-                  </DialogTitle>
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showModal" class="admin-dialog-backdrop" @click.self="closeModal">
+          <div class="admin-dialog flex flex-col" style="width: min(46rem, 100%); margin-top: 5vh; max-height: 90vh" role="dialog" aria-modal="true">
+            <!-- Modal Header -->
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
+                  <Icon :name="isFieldTab ? 'heroicons:queue-list' : 'heroicons:paint-brush'" class="h-5 w-5" />
+                </span>
+                <div class="min-w-0">
+                  <p class="admin-panel-title">{{ modalMode === 'add' ? 'Add' : 'Edit' }} {{ currentTabName }}</p>
+                  <p class="admin-panel-subtitle">Configure this {{ isFieldTab ? 'field' : 'design option' }} and its plan availability.</p>
                 </div>
+              </div>
+              <button type="button" class="admin-icon-btn" aria-label="Close" @click="closeModal">
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
 
-                <!-- Modal Body -->
-                <div class="px-6 py-6">
-                  <div class="space-y-5 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
+            <!-- Modal Body -->
+            <div class="admin-panel-body flex-1 overflow-y-auto">
+              <div class="space-y-6">
                     <!-- FIELDS FORM -->
                     <template v-if="isFieldTab">
                       <div class="grid grid-cols-2 gap-4">
@@ -1441,7 +1457,7 @@
                             v-model="formData.placeholder"
                             type="text"
                             class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                            placeholder="Enter your name"
+                            :placeholder="getFieldPlaceholderHint(formData.field_type)"
                           />
                         </div>
 
@@ -1458,7 +1474,7 @@
 
                       <!-- Field Grouping -->
                       <div class="bg-primary-50 rounded-lg p-4 border border-primary-200">
-                        <h4 class="card-title text-secondary-900 mb-3 flex items-center">
+                        <h4 class="admin-form-section-title mb-3 flex items-center">
                           <Icon name="heroicons:rectangle-group" class="w-4 h-4 mr-2 text-primary-600" />
                           Field Grouping (for UI display)
                         </h4>
@@ -1479,25 +1495,25 @@
                               class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg"
                             >
                               <option value="">Select icon...</option>
-                              <option value="heroicons:user-circle">👤 User Circle</option>
-                              <option value="heroicons:document-text">📄 Document</option>
-                              <option value="heroicons:phone">📞 Phone</option>
-                              <option value="heroicons:academic-cap">🎓 Academic</option>
-                              <option value="heroicons:identification">🪪 Identification</option>
-                              <option value="heroicons:information-circle">ℹ️ Information</option>
-                              <option value="heroicons:star">⭐ Star</option>
-                              <option value="heroicons:map-pin">📍 Map Pin</option>
-                              <option value="heroicons:clock">🕐 Clock</option>
-                              <option value="heroicons:trophy">🏆 Trophy</option>
-                              <option value="heroicons:user-group">👥 User Group</option>
-                              <option value="heroicons:rocket-launch">🚀 Rocket</option>
-                              <option value="heroicons:photo">🖼️ Photo</option>
-                              <option value="heroicons:currency-dollar">💵 Currency</option>
-                              <option value="heroicons:pencil-square">✏️ Pencil</option>
-                              <option value="heroicons:calendar">📅 Calendar</option>
-                              <option value="heroicons:clipboard-document-list">📋 Clipboard</option>
-                              <option value="heroicons:folder">📁 Folder</option>
-                              <option value="heroicons:squares-plus">➕ Squares Plus</option>
+                              <option value="heroicons:user-circle">User Circle</option>
+                              <option value="heroicons:document-text">Document</option>
+                              <option value="heroicons:phone">Phone</option>
+                              <option value="heroicons:academic-cap">Academic</option>
+                              <option value="heroicons:identification">Identification</option>
+                              <option value="heroicons:information-circle">Information</option>
+                              <option value="heroicons:star">Star</option>
+                              <option value="heroicons:map-pin">Map Pin</option>
+                              <option value="heroicons:clock">Clock</option>
+                              <option value="heroicons:trophy">Trophy</option>
+                              <option value="heroicons:user-group">User Group</option>
+                              <option value="heroicons:rocket-launch">Rocket</option>
+                              <option value="heroicons:photo">Photo</option>
+                              <option value="heroicons:currency-dollar">Currency</option>
+                              <option value="heroicons:pencil-square">Pencil</option>
+                              <option value="heroicons:calendar">Calendar</option>
+                              <option value="heroicons:clipboard-document-list">Clipboard</option>
+                              <option value="heroicons:folder">Folder</option>
+                              <option value="heroicons:squares-plus">Squares Plus</option>
                             </select>
                           </div>
                           <div>
@@ -1516,7 +1532,7 @@
 
                       <!-- Repeater Configuration -->
                       <div v-if="formData.field_type === 'repeater'" class="bg-info-50 rounded-lg p-4 border border-info-200">
-                        <h4 class="card-title text-secondary-900 mb-3 flex items-center">
+                        <h4 class="admin-form-section-title mb-3 flex items-center">
                           <Icon name="heroicons:queue-list" class="w-4 h-4 mr-2" />
                           Repeater Configuration
                         </h4>
@@ -1545,7 +1561,7 @@
                       </div>
 
                       <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
-                        <h4 class="card-title text-secondary-900 mb-3">Validation</h4>
+                        <h4 class="admin-form-section-title mb-3">Validation</h4>
                         <div class="grid grid-cols-2 gap-4">
                           <div>
                             <label class="block text-label text-secondary-700 mb-1.5">Min Length</label>
@@ -1607,26 +1623,67 @@
 
                       <!-- Type-specific Configuration -->
                       <div class="bg-secondary-50 rounded-lg p-4 border border-secondary-200">
-                        <h4 class="card-title text-secondary-900 mb-3">Configuration</h4>
+                        <h4 class="admin-form-section-title mb-3">Configuration</h4>
                         
                         <div v-if="currentTab === 'theme'" class="space-y-3">
+                          <div class="grid grid-cols-2 gap-3">
+                            <div>
+                              <label class="block text-label text-secondary-700 mb-1.5">Background Color</label>
+                              <div class="flex gap-2">
+                                <input v-model="formData.config.backgroundColor" type="color" class="w-11 h-10 rounded border-2 border-secondary-300 cursor-pointer" />
+                                <input v-model="formData.config.backgroundColor" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#FFFFFF" />
+                              </div>
+                            </div>
+                            <div>
+                              <label class="block text-label text-secondary-700 mb-1.5">Text Color</label>
+                              <div class="flex gap-2">
+                                <input v-model="formData.config.textColor" type="color" class="w-11 h-10 rounded border-2 border-secondary-300 cursor-pointer" />
+                                <input v-model="formData.config.textColor" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#111827" />
+                              </div>
+                            </div>
+                            <div>
+                              <label class="block text-label text-secondary-700 mb-1.5">Accent Color</label>
+                              <div class="flex gap-2">
+                                <input v-model="formData.config.accentColor" type="color" class="w-11 h-10 rounded border-2 border-secondary-300 cursor-pointer" />
+                                <input v-model="formData.config.accentColor" type="text" class="flex-1 px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="#2563EB" />
+                              </div>
+                            </div>
+                          </div>
                           <div>
-                            <label class="block text-label text-secondary-700 mb-1.5">Background Color</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Gradient Override (optional)</label>
                             <input
-                              v-model="formData.config.backgroundColor"
+                              v-model="formData.config.bgGradient"
                               type="text"
                               class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono"
-                              placeholder="#FFFFFF"
+                              placeholder="linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%)"
+                              @input="syncThemePreviewCss"
                             />
                           </div>
                           <div>
-                            <label class="block text-label text-secondary-700 mb-1.5">Preview Classes</label>
+                            <label class="block text-label text-secondary-700 mb-1.5">Preview CSS (auto-generated)</label>
+                            <textarea
+                              v-model="formData.config.previewCss"
+                              rows="2"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none bg-secondary-50"
+                              placeholder="background: ..."
+                            ></textarea>
+                            <button type="button" @click="syncThemePreviewCss" class="mt-1.5 text-caption font-semibold text-primary-600 hover:text-primary-700">↻ Regenerate from colors</button>
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Fallback Tailwind Class</label>
                             <input
                               v-model="formData.config.preview"
                               type="text"
                               class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono"
                               placeholder="bg-white"
                             />
+                          </div>
+                          <div class="rounded-lg border border-secondary-200 p-3">
+                            <p class="text-micro font-semibold text-secondary-500 uppercase tracking-wider mb-2">Live Preview</p>
+                            <div
+                              class="w-full h-16 rounded-lg ring-1 ring-black/5"
+                              :style="formData.config.previewCss ? formData.config.previewCss : { background: formData.config.bgGradient || formData.config.backgroundColor || '#ffffff' }"
+                            ></div>
                           </div>
                         </div>
 
@@ -1640,14 +1697,91 @@
                           />
                         </div>
 
-                        <div v-if="currentTab === 'button_style'">
-                          <label class="block text-label text-secondary-700 mb-1.5">CSS Classes</label>
-                          <textarea
-                            v-model="formData.config.class"
-                            rows="2"
-                            class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
-                            placeholder="bg-black text-white rounded-full"
-                          ></textarea>
+                        <div v-if="currentTab === 'button_style'" class="space-y-3">
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">CSS Classes (applied in profile builder)</label>
+                            <textarea
+                              v-model="formData.config.class"
+                              rows="2"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder="bg-black text-white rounded-full"
+                            ></textarea>
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Preview CSS (inline style for admin preview)</label>
+                            <textarea
+                              v-model="formData.config.previewCss"
+                              rows="2"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder="background:#0F172A;color:#FFFFFF;border-radius:9999px;"
+                            ></textarea>
+                          </div>
+                        </div>
+
+                        <div v-if="currentTab === 'card_style'" class="space-y-3">
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">CSS Classes (applied in profile builder)</label>
+                            <textarea
+                              v-model="formData.config.class"
+                              rows="2"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder="bg-white/90 backdrop-blur-sm rounded-2xl border"
+                            ></textarea>
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Preview CSS (inline style)</label>
+                            <textarea
+                              v-model="formData.config.previewCss"
+                              rows="3"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder="background:rgba(255,255,255,0.9);border-radius:16px;..."
+                            ></textarea>
+                          </div>
+                        </div>
+
+                        <div v-if="currentTab === 'bg_animation'" class="space-y-3">
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Animation Component</label>
+                            <input
+                              v-model="formData.config.component"
+                              type="text"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono"
+                              placeholder="BgAurora"
+                            />
+                            <p class="text-micro text-secondary-500 mt-1">Component rendered in the profile builder. Leave empty for "none".</p>
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Preview CSS (inline style for static preview)</label>
+                            <textarea
+                              v-model="formData.config.previewCss"
+                              rows="3"
+                              class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono resize-none"
+                              placeholder="background: radial-gradient(...);"
+                            ></textarea>
+                          </div>
+                        </div>
+
+                        <div v-if="currentTab === 'profile_style'" class="space-y-3">
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Avatar Position</label>
+                            <select v-model="formData.config.avatarPosition" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg">
+                              <option value="center">Center</option>
+                              <option value="left">Left</option>
+                              <option value="right">Right</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Layout Variant</label>
+                            <select v-model="formData.config.layout" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg">
+                              <option value="vertical">Vertical Stack</option>
+                              <option value="horizontal">Horizontal (Side Avatar)</option>
+                              <option value="cover">Cover + Profile</option>
+                            </select>
+                          </div>
+                          <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
+                            <input v-model="formData.config.requireCoverImage" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
+                            <span class="ml-2 text-body text-secondary-900">Requires cover image</span>
+                          </label>
                         </div>
 
                         <div v-if="currentTab === 'color_scheme'" class="space-y-3">
@@ -1689,27 +1823,29 @@
                           </div>
                         </div>
 
-                        <div v-if="currentTab === 'tab_control'">
-                          <label class="block text-label text-secondary-700 mb-1.5">Enabled Tabs (comma-separated)</label>
-                          <input v-model="tabsInput" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg" placeholder="profile, company, services" @blur="updateTabsArray" />
-                        </div>
-
                         <div v-if="currentTab === 'feature_toggle'" class="space-y-3">
                           <div>
                             <label class="block text-label text-secondary-700 mb-1.5">Feature Key</label>
                             <input v-model="formData.config.feature_key" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="stats" />
                           </div>
-                          <label class="flex items-center p-2 bg-white rounded border border-secondary-300 cursor-pointer">
-                            <input v-model="formData.config.enabled" type="checkbox" class="w-4 h-4 rounded border-secondary-300 text-primary-600" />
-                            <span class="ml-2 text-body text-secondary-900">Enabled by Default</span>
-                          </label>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Icon</label>
+                            <input v-model="formData.config.icon" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg font-mono" placeholder="heroicons:chart-bar" />
+                          </div>
+                          <div>
+                            <label class="block text-label text-secondary-700 mb-1.5">Category</label>
+                            <input v-model="formData.config.category" type="text" class="w-full px-3 py-2 text-input border border-secondary-300 rounded-lg" placeholder="analytics" />
+                          </div>
+                          <div class="rounded-lg border border-secondary-200 bg-secondary-50 p-3">
+                            <p class="text-caption text-secondary-600">The "Enabled by default" state is controlled by the <strong>Default</strong> toggle on the option card (star icon). Set this option as default to enable it by default for new users.</p>
+                          </div>
                         </div>
                       </div>
                     </template>
 
                     <!-- Plan Availability - Redesigned -->
                     <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-lg p-5 border-2 border-secondary-200">
-                      <h4 class="card-title text-secondary-900 mb-4 flex items-center">
+                      <h4 class="admin-form-section-title mb-4 flex items-center">
                         <Icon name="heroicons:shield-check" class="w-4 h-4 mr-2" />
                         Plan Availability
                       </h4>
@@ -1831,71 +1967,56 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="bg-secondary-50 px-6 py-4 border-t border-secondary-200 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                <div class="admin-dialog-foot">
                   <button
                     type="button"
+                    class="admin-btn admin-btn--ghost"
                     @click="closeModal"
-                    class="px-4 py-2 text-button text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
-                    @click="saveOption"
+                    class="admin-btn admin-btn--primary"
                     :disabled="saving"
-                    class="px-4 py-2 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    @click="saveOption"
                   >
-                    <Icon v-if="saving" name="heroicons:arrow-path" class="w-4 h-4 mr-1.5 animate-spin inline" />
-                    {{ saving ? 'Saving...' : (modalMode === 'add' ? 'Add' : 'Update') }}
+                    <Icon v-if="saving" name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+                    {{ saving ? 'Saving…' : (modalMode === 'add' ? 'Add' : 'Update') }}
                   </button>
                 </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+              </div>
+            </div>
+      </Transition>
+    </Teleport>
 
     <!-- Section Modal -->
-    <TransitionRoot as="template" :show="showSectionModal">
-      <Dialog as="div" class="relative z-50" @close="closeSectionModal">
-        <TransitionChild
-          as="template"
-          enter="ease-out duration-300"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="ease-in duration-200"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-secondary-900/75 backdrop-blur-sm transition-opacity" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-          <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <TransitionChild
-              as="template"
-              enter="ease-out duration-300"
-              enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enter-to="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leave-from="opacity-100 translate-y-0 sm:scale-100"
-              leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <DialogPanel class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-5xl">
-                <!-- Modal Header -->
-                <div class="bg-secondary-50 px-6 py-4 border-b border-secondary-200 flex items-center justify-between">
-                  <DialogTitle as="h3" class="modal-title text-secondary-900">
-                    {{ sectionModalMode === 'add' ? 'Add New' : 'Edit' }} Section
-                  </DialogTitle>
-                  <div class="flex items-center gap-2 text-caption text-secondary-500">
-                    <span class="px-2 py-1 bg-secondary-100 rounded font-medium">{{ sectionFormData.key || 'new-section' }}</span>
-                  </div>
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showSectionModal && !showModal" class="admin-dialog-backdrop" @click.self="closeSectionModal">
+          <div class="admin-dialog flex flex-col" style="width: min(56rem, 100%); margin-top: 5vh; max-height: 90vh" role="dialog" aria-modal="true">
+            <!-- Modal Header -->
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
+                  <Icon name="heroicons:rectangle-stack" class="h-5 w-5" />
+                </span>
+                <div class="min-w-0">
+                  <p class="admin-panel-title">{{ sectionModalMode === 'add' ? 'Add' : 'Edit' }} section</p>
+                  <p class="admin-panel-subtitle">Define the section details and manage the fields it contains.</p>
                 </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="admin-badge admin-badge--neutral">{{ sectionFormData.key || 'new-section' }}</span>
+                <button type="button" class="admin-icon-btn" aria-label="Close" @click="closeSectionModal">
+                  <Icon name="heroicons:x-mark" class="h-5 w-5" />
+                </button>
+              </div>
+            </div>
 
-                <!-- Modal Body -->
-                <div class="px-6 py-6">
-                  <div class="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
+            <!-- Modal Body -->
+            <div class="admin-panel-body flex-1 overflow-y-auto">
+              <div class="space-y-6">
                     <!-- ════════════════ SECTION SETTINGS ════════════════ -->
                     <div>
                       <h4 class="text-caption font-bold uppercase tracking-wider text-secondary-400 mb-3">Section Settings</h4>
@@ -1955,7 +2076,7 @@
                                 />
                               </div>
                             </div>
-                            <div class="grid grid-cols-8 gap-1.5 max-h-60 overflow-y-auto p-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-secondary-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                            <div class="grid grid-cols-8 gap-1.5 max-h-60 overflow-y-auto p-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[color:var(--brass)] [&::-webkit-scrollbar-thumb]:rounded-full">
                               <button
                                 v-for="iconName in filteredSectionIconChoices"
                                 :key="iconName"
@@ -2015,20 +2136,35 @@
                           </label>
                         </div>
 
-                        <!-- Available Plans Info -->
+                        <!-- Available Plans -->
                         <div class="col-span-2">
-                          <div class="bg-info-50 border border-info-200 rounded-lg p-3">
-                            <div class="flex items-start gap-2">
-                              <Icon name="heroicons:information-circle" class="w-5 h-5 text-info-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p class="text-label text-info-800">Plan Availability</p>
-                                <p class="text-caption text-info-600 mt-1">
-                                  Section plans are automatically calculated based on the fields' plan settings.
-                                  Configure plan availability in the "Plan Assignments" section below.
-                                </p>
+                          <label class="block text-label text-secondary-900 mb-2">Available Plans</label>
+                          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <label
+                              v-for="plan in plans"
+                              :key="plan.id"
+                              class="flex items-center gap-2 p-2.5 bg-white rounded-lg border-2 cursor-pointer transition-all"
+                              :class="sectionFormData.available_plans.includes(plan.id) ? 'border-primary-500 shadow-sm' : 'border-secondary-300 hover:border-primary-300'"
+                            >
+                              <input
+                                type="checkbox"
+                                :value="plan.id"
+                                v-model="sectionFormData.available_plans"
+                                class="w-4 h-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <div class="flex items-center gap-1.5 min-w-0">
+                                <div
+                                  class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                  :class="plan.id === 'free' ? 'bg-secondary-500' : plan.id === 'basic' ? 'bg-info-500' : plan.id === 'premium' ? 'bg-primary-500' : 'bg-warning-500'"
+                                ></div>
+                                <span class="text-label text-secondary-900 truncate">{{ plan.name }}</span>
                               </div>
-                            </div>
+                            </label>
                           </div>
+                          <p class="text-helper mt-2 flex items-start gap-1">
+                            <Icon name="heroicons:information-circle" class="w-3 h-3 mt-0.5 flex-shrink-0" />
+                            Leave all unchecked to make this section available for all plans.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -2059,12 +2195,12 @@
                       <!-- Empty states -->
                       <div v-if="!sectionFormData.key" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
                         <Icon name="heroicons:pencil-square" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
-                        <p class="card-title text-secondary-400">Fill in Section Key first</p>
+                        <p class="text-body font-semibold text-secondary-400">Fill in Section Key first</p>
                         <p class="text-body text-secondary-400 mt-0.5">Fields are saved per section key</p>
                       </div>
                       <div v-else-if="!sectionFormData.has_fields" class="border-2 border-dashed border-secondary-200 rounded-xl p-6 text-center">
                         <Icon name="heroicons:cube" class="w-8 h-8 text-secondary-300 mx-auto mb-2" />
-                        <p class="card-title text-secondary-400">This section has no fields enabled</p>
+                        <p class="text-body font-semibold text-secondary-400">This section has no fields enabled</p>
                         <p class="text-body text-secondary-400 mt-0.5">Tick "Has Fields" above to manage fields here</p>
                       </div>
 
@@ -2093,16 +2229,16 @@
                             </div>
                             <div class="flex items-center gap-2 mt-0.5">
                               <span class="text-badge px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 font-medium border border-primary-100">
-                                {{ field.type || field.input_type || 'text' }}
+                                {{ field.field_type || field.type || field.input_type || 'text' }}
                               </span>
-                              <span class="text-micro text-secondary-400 font-mono truncate">key: {{ field.key || field.name }}</span>
+                              <span class="text-micro text-secondary-400 font-mono truncate">key: {{ field.field_key || field.key || field.name }}</span>
                             </div>
                           </div>
                           <!-- Plan chips -->
                           <div class="hidden md:flex items-center gap-1 flex-shrink-0">
                             <template v-for="plan in plans" :key="plan.id">
                               <span
-                                v-if="(field.available_plans && field.available_plans.includes(plan.id)) || (field.plan_assignments && field.plan_assignments.includes(plan.id)) || (plan.id === 'basic')"
+                                v-if="isFieldAvailableForPlan(field, plan.id)"
                                 :class="[
                                   'text-badge px-1.5 py-0.5 rounded-full font-bold',
                                   plan.color === 'amber' ? 'bg-warning-50 text-warning-700 border border-warning-200' :
@@ -2126,7 +2262,7 @@
                             </button>
                             <button
                               type="button"
-                              @click="deleteFieldFromSection(field, fIdx)"
+                              @click="deleteFieldFromSection(field)"
                               class="w-8 h-8 rounded-lg flex items-center justify-center text-secondary-500 hover:text-error-600 hover:bg-error-50 transition-colors"
                               title="Delete field"
                             >
@@ -2139,7 +2275,7 @@
                           <div class="w-14 h-14 mx-auto rounded-2xl bg-secondary-50 border-2 border-dashed border-secondary-200 flex items-center justify-center mb-3">
                             <Icon name="heroicons:queue-list" class="w-7 h-7 text-secondary-300" />
                           </div>
-                          <p class="card-title text-secondary-600 mb-1">No fields yet</p>
+                          <p class="text-body font-semibold text-secondary-600 mb-1">No fields yet</p>
                           <p class="text-body text-secondary-400 mb-4">Add the first input field to this section</p>
                           <button
                             type="button"
@@ -2156,56 +2292,49 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="bg-secondary-50 px-6 py-4 border-t border-secondary-200 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                <div class="admin-dialog-foot">
                   <button
                     type="button"
+                    class="admin-btn admin-btn--ghost"
                     @click="closeSectionModal"
-                    class="px-4 py-2 text-button text-secondary-700 bg-white border border-secondary-300 rounded-lg hover:bg-secondary-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
-                    @click="saveSection"
+                    class="admin-btn admin-btn--primary"
                     :disabled="saving"
-                    class="px-4 py-2 text-button text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    @click="saveSection"
                   >
-                    <Icon v-if="saving" name="heroicons:arrow-path" class="w-4 h-4 mr-1.5 animate-spin inline" />
-                    {{ saving ? 'Saving...' : (sectionModalMode === 'add' ? 'Add' : 'Update') }}
+                    <Icon v-if="saving" name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+                    {{ saving ? 'Saving…' : (sectionModalMode === 'add' ? 'Add' : 'Update') }}
                   </button>
                 </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+              </div>
+            </div>
+      </Transition>
+    </Teleport>
 
     <!-- Business User Modal -->
-    <TransitionRoot as="template" :show="showBusinessUserModal">
-      <Dialog as="div" class="relative z-50" @close="closeBusinessUserModal">
-        <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-          <div class="fixed inset-0 bg-secondary-900/75 backdrop-blur-sm" />
-        </TransitionChild>
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100" leave="ease-in duration-200" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95">
-              <DialogPanel class="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl">
-                <div class="flex items-center justify-between p-4 border-b border-secondary-200 bg-warning-50">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-warning-200 flex items-center justify-center">
-                      <span class="text-warning-800 font-bold">{{ selectedBusinessUser?.name?.charAt(0) || '?' }}</span>
-                    </div>
-                    <div>
-                      <DialogTitle class="modal-title text-secondary-900">{{ selectedBusinessUser?.name }}</DialogTitle>
-                      <p class="card-subtitle">{{ selectedBusinessUser?.email }}</p>
-                    </div>
-                  </div>
-                  <button @click="closeBusinessUserModal" class="p-2 hover:bg-warning-100 rounded-lg">
-                    <Icon name="heroicons:x-mark" class="w-5 h-5 text-secondary-500" />
-                  </button>
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showBusinessUserModal" class="admin-dialog-backdrop" @click.self="closeBusinessUserModal">
+          <div class="admin-dialog flex flex-col" style="width: min(48rem, 100%); margin-top: 5vh; max-height: 90vh" role="dialog" aria-modal="true">
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning-100 text-warning-700">
+                  <span class="text-label font-bold">{{ selectedBusinessUser?.name?.charAt(0) || '?' }}</span>
+                </span>
+                <div class="min-w-0">
+                  <p class="admin-panel-title">{{ selectedBusinessUser?.name }}</p>
+                  <p class="admin-panel-subtitle">{{ selectedBusinessUser?.email }}</p>
                 </div>
-                <div class="p-6 max-h-[60vh] overflow-y-auto">
+              </div>
+              <button type="button" class="admin-icon-btn" aria-label="Close" @click="closeBusinessUserModal">
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+            <div class="admin-panel-body flex-1 overflow-y-auto">
                   <div class="mb-6 p-4 bg-secondary-50 rounded-lg">
                     <label class="flex items-center justify-between cursor-pointer">
                       <div>
@@ -2293,33 +2422,70 @@
                     <p class="font-medium text-secondary-700">Using Default Business Plan Settings</p>
                   </div>
                 </div>
-                <div class="flex items-center justify-between p-4 border-t border-secondary-200 bg-secondary-50">
-                  <button v-if="businessUserFormData.use_custom" @click="resetBusinessUserToDefault" class="text-button text-secondary-600 hover:text-secondary-900">Reset to Default</button>
+                <div class="admin-dialog-foot !justify-between">
+                  <button v-if="businessUserFormData.use_custom" type="button" class="admin-btn admin-btn--ghost" @click="resetBusinessUserToDefault">Reset to default</button>
                   <div v-else></div>
-                  <div class="flex gap-3">
-                    <button @click="closeBusinessUserModal" class="px-4 py-2 text-button text-secondary-700 hover:bg-secondary-100 rounded-lg">Cancel</button>
-                    <button @click="saveBusinessUserAssignment" :disabled="savingBusinessUser" class="px-4 py-2 text-button text-white bg-warning-600 hover:bg-warning-700 rounded-lg disabled:opacity-50">
-                      {{ savingBusinessUser ? 'Saving...' : 'Save' }}
+                  <div class="flex items-center gap-2">
+                    <button type="button" class="admin-btn admin-btn--ghost" @click="closeBusinessUserModal">Cancel</button>
+                    <button type="button" class="admin-btn admin-btn--primary" :disabled="savingBusinessUser" @click="saveBusinessUserAssignment">
+                      <Icon v-if="savingBusinessUser" name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+                      {{ savingBusinessUser ? 'Saving…' : 'Save' }}
                     </button>
                   </div>
                 </div>
-              </DialogPanel>
-            </TransitionChild>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+      </Transition>
+    </Teleport>
+
+    <AdminConfirmDialog
+      v-model="confirmOpen"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-label="confirmConfig.confirmLabel"
+      :tone="confirmConfig.tone"
+      :loading="confirmBusy"
+      @confirm="runConfirm"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
 const config = useRuntimeConfig();
 const { $toast } = useNuxtApp();
+
+// Shared confirmation dialog state
+const confirmOpen = ref(false);
+const confirmBusy = ref(false);
+const confirmConfig = ref({
+  title: '',
+  message: '',
+  confirmLabel: 'Confirm',
+  tone: 'primary',
+});
+let confirmAction = null;
+
+const askConfirm = (options, action) => {
+  confirmConfig.value = { confirmLabel: 'Confirm', tone: 'primary', ...options };
+  confirmAction = action;
+  confirmOpen.value = true;
+};
+
+const runConfirm = async () => {
+  if (!confirmAction) return;
+  confirmBusy.value = true;
+  try {
+    await confirmAction();
+  } finally {
+    confirmBusy.value = false;
+    confirmOpen.value = false;
+    confirmAction = null;
+  }
+};
 
 // State
 const currentTab = ref('theme');
@@ -2373,7 +2539,7 @@ const filteredBusinessUsers = computed(() => {
 const totalSections = computed(() => generalSections.value.length);
 const totalFields = computed(() => Object.values(fields.value).flat().length);
 const totalDesignOptions = computed(() => {
-  const designTabs = ['theme', 'font', 'button_style', 'color_scheme', 'layout'];
+  const designTabs = ['theme', 'font', 'button_style', 'card_style', 'bg_animation', 'profile_style', 'color_scheme', 'layout'];
   return designTabs.reduce((sum, tab) => sum + (options.value[tab]?.length || 0), 0);
 });
 const totalFeatures = computed(() => filteredOptionsFeatureToggles.value.length);
@@ -2392,7 +2558,7 @@ const fieldPlanBreakdown = computed(() => {
 
 // Plan breakdown for design options
 const designPlanBreakdown = computed(() => {
-  const designTabs = ['theme', 'font', 'button_style', 'color_scheme', 'layout'];
+  const designTabs = ['theme', 'font', 'button_style', 'card_style', 'bg_animation', 'profile_style', 'color_scheme', 'layout'];
   const allDesigns = designTabs.flatMap(tab => options.value[tab] || []);
   return {
     basic: allDesigns.filter(o => isAvailableForPlan(o, 'basic')).length,
@@ -2473,6 +2639,10 @@ const filteredBusinessUserFeatureToggles = computed(() => {
 
 // Section Management
 const showSectionModal = ref(false);
+// Tracks the catalog tab that was active before opening a field modal from the
+// section modal, so we can restore it afterwards (field tabs were removed from
+// the catalog tab bar to avoid duplication with the Field sections view).
+const savedCatalogTab = ref(null);
 const sectionModalMode = ref('add');
 const editingSection = ref(null);
 const sectionFormData = ref({
@@ -2531,6 +2701,7 @@ const openAddFieldFromSection = () => {
     $toast.error('Please enter Section Key first before adding fields');
     return;
   }
+  savedCatalogTab.value = currentTab.value;
   currentTab.value = `field_${sKey}`;
   nextTick(() => {
     openAddModal();
@@ -2539,6 +2710,7 @@ const openAddFieldFromSection = () => {
 
 const openEditFieldFromSection = (field) => {
   const sKey = sectionFormData.value.key || field.tab || (field.option_id ? field.option_id.split('__')[0] : null);
+  savedCatalogTab.value = currentTab.value;
   if (sKey) currentTab.value = `field_${sKey}`;
   nextTick(() => {
     openEditModal(field);
@@ -2547,13 +2719,14 @@ const openEditFieldFromSection = (field) => {
 
 const deleteFieldFromSection = async (field) => {
   const sKey = sectionFormData.value.key || field.tab;
-  const originalTab = currentTab.value;
+  savedCatalogTab.value = currentTab.value;
   if (sKey) currentTab.value = `field_${sKey}`;
   try {
     await confirmDelete(field);
   } finally {
-    if (sKey && originalTab && !originalTab.startsWith('field_')) {
-      // restore original if needed; typically fetchData reloads context so leave
+    if (savedCatalogTab.value) {
+      currentTab.value = savedCatalogTab.value;
+      savedCatalogTab.value = null;
     }
   }
 };
@@ -2630,7 +2803,7 @@ const generalTabs = computed(() => {
 
 // Design Sections tabs (aligned with user frontend)
 const designTabs = [
-  { id: 'style', name: 'Style', icon: 'heroicons:sparkles', category: 'design', requiredPermission: 'style', subItems: ['theme', 'font', 'button_style', 'color_scheme', 'layout'] },
+  { id: 'style', name: 'Style', icon: 'heroicons:sparkles', category: 'design', requiredPermission: 'style', subItems: ['theme', 'font', 'button_style', 'card_style', 'bg_animation', 'profile_style', 'color_scheme', 'layout'] },
   { id: 'watermarks', name: 'Watermarks', icon: 'heroicons:eye', category: 'design', requiredPermission: 'watermarks', subItems: ['feature_toggle'] },
 ];
 
@@ -2639,9 +2812,12 @@ const tabs = [
   { id: 'theme', name: 'Themes', icon: 'heroicons:paint-brush' },
   { id: 'font', name: 'Fonts', icon: 'heroicons:language' },
   { id: 'button_style', name: 'Button Styles', icon: 'heroicons:cursor-arrow-rays' },
+  { id: 'card_style', name: 'Card Styles', icon: 'heroicons:rectangle-stack' },
+  { id: 'bg_animation', name: 'Background Effects', icon: 'heroicons:sparkles' },
+  { id: 'profile_style', name: 'Profile Layouts', icon: 'heroicons:user-circle' },
   { id: 'color_scheme', name: 'Color Schemes', icon: 'heroicons:swatch' },
   { id: 'layout', name: 'Layouts', icon: 'heroicons:squares-2x2' },
-  { id: 'feature_toggle', name: 'Features', icon: 'heroicons:sparkles' },
+  { id: 'feature_toggle', name: 'Features', icon: 'heroicons:rocket-launch' },
 ];
 
 // Field tabs (for backward compatibility with legacy code)
@@ -2711,7 +2887,21 @@ const defaultFormData = () => {
 };
 
 const formData = ref(defaultFormData());
-const tabsInput = ref('');
+
+// ========================================
+// 🎨 THEME PREVIEW CSS HELPER
+// ========================================
+// Auto-generates the previewCss for a theme from its bgGradient or backgroundColor.
+const syncThemePreviewCss = () => {
+  const cfg = formData.value.config || {};
+  const bg = cfg.bgGradient || cfg.backgroundColor;
+  if (bg) {
+    formData.value.config = {
+      ...cfg,
+      previewCss: `background: ${bg};`,
+    };
+  }
+};
 
 // ========================================
 // 🆕 SECTION MANAGEMENT FUNCTIONS
@@ -2830,45 +3020,46 @@ const saveSection = async () => {
 };
 
 // Delete Section
-const confirmDeleteSection = async (section) => {
+const confirmDeleteSection = (section) => {
   const fieldsCount = (fields.value[section.key] || []).length;
-  
+
   let confirmMsg = `Are you sure you want to delete the "${section.name}" section?`;
   if (fieldsCount > 0) {
-    confirmMsg += `\n\n⚠️ WARNING: This will also delete ${fieldsCount} field(s) in this section!`;
+    confirmMsg += ` This will also delete ${fieldsCount} field(s) in this section.`;
   }
-  confirmMsg += '\n\nThis action cannot be undone.';
-  
-  if (!confirm(confirmMsg)) {
-    return;
-  }
-  
-  try {
-    const sectionId = section.id || section.key;
-    console.log(`🗑️ Deleting section: ${section.name} (${sectionId})`);
-    
-    const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder/sections/${sectionId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Failed to delete section');
+  confirmMsg += ' This action cannot be undone.';
+
+  askConfirm(
+    { title: 'Delete section', message: confirmMsg, confirmLabel: 'Delete', tone: 'danger' },
+    async () => {
+      try {
+        const sectionId = section.id || section.key;
+        console.log(`🗑️ Deleting section: ${section.name} (${sectionId})`);
+
+        const response = await fetch(`${config.public.apiBaseUrl}/admin/profile-builder/sections/${sectionId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to delete section');
+        }
+
+        console.log('✅ Section deleted successfully');
+        $toast.success('Section deleted successfully');
+
+        // Reload sections and data
+        await loadSections();
+        await fetchData();
+      } catch (error) {
+        console.error('❌ Error deleting section:', error);
+        $toast.error(`Failed to delete section: ${error.message}`);
+      }
     }
-    
-    console.log('✅ Section deleted successfully');
-    $toast.success('Section deleted successfully');
-    
-    // Reload sections and data
-    await loadSections();
-    await fetchData();
-  } catch (error) {
-    console.error('❌ Error deleting section:', error);
-    $toast.error(`Failed to delete section: ${error.message}`);
-  }
+  );
 };
 
 // Helper to ensure available_plans is an array
@@ -2886,8 +3077,15 @@ const ensureArray = (value) => {
   return [];
 };
 
-// Get Section Plans (Union of all fields' available_plans)
+// Get Section Plans — prefer the section's own available_plans setting.
+// Falls back to the union of all fields' available_plans if the section has none.
 const getSectionPlans = (sectionKey) => {
+  const section = availableSections.value.find(s => s.key === sectionKey);
+  const sectionPlans = ensureArray(section?.available_plans);
+  if (sectionPlans.length > 0) {
+    return sectionPlans;
+  }
+
   const sectionFields = fields.value[sectionKey] || [];
   if (sectionFields.length === 0) {
     return ['free', 'basic', 'premium', 'business']; // No fields = all plans
@@ -2915,17 +3113,15 @@ const getSectionPlans = (sectionKey) => {
 
 // Computed
 const allTabs = computed(() => {
-  // Combine design tabs with dynamic field tabs from sections
-  const dynamicFieldTabs = generalTabs.value.map(tab => ({
-    id: tab.id,
-    name: `${tab.name} Fields`,
-    icon: tab.icon
-  }));
-  return [...tabs, ...dynamicFieldTabs];
+  // Design catalog only shows design/feature tabs.
+  // Field tabs (profile, company, services, links, portfolio, blog) live under
+  // the "Field sections" tab and are intentionally excluded here to avoid duplication.
+  return [...tabs];
 });
 
 const isFieldTab = computed(() => currentTab.value.startsWith('field_'));
 const currentTabName = computed(() => {
+  if (isFieldTab.value) return 'Field';
   const tab = allTabs.value.find(t => t.id === currentTab.value);
   return tab ? tab.name.slice(0, -1) : 'Option';
 });
@@ -2971,6 +3167,39 @@ const isAvailableForPlan = (option, plan) => {
     return true; // Available for all plans
   }
   return option.available_plans.includes(plan);
+};
+
+// Safe plan-availability check for fields (handles array, string, or undefined)
+const isFieldAvailableForPlan = (field, plan) => {
+  const plans = ensureArray(field?.available_plans || field?.plan_assignments);
+  if (plans.length === 0) return true; // empty = all plans
+  return plans.includes(plan);
+};
+
+// Returns a context-appropriate placeholder hint based on field type
+const getFieldPlaceholderHint = (fieldType) => {
+  const hints = {
+    text: 'Enter text',
+    email: 'Enter email address',
+    tel: 'Enter phone number',
+    url: 'Enter website URL',
+    number: 'Enter number',
+    textarea: 'Enter text',
+    richtext: 'Enter text',
+    select: 'Select an option',
+    toggle: '',
+    checkbox: '',
+    date: 'Select a date',
+    image: 'Upload an image',
+    gallery: 'Upload images',
+    video: 'Upload a video',
+    file: 'Upload a file',
+    repeater: '',
+    tags: 'Enter tags',
+    icon: 'Select an icon',
+    color: 'Select a color',
+  };
+  return hints[fieldType] || 'Enter value';
 };
 
 const getPlanNames = (option) => {
@@ -3438,27 +3667,18 @@ const openEditModal = (option) => {
     available_plans: option.available_plans || [],
   };
   
-  if (currentTab.value === 'tab_control' && Array.isArray(option.config?.tabs)) {
-    tabsInput.value = option.config.tabs.join(', ');
-  }
-  
   showModal.value = true;
-};
-
-const updateTabsArray = () => {
-  if (currentTab.value === 'tab_control' && tabsInput.value) {
-    formData.value.config.tabs = tabsInput.value
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-  }
 };
 
 const closeModal = () => {
   showModal.value = false;
   formData.value = defaultFormData();
   editingOption.value = null;
-  tabsInput.value = '';
+  // Restore the catalog tab if this field modal was opened from the section modal
+  if (savedCatalogTab.value) {
+    currentTab.value = savedCatalogTab.value;
+    savedCatalogTab.value = null;
+  }
 };
 
 const saveOption = async () => {
@@ -3478,8 +3698,9 @@ const saveOption = async () => {
       return;
     }
 
-    if (currentTab.value === 'tab_control') {
-      updateTabsArray();
+    // Auto-generate theme previewCss if missing
+    if (currentTab.value === 'theme' && !formData.value.config?.previewCss) {
+      syncThemePreviewCss();
     }
   }
 
@@ -3574,36 +3795,42 @@ const setAsDefault = async (option) => {
   }
 };
 
-const confirmDelete = async (option) => {
+const confirmDelete = (option) => {
   const displayName = isFieldTab.value ? option.label : option.name;
-  
-  if (!confirm(`Are you sure you want to delete "${displayName}"?\n\nThis action cannot be undone.`)) {
-    return;
-  }
 
-  try {
-    const url = isFieldTab.value
-      ? `${config.public.apiBaseUrl}/admin/profile-builder/fields/${option.id}`
-      : `${config.public.apiBaseUrl}/admin/profile-design-options/${option.id}`;
-      
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-      },
-    });
+  askConfirm(
+    {
+      title: isFieldTab.value ? 'Delete field' : 'Delete option',
+      message: `Are you sure you want to delete "${displayName}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    },
+    async () => {
+      try {
+        const url = isFieldTab.value
+          ? `${config.public.apiBaseUrl}/admin/profile-builder/fields/${option.id}`
+          : `${config.public.apiBaseUrl}/admin/profile-design-options/${option.id}`;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to delete');
+        const response = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to delete');
+        }
+
+        await fetchData();
+        $toast.success(`${isFieldTab.value ? 'Field' : 'Option'} deleted successfully`);
+      } catch (error) {
+        console.error('Error deleting:', error);
+        $toast.error(error.message);
+      }
     }
-
-    await fetchData();
-    $toast.success(`${isFieldTab.value ? 'Field' : 'Option'} deleted successfully`);
-  } catch (error) {
-    console.error('Error deleting:', error);
-    $toast.error(error.message);
-  }
+  );
 };
 
 const updateField = async (field) => {
@@ -3887,25 +4114,33 @@ const saveBusinessUserAssignment = async () => {
   }
 };
 
-const resetBusinessUserToDefault = async () => {
-  if (!confirm('Reset this user to default Business plan settings?')) return;
-  
-  savingBusinessUser.value = true;
-  try {
-    await fetch(`${config.public.apiBaseUrl}/admin/business-user-assignments/${selectedBusinessUser.value.id}/reset`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-    });
-    
-    await loadBusinessUsers();
-    closeBusinessUserModal();
-    $toast.success('Reset to default settings');
-  } catch (error) {
-    console.error('Error resetting:', error);
-    $toast.error('Failed to reset settings');
-  } finally {
-    savingBusinessUser.value = false;
-  }
+const resetBusinessUserToDefault = () => {
+  askConfirm(
+    {
+      title: 'Reset to default',
+      message: 'Reset this user to the default Business plan settings?',
+      confirmLabel: 'Reset',
+      tone: 'danger',
+    },
+    async () => {
+      savingBusinessUser.value = true;
+      try {
+        await fetch(`${config.public.apiBaseUrl}/admin/business-user-assignments/${selectedBusinessUser.value.id}/reset`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${authStore.token}` },
+        });
+
+        await loadBusinessUsers();
+        closeBusinessUserModal();
+        $toast.success('Reset to default settings');
+      } catch (error) {
+        console.error('Error resetting:', error);
+        $toast.error('Failed to reset settings');
+      } finally {
+        savingBusinessUser.value = false;
+      }
+    }
+  );
 };
 
 onMounted(async () => {
@@ -3929,3 +4164,56 @@ definePageMeta({
   layout: 'admin-management',
 });
 </script>
+
+<style>
+.bg-effect-preview-particle {
+  animation: preview-particle-drift 4s ease-in-out infinite;
+}
+
+.bg-effect-preview-particle:nth-child(2) {
+  animation-delay: -1.3s;
+}
+
+.bg-effect-preview-particle:nth-child(3) {
+  animation-delay: -2.6s;
+}
+
+.bg-effect-preview-sparkle {
+  animation: preview-sparkle 2.4s ease-in-out infinite;
+}
+
+.bg-effect-preview-sparkle:nth-child(2) {
+  animation-delay: -0.6s;
+}
+
+.bg-effect-preview-sparkle:nth-child(3) {
+  animation-delay: -1.2s;
+}
+
+.bg-effect-preview-sparkle:nth-child(4) {
+  animation-delay: -1.8s;
+}
+
+@keyframes preview-particle-drift {
+  0%, 100% { opacity: 0.7; transform: translateY(2px) scale(0.9); }
+  50% { opacity: 1; transform: translateY(-3px) scale(1.1); }
+}
+
+@keyframes preview-sparkle {
+  0%, 100% { opacity: 0.55; transform: scale(0.82) rotate(-8deg); }
+  50% { opacity: 1; transform: scale(1.08) rotate(8deg); }
+}
+
+@keyframes aurora {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-effect-preview-particle,
+  .bg-effect-preview-sparkle {
+    animation: none;
+  }
+}
+</style>

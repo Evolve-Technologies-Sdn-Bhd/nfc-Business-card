@@ -566,8 +566,13 @@ class PaymentService
 
     /**
      * Process refund via Fiuu
+     *
+     * @param  Refund|null  $existingRefund  When approving an existing pending
+     *                                        refund request, pass it here so the
+     *                                        same record is updated rather than a
+     *                                        duplicate being created.
      */
-    public function processRefund(Transaction $transaction, array $data): Refund
+    public function processRefund(Transaction $transaction, array $data, ?Refund $existingRefund = null): Refund
     {
         try {
             $amount = $data['amount'] ?? $transaction->refundable_amount;
@@ -577,18 +582,29 @@ class PaymentService
                 throw new Exception('Refund amount exceeds refundable amount');
             }
 
-            // Create refund record
-            $refund = Refund::create([
-                'transaction_id' => $transaction->id,
-                'user_id' => $transaction->user_id,
-                'provider' => $transaction->provider,
-                'amount' => $amount,
-                'currency' => $transaction->currency,
-                'status' => 'pending',
-                'reason' => $reason,
-                'notes' => $data['notes'] ?? null,
-                'processed_by' => $data['processed_by'] ?? null,
-            ]);
+            // Reuse an existing pending refund record when approving one,
+            // otherwise create a new record (auto-approval path).
+            if ($existingRefund) {
+                $refund = $existingRefund;
+                $refund->update([
+                    'amount' => $amount,
+                    'reason' => $reason,
+                    'notes' => $data['notes'] ?? $refund->notes,
+                    'processed_by' => $data['processed_by'] ?? $refund->processed_by,
+                ]);
+            } else {
+                $refund = Refund::create([
+                    'transaction_id' => $transaction->id,
+                    'user_id' => $transaction->user_id,
+                    'provider' => $transaction->provider,
+                    'amount' => $amount,
+                    'currency' => $transaction->currency,
+                    'status' => 'pending',
+                    'reason' => $reason,
+                    'notes' => $data['notes'] ?? null,
+                    'processed_by' => $data['processed_by'] ?? null,
+                ]);
+            }
 
             // For Fiuu refunds, we need to call their API
             if ($transaction->provider === 'fiuu') {
@@ -599,10 +615,17 @@ class PaymentService
                     'status' => $refundResult['success'] ? 'succeeded' : 'failed',
                     'processed_at' => now(),
                 ]);
+            } else {
+                // Non-Fiuu providers: the refund has been processed/admin-approved
+                // locally, so mark it as succeeded.
+                $refund->update([
+                    'status' => 'succeeded',
+                    'processed_at' => now(),
+                ]);
             }
 
             // Update transaction status
-            $totalRefunded = $transaction->total_refunded + $amount;
+            $totalRefunded = $transaction->refresh()->total_refunded;
             if ($totalRefunded >= $transaction->amount) {
                 $transaction->update(['status' => 'refunded']);
             } else {

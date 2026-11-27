@@ -1,119 +1,167 @@
+<!-- components/InvoicePreviewModal.vue
+     Invoice PDF preview dialog with download and print actions. -->
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="close"></div>
-
-      <!-- Modal panel -->
-      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-        <!-- Header -->
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="modal-title leading-6 text-gray-900" id="modal-title">
-              Invoice {{ invoice?.invoice_number }}
-            </h3>
-            <button @click="close" class="text-gray-400 hover:text-gray-500">
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+  <Teleport to="body">
+    <Transition name="admin-fade">
+      <div
+        v-if="show"
+        class="admin-dialog-backdrop"
+        @click.self="close"
+      >
+        <div
+          class="admin-dialog flex flex-col"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="`Invoice ${invoice?.invoice_number || ''}`"
+          style="width: min(56rem, 100%); margin-top: 4vh; max-height: 92vh"
+        >
+          <!-- Header -->
+          <div class="admin-dialog-head">
+            <div class="flex items-center gap-3">
+              <span
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+              >
+                <Icon name="heroicons:document-text" class="h-5 w-5" />
+              </span>
+              <div class="min-w-0">
+                <p class="admin-panel-title truncate">
+                  Invoice {{ invoice?.invoice_number }}
+                </p>
+                <p class="admin-panel-subtitle">
+                  {{ formatDate(invoice?.created_at) }}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="admin-icon-btn"
+              aria-label="Close"
+              @click="close"
+            >
+              <Icon name="heroicons:x-mark" class="h-5 w-5" />
             </button>
           </div>
 
-          <!-- Invoice details -->
-          <div v-if="invoice" class="grid grid-cols-2 gap-4 mb-6 text-body">
-            <div>
-              <p class="text-gray-600">Date:</p>
-              <p class="font-medium">{{ formatDate(invoice.created_at) }}</p>
+          <!-- Body -->
+          <div class="admin-panel-body flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div v-if="invoice" class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="rounded-lg border border-secondary-200 bg-secondary-50 p-3">
+                <p class="text-caption uppercase tracking-wide text-secondary-500">Amount</p>
+                <p class="mt-1 text-xl font-semibold text-secondary-900">
+                  {{ formatCurrency(invoice.total_amount, invoice.currency) }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-secondary-200 bg-secondary-50 p-3">
+                <p class="text-caption uppercase tracking-wide text-secondary-500">Status</p>
+                <div class="mt-1.5">
+                  <AdminStatusBadge
+                    :status="invoice.status"
+                    :label="getStatusLabel(invoice.status)"
+                    :tone="statusTone(invoice.status)"
+                  />
+                </div>
+                <p v-if="invoice.due_date" class="mt-2 text-caption text-secondary-500">
+                  Due: {{ formatDate(invoice.due_date) }}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="text-gray-600">Status:</p>
-              <span :class="getStatusBadgeClass(invoice.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-badge">
-                {{ getStatusLabel(invoice.status) }}
-              </span>
-            </div>
-            <div>
-              <p class="text-gray-600">Amount:</p>
-              <p class="font-medium text-lg">{{ formatCurrency(invoice.total_amount, invoice.currency) }}</p>
-            </div>
-            <div v-if="invoice.due_date">
-              <p class="text-gray-600">Due Date:</p>
-              <p class="font-medium">{{ formatDate(invoice.due_date) }}</p>
+
+            <div class="flex-1 overflow-hidden rounded-lg border border-secondary-200" style="min-height: 28rem;">
+              <iframe
+                v-if="previewUrl"
+                :src="previewUrl"
+                class="h-full w-full"
+                frameborder="0"
+                title="Invoice preview"
+              ></iframe>
+              <div v-else class="flex h-full min-h-[28rem] items-center justify-center bg-secondary-50">
+                <p class="text-body text-secondary-500">Loading preview…</p>
+              </div>
             </div>
           </div>
 
-          <!-- PDF Preview -->
-          <div class="border rounded-lg overflow-hidden" style="height: 600px;">
-            <iframe
-              v-if="previewUrl"
-              :src="previewUrl"
-              class="w-full h-full"
-              frameborder="0"
-            ></iframe>
-            <div v-else class="flex items-center justify-center h-full bg-gray-50">
-              <p class="text-gray-500">Loading preview...</p>
-            </div>
+          <!-- Footer -->
+          <div class="admin-dialog-foot">
+            <button
+              type="button"
+              class="admin-btn admin-btn--ghost"
+              @click="close"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="admin-btn admin-btn--outline"
+              @click="handlePrint"
+              :disabled="!previewUrl"
+            >
+              <Icon name="heroicons:printer" class="h-4 w-4" />
+              Print
+            </button>
+            <button
+              type="button"
+              class="admin-btn admin-btn--primary"
+              :disabled="downloading"
+              @click="handleDownload"
+            >
+              <Icon
+                :name="downloading ? 'heroicons:arrow-path' : 'heroicons:arrow-down-tray'"
+                class="h-4 w-4"
+                :class="{ 'animate-spin': downloading }"
+              />
+              {{ downloading ? 'Downloading…' : 'Download PDF' }}
+            </button>
           </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-          <button
-            @click="handleDownload"
-            :disabled="downloading"
-            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-button text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto disabled:opacity-50"
-          >
-            <svg v-if="downloading" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            {{ downloading ? 'Downloading...' : 'Download PDF' }}
-          </button>
-          <button
-            @click="handlePrint"
-            class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto"
-          >
-            Print
-          </button>
-          <button
-            @click="close"
-            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-button text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto"
-          >
-            Close
-          </button>
         </div>
       </div>
-    </div>
-  </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useInvoices } from '~/composables/useInvoices';
 
 const props = defineProps({
   show: {
     type: Boolean,
-    default: false
+    default: false,
   },
   invoice: {
     type: Object,
-    default: null
-  }
+    default: null,
+  },
 });
 
 const emit = defineEmits(['close']);
 
-const { 
-  getPreviewUrl, 
-  downloadInvoice, 
-  formatCurrency, 
-  formatDate, 
-  getStatusBadgeClass, 
-  getStatusLabel 
+const {
+  getPreviewUrl,
+  downloadInvoice,
+  formatCurrency,
+  formatDate,
+  getStatusLabel,
 } = useInvoices();
 
 const downloading = ref(false);
-const previewUrl = computed(() => props.invoice ? getPreviewUrl(props.invoice) : null);
+const previewUrl = computed(() => (props.invoice ? getPreviewUrl(props.invoice) : null));
+
+const statusTone = (status) => {
+  switch (status) {
+    case 'paid':
+      return 'success';
+    case 'issued':
+      return 'info';
+    case 'draft':
+      return 'neutral';
+    case 'cancelled':
+      return 'danger';
+    case 'refunded':
+      return 'warning';
+    default:
+      return 'neutral';
+  }
+};
 
 const close = () => {
   emit('close');
@@ -121,7 +169,6 @@ const close = () => {
 
 const handleDownload = async () => {
   if (!props.invoice) return;
-  
   downloading.value = true;
   try {
     await downloadInvoice(props.invoice);
@@ -136,16 +183,24 @@ const handlePrint = () => {
   }
 };
 
-// Close on Escape key
-watch(() => props.show, (newValue) => {
-  if (newValue) {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        close();
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+let escapeHandler = null;
+
+watch(
+  () => props.show,
+  (newValue) => {
+    if (newValue) {
+      escapeHandler = (e) => {
+        if (e.key === 'Escape') close();
+      };
+      document.addEventListener('keydown', escapeHandler);
+    } else if (escapeHandler) {
+      document.removeEventListener('keydown', escapeHandler);
+      escapeHandler = null;
+    }
   }
+);
+
+onBeforeUnmount(() => {
+  if (escapeHandler) document.removeEventListener('keydown', escapeHandler);
 });
 </script>

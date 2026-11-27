@@ -1,170 +1,224 @@
 <!-- pages/AdminManagement/legal-documents.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title text-secondary-900">
-            Legal Documents Management
-          </h1>
-          <p class="mt-2 text-secondary-600">
-            Manage Terms of Service and Privacy Policy
-          </p>
-        </div>
-      </div>
+    <AdminPageHeader
+      eyebrow="Compliance"
+      eyebrow-icon="heroicons:document-text"
+      title="Legal Documents"
+      description="Publish, version and preview the Terms of Service and Privacy Policy PDFs shown across NFCGo."
+    />
+
+    <!-- KPI tiles -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <AdminStatTile
+        label="Terms version"
+        :value="termsData.version"
+        icon="heroicons:document-text"
+      />
+      <AdminStatTile
+        label="Privacy version"
+        :value="privacyData.version"
+        icon="heroicons:shield-check"
+        icon-class="!bg-accent-50 !text-accent-600"
+      />
+      <AdminStatTile
+        label="PDFs published"
+        :value="`${(termsPdfStatus.exists ? 1 : 0) + (privacyPdfStatus.exists ? 1 : 0)} / 2`"
+        icon="heroicons:document-check"
+        icon-class="!bg-success-50 !text-success-600"
+      />
     </div>
 
-    <!-- Document Tabs -->
-    <div class="card mb-6">
-      <div class="border-b border-secondary-200">
-        <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+    <!-- Document register -->
+    <AdminSectionCard flush class="mt-5">
+      <template #title>Document register</template>
+      <template #header-actions>
+        <span class="text-caption text-secondary-500">
+          {{ (termsPdfStatus.exists ? 1 : 0) + (privacyPdfStatus.exists ? 1 : 0) }} of 2 PDFs published
+        </span>
+      </template>
+
+      <div class="admin-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Stored type</th>
+              <th>Version</th>
+              <th>Last updated</th>
+              <th>PDF status</th>
+              <th class="admin-col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="doc in [
+                {
+                  key: 'terms',
+                  title: 'Terms of Service',
+                  type: 'terms_of_service',
+                  version: termsData.version,
+                  updatedAt: termsData.updated_at,
+                  exists: termsPdfStatus.exists,
+                },
+                {
+                  key: 'privacy',
+                  title: 'Privacy Policy',
+                  type: 'privacy_policy',
+                  version: privacyData.version,
+                  updatedAt: privacyData.updated_at,
+                  exists: privacyPdfStatus.exists,
+                },
+              ]"
+              :key="doc.key"
+            >
+              <td>
+                <div class="flex items-center gap-3">
+                  <span
+                    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                  >
+                    <Icon name="heroicons:document-text" class="h-5 w-5" />
+                  </span>
+                  <span class="font-semibold text-secondary-900">
+                    {{ doc.title }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <code
+                  class="rounded bg-secondary-100 px-1.5 py-0.5 text-caption text-secondary-600"
+                >
+                  {{ doc.type }}
+                </code>
+              </td>
+              <td class="tabular-nums">{{ doc.version }}</td>
+              <td class="text-secondary-500">
+                {{ doc.updatedAt ? formatDate(doc.updatedAt) : "Not saved yet" }}
+              </td>
+              <td>
+                <AdminStatusBadge
+                  :tone="doc.exists ? 'success' : 'warning'"
+                  :label="doc.exists ? 'Published' : 'Awaiting PDF'"
+                />
+              </td>
+              <td class="admin-col-actions">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--outline admin-btn--sm"
+                  @click="activeTab = doc.key"
+                >
+                  <Icon name="heroicons:pencil" class="h-4 w-4" />
+                  Edit
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </AdminSectionCard>
+
+    <!-- Workspace -->
+    <AdminSectionCard flush class="mt-5">
+      <template #title>Document workspace</template>
+      <template #header-actions>
+        <div
+          class="inline-flex rounded-lg border border-secondary-200 bg-secondary-50 p-0.5"
+        >
           <button
-            @click="activeTab = 'terms'"
-            :class="[
+            type="button"
+            class="rounded-md px-3 py-1.5 text-caption font-semibold transition"
+            :class="
               activeTab === 'terms'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 text-navigation',
-            ]"
+                ? 'bg-white text-accent-700 shadow-sm'
+                : 'text-secondary-500 hover:text-secondary-700'
+            "
+            @click="activeTab = 'terms'"
           >
             Terms of Service
           </button>
           <button
-            @click="activeTab = 'privacy'"
-            :class="[
+            type="button"
+            class="rounded-md px-3 py-1.5 text-caption font-semibold transition"
+            :class="
               activeTab === 'privacy'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300',
-              'whitespace-nowrap py-4 px-1 border-b-2 text-navigation',
-            ]"
+                ? 'bg-white text-accent-700 shadow-sm'
+                : 'text-secondary-500 hover:text-secondary-700'
+            "
+            @click="activeTab = 'privacy'"
           >
             Privacy Policy
           </button>
-        </nav>
-      </div>
+        </div>
+      </template>
 
-      <!-- Terms of Service Tab -->
-      <div v-show="activeTab === 'terms'" class="p-6">
-        <form @submit.prevent="saveDocument('terms_of_service')">
-          <div class="space-y-6">
-            <!-- Document Info -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  class="block text-label text-secondary-700 mb-1"
-                >
-                  Version *
-                </label>
-                <input
-                  v-model.number="termsData.version"
-                  type="number"
-                  min="1.0"
-                  step="0.1"
-                  :class="[
-                    'input',
-                    versionErrors.terms ? 'border-error-500 focus:ring-error-500' : ''
-                  ]"
-                  placeholder="1.0"
-                  @input="validateTermsVersion"
-                  @change="validateTermsVersion"
-                  required
-                />
-                <p v-if="versionErrors.terms" class="text-error mt-1">
-                  {{ versionErrors.terms }}
+      <div class="admin-panel-body">
+        <!-- Terms of Service -->
+        <form
+          v-show="activeTab === 'terms'"
+          @submit.prevent="saveDocument('terms_of_service')"
+        >
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Metadata column -->
+            <div class="space-y-5">
+              <div class="admin-form-section">
+                <p class="admin-form-section-title">Document metadata</p>
+                <p class="admin-form-section-desc">
+                  Set the version and effective date stored for this document.
                 </p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="admin-label">
+                      Version <span class="text-error-600">*</span>
+                    </label>
+                    <input
+                      v-model.number="termsData.version"
+                      type="number"
+                      min="1.0"
+                      step="0.1"
+                      class="admin-field tabular-nums"
+                      :class="versionErrors.terms ? '!border-error-400' : ''"
+                      placeholder="1.0"
+                      required
+                      @input="validateTermsVersion"
+                      @change="validateTermsVersion"
+                    />
+                    <p
+                      v-if="versionErrors.terms"
+                      class="text-helper mt-1 text-error-600"
+                    >
+                      {{ versionErrors.terms }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="admin-label">
+                      Effective date <span class="text-error-600">*</span>
+                    </label>
+                    <input
+                      v-model="termsData.effective_date"
+                      type="date"
+                      class="admin-field"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label
-                  class="block text-label text-secondary-700 mb-1"
-                >
-                  Effective Date
-                </label>
-                <input
-                  v-model="termsData.effective_date"
-                  type="date"
-                  class="input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="bg-warning-50 border border-warning-200 rounded-lg p-3">
-              <p class="text-body text-warning-800">
-                <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
-              </p>
-            </div>
-
-            <!-- PDF Upload Section -->
-            <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-              <h3 class="card-title text-secondary-900 mb-3">
-                PDF Document Upload
-              </h3>
-              <p class="text-body text-secondary-600 mb-4">
-                Upload a PDF file containing the Terms of Service document. This PDF will be displayed to users who access the Terms of Service.
-              </p>
 
               <div
-                v-if="termsPdfStatus.exists"
-                class="mb-4 flex items-center justify-between bg-success-50 border border-success-200 rounded p-3"
+                class="flex items-start gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4"
               >
-                <div
-                  class="flex items-center space-x-2 text-body text-success-700"
-                >
-                  <Icon
-                    name="heroicons:document-check"
-                    class="h-5 w-5 text-success-500"
-                  />
-                  <span
-                    >{{ getDisplayFileName(termsPdfStatus.fileInfo?.original_filename) }} ({{
-                      formatFileSize(termsPdfStatus.fileInfo?.size)
-                    }})</span
-                  >
-                </div>
-                <button
-                  type="button"
-                  @click="downloadPdf('terms')"
-                  class="btn btn-sm btn-outline"
-                >
-                  <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
-                  Download
-                </button>
-              </div>
-
-              <div v-else class="mb-4 text-body text-secondary-500 bg-warning-50 border border-warning-200 rounded p-3">
                 <Icon
-                  name="heroicons:exclamation-triangle"
-                  class="h-5 w-5 inline mr-1 text-warning-600"
+                  name="heroicons:information-circle"
+                  class="mt-0.5 h-5 w-5 shrink-0 text-warning-600"
                 />
-                No PDF uploaded yet. Please upload a PDF file below.
+                <p class="text-body-sm text-warning-800">
+                  <strong class="font-semibold">Workflow:</strong> (1) upload your
+                  PDF on the right, (2) set version and effective date, (3) save to
+                  store the metadata.
+                </p>
               </div>
 
-              <div class="flex items-center space-x-3">
-                <input
-                  type="file"
-                  ref="termsFileInput"
-                  accept="application/pdf"
-                  @change="handleTermsFileSelect"
-                  class="hidden"
-                />
-                <button
-                  type="button"
-                  @click="$refs.termsFileInput.click()"
-                  :disabled="uploadingTermsPdf"
-                  class="btn btn-sm btn-primary"
-                >
-                  <Icon v-if="!uploadingTermsPdf" name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
-                  <span v-if="uploadingTermsPdf" class="animate-spin">⏳</span>
-                  {{ uploadingTermsPdf ? 'Uploading...' : 'Choose PDF File' }}
-                </button>
-                <span class="text-helper">Max 10MB</span>
-              </div>
-            </div>
-
-            <!-- Last Updated Info -->
-            <div v-if="termsData.updated_at" class="text-body text-secondary-600">
-              <p>
-                Last updated: {{ formatDate(termsData.updated_at) }}
+              <p v-if="termsData.updated_at" class="text-body-sm text-secondary-600">
+                Last updated {{ formatDate(termsData.updated_at) }}
                 <span v-if="termsData.updater">
                   by {{ termsData.updater.first_name }}
                   {{ termsData.updater.last_name }}
@@ -172,156 +226,180 @@
               </p>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex justify-end items-center">
-              <div class="flex space-x-3">
-                <button
-                  type="button"
-                  @click="previewDocument('terms')"
-                  class="btn btn-outline"
+            <!-- PDF column -->
+            <div>
+              <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                <p class="admin-form-section-title">PDF document</p>
+                <p class="admin-form-section-desc">
+                  The uploaded PDF is shown to users who open the Terms of Service.
+                </p>
+
+                <div
+                  v-if="termsPdfStatus.exists"
+                  class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success-200 bg-success-50 p-3"
                 >
-                  <Icon name="heroicons:eye" class="h-5 w-5 mr-2" />
-                  Preview
-                </button>
-                <button
-                  type="submit"
-                  :disabled="savingTerms"
-                  class="btn btn-primary"
+                  <div
+                    class="flex min-w-0 items-center gap-2 text-body-sm text-success-700"
+                  >
+                    <Icon
+                      name="heroicons:document-check"
+                      class="h-5 w-5 shrink-0 text-success-500"
+                    />
+                    <span class="truncate">
+                      {{ getDisplayFileName(termsPdfStatus.fileInfo?.original_filename) }}
+                      ({{ formatFileSize(termsPdfStatus.fileInfo?.size) }})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--outline admin-btn--sm"
+                    @click="downloadPdf('terms')"
+                  >
+                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4" />
+                    Download
+                  </button>
+                </div>
+
+                <div
+                  v-else
+                  class="mt-4 flex items-center gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-body-sm text-warning-700"
                 >
-                  <div v-if="savingTerms" class="spinner mr-2"></div>
-                  <Icon v-else name="heroicons:check" class="h-5 w-5 mr-2" />
-                  {{ savingTerms ? "Saving..." : "Save Changes" }}
-                </button>
+                  <Icon
+                    name="heroicons:exclamation-triangle"
+                    class="h-5 w-5 shrink-0 text-warning-600"
+                  />
+                  No PDF uploaded yet — upload one below.
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <input
+                    ref="termsFileInput"
+                    type="file"
+                    accept="application/pdf"
+                    class="hidden"
+                    @change="handleTermsFileSelect"
+                  />
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--primary admin-btn--sm"
+                    :disabled="uploadingTermsPdf"
+                    @click="$refs.termsFileInput.click()"
+                  >
+                    <Icon
+                      v-if="!uploadingTermsPdf"
+                      name="heroicons:arrow-up-tray"
+                      class="h-4 w-4"
+                    />
+                    <Icon
+                      v-else
+                      name="heroicons:arrow-path"
+                      class="h-4 w-4 animate-spin"
+                    />
+                    {{ uploadingTermsPdf ? "Uploading…" : "Choose PDF file" }}
+                  </button>
+                  <span class="admin-hint !mt-0">Max 10 MB</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div
+            class="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-secondary-200 pt-5"
+          >
+            <button
+              type="button"
+              class="admin-btn admin-btn--outline"
+              @click="previewDocument('terms')"
+            >
+              <Icon name="heroicons:eye" class="h-4 w-4" />
+              Preview
+            </button>
+            <button
+              type="submit"
+              :disabled="savingTerms"
+              class="admin-btn admin-btn--primary"
+            >
+              <Icon
+                v-if="savingTerms"
+                name="heroicons:arrow-path"
+                class="h-4 w-4 animate-spin"
+              />
+              <Icon v-else name="heroicons:check" class="h-4 w-4" />
+              {{ savingTerms ? "Saving…" : "Save changes" }}
+            </button>
+          </div>
         </form>
-      </div>
 
-      <!-- Privacy Policy Tab -->
-      <div v-show="activeTab === 'privacy'" class="p-6">
-        <form @submit.prevent="saveDocument('privacy_policy')">
-          <div class="space-y-6">
-            <!-- Document Info -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  class="block text-label text-secondary-700 mb-1"
-                >
-                  Version *
-                </label>
-                <input
-                  v-model.number="privacyData.version"
-                  type="number"
-                  min="1.0"
-                  step="0.1"
-                  :class="[
-                    'input',
-                    versionErrors.privacy ? 'border-error-500 focus:ring-error-500' : ''
-                  ]"
-                  placeholder="1.0"
-                  @input="validatePrivacyVersion"
-                  @change="validatePrivacyVersion"
-                  required
-                />
-                <p v-if="versionErrors.privacy" class="text-error mt-1">
-                  {{ versionErrors.privacy }}
+        <!-- Privacy Policy -->
+        <form
+          v-show="activeTab === 'privacy'"
+          @submit.prevent="saveDocument('privacy_policy')"
+        >
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Metadata column -->
+            <div class="space-y-5">
+              <div class="admin-form-section">
+                <p class="admin-form-section-title">Document metadata</p>
+                <p class="admin-form-section-desc">
+                  Set the version and effective date stored for this document.
                 </p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="admin-label">
+                      Version <span class="text-error-600">*</span>
+                    </label>
+                    <input
+                      v-model.number="privacyData.version"
+                      type="number"
+                      min="1.0"
+                      step="0.1"
+                      class="admin-field tabular-nums"
+                      :class="versionErrors.privacy ? '!border-error-400' : ''"
+                      placeholder="1.0"
+                      required
+                      @input="validatePrivacyVersion"
+                      @change="validatePrivacyVersion"
+                    />
+                    <p
+                      v-if="versionErrors.privacy"
+                      class="text-helper mt-1 text-error-600"
+                    >
+                      {{ versionErrors.privacy }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="admin-label">
+                      Effective date <span class="text-error-600">*</span>
+                    </label>
+                    <input
+                      v-model="privacyData.effective_date"
+                      type="date"
+                      class="admin-field"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label
-                  class="block text-label text-secondary-700 mb-1"
-                >
-                  Effective Date
-                </label>
-                <input
-                  v-model="privacyData.effective_date"
-                  type="date"
-                  class="input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="bg-warning-50 border border-warning-200 rounded-lg p-3">
-              <p class="text-body text-warning-800">
-                <strong>Workflow:</strong> (1) Upload your PDF file below, (2) Set version and effective date, (3) Click Save Changes to store metadata.
-              </p>
-            </div>
-
-            <!-- PDF Upload Section -->
-            <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-              <h3 class="card-title text-secondary-900 mb-3">
-                PDF Document Upload
-              </h3>
-              <p class="text-body text-secondary-600 mb-4">
-                Upload a PDF file containing the Privacy Policy document. This PDF will be displayed to users who access the Privacy Policy.
-              </p>
 
               <div
-                v-if="privacyPdfStatus.exists"
-                class="mb-4 flex items-center justify-between bg-success-50 border border-success-200 rounded p-3"
+                class="flex items-start gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4"
               >
-                <div
-                  class="flex items-center space-x-2 text-body text-success-700"
-                >
-                  <Icon
-                    name="heroicons:document-check"
-                    class="h-5 w-5 text-success-500"
-                  />
-                  <span
-                    >{{ getDisplayFileName(privacyPdfStatus.fileInfo?.original_filename) }} ({{
-                      formatFileSize(privacyPdfStatus.fileInfo?.size)
-                    }})</span
-                  >
-                </div>
-                <button
-                  type="button"
-                  @click="downloadPdf('privacy')"
-                  class="btn btn-sm btn-outline"
-                >
-                  <Icon name="heroicons:arrow-down-tray" class="h-4 w-4 mr-1" />
-                  Download
-                </button>
-              </div>
-
-              <div v-else class="mb-4 text-body text-secondary-500 bg-warning-50 border border-warning-200 rounded p-3">
                 <Icon
-                  name="heroicons:exclamation-triangle"
-                  class="h-5 w-5 inline mr-1 text-warning-600"
+                  name="heroicons:information-circle"
+                  class="mt-0.5 h-5 w-5 shrink-0 text-warning-600"
                 />
-                No PDF uploaded yet. Please upload a PDF file below.
+                <p class="text-body-sm text-warning-800">
+                  <strong class="font-semibold">Workflow:</strong> (1) upload your
+                  PDF on the right, (2) set version and effective date, (3) save to
+                  store the metadata.
+                </p>
               </div>
 
-              <div class="flex items-center space-x-3">
-                <input
-                  type="file"
-                  ref="privacyFileInput"
-                  accept="application/pdf"
-                  @change="handlePrivacyFileSelect"
-                  class="hidden"
-                />
-                <button
-                  type="button"
-                  @click="$refs.privacyFileInput.click()"
-                  :disabled="uploadingPrivacyPdf"
-                  class="btn btn-sm btn-primary"
-                >
-                  <Icon v-if="!uploadingPrivacyPdf" name="heroicons:arrow-up-tray" class="h-4 w-4 mr-1" />
-                  <span v-if="uploadingPrivacyPdf" class="animate-spin">⏳</span>
-                  {{ uploadingPrivacyPdf ? 'Uploading...' : 'Choose PDF File' }}
-                </button>
-                <span class="text-helper">Max 10MB</span>
-              </div>
-            </div>
-
-            <!-- Last Updated Info -->
-            <div
-              v-if="privacyData.updated_at"
-              class="text-body text-secondary-600"
-            >
-              <p>
-                Last updated: {{ formatDate(privacyData.updated_at) }}
+              <p
+                v-if="privacyData.updated_at"
+                class="text-body-sm text-secondary-600"
+              >
+                Last updated {{ formatDate(privacyData.updated_at) }}
                 <span v-if="privacyData.updater">
                   by {{ privacyData.updater.first_name }}
                   {{ privacyData.updater.last_name }}
@@ -329,75 +407,178 @@
               </p>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex justify-end items-center">
-              <div class="flex space-x-3">
-                <button
-                  type="button"
-                  @click="previewDocument('privacy')"
-                  class="btn btn-outline"
+            <!-- PDF column -->
+            <div>
+              <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                <p class="admin-form-section-title">PDF document</p>
+                <p class="admin-form-section-desc">
+                  The uploaded PDF is shown to users who open the Privacy Policy.
+                </p>
+
+                <div
+                  v-if="privacyPdfStatus.exists"
+                  class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success-200 bg-success-50 p-3"
                 >
-                  <Icon name="heroicons:eye" class="h-5 w-5 mr-2" />
-                  Preview
-                </button>
-                <button
-                  type="submit"
-                  :disabled="savingPrivacy"
-                  class="btn btn-primary"
+                  <div
+                    class="flex min-w-0 items-center gap-2 text-body-sm text-success-700"
+                  >
+                    <Icon
+                      name="heroicons:document-check"
+                      class="h-5 w-5 shrink-0 text-success-500"
+                    />
+                    <span class="truncate">
+                      {{ getDisplayFileName(privacyPdfStatus.fileInfo?.original_filename) }}
+                      ({{ formatFileSize(privacyPdfStatus.fileInfo?.size) }})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--outline admin-btn--sm"
+                    @click="downloadPdf('privacy')"
+                  >
+                    <Icon name="heroicons:arrow-down-tray" class="h-4 w-4" />
+                    Download
+                  </button>
+                </div>
+
+                <div
+                  v-else
+                  class="mt-4 flex items-center gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-body-sm text-warning-700"
                 >
-                  <div v-if="savingPrivacy" class="spinner mr-2"></div>
-                  <Icon v-else name="heroicons:check" class="h-5 w-5 mr-2" />
-                  {{ savingPrivacy ? "Saving..." : "Save Changes" }}
-                </button>
+                  <Icon
+                    name="heroicons:exclamation-triangle"
+                    class="h-5 w-5 shrink-0 text-warning-600"
+                  />
+                  No PDF uploaded yet — upload one below.
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <input
+                    ref="privacyFileInput"
+                    type="file"
+                    accept="application/pdf"
+                    class="hidden"
+                    @change="handlePrivacyFileSelect"
+                  />
+                  <button
+                    type="button"
+                    class="admin-btn admin-btn--primary admin-btn--sm"
+                    :disabled="uploadingPrivacyPdf"
+                    @click="$refs.privacyFileInput.click()"
+                  >
+                    <Icon
+                      v-if="!uploadingPrivacyPdf"
+                      name="heroicons:arrow-up-tray"
+                      class="h-4 w-4"
+                    />
+                    <Icon
+                      v-else
+                      name="heroicons:arrow-path"
+                      class="h-4 w-4 animate-spin"
+                    />
+                    {{ uploadingPrivacyPdf ? "Uploading…" : "Choose PDF file" }}
+                  </button>
+                  <span class="admin-hint !mt-0">Max 10 MB</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div
+            class="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-secondary-200 pt-5"
+          >
+            <button
+              type="button"
+              class="admin-btn admin-btn--outline"
+              @click="previewDocument('privacy')"
+            >
+              <Icon name="heroicons:eye" class="h-4 w-4" />
+              Preview
+            </button>
+            <button
+              type="submit"
+              :disabled="savingPrivacy"
+              class="admin-btn admin-btn--primary"
+            >
+              <Icon
+                v-if="savingPrivacy"
+                name="heroicons:arrow-path"
+                class="h-4 w-4 animate-spin"
+              />
+              <Icon v-else name="heroicons:check" class="h-4 w-4" />
+              {{ savingPrivacy ? "Saving…" : "Save changes" }}
+            </button>
+          </div>
         </form>
       </div>
-    </div>
+    </AdminSectionCard>
 
-    <!-- Preview Modal -->
-    <div
-      v-if="showPreview"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      @click="showPreview = false"
-    >
-      <div
-        class="card max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
-        @click.stop
-      >
+    <!-- Preview modal -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
         <div
-          class="flex items-center justify-between p-6 border-b border-secondary-200"
+          v-if="showPreview"
+          class="admin-dialog-backdrop"
+          @click.self="showPreview = false"
         >
-          <h3 class="modal-title text-secondary-900">
-            {{
-              previewType === "terms" ? "Terms of Service" : "Privacy Policy"
-            }}
-            Preview
-          </h3>
-          <button
-            @click="showPreview = false"
-            class="p-2 text-secondary-400 hover:text-secondary-500 rounded-lg hover:bg-secondary-100"
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            :aria-label="
+              previewType === 'terms' ? 'Terms of Service' : 'Privacy Policy'
+            "
+            style="width: min(64rem, 100%); margin-top: 5vh; max-height: 90vh"
           >
-            <Icon name="heroicons:x-mark" class="h-6 w-6" />
-          </button>
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:document-text" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">
+                    {{
+                      previewType === "terms" ? "Terms of Service" : "Privacy Policy"
+                    }}
+                  </p>
+                  <p class="admin-panel-subtitle">Document preview</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="showPreview = false"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
+            </div>
+
+            <div class="admin-panel-body flex-1 overflow-y-auto">
+              <PdfViewer
+                :url="previewPdfUrl"
+                :require-auth="true"
+                min-height="calc(90vh - 200px)"
+                @loaded="onPdfLoaded"
+                @error="onPdfError"
+              />
+            </div>
+
+            <div class="admin-dialog-foot">
+              <button
+                type="button"
+                class="admin-btn admin-btn--outline"
+                @click="showPreview = false"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="flex-1 p-6 overflow-hidden">
-          <PdfViewer
-            :url="previewPdfUrl"
-            :require-auth="true"
-            min-height="calc(90vh - 200px)"
-            @loaded="onPdfLoaded"
-            @error="onPdfError"
-          />
-        </div>
-        <div class="flex justify-end p-6 border-t border-secondary-200">
-          <button @click="showPreview = false" class="btn btn-outline">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 

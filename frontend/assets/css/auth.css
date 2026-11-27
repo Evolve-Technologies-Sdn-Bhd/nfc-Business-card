@@ -115,10 +115,45 @@
   width: min(100%, 22rem);
   transform: rotate(-3deg);
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 0 0 1px rgba(247, 245, 240, 0.16),
+    0 0 22px 0 rgba(247, 245, 240, 0.24),
+    0 0 60px 8px rgba(194, 160, 104, 0.4),
+    0 0 130px 38px rgba(194, 160, 104, 0.18);
 }
 
 .lg-mock:hover {
   transform: rotate(0deg) translateY(-6px);
+}
+
+/* Paper-white backlight so the card reads as a raised, floating object.
+   The glow box must be wider than the card AND the gradient must fade out at
+   the box edge, otherwise the whole visible glow sits behind the card. */
+.lg-card-stage::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(min(100%, 22rem) + 11rem);
+  aspect-ratio: 1.4 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 2rem;
+  background: radial-gradient(
+    72% 72% at 50% 50%,
+    color-mix(in srgb, var(--paper, #f7f5f0) 88%, transparent) 0%,
+    color-mix(in srgb, var(--brass, #c2a068) 62%, transparent) 52%,
+    color-mix(in srgb, var(--brass, #c2a068) 22%, transparent) 74%,
+    transparent 100%
+  );
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.lg-card-stage:hover::before {
+  opacity: 1;
 }
 
 .lg-mock-sub {
@@ -888,6 +923,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lg-mock,
+  .lg-card-stage::before,
   .lg-ripple,
   .lg-spin {
     transition: none;
@@ -1352,5 +1388,256 @@
 @media (max-width: 479px) {
   .lg-name-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ============================================================================
+   ADMIN SIGN-IN — "Ink & Brass" authority treatment
+   Every rule below is scoped to `.lg-auth-root--admin`, which login.vue only
+   adds when it is reached via ?admin=1. The public sign-in and the sign-up
+   flow never render that class, so their experience is untouched.
+   ========================================================================= */
+
+.lg-auth-root--admin {
+  background: var(--admin-paper, #f5f1e8);
+}
+
+.lg-auth-root--admin .lg-form-side {
+  background: var(--admin-paper, #f5f1e8);
+}
+
+/* ---- Brand panel: deeper ink, brass-forward glow ---- */
+.lg-auth-root--admin .lg-ink-side--admin {
+  background: linear-gradient(180deg, #171d2b 0%, #1d2534 58%, #171d2b 100%);
+}
+
+.lg-auth-root--admin .lg-ink-glow {
+  background:
+    radial-gradient(26rem 26rem at 16% 6%, color-mix(in srgb, var(--brass, #c2a068) 30%, transparent), transparent 60%),
+    radial-gradient(22rem 22rem at 88% 30%, color-mix(in srgb, #3f4b63 42%, transparent), transparent 62%);
+}
+
+/* ---- Console preview (replaces the NFC card mockup) ---- */
+.lg-console-stage {
+  position: relative;
+  display: none;
+  justify-content: center;
+  padding: 1.4rem 0 0.6rem;
+}
+
+.lg-console {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 24rem);
+  overflow: hidden;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 34px 60px -34px rgba(0, 0, 0, 0.75),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  transform: rotate(-1.5deg);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lg-console:hover {
+  transform: rotate(0deg) translateY(-6px);
+}
+
+.lg-console__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lg-console__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.lg-console__dot:first-child {
+  background: color-mix(in srgb, var(--brass, #c2a068) 72%, transparent);
+}
+
+.lg-console__title {
+  margin-left: 0.35rem;
+  font-size: var(--text-micro, 0.6875rem);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lg-console__lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: var(--text-micro, 0.6875rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass-200, #e8d9b8);
+  background: color-mix(in srgb, var(--brass, #c2a068) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brass, #c2a068) 36%, transparent);
+}
+
+.lg-console__body {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  min-height: 12rem;
+}
+
+.lg-console__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 0;
+  background: rgba(0, 0, 0, 0.16);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lg-console__rail > span {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lg-console__rail > span.is-active {
+  background: var(--brass, #c2a068);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass, #c2a068) 22%, transparent);
+}
+
+.lg-console__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.1rem 1.15rem;
+}
+
+.lg-console__shield {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--brass, #c2a068) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brass, #c2a068) 26%, transparent);
+}
+
+.lg-console__shield-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  color: var(--admin-ink, #171d2b);
+  background: var(--brass, #c2a068);
+}
+
+.lg-console__shield-title {
+  font-size: var(--text-body-sm, 0.8125rem);
+  font-weight: var(--weight-bold);
+  color: #ffffff;
+}
+
+.lg-console__shield-text {
+  font-size: var(--text-micro, 0.6875rem);
+  line-height: 1.45;
+  color: rgba(238, 241, 246, 0.6);
+}
+
+.lg-console__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.lg-console__rows > span {
+  height: 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.lg-console__rows > span:nth-child(1) {
+  width: 88%;
+}
+.lg-console__rows > span:nth-child(2) {
+  width: 66%;
+}
+.lg-console__rows > span:nth-child(3) {
+  width: 74%;
+}
+
+/* ---- Auth card: brass rule + authority framing ---- */
+.lg-auth-root--admin .lg-card {
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 24%, transparent);
+  box-shadow:
+    0 30px 64px -38px rgba(23, 29, 43, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+.lg-auth-root--admin .lg-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: linear-gradient(90deg, transparent, var(--brass, #c2a068), transparent);
+}
+
+.lg-secure-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  font-size: var(--text-micro, 0.6875rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--admin-brass-ink, #3a2c14);
+  background: color-mix(in srgb, var(--brass, #c2a068) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brass, #c2a068) 42%, transparent);
+}
+
+.lg-admin-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1.4rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--theme-secondary-200, #e6e2d8) 85%, transparent);
+  font-size: var(--text-body-sm, 0.8125rem);
+  line-height: 1.5;
+  color: var(--theme-secondary-500, #7f7763);
+}
+
+.lg-admin-foot svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--brass-600, #a9854d);
+}
+
+@media (min-width: 1024px) {
+  .lg-console-stage {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-console {
+    transition: none;
   }
 }

@@ -112,7 +112,7 @@
                       </button>
                       <button
                         @click.stop="$emit('delete', notification.id)"
-                        class="p-1 text-secondary-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        class="p-1 text-secondary-400 hover:text-error-600 hover:bg-error-50 rounded-md transition-colors"
                         title="Delete"
                       >
                         <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
@@ -147,7 +147,7 @@
           <button
             v-if="hasRead"
             @click="$emit('clear-read')"
-            class="px-2.5 py-1.5 text-micro font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1"
+            class="px-2.5 py-1.5 text-micro font-semibold text-error-600 hover:bg-error-50 rounded-lg transition-colors inline-flex items-center gap-1"
           >
             <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
             Clear read
@@ -233,11 +233,11 @@ const hasRead = computed(() =>
 const getIconBgClass = (type) => {
   const cat = props.getCategory(type);
   const map = {
-    system: "bg-blue-100",
-    security: "bg-red-100",
-    activity: "bg-green-100",
-    payment: "bg-purple-100",
-    nfc: "bg-orange-100",
+    system: "bg-info-100",
+    security: "bg-error-100",
+    activity: "bg-success-100",
+    payment: "bg-primary-100",
+    nfc: "bg-warning-100",
     other: "bg-secondary-100",
   };
   return map[cat] || "bg-secondary-100";

@@ -411,6 +411,76 @@
 .lp-design-finance { background: linear-gradient(135deg, #134e4a, #0f766e); color: #ffffff; }
 .lp-design-healthcare { background: linear-gradient(135deg, #881337, #be185d); color: #ffffff; }
 
+/* Design shot — a lifted frame holding real template artwork (5:3-ish). */
+.lp-design-shot {
+  padding: 0;
+  background: rgba(255, 255, 255, 0.04);
+}
+.lp-design-shot__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Designs with both faces flip to the back on hover. */
+.lp-design-flip {
+  perspective: 1000px;
+}
+.lp-design-flip__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .lp-design-flip__inner {
+  transform: rotateY(180deg);
+}
+.lp-design-flip__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.lp-design-flip__back {
+  transform: rotateY(180deg);
+}
+
+/* Pager for the design library (ink surface, brass accent). */
+.lp-pager-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.lp-pager-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--brass, #c2a068) 55%, transparent);
+  background: color-mix(in srgb, var(--brass, #c2a068) 14%, transparent);
+  color: #fff;
+}
+.lp-pager-btn--active {
+  border-color: var(--brass, #c2a068);
+  background: var(--brass, #c2a068);
+  color: var(--ink-950, #06090d);
+}
+.lp-pager-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ---- Digital profile phone mockup — 3 colours only: ink, brass, paper ---- */
 .lp-prof-bullet {
   display: inline-flex;
@@ -909,6 +979,38 @@
   filter: blur(46px);
   pointer-events: none;
 }
+/* Paper-white backlight so the card reads as a raised, floating object.
+   Two rules matter here:
+   1. It lives on the stage, not .hero-card-wrap — the wrapper's rotate()
+      transform creates its own stacking context and would isolate the blend.
+   2. The glow box must be wider than the card AND the gradient must fade out
+      at the box edge, otherwise the whole visible glow sits behind the card. */
+.hero-stage::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: calc(min(100%, 27rem) + 14rem);
+  aspect-ratio: 1.4 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 2rem;
+  background: radial-gradient(
+    72% 72% at 50% 50%,
+    color-mix(in srgb, var(--paper, #f7f5f0) 88%, transparent) 0%,
+    color-mix(in srgb, var(--brass, #c2a068) 62%, transparent) 52%,
+    color-mix(in srgb, var(--brass, #c2a068) 22%, transparent) 74%,
+    transparent 100%
+  );
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.hero-stage:hover::before {
+  opacity: 1;
+}
 .hero-card-wrap {
   position: relative;
   z-index: 2;
@@ -922,8 +1024,11 @@
 .hero-card {
   border-radius: 1.1rem;
   box-shadow:
-    0 44px 74px -32px rgba(0, 0, 0, 0.82),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+    0 0 0 1px rgba(247, 245, 240, 0.16),
+    0 0 26px 0 rgba(247, 245, 240, 0.26),
+    0 0 72px 10px rgba(194, 160, 104, 0.42),
+    0 0 150px 44px rgba(194, 160, 104, 0.2),
+    0 48px 80px -32px rgba(0, 0, 0, 0.85);
 }
 .hero-chip {
   position: absolute;
@@ -1540,6 +1645,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-card-wrap,
+  .hero-stage::before,
   .material-card,
   .faq-item__icon {
     transition: none;

@@ -76,7 +76,7 @@
         </div>
 
         <button @click="handleReturn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-button text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Return to Dashboard
+          Continue
         </button>
       </div>
     </div>
@@ -123,7 +123,7 @@ const downloadInvoice = async () => {
     try {
         // Get auth token for the request
         const authStore = useAuthStore()
-        const token = authStore.token || useCookie('auth_token').value
+        const token = authStore.token || useCookie('auth-token').value
 
         // Build the API URL
         const apiBase = config.public.apiBase || 'http://localhost:8000/api'
@@ -191,15 +191,15 @@ const handleReturn = async () => {
     
     // Payment status validation
     if (statusCode === '00' || status === 'Success') {
-        // Payment successful - navigate to dashboard
+        // Payment succeeded. Finish the funnel in the one place that owns the
+        // outcome — /Onboarding/complete shows the receipt and, for a guest
+        // account created at Pay time, the "set your password" step.
         try {
             await authStore.fetchProfile()
-            navigateTo('/UserDashboard')
-            $toast.success('Payment successful! Welcome to your dashboard.')
         } catch (error) {
             console.error('Failed to refresh user data:', error)
-            navigateTo('/UserDashboard')
         }
+        await navigateTo('/Onboarding/complete?status=paid')
     } else if (['22', 'Pending', 'Processing', '33'].includes(statusCode)) {
         // Payment pending - go to homepage
         navigateTo('/Homepage')

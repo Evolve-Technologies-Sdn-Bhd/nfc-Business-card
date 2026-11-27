@@ -86,8 +86,13 @@ class NfcCardController extends Controller
 
         // If user is Business Admin, get all cards under the business account
         if ($user->isBusinessAccount()) {
-            // Get cards for business admin and all employees
-            $nfcCards = NfcCard::where('business_account_id', $user->id)
+            // Cards issued under the business (employees) PLUS the owner's own
+            // cards — an owner card created without business_account_id was
+            // otherwise missing from Business Cards and Business Analytics.
+            $nfcCards = NfcCard::where(function ($q) use ($user) {
+                    $q->where('business_account_id', $user->id)
+                      ->orWhere('user_id', $user->id);
+                })
                 ->with(['nfcTag', $eagerUser, 'transaction', 'cardTemplate'])
                 ->orderBy('created_at', 'desc')
                 ->get();

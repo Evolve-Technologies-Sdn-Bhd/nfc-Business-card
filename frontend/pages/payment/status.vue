@@ -230,7 +230,7 @@ const checkAgain = async () => {
 }
 
 const tryAgain = () => {
-  router.push('/user-dashboard/payment')
+  router.push('/Onboarding/checkout')
 }
 
 const goToDashboard = async () => {

@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'public' });
+definePageMeta({ layout: 'public', middleware: 'guest' });
 
 useSeoMeta({
   title: "FAQ - NFCGo Smart Digital Business Cards",

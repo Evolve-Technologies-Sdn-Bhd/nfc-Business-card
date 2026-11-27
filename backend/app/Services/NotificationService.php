@@ -203,6 +203,12 @@ class NotificationService
             'icon' => '⏳',
             'priority' => 'high',
         ],
+        'guest_checkout_welcome' => [
+            'title' => 'Welcome, {name}! Set your password',
+            'message' => 'Your NFC card order is on its way. We created an account for you with this email so you can track the order and manage your digital profile — just set a password to finish setting it up. If you already set it, you can ignore this message.',
+            'icon' => '🔑',
+            'priority' => 'high',
+        ],
     ];
 
     /**

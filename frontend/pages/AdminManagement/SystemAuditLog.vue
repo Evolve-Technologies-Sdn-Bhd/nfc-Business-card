@@ -1,662 +1,568 @@
+<!-- pages/AdminManagement/SystemAuditLog.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="page-title text-secondary-900">
-            Audit Log
-          </h1>
-          <p class="mt-2 text-secondary-600">
-            Track and review ALL user activity, admin actions, and data mutations within the NFCGo system
-          </p>
+    <AdminPageHeader
+      eyebrow="Security"
+      eyebrow-icon="heroicons:clipboard-document-list"
+      title="Audit Log"
+      description="Track and review every user activity, admin action and data mutation recorded across the NFCGo system."
+    >
+      <template #actions>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline"
+          :disabled="loading"
+          @click="handleRefresh"
+        >
+          <Icon
+            name="heroicons:arrow-path"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': loading }"
+          />
+          {{ loading ? 'Loading…' : 'Refresh' }}
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--primary"
+          :disabled="exportingCsv || logs.length === 0"
+          @click="exportAuditCsv"
+        >
+          <Icon
+            :name="exportingCsv ? 'heroicons:arrow-path' : 'heroicons:arrow-down-tray'"
+            class="h-4 w-4"
+            :class="{ 'animate-spin': exportingCsv }"
+          />
+          {{ exportingCsv ? 'Generating…' : 'Export CSV' }}
+        </button>
+      </template>
+    </AdminPageHeader>
+
+    <!-- Statistic tiles -->
+    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <AdminStatTile
+        label="Total all logs"
+        :value="formatNumber(meta.total || logs.length)"
+        icon="heroicons:document-text"
+        :hint="meta.from && meta.to ? `Showing ${meta.from}–${meta.to} of ${meta.total}` : ''"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Today"
+        :value="formatNumber(stats.today)"
+        icon="heroicons:clock"
+        :hint="`Activity for ${formatDateDMY(new Date())}`"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Last 7 days"
+        :value="formatNumber(stats.last7Days)"
+        icon="heroicons:calendar-days"
+        hint="Recent activity trend"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Admin actions"
+        :value="formatNumber(stats.adminActions)"
+        icon="heroicons:check-circle"
+        :hint="meta.total ? `${Math.round((stats.adminActions / Math.max(meta.total, 1)) * 100)}% of total` : 'N/A'"
+        :loading="loading"
+      />
+    </div>
+
+    <!-- Filters -->
+    <AdminFilterBar @submit="handleSearch">
+      <template #search>
+        <div class="mb-[0.35rem] flex items-baseline justify-between gap-2">
+          <label class="admin-label !mb-0">Keyword search</label>
+          <span class="shrink-0 whitespace-nowrap text-helper text-secondary-400">
+            Press Enter to search
+          </span>
         </div>
-        <div class="flex gap-3 flex-wrap">
-          <button
-            @click="handleRefresh"
-            :disabled="loading"
-            class="btn btn-outline disabled:opacity-60"
+        <div class="relative">
+          <Icon
+            name="heroicons:magnifying-glass"
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+          />
+          <input
+            v-model="filters.search"
+            type="text"
+            placeholder="Description, entity, metadata…"
+            maxlength="150"
+            class="admin-field !pl-9"
+            @keydown.enter="handleSearch"
+          />
+        </div>
+      </template>
+
+      <div class="min-w-[12rem]">
+        <label class="admin-label">Action type</label>
+        <select v-model="filters.action_type" class="admin-field">
+          <option value="">All types</option>
+          <option
+            v-for="actionType in meta.available_action_types || []"
+            :key="actionType"
+            :value="actionType"
           >
-            <Icon name="heroicons:arrow-path" :class="['h-4 w-4 mr-2', { 'animate-spin': loading }]" />
-            {{ loading ? 'Loading...' : 'Refresh' }}
-          </button>
-          <button
-            @click="exportAuditCsv"
-            :disabled="exportingCsv || logs.length === 0"
-            class="btn btn-primary disabled:opacity-60"
+            {{ formatActionType(actionType) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="min-w-[12rem]">
+        <label class="admin-label">Entity type</label>
+        <select v-model="filters.entity_type" class="admin-field">
+          <option value="">All entities</option>
+          <option
+            v-for="entityType in meta.available_entity_types || []"
+            :key="entityType"
+            :value="entityType"
           >
-            <span v-if="exportingCsv" class="loading loading-spinner loading-xs mr-2"></span>
-            <Icon v-else name="heroicons:arrow-down-tray" class="h-4 w-4 mr-2" />
-            {{ exportingCsv ? 'Generating CSV...' : 'Export CSV' }}
+            {{ formatActionType(entityType) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Date from</label>
+        <input v-model="filters.date_from" type="date" class="admin-field" />
+      </div>
+
+      <div class="min-w-[10rem]">
+        <label class="admin-label">Date to</label>
+        <input v-model="filters.date_to" type="date" class="admin-field" />
+      </div>
+
+      <div class="min-w-[13rem]">
+        <label class="admin-label">Actor name / email</label>
+        <div class="relative">
+          <Icon
+            name="heroicons:users"
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+          />
+          <input
+            v-model="filters.actor_search"
+            type="text"
+            placeholder="Name or email…"
+            maxlength="100"
+            class="admin-field !pl-9"
+            @keydown.enter="handleSearch"
+          />
+        </div>
+      </div>
+
+      <template #actions>
+        <span class="text-body-sm text-secondary-500">
+          {{ formatNumber(meta.total) }} found
+        </span>
+        <button
+          type="button"
+          class="admin-btn admin-btn--outline admin-btn--sm"
+          :disabled="loading"
+          @click="handleResetFilters"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          Reset
+        </button>
+        <button
+          type="submit"
+          class="admin-btn admin-btn--primary admin-btn--sm"
+          :disabled="loading"
+        >
+          <Icon name="heroicons:funnel" class="h-4 w-4" />
+          Apply search
+        </button>
+      </template>
+    </AdminFilterBar>
+
+    <!-- Activity table -->
+    <AdminSectionCard flush>
+      <template #title>Activity records</template>
+      <template #header-actions>
+        <span class="text-caption text-secondary-500">
+          {{ formatNumber(meta.total) }} record{{ meta.total === 1 ? '' : 's' }}
+        </span>
+      </template>
+
+      <!-- Loading skeleton -->
+      <div
+        v-if="loading"
+        class="divide-y divide-secondary-100"
+        role="status"
+        aria-busy="true"
+      >
+        <div
+          v-for="i in 7"
+          :key="i"
+          class="flex items-center gap-4 px-5 py-4"
+        >
+          <span class="admin-skeleton h-4 w-24 shrink-0"></span>
+          <span class="admin-skeleton h-9 w-9 shrink-0 rounded-full"></span>
+          <span class="admin-skeleton h-4 w-1/4"></span>
+          <span class="admin-skeleton ml-auto h-4 w-20"></span>
+        </div>
+      </div>
+
+      <!-- Empty -->
+      <AdminEmptyState
+        v-else-if="!logs.length"
+        icon="heroicons:document-text"
+        title="No activity records"
+        description="Nothing matches the current filters. Try resetting them or adjusting your search keywords."
+      >
+        <template #actions>
+          <button
+            type="button"
+            class="admin-btn admin-btn--outline admin-btn--sm"
+            @click="handleResetFilters"
+          >
+            <Icon name="heroicons:arrow-path" class="h-4 w-4" />
+            Reset all filters
           </button>
-        </div>
-      </div>
-    </div>
+        </template>
+      </AdminEmptyState>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-primary-100">
-              <Icon name="heroicons:document-text" class="h-6 w-6 text-primary-600" />
-            </div>
-          </div>
-          <div class="ml-5 flex-1">
-            <p class="stat-label text-secondary-600">Total All Logs</p>
-            <p class="stat-value text-secondary-900 mt-1">
-              {{ loading ? '—' : formatNumber(meta.total || logs.length) }}
-            </p>
-            <p v-if="meta.from && meta.to && !loading" class="text-helper mt-1">
-              Showing {{ meta.from }}–{{ meta.to }} of {{ meta.total }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-info-100">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-info-700" />
-            </div>
-          </div>
-          <div class="ml-5">
-            <p class="stat-label text-secondary-600">Today</p>
-            <p class="stat-value text-secondary-900 mt-1">
-              {{ loading ? '—' : formatNumber(stats.today) }}
-            </p>
-            <p class="text-helper mt-1">Activity for {{ formatDateDMY(new Date()) }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-warning-100">
-              <Icon name="heroicons:clock" class="h-6 w-6 text-warning-700" />
-            </div>
-          </div>
-          <div class="ml-5">
-            <p class="stat-label text-secondary-600">Last 7 Days</p>
-            <p class="stat-value text-secondary-900 mt-1">
-              {{ loading ? '—' : formatNumber(stats.last7Days) }}
-            </p>
-            <p class="text-helper mt-1">Recent activity trend</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="p-3 rounded-xl bg-primary-100">
-              <Icon name="heroicons:check-circle" class="h-6 w-6 text-primary-700" />
-            </div>
-          </div>
-          <div class="ml-5">
-            <p class="stat-label text-secondary-600">Admin Actions</p>
-            <p class="stat-value text-secondary-900 mt-1">
-              {{ loading ? '—' : formatNumber(stats.adminActions) }}
-            </p>
-            <p class="text-helper mt-1">
-              {{ loading ? '—' : (meta.total ? `${Math.round((stats.adminActions / Math.max(meta.total, 1)) * 100)}% of total` : 'N/A') }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters Bar -->
-    <div class="card mb-6">
-      <div class="card-body">
-        <div class="flex flex-wrap items-end gap-4">
-          <!-- 1. Keyword Search (Description / Metadata) -->
-          <div class="flex-1 min-w-[240px]">
-            <label class="block text-label text-secondary-700 mb-1.5">
-              Keyword Search
-            </label>
-            <div class="relative">
-              <Icon
-                name="heroicons:document-text"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400"
-              />
-              <input
-                v-model="filters.search"
-                type="text"
-                placeholder="Search in description, entity, metadata..."
-                maxlength="150"
-                class="input input-bordered w-full pl-10 pr-4"
-                @keydown.enter="handleSearch"
-              />
-            </div>
-          </div>
-
-          <!-- 2. Action Type Dropdown -->
-          <div class="min-w-[200px]">
-            <label class="block text-label text-secondary-700 mb-1.5">
-              Action Type
-            </label>
-            <select
-              v-model="filters.action_type"
-              class="input input-bordered w-full"
-            >
-              <option value="">All Types</option>
-              <option
-                v-for="actionType in meta.available_action_types || []"
-                :key="actionType"
-                :value="actionType"
-              >
-                {{ formatActionType(actionType) }}
-              </option>
-            </select>
-          </div>
-
-          <!-- 3. Date From -->
-          <div class="min-w-[160px]">
-            <label class="block text-label text-secondary-700 mb-1.5">
-              Date From
-            </label>
-            <input
-              v-model="filters.date_from"
-              type="date"
-              class="input input-bordered w-full"
-            />
-          </div>
-
-          <!-- 4. Date To -->
-          <div class="min-w-[160px]">
-            <label class="block text-label text-secondary-700 mb-1.5">
-              Date To
-            </label>
-            <input
-              v-model="filters.date_to"
-              type="date"
-              class="input input-bordered w-full"
-            />
-          </div>
-
-          <!-- 5. Actor Search (Nama / Email Admin/User) -->
-          <div class="min-w-[220px]">
-            <label class="block text-label text-secondary-700 mb-1.5">
-              Actor Name / Email
-            </label>
-            <div class="relative">
-              <Icon
-                name="heroicons:users"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400"
-              />
-              <input
-                v-model="filters.actor_search"
-                type="text"
-                placeholder="Search name or email..."
-                maxlength="100"
-                class="input input-bordered w-full pl-10 pr-4"
-                @keydown.enter="handleSearch"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter Action Buttons Row -->
-        <div class="mt-5 pt-5 border-t border-secondary-200 flex flex-wrap justify-between items-center gap-3">
-          <div class="text-helper flex items-center gap-2">
-            <Icon name="heroicons:information-circle" class="h-4 w-4" />
-            <span>Tip: Press Enter on search to apply filters immediately</span>
-          </div>
-          <div class="flex gap-3 flex-wrap">
-            <button
-              @click="handleResetFilters"
-              :disabled="loading"
-              class="btn btn-outline disabled:opacity-60"
-            >
-              <Icon name="heroicons:x-mark" class="h-4 w-4 mr-2" />
-              Reset Filters
-            </button>
-            <button
-              @click="handleSearch"
-              :disabled="loading"
-              class="btn btn-primary disabled:opacity-60"
-            >
-              <Icon name="heroicons:funnel" class="h-4 w-4 mr-2" />
-              Apply Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Audit Log Datatable -->
-    <div class="card">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-secondary-200">
-          <thead class="bg-secondary-50">
+      <!-- Table -->
+      <div v-else class="admin-scroll">
+        <table class="admin-table">
+          <thead>
             <tr>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
-              >
-                Time
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
-              >
-                Actor
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
-              >
-                Type
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head"
-              >
-                Description
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
-              >
-                Entity
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-left table-head whitespace-nowrap"
-              >
-                IP & HTTP
-              </th>
-              <th
-                class="px-3 sm:px-6 py-3.5 text-right table-head whitespace-nowrap"
-              >
-                Actions
-              </th>
+              <th>Time</th>
+              <th>Actor</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Entity</th>
+              <th>IP &amp; HTTP</th>
+              <th class="admin-col-actions">Actions</th>
             </tr>
           </thead>
-          <tbody
-            v-if="!loading && logs.length > 0"
-            class="bg-white divide-y divide-secondary-200"
-          >
-            <tr
-              v-for="log in logs"
-              :key="log.id"
-              class="hover:bg-secondary-50/60 transition-colors"
-            >
+          <tbody>
+            <tr v-for="log in logs" :key="log.id">
               <!-- Timestamp -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
-                <div class="table-cell font-medium text-secondary-900">
+              <td class="whitespace-nowrap">
+                <div class="font-medium text-secondary-900">
                   {{ formatTime(log.created_at) }}
                 </div>
-                <div class="text-caption text-secondary-500 mt-0.5">
+                <div class="text-caption text-secondary-500">
                   {{ formatDateDMY(log.created_at) }}
                 </div>
               </td>
 
-              <!-- Actor (Admin/User) -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
+              <!-- Actor -->
+              <td>
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-secondary-200 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
+                  <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary-200 ring-1 ring-secondary-200"
+                  >
                     <img
-                      v-if="log.user?.account_image || log.user?.profile_image"
-                      :src="log.user.account_image || log.user.profile_image"
-                      :alt="log.user?.full_name || log.user?.name || 'User'"
-                      class="w-full h-full object-cover"
+                      v-if="log.actor?.avatar_url"
+                      :src="log.actor.avatar_url"
+                      :alt="log.actor?.name || 'User'"
+                      class="h-full w-full object-cover"
                       @error="$event.target.style.display = 'none'"
                     />
                     <Icon v-else name="heroicons:users" class="h-5 w-5 text-secondary-400" />
                   </div>
                   <div class="min-w-0">
-                    <div class="table-cell font-semibold text-secondary-900 truncate max-w-[180px]">
-                      {{ log.user?.full_name || log.user?.name || 'System' }}
-                    </div>
-                    <div class="text-caption text-secondary-500 truncate max-w-[180px]">
-                      {{ log.user?.email || log.metadata?.admin_context || 'N/A' }}
-                    </div>
-                    <div v-if="log.metadata?.admin_context" class="flex items-center gap-1 mt-1">
-                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-badge uppercase tracking-wider bg-primary-100 text-primary-800">
+                    <div class="flex items-center gap-2">
+                      <span class="truncate text-body font-semibold text-secondary-900 max-w-[180px]">
+                        {{ log.actor?.name || 'System' }}
+                      </span>
+                      <span
+                        v-if="log.actor?.admin_role || log.metadata?.admin_context"
+                        class="admin-badge admin-badge--warning admin-badge--plain"
+                      >
                         Admin
                       </span>
                     </div>
+                    <div class="truncate text-caption text-secondary-500 max-w-[180px]">
+                      {{ log.actor?.email || 'N/A' }}
+                    </div>
                   </div>
                 </div>
               </td>
 
-              <!-- Action Type Badge -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
-                <span
-                  :class="getActionBadgeClass(log.action_type)"
-                  class="inline-flex items-center px-2.5 py-1 rounded-full text-badge"
-                >
-                  <Icon :name="getActionIcon(log.action_type)" class="h-3.5 w-3.5 mr-1" />
-                  {{ formatActionType(log.action_type) }}
-                </span>
+              <!-- Action type -->
+              <td class="whitespace-nowrap">
+                <div class="flex items-center gap-1.5">
+                  <Icon
+                    :name="getActionIcon(log.action_type)"
+                    class="h-4 w-4 shrink-0 text-secondary-400"
+                  />
+                  <AdminStatusBadge
+                    :tone="actionTone(log.action_type)"
+                    :label="formatActionType(log.action_type)"
+                  />
+                </div>
               </td>
 
               <!-- Description -->
-              <td class="px-3 sm:px-6 py-4 align-top min-w-[260px]">
-                <div class="table-cell text-secondary-800 leading-snug">
-                  {{ log.description || 'No description' }}
+              <td class="min-w-[260px]">
+                <div class="text-body text-secondary-800 leading-snug">
+                  {{ log.action_description || 'No description' }}
                 </div>
-                <div v-if="log.metadata?.new_values && typeof log.metadata.new_values === 'object' && Object.keys(log.metadata.new_values).length > 0" class="mt-2.5">
-                  <div class="inline-flex items-center gap-1 text-badge px-2 py-0.5 rounded-full bg-success-50 text-success-700 border border-success-200">
+                <div
+                  v-if="log.new_values && typeof log.new_values === 'object' && Object.keys(log.new_values).length > 0"
+                  class="mt-2"
+                >
+                  <span class="admin-badge admin-badge--success admin-badge--plain">
                     <Icon name="heroicons:pencil-square" class="h-3 w-3" />
-                    <span>{{ Object.keys(log.metadata.new_values).length }} fields updated</span>
-                  </div>
+                    {{ Object.keys(log.new_values).length }} fields updated
+                  </span>
                 </div>
               </td>
 
-              <!-- Entity Info -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
-                <div v-if="log.entity_type || log.entity_id">
-                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary-100 border border-secondary-200">
-                    <Icon name="heroicons:cube" class="h-3.5 w-3.5 text-secondary-500" />
-                    <span class="text-caption font-medium text-secondary-700 capitalize">
-                      {{ log.entity_type || 'unknown' }}
-                    </span>
-                  </div>
-                  <div v-if="log.entity_id" class="mt-1.5">
-                    <span class="text-table-body font-mono px-1.5 py-0.5 rounded bg-secondary-50 text-secondary-600 border border-secondary-200">
+              <!-- Entity -->
+              <td class="whitespace-nowrap">
+                <div v-if="log.entity_type || log.entity_id" class="space-y-1.5">
+                  <span class="admin-badge admin-badge--neutral">
+                    <Icon name="heroicons:cube" class="h-3.5 w-3.5" />
+                    <span class="capitalize">{{ log.entity_type || 'unknown' }}</span>
+                  </span>
+                  <div v-if="log.entity_id">
+                    <span class="font-mono text-table-body rounded border border-secondary-200 bg-secondary-50 px-1.5 py-0.5 text-secondary-600">
                       #{{ log.entity_id }}
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-caption text-secondary-400 italic">—</span>
+                <span v-else class="text-caption italic text-secondary-400">—</span>
               </td>
 
-              <!-- IP Address + HTTP Method -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap align-top">
-                <div v-if="log.ip_address || log.metadata?.http_method" class="space-y-1">
+              <!-- IP & HTTP -->
+              <td class="whitespace-nowrap">
+                <div v-if="log.ip_address || log.metadata?.http_method" class="space-y-1.5">
                   <div v-if="log.ip_address" class="flex items-center gap-1.5">
                     <Icon name="heroicons:globe-alt" class="h-3.5 w-3.5 text-secondary-400" />
-                    <span class="text-caption font-mono text-secondary-700 bg-secondary-50 px-1.5 py-0.5 rounded border border-secondary-200">
+                    <span class="font-mono text-caption rounded border border-secondary-200 bg-secondary-50 px-1.5 py-0.5 text-secondary-700">
                       {{ log.ip_address }}
                     </span>
                   </div>
                   <div v-if="log.metadata?.http_method" class="flex items-center gap-1.5">
                     <Icon name="heroicons:link" class="h-3.5 w-3.5 text-secondary-400" />
-                    <span
-                      :class="getHttpMethodBadgeClass(log.metadata.http_method)"
-                      class="text-badge uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    >
-                      {{ log.metadata.http_method }}
-                    </span>
-                    <span v-if="log.metadata?.response_status" class="text-table-body text-secondary-500 font-mono">
+                    <AdminStatusBadge
+                      :tone="httpTone(log.metadata.http_method)"
+                      :label="String(log.metadata.http_method).toUpperCase()"
+                    />
+                    <span v-if="log.metadata?.response_status" class="font-mono text-table-body text-secondary-500">
                       {{ log.metadata.response_status }}
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-caption text-secondary-400 italic">—</span>
+                <span v-else class="text-caption italic text-secondary-400">—</span>
               </td>
 
-              <!-- Action Button: View Detail -->
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right align-top">
+              <!-- Actions -->
+              <td class="admin-col-actions">
                 <button
+                  type="button"
+                  class="admin-btn admin-btn--outline admin-btn--sm"
                   @click="openLogDetail(log)"
-                  class="btn btn-outline btn-xs"
                 >
-                  <Icon name="heroicons:eye" class="h-3.5 w-3.5 mr-1" />
-                  View Details
+                  <Icon name="heroicons:eye" class="h-4 w-4" />
+                  Details
                 </button>
-              </td>
-            </tr>
-          </tbody>
-
-          <!-- Loading State -->
-          <tbody v-else-if="loading">
-            <tr>
-              <td colspan="7" class="px-3 sm:px-6 py-16 text-center">
-                <div class="flex flex-col items-center justify-center gap-3">
-                  <span class="loading loading-spinner text-primary-600 w-10 h-10"></span>
-                  <p class="text-body text-secondary-600">Loading audit log data...</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-
-          <!-- Empty State -->
-          <tbody v-else>
-            <tr>
-              <td colspan="7" class="px-3 sm:px-6 py-20 text-center">
-                <div class="flex flex-col items-center justify-center gap-4 max-w-md mx-auto">
-                  <div class="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center">
-                    <Icon name="heroicons:document-text" class="h-8 w-8 text-secondary-400" />
-                  </div>
-                  <div>
-                    <h3 class="card-title text-secondary-800 mb-1.5">No Activity Records</h3>
-                    <p class="text-body text-secondary-500 leading-relaxed">
-                      No activity logs match the current filters. Try resetting filters or changing search keywords.
-                    </p>
-                  </div>
-                  <button
-                    @click="handleResetFilters"
-                    class="btn btn-outline btn-sm mt-2"
-                  >
-                    <Icon name="heroicons:arrow-path" class="h-4 w-4 mr-2" />
-                    Reset All Filters
-                  </button>
-                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </AdminSectionCard>
 
-      <!-- Pagination -->
-      <div
-        v-if="!loading && meta.last_page && meta.last_page > 1"
-        class="px-6 py-4 border-t border-secondary-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-      >
-        <div class="text-body text-secondary-600">
-          Showing
-          <span class="font-semibold text-secondary-900">{{ meta.from || 0 }}</span>
-          to
-          <span class="font-semibold text-secondary-900">{{ meta.to || 0 }}</span>
-          of
-          <span class="font-semibold text-secondary-900">{{ meta.total || 0 }}</span>
-          records
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button
-            @click="changePage(meta.current_page - 1)"
-            :disabled="meta.current_page <= 1 || loading"
-            class="btn btn-outline btn-sm disabled:opacity-40"
-          >
-            <Icon name="heroicons:chevron-left" class="h-4 w-4" />
-            Previous
-          </button>
+    <AdminPagination
+      v-if="logs.length > 0"
+      :current-page="meta.current_page"
+      :last-page="meta.last_page"
+      :per-page="itemsPerPage"
+      :total="meta.total"
+      item-label="records"
+      @page-change="changePage"
+      @per-page-change="changeItemsPerPage"
+    />
 
-          <div class="flex items-center gap-1">
-            <template v-for="page in pageNumbers" :key="page">
-              <span v-if="page === '...'" class="px-2.5 py-1 text-caption font-medium text-secondary-400">
-                ···
-              </span>
-              <button
-                v-else
-                @click="changePage(page)"
-                :disabled="loading"
-                :class="[
-                  'px-3 py-1.5 rounded-md text-button transition-colors min-w-[34px]',
-                  page === meta.current_page
-                    ? 'bg-primary-600 text-white shadow-sm'
-                    : 'text-secondary-600 hover:bg-secondary-100'
-                ]"
-              >
-                {{ page }}
-              </button>
-            </template>
-          </div>
-
-          <button
-            @click="changePage(meta.current_page + 1)"
-            :disabled="meta.current_page >= meta.last_page || loading"
-            class="btn btn-outline btn-sm disabled:opacity-40"
-          >
-            Next
-            <Icon name="heroicons:chevron-right" class="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============= LOG DETAIL MODAL ============= -->
-    <div
-      v-if="detailModal.show"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-    >
-      <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[88vh] overflow-hidden flex flex-col">
-        <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-secondary-200 flex items-start justify-between gap-4 flex-shrink-0">
-          <div class="flex items-start gap-4">
-            <div class="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
-              <Icon name="heroicons:document-text" class="h-6 w-6 text-primary-700" />
-            </div>
-            <div>
-              <h3 class="modal-title text-secondary-900 mb-0.5">
-                Activity Details {{ detailModal.log?.id ? `#${detailModal.log.id}` : '' }}
-              </h3>
-              <p class="text-body text-secondary-500 flex items-center gap-2 flex-wrap">
-                <span
-                  v-if="detailModal.log?.action_type"
-                  :class="getActionBadgeClass(detailModal.log.action_type)"
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-badge"
-                >
-                  {{ formatActionType(detailModal.log.action_type) }}
-                </span>
-                <span v-if="detailModal.log?.created_at" class="flex items-center gap-1">
-                  <Icon name="heroicons:calendar" class="h-3.5 w-3.5" />
-                  {{ formatDateDMY(detailModal.log.created_at) }} at {{ formatTime(detailModal.log.created_at) }}
-                </span>
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            @click="closeLogDetail"
-            class="text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
-          >
-            <Icon name="heroicons:x-mark" class="h-5 w-5" />
-          </button>
-        </div>
-
-        <!-- Modal Body Scrollable -->
+    <!-- ============= Log detail dialog ============= -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
         <div
-          v-if="detailModal.log"
-          class="px-6 py-5 overflow-y-auto flex-1 space-y-6"
+          v-if="detailModal.show"
+          class="admin-dialog-backdrop"
+          @click.self="closeLogDetail"
         >
-          <!-- Summary Info Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Actor</p>
-              <p class="text-body font-semibold text-secondary-900">
-                {{ detailModal.log.user?.full_name || detailModal.log.user?.name || 'NFCGo System' }}
-              </p>
-              <p class="text-caption text-secondary-600 mt-0.5">
-                {{ detailModal.log.user?.email || detailModal.log.metadata?.admin_context || 'No email' }}
-              </p>
-              <p v-if="detailModal.log.user?.id" class="text-micro text-secondary-500 mt-1">
-                User ID: <span class="font-mono">{{ detailModal.log.user.id }}</span>
-              </p>
-            </div>
-            <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Device & Location</p>
-              <p v-if="detailModal.log.ip_address" class="text-body font-mono text-secondary-800">
-                IP: {{ detailModal.log.ip_address }}
-              </p>
-              <p v-if="detailModal.log.metadata?.http_method" class="text-body text-secondary-700 mt-1">
-                HTTP:
-                <span :class="getHttpMethodBadgeClass(detailModal.log.metadata.http_method)" class="text-badge uppercase px-1.5 py-0.5 rounded">
-                  {{ detailModal.log.metadata.http_method }}
+          <div
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Activity details"
+            style="width: min(48rem, 100%); margin-top: 5vh; max-height: 90vh"
+          >
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700"
+                >
+                  <Icon name="heroicons:document-text" class="h-5 w-5" />
                 </span>
-                <span v-if="detailModal.log.metadata?.response_status" class="ml-1 text-caption font-mono text-secondary-600">
-                  ({{ detailModal.log.metadata.response_status }})
-                </span>
-              </p>
-              <p v-if="detailModal.log.metadata?.route_uri" class="text-caption text-secondary-600 mt-1 break-all">
-                Route: <span class="font-mono">{{ detailModal.log.metadata.route_uri }}</span>
-              </p>
+                <div class="min-w-0">
+                  <p class="admin-panel-title">
+                    Activity details {{ detailModal.log?.id ? `#${detailModal.log.id}` : '' }}
+                  </p>
+                  <p class="admin-panel-subtitle flex flex-wrap items-center gap-2">
+                    <AdminStatusBadge
+                      v-if="detailModal.log?.action_type"
+                      :tone="actionTone(detailModal.log.action_type)"
+                      :label="formatActionType(detailModal.log.action_type)"
+                    />
+                    <span v-if="detailModal.log?.created_at" class="flex items-center gap-1 text-caption text-secondary-500">
+                      <Icon name="heroicons:calendar" class="h-3.5 w-3.5" />
+                      {{ formatDateDMY(detailModal.log.created_at) }} · {{ formatTime(detailModal.log.created_at) }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="admin-icon-btn"
+                aria-label="Close"
+                @click="closeLogDetail"
+              >
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
+              </button>
             </div>
-            <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Target Entity</p>
-              <p v-if="detailModal.log.entity_type" class="text-body font-semibold text-secondary-900 capitalize">
-                {{ detailModal.log.entity_type }}
-                <span v-if="detailModal.log.entity_id" class="ml-1 text-caption font-mono font-normal text-secondary-600">#{{ detailModal.log.entity_id }}</span>
-              </p>
-              <p v-else class="text-body text-secondary-500 italic">No specific entity</p>
-            </div>
-            <div class="p-4 bg-secondary-50/60 rounded-xl border border-secondary-200">
-              <p class="text-caption font-semibold uppercase tracking-wider text-secondary-500 mb-1.5">Description</p>
-              <p class="text-body text-secondary-800 leading-snug">
-                {{ detailModal.log.description || 'No description' }}
-              </p>
-            </div>
-          </div>
 
-          <!-- Old Values Section -->
-          <div v-if="detailModal.log.metadata?.old_values && typeof detailModal.log.metadata.old_values === 'object' && Object.keys(detailModal.log.metadata.old_values).length > 0">
-            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:archive-box-arrow-down" class="h-4 w-4 text-warning-500" />
-              Old Values
-            </h4>
-            <div class="bg-warning-50 border border-warning-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-caption font-mono text-warning-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.old_values) }}</pre>
-            </div>
-          </div>
+            <div
+              v-if="detailModal.log"
+              class="admin-panel-body flex-1 space-y-6 overflow-y-auto"
+            >
+              <!-- Summary grid -->
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4">
+                  <p class="mb-1.5 text-caption font-semibold uppercase tracking-wider text-secondary-500">
+                    Actor
+                  </p>
+                  <p class="text-body font-semibold text-secondary-900">
+                    {{ detailModal.log.actor?.name || 'NFCGo System' }}
+                  </p>
+                  <p class="mt-0.5 text-caption text-secondary-600">
+                    {{ detailModal.log.actor?.email || 'No email' }}
+                  </p>
+                  <p v-if="detailModal.log.actor?.id" class="mt-1 text-micro text-secondary-500">
+                    User ID: <span class="font-mono">{{ detailModal.log.actor.id }}</span>
+                  </p>
+                </div>
 
-          <!-- New Values Section -->
-          <div v-if="detailModal.log.metadata?.new_values && typeof detailModal.log.metadata.new_values === 'object' && Object.keys(detailModal.log.metadata.new_values).length > 0">
-            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:sparkles" class="h-4 w-4 text-success-600" />
-              New Values
-            </h4>
-            <div class="bg-success-50 border border-success-200 rounded-xl overflow-hidden">
-              <pre class="p-4 text-caption font-mono text-success-900 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata.new_values) }}</pre>
-            </div>
-          </div>
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4">
+                  <p class="mb-1.5 text-caption font-semibold uppercase tracking-wider text-secondary-500">
+                    Device &amp; location
+                  </p>
+                  <p v-if="detailModal.log.ip_address" class="font-mono text-body text-secondary-800">
+                    IP: {{ detailModal.log.ip_address }}
+                  </p>
+                  <p v-if="detailModal.log.metadata?.http_method" class="mt-1 flex items-center gap-1.5 text-body text-secondary-700">
+                    HTTP:
+                    <AdminStatusBadge
+                      :tone="httpTone(detailModal.log.metadata.http_method)"
+                      :label="String(detailModal.log.metadata.http_method).toUpperCase()"
+                    />
+                    <span v-if="detailModal.log.metadata?.response_status" class="font-mono text-caption text-secondary-600">
+                      ({{ detailModal.log.metadata.response_status }})
+                    </span>
+                  </p>
+                  <p v-if="detailModal.log.metadata?.route_uri" class="mt-1 break-all text-caption text-secondary-600">
+                    Route: <span class="font-mono">{{ detailModal.log.metadata.route_uri }}</span>
+                  </p>
+                </div>
 
-          <!-- Full Metadata Section -->
-          <div v-if="hasExtraMetadata">
-            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:code-bracket-square" class="h-4 w-4 text-secondary-600" />
-              Full Metadata (JSON)
-            </h4>
-            <div class="bg-secondary-900 rounded-xl overflow-hidden">
-              <pre class="p-4 text-caption font-mono text-secondary-100 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ prettyJSON(detailModal.log.metadata) }}</pre>
-            </div>
-          </div>
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4">
+                  <p class="mb-1.5 text-caption font-semibold uppercase tracking-wider text-secondary-500">
+                    Target entity
+                  </p>
+                  <p v-if="detailModal.log.entity_type" class="text-body font-semibold capitalize text-secondary-900">
+                    {{ detailModal.log.entity_type }}
+                    <span v-if="detailModal.log.entity_id" class="ml-1 font-mono text-caption font-normal text-secondary-600">
+                      #{{ detailModal.log.entity_id }}
+                    </span>
+                  </p>
+                  <p v-else class="text-body italic text-secondary-500">No specific entity</p>
+                </div>
 
-          <!-- User Agent -->
-          <div v-if="detailModal.log.user_agent">
-            <h4 class="card-title text-secondary-800 mb-2.5 flex items-center gap-2">
-              <Icon name="heroicons:command-line" class="h-4 w-4 text-secondary-600" />
-              User Agent
-            </h4>
-            <div class="bg-secondary-50 border border-secondary-200 rounded-xl p-4">
-              <p class="text-caption font-mono text-secondary-700 break-all leading-relaxed">
-                {{ detailModal.log.user_agent }}
-              </p>
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4">
+                  <p class="mb-1.5 text-caption font-semibold uppercase tracking-wider text-secondary-500">
+                    Description
+                  </p>
+                  <p class="text-body leading-snug text-secondary-800">
+                    {{ detailModal.log.action_description || 'No description' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Old values -->
+              <div v-if="detailModal.log.old_values && typeof detailModal.log.old_values === 'object' && Object.keys(detailModal.log.old_values).length > 0">
+                <p class="admin-form-section-title flex items-center gap-2">
+                  <Icon name="heroicons:archive-box-arrow-down" class="h-4 w-4 text-warning-500" />
+                  Old values
+                </p>
+                <div class="mt-2.5 overflow-hidden rounded-xl border border-warning-200 bg-warning-50">
+                  <pre class="overflow-x-auto whitespace-pre-wrap p-4 font-mono text-caption leading-relaxed text-warning-900">{{ prettyJSON(detailModal.log.old_values) }}</pre>
+                </div>
+              </div>
+
+              <!-- New values -->
+              <div v-if="detailModal.log.new_values && typeof detailModal.log.new_values === 'object' && Object.keys(detailModal.log.new_values).length > 0">
+                <p class="admin-form-section-title flex items-center gap-2">
+                  <Icon name="heroicons:sparkles" class="h-4 w-4 text-success-600" />
+                  New values
+                </p>
+                <div class="mt-2.5 overflow-hidden rounded-xl border border-success-200 bg-success-50">
+                  <pre class="overflow-x-auto whitespace-pre-wrap p-4 font-mono text-caption leading-relaxed text-success-900">{{ prettyJSON(detailModal.log.new_values) }}</pre>
+                </div>
+              </div>
+
+              <!-- Full metadata -->
+              <div v-if="hasExtraMetadata">
+                <p class="admin-form-section-title flex items-center gap-2">
+                  <Icon name="heroicons:code-bracket-square" class="h-4 w-4 text-secondary-600" />
+                  Full metadata (JSON)
+                </p>
+                <div class="mt-2.5 overflow-hidden rounded-xl bg-secondary-900">
+                  <pre class="overflow-x-auto whitespace-pre-wrap p-4 font-mono text-caption leading-relaxed text-secondary-100">{{ prettyJSON(detailModal.log.metadata) }}</pre>
+                </div>
+              </div>
+
+              <!-- User agent -->
+              <div v-if="detailModal.log.user_agent">
+                <p class="admin-form-section-title flex items-center gap-2">
+                  <Icon name="heroicons:command-line" class="h-4 w-4 text-secondary-600" />
+                  User agent
+                </p>
+                <div class="mt-2.5 rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                  <p class="break-all font-mono text-caption leading-relaxed text-secondary-700">
+                    {{ detailModal.log.user_agent }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-dialog-foot">
+              <button
+                type="button"
+                class="admin-btn admin-btn--ghost"
+                @click="closeLogDetail"
+              >
+                Close
+              </button>
+              <button
+                v-if="detailModal.log?.id"
+                type="button"
+                class="admin-btn admin-btn--primary"
+                @click="copyLogDetail"
+              >
+                <Icon name="heroicons:clipboard" class="h-4 w-4" />
+                Copy details
+              </button>
             </div>
           </div>
         </div>
-
-        <!-- Modal Footer -->
-        <div class="px-6 py-4 border-t border-secondary-200 flex flex-wrap justify-end gap-3 bg-secondary-50/50 flex-shrink-0">
-          <button
-            type="button"
-            @click="closeLogDetail"
-            class="btn btn-outline"
-          >
-            Close
-          </button>
-          <button
-            v-if="detailModal.log?.id"
-            type="button"
-            @click="copyLogDetail"
-            class="btn btn-primary"
-          >
-            <Icon name="heroicons:clipboard" class="h-4 w-4 mr-2" />
-            Copy Details
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- ============= END LOG DETAIL MODAL ============= -->
+      </Transition>
+    </Teleport>
+    <!-- ============= End log detail dialog ============= -->
   </div>
 </template>
 
@@ -680,6 +586,7 @@ const { $api, $toast } = useNuxtApp();
 const loading = ref(false);
 const exportingCsv = ref(false);
 const currentPage = ref(1);
+const itemsPerPage = ref(25);
 
 const logs = ref([]);
 const meta = reactive({
@@ -690,6 +597,7 @@ const meta = reactive({
   from: 0,
   to: 0,
   available_action_types: [],
+  available_entity_types: [],
 });
 
 const filters = reactive({
@@ -706,66 +614,22 @@ const detailModal = reactive({
   log: null,
 });
 
-// =============== COMPUTED ===============
-const stats = computed(() => {
-  // 🏰 Robust guard: NEVER crash even if logs.value is wrong shape
-  // (e.g., Laravel pagination object accidentally assigned instead of array)
-  const allLogs = Array.isArray(logs.value) ? logs.value : (
-    Array.isArray(logs.value?.data) ? logs.value.data : []
-  );
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  sevenDaysAgo.setHours(0, 0, 0, 0);
-
-  let todayCount = 0;
-  let last7Count = 0;
-  let adminCount = 0;
-
-  for (const log of allLogs) {
-    if (!log || typeof log !== 'object') continue;
-    const t = log.created_at ? new Date(log.created_at) : null;
-    if (t && !Number.isNaN(t.getTime()) && t >= today) todayCount++;
-    if (t && !Number.isNaN(t.getTime()) && t >= sevenDaysAgo) last7Count++;
-    if (
-      log.metadata?.admin_context ||
-      log.user?.role === 'admin' ||
-      log.user?.is_admin === true ||
-      log.user?.is_admin === 1 ||
-      log.metadata?.admin_role
-    ) {
-      adminCount++;
-    }
-  }
-
-  return {
-    today: todayCount,
-    last7Days: last7Count,
-    adminActions: adminCount,
-  };
+// Stats are returned by the backend (computed over the full filtered set,
+// not just the current page) so the KPI tiles are always accurate.
+const stats = reactive({
+  today: 0,
+  last7Days: 0,
+  adminActions: 0,
 });
 
 const hasExtraMetadata = computed(() => {
   const md = detailModal.log?.metadata;
   if (!md || typeof md !== 'object') return false;
   const keys = Object.keys(md);
-  const baseKeys = ['old_values', 'new_values'];
-  return keys.some(k => !baseKeys.includes(k) && (Array.isArray(md[k]) ? md[k].length > 0 : md[k] !== null && md[k] !== undefined && md[k] !== ''));
-});
-
-const pageNumbers = computed(() => {
-  const current = meta.current_page || 1;
-  const last = meta.last_page || 1;
-  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
-  const pages = [1];
-  const start = Math.max(2, current - 1);
-  const end = Math.min(last - 1, current + 1);
-  if (start > 2) pages.push('...');
-  for (let p = start; p <= end; p++) pages.push(p);
-  if (end < last - 1) pages.push('...');
-  pages.push(last);
-  return pages;
+  return keys.some(k => {
+    const v = md[k];
+    return Array.isArray(v) ? v.length > 0 : v !== null && v !== undefined && v !== '';
+  });
 });
 
 // =============== METHODS ===============
@@ -778,7 +642,7 @@ const buildQueryParams = () => {
   if (filters.date_from) params.date_from = filters.date_from;
   if (filters.date_to) params.date_to = filters.date_to;
   params.page = currentPage.value;
-  params.per_page = meta.per_page || 25;
+  params.per_page = itemsPerPage.value;
   return params;
 };
 
@@ -789,34 +653,39 @@ const fetchAuditLogs = async (resetPage = false) => {
     const params = buildQueryParams();
     const resp = await $api.get('/admin/audit-logs', { params });
     if (resp?.success) {
-      // 🏰 Laravel API may return pagination in 3 shapes:
-      // Shape A: { data: [...], meta: {...} }
-      // Shape B: { data: { data: [...], meta: {...} } }  (double-wrapped from api.client unwrap of paginate resource)
-      // Shape C: [ ... ] (plain array)
-      let extractedData = resp.data ?? resp.logs ?? [];
-      let extractedMeta = resp.meta ?? resp.pagination ?? {};
+      // Laravel API returns { logs: { data, total, per_page, current_page, last_page, from, to, ... }, meta, stats }
+      const paginator = resp.logs ?? resp.data ?? {};
+      let extractedData = paginator.data ?? resp.data ?? resp.logs ?? [];
 
-      // Handle double-wrapped pagination (Shape B is common in Laravel API Resources)
-      if (extractedData && typeof extractedData === 'object' && !Array.isArray(extractedData)) {
-        if (Array.isArray(extractedData.data)) {
-          // Merge meta from both inner and outer
-          const innerMeta = extractedData.meta || extractedData.pagination || {};
-          extractedMeta = Object.assign({}, innerMeta, extractedMeta);
-          extractedData = extractedData.data;
-        } else {
-          extractedData = [];
-        }
+      // If the paginator itself is the array (plain array response)
+      if (Array.isArray(paginator)) {
+        extractedData = paginator;
       }
 
-      // Final safety: always coerce to array (never set logs.value to an object!)
+      // Final safety: always coerce to array
       logs.value = Array.isArray(extractedData) ? extractedData : [];
 
-      // Merge meta (paginate fields: total/per_page/current_page/last_page/from/to + available_action_types)
-      if (extractedMeta && typeof extractedMeta === 'object') {
-        Object.assign(meta, extractedMeta);
+      // Pull pagination fields directly from the Laravel paginator object
+      if (paginator && typeof paginator === 'object' && !Array.isArray(paginator)) {
+        meta.total = typeof paginator.total === 'number' ? paginator.total : (logs.value.length || 0);
+        meta.per_page = typeof paginator.per_page === 'number' ? paginator.per_page : (meta.per_page || 25);
+        meta.current_page = typeof paginator.current_page === 'number' ? paginator.current_page : currentPage.value;
+        meta.last_page = typeof paginator.last_page === 'number' ? paginator.last_page : Math.max(1, Math.ceil(meta.total / meta.per_page));
+        meta.from = typeof paginator.from === 'number' ? paginator.from : (logs.value.length ? ((meta.current_page - 1) * meta.per_page) + 1 : 0);
+        meta.to = typeof paginator.to === 'number' ? paginator.to : (logs.value.length ? meta.from + logs.value.length - 1 : 0);
       }
+
+      // Merge additional meta (available_action_types, available_entity_types, total_count)
       if (resp.meta && typeof resp.meta === 'object') {
-        Object.assign(meta, resp.meta);
+        if (Array.isArray(resp.meta.available_action_types)) {
+          meta.available_action_types = resp.meta.available_action_types;
+        }
+        if (Array.isArray(resp.meta.available_entity_types)) {
+          meta.available_entity_types = resp.meta.available_entity_types;
+        }
+        if (typeof resp.meta.total_count === 'number' && !meta.total) {
+          meta.total = resp.meta.total_count;
+        }
       }
 
       // Parse available_action_types if serialized JSON string
@@ -826,15 +695,13 @@ const fetchAuditLogs = async (resetPage = false) => {
         }
       }
       if (!Array.isArray(meta.available_action_types)) meta.available_action_types = [];
+      if (!Array.isArray(meta.available_entity_types)) meta.available_entity_types = [];
 
-      // If total not present in meta, fallback to array length
-      if (!meta.total || typeof meta.total !== 'number') meta.total = logs.value.length;
-      if (!meta.current_page) meta.current_page = currentPage.value;
-      if (!meta.last_page) meta.last_page = Math.max(1, Math.ceil(meta.total / (meta.per_page || 25)));
-      if (!meta.from || !meta.to) {
-        const from = logs.value.length ? ((currentPage.value - 1) * (meta.per_page || 25)) + 1 : 0;
-        meta.from = from;
-        meta.to = logs.value.length ? from + logs.value.length - 1 : 0;
+      // Stats from backend (computed over full filtered dataset)
+      if (resp.stats && typeof resp.stats === 'object') {
+        stats.today = Number(resp.stats.today) || 0;
+        stats.last7Days = Number(resp.stats.last_7_days) || 0;
+        stats.adminActions = Number(resp.stats.admin_actions) || 0;
       }
     } else {
       $toast.error(resp?.message || 'Failed to load audit log.');
@@ -867,6 +734,12 @@ const changePage = async (pageNum) => {
   if (typeof window !== 'undefined') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+};
+
+const changeItemsPerPage = (perPage) => {
+  itemsPerPage.value = perPage;
+  currentPage.value = 1;
+  fetchAuditLogs(false);
 };
 
 const exportAuditCsv = async () => {
@@ -912,19 +785,20 @@ const closeLogDetail = () => {
 
 const copyLogDetail = async () => {
   if (!detailModal.log) return;
+  const log = detailModal.log;
   const text = [
-    `=== AUDIT LOG #${detailModal.log.id} ===`,
-    `Time: ${formatDateDMY(detailModal.log.created_at)} ${formatTime(detailModal.log.created_at)}`,
-    `Actor: ${detailModal.log.user?.full_name || detailModal.log.user?.name || 'System'} (${detailModal.log.user?.email || 'N/A'})`,
-    `Action Type: ${detailModal.log.action_type}`,
-    `Description: ${detailModal.log.description || 'N/A'}`,
-    `Entity: ${detailModal.log.entity_type || 'N/A'}${detailModal.log.entity_id ? ' #' + detailModal.log.entity_id : ''}`,
-    `IP Address: ${detailModal.log.ip_address || 'N/A'}`,
-    `HTTP Method: ${detailModal.log.metadata?.http_method || 'N/A'} ${detailModal.log.metadata?.response_status || ''}`,
-    `Route: ${detailModal.log.metadata?.route_uri || 'N/A'}`,
+    `=== AUDIT LOG #${log.id} ===`,
+    `Time: ${formatDateDMY(log.created_at)} ${formatTime(log.created_at)}`,
+    `Actor: ${log.actor?.name || 'System'} (${log.actor?.email || 'N/A'})`,
+    `Action Type: ${log.action_type}`,
+    `Description: ${log.action_description || 'N/A'}`,
+    `Entity: ${log.entity_type || 'N/A'}${log.entity_id ? ' #' + log.entity_id : ''}`,
+    `IP Address: ${log.ip_address || 'N/A'}`,
+    `HTTP Method: ${log.metadata?.http_method || 'N/A'} ${log.metadata?.response_status || ''}`,
+    `Route: ${log.metadata?.route_uri || 'N/A'}`,
     ``,
     `Metadata (JSON):`,
-    prettyJSON(detailModal.log.metadata),
+    prettyJSON(log.metadata),
   ].filter(Boolean).join('\n');
   try {
     await navigator.clipboard.writeText(text);
@@ -973,18 +847,35 @@ const prettyJSON = (obj) => {
   catch { return String(obj); }
 };
 
-// =============== BADGE COLOR HELPERS ===============
-const getActionBadgeClass = (actionType) => {
+// =============== BADGE TONE RESOLVERS ===============
+// Maps action types onto Ink & Brass badge tones (never Tailwind colours,
+// so the shared AdminStatusBadge stays the single source of styling).
+const ACTION_TONE_RULES = [
+  [/create|register|purchase|send|add_|_created$/, 'success'],
+  [/update|edit|modify|change|assign|enable|sync/, 'warning'],
+  [/delete|remove|revoke|disable|cancel|unlink|purge/, 'danger'],
+  [/login|auth|verify|2fa/, 'info'],
+  [/logout/, 'neutral'],
+  [/export|download|report|backup/, 'brass'],
+  [/admin|audit|impersonate|bulk/, 'brass'],
+];
+const actionTone = (actionType) => {
   const at = (actionType || '').toString().toLowerCase();
-  if (/create|register|purchase|send|add_|_created$/.test(at)) return 'bg-success-100 text-success-800';
-  if (/update|edit|modify|change|assign|enable|sync/.test(at)) return 'bg-warning-100 text-warning-800';
-  if (/delete|remove|revoke|disable|cancel|unlink|purge/.test(at)) return 'bg-error-100 text-error-800';
-  if (/login|auth|verify|2fa/.test(at)) return 'bg-info-100 text-info-800';
-  if (/logout/.test(at)) return 'bg-secondary-100 text-secondary-700';
-  if (/export|download|report|backup/.test(at)) return 'bg-primary-100 text-primary-800';
-  if (/admin|audit|impersonate|bulk/.test(at)) return 'bg-primary-100 text-primary-800';
-  return 'bg-secondary-100 text-secondary-700';
+  for (const [re, tone] of ACTION_TONE_RULES) {
+    if (re.test(at)) return tone;
+  }
+  return 'neutral';
 };
+
+const HTTP_TONE_MAP = {
+  GET: 'info',
+  HEAD: 'info',
+  POST: 'success',
+  PUT: 'warning',
+  PATCH: 'warning',
+  DELETE: 'danger',
+};
+const httpTone = (method) => HTTP_TONE_MAP[(method || '').toString().toUpperCase()] || 'neutral';
 
 // ⚠️ IKON DI BAWAH HANYA GUNA SET YANG CONFIRMED WORKING (pernah digunakan & verified render sebagai icon BUKAN plain text):
 //   heroicons:document-text, heroicons:check-circle, heroicons:arrow-down-tray,
@@ -1000,15 +891,6 @@ const getActionIcon = (actionType) => {
   if (/admin|audit|role|permission/.test(at)) return 'heroicons:check-circle';
   if (/view|access|read|show|list|search|index|visited|viewed/.test(at)) return 'heroicons:document-text';
   return 'heroicons:document-text';
-};
-
-const getHttpMethodBadgeClass = (method) => {
-  const m = (method || '').toString().toUpperCase();
-  if (m === 'GET' || m === 'HEAD') return 'bg-info-100 text-info-800';
-  if (m === 'POST') return 'bg-success-100 text-success-800';
-  if (m === 'PUT' || m === 'PATCH') return 'bg-warning-100 text-warning-800';
-  if (m === 'DELETE') return 'bg-error-100 text-error-800';
-  return 'bg-secondary-100 text-secondary-700';
 };
 
 // =============== LIFECYCLE ===============

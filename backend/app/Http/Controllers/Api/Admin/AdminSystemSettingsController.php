@@ -17,6 +17,22 @@ class AdminSystemSettingsController extends Controller
     protected string $cachePrefix = 'admin_system_settings:';
     protected FileUploadService $fileUploadService;
 
+    /**
+     * System-wide colour themes. Kept in sync with the frontend theme
+     * registry in `frontend/composables/useTheme.js`. The first entry is the
+     * default fallback (Ink & Brass) applied when nothing has been chosen.
+     */
+    protected array $allowedThemes = [
+        'zoraPro',
+        'holographicPurple',
+        'landingPage',
+        'cyberExecutive',
+        'obsidianGlass',
+        'onyxPlatinum',
+    ];
+
+    protected string $defaultTheme = 'zoraPro';
+
     public function __construct(FileUploadService $fileUploadService)
     {
         $this->fileUploadService = $fileUploadService;
@@ -73,8 +89,8 @@ class AdminSystemSettingsController extends Controller
         try {
             $defaults = [
                 'app_name' => 'NFCGo',
-                'app_url' => 'https://nfcgo.my',
-                'support_email' => 'support@nfcgo.my',
+                'app_url' => 'https://nfcgo.com',
+                'support_email' => 'support@nfcgo.com',
                 'support_phone' => '+60 12-345 6789',
                 'company_name' => 'NFCGo Sdn Bhd',
                 'company_address' => '',
@@ -262,7 +278,7 @@ class AdminSystemSettingsController extends Controller
                 'smtp_encryption' => env('MAIL_ENCRYPTION', 'tls'),
                 'mailer' => env('MAIL_MAILER', 'smtp'),
                 'from_name' => env('MAIL_FROM_NAME', 'NFCGo'),
-                'from_email' => env('MAIL_FROM_ADDRESS', 'no-reply@nfcgo.my'),
+                'from_email' => env('MAIL_FROM_ADDRESS', 'no-reply@nfcgo.com'),
             ];
 
             $saved = Cache::get($this->cachePrefix . 'email', []);
@@ -364,7 +380,7 @@ class AdminSystemSettingsController extends Controller
             $to = $validator->validated()['to'];
             $emailSettings = Cache::get($this->cachePrefix . 'email', []);
             $fromName = $emailSettings['from_name'] ?? env('MAIL_FROM_NAME', 'NFCGo');
-            $fromEmail = $emailSettings['from_email'] ?? env('MAIL_FROM_ADDRESS', 'no-reply@nfcgo.my');
+            $fromEmail = $emailSettings['from_email'] ?? env('MAIL_FROM_ADDRESS', 'no-reply@nfcgo.com');
 
             // Send a simple test email
             Mail::raw("This is a test email from NFCGo System Configuration.\n\nIf you received this, your email settings are working correctly!\n\nTime: " . now()->toDateTimeString(), function ($message) use ($to, $fromName, $fromEmail) {
@@ -893,7 +909,76 @@ class AdminSystemSettingsController extends Controller
     }
 
     /**
+     * Get the system-wide appearance settings (admin-controlled theme)
+     */
+    public function getAppearanceSettings()
+    {
+        try {
+            $saved = Cache::get($this->cachePrefix . 'appearance', []);
+            $theme = $saved['system_theme'] ?? $this->defaultTheme;
+
+            if (!in_array($theme, $this->allowedThemes, true)) {
+                $theme = $this->defaultTheme;
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'system_theme' => $theme,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to get appearance settings: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load settings',
+            ], 500);
+        }
+    }
+
+    /**
+     * Save the system-wide appearance theme (admin only).
+     * Applies to every visitor — end users cannot change the system theme.
+     */
+    public function saveAppearanceSettings(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'system_theme' => 'required|string|in:' . implode(',', $this->allowedThemes),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $appearance = Cache::get($this->cachePrefix . 'appearance', []);
+            $appearance['system_theme'] = $validator->validated()['system_theme'];
+            Cache::forever($this->cachePrefix . 'appearance', $appearance);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appearance settings saved successfully',
+                'data' => [
+                    'system_theme' => $appearance['system_theme'],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to save appearance settings: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save settings: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Public brand info endpoint (for non-admin pages like login/home)
+     * Also exposes the admin-controlled system theme so every visitor
+     * (authenticated or not) applies the same palette.
      */
     public function publicBrandInfo()
     {
@@ -902,10 +987,17 @@ class AdminSystemSettingsController extends Controller
                 'app_name' => 'NFCGo',
                 'system_logo_url' => '',
                 'system_favicon_url' => '',
+                'system_theme' => $this->defaultTheme,
             ];
             $general = Cache::get($this->cachePrefix . 'general', []);
             $brand = Cache::get($this->cachePrefix . 'brand', []);
-            $data = array_merge($defaults, array_intersect_key($general, ['app_name' => true]), $brand);
+            $appearance = Cache::get($this->cachePrefix . 'appearance', []);
+            $data = array_merge($defaults, array_intersect_key($general, ['app_name' => true]), $brand, $appearance);
+
+            // Never leak an invalid/stale theme key to the client.
+            if (!in_array($data['system_theme'] ?? null, $this->allowedThemes, true)) {
+                $data['system_theme'] = $this->defaultTheme;
+            }
 
             // Correct brand asset URLs for current request context
             foreach (['system_logo_url', 'system_logo_public_url', 'system_favicon_url', 'system_favicon_public_url'] as $key) {

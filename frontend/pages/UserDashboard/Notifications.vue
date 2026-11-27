@@ -73,21 +73,21 @@
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label text-orange-600">Unread</p>
-            <p class="stat-value text-orange-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-warning-600">Unread</p>
+            <p class="stat-value text-warning-600 mt-1.5 tabular-nums">
               {{ unreadCount }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-warning-100 to-warning-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:envelope"
-              class="w-6 h-6 text-orange-600"
+              class="w-6 h-6 text-warning-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-orange-100 rounded-full overflow-hidden">
+        <div class="mt-4 h-1 bg-warning-100 rounded-full overflow-hidden">
           <div
-            class="h-full bg-orange-500 rounded-full transition-all duration-500"
+            class="h-full bg-warning-500 rounded-full transition-all duration-500"
             :style="{ width: unreadPct + '%' }"
           ></div>
         </div>
@@ -96,21 +96,21 @@
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label text-green-600">Read</p>
-            <p class="stat-value text-green-600 mt-1.5 tabular-nums">
+            <p class="stat-label text-success-600">Read</p>
+            <p class="stat-value text-success-600 mt-1.5 tabular-nums">
               {{ readCount }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-gradient-to-br from-success-100 to-success-200 rounded-xl flex items-center justify-center">
             <Icon
               name="heroicons:check-circle-20-solid"
-              class="w-6 h-6 text-green-600"
+              class="w-6 h-6 text-success-600"
             />
           </div>
         </div>
-        <div class="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
+        <div class="mt-4 h-1 bg-success-100 rounded-full overflow-hidden">
           <div
-            class="h-full bg-green-500 rounded-full transition-all duration-500"
+            class="h-full bg-success-500 rounded-full transition-all duration-500"
             :style="{ width: readPct + '%' }"
           ></div>
         </div>
@@ -298,7 +298,7 @@
                   <div class="flex items-center gap-2">
                     <span
                       v-if="notification.is_read"
-                      class="flex items-center text-caption text-green-600 font-semibold"
+                      class="flex items-center text-caption text-success-600 font-semibold"
                     >
                       <Icon
                         name="heroicons:check-circle-20-solid"
@@ -335,7 +335,7 @@
               </button>
               <button
                 @click.stop="handleDeleteNotification(notification.id)"
-                class="p-2 text-secondary-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                class="p-2 text-secondary-400 hover:text-error-600 hover:bg-error-50 rounded-lg transition-all"
                 title="Delete notification"
               >
                 <Icon name="heroicons:trash" class="h-4.5 w-4.5" />
@@ -351,7 +351,7 @@
           <button
             v-if="hasReadNotifications"
             @click="handleDeleteAllRead"
-            class="px-3.5 py-2 text-button text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors inline-flex items-center gap-1.5 border border-red-100"
+            class="px-3.5 py-2 text-button text-error-600 bg-error-50 hover:bg-error-100 rounded-xl transition-colors inline-flex items-center gap-1.5 border border-error-100"
           >
             <Icon name="heroicons:trash" class="w-3.5 h-3.5" />
             Clear all read
@@ -486,11 +486,11 @@ const hasReadNotifications = computed(() =>
 
 const getCategoryBgClass = (category) => {
   const classes = {
-    system: "bg-blue-100",
-    security: "bg-red-100",
-    activity: "bg-green-100",
-    payment: "bg-purple-100",
-    nfc: "bg-orange-100",
+    system: "bg-info-100",
+    security: "bg-error-100",
+    activity: "bg-success-100",
+    payment: "bg-primary-100",
+    nfc: "bg-warning-100",
     other: "bg-secondary-100",
   };
   return classes[category] || "bg-secondary-100";
@@ -498,11 +498,11 @@ const getCategoryBgClass = (category) => {
 
 const getCategoryBadgeClass = (category) => {
   const classes = {
-    system: "bg-blue-50 text-blue-700",
-    security: "bg-red-50 text-red-700",
-    activity: "bg-green-50 text-green-700",
-    payment: "bg-purple-50 text-purple-700",
-    nfc: "bg-orange-50 text-orange-700",
+    system: "bg-info-50 text-info-700",
+    security: "bg-error-50 text-error-700",
+    activity: "bg-success-50 text-success-700",
+    payment: "bg-primary-50 text-primary-700",
+    nfc: "bg-warning-50 text-warning-700",
     other: "bg-secondary-100 text-secondary-700",
   };
   return classes[category] || "bg-secondary-100 text-secondary-700";

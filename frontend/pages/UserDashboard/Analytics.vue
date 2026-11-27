@@ -41,17 +41,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Subscription Notice for Free Users -->
       <div v-if="!hasPremiumSubscription" class="mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="bg-info-50 border border-info-200 rounded-lg p-4">
           <div class="flex items-center">
             <Icon
               name="heroicons:information-circle"
-              class="h-5 w-5 text-blue-400 mr-2"
+              class="h-5 w-5 text-info-400 mr-2"
             />
             <div class="flex-1">
-              <h3 class="text-body font-medium text-blue-800">
+              <h3 class="text-body font-medium text-info-800">
                 Free Plan Analytics
               </h3>
-              <p class="text-body text-blue-700 mt-1">
+              <p class="text-body text-info-700 mt-1">
                 You're viewing basic analytics. Upgrade to Premium for detailed
                 insights, device breakdowns, geographic data, and more.
               </p>
@@ -144,8 +144,8 @@
 
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0 bg-blue-100 p-3 rounded-lg">
-                <Icon name="heroicons:users" class="h-6 w-6 text-blue-600" />
+              <div class="flex-shrink-0 bg-info-100 p-3 rounded-lg">
+                <Icon name="heroicons:users" class="h-6 w-6 text-info-600" />
               </div>
               <div class="ml-4">
                 <p class="stat-label text-secondary-500">
@@ -172,8 +172,8 @@
 
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0 bg-green-100 p-3 rounded-lg">
-                <Icon name="heroicons:clock" class="h-6 w-6 text-green-600" />
+              <div class="flex-shrink-0 bg-success-100 p-3 rounded-lg">
+                <Icon name="heroicons:clock" class="h-6 w-6 text-success-600" />
               </div>
               <div class="ml-4">
                 <p class="stat-label text-secondary-500">
@@ -188,8 +188,8 @@
 
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0 bg-orange-100 p-3 rounded-lg">
-                <Icon name="heroicons:map-pin" class="h-6 w-6 text-orange-600" />
+              <div class="flex-shrink-0 bg-warning-100 p-3 rounded-lg">
+                <Icon name="heroicons:map-pin" class="h-6 w-6 text-warning-600" />
               </div>
               <div class="ml-4">
                 <p class="stat-label text-secondary-500">
@@ -349,11 +349,11 @@
                   >
                     <div class="flex items-center space-x-3">
                       <div
-                        class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"
+                        class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center"
                       >
                         <Icon
                           name="heroicons:cursor-arrow-ripple"
-                          class="h-5 w-5 text-purple-600"
+                          class="h-5 w-5 text-primary-600"
                         />
                       </div>
                       <div>
@@ -482,7 +482,7 @@
                     <div class="flex items-center space-x-2">
                       <div class="w-16 bg-secondary-200 rounded-full h-2">
                         <div
-                          class="bg-orange-500 h-2 rounded-full"
+                          class="bg-warning-500 h-2 rounded-full"
                           :style="{ width: `${hour.percentage}%` }"
                         ></div>
                       </div>
@@ -565,8 +565,8 @@ const selectedPeriod = ref("30d");
 
 // ── Card selection ──────────────────────────────────────────────────────────
 // CardManagement links here with ?cardId=<NfcCard id>&nfc_card_id=...&card_number=...
-// Fall back to the user's first card (from /me -> user.nfcCards) when no param.
-const userCards = computed(() => authStore.user?.nfcCards || []);
+// Fall back to the user's first card (from /me -> user.nfc_cards) when no param.
+const userCards = computed(() => authStore.user?.nfc_cards ?? authStore.user?.nfcCards ?? []);
 
 const selectedCard = computed(() => {
   const queryId = route.query.cardId;
@@ -600,8 +600,8 @@ const cardSubtitle = computed(() => {
   const info = cardInfo.value || selectedCard.value;
   if (!info) return "—";
   const num = info.card_number ? `Card #${info.card_number}` : null;
-  const ref = info.card_id || info.nfc_card_id || null;
-  return [num, ref].filter(Boolean).join(" • ") || "NFC card";
+  const cardRef = info.card_id || info.nfc_card_id || null;
+  return [num, cardRef].filter(Boolean).join(" • ") || "NFC card";
 });
 
 // Check if user has Premium subscription for detailed analytics
@@ -765,8 +765,8 @@ const refreshTaps = () => loadAnalytics();
 const upgradeToPremium = () => {
   const { $toast } = useNuxtApp();
   $toast?.info?.("Opening upgrade options...");
-  // Send the user to the real, working plan-selection / upgrade route.
-  navigateTo("/UserDashboard/PlanSelection");
+  // Send the user to the onboarding funnel's plan-selection step.
+  navigateTo("/Onboarding/plan");
 };
 
 const exportAnalytics = async () => {

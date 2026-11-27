@@ -167,19 +167,11 @@ class SettingsController extends Controller
 
         $preference = UserNotificationPreference::where('user_id', $user->id)->first();
 
+        // The placeholder `security_settings` / `privacy_settings` blocks were
+        // removed: nothing persisted or enforced them, and no client reads them.
         return response()->json([
             'success' => true,
             'user' => $user,
-            'security_settings' => [
-                'two_factor_sms' => false, // Placeholder
-                'login_notifications' => true,
-            ],
-            'privacy_settings' => [
-                'public_profile' => true,
-                'search_indexing' => true,
-                'analytics_enabled' => true,
-                'location_tracking' => true,
-            ],
             'notification_settings' => $preference
                 ? [
                     'profile_views' => (bool) $preference->profile_views,
@@ -188,7 +180,79 @@ class SettingsController extends Controller
                     'product_updates' => (bool) $preference->product_updates,
                 ]
                 : UserNotificationPreference::DEFAULTS,
+            // Admin-configured contact (System Settings → General), used by the
+            // "Close account" request on the Settings page.
+            'support_email' => $this->supportEmail(),
         ]);
+    }
+
+    /**
+     * Download a copy of the signed-in user's own data.
+     *
+     * POST /api/settings/export-data
+     * Read-only: account details, NFC cards with their profile pages and links,
+     * invoices, subscriptions and notification preferences. Credentials and
+     * 2FA material are never included.
+     */
+    public function exportData(Request $request)
+    {
+        $user = $request->user();
+
+        try {
+            $account = $user->makeHidden(['nfcCards', 'nfc_cards', 'latestSubscription'])->toArray();
+            unset($account['nfc_cards'], $account['latest_subscription']);
+            unset($account['two_factor_secret'], $account['remember_token'], $account['password']);
+            if (is_array($account['settings'] ?? null)) {
+                $account['settings'] = collect($account['settings'])
+                    ->reject(fn ($v, $k) => Str::contains(strtolower((string) $k), ['two_factor', 'recovery', 'secret', 'token']))
+                    ->all();
+            }
+
+            $cards = $user->nfcCards()
+                ->with(['landingPage.socialLinks'])
+                ->get()
+                ->map(fn ($card) => $card->toArray())
+                ->all();
+
+            $invoices = \App\Models\Invoice::where('user_id', $user->id)
+                ->orderByDesc('issued_at')
+                ->get(['invoice_number', 'status', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount', 'currency', 'line_items', 'issued_at', 'paid_at', 'due_date'])
+                ->toArray();
+
+            $preference = UserNotificationPreference::where('user_id', $user->id)->first();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'exported_at' => now()->toIso8601String(),
+                    'account' => $account,
+                    'nfc_cards' => $cards,
+                    'invoices' => $invoices,
+                    'subscriptions' => $user->subscriptions()->get()->toArray(),
+                    'notification_preferences' => $preference
+                        ? $preference->only(['profile_views', 'nfc_taps', 'weekly_reports', 'product_updates'])
+                        : UserNotificationPreference::DEFAULTS,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('User data export failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'We could not prepare your export. Please try again.',
+            ], 500);
+        }
+    }
+
+    private function supportEmail(): string
+    {
+        $saved = \Illuminate\Support\Facades\Cache::get('admin_system_settings:general', []);
+        $email = is_array($saved) ? ($saved['support_email'] ?? null) : null;
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'support@nfcgo.com';
     }
 
     /**

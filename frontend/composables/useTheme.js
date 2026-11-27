@@ -1,8 +1,15 @@
 // composables/useTheme.js
-// Global theme switcher composable with 5 themes and localStorage persistence
+// System-wide theme. The active theme is controlled by the ADMIN only
+// (persisted server-side under system-settings/appearance) and applied to
+// every visitor. End users cannot change the system theme — they only control
+// the theme of their own public landing page.
+//
+// The chosen theme is cached in localStorage purely to paint the correct
+// palette instantly on the next cold load (avoids a flash of the default).
+// The legacy per-user key `nfcgo-color-theme` is deliberately ignored.
 // Icons use Heroicons name paths (SVG) — EMOJI-FREE per UI guidelines
 
-const THEME_STORAGE_KEY = 'nfcgo-color-theme';
+const SYSTEM_THEME_STORAGE_KEY = 'nfcgo-system-theme';
 const DEFAULT_THEME = 'zoraPro';
 
 // Theme definitions with complete color palettes
@@ -156,8 +163,86 @@ const themes = {
       secondary800: '#1E293B',
       secondary900: '#0F172A',
     }
+  },
+  onyxPlatinum: {
+    name: 'Onyx & Platinum',
+    description: 'Cool onyx black with platinum-silver accents — a refined, monochrome executive look.',
+    icon: 'heroicons:cube-transparent',
+    colors: {
+      // Primary — ONYX (cool near-black)
+      primary50: '#F5F6F8',
+      primary100: '#E7E9ED',
+      primary200: '#CFD3DA',
+      primary300: '#AAB0BB',
+      primary400: '#7E8794',
+      primary500: '#545C69',
+      primary600: '#333A45',
+      primary700: '#232932',
+      primary800: '#171B21',
+      primary900: '#0C0E12',
+      // Accent — PLATINUM (cool silver)
+      accent: '#C9CED6',
+      accentSecondary: '#9AA3AE',
+      // Secondary — cool slate neutral
+      secondary50: '#F8FAFC',
+      secondary100: '#F1F5F9',
+      secondary200: '#E2E8F0',
+      secondary300: '#CBD5E1',
+      secondary400: '#94A3B8',
+      secondary500: '#64748B',
+      secondary600: '#475569',
+      secondary700: '#334155',
+      secondary800: '#1E293B',
+      secondary900: '#0F172A',
+    }
   }
 };
+
+// ---------------------------------------------------------------------------
+// Accent scale helpers
+// Every theme only declares a single `accent` (+ `accentSecondary`); we derive
+// a full 50–900 ramp from it so `bg-accent-*` / `text-accent-*` utilities work
+// for any palette, not just Ink & Brass.
+// ---------------------------------------------------------------------------
+const clampChannel = (v) => Math.max(0, Math.min(255, Math.round(v)));
+
+const parseHex = (hex) => {
+  const h = String(hex).replace('#', '').trim();
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+  ];
+};
+
+const toHex = (rgb) =>
+  '#' + rgb.map((c) => clampChannel(c).toString(16).padStart(2, '0')).join('').toUpperCase();
+
+// Mix a colour toward white (amount > 0) or black (amount < 0)
+const mix = (hex, amount) => {
+  const [r, g, b] = parseHex(hex);
+  const target = amount >= 0 ? 255 : 0;
+  const t = Math.abs(amount);
+  return toHex([
+    r + (target - r) * t,
+    g + (target - g) * t,
+    b + (target - b) * t,
+  ]);
+};
+
+const buildAccentScale = (accent, accentSecondary) => ({
+  accent50: mix(accent, 0.92),
+  accent100: mix(accent, 0.84),
+  accent200: mix(accent, 0.66),
+  accent300: mix(accent, 0.46),
+  accent400: mix(accent, 0.24),
+  accent500: accent,
+  accent600: accentSecondary || mix(accent, -0.18),
+  accent700: mix(accent, -0.3),
+  accent800: mix(accent, -0.46),
+  accent900: mix(accent, -0.6),
+});
 
 // Shared state (singleton pattern for SSR compatibility)
 let currentTheme = null;
@@ -192,6 +277,13 @@ export function useTheme() {
     root.style.setProperty('--theme-primary-900', colors.primary900);
     root.style.setProperty('--theme-accent', colors.accent);
     root.style.setProperty('--theme-accent-secondary', colors.accentSecondary);
+
+    // Derive + apply the full accent ramp (50–900) for every theme
+    const accentScale = buildAccentScale(colors.accent, colors.accentSecondary);
+    Object.entries(accentScale).forEach(([key, value]) => {
+      const shade = key.replace('accent', '');
+      root.style.setProperty(`--theme-accent-${shade}`, value);
+    });
     root.style.setProperty('--theme-secondary-50', colors.secondary50);
     root.style.setProperty('--theme-secondary-100', colors.secondary100);
     root.style.setProperty('--theme-secondary-200', colors.secondary200);
@@ -207,7 +299,22 @@ export function useTheme() {
     root.setAttribute('data-theme', themeName);
   };
 
-  // Set theme and persist to localStorage
+  // Apply the admin-controlled system theme (server value) and cache it so the
+  // next cold load paints the correct palette instantly. This is what every
+  // visitor goes through — end users never set this value themselves.
+  const applySystemTheme = (themeName) => {
+    const resolved = themes[themeName] ? themeName : DEFAULT_THEME;
+
+    themeRef.value = resolved;
+    currentTheme = resolved;
+    applyTheme(resolved);
+
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(SYSTEM_THEME_STORAGE_KEY, resolved);
+    }
+  };
+
+  // Set theme and persist to localStorage (admin action)
   const setTheme = (themeName) => {
     if (!themes[themeName]) {
       console.warn(`Theme "${themeName}" not found. Using default.`);
@@ -219,16 +326,16 @@ export function useTheme() {
     applyTheme(themeName);
     
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(THEME_STORAGE_KEY, themeName);
+      localStorage.setItem(SYSTEM_THEME_STORAGE_KEY, themeName);
     }
   };
 
-  // Initialize theme from localStorage or default
+  // Initialize theme from the cached system theme or the default fallback
   const initTheme = () => {
     let savedTheme = DEFAULT_THEME;
     
     if (typeof localStorage !== 'undefined') {
-      savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || DEFAULT_THEME;
+      savedTheme = localStorage.getItem(SYSTEM_THEME_STORAGE_KEY) || DEFAULT_THEME;
     }
     
     // Validate saved theme
@@ -267,6 +374,7 @@ export function useTheme() {
     currentTheme: themeRef,
     themes,
     setTheme,
+    applySystemTheme,
     initTheme,
     getThemes,
     getCurrentThemeInfo

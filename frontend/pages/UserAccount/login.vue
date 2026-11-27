@@ -1,11 +1,14 @@
 <!-- pages/UserAccount/login.vue -->
 <template>
-  <div class="lg-auth-root">
+  <div class="lg-auth-root" :class="isAdminLogin ? 'lg-auth-root--admin' : ''">
     <div class="lg-auth-split">
       <!-- ============================================================
            BRAND PANEL (Ink & Brass) — desktop storytelling / mobile intro
            ============================================================ -->
-      <aside class="lg-ink-side ink-surface ink-grid">
+      <aside
+        class="lg-ink-side ink-surface ink-grid"
+        :class="isAdminLogin ? 'lg-ink-side--admin' : ''"
+      >
         <div class="lg-ink-glow" aria-hidden="true"></div>
 
         <div class="lg-ink-inner">
@@ -35,8 +38,8 @@
             </p>
           </div>
 
-          <!-- NFC card mockup (desktop) -->
-          <div class="lg-card-stage">
+          <!-- NFC card mockup (public) / admin console preview (admin) -->
+          <div v-if="!isAdminLogin" class="lg-card-stage">
             <span class="tap-ripple lg-ripple" aria-hidden="true"></span>
 
             <div class="nfc-mock lg-mock">
@@ -66,20 +69,80 @@
             </div>
           </div>
 
+          <div v-else class="lg-console-stage">
+            <span class="tap-ripple lg-ripple" aria-hidden="true"></span>
+
+            <div class="lg-console">
+              <div class="lg-console__bar">
+                <span class="lg-console__dot"></span>
+                <span class="lg-console__dot"></span>
+                <span class="lg-console__dot"></span>
+                <span class="lg-console__title">admin.nfcgo / console</span>
+                <span class="lg-console__lock">
+                  <Icon name="heroicons:lock-closed" class="h-3.5 w-3.5" />
+                  Secure
+                </span>
+              </div>
+              <div class="lg-console__body">
+                <div class="lg-console__rail" aria-hidden="true">
+                  <span class="is-active"></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="lg-console__main">
+                  <div class="lg-console__shield">
+                    <span class="lg-console__shield-ico">
+                      <Icon name="heroicons:shield-check" class="h-4 w-4" />
+                    </span>
+                    <div>
+                      <p class="lg-console__shield-title">Protected workspace</p>
+                      <p class="lg-console__shield-text">
+                        Two-factor authentication &amp; role-based access
+                      </p>
+                    </div>
+                  </div>
+                  <div class="lg-console__rows" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Trust ticks -->
           <div class="lg-ticks">
-            <span>
-              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
-              No app required
-            </span>
-            <span>
-              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
-              Instant setup
-            </span>
-            <span>
-              <Icon name="heroicons:check-circle" class="lg-tick-ico" />
-              Secure sign-in
-            </span>
+            <template v-if="isAdminLogin">
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                Role-based access
+              </span>
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                Full audit trail
+              </span>
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                2FA protected
+              </span>
+            </template>
+            <template v-else>
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                No app required
+              </span>
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                Instant setup
+              </span>
+              <span>
+                <Icon name="heroicons:check-circle" class="lg-tick-ico" />
+                Secure sign-in
+              </span>
+            </template>
           </div>
 
           <!-- Explore CTA (desktop) -->
@@ -118,6 +181,10 @@
               <p class="lg-subtitle">
                 {{ isAdminLogin ? 'Sign in to access the NFCGo administration dashboard.' : 'Sign in to continue to your NFCGo dashboard.' }}
               </p>
+              <span v-if="isAdminLogin" class="lg-secure-chip">
+                <Icon name="heroicons:shield-check" class="h-3.5 w-3.5" />
+                Secure administration area
+              </span>
             </header>
 
             <!-- Status banners -->
@@ -328,6 +395,11 @@
             <p v-if="!isAdminLogin" class="lg-register">
               Don't have an account?
               <NuxtLink to="/UserAccount/register">Create one for free</NuxtLink>
+            </p>
+
+            <p v-else class="lg-admin-foot">
+              <Icon name="heroicons:information-circle" class="h-4 w-4" />
+              Authorised personnel only. Every sign-in attempt is logged.
             </p>
           </div>
 
@@ -576,21 +648,15 @@ const handleLogin = async () => {
     } else {
       $toast.success("Welcome back!");
 
-      let redirectPath = route.query.redirect;
+      // Explicit ?redirect= wins, otherwise derive from the user's role/plan.
+      const redirectPath =
+        route.query.redirect || authStore.getRedirectPathByPlan();
 
-      if (!redirectPath) {
-        // Get redirect path based on user's plan
-        redirectPath = authStore.getRedirectPathByPlan();
-        console.log(
-          "User plan:",
-          authStore.user?.subscription_plan || authStore.user?.plan
-        );
-        console.log("Redirecting to:", redirectPath);
-      }
-
-      console.log("Redirecting to:", redirectPath);
-      // Use window.location for reliable navigation
-      window.location.href = redirectPath;
+      // Single client-side navigation. Previously this ALSO assigned
+      // window.location.href while the isAuthenticated watcher pushed the same
+      // route, which produced a duplicate navigation ("NAV BLOCKED") and an
+      // aborted in-flight request.
+      await router.push(redirectPath);
     }
   } catch (error) {
     console.error("Login error details:", error);
@@ -626,20 +692,9 @@ const handle2FA = async () => {
     await authStore.verify2FA(twoFactorCode.value);
     $toast.success("Welcome back!");
 
-    let redirectPath = route.query.redirect;
-
-    if (!redirectPath) {
-      // Get redirect path based on user's plan
-      redirectPath = authStore.getRedirectPathByPlan();
-      console.log(
-        "User plan (2FA):",
-        authStore.user?.subscription_plan || authStore.user?.plan
-      );
-      console.log("Redirecting to:", redirectPath);
-    }
-
-    // Use window.location for reliable navigation
-    window.location.href = redirectPath;
+    const redirectPath =
+      route.query.redirect || authStore.getRedirectPathByPlan();
+    await router.push(redirectPath);
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.validationErrors || {};
@@ -688,18 +743,6 @@ const handleAppleLogin = () => {
   // Backend will redirect to Apple's sign-in page
   window.location.href = `${apiBaseUrl}/auth/apple/redirect`;
 };
-
-// Redirect if already authenticated
-watch(
-  () => authStore.isAuthenticated,
-  (isAuth) => {
-    if (isAuth) {
-      const redirect =
-        route.query.redirect || authStore.getRedirectPathByPlan();
-      router.push(redirect);
-    }
-  }
-);
 </script>
 
 <style scoped src="../../assets/css/auth.css"></style>

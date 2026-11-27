@@ -8,10 +8,6 @@
       <div class="container relative">
         <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 items-center">
           <div class="mb-16 lg:mb-0">
-            <span class="eyebrow-brass animate-fade-in-up">
-              <span class="dot"></span>
-              Smart NFC Business Card
-            </span>
             <h1 class="showcase-display mt-7 mb-6 text-white animate-fade-in-up">
               Your digital business card,
               <span class="brass-grad">one tap away</span>
@@ -937,7 +933,7 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'public' });
+definePageMeta({ layout: 'public', middleware: 'guest' });
 
 const config = useRuntimeConfig();
 const canonicalUrl = `${config.public.appUrl}/Homepage`;
@@ -1080,9 +1076,9 @@ onMounted(() => {
       return;
     }
     if (authStore.isAdmin()) {
-      navigateTo("/AdminManagement/");
+      navigateTo("/AdminManagement");
     } else {
-      navigateTo("/UserDashboard/");
+      navigateTo("/UserDashboard");
     }
   }
 });

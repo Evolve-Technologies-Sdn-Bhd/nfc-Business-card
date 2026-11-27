@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\GuestCheckoutController;
 use App\Http\Controllers\Api\LegalDocumentController;
 use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\AdminChatbotController;
@@ -131,6 +132,14 @@ Route::post('/nfc/tap/{nfcId}', [NfcController::class, 'tap'])->middleware('thro
 // Business plan enquiries (public — homepage + plan selection forms)
 Route::post('/business-inquiries', [BusinessInquiryController::class, 'store'])->middleware('throttle:5,1'); // 5 per minute
 
+// Guest checkout (public) — lets a visitor buy a Basic/Premium card without
+// registering first. /start creates a placeholder account (no password) at the
+// moment the visitor presses Pay and returns a token, so the normal payment
+// endpoints work unchanged. /set-password is the only follow-up; it still runs
+// behind auth:sanctum because it needs the token issued by /start.
+Route::post('/guest-checkout/start', [GuestCheckoutController::class, 'start'])->middleware('throttle:5,1');
+Route::post('/guest-checkout/set-password', [GuestCheckoutController::class, 'setPassword'])->middleware('auth:sanctum');
+
 // Legacy password reset routes (no prefix) for backward compatibility with older clients
 Route::post('password-reset-request', [PasswordResetController::class, 'requestReset']);
 Route::post('password-reset', [PasswordResetController::class, 'resetPassword']);
@@ -242,6 +251,7 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->grou
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'getSettings']);
+    Route::post('/settings/export-data', [SettingsController::class, 'exportData'])->middleware('throttle:5,1');
     Route::put('/settings/personal-info', [SettingsController::class, 'updatePersonalInfo']);
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotificationSettings']);
     Route::post('/settings/upload-account-image', [SettingsController::class, 'uploadUserAccountImage']);
@@ -284,8 +294,12 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerifiedWithGrace::class])->grou
     Route::post('/onboarding/select-plan', [OnboardingController::class, 'selectPlan']);
     Route::post('/onboarding/save-card-info', [OnboardingController::class, 'saveCardInfo']);
     Route::post('/onboarding/upload-card-design', [OnboardingController::class, 'uploadCardDesign']);
-    Route::post('/onboarding/process-payment', [OnboardingController::class, 'processPayment']);
     Route::get('/onboarding/order-status', [OnboardingController::class, 'getOrderStatus']);
+
+    // Onboarding funnel draft (persisted under users.settings.onboarding_draft)
+    Route::get('/onboarding/draft', [OnboardingController::class, 'getDraft']);
+    Route::put('/onboarding/draft', [OnboardingController::class, 'saveDraft']);
+    Route::delete('/onboarding/draft', [OnboardingController::class, 'clearDraft']);
 
     // Payment Routes
     Route::prefix('payment')->group(function () {
@@ -388,6 +402,10 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/stats', [AdminController::class, 'getSystemStats']);
+
+    // Admin's own profile & password
+    Route::post('/profile/update', [AdminController::class, 'updateAdminProfile']);
+    Route::post('/profile/change-password', [AdminController::class, 'changeAdminPassword']);
 
     // User management
     Route::get('/users', [AdminController::class, 'getUsers']);
@@ -554,6 +572,7 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::get('/', [CardDesignController::class, 'index']);
         Route::post('/', [CardDesignController::class, 'store']);
         Route::post('/upload-background', [CardDesignController::class, 'uploadBackground']);
+        Route::get('/background-media', [CardDesignController::class, 'backgroundMedia']);
         Route::get('/{id}', [CardDesignController::class, 'show']);
         Route::put('/{id}', [CardDesignController::class, 'update']);
         Route::delete('/{id}', [CardDesignController::class, 'destroy']);
@@ -587,6 +606,13 @@ Route::middleware(['auth:sanctum', 'admin', \App\Http\Middleware\LogActivity::cl
         Route::get('/statistics', [AdminBusinessInquiryController::class, 'statistics']);
         Route::get('/{inquiry}', [AdminBusinessInquiryController::class, 'show']);
         Route::put('/{inquiry}', [AdminBusinessInquiryController::class, 'update']);
+    });
+
+    // System-wide appearance theme. Set by any admin (surfaced in the admin
+    // header switcher) and applied to every visitor — end users cannot change it.
+    Route::prefix('system-settings')->middleware('admin')->group(function () {
+        Route::get('/appearance', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'getAppearanceSettings']);
+        Route::post('/appearance', [\App\Http\Controllers\Api\Admin\AdminSystemSettingsController::class, 'saveAppearanceSettings']);
     });
 
     // ✅ Admin System Settings (requires the system.settings admin permission)
