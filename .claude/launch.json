@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "C:/xampp/php/php.exe",
+      "runtimeArgs": ["backend/artisan", "serve", "--host=127.0.0.1", "--port=8000"],
+      "port": 8000
+    },
+    {
+      "name": "portal-build-check",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/AppData/Local/Temp/claude/fab00930b2e588be/12ebd3cd-6e79-4405-9465-94e1f344a57a/scratchpad/fe-build/.output/server/index.mjs"
+      ],
+      "env": { "PORT": "3100", "NITRO_PORT": "3100" },
+      "port": 3100
+    }
+  ]
+}
