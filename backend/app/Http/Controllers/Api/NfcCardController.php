@@ -74,12 +74,17 @@ class NfcCardController extends Controller
         }
 
         if (!$hasActiveAccess) {
-            \Log::warning('User does not have active card access', ['user_id' => $user?->id]);
+            // Listing your own cards is not a privileged action: a Free user (or
+            // one whose cards have all expired/cancelled) simply gets their own
+            // list — usually empty — plus a flag the UI can use for upsell copy.
+            // Answering 403 here made every Free visit to My Cards / the builder
+            // log request failures.
             return response()->json([
-                'success' => false,
-                'message' => 'This feature requires an active Premium subscription or NFC card order',
-                'upgrade_required' => true
-            ], 403);
+                'success' => true,
+                'nfc_cards' => $user->nfcCards()->orderBy('created_at', 'desc')->get(),
+                'upgrade_required' => true,
+                'message' => 'Order an NFC card to manage it here.',
+            ]);
         }
 
         $eagerUser = 'user:id,first_name,last_name,email,job_title,name_slug';
@@ -405,8 +410,17 @@ class NfcCardController extends Controller
     {
         $user = $request->user();
 
+        // A card keeps ONE tag ID for life: the physical chip / printed QR can
+        // point at it, so re-activating a paused card must never mint a new ID.
+        $existingTag = NfcTag::where('nfc_card_id', $nfcCard->nfc_card_id)->first();
+
         $validator = Validator::make($request->all(), [
-            'nfc_id' => 'required|string|unique:nfc_tags,nfc_id',
+            'nfc_id' => [
+                'nullable',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('nfc_tags', 'nfc_id')->ignore($existingTag?->id),
+            ],
             'name' => 'nullable|string|max:255',
             'activation_code' => 'nullable|string|max:32',
         ]);
@@ -451,13 +465,17 @@ class NfcCardController extends Controller
             $nfcCard->update(['user_id' => $user->id]);
         }
 
-        // Create or update NFC tag
+        // Create or update NFC tag — existing tag ID wins; a new one is only
+        // issued (client-supplied or generated) the first time.
+        $nfcId = $existingTag?->nfc_id
+            ?: ($request->filled('nfc_id') ? $request->nfc_id : 'NFC-' . strtoupper(Str::random(9)));
+
         $nfcTag = NfcTag::updateOrCreate(
             ['nfc_card_id' => $nfcCard->nfc_card_id],
             [
                 'user_id' => $request->user()->id,
-                'nfc_id' => $request->nfc_id,
-                'name' => $request->name ?? 'Business Card',
+                'nfc_id' => $nfcId,
+                'name' => $request->name ?? $existingTag?->name ?? 'Business Card',
                 'status' => 'active',
             ]
         );
@@ -470,7 +488,7 @@ class NfcCardController extends Controller
         // Send NFC card activated notification
         $this->notificationService->create($request->user(), 'nfc_card_activated', [
             'card_id' => $nfcCard->nfc_card_id,
-            'nfc_id' => $request->nfc_id,
+            'nfc_id' => $nfcTag->nfc_id,
         ]);
 
         return response()->json([

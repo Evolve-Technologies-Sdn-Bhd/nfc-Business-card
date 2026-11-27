@@ -2,23 +2,19 @@
 <!-- Premium Plan Analytics - Same as Business but without Employee filter -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title">Analytics</h1>
-          <p class="mt-2 text-secondary-600">
-            Track engagement and performance metrics
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="exportAnalytics" class="btn btn-primary">
-            <Icon name="heroicons:arrow-down-tray" class="h-5 w-5 mr-2" />
-            Export Data
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Analytics"
+      eyebrow-icon="heroicons:chart-bar"
+      title="Analytics"
+      description="Compare taps and visitors across all your cards, or focus on one."
+    >
+      <template #actions>
+        <button type="button" @click="exportAnalytics" class="admin-btn admin-btn--outline">
+          <Icon name="heroicons:arrow-down-tray" class="h-4 w-4" />
+          Export CSV
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <!-- Filters -->
     <div class="card mb-6">
@@ -32,7 +28,7 @@
               @change="onCardChange"
               class="input w-full"
             >
-              <option value="all">📊 All Cards (Total Overview)</option>
+              <option value="all">All cards (combined)</option>
               <option
                 v-for="card in nfcCards"
                 :key="card.id"
@@ -361,12 +357,12 @@
                   stroke-width="3"
                   fill="none"
                   stroke-linecap="round"
-                  :stroke-dasharray="`${analytics.performanceScore}, 100`"
+                  :stroke-dasharray="`${analytics.totalTaps > 0 ? analytics.performanceScore : 0}, 100`"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
               <div class="absolute inset-0 flex items-center justify-center">
-                <span class="stat-value">{{ analytics.performanceScore }}%</span>
+                <span class="stat-value">{{ analytics.totalTaps > 0 ? analytics.performanceScore + "%" : "—" }}</span>
               </div>
             </div>
             <p class="card-subtitle">Based on tap frequency and engagement</p>
@@ -393,6 +389,7 @@ const { $api, $toast } = useNuxtApp();
 const loading = ref(true);
 const selectedPeriod = ref("30d");
 const selectedCardId = ref("all");
+const pageRoute = useRoute(); // read in setup scope, used after awaits
 const nfcCards = ref([]);
 
 // Analytics data
@@ -420,7 +417,12 @@ const loadNfcCards = async () => {
     const response = await $api.get("/nfc-cards");
     if (response.success) {
       nfcCards.value = response.nfc_cards || [];
-      // Load analytics for default "All Cards" selection
+      // Deep link from My Cards ("Analytics") preselects that card
+      const requested = String(pageRoute.query.cardId || "");
+      if (requested && nfcCards.value.some((c) => String(c.id) === requested)) {
+        selectedCardId.value = requested;
+      }
+      // Load analytics for the selected card (default "All Cards")
       if (nfcCards.value.length > 0) {
         await loadAnalytics();
       } else {

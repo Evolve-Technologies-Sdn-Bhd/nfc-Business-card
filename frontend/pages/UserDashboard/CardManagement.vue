@@ -1,145 +1,81 @@
 <!-- pages/UserDashboard/CardManagement.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-secondary-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-4">
-            <div>
-              <h1 class="page-title text-secondary-900">
-                Card Management
-              </h1>
-              <p class="card-subtitle">
-                Manage your physical NFC cards and subscriptions
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- ─── Header right action button: NO FLICKER ────────────────────
-                 Tier priority:
-                 (1) While loading → use authStore INSTANT value (no API wait)
-                 (2) After load → same computed hasPremiumSubscription as before
-                 Result: "Upgrade to Premium" NEVER appears for a Premium user,
-                 even for a 1ms flash.  The raw computed value is ALREADY safe
-                 because it checks authStore first — but we add this explicit
-                 early-return here for DOCUMENTATION / clarity of intent. -->
-            <template v-if="!loading">
-              <button
-                v-if="!hasPremiumSubscription"
-                @click="upgradeToPremium"
-                class="btn btn-primary"
-              >
-                <Icon name="heroicons:star" class="h-4 w-4 mr-2" />
-                Upgrade to Premium
-              </button>
-              <button v-else @click="orderNewCard" class="btn btn-primary">
-                <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-                Order New Card
+  <div>
+    <AdminPageHeader
+      eyebrow="Workspace"
+      eyebrow-icon="heroicons:credit-card"
+      title="My Cards"
+      description="Track each card from order to delivery, activate it when it arrives, and choose which profile it opens."
+    >
+      <template #actions>
+        <button v-if="loading" type="button" disabled class="admin-btn admin-btn--primary opacity-70">
+          <Icon name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+          Loading…
+        </button>
+        <button v-else-if="hasPremiumSubscription" type="button" class="admin-btn admin-btn--primary" @click="orderNewCard">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          Order another card
+        </button>
+        <button v-else type="button" class="admin-btn admin-btn--primary" @click="upgradeToPremium">
+          <Icon name="heroicons:sparkles" class="h-4 w-4" />
+          Get an NFC card
+        </button>
+      </template>
+    </AdminPageHeader>
+
+    <div>
+      <div v-if="loading" class="space-y-3">
+        <AdminLoadingState />
+        <AdminLoadingState />
+      </div>
+
+      <template v-else>
+        <!-- No card on the account yet (Free plan, or nothing ordered) -->
+        <div v-if="!hasPremiumSubscription" class="admin-panel">
+          <AdminEmptyState
+            icon="heroicons:credit-card"
+            title="You don't have an NFC card yet"
+            description="Your digital profile already works with a link or QR code. Add a physical NFC card (Basic or Premium plan) so people can open it with a single tap."
+          >
+            <template #actions>
+              <button type="button" class="admin-btn admin-btn--primary" @click="upgradeToPremium">
+                <Icon name="heroicons:sparkles" class="h-4 w-4" />
+                Compare card plans
               </button>
             </template>
-            <!-- Semasa loading: show placeholder same size BUTTON so layout tak shift -->
-            <button v-else disabled class="btn btn-primary opacity-70">
-              <div class="spinner spinner-sm text-white mr-2"></div>
-              Loading...
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- ─── LOADING STATE (renders ALONE — no gate, no content, no empty state) ───
-           Elak FLICKER "Premium padlock → content" yang nampak selama 300ms.
-           Semasa data tengah loading, user cuma nampak spinner SINGLE block.  -->
-      <div v-if="loading" class="text-center py-16">
-        <div class="spinner mx-auto mb-4"></div>
-        <p class="text-secondary-600">Loading card information...</p>
-      </div>
-
-      <!-- ─── AFTER LOADING: ONLY then decide gate/content/empty ─────────────── -->
-      <template v-else>
-        <!-- Upgrade Required Message (ONLY if !hasPremiumSubscription AFTER load) -->
-        <div v-if="!hasPremiumSubscription" class="text-center py-12">
-          <div class="max-w-md mx-auto">
-            <Icon
-              name="heroicons:lock-closed"
-              class="h-16 w-16 text-secondary-400 mx-auto mb-4"
-            />
-            <h3 class="card-title text-secondary-900 mb-2">
-              Premium Feature
-            </h3>
-            <p class="text-secondary-600 mb-6">
-              Physical NFC card management is available exclusively to Premium
-              subscribers. Upgrade your plan to access this feature.
-            </p>
-            <button @click="upgradeToPremium" class="btn btn-primary btn-lg">
-              <Icon name="heroicons:star" class="h-5 w-5 mr-2" />
-              Upgrade to Premium
-            </button>
-          </div>
+          </AdminEmptyState>
         </div>
 
         <!-- NFC Cards List -->
         <div v-else-if="nfcCards.length > 0" class="space-y-3">
-          <div class="flex items-center justify-between mb-4 mt-2">
-            <h3 class="section-title text-secondary-900">
-              Your Cards
-              <span class="text-body font-normal text-secondary-500 ml-2">
-                ({{ nfcCards.length }} total)
-              </span>
-            </h3>
-          </div>
-          <div v-for="card in nfcCards" :key="card.id" class="card overflow-hidden">
-            <!-- Compact Card Header - Click to Expand -->
-            <div
-              class="grid grid-cols-3 items-center p-5 cursor-pointer hover:bg-secondary-50 transition-colors gap-4"
+          <p class="admin-kpi-label mb-1">
+            {{ nfcCards.length }} card{{ nfcCards.length === 1 ? '' : 's' }} · tap a card for details and actions
+          </p>
+          <div v-for="card in nfcCards" :key="card.id" class="admin-panel overflow-hidden">
+            <button
+              type="button"
+              class="flex w-full flex-wrap items-center gap-x-4 gap-y-3 p-4 text-left transition-colors hover:bg-secondary-50 sm:p-5"
+              :aria-expanded="expandedCardId === card.id"
               @click="toggleExpand(card.id)"
             >
-              <!-- Left: Name + Card ID -->
-              <div class="flex items-center space-x-4 min-w-0">
-                <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shrink-0 shadow-md">
-                  <Icon name="heroicons:credit-card" class="h-5 w-5 text-white" />
-                </div>
-                <div class="min-w-0">
-                  <h4 class="card-title text-secondary-900 truncate">
-                    {{ card.card_owner }}
-                  </h4>
-                  <p class="text-helper font-mono truncate">
-                    ID: {{ card.card_id || card.nfc_card_id }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Center: Plan -->
-              <div class="flex justify-center min-w-0">
-                <div class="text-center">
-                  <p class="text-caption text-secondary-500">Plan</p>
-                  <p class="text-body font-semibold text-primary-700">
-                    {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Right: Status + Expand Button -->
-              <div class="flex items-center justify-end space-x-3 shrink-0 min-w-0">
-                <span
-                  :class="card.status_badge_class || getStatusBadgeClass(card.status)"
-                  class="px-3 py-1.5 rounded-full text-badge whitespace-nowrap"
-                >
-                  {{ getCardStatusLabel(card) }}
+              <span class="portal-card-chip" :class="`is-${String(card.subscription_plan || 'basic').toLowerCase()}`">
+                <Icon name="heroicons:wifi" class="h-4 w-4 rotate-90" />
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-body font-semibold text-secondary-900">{{ card.card_owner }}</span>
+                <span class="block truncate text-caption text-secondary-500">
+                  {{ String(card.subscription_plan || '').replace(/\b\w/g, c => c.toUpperCase()) }} card ·
+                  <span class="font-mono">{{ card.card_id || card.nfc_card_id }}</span>
                 </span>
-                <button
-                  class="p-2 rounded-lg hover:bg-secondary-100 transition-colors text-secondary-400 hover:text-secondary-700 shrink-0"
-                  @click.stop
-                >
-                  <Icon
-                    :name="expandedCardId === card.id ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
-                    class="h-5 w-5 transition-transform"
-                  />
-                </button>
-              </div>
-            </div>
+              </span>
+              <span class="ml-auto flex shrink-0 items-center gap-2">
+                <AdminStatusBadge :status="String(card.status || '').toLowerCase()" :label="getCardStatusLabel(card)" />
+                <Icon
+                  :name="expandedCardId === card.id ? 'heroicons:chevron-up' : 'heroicons:chevron-down'"
+                  class="h-5 w-5 text-secondary-400"
+                />
+              </span>
+            </button>
 
             <!-- Expanded Content -->
             <Transition name="accordion">
@@ -181,7 +117,7 @@
                           <div>
                             <p class="text-secondary-500">Amount To Pay</p>
                             <p class="text-h5 font-bold text-primary-700">
-                              RM {{ (Number(card.purchase_amount) || 0).toFixed(2) }}
+                              {{ Number(card.purchase_amount) > 0 ? `RM ${Number(card.purchase_amount).toFixed(2)}` : "—" }}
                             </p>
                           </div>
                           <div v-if="card.transaction?.transaction_id" class="md:col-span-2">
@@ -346,7 +282,7 @@
                         <div>
                           <p class="stat-label">Amount</p>
                           <p class="text-body font-medium text-secondary-900">
-                            RM {{ (Number(card.purchase_amount) || 0).toFixed(2) }}
+                            {{ Number(card.purchase_amount) > 0 ? `RM ${Number(card.purchase_amount).toFixed(2)}` : "—" }}
                           </p>
                         </div>
                         <div>
@@ -390,14 +326,26 @@
                           ]"
                         >
                           <Icon name="heroicons:wrench-screwdriver" class="h-4 w-4 mr-1" />
-                          {{ cardCanDesignProfile(card) ? "Design Profile" : "Design (After Payment)" }}
+                          {{ cardCanDesignProfile(card) ? "Edit profile" : "Edit profile (after payment)" }}
                         </button>
 
-                        <template
-                          v-if="['active','delivered','inactive','expired'].includes(card.status)"
+                        <a
+                          v-if="card.status === 'active' && card.public_url"
+                          :href="card.public_url"
+                          target="_blank"
+                          rel="noopener"
+                          class="btn btn-sm btn-outline w-full"
                         >
+                          <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4 mr-1" />
+                          View public profile
+                        </a>
+
+                        <template
+                          v-if="['active','inactive','expired'].includes(card.status)"
+                        >
+                          <!-- Delivered cards are not live yet: their action is "Activate My Card" below -->
                           <button
-                            v-if="card.status === 'active' || card.status === 'delivered'"
+                            v-if="card.status === 'active'"
                             @click="deactivateCard(card)"
                             class="btn btn-sm btn-outline btn-warning w-full"
                           >
@@ -516,25 +464,20 @@
           </div>
         </div>
 
-      <!-- No Cards Message (premium tapi empty) -->
-      <div v-else-if="hasPremiumSubscription" class="text-center py-12">
-        <div class="max-w-md mx-auto">
-          <Icon
-            name="heroicons:credit-card"
-            class="h-16 w-16 text-secondary-400 mx-auto mb-4"
-          />
-          <h3 class="card-title text-secondary-900 mb-2">
-            No Physical Cards
-          </h3>
-          <p class="text-secondary-600 mb-6">
-            You haven't ordered any physical NFC cards yet. Order your first
-            card to get started.
-          </p>
-          <button @click="orderNewCard" class="btn btn-primary">
-            <Icon name="heroicons:plus" class="h-4 w-4 mr-2" />
-            Order Your First Card
-          </button>
-        </div>
+      <!-- Paid plan but no card ordered yet -->
+      <div v-else class="admin-panel">
+        <AdminEmptyState
+          icon="heroicons:credit-card"
+          title="No card ordered yet"
+          description="Order your first NFC card. Once payment is verified you can design the profile it opens."
+        >
+          <template #actions>
+            <button type="button" class="admin-btn admin-btn--primary" @click="orderNewCard">
+              <Icon name="heroicons:plus" class="h-4 w-4" />
+              Order your first card
+            </button>
+          </template>
+        </AdminEmptyState>
       </div>
 
       </template>
@@ -1374,6 +1317,16 @@
         </div>
       </div>
     </Transition>
+
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
@@ -1399,6 +1352,9 @@ const orderLoading = ref(false);
 const showCardDetailsModal = ref(false);
 const selectedCard = ref(null);
 const expandedCardId = ref(null);
+
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
 
 const toggleExpand = (cardId) => {
   if (expandedCardId.value === cardId) {
@@ -1590,7 +1546,7 @@ const hasPremiumSubscription = computed(() => {
 
 // Helpers — use label/badge from backend (NfcCard model accessors when available
 const cardCanDesignProfile = (card) => {
-  if (typeof card.can_access_profile_builder !== undefined) {
+  if (typeof card.can_access_profile_builder !== "undefined") {
     return !!card.can_access_profile_builder;
   }
   return ["payment_verified","processing","shipped","delivered","active"].includes(card.status);
@@ -1614,7 +1570,11 @@ const loadNfcCards = async () => {
     if (response.success) {
       nfcCards.value = (response.nfc_cards || []).map((card) => {
         const planFallback = card.subscription_plan || subscriptionData.value?.subscription_plan || "basic";
-        const timeline = buildDefaultTimeline(card);
+        // Prefer the backend timeline (NfcCard::getTimelineAttribute: real dates,
+        // cancellation aware); the local builder is only a fallback.
+        const timeline = Array.isArray(card.timeline) && card.timeline.length
+          ? card.timeline
+          : buildDefaultTimeline(card);
         return {
           ...card,
           subscription_plan: planFallback,
@@ -1708,7 +1668,6 @@ const buildDefaultTimeline = (card) => {
 const upgradeToPremium = () => {
   // Send the user to the real, working plan-selection / upgrade route.
   // (There is no dedicated /upgrade page.)
-  $toast.info("Opening upgrade options...");
   navigateTo("/Onboarding/plan");
 };
 
@@ -1884,7 +1843,7 @@ const goToProfileBuilderForCard = (card) => {
 const activateCard = async (card) => {
   try {
     const response = await $api.post(`/nfc-cards/${card.id}/activate`, {
-      nfc_id: `NFC-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      // No nfc_id: the backend keeps the card's existing tag ID (or issues one once).
       name: card.card_owner,
     });
 
@@ -1900,7 +1859,13 @@ const activateCard = async (card) => {
 };
 
 const deactivateCard = async (card) => {
-  if (!confirm("Are you sure you want to deactivate this card?")) return;
+  const ok = await askConfirm({
+    title: "Deactivate this card?",
+    message: "Its profile will stop opening when someone taps the card or visits its link. You can reactivate it at any time.",
+    confirmLabel: "Deactivate",
+    tone: "danger",
+  });
+  if (!ok) return;
 
   try {
     const response = await $api.post(`/nfc-cards/${card.id}/deactivate`);
@@ -2021,12 +1986,14 @@ const uploadPaymentProof = async () => {
 // Confirm received flow — accept status shipped (flow biasa) ATAU delivered (admin override belum activate)
 const confirmCardReceived = async (card) => {
   const isDeliveredState = card.status === 'delivered';
-  const msg = isDeliveredState
-    ? "You are in DELIVERED (NOT ACTIVE) status. Confirm to ACTIVATE your premium subscription NOW! This action will activate your subscription plan."
-    : "Make SURE you have PHYSICALLY received the NFC card! This action will activate your premium subscription.";
-  if (!confirm(msg)) {
-    return;
-  }
+  const ok = await askConfirm({
+    title: isDeliveredState ? "Activate this card?" : "Have you received your card?",
+    message: isDeliveredState
+      ? "Activating starts your plan and makes the card open your profile when tapped."
+      : "Only confirm once the physical card is in your hands. Confirming activates the card and starts your plan.",
+    confirmLabel: isDeliveredState ? "Activate card" : "Yes, I have it",
+  });
+  if (!ok) return;
 
   confirmLoading.value = { id: card.id, loading: true };
   try {
@@ -2196,6 +2163,25 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Mini card glyph per plan (same treatment as the dashboard card list) */
+.portal-card-chip {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 3.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.55rem;
+  border-radius: 0.5rem;
+  color: rgba(245, 241, 232, 0.8);
+  background: linear-gradient(135deg, #252b38 0%, #171d2b 100%);
+  box-shadow: inset 0 0 0 1px rgba(194, 160, 104, 0.25);
+}
+.portal-card-chip.is-premium,
+.portal-card-chip.is-business {
+  color: #3a2c14;
+  background: linear-gradient(135deg, #dcc28a 0%, #a88750 100%);
+}
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;

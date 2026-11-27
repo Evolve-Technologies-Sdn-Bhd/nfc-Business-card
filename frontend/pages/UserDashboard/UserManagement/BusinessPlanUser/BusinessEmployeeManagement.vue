@@ -1,25 +1,19 @@
 <!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title">
-            Employee Management
-          </h1>
-          <p class="mt-2 text-secondary-600">
-            Manage employee details, cards and passwords
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="showCardDesignModal = true" class="btn btn-primary">
-            <Icon name="heroicons:paint-brush" class="h-5 w-5 mr-2" />
-            Design Cards
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Team"
+      eyebrow-icon="heroicons:users"
+      title="Team Members"
+      description="People on your Business account: their roles, account status and cards. New accounts are created by NFCGo on request."
+    >
+      <template #actions>
+        <button type="button" @click="showCardDesignModal = true" class="admin-btn admin-btn--primary">
+          <Icon name="heroicons:paint-brush" class="h-4 w-4" />
+          Design team cards
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <!-- Account & Card Usage Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -111,12 +105,17 @@
             />
             <div class="ml-3">
               <h3 class="text-label text-warning-800">
-                Quota Limit Reached
+                {{ totalQuota > 0 ? "Quota limit reached" : "No quota assigned yet" }}
               </h3>
               <p class="text-body text-warning-700 mt-1">
-                You have reached the maximum quota ({{ totalQuota }}). Cannot
-                create more accounts or order more cards until quota is
-                increased. Please contact support to purchase additional quota.
+                <template v-if="totalQuota > 0">
+                  All {{ totalQuota }} seats are in use. Contact NFCGo support to add more
+                  accounts or cards.
+                </template>
+                <template v-else>
+                  NFCGo has not set a seat quota for this Business account yet. Contact
+                  support to add team accounts or order cards.
+                </template>
               </p>
             </div>
           </div>
@@ -612,6 +611,16 @@
         </div>
       </div>
     </Transition>
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :cancel-label="confirmState.cancelLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
@@ -621,6 +630,10 @@ definePageMeta({
   layout: "user-dashboard",
   middleware: ["auth"],
 });
+
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
+
 
 // Stores and Composables
 const { $api, $toast } = useNuxtApp();
@@ -831,13 +844,14 @@ const toggleEmployeeStatus = async (employee) => {
   const action = newStatus ? 'activate' : 'deactivate';
 
   if (
-    confirm(
-      `Are you sure you want to ${action} ${employee.name}'s account?${
-        !newStatus
-          ? '\n\nDeactivated employees cannot log in or use the system.'
-          : ''
-      }`
-    )
+    await askConfirm({
+      title: newStatus ? `Reactivate ${employee.name}?` : `Deactivate ${employee.name}?`,
+      message: newStatus
+        ? "They will be able to sign in and use their card again."
+        : "They will not be able to sign in or use NFCGo until you reactivate the account.",
+      confirmLabel: newStatus ? "Reactivate" : "Deactivate",
+      tone: newStatus ? "primary" : "danger",
+    })
   ) {
     try {
       const response = await $api.post(

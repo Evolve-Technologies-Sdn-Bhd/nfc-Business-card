@@ -9,10 +9,13 @@
   <div class="admin-shell portal-shell h-screen overflow-hidden">
     <div class="flex h-full overflow-hidden">
       <!-- ============================ RAIL (desktop) ============================ -->
-      <aside class="admin-rail hidden shrink-0 flex-col lg:flex">
+      <aside
+        class="admin-rail hidden shrink-0 flex-col lg:flex"
+        :class="{ 'admin-rail--collapsed': railCollapsed }"
+      >
         <div class="admin-rail-brand flex h-16 items-center px-4">
           <NuxtLink to="/UserDashboard" class="flex min-w-0 items-center gap-3" aria-label="NFCGo dashboard">
-            <NFCGoLogo variant="dark" size="sm" />
+            <NFCGoLogo variant="dark" size="sm" :show-text="!railCollapsed" />
           </NuxtLink>
         </div>
 
@@ -21,12 +24,27 @@
             :groups="navigation"
             :is-active="isActiveRoute"
             :busy="routeNavigationInProgress"
+            :collapsed="railCollapsed"
             @locked="onLockedClick"
           />
         </nav>
 
-        <div class="admin-rail-foot px-3 py-3">
-          <PortalPlanChip :access="access" />
+        <div class="admin-rail-foot px-3 py-3" :class="railCollapsed ? 'flex justify-center' : 'space-y-2'">
+          <PortalPlanChip v-if="!railCollapsed" :access="access" />
+          <button
+            type="button"
+            class="admin-icon-btn text-white/60 hover:bg-white/10 hover:text-white"
+            :class="railCollapsed ? '' : 'w-full justify-center'"
+            :aria-label="railCollapsed ? 'Expand navigation' : 'Collapse navigation'"
+            :title="railCollapsed ? 'Expand navigation' : 'Collapse navigation'"
+            :aria-expanded="!railCollapsed"
+            @click="toggleRail"
+          >
+            <Icon
+              :name="railCollapsed ? 'heroicons:chevron-double-right' : 'heroicons:chevron-double-left'"
+              class="h-5 w-5"
+            />
+          </button>
         </div>
       </aside>
 
@@ -335,6 +353,14 @@ useHead({ htmlAttrs: { class: "shell-scroll-lock" } });
 
 const isMounted = ref(false);
 const sidebarOpen = ref(false);
+
+// Desktop rail collapse — same behaviour as the admin panel, remembered per browser
+const RAIL_PREF_KEY = "nfcgo.portal.railCollapsed";
+const railCollapsed = ref(false);
+const toggleRail = () => {
+  railCollapsed.value = !railCollapsed.value;
+  if (process.client) localStorage.setItem(RAIL_PREF_KEY, railCollapsed.value ? "1" : "0");
+};
 const showProfilePreview = ref(false);
 const showNotifications = ref(false);
 const showProfileMenu = ref(false);
@@ -579,6 +605,7 @@ const handleDeleteAllRead = async () => {
 // ---------------------------------------------------------------------------
 onMounted(() => {
   isMounted.value = true;
+  railCollapsed.value = localStorage.getItem(RAIL_PREF_KEY) === "1";
   loadUnreadCount();
 
   const intervalId = setInterval(() => {

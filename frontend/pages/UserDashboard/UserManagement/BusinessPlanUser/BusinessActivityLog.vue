@@ -1,14 +1,11 @@
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="page-title">
-        Employee Activity Log
-      </h1>
-      <p class="mt-2 text-secondary-600">
-        Monitor all actions performed by your employees
-      </p>
-    </div>
+    <AdminPageHeader
+      eyebrow="Team"
+      eyebrow-icon="heroicons:clipboard-document-list"
+      title="Activity Log"
+      description="Sign-ins, profile edits and card changes made by people on your Business account. Read-only."
+    />
 
     <!-- Statistics Dashboard -->
     <div
@@ -459,7 +456,7 @@ definePageMeta({
 const config = useRuntimeConfig();
 const apiBaseUrl = config.public.apiBaseUrl || "http://localhost:8000";
 const authStore = useAuthStore();
-const { $api } = useNuxtApp();
+const { $api, $toast } = useNuxtApp();
 
 // Check if user is Business Plan
 const checkBusinessAccess = () => {
@@ -528,9 +525,7 @@ const fetchActivityLogs = async (page = 1) => {
     }
   } catch (error) {
     console.error("Error fetching activity logs:", error);
-    alert(
-      `Failed to load activity logs: ${error.message || "Please try again."}`
-    );
+    $toast?.error?.("Could not load the activity log. Please try again.");
   }
 };
 
@@ -623,10 +618,10 @@ const exportLogs = async () => {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    alert("Activity logs exported successfully!");
+    $toast?.success?.("Activity log exported");
   } catch (error) {
     console.error("Error exporting logs:", error);
-    alert(`Failed to export logs: ${error.message || "Please try again."}`);
+    $toast?.error?.("Export failed. Please try again.");
   }
 };
 

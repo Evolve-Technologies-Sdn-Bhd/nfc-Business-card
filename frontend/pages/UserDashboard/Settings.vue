@@ -378,67 +378,6 @@
             </div>
           </div>
 
-          <!-- Preferences Tab -->
-          <div v-if="activeTab === 'preferences'" class="space-y-6">
-            <!-- Language & Region Card -->
-            <div class="card">
-              <div class="px-6 py-4 border-b border-secondary-200">
-                <h2 class="card-title text-secondary-900">
-                  Language & Region
-                </h2>
-                <p class="card-subtitle text-secondary-600">
-                  Set your preferred interface language and timezone
-                </p>
-              </div>
-              <div class="p-6 space-y-5">
-                <div class="form-group">
-                  <label class="block text-label text-secondary-700 mb-2">
-                    Interface Language
-                  </label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
-                    <button
-                      v-for="lang in languageOptions"
-                      :key="lang.code"
-                      type="button"
-                      @click="uiLanguage = lang.code; saveLocalPref('language', lang.code); showSuccess(`Language changed to ${lang.label}`);"
-                      :class="[
-                        'p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center justify-between',
-                        uiLanguage === lang.code
-                          ? 'border-primary-500 bg-primary-50/70'
-                          : 'border-secondary-200 hover:border-primary-300 hover:bg-secondary-50'
-                      ]"
-                    >
-                      <span class="font-medium text-secondary-900 text-body">{{ lang.label }}</span>
-                      <Icon v-if="uiLanguage === lang.code" name="heroicons:check" class="h-5 w-5 text-primary-600" />
-                    </button>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="block text-label text-secondary-700 mb-2">
-                    Timezone
-                  </label>
-                  <select
-                    v-model="uiTimezone"
-                    @change="saveLocalPref('timezone', uiTimezone)"
-                    class="input input-bordered w-full max-w-xl"
-                  >
-                    <option
-                      v-for="tz in timezoneOptions"
-                      :key="tz.value"
-                      :value="tz.value"
-                    >
-                      {{ tz.label }}
-                    </option>
-                  </select>
-                  <p class="text-helper text-secondary-500 mt-2">
-                    Timezone is used to display analytics dates and times, invoices, and activity logs.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Security Settings Tab -->
           <div v-if="activeTab === 'security'" class="space-y-6">
             <!-- Change Password Card -->
@@ -1009,13 +948,6 @@
                       Manage your NFCGo Business Card subscription
                     </p>
                   </div>
-                  <button
-                    @click="activeTab = 'account'"
-                    class="btn btn-outline btn-sm"
-                  >
-                    <Icon name="heroicons:arrow-left" class="h-4 w-4 mr-2" />
-                    Back to Account
-                  </button>
                 </div>
               </div>
               <div class="p-6">
@@ -1516,11 +1448,22 @@
         <p class="text-body font-medium text-error-800">{{ errorMessage }}</p>
       </div>
     </div>
+
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :cancel-label="confirmState.cancelLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, computed, watch, onBeforeUnmount } from "vue";
 import { renderSVG } from "uqr";
 import InvoiceList from "~/components/InvoiceList.vue";
 import InvoicePreviewModal from "~/components/InvoicePreviewModal.vue";
@@ -1573,7 +1516,7 @@ const timezoneOptions = [
 
 // Reactive data
 // Deep-linkable: /UserDashboard/Settings?tab=billing opens that section.
-const SETTINGS_TAB_IDS = ["account", "preferences", "security", "privacy", "notifications", "billing", "danger"];
+const SETTINGS_TAB_IDS = ["account", "security", "privacy", "notifications", "billing", "danger"];
 const settingsRoute = useRoute();
 const initialTab = String(settingsRoute.query.tab || "");
 const activeTab = ref(SETTINGS_TAB_IDS.includes(initialTab) ? initialTab : "account");
@@ -1703,6 +1646,9 @@ const updatingPersonalInfo = ref(false);
 const changingPassword = ref(false);
 const exportingData = ref(false);
 
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
+
 // Plan / role-aware routes shared with the portal shell
 const portalAccess = usePortalAccess();
 
@@ -1743,7 +1689,6 @@ const errorMessage = ref("");
 // Settings tabs (removed separate profile tab, integrated with account)
 const settingsTabs = [
   { id: "account", label: "Account", icon: "heroicons:user-circle" },
-  { id: "preferences", label: "Preferences", icon: "heroicons:adjustments-horizontal" },
   { id: "security", label: "Security", icon: "heroicons:shield-check" },
   { id: "privacy", label: "Privacy & Data", icon: "heroicons:eye-slash" },
   { id: "notifications", label: "Notifications", icon: "heroicons:bell" },
@@ -2017,7 +1962,7 @@ const revokeSession = async (sessionId) => {
 
 const logoutEverywhere = async () => {
   if (loadingLogoutEverywhere.value) return;
-  if (!confirm('Log out from ALL devices? You will need to log in again on this device.')) return;
+  if (!(await askConfirm({ title: "Sign out of all devices?", message: "Every session, including this one, will be signed out. You will need to sign in again.", confirmLabel: "Sign out everywhere", tone: "danger" }))) return;
   loadingLogoutEverywhere.value = true;
   try {
     const { $api } = useNuxtApp();
@@ -2181,7 +2126,7 @@ const disable2FA = async () => {
 };
 
 const regenerateRecoveryCodes = async () => {
-  if (!confirm('Regenerate 8 new recovery codes? All existing recovery codes will be revoked immediately.')) return;
+  if (!(await askConfirm({ title: "Generate new recovery codes?", message: "You will get 8 new codes and your current recovery codes will stop working immediately.", confirmLabel: "Generate new codes" }))) return;
   twoFactor.value.loading = true;
   try {
     const { $api } = useNuxtApp();
@@ -2541,7 +2486,7 @@ const getSubscriptionFeatures = (plan) => {
 };
 
 const cancelSubscription = async () => {
-  if (!confirm("Are you sure you want to cancel your subscription?")) return;
+  if (!(await askConfirm({ title: "Cancel your subscription?", message: "Your plan stays active until the end of the current paid period, then it will not renew.", confirmLabel: "Cancel subscription", cancelLabel: "Keep subscription", tone: "danger" }))) return;
 
   try {
     const { $api } = useNuxtApp();
@@ -2706,7 +2651,7 @@ const linkAccount = async () => {
 const confirmUnlinkAccount = async (provider) => {
   const providerName = provider === 'google' ? 'Google' : 'Apple';
   
-  if (!confirm(`Are you sure you want to unlink your ${providerName} account? You will no longer be able to sign in with ${providerName}.`)) {
+  if (!(await askConfirm({ title: `Unlink ${providerName}?`, message: `You will no longer be able to sign in with ${providerName}. Make sure you can still sign in with your password.`, confirmLabel: "Unlink", tone: "danger" }))) {
     return;
   }
 

@@ -1,4 +1,4 @@
-<!-- pages/UserDashboard/ProfileBuilder.vue -->
+<!-- pages/UserDashboard/UserManagement/FreePlanUser/FreeProfileBuilder.vue -->
 <template>
   <div>
     <!-- Global Loading Overlay -->
@@ -14,7 +14,7 @@
       >
         <div class="text-center">
           <div
-            class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"
+            class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent-500 border-t-transparent"
           ></div>
           <p class="mt-4 text-body text-secondary-600">Loading your profile...</p>
         </div>
@@ -23,17 +23,17 @@
 
     <!-- Free Trial Banner -->
     <div
-      class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-4 py-3"
+      class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-secondary-200 bg-gradient-to-r from-secondary-50 to-white px-4 py-3"
     >
       <div class="flex items-start gap-3">
         <span
-          class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-900 text-white"
+          class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-secondary-900 text-white"
         >
           <Icon name="heroicons:sparkles" class="h-4 w-4" />
         </span>
         <div>
-          <p class="text-body font-semibold text-slate-900">Free Trial</p>
-          <p class="text-caption text-slate-600">
+          <p class="text-body font-semibold text-secondary-900">Free Trial</p>
+          <p class="text-caption text-secondary-600">
             Design your profile with the basic feature set. Upgrade to unlock all
             fields, layouts and design options.
           </p>
@@ -43,7 +43,7 @@
         to="/Onboarding/plan"
         class="btn btn-primary whitespace-nowrap flex-shrink-0 flex items-center gap-2"
       >
-        <Icon name="heroicons:arrow-up-t-circle" class="h-5 w-5" />
+        <Icon name="heroicons:arrow-up-circle" class="h-5 w-5" />
         Upgrade Plan
       </NuxtLink>
     </div>
@@ -57,13 +57,13 @@
             Free trial — customize your digital business card with the basic
             feature set
           </p>
-          <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
-            <Icon name="heroicons:lock-closed" class="w-4 h-4 text-slate-500" />
-            <span class="text-caption text-slate-700 font-medium">Free Trial: basic features</span>
+          <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-secondary-50 border border-secondary-200 rounded-lg">
+            <Icon name="heroicons:lock-closed" class="w-4 h-4 text-secondary-500" />
+            <span class="text-caption text-secondary-700 font-medium">Free Trial: basic features</span>
           </div>
           <p
             v-if="!loadingCards && userNfcCards.length === 0"
-            class="mt-2 text-caption text-amber-700"
+            class="mt-2 text-caption text-warning-700"
           >
             No NFC card yet — design and preview your profile now, then activate a
             card to save it.
@@ -89,14 +89,14 @@
                 <span v-else>Select Card</span>
                 <Icon
                   name="heroicons:chevron-down"
-                  class="w-4 h-4 text-gray-400"
+                  class="w-4 h-4 text-secondary-400"
                 />
               </button>
 
               <!-- Card Selector Dropdown -->
               <div
                 v-if="showCardSelector"
-                class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
+                class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl border border-secondary-200 z-50 max-h-96 overflow-y-auto"
               >
                 <div class="p-3 space-y-2">
                   <div
@@ -106,8 +106,8 @@
                     :class="[
                       'relative cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md',
                       selectedNfcCardId === card.id
-                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100'
-                        : 'border-gray-200 hover:border-gray-300 bg-white',
+                        ? 'border-info-500 bg-gradient-to-br from-info-50 to-info-100'
+                        : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
                     <!-- Card Mini Design -->
@@ -120,16 +120,16 @@
                             :class="[
                               'w-5 h-5',
                               selectedNfcCardId === card.id
-                                ? 'text-blue-600'
-                                : 'text-gray-400',
+                                ? 'text-info-600'
+                                : 'text-secondary-400',
                             ]"
                           />
-                          <p class="text-body font-bold text-gray-900 truncate">
+                          <p class="text-body font-bold text-secondary-900 truncate">
                             {{ card.nfc_card_id || "Card #" + card.id }}
                           </p>
                         </div>
 
-                        <p class="text-caption text-gray-600 mb-2 truncate">
+                        <p class="text-caption text-secondary-600 mb-2 truncate">
                           {{ card.card_owner || "No owner" }}
                         </p>
 
@@ -139,10 +139,10 @@
                             :class="[
                               'inline-flex items-center px-2 py-0.5 rounded-full text-badge',
                               card.status === 'active'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-success-100 text-success-800'
                                 : card.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800',
+                                ? 'bg-warning-100 text-warning-800'
+                                : 'bg-secondary-100 text-secondary-800',
                             ]"
                           >
                             {{ card.status || "pending" }}
@@ -162,7 +162,7 @@
                       <Icon
                         v-if="selectedNfcCardId === card.id"
                         name="heroicons:check-circle"
-                        class="w-5 h-5 text-blue-500 flex-shrink-0"
+                        class="w-5 h-5 text-info-500 flex-shrink-0"
                       />
                     </div>
                   </div>
@@ -214,10 +214,10 @@
           <div class="card-body">
             <!-- Display message when no options are available -->
             <div v-if="availableGeneralTabs.length === 0 && availableDesignTabs.length === 0" 
-                 class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-              <Icon name="heroicons:exclamation-triangle" class="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-              <h3 class="card-title text-yellow-800 mb-1">No Options Available</h3>
-              <p class="text-caption text-yellow-700">
+                 class="p-4 bg-warning-50 border border-warning-200 rounded-lg text-center">
+              <Icon name="heroicons:exclamation-triangle" class="w-8 h-8 text-warning-400 mx-auto mb-2" />
+              <h3 class="card-title text-warning-800 mb-1">No Options Available</h3>
+              <p class="text-caption text-warning-700">
                 Your admin has not assigned any sections or features to your account yet.
                 Please contact your administrator for assistance.
               </p>
@@ -225,7 +225,7 @@
             
             <div v-else>
               <!-- Main Category Tabs Container -->
-              <div class="flex items-center gap-1 sm:gap-2 border-b border-gray-200 pb-3 mb-5">
+              <div class="flex items-center gap-1 sm:gap-2 border-b border-secondary-200 pb-3 mb-5">
                 <!-- Only show General Sections button when general options are available -->
                 <button
                   v-if="availableGeneralTabs.length > 0"
@@ -233,8 +233,8 @@
                   :class="[
                     'px-4 sm:px-5 py-2.5 text-navigation rounded-xl transition-all duration-200',
                     mainCategory === 'general'
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
+                      ? 'bg-gradient-to-r from-info-50 to-primary-50 text-info-700 shadow-sm ring-1 ring-info-200'
+                      : 'text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50',
                   ]"
                 >
                   General Sections
@@ -246,8 +246,8 @@
                   :class="[
                     'px-4 sm:px-5 py-2.5 text-navigation rounded-xl transition-all duration-200',
                     mainCategory === 'design'
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
+                      ? 'bg-gradient-to-r from-info-50 to-primary-50 text-info-700 shadow-sm ring-1 ring-info-200'
+                      : 'text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50',
                   ]"
                 >
                   Design Sections
@@ -263,8 +263,8 @@
                   :class="[
                     'px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-navigation transition-all duration-200 flex items-center gap-2.5 border',
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md shadow-blue-200/50'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800',
+                      ? 'bg-gradient-to-r from-info-600 to-primary-600 text-white border-transparent shadow-md shadow-info-200/50'
+                      : 'bg-white text-secondary-600 border-secondary-200 hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-800',
                   ]"
                 >
                   <Icon :name="tab.icon" class="w-4.5 h-4.5" />
@@ -281,8 +281,8 @@
                   :class="[
                     'px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-navigation transition-all duration-200 flex items-center gap-2.5 border',
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md shadow-blue-200/50'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800',
+                      ? 'bg-gradient-to-r from-info-600 to-primary-600 text-white border-transparent shadow-md shadow-info-200/50'
+                      : 'bg-white text-secondary-600 border-secondary-200 hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-800',
                   ]"
                 >
                   <Icon :name="tab.icon" class="w-4.5 h-4.5" />
@@ -298,20 +298,20 @@
           <div class="card-body">
             <!-- Content to display when no options are available -->
             <div v-if="availableGeneralTabs.length === 0 && availableDesignTabs.length === 0" class="space-y-4 sm:space-y-6">
-              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 text-center shadow-sm">
+              <div class="bg-gradient-to-br from-info-50 to-primary-50 border border-info-100 rounded-xl p-8 text-center shadow-sm">
                 <div class="w-32 h-32 mx-auto mb-6 relative">
-                  <div class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full opacity-10 animate-pulse"></div>
-                  <div class="absolute inset-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full opacity-20"></div>
+                  <div class="absolute inset-0 bg-gradient-to-br from-info-400 to-primary-500 rounded-full opacity-10 animate-pulse"></div>
+                  <div class="absolute inset-3 bg-gradient-to-br from-info-500 to-primary-600 rounded-full opacity-20"></div>
                   <div class="absolute inset-0 flex items-center justify-center">
-                    <Icon name="heroicons:document-text" class="w-16 h-16 text-indigo-500" />
+                    <Icon name="heroicons:document-text" class="w-16 h-16 text-primary-500" />
                   </div>
                 </div>
-                <h3 class="card-title text-indigo-900 mb-3">No Profile Options Available</h3>
-                <p class="text-body text-indigo-700 mb-6 max-w-md mx-auto">
+                <h3 class="card-title text-primary-900 mb-3">No Profile Options Available</h3>
+                <p class="text-body text-primary-700 mb-6 max-w-md mx-auto">
                   Your administrator has not assigned any profile sections or design options to your account yet.
                   Please contact your administrator for assistance.
                 </p>
-                <a href="/UserDashboard" class="inline-flex items-center px-5 py-2.5 text-button text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-all duration-200">
+                <a href="/UserDashboard" class="inline-flex items-center px-5 py-2.5 text-button text-white bg-gradient-to-r from-info-600 to-primary-600 rounded-lg shadow-md hover:from-info-700 hover:to-primary-700 transition-all duration-200">
                   <Icon name="heroicons:arrow-left" class="w-4 h-4 mr-2" />
                   Return to Dashboard
                 </a>
@@ -322,24 +322,24 @@
               <!-- No Cards Warning (only show if no cards and not loading) -->
               <div
                 v-if="!loadingCards && userNfcCards.length === 0"
-                class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+                class="bg-warning-50 border border-warning-200 rounded-lg p-4"
               >
                 <div class="flex">
                   <Icon
                     name="heroicons:exclamation-triangle"
-                    class="h-5 w-5 text-yellow-400"
+                    class="h-5 w-5 text-warning-400"
                   />
                   <div class="ml-3">
-                    <h3 class="card-title text-yellow-800">
+                    <h3 class="card-title text-warning-800">
                       No NFC Cards Found
                     </h3>
-                    <p class="text-body text-yellow-700 mt-1">
+                    <p class="text-body text-warning-700 mt-1">
                       You need to order an NFC card before creating a profile.
                       Go to Card Management to order your card.
                     </p>
                     <NuxtLink
                       to="/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
-                      class="inline-flex items-center mt-2 text-navigation text-yellow-800 hover:text-yellow-900"
+                      class="inline-flex items-center mt-2 text-navigation text-warning-800 hover:text-warning-900"
                     >
                       Go to Card Management
                       <Icon name="heroicons:arrow-right" class="ml-1 h-4 w-4" />
@@ -378,10 +378,10 @@
               <div 
                 v-for="group in getGroupedProfileFields()" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -399,15 +399,15 @@
                     <!-- Locked Field Overlay for Basic Plan -->
                     <div
                       v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-gray-50/90 backdrop-blur-sm rounded-lg border-2 border-amber-300 flex items-center justify-center cursor-not-allowed group hover:bg-gray-100/90 transition-all"
+                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
                     >
                       <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-gray-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-gray-600 mb-3">Available on higher plans</p>
+                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
+                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
+                        <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
                         <button
                           @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
                         >
                           Upgrade Now
                         </button>
@@ -437,15 +437,15 @@
                 <!-- Locked Overlay for Company Logo -->
                 <div
                   v-if="isFieldRestricted('companyLogo')"
-                  class="absolute inset-0 bg-gray-50/90 backdrop-blur-sm rounded-lg border-2 border-amber-300 flex items-center justify-center cursor-not-allowed group hover:bg-gray-100/90 transition-all"
+                  class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
                 >
                   <div class="text-center p-4">
-                    <Icon name="heroicons:lock-closed-solid" class="w-10 h-10 text-amber-500 mx-auto mb-2" />
-                    <p class="text-body font-semibold text-gray-900 mb-1">Company Logo</p>
-                    <p class="text-caption text-gray-600 mb-3">Available on higher plans</p>
+                    <Icon name="heroicons:lock-closed-solid" class="w-10 h-10 text-warning-500 mx-auto mb-2" />
+                    <p class="text-body font-semibold text-secondary-900 mb-1">Company Logo</p>
+                    <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
                     <button
                       @click="showUpgradeModal"
-                      class="text-button text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                      class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
                     >
                       Upgrade to Unlock
                     </button>
@@ -457,10 +457,10 @@
               <div 
                 v-for="group in getGroupedCompanyFields().filter(g => g.name !== 'Team Members')" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -478,15 +478,15 @@
                     <!-- Locked Field Overlay for Basic Plan -->
                     <div
                       v-if="isFieldRestricted(field.field_key)"
-                      class="absolute inset-0 bg-gray-50/90 backdrop-blur-sm rounded-lg border-2 border-amber-300 flex items-center justify-center cursor-not-allowed group hover:bg-gray-100/90 transition-all"
+                      class="absolute inset-0 bg-secondary-50/90 backdrop-blur-sm rounded-lg border-2 border-warning-300 flex items-center justify-center cursor-not-allowed group hover:bg-secondary-100/90 transition-all"
                     >
                       <div class="text-center p-4">
-                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                        <p class="text-body font-semibold text-gray-900 mb-1">{{ field.label }}</p>
-                        <p class="text-caption text-gray-600 mb-3">Available on higher plans</p>
+                        <Icon name="heroicons:lock-closed-solid" class="w-8 h-8 text-warning-500 mx-auto mb-2" />
+                        <p class="text-body font-semibold text-secondary-900 mb-1">{{ field.label }}</p>
+                        <p class="text-caption text-secondary-600 mb-3">Available on higher plans</p>
                         <button
                           @click="showUpgradeModal"
-                          class="text-button text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                          class="text-button text-white bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
                         >
                           Upgrade Now
                         </button>
@@ -497,17 +497,17 @@
               </div>
 
               <!-- Team Members Section (Special handling) -->
-              <div v-if="shouldShowField('teamMembers')" class="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
-                <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div v-if="shouldShowField('teamMembers')" class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-secondary-100">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:user-group" class="w-5 h-5 text-cyan-600" />
+                    <Icon name="heroicons:user-group" class="w-5 h-5 text-info-600" />
                     <h3 class="card-title">Team Members</h3>
                   </div>
                   <button
                     type="button"
                     @click="loadBusinessTeamMembers"
                     :disabled="loadingTeamMembers"
-                    class="flex items-center gap-2 px-3 py-1.5 text-button text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                    class="flex items-center gap-2 px-3 py-1.5 text-button text-info-600 hover:text-info-800 hover:bg-info-50 rounded-lg transition-colors"
                   >
                     <Icon v-if="loadingTeamMembers" name="heroicons:arrow-path" class="w-4 h-4 animate-spin" />
                     <Icon v-else name="heroicons:users" class="w-4 h-4" />
@@ -517,7 +517,7 @@
 
                 <!-- Available Employees -->
                 <div v-if="businessEmployees.length > 0" class="space-y-2">
-                  <p class="text-caption text-gray-500">Select team members to display on your landing page:</p>
+                  <p class="text-caption text-secondary-500">Select team members to display on your landing page:</p>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div
                       v-for="employee in businessEmployees"
@@ -526,8 +526,8 @@
                       :class="[
                         'flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all',
                         isTeamMemberSelected(employee) 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          ? 'border-info-500 bg-info-50' 
+                          : 'border-secondary-200 hover:border-secondary-300 bg-white'
                       ]"
                     >
                       <div class="flex-shrink-0">
@@ -537,18 +537,18 @@
                           :alt="employee.name"
                           class="w-10 h-10 rounded-full object-cover"
                         />
-                        <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-body font-bold">
+                        <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-info-400 to-primary-500 flex items-center justify-center text-white text-body font-bold">
                           {{ employee.initials }}
                         </div>
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-body font-medium text-gray-900 truncate">{{ employee.name }}</p>
-                        <p class="text-caption text-gray-500 truncate">{{ employee.role }}</p>
+                        <p class="text-body font-medium text-secondary-900 truncate">{{ employee.name }}</p>
+                        <p class="text-caption text-secondary-500 truncate">{{ employee.role }}</p>
                       </div>
                       <div class="flex-shrink-0">
                         <Icon 
                           :name="isTeamMemberSelected(employee) ? 'heroicons:check-circle-solid' : 'heroicons:plus-circle'" 
-                          :class="isTeamMemberSelected(employee) ? 'w-5 h-5 text-blue-500' : 'w-5 h-5 text-gray-300'"
+                          :class="isTeamMemberSelected(employee) ? 'w-5 h-5 text-info-500' : 'w-5 h-5 text-secondary-300'"
                         />
                       </div>
                     </div>
@@ -556,16 +556,16 @@
                 </div>
 
                 <!-- Selected Team Members Preview -->
-                <div v-if="validTeamMembers.length > 0" class="space-y-2 pt-3 border-t border-gray-100">
-                  <p class="text-caption font-medium text-gray-700">Selected ({{ validTeamMembers.length }}):</p>
+                <div v-if="validTeamMembers.length > 0" class="space-y-2 pt-3 border-t border-secondary-100">
+                  <p class="text-caption font-medium text-secondary-700">Selected ({{ validTeamMembers.length }}):</p>
                   <div class="flex flex-wrap gap-2">
                     <div
                       v-for="(member, idx) in validTeamMembers"
                       :key="idx"
-                      class="flex items-center gap-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-badge"
+                      class="flex items-center gap-2 px-2 py-1 bg-info-100 text-info-800 rounded-full text-badge"
                     >
                       <span class="font-medium">{{ member.name }}</span>
-                      <button @click="removeTeamMemberByName(member.name)" class="hover:text-red-600">
+                      <button @click="removeTeamMemberByName(member.name)" class="hover:text-error-600">
                         <Icon name="heroicons:x-mark" class="w-3 h-3" />
                       </button>
                     </div>
@@ -573,9 +573,9 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-else-if="businessEmployees.length === 0 && !loadingTeamMembers" class="text-center py-6 bg-gray-50 rounded-lg">
-                  <Icon name="heroicons:user-group" class="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                  <p class="text-body text-gray-500">Click "Load Employees" to fetch your team</p>
+                <div v-else-if="businessEmployees.length === 0 && !loadingTeamMembers" class="text-center py-6 bg-secondary-50 rounded-lg">
+                  <Icon name="heroicons:user-group" class="w-10 h-10 mx-auto mb-2 text-secondary-300" />
+                  <p class="text-body text-secondary-500">Click "Load Employees" to fetch your team</p>
                 </div>
               </div>
             </div>
@@ -586,10 +586,10 @@
               <div 
                 v-for="group in getGroupedServicesFields()" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -604,26 +604,26 @@
               </div>
 
               <!-- Service Icon Picker & Form Fields Container -->
-              <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-5">
+              <div class="bg-white border border-secondary-200 rounded-xl p-4 space-y-5">
                 <!-- Service Icon Picker -->
                 <div>
-                  <div class="flex items-center gap-2 pb-2 mb-3 border-b border-gray-100">
-                    <Icon name="heroicons:face-smile" class="w-5 h-5 text-purple-600" />
+                  <div class="flex items-center gap-2 pb-2 mb-3 border-b border-secondary-100">
+                    <Icon name="heroicons:face-smile" class="w-5 h-5 text-primary-600" />
                     <h3 class="card-title">Service Icon</h3>
-                    <span class="text-caption text-gray-400">(Select icon for this service)</span>
+                    <span class="text-caption text-secondary-400">(Select icon for this service)</span>
                   </div>
                   <!-- Selected Icon Preview -->
                   <div class="mb-4 flex items-center gap-4">
-                    <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 shadow-sm ring-1 ring-blue-200">
+                    <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-info-100 to-primary-100 shadow-sm ring-1 ring-info-200">
                       <span class="text-4xl">{{ profileData.serviceIcon || "🚀" }}</span>
                     </div>
                     <div>
-                      <p class="text-body font-medium text-gray-800 mb-0.5">Selected Icon</p>
-                      <p class="text-caption text-gray-500">Click on an icon below to change</p>
+                      <p class="text-body font-medium text-secondary-800 mb-0.5">Selected Icon</p>
+                      <p class="text-caption text-secondary-500">Click on an icon below to change</p>
                     </div>
                   </div>
                   <!-- Icon Grid Picker -->
-                  <div class="grid grid-cols-8 gap-2 max-h-52 overflow-y-auto p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div class="grid grid-cols-8 gap-2 max-h-52 overflow-y-auto p-3 bg-secondary-50 rounded-xl border border-secondary-200">
                     <button
                       v-for="icon in SERVICE_ICONS"
                       :key="icon"
@@ -631,8 +631,8 @@
                       :class="[
                         'w-full aspect-square rounded-xl flex items-center justify-center text-2xl transition-all duration-150 hover:scale-110',
                         profileData.serviceIcon === icon
-                          ? 'bg-blue-600 shadow-md ring-2 ring-blue-400'
-                          : 'bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+                          ? 'bg-info-600 shadow-md ring-2 ring-info-400'
+                          : 'bg-white border border-secondary-200 hover:bg-info-50 hover:border-info-300'
                       ]"
                       type="button"
                     >
@@ -641,19 +641,19 @@
                   </div>
                   <!-- Custom Emoji Input -->
                   <div class="mt-3">
-                    <label class="block text-label text-gray-600 mb-1">Atau masukkan custom emoji sendiri:</label>
+                    <label class="block text-label text-secondary-600 mb-1">Atau masukkan custom emoji sendiri:</label>
                     <div class="flex gap-2">
                       <input
                         v-model="profileData.serviceIcon"
                         type="text"
                         maxlength="4"
                         placeholder="Tampal emoji di sini..."
-                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-input focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        class="flex-1 px-3 py-2 border border-secondary-300 rounded-lg text-input focus:ring-2 focus:ring-info-500 focus:border-info-500 outline-none"
                       />
                       <button
                         @click="profileData.serviceIcon = '🚀'"
                         type="button"
-                        class="px-3 py-2 text-button text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        class="px-3 py-2 text-button text-secondary-600 bg-secondary-100 hover:bg-secondary-200 rounded-lg transition-colors"
                       >
                         Reset
                       </button>
@@ -667,7 +667,7 @@
                 <button 
                   type="button"
                   @click="clearServiceForm"
-                  class="px-4 py-2 text-button text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  class="px-4 py-2 text-button text-secondary-700 bg-secondary-100 rounded-lg hover:bg-secondary-200 transition-colors"
                 >
                   <Icon name="heroicons:x-mark" class="w-4 h-4 inline mr-1" />
                   {{ editingServiceIndex !== null ? 'Cancel Edit' : 'Clear Form' }}
@@ -676,7 +676,7 @@
                   type="button"
                   @click="addService"
                   class="px-4 py-2 text-button text-white rounded-lg transition-colors"
-                  :class="editingServiceIndex !== null ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'"
+                  :class="editingServiceIndex !== null ? 'bg-info-600 hover:bg-info-700' : 'bg-success-600 hover:bg-success-700'"
                 >
                   <Icon :name="editingServiceIndex !== null ? 'heroicons:check' : 'heroicons:plus'" class="w-4 h-4 inline mr-1" />
                   {{ editingServiceIndex !== null ? 'Update Service' : 'Add Service' }}
@@ -684,9 +684,9 @@
               </div>
 
               <!-- Services List -->
-              <div v-if="profileData.services && profileData.services.length > 0" class="bg-white border border-gray-200 rounded-xl p-4">
-                <div class="flex items-center gap-2 pb-3 border-b border-gray-100 mb-4">
-                  <Icon name="heroicons:briefcase" class="w-5 h-5 text-green-600" />
+              <div v-if="profileData.services && profileData.services.length > 0" class="bg-white border border-secondary-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 pb-3 border-b border-secondary-100 mb-4">
+                  <Icon name="heroicons:briefcase" class="w-5 h-5 text-success-600" />
                   <h3 class="card-title">Services ({{ profileData.services.length }})</h3>
                 </div>
                 <div class="space-y-3">
@@ -694,21 +694,21 @@
                     v-for="(service, index) in profileData.services" 
                     :key="service.id || index"
                     class="flex items-center justify-between p-3 rounded-lg transition-colors"
-                    :class="editingServiceIndex === index ? 'bg-green-100 ring-2 ring-green-500' : 'bg-gray-50 hover:bg-gray-100'"
+                    :class="editingServiceIndex === index ? 'bg-success-100 ring-2 ring-success-500' : 'bg-secondary-50 hover:bg-secondary-100'"
                   >
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-xl ring-1 ring-blue-100">
+                        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-info-50 to-primary-50 flex items-center justify-center text-xl ring-1 ring-info-100">
                           {{ service.icon || "🚀" }}
                         </div>
                         <div class="min-w-0">
                           <h4 class="card-title">{{ service.name }}</h4>
-                          <span v-if="editingServiceIndex === index" class="text-badge bg-green-600 text-white px-2 py-0.5 rounded">Editing</span>
+                          <span v-if="editingServiceIndex === index" class="text-badge bg-success-600 text-white px-2 py-0.5 rounded">Editing</span>
                         </div>
                       </div>
-                      <p class="text-caption text-gray-500 mt-0.5">
+                      <p class="text-caption text-secondary-500 mt-0.5">
                         <span v-if="service.category" class="mr-2">{{ service.category }}</span>
-                        <span v-if="service.price" class="text-green-600 font-medium">{{ service.price }}</span>
+                        <span v-if="service.price" class="text-success-600 font-medium">{{ service.price }}</span>
                         <span v-if="service.duration" class="ml-2">• {{ service.duration }}</span>
                       </p>
                     </div>
@@ -716,7 +716,7 @@
                       <button 
                         type="button"
                         @click="editService(index)"
-                        class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        class="p-1.5 text-info-600 hover:bg-info-100 rounded-lg transition-colors"
                         :title="editingServiceIndex === index ? 'Currently editing' : 'Edit service'"
                       >
                         <Icon name="heroicons:pencil" class="w-4 h-4" />
@@ -724,7 +724,7 @@
                       <button 
                         type="button"
                         @click="removeService(index)"
-                        class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                        class="p-1.5 text-error-600 hover:bg-error-100 rounded-lg transition-colors"
                         title="Remove service"
                       >
                         <Icon name="heroicons:trash" class="w-4 h-4" />
@@ -740,12 +740,12 @@
               <div class="space-y-3 sm:space-y-4">
                 <div class="flex items-center justify-between">
                   <h3 class="card-title">Your Links</h3>
-                  <span class="text-caption text-gray-500">{{ links.length}} links</span>
+                  <span class="text-caption text-secondary-500">{{ links.length}} links</span>
                 </div>
                 
                 <!-- Real-time Preview Notice -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p class="text-caption text-blue-700 flex items-center gap-2">
+                <div class="bg-info-50 border border-info-200 rounded-lg p-3">
+                  <p class="text-caption text-info-700 flex items-center gap-2">
                     <Icon name="heroicons:eye" class="h-4 w-4" />
                     <span>Changes appear instantly in the preview →</span>
                   </p>
@@ -753,8 +753,8 @@
 
                 <!-- Empty State -->
                 <div v-if="links.length === 0 && !loading" class="text-center py-8 sm:py-12">
-                  <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Icon name="heroicons:link" class="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 bg-secondary-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Icon name="heroicons:link" class="h-8 w-8 sm:h-10 sm:w-10 text-secondary-400" />
                   </div>
                   <h3 class="card-title mb-2">No Links Yet</h3>
                   <p class="text-body text-secondary-600 mb-6">Add your social media and custom links. They'll be saved when you save your profile.</p>
@@ -769,34 +769,34 @@
                   <draggable v-model="links" @end="updateLinkOrder" item-key="id" class="space-y-3" handle=".drag-handle">
                     <template #item="{ element: link, index }">
                       <div class="group relative">
-                        <div :class="['border-2 rounded-lg p-3 sm:p-4 transition-all', link.is_active ? 'border-gray-200 bg-white' : 'border-gray-200 bg-gray-50 opacity-60']">
+                        <div :class="['border-2 rounded-lg p-3 sm:p-4 transition-all', link.is_active ? 'border-secondary-200 bg-white' : 'border-secondary-200 bg-secondary-50 opacity-60']">
                           <div class="flex items-start space-x-3">
                             <div class="drag-handle cursor-move pt-1">
-                              <Icon name="heroicons:bars-3" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                              <Icon name="heroicons:bars-3" class="h-5 w-5 text-secondary-400 hover:text-secondary-600" />
                             </div>
-                            <div :class="['w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', link.is_active ? getPlatformColor(link.platform) : 'bg-gray-200']">
-                              <Icon :name="getPlatformIcon(link.platform)" :class="['h-5 w-5', link.is_active ? 'text-white' : 'text-gray-400']" />
+                            <div :class="['w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', link.is_active ? getPlatformColor(link.platform) : 'bg-secondary-200']">
+                              <Icon :name="getPlatformIcon(link.platform)" :class="['h-5 w-5', link.is_active ? 'text-white' : 'text-secondary-400']" />
                             </div>
                             <div class="flex-1 min-w-0">
-                              <input v-model="link.title" type="text" placeholder="Link title" class="w-full px-3 py-1.5 text-input font-medium bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded" @blur="updateLink(link)" />
-                              <input v-model="link.url" type="url" placeholder="URL" class="w-full px-3 py-1 mt-1 text-input text-gray-600 bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded" @blur="updateLink(link)" />
-                              <p class="text-caption text-gray-500 mt-1">
+                              <input v-model="link.title" type="text" placeholder="Link title" class="w-full px-3 py-1.5 text-input font-medium bg-transparent border-0 focus:ring-2 focus:ring-info-500 rounded" @blur="updateLink(link)" />
+                              <input v-model="link.url" type="url" placeholder="URL" class="w-full px-3 py-1 mt-1 text-input text-secondary-600 bg-transparent border-0 focus:ring-2 focus:ring-info-500 rounded" @blur="updateLink(link)" />
+                              <p class="text-caption text-secondary-500 mt-1">
                                 <Icon name="heroicons:cursor-arrow-ripple" class="h-3 w-3 inline mr-1" />
                                 {{ link.click_count || 0 }} clicks
                               </p>
                             </div>
                             <div class="flex items-center space-x-2">
-                              <button @click="toggleLink(link)" :class="['relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out', link.is_active ? 'bg-blue-600' : 'bg-gray-200']">
+                              <button @click="toggleLink(link)" :class="['relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out', link.is_active ? 'bg-info-600' : 'bg-secondary-200']">
                                 <span :class="['pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out', link.is_active ? 'translate-x-5' : 'translate-x-0']" />
                               </button>
-                              <button @click="deleteLink(link)" class="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                              <button @click="deleteLink(link)" class="p-1 text-secondary-400 hover:text-error-600 transition-colors">
                                 <Icon name="heroicons:trash" class="h-4 w-4" />
                               </button>
                             </div>
                           </div>
                         </div>
                         <div v-if="index < links.length - 1" class="absolute left-1/2 -bottom-3 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                          <button @click="showAddLinkModal = true; insertIndex = index + 1" class="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg flex items-center justify-center">
+                          <button @click="showAddLinkModal = true; insertIndex = index + 1" class="w-8 h-8 bg-info-600 text-white rounded-full hover:bg-info-700 transition-colors shadow-lg flex items-center justify-center">
                             <Icon name="heroicons:plus" class="h-4 w-4" />
                           </button>
                         </div>
@@ -811,8 +811,8 @@
 
                 <!-- Loading State -->
                 <div v-if="loading" class="flex items-center justify-center py-12">
-                  <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-                  <span class="ml-3 text-gray-600">Loading your links...</span>
+                  <div class="animate-spin rounded-full h-8 w-8 border-4 border-accent-500 border-t-transparent"></div>
+                  <span class="ml-3 text-secondary-600">Loading your links...</span>
                 </div>
               </div>
             </div>
@@ -834,10 +834,10 @@
               <div 
                 v-for="group in getGroupedPortfolioFields()" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -856,7 +856,7 @@
                 <button 
                   type="button"
                   @click="clearProjectForm"
-                  class="px-4 py-2 text-button text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  class="px-4 py-2 text-button text-secondary-700 bg-secondary-100 rounded-lg hover:bg-secondary-200 transition-colors"
                 >
                   <Icon name="heroicons:x-mark" class="w-4 h-4 inline mr-1" />
                   {{ editingProjectIndex !== null ? 'Cancel Edit' : 'Clear Form' }}
@@ -865,7 +865,7 @@
                   type="button"
                   @click="addProject"
                   class="px-4 py-2 text-button text-white rounded-lg transition-colors"
-                  :class="editingProjectIndex !== null ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'"
+                  :class="editingProjectIndex !== null ? 'bg-info-600 hover:bg-info-700' : 'bg-primary-600 hover:bg-primary-700'"
                 >
                   <Icon :name="editingProjectIndex !== null ? 'heroicons:check' : 'heroicons:plus'" class="w-4 h-4 inline mr-1" />
                   {{ editingProjectIndex !== null ? 'Update Project' : 'Add Project' }}
@@ -873,9 +873,9 @@
               </div>
 
               <!-- Projects List -->
-              <div v-if="profileData.projects && profileData.projects.length > 0" class="bg-white border border-gray-200 rounded-xl p-4">
-                <div class="flex items-center gap-2 pb-3 border-b border-gray-100 mb-4">
-                  <Icon name="heroicons:folder" class="w-5 h-5 text-purple-600" />
+              <div v-if="profileData.projects && profileData.projects.length > 0" class="bg-white border border-secondary-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 pb-3 border-b border-secondary-100 mb-4">
+                  <Icon name="heroicons:folder" class="w-5 h-5 text-primary-600" />
                   <h3 class="card-title">Projects ({{ profileData.projects.length }})</h3>
                 </div>
                 <div class="space-y-3">
@@ -883,14 +883,14 @@
                     v-for="(project, index) in profileData.projects" 
                     :key="project.id || index"
                     class="flex items-center justify-between p-3 rounded-lg transition-colors"
-                    :class="editingProjectIndex === index ? 'bg-purple-100 ring-2 ring-purple-500' : 'bg-gray-50 hover:bg-gray-100'"
+                    :class="editingProjectIndex === index ? 'bg-primary-100 ring-2 ring-primary-500' : 'bg-secondary-50 hover:bg-secondary-100'"
                   >
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
                         <h4 class="card-title">{{ project.title }}</h4>
-                        <span v-if="editingProjectIndex === index" class="text-badge bg-purple-600 text-white px-2 py-0.5 rounded">Editing</span>
+                        <span v-if="editingProjectIndex === index" class="text-badge bg-primary-600 text-white px-2 py-0.5 rounded">Editing</span>
                       </div>
-                      <p class="text-caption text-gray-500 mt-0.5">
+                      <p class="text-caption text-secondary-500 mt-0.5">
                         <span v-if="project.category" class="mr-2">{{ project.category }}</span>
                         <span v-if="project.client_name">for {{ project.client_name }}</span>
                         <span v-if="project.date_completed" class="ml-2">• {{ project.date_completed }}</span>
@@ -900,7 +900,7 @@
                       <button 
                         type="button"
                         @click="editProject(index)"
-                        class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        class="p-1.5 text-info-600 hover:bg-info-100 rounded-lg transition-colors"
                         :title="editingProjectIndex === index ? 'Currently editing' : 'Edit project'"
                       >
                         <Icon name="heroicons:pencil" class="w-4 h-4" />
@@ -908,7 +908,7 @@
                       <button 
                         type="button"
                         @click="removeProject(index)"
-                        class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                        class="p-1.5 text-error-600 hover:bg-error-100 rounded-lg transition-colors"
                         title="Remove project"
                       >
                         <Icon name="heroicons:trash" class="w-4 h-4" />
@@ -919,10 +919,10 @@
               </div>
 
               <!-- Empty State -->
-              <div v-if="portfolioFields.length === 0 && (!profileData.projects || profileData.projects.length === 0)" class="text-center py-8 bg-gray-50 rounded-lg">
-                <Icon name="heroicons:folder" class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <div v-if="portfolioFields.length === 0 && (!profileData.projects || profileData.projects.length === 0)" class="text-center py-8 bg-secondary-50 rounded-lg">
+                <Icon name="heroicons:folder" class="w-12 h-12 mx-auto mb-3 text-secondary-300" />
                 <h4 class="card-title mb-1">No Projects Yet</h4>
-                <p class="text-caption text-gray-500">Fill in the form above and click "Add Project" to showcase your work</p>
+                <p class="text-caption text-secondary-500">Fill in the form above and click "Add Project" to showcase your work</p>
               </div>
             </div>
 
@@ -932,10 +932,10 @@
               <div 
                 v-for="group in getGroupedBlogFields()" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -954,7 +954,7 @@
                 <button 
                   type="button"
                   @click="clearBlogForm"
-                  class="px-4 py-2 text-button text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  class="px-4 py-2 text-button text-secondary-700 bg-secondary-100 rounded-lg hover:bg-secondary-200 transition-colors"
                 >
                   <Icon name="heroicons:x-mark" class="w-4 h-4 inline mr-1" />
                   {{ editingBlogPostIndex !== null ? 'Cancel Edit' : 'Clear Form' }}
@@ -963,7 +963,7 @@
                   type="button"
                   @click="addBlogPost"
                   class="px-4 py-2 text-button text-white rounded-lg transition-colors"
-                  :class="editingBlogPostIndex !== null ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'"
+                  :class="editingBlogPostIndex !== null ? 'bg-success-600 hover:bg-success-700' : 'bg-info-600 hover:bg-info-700'"
                 >
                   <Icon :name="editingBlogPostIndex !== null ? 'heroicons:check' : 'heroicons:plus'" class="w-4 h-4 inline mr-1" />
                   {{ editingBlogPostIndex !== null ? 'Update Blog Post' : 'Add Blog Post' }}
@@ -971,9 +971,9 @@
               </div>
 
               <!-- Blog Posts List -->
-              <div v-if="profileData.blogPosts && profileData.blogPosts.length > 0" class="bg-white border border-gray-200 rounded-xl p-4">
-                <div class="flex items-center gap-2 pb-3 border-b border-gray-100 mb-4">
-                  <Icon name="heroicons:document-text" class="w-5 h-5 text-blue-600" />
+              <div v-if="profileData.blogPosts && profileData.blogPosts.length > 0" class="bg-white border border-secondary-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 pb-3 border-b border-secondary-100 mb-4">
+                  <Icon name="heroicons:document-text" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">Blog Posts ({{ profileData.blogPosts.length }})</h3>
                 </div>
                 <div class="space-y-3">
@@ -981,14 +981,14 @@
                     v-for="(post, index) in profileData.blogPosts" 
                     :key="post.id || index"
                     class="flex items-center justify-between p-3 rounded-lg transition-colors"
-                    :class="editingBlogPostIndex === index ? 'bg-blue-100 ring-2 ring-blue-500' : 'bg-gray-50 hover:bg-gray-100'"
+                    :class="editingBlogPostIndex === index ? 'bg-info-100 ring-2 ring-info-500' : 'bg-secondary-50 hover:bg-secondary-100'"
                   >
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
                         <h4 class="card-title">{{ post.title }}</h4>
-                        <span v-if="editingBlogPostIndex === index" class="text-badge bg-blue-600 text-white px-2 py-0.5 rounded">Editing</span>
+                        <span v-if="editingBlogPostIndex === index" class="text-badge bg-info-600 text-white px-2 py-0.5 rounded">Editing</span>
                       </div>
-                      <p class="text-caption text-gray-500 mt-0.5">
+                      <p class="text-caption text-secondary-500 mt-0.5">
                         <span v-if="post.category" class="mr-2">{{ post.category }}</span>
                         <span v-if="post.author_name">by {{ post.author_name }}</span>
                         <span v-if="post.published_date" class="ml-2">• {{ post.published_date }}</span>
@@ -998,7 +998,7 @@
                       <button 
                         type="button"
                         @click="editBlogPost(index)"
-                        class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        class="p-1.5 text-info-600 hover:bg-info-100 rounded-lg transition-colors"
                         :title="editingBlogPostIndex === index ? 'Currently editing' : 'Edit post'"
                       >
                         <Icon name="heroicons:pencil" class="w-4 h-4" />
@@ -1006,7 +1006,7 @@
                       <button 
                         type="button"
                         @click="removeBlogPost(index)"
-                        class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                        class="p-1.5 text-error-600 hover:bg-error-100 rounded-lg transition-colors"
                         title="Remove post"
                       >
                         <Icon name="heroicons:trash" class="w-4 h-4" />
@@ -1017,10 +1017,10 @@
               </div>
 
               <!-- Empty State -->
-              <div v-if="blogFields.length === 0 && (!profileData.blogPosts || profileData.blogPosts.length === 0)" class="text-center py-8 bg-gray-50 rounded-lg">
-                <Icon name="heroicons:document-text" class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <div v-if="blogFields.length === 0 && (!profileData.blogPosts || profileData.blogPosts.length === 0)" class="text-center py-8 bg-secondary-50 rounded-lg">
+                <Icon name="heroicons:document-text" class="w-12 h-12 mx-auto mb-3 text-secondary-300" />
                 <h4 class="card-title mb-1">No Blog Posts Yet</h4>
-                <p class="text-caption text-gray-500">Fill in the form above and click "Add Blog Post" to create your first post</p>
+                <p class="text-caption text-secondary-500">Fill in the form above and click "Add Blog Post" to create your first post</p>
               </div>
             </div>
 
@@ -1033,10 +1033,10 @@
               <div 
                 v-for="group in getDynamicSectionGroups(activeTab)" 
                 :key="group.name"
-                class="bg-white border border-gray-200 rounded-xl p-4 space-y-4"
+                class="bg-white border border-secondary-200 rounded-xl p-4 space-y-4"
               >
-                <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Icon :name="group.icon" class="w-5 h-5 text-blue-600" />
+                <div class="flex items-center gap-2 pb-2 border-b border-secondary-100">
+                  <Icon :name="group.icon" class="w-5 h-5 text-info-600" />
                   <h3 class="card-title">{{ group.name }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': group.fields.length > 1 && !group.fields.some(f => f.field_type === 'richtext' || f.field_type === 'textarea' || f.field_type === 'repeater') }">
@@ -1051,10 +1051,10 @@
               </div>
 
               <!-- Empty State -->
-              <div v-if="getDynamicSectionFields(activeTab).length === 0" class="text-center py-8 bg-gray-50 rounded-lg">
-                <Icon name="heroicons:squares-plus" class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <div v-if="getDynamicSectionFields(activeTab).length === 0" class="text-center py-8 bg-secondary-50 rounded-lg">
+                <Icon name="heroicons:squares-plus" class="w-12 h-12 mx-auto mb-3 text-secondary-300" />
                 <h4 class="card-title mb-1">No Fields Yet</h4>
-                <p class="text-caption text-gray-500">Admin hasn't configured any fields for this section yet.</p>
+                <p class="text-caption text-secondary-500">Admin hasn't configured any fields for this section yet.</p>
               </div>
             </div>
 
@@ -1064,7 +1064,7 @@
               <div v-if="themes.length > 0">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-purple-600" />
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-primary-600" />
                     <h3 class="card-title">Theme Presets</h3>
                   </div>
                   <span class="text-badge text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">{{ themes.length }} available</span>
@@ -1101,7 +1101,7 @@
               <div v-if="bgAnimations.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-fuchsia-600" />
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-primary-600" />
                     <h3 class="card-title">Background Animation</h3>
                   </div>
                   <span class="text-badge text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">{{ bgAnimations.length }} effects</span>
@@ -1114,7 +1114,7 @@
                     :class="[
                       'relative cursor-pointer rounded-2xl border-2 p-3 transition-all hover:shadow-md',
                       profileData.bgAnimation === anim.id
-                        ? 'border-fuchsia-500 bg-fuchsia-50/60 shadow-md'
+                        ? 'border-primary-500 bg-primary-50/60 shadow-md'
                         : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
@@ -1128,7 +1128,7 @@
                     <Icon
                       v-if="profileData.bgAnimation === anim.id"
                       name="heroicons:check-circle-solid"
-                      class="absolute top-2 right-2 w-4.5 h-4.5 text-fuchsia-500"
+                      class="absolute top-2 right-2 w-4.5 h-4.5 text-primary-500"
                     />
                   </div>
                 </div>
@@ -1138,7 +1138,7 @@
               <div v-if="cardStyles.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:rectangle-stack" class="h-5 w-5 text-teal-600" />
+                    <Icon name="heroicons:rectangle-stack" class="h-5 w-5 text-info-600" />
                     <h3 class="card-title">Card Style</h3>
                   </div>
                   <span class="text-badge text-secondary-500 bg-secondary-100 px-2.5 py-1 rounded-full">{{ cardStyles.length }} styles</span>
@@ -1151,7 +1151,7 @@
                     :class="[
                       'relative cursor-pointer rounded-2xl border-2 p-3.5 transition-all hover:shadow-md',
                       profileData.cardStyle === cs.id
-                        ? 'border-teal-500 bg-teal-50/60 shadow-md'
+                        ? 'border-info-500 bg-info-50/60 shadow-md'
                         : 'border-secondary-200 hover:border-secondary-300 bg-white',
                     ]"
                   >
@@ -1171,7 +1171,7 @@
                     <Icon
                       v-if="profileData.cardStyle === cs.id"
                       name="heroicons:check-circle-solid"
-                      class="absolute top-2 right-2 w-4.5 h-4.5 text-teal-500"
+                      class="absolute top-2 right-2 w-4.5 h-4.5 text-info-500"
                     />
                   </div>
                 </div>
@@ -1180,7 +1180,7 @@
               <!-- Color Settings -->
               <div class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center gap-2 mb-4">
-                  <Icon name="heroicons:swatch" class="h-5 w-5 text-amber-600" />
+                  <Icon name="heroicons:swatch" class="h-5 w-5 text-warning-600" />
                   <h3 class="card-title">Colors</h3>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1250,7 +1250,7 @@
               <div v-if="colorSchemes.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:paint-brush" class="h-5 w-5 text-pink-600" />
+                    <Icon name="heroicons:paint-brush" class="h-5 w-5 text-success-600" />
                     <h3 class="card-title">Color Schemes</h3>
                   </div>
                   <span class="text-badge text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full">{{ colorSchemes.length }} schemes</span>
@@ -1287,7 +1287,7 @@
               <div v-if="layouts.length > 0" class="border-t border-secondary-200 pt-6">
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:squares-2x2" class="h-5 w-5 text-cyan-600" />
+                    <Icon name="heroicons:squares-2x2" class="h-5 w-5 text-info-600" />
                     <h3 class="card-title">Layout</h3>
                   </div>
                   <span class="text-badge text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full">{{ layouts.length }} layouts</span>
@@ -1447,7 +1447,7 @@
               <div>
                 <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-2">
-                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-amber-600" />
+                    <Icon name="heroicons:sparkles" class="h-5 w-5 text-warning-600" />
                     <h3 class="card-title">Feature Settings</h3>
                   </div>
                   <span class="text-badge bg-secondary-100 px-2 py-1 rounded">
@@ -1532,17 +1532,17 @@
                   <Icon name="heroicons:sparkles" class="w-12 h-12 mx-auto mb-3 text-secondary-300" />
                   <h4 class="card-title mb-1">No Features Available</h4>
                   <p class="text-helper">Features will be configured by admin</p>
-                  <p class="text-caption text-blue-600 mt-3">
+                  <p class="text-caption text-info-600 mt-3">
                     <Icon name="heroicons:information-circle" class="inline w-4 h-4 mr-1" />
                     Quick Actions section will be hidden on landing page until features are assigned
                   </p>
                 </div>
                 
                 <!-- Order Info -->
-                <div v-if="sortedFeatureToggles.length > 0" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div v-if="sortedFeatureToggles.length > 0" class="mt-4 p-3 bg-info-50 border border-info-200 rounded-lg">
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:information-circle" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <p class="text-caption text-blue-700">
+                    <Icon name="heroicons:information-circle" class="w-4 h-4 text-info-600 flex-shrink-0 mt-0.5" />
+                    <p class="text-caption text-info-700">
                       Drag features to reorder. Enabled features will appear on your landing page in this order.
                     </p>
                   </div>
@@ -1560,8 +1560,8 @@
               <!-- Preview Header -->
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <h3 class="card-title text-blue-800">Live Preview</h3>
-                  <p class="text-caption text-blue-600 mt-0.5">Real-time preview</p>
+                  <h3 class="card-title text-info-800">Live Preview</h3>
+                  <p class="text-caption text-info-600 mt-0.5">Real-time preview</p>
                 </div>
                 <div class="flex gap-2">
                   <button
@@ -1584,25 +1584,25 @@
               
               <!-- iPhone 15 Mockup - Real Proportions (9:19.5 aspect ratio) -->
               <div class="w-full max-w-[360px] mx-auto">
-                <div class="relative aspect-[9/19.5] w-full rounded-[54px] bg-neutral-900 shadow-2xl p-[10px] ring-[2px] ring-neutral-700">
+                <div class="relative aspect-[9/19.5] w-full rounded-[54px] bg-secondary-900 shadow-2xl p-[10px] ring-[2px] ring-secondary-700">
                   <!-- Outer Frame Gradient for Titanium Effect -->
-                  <div class="absolute inset-0 rounded-[54px] bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 pointer-events-none"></div>
-                  <div class="absolute inset-[2px] rounded-[52px] bg-gradient-to-br from-neutral-600/40 to-neutral-900/80 pointer-events-none"></div>
+                  <div class="absolute inset-0 rounded-[54px] bg-gradient-to-b from-secondary-700 via-secondary-800 to-secondary-900 pointer-events-none"></div>
+                  <div class="absolute inset-[2px] rounded-[52px] bg-gradient-to-br from-secondary-600/40 to-secondary-900/80 pointer-events-none"></div>
 
                   <!-- Left Side Buttons -->
-                  <div class="absolute left-[-2px] top-[15%] w-[3px] h-8 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
-                  <div class="absolute left-[-2px] top-[23%] w-[3px] h-14 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
-                  <div class="absolute left-[-2px] top-[34%] w-[3px] h-14 bg-gradient-to-r from-neutral-600 to-neutral-500 rounded-l-sm"></div>
+                  <div class="absolute left-[-2px] top-[15%] w-[3px] h-8 bg-gradient-to-r from-secondary-600 to-secondary-500 rounded-l-sm"></div>
+                  <div class="absolute left-[-2px] top-[23%] w-[3px] h-14 bg-gradient-to-r from-secondary-600 to-secondary-500 rounded-l-sm"></div>
+                  <div class="absolute left-[-2px] top-[34%] w-[3px] h-14 bg-gradient-to-r from-secondary-600 to-secondary-500 rounded-l-sm"></div>
                   
                   <!-- Right Side Action Button -->
-                  <div class="absolute right-[-2px] top-[20%] w-[3px] h-16 bg-gradient-to-l from-neutral-600 to-neutral-500 rounded-r-sm"></div>
+                  <div class="absolute right-[-2px] top-[20%] w-[3px] h-16 bg-gradient-to-l from-secondary-600 to-secondary-500 rounded-r-sm"></div>
 
                   <!-- Inner Screen Container -->
                   <div class="relative w-full h-full rounded-[44px] bg-black overflow-hidden shadow-inner">
                     
                     <!-- Dynamic Island -->
                     <div class="absolute top-2 left-1/2 -translate-x-1/2 w-[110px] h-[32px] bg-black rounded-full z-30 flex items-center justify-center">
-                      <div class="w-[48px] h-[6px] bg-neutral-800 rounded-full opacity-70"></div>
+                      <div class="w-[48px] h-[6px] bg-secondary-800 rounded-full opacity-70"></div>
                     </div>
 
                     <!-- Status Bar (Real iPhone Style) -->
@@ -1641,25 +1641,25 @@
                         ></iframe>
                           
                         <!-- NFC Card ID Badge -->
-                        <div class="absolute bottom-3 right-3 bg-blue-600/95 backdrop-blur-sm text-white text-badge px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 z-20">
+                        <div class="absolute bottom-3 right-3 bg-info-600/95 backdrop-blur-sm text-white text-badge px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 z-20">
                           <Icon name="heroicons:credit-card" class="h-3 w-3" />
                           <span class="font-semibold">{{ getSelectedCard()?.nfc_card_id || `Card #${getSelectedCard()?.id}` }}</span>
                         </div>
                       </template>
                       
                       <!-- Empty State -->
-                      <div v-else class="w-full h-full bg-gradient-to-b from-blue-50 via-indigo-50 to-white flex items-center justify-center overflow-hidden">
+                      <div v-else class="w-full h-full bg-gradient-to-b from-info-50 via-primary-50 to-white flex items-center justify-center overflow-hidden">
                         <div class="text-center px-6 max-w-xs">
                           <div class="relative w-24 h-24 mx-auto mb-6">
-                            <div class="absolute inset-0 bg-blue-100 rounded-full animate-pulse"></div>
-                            <div class="absolute inset-2 bg-blue-200 rounded-full opacity-50"></div>
-                            <Icon name="heroicons:device-phone-mobile" class="absolute inset-0 h-24 w-24 text-blue-500 p-5" />
+                            <div class="absolute inset-0 bg-info-100 rounded-full animate-pulse"></div>
+                            <div class="absolute inset-2 bg-info-200 rounded-full opacity-50"></div>
+                            <Icon name="heroicons:device-phone-mobile" class="absolute inset-0 h-24 w-24 text-info-500 p-5" />
                           </div>
-                          <h3 class="card-title text-indigo-900 mb-2">Preview Area</h3>
-                          <p class="text-body text-indigo-700/80 mb-6 leading-relaxed">
+                          <h3 class="card-title text-primary-900 mb-2">Preview Area</h3>
+                          <p class="text-body text-primary-700/80 mb-6 leading-relaxed">
                             Select a card from the left to view real-time preview
                           </p>
-                          <div class="inline-flex items-center justify-center px-4 py-2 bg-white text-blue-700 rounded-full text-badge shadow-sm border border-blue-100">
+                          <div class="inline-flex items-center justify-center px-4 py-2 bg-white text-info-700 rounded-full text-badge shadow-sm border border-info-100">
                             <Icon name="heroicons:arrow-left" class="h-3.5 w-3.5 mr-1.5" />
                             <span>Please select a card first</span>
                           </div>
@@ -1683,29 +1683,29 @@
         <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <h3 class="modal-title">Add New Link</h3>
-            <button @click="closeAddLinkModal" class="p-2 hover:bg-gray-100 rounded-lg">
-              <Icon name="heroicons:x-mark" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+            <button @click="closeAddLinkModal" class="p-2 hover:bg-secondary-100 rounded-lg">
+              <Icon name="heroicons:x-mark" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" />
             </button>
           </div>
           <div class="mb-6">
             <div class="relative">
-              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input v-model="searchQuery" type="text" placeholder="URL or App" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400" />
+              <input v-model="searchQuery" type="text" placeholder="URL or App" class="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-info-500 focus:border-transparent" />
             </div>
           </div>
           <div class="space-y-4">
             <h4 class="card-title">Popular Platforms</h4>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              <button v-for="platform in popularPlatforms" :key="platform.id" @click="selectPlatform(platform)" class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-colors">
+              <button v-for="platform in popularPlatforms" :key="platform.id" @click="selectPlatform(platform)" class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl hover:bg-secondary-50 transition-colors">
                 <div :class="['w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2', platform.color]">
                   <Icon :name="platform.icon" class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                 </div>
-                <span class="text-caption text-gray-700">{{ platform.name }}</span>
+                <span class="text-caption text-secondary-700">{{ platform.name }}</span>
               </button>
             </div>
-            <button @click="selectCustomUrl" class="w-full p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
-              <Icon name="heroicons:link" class="h-5 w-5 text-gray-600" />
-              <span class="text-body text-gray-700">Add Custom URL</span>
+            <button @click="selectCustomUrl" class="w-full p-3 border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors flex items-center justify-center space-x-2">
+              <Icon name="heroicons:link" class="h-5 w-5 text-secondary-600" />
+              <span class="text-body text-secondary-700">Add Custom URL</span>
             </button>
           </div>
         </div>
@@ -1718,22 +1718,22 @@
         <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <h3 class="modal-title">{{ selectedPlatform ? `Add ${selectedPlatform.name}` : "Add Custom Link" }}</h3>
-            <button @click="closePlatformForm" class="p-2 hover:bg-gray-100 rounded-lg">
-              <Icon name="heroicons:x-mark" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+            <button @click="closePlatformForm" class="p-2 hover:bg-secondary-100 rounded-lg">
+              <Icon name="heroicons:x-mark" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" />
             </button>
           </div>
           <form @submit.prevent="saveLink" class="space-y-4">
             <div>
-              <label class="block text-label text-gray-700 mb-1">Title</label>
-              <input v-model="linkForm.title" type="text" :placeholder="selectedPlatform?.placeholder || 'My Link'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
+              <label class="block text-label text-secondary-700 mb-1">Title</label>
+              <input v-model="linkForm.title" type="text" :placeholder="selectedPlatform?.placeholder || 'My Link'" class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-info-500 focus:border-transparent" required />
             </div>
             <div>
-              <label class="block text-label text-gray-700 mb-1">URL</label>
-              <input v-model="linkForm.url" type="url" :placeholder="selectedPlatform?.urlExample || 'https://example.com'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
+              <label class="block text-label text-secondary-700 mb-1">URL</label>
+              <input v-model="linkForm.url" type="url" :placeholder="selectedPlatform?.urlExample || 'https://example.com'" class="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-info-500 focus:border-transparent" required />
             </div>
             <div class="flex items-center space-x-3">
-              <input type="checkbox" v-model="linkForm.is_active" id="activeLink" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
-              <label for="activeLink" class="text-label text-gray-700">Make this link active</label>
+              <input type="checkbox" v-model="linkForm.is_active" id="activeLink" class="w-4 h-4 text-info-600 bg-secondary-100 border-secondary-300 rounded focus:ring-info-500" />
+              <label for="activeLink" class="text-label text-secondary-700">Make this link active</label>
             </div>
             <div class="flex gap-3 pt-4">
               <button type="button" @click="closePlatformForm" class="btn btn-outline flex-1">Cancel</button>
@@ -1753,38 +1753,38 @@
         <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-6">
             <h3 class="modal-title">Apply Design to Cards</h3>
-            <button @click="showApplyDesignModal = false" class="p-2 hover:bg-gray-100 rounded-lg">
-              <Icon name="heroicons:x-mark" class="h-6 w-6 text-gray-600" />
+            <button @click="showApplyDesignModal = false" class="p-2 hover:bg-secondary-100 rounded-lg">
+              <Icon name="heroicons:x-mark" class="h-6 w-6 text-secondary-600" />
             </button>
           </div>
 
           <!-- Current Design Preview -->
-          <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 class="card-title text-blue-900 mb-3">Current Design Settings</h4>
+          <div class="mb-6 p-4 bg-info-50 rounded-lg border border-info-200">
+            <h4 class="card-title text-info-900 mb-3">Current Design Settings</h4>
             <div class="space-y-2 text-body">
               <div class="flex items-center justify-between">
-                <span class="text-blue-700 font-medium">Font:</span>
-                <span class="text-blue-900 truncate ml-2">{{ getFontName(profileData.font) }}</span>
+                <span class="text-info-700 font-medium">Font:</span>
+                <span class="text-info-900 truncate ml-2">{{ getFontName(profileData.font) }}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-blue-700 font-medium">Theme:</span>
-                <span class="text-blue-900 truncate ml-2">{{ profileData.theme }}</span>
+                <span class="text-info-700 font-medium">Theme:</span>
+                <span class="text-info-900 truncate ml-2">{{ profileData.theme }}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-blue-700 font-medium">Button Style:</span>
-                <span class="text-blue-900 truncate ml-2">{{ profileData.buttonStyle }}</span>
+                <span class="text-info-700 font-medium">Button Style:</span>
+                <span class="text-info-900 truncate ml-2">{{ profileData.buttonStyle }}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-blue-700 font-medium">Colors:</span>
+                <span class="text-info-700 font-medium">Colors:</span>
                 <div class="flex items-center gap-2 ml-2">
-                  <div :style="{backgroundColor: profileData.backgroundColor}" class="w-5 h-5 rounded border border-gray-300 flex-shrink-0"></div>
-                  <div :style="{backgroundColor: profileData.textColor}" class="w-5 h-5 rounded border border-gray-300 flex-shrink-0"></div>
+                  <div :style="{backgroundColor: profileData.backgroundColor}" class="w-5 h-5 rounded border border-secondary-300 flex-shrink-0"></div>
+                  <div :style="{backgroundColor: profileData.textColor}" class="w-5 h-5 rounded border border-secondary-300 flex-shrink-0"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <p class="text-body text-gray-600 mb-4">
+          <p class="text-body text-secondary-600 mb-4">
             Select cards to apply the current design settings. Only design and style will be copied—content remains unchanged.
           </p>
 
@@ -1795,18 +1795,18 @@
                 v-model="cardSearchQuery"
                 type="text"
                 placeholder="Search by card owner or card ID..."
-                class="w-full px-4 py-2 pl-10 text-input border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-2 pl-10 text-input border border-secondary-300 rounded-lg focus:ring-2 focus:ring-info-500 focus:border-info-500"
               />
-              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400" />
               <button
                 v-if="cardSearchQuery"
                 @click="cardSearchQuery = ''"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
               >
                 <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
-            <p v-if="cardSearchQuery" class="text-caption text-gray-500 mt-2">
+            <p v-if="cardSearchQuery" class="text-caption text-secondary-500 mt-2">
               Showing {{ filteredAvailableCards.length }} of {{ allAvailableCards.length }} cards
             </p>
           </div>
@@ -1815,53 +1815,53 @@
           <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
             <button
               @click="toggleSelectAllCards"
-              class="px-4 py-2 text-button text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
+              class="px-4 py-2 text-button text-info-600 hover:bg-info-50 rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
             >
               <div v-if="isAllCardsSelected" class="h-5 w-5 flex-shrink-0">
-                <Icon name="heroicons:check-circle" class="h-5 w-5 text-blue-600" />
+                <Icon name="heroicons:check-circle" class="h-5 w-5 text-info-600" />
               </div>
-              <div v-else class="h-5 w-5 rounded-full border-2 border-blue-600 flex-shrink-0"></div>
+              <div v-else class="h-5 w-5 rounded-full border-2 border-info-600 flex-shrink-0"></div>
               <span class="whitespace-nowrap">{{ isAllCardsSelected ? 'Deselect All' : 'Select All Employee Cards' }}</span>
             </button>
-            <span class="text-caption text-gray-500 flex-shrink-0">
+            <span class="text-caption text-secondary-500 flex-shrink-0">
               {{ selectedCardsForDesign.length }} / {{ filteredAvailableCards.length }} selected
             </span>
           </div>
 
           <!-- Card Selection List -->
-          <div class="space-y-3 mb-6 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
-            <div v-if="filteredAvailableCards.length === 0" class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
-              <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-gray-300" />
+          <div class="space-y-3 mb-6 max-h-64 overflow-y-auto border border-secondary-200 rounded-lg p-2">
+            <div v-if="filteredAvailableCards.length === 0" class="text-center py-12 text-secondary-500 bg-secondary-50 rounded-lg">
+              <Icon name="heroicons:credit-card" class="h-12 w-12 mx-auto mb-3 text-secondary-300" />
               <p class="text-body font-medium">{{ cardSearchQuery ? 'No cards found' : 'No other cards available' }}</p>
-              <p class="text-caption text-gray-400 mt-1">{{ cardSearchQuery ? 'Try a different search term' : 'All your cards are already selected or this is your only card' }}</p>
+              <p class="text-caption text-secondary-400 mt-1">{{ cardSearchQuery ? 'Try a different search term' : 'All your cards are already selected or this is your only card' }}</p>
             </div>
             
             <label
               v-for="card in filteredAvailableCards"
               :key="card.id"
-              class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border-2 min-h-[70px]"
-              :class="selectedCardsForDesign.includes(card.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'"
+              class="flex items-center p-4 bg-secondary-50 rounded-lg hover:bg-secondary-100 cursor-pointer transition-colors border-2 min-h-[70px]"
+              :class="selectedCardsForDesign.includes(card.id) ? 'border-info-500 bg-info-50' : 'border-transparent'"
             >
               <input
                 type="checkbox"
                 :value="card.id"
                 v-model="selectedCardsForDesign"
-                class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded flex-shrink-0"
+                class="h-5 w-5 text-info-600 focus:ring-info-500 border-secondary-300 rounded flex-shrink-0"
               />
               <div class="ml-4 flex-1 min-w-0">
                 <p class="card-title truncate">
                   {{ card.nfc_card_id || `Card #${card.id}` }}
                 </p>
-                <p class="text-caption text-gray-600 truncate">
+                <p class="text-caption text-secondary-600 truncate">
                   {{ card.card_owner }}
-                  <span v-if="card.is_employee" class="ml-2 px-2 py-0.5 text-badge bg-purple-100 text-purple-800 rounded-full">
+                  <span v-if="card.is_employee" class="ml-2 px-2 py-0.5 text-badge bg-primary-100 text-primary-800 rounded-full">
                     Employee
                   </span>
                 </p>
               </div>
               <div class="flex gap-2 flex-shrink-0">
                 <span class="px-2 py-1 text-badge rounded-full"
-                  :class="card.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                  :class="card.status === 'active' ? 'bg-success-100 text-success-800' : 'bg-secondary-100 text-secondary-800'">
                   {{ card.status }}
                 </span>
               </div>
@@ -1919,7 +1919,7 @@
         >
           <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all">
             <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white relative">
+            <div class="bg-gradient-to-r from-warning-500 to-warning-500 p-6 text-white relative">
               <button
                 @click="closeUpgradeModal"
                 class="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
@@ -1930,62 +1930,62 @@
                 <Icon name="heroicons:rocket-launch" class="w-10 h-10" />
                 <h2 class="modal-title">Upgrade to Business Plan</h2>
               </div>
-              <p class="text-amber-50">Unlock all premium features and grow your business</p>
+              <p class="text-warning-50">Unlock all premium features and grow your business</p>
             </div>
 
             <!-- Modal Body -->
             <div class="p-6 space-y-6">
               <!-- Current Plan -->
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div class="bg-secondary-50 border border-secondary-200 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-2">
                   <h3 class="card-title">Your Current Plan</h3>
-                  <span class="text-badge bg-gray-200 text-gray-700 px-3 py-1 rounded-full">Basic</span>
+                  <span class="text-badge bg-secondary-200 text-secondary-700 px-3 py-1 rounded-full">Basic</span>
                 </div>
-                <p class="text-body text-gray-600">8 essential fields available</p>
+                <p class="text-body text-secondary-600">8 essential fields available</p>
               </div>
 
               <!-- Business Plan Features -->
-              <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg p-5">
+              <div class="bg-gradient-to-br from-warning-50 to-warning-50 border-2 border-warning-200 rounded-lg p-5">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="card-title text-gray-900">Business Plan</h3>
-                  <span class="text-badge bg-green-500 text-white px-3 py-1 rounded-full">Recommended</span>
+                  <h3 class="card-title text-secondary-900">Business Plan</h3>
+                  <span class="text-badge bg-success-500 text-white px-3 py-1 rounded-full">Recommended</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Company Logo Display</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Company Logo Display</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Job Title & Position</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Job Title & Position</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Company Tagline</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Company Tagline</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Registration Number</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Registration Number</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Department/Division</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Department/Division</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Services Offered</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Services Offered</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Staff ID/Code</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Staff ID/Code</span>
                   </div>
                   <div class="flex items-start gap-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700">Team Members</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700">Team Members</span>
                   </div>
                   <div class="flex items-start gap-2 sm:col-span-2">
-                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span class="text-body text-gray-700 font-medium">All Basic features + Unlimited fields</span>
+                    <Icon name="heroicons:check-circle-solid" class="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
+                    <span class="text-body text-secondary-700 font-medium">All Basic features + Unlimited fields</span>
                   </div>
                 </div>
               </div>
@@ -1994,20 +1994,20 @@
               <div class="flex flex-col sm:flex-row gap-3">
                 <button
                   @click="navigateToUpgrade"
-                  class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl"
+                  class="flex-1 bg-gradient-to-r from-warning-500 to-warning-500 hover:from-warning-600 hover:to-warning-600 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl"
                 >
                   Upgrade Now
                 </button>
                 <button
                   @click="closeUpgradeModal"
-                  class="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+                  class="flex-1 sm:flex-none bg-secondary-100 hover:bg-secondary-200 text-secondary-700 font-medium py-3 px-6 rounded-lg transition-colors"
                 >
                   Maybe Later
                 </button>
               </div>
 
               <!-- Note -->
-              <p class="text-caption text-center text-gray-500">
+              <p class="text-caption text-center text-secondary-500">
                 <Icon name="heroicons:information-circle" class="w-4 h-4 inline mr-1" />
                 Your data is preserved when upgrading - no information will be lost
               </p>
@@ -2016,6 +2016,16 @@
         </div>
       </Transition>
     </Teleport>
+
+    <AdminConfirmDialog
+      v-model="confirmState.open"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-label="confirmState.confirmLabel"
+      :tone="confirmState.tone"
+      @confirm="resolveConfirm(true)"
+      @cancel="resolveConfirm(false)"
+    />
   </div>
 </template>
 
@@ -2031,6 +2041,9 @@ definePageMeta({
   layout: "user-dashboard",
   middleware: ["auth"],
 });
+
+// Styled replacement for window.confirm() (composables/useConfirmDialog.js)
+const { confirmState, askConfirm, resolveConfirm } = useConfirmDialog();
 
 // ========================================
 // BASIC PLAN FIELD RESTRICTIONS
@@ -3717,7 +3730,13 @@ const updateLink = async (link) => {
 };
 
 const deleteLink = async (link) => {
-  if (!confirm("Are you sure you want to delete this link?")) return;
+  const ok = await askConfirm({
+    title: "Delete this link?",
+    message: "It will be removed from your public profile straight away.",
+    confirmLabel: "Delete link",
+    tone: "danger",
+  });
+  if (!ok) return;
   
   try {
     const index = links.value.findIndex((l) => l.id === link.id);

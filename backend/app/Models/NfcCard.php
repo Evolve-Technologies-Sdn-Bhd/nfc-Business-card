@@ -459,9 +459,15 @@ class NfcCard extends Model
             return null;
         }
 
-        $matches = self::where(function ($q) use ($variations) {
+        // Digits-only form of contact_number. SQLite (local dev) has no
+        // REGEXP_REPLACE, so strip the usual phone punctuation there instead.
+        $digitsOnly = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+            ? "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(contact_number, ''), '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', '')"
+            : "REGEXP_REPLACE(COALESCE(contact_number, ''), '[^0-9]', '')";
+
+        $matches = self::where(function ($q) use ($variations, $digitsOnly) {
                 foreach ($variations as $v) {
-                    $q->orWhereRaw("REGEXP_REPLACE(COALESCE(contact_number, ''), '[^0-9]', '') = ?", [$v]);
+                    $q->orWhereRaw("{$digitsOnly} = ?", [$v]);
                 }
             })
             ->with('landingPage')

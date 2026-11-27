@@ -587,7 +587,8 @@ const checkEmailAuthMethod = async (email) => {
       oauthBlocked.value = false;
     }
   } catch (error) {
-    console.error('Email check error:', error);
+    // Superseded (cancelled) lookups are expected while the user is typing.
+    if (!error?.__aborted) console.error('Email check error:', error);
     // On error, don't block OAuth (fail open for UX)
     emailHasPassword.value = false;
     oauthBlocked.value = false;

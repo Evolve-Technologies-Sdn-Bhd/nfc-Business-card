@@ -1,56 +1,43 @@
 <!-- pages/UserDashboard/Notifications.vue -->
 <template>
-  <div class="min-h-screen bg-secondary-50">
-    <!-- Page Header -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-3 mb-2">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-sm">
-            <Icon name="heroicons:bell" class="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 class="page-title text-secondary-900 tracking-tight">Notifications</h1>
-            <p class="card-subtitle mt-0.5">
-              Stay updated with account activity, card status, and important announcements
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 flex-shrink-0">
+  <div>
+    <AdminPageHeader
+      eyebrow="Account"
+      eyebrow-icon="heroicons:bell"
+      title="Notifications"
+      description="Card status, payments, security alerts and announcements, all in one place."
+    >
+      <template #actions>
         <button
           v-if="unreadCount > 0"
+          type="button"
           @click="handleMarkAllAsRead"
-          class="px-4 py-2.5 text-button bg-primary-600 text-white rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-all duration-200 flex items-center shadow-sm hover:shadow-md hover:shadow-primary-600/10"
+          class="admin-btn admin-btn--primary"
         >
-          <Icon name="heroicons:check-double" class="w-4 h-4 mr-2" />
+          <Icon name="heroicons:check-circle" class="h-4 w-4" />
           Mark all as read
-          <span
-            v-if="unreadCount > 0"
-            class="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-badge"
-          >
+          <span class="ml-1 rounded-full bg-white/40 px-2 py-0.5 text-badge">
             {{ unreadCount > 9 ? "9+" : unreadCount }}
           </span>
         </button>
         <button
+          type="button"
           @click="loadNotifications()"
           :disabled="loading"
-          class="px-4 py-2.5 text-button bg-white text-secondary-700 rounded-xl hover:bg-secondary-50 active:bg-secondary-100 transition-all duration-200 flex items-center border border-secondary-200 shadow-sm disabled:opacity-50"
+          class="admin-btn admin-btn--outline"
         >
-          <Icon
-            name="heroicons:arrow-path"
-            :class="['w-4 h-4 mr-2', { 'animate-spin': loading }]"
-          />
+          <Icon name="heroicons:arrow-path" :class="['h-4 w-4', { 'animate-spin': loading }]" />
           Refresh
         </button>
-      </div>
-    </div>
+      </template>
+    </AdminPageHeader>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div class="bg-white rounded-2xl shadow-sm border border-secondary-200/60 p-5 hover:shadow-md transition-all duration-200">
         <div class="flex items-center justify-between">
           <div>
-            <p class="stat-label">Total</p>
+            <p class="stat-label">Showing</p>
             <p class="stat-value text-secondary-900 mt-1.5 tabular-nums">
               {{ notifications.length }}
             </p>
@@ -372,6 +359,15 @@
         </div>
       </div>
     </div>
+
+    <AdminConfirmDialog
+      v-model="showClearReadConfirm"
+      title="Clear read notifications?"
+      message="Every notification you have already read will be permanently removed."
+      confirm-label="Clear"
+      tone="danger"
+      @confirm="confirmDeleteAllRead"
+    />
   </div>
 </template>
 
@@ -536,18 +532,18 @@ const handleMarkFilteredAsRead = async () => {
   $toast.success(`Marked ${unreadFiltered.length} notification(s) as read`);
 };
 
+// Single delete is low-stakes: no confirmation step.
 const handleDeleteNotification = async (notificationId) => {
-  if (!confirm("Delete this notification?")) {
-    return;
-  }
   await deleteNotification(notificationId);
   $toast.success("Notification deleted");
 };
 
-const handleDeleteAllRead = async () => {
-  if (!confirm("Delete all read notifications? This cannot be undone.")) {
-    return;
-  }
+const showClearReadConfirm = ref(false);
+const handleDeleteAllRead = () => {
+  showClearReadConfirm.value = true;
+};
+const confirmDeleteAllRead = async () => {
+  showClearReadConfirm.value = false;
   await deleteAllRead();
   $toast.success("All read notifications cleared");
 };

@@ -68,6 +68,8 @@ const closePreview = () => {
 onMounted(async () => {
   try {
     await fetchStatistics();
+  } catch {
+    // useInvoices already reported it; the tiles fall back to zero.
   } finally {
     statsLoaded.value = true;
   }

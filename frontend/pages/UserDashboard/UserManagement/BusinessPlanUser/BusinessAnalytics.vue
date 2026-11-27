@@ -1,23 +1,19 @@
 <!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessAnalytics.vue -->
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="page-title">Analytics</h1>
-          <p class="mt-2 text-secondary-600">
-            Track engagement and performance metrics
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <button @click="exportAnalytics" class="btn btn-primary">
-            <Icon name="heroicons:arrow-down-tray" class="h-5 w-5 mr-2" />
-            Export Data
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminPageHeader
+      eyebrow="Analytics"
+      eyebrow-icon="heroicons:chart-bar"
+      title="Analytics"
+      description="Reach across every card in your business, by card or by team member."
+    >
+      <template #actions>
+        <button type="button" @click="exportAnalytics" class="admin-btn admin-btn--outline">
+          <Icon name="heroicons:arrow-down-tray" class="h-4 w-4" />
+          Export CSV
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <!-- Filters -->
     <div class="card mb-6">
@@ -31,7 +27,7 @@
               @change="onCardChange"
               class="input w-full"
             >
-              <option value="all">📊 All Cards (Total Overview)</option>
+              <option value="all">All cards (combined)</option>
               <option
                 v-for="card in nfcCards"
                 :key="card.id"
@@ -431,13 +427,13 @@
                     stroke-width="3"
                     fill="none"
                     stroke-linecap="round"
-                    :stroke-dasharray="`${analytics.performanceScore}, 100`"
+                    :stroke-dasharray="`${analytics.totalTaps > 0 ? analytics.performanceScore : 0}, 100`"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                 </svg>
                 <div class="absolute inset-0 flex items-center justify-center">
                   <span class="stat-value"
-                    >{{ analytics.performanceScore }}%</span
+                    >{{ analytics.totalTaps > 0 ? analytics.performanceScore + "%" : "—" }}</span
                   >
                 </div>
               </div>

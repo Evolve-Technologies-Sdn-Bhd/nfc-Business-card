@@ -37,7 +37,7 @@ export const useInvoices = () => {
       const isAdmin = Boolean(
         authStore?.user?.is_admin ||
         authStore?.user?.admin_role ||
-        authStore?.isAdmin
+        authStore?.isAdmin?.()
       );
       return isAdmin ? "/admin/invoices" : "/invoices";
     } catch (_) {
@@ -159,7 +159,7 @@ export const useInvoices = () => {
       const isAdmin = Boolean(
         authStore?.user?.is_admin ||
         authStore?.user?.admin_role ||
-        authStore?.isAdmin
+        authStore?.isAdmin?.()
       );
       const prefix = isAdmin ? "/admin/invoices" : "/invoices";
       return `${config.public.apiBaseUrl}${prefix}/${inv.id}/download`;
@@ -178,7 +178,7 @@ export const useInvoices = () => {
       const isAdmin = Boolean(
         authStore?.user?.is_admin ||
         authStore?.user?.admin_role ||
-        authStore?.isAdmin
+        authStore?.isAdmin?.()
       );
       const prefix = isAdmin ? "/admin/invoices" : "/invoices";
       return `${config.public.apiBaseUrl}${prefix}/${inv.id}/preview`;
@@ -201,7 +201,7 @@ export const useInvoices = () => {
         isAdmin = Boolean(
           authStore?.user?.is_admin ||
           authStore?.user?.admin_role ||
-          authStore?.isAdmin
+          authStore?.isAdmin?.()
         );
       } catch (_) { /* not available */ }
 
