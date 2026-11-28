@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\EmployeeImport;
 
@@ -208,20 +209,60 @@ class EmployeeController extends Controller
             ], 403);
         }
 
-        // Validate request
+        // The order page (NFCCardDesign/BusinessPlanNFCCard) sends the recipient
+        // list it built (manual entries + parsed CSV + the admin's own card) as
+        // a JSON `employees` field, multipart so custom design files can ride
+        // along. A CSV/XLSX `file` is still accepted.
+        if (is_string($request->input('employees'))) {
+            $request->merge(['employees' => json_decode($request->input('employees'), true) ?: []]);
+        }
+
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx|max:5120', // 5MB max
+            'file' => 'required_without:employees|file|mimes:csv,xlsx|max:5120', // 5MB max
+            'employees' => 'required_without:file|array|min:1|max:500',
+            'employees.*.name' => 'required_with:employees|string|max:255',
+            'employees.*.email' => 'required_with:employees|email|max:255',
+            'employees.*.position' => 'required_with:employees|string|max:255',
+            'employees.*.contact_number' => 'nullable|string|max:50',
+            'employees.*.website' => 'nullable|string|max:255',
+            'employees.*.address' => 'nullable|string|max:1000',
+            'employees.*.delivery_address' => 'nullable|string|max:1000',
             'design_method' => 'required|in:template,custom',
             'selected_template' => 'required_if:design_method,template',
-            'front_design' => 'required_if:design_method,custom|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'back_design' => 'required_if:design_method,custom|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'front_design' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'back_design' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            // Re-use of a previous custom design: must be one of this business's own cards.
+            'front_design_url' => 'nullable|string|max:500',
+            'back_design_url' => 'nullable|string|max:500',
+            'company_name' => 'nullable|string|max:255',
+            'company_logo' => 'nullable|string|max:3000000', // data URL from the order page
         ]);
+
+        if ($request->design_method === 'custom'
+            && !$request->hasFile('front_design')
+            && !$this->ownDesignUrl($businessAccount, $request->input('front_design_url'))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload a front design, or pick one of your previous designs.',
+                'errors' => ['front_design' => ['Required for a custom design.']],
+            ], 422);
+        }
 
         try {
             DB::beginTransaction();
 
             $file = $request->file('file');
-            $employees = $this->parseEmployeeFile($file);
+            $employees = $file
+                ? $this->parseEmployeeFile($file)
+                : array_values(array_map(fn ($e) => array_map(fn ($v) => is_string($v) ? trim($v) : $v, $e), $request->input('employees', [])));
+
+            // Company details from the order page: kept on the account when it
+            // has none yet, and on every card so production has them.
+            $companyName = trim((string) $request->input('company_name', ''));
+            if ($companyName !== '' && !$businessAccount->company) {
+                $businessAccount->forceFill(['company' => $companyName])->save();
+            }
+            $companyLogoUrl = $this->storeDataUrlImage($request->input('company_logo'), 'company-logos');
 
             if (empty($employees)) {
                 DB::rollBack();
@@ -248,10 +289,10 @@ class EmployeeController extends Controller
             }
 
             // Store file for admin review
-            $storedFilePath = $file->store('employee-uploads', 'private');
+            $storedFilePath = $file ? $file->store('employee-uploads', 'private') : null;
 
             // Resolve design assets once — they apply to every card in the batch.
-            $design = $this->resolveDesignPayload($request);
+            $design = $this->resolveDesignPayload($request, $businessAccount);
 
             // Company card template locked by the owner: every card uses it.
             $settings = app(\App\Services\BusinessTenantService::class)->settingsFor($businessAccount);
@@ -294,7 +335,7 @@ class EmployeeController extends Controller
                         'custom_design_front_url' => $design['front_url'],
                         'custom_design_back_url' => $design['back_url'],
                         'design_notes' => $design['design_notes'],
-                        'notes' => $this->buildEmployeeNotes($employeeData),
+                        'notes' => $this->buildEmployeeNotes($employeeData, $companyName, $companyLogoUrl),
                         // Business plan cards are covered by the tenant quota, so they
                         // enter the fulfilment pipeline already payment-verified.
                         'status' => 'payment_verified',
@@ -357,7 +398,7 @@ class EmployeeController extends Controller
     /**
      * Resolve the design payload shared by all cards in a bulk upload.
      */
-    private function resolveDesignPayload(Request $request): array
+    private function resolveDesignPayload(Request $request, ?User $businessAccount = null): array
     {
         $isCustom = $request->design_method === 'custom';
         $frontUrl = null;
@@ -373,6 +414,13 @@ class EmployeeController extends Controller
             if ($request->hasFile('back_design')) {
                 $path = $request->file('back_design')->store('card-designs', 'public');
                 $backUrl = Storage::url($path);
+            }
+            // Re-used previous design (only URLs already on this business's cards).
+            if (!$frontUrl && $businessAccount && $this->ownDesignUrl($businessAccount, $request->input('front_design_url'))) {
+                $frontUrl = $request->input('front_design_url');
+            }
+            if (!$backUrl && $businessAccount && $this->ownDesignUrl($businessAccount, $request->input('back_design_url'))) {
+                $backUrl = $request->input('back_design_url');
             }
         } else {
             $selected = $request->selected_template;
@@ -396,15 +444,55 @@ class EmployeeController extends Controller
      * Compose the free-text notes that preserve the extra CSV columns
      * (position / e-mail / website) that have no dedicated column.
      */
-    private function buildEmployeeNotes(array $employeeData): string
+    private function buildEmployeeNotes(array $employeeData, string $companyName = '', ?string $companyLogoUrl = null): string
     {
         $parts = array_filter([
             !empty($employeeData['position']) ? 'Position: ' . $employeeData['position'] : null,
             !empty($employeeData['email']) ? 'Employee e-mail: ' . $employeeData['email'] : null,
             !empty($employeeData['website']) ? 'Website: ' . $employeeData['website'] : null,
+            $companyName !== '' ? 'Company: ' . $companyName : null,
+            $companyLogoUrl ? 'Company logo: ' . $companyLogoUrl : null,
         ]);
 
         return implode(' | ', $parts);
+    }
+
+    /** Is $url a custom design already used on one of this business's cards? */
+    private function ownDesignUrl(User $businessAccount, $url): bool
+    {
+        if (!is_string($url) || $url === '') {
+            return false;
+        }
+
+        return NfcCard::where(function ($q) use ($businessAccount) {
+                $q->where('business_account_id', $businessAccount->id)->orWhere('user_id', $businessAccount->id);
+            })
+            ->where(function ($q) use ($url) {
+                $q->where('custom_design_front_url', $url)->orWhere('custom_design_back_url', $url);
+            })
+            ->exists();
+    }
+
+    /**
+     * Save a PNG/JPEG/WebP data URL (the order page's company logo) to public
+     * storage and return its URL, or null when absent/invalid/too large.
+     */
+    private function storeDataUrlImage($dataUrl, string $folder): ?string
+    {
+        if (!is_string($dataUrl) || !preg_match('#^data:image/(png|jpe?g|webp);base64,([A-Za-z0-9+/=]+)$#', $dataUrl, $m)) {
+            return null;
+        }
+
+        $bytes = base64_decode($m[2], true);
+        if ($bytes === false || strlen($bytes) > 2 * 1024 * 1024) {
+            return null;
+        }
+
+        $ext = $m[1] === 'jpeg' ? 'jpg' : $m[1];
+        $path = $folder . '/' . Str::uuid() . '.' . $ext;
+        Storage::disk('public')->put($path, $bytes);
+
+        return Storage::url($path);
     }
 
     /**
@@ -536,9 +624,13 @@ class EmployeeController extends Controller
     private function notifySuperAdmin($businessAccount, $filePath, $cards, $request)
     {
         // Get all super admin users
-        $superAdmins = User::where('is_admin', true)
-            ->where('subscription_plan', 'super-admin')
-            ->get();
+        // Super admins are identified by admin_role (no user ever has the
+        // plan "super-admin", so the old query notified nobody). Fall back to
+        // every admin when no super admin exists.
+        $superAdmins = User::where('is_admin', true)->where('admin_role', 'super_admin')->get();
+        if ($superAdmins->isEmpty()) {
+            $superAdmins = User::where('is_admin', true)->get();
+        }
 
         $notificationData = [
             'type' => 'business_bulk_order_placed',

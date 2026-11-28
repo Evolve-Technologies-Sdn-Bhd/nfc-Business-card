@@ -384,12 +384,14 @@
                     class="aspect-[90/54] rounded mb-2 relative overflow-hidden bg-secondary-100"
                   >
                     <!-- Template Image -->
-                    <img
-                      v-if="template.front_image_url"
-                      :src="getTemplateImageUrl(template.front_image_url)"
-                      :alt="template.name"
-                      class="w-full h-full object-cover"
-                    />
+                    <!-- Artwork + designer placeholders filled with sample data -->
+                      <CardTemplateFace
+                        v-if="template.front_image_url"
+                        :template="template"
+                        :image-url="getTemplateImageUrl(template.front_image_url)"
+                        :alt="template.name"
+                        class="absolute inset-0 h-full w-full"
+                      />
                     <!-- Fallback if no image -->
                     <div
                       v-else

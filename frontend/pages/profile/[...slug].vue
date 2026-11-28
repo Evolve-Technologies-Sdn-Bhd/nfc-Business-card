@@ -894,15 +894,19 @@
                     letterSpacing: '-0.01em',
                   }"
                 >{{ heroNameLines.leading }}</span>
+                <!-- Cream metallic text on dark themes; on light themes it
+                     would vanish, so it uses the theme's text colour. -->
                 <span
-                  :style="{
-                    display: 'block',
-                    fontWeight: 600,
-                    backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #f7f5f0 46%, #e8d9b8 100%)',
-                    WebkitBackgroundClip: 'text',
-                    backgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }"
+                  :style="isLightTheme
+                    ? { display: 'block', fontWeight: 600, color: responsive.textPrimary }
+                    : {
+                        display: 'block',
+                        fontWeight: 600,
+                        backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #f7f5f0 46%, #e8d9b8 100%)',
+                        WebkitBackgroundClip: 'text',
+                        backgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }"
                 >{{ heroNameLines.trailing || heroNameLines.leading }}</span>
               </h1>
 
@@ -1313,7 +1317,7 @@
                         fontFamily: responsive.displayFont,
                         fontWeight: 600,
                         letterSpacing: '-0.01em',
-                        color: '#e8d9b8',
+                        color: chipTextColor,
                         zIndex: 1,
                         textAlign: 'center',
                         padding: '6px',
@@ -1442,7 +1446,7 @@
                       background: 'rgba(194, 160, 104, 0.2)',
                       border: '1px solid rgba(194, 160, 104, 0.4)',
                       borderRadius: '50px',
-                      color: '#e8d9b8',
+                      color: chipTextColor,
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
                       maxWidth: '100%',
@@ -1854,7 +1858,7 @@
                           <Icon name="heroicons:building-library" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ edu.institution }}
                         </p>
                       </div>
-                      <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(169, 133, 77, 0.2)', borderRadius: '20px', color: '#e8d9b8', fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
+                      <span v-if="edu.year" :style="{ padding: '4px 12px', background: 'rgba(169, 133, 77, 0.2)', borderRadius: '20px', color: chipTextColor, fontSize: responsive.smallSize, fontWeight: 600, whiteSpace: 'nowrap' }">{{ edu.year }}</span>
                     </div>
                   </div>
                 </div>
@@ -2120,7 +2124,7 @@
                 >
                   <span
                     :style="{
-                      color: '#e8d9b8',
+                      color: chipTextColor,
                       fontSize: responsive.bodySize,
                       fontWeight: 600,
                       letterSpacing: '0.02em',
@@ -2228,7 +2232,7 @@
                       border: '1px solid rgba(194, 160, 104, 0.5)',
                       borderRadius: '16px',
                       fontSize: responsive.smallSize,
-                      color: '#e8d9b8',
+                      color: chipTextColor,
                     }"
                   >
                     #{{ typeof tag === 'object' ? (tag.tag || tag.name || tag) : tag }}
@@ -3006,7 +3010,7 @@
                   />
                   <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6, 9, 13, 0.9) 0%, transparent 60%)' }" />
                   <!-- Project number badge -->
-                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '40px', height: '40px', background: 'rgba(6, 9, 13, 0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.55)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e8d9b8', fontFamily: responsive.displayFont, fontWeight: 500, fontSize: '15px' }">
+                  <div :style="{ position: 'absolute', top: '12px', left: '12px', width: '40px', height: '40px', background: 'rgba(6, 9, 13, 0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', border: `1px solid ${hexToRgba(designSettings.accentColor, 0.55)}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: chipTextColor, fontFamily: responsive.displayFont, fontWeight: 500, fontSize: '15px' }">
                     {{ String(idx + 1).padStart(2, '0') }}
                   </div>
                 </div>
@@ -3101,7 +3105,7 @@
                         background: 'rgba(169, 133, 77, 0.2)',
                         border: '1px solid rgba(169, 133, 77, 0.3)',
                         borderRadius: '12px',
-                        color: '#e8d9b8',
+                        color: chipTextColor,
                         fontSize: responsive.smallSize,
                       }"
                     >{{ typeof skill === 'object' ? (skill.skill || skill.name || skill) : skill }}</span>
@@ -3118,7 +3122,7 @@
                       background: 'rgba(194, 160, 104, 0.2)',
                       border: '1px solid rgba(194, 160, 104, 0.4)',
                       borderRadius: '50px',
-                      color: '#e8d9b8',
+                      color: chipTextColor,
                       fontSize: responsive.smallSize,
                       fontWeight: 600,
                     }"
@@ -3265,7 +3269,7 @@
                   />
                   <div :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6, 9, 13, 0.95) 0%, transparent 70%)' }" />
                   <!-- Category badge on image -->
-                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'rgba(10, 14, 20, 0.82)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(194, 160, 104, 0.4)', borderRadius: '999px', color: '#e8d9b8', fontSize: responsive.smallSize, fontWeight: 600, letterSpacing: '0.04em' }">{{ post.category }}</span>
+                  <span v-if="post.category && isFieldVisible('blog', 'blogCategory')" :style="{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', background: 'rgba(10, 14, 20, 0.82)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(194, 160, 104, 0.4)', borderRadius: '999px', color: chipTextColor, fontSize: responsive.smallSize, fontWeight: 600, letterSpacing: '0.04em' }">{{ post.category }}</span>
                 </div>
                 
                 <!-- Content -->
@@ -3306,7 +3310,7 @@
                         background: 'rgba(232, 217, 184, 0.15)',
                         border: '1px solid rgba(232, 217, 184, 0.25)',
                         borderRadius: '15px',
-                        color: '#e8d9b8',
+                        color: chipTextColor,
                         fontSize: responsive.smallSize,
                         transition: 'all 0.2s',
                       }"
@@ -3631,7 +3635,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '18px',
           }"
         ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
@@ -3639,8 +3643,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px', textAlign: 'center' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:envelope" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
-          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">I'll get back to you as soon as possible</p>
+          <h3 :style="{ color: modalText.primary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Send a Message</h3>
+          <p :style="{ color: modalText.muted, fontSize: '14px' }">I'll get back to you as soon as possible</p>
         </div>
 
         <!-- Success Message -->
@@ -3662,7 +3666,7 @@
         <!-- Form -->
         <form v-else @submit.prevent="submitContactForm" :style="{ display: 'grid', gap: '16px' }">
           <div>
-            <label :style="{ display: 'block', color: responsive.textMuted, fontSize: '14px', marginBottom: '6px' }">Your Name</label>
+            <label :style="{ display: 'block', color: modalText.muted, fontSize: '14px', marginBottom: '6px' }">Your Name</label>
             <input
               v-model="contactForm.name"
               type="text"
@@ -3673,7 +3677,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3681,7 +3685,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: responsive.textMuted, fontSize: '14px', marginBottom: '6px' }">Email Address</label>
+            <label :style="{ display: 'block', color: modalText.muted, fontSize: '14px', marginBottom: '6px' }">Email Address</label>
             <input
               v-model="contactForm.email"
               type="email"
@@ -3692,7 +3696,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3700,7 +3704,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: responsive.textMuted, fontSize: '14px', marginBottom: '6px' }">Phone (Optional)</label>
+            <label :style="{ display: 'block', color: modalText.muted, fontSize: '14px', marginBottom: '6px' }">Phone (Optional)</label>
             <input
               v-model="contactForm.phone"
               type="tel"
@@ -3710,7 +3714,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: '15px',
                 outline: 'none',
               }"
@@ -3718,7 +3722,7 @@
             />
           </div>
           <div>
-            <label :style="{ display: 'block', color: responsive.textMuted, fontSize: '14px', marginBottom: '6px' }">Message</label>
+            <label :style="{ display: 'block', color: modalText.muted, fontSize: '14px', marginBottom: '6px' }">Message</label>
             <textarea
               v-model="contactForm.message"
               required
@@ -3729,7 +3733,7 @@
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '12px',
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: '15px',
                 outline: 'none',
                 resize: 'vertical',
@@ -3746,7 +3750,7 @@
               background: contactFormSubmitting ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #f0e3c4 0%, #c2a068 46%, #a9854d 100%)',
               border: 'none',
               borderRadius: '12px',
-              color: contactFormSubmitting ? responsive.textPrimary : '#1b1407',
+              color: contactFormSubmitting ? modalText.primary : '#1b1407',
               fontSize: '16px',
               fontWeight: 700,
               cursor: contactFormSubmitting ? 'not-allowed' : 'pointer',
@@ -3803,7 +3807,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '18px',
           }"
         ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
@@ -3811,8 +3815,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:qr-code" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
-          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share this profile instantly</p>
+          <h3 :style="{ color: modalText.primary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Scan to Connect</h3>
+          <p :style="{ color: modalText.muted, fontSize: '14px' }">Share this profile instantly</p>
         </div>
 
         <!-- QR Code -->
@@ -3834,8 +3838,8 @@
 
         <!-- Profile Info -->
         <div :style="{ marginBottom: '16px' }">
-          <p :style="{ color: responsive.textPrimary, fontSize: '18px', fontWeight: 600, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.name }}</p>
-          <p :style="{ color: responsive.textMuted, fontSize: '14px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.position }}</p>
+          <p :style="{ color: modalText.primary, fontSize: '18px', fontWeight: 600, overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.name }}</p>
+          <p :style="{ color: modalText.muted, fontSize: '14px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ profile.position }}</p>
         </div>
 
         <!-- Copy Link Button -->
@@ -3906,7 +3910,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '18px',
           }"
         ><Icon name="heroicons:x-mark" class="w-[18px] h-[18px]" aria-hidden="true" /></button>
@@ -3914,8 +3918,8 @@
         <!-- Header -->
         <div :style="{ marginBottom: '24px' }">
           <div :style="{ fontSize: '40px', marginBottom: '12px' }"><Icon name="heroicons:share" :style="{ width: '40px', height: '40px' }" aria-hidden="true" /></div>
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
-          <p :style="{ color: responsive.textMuted, fontSize: '14px' }">Share on your favorite platform</p>
+          <h3 :style="{ color: modalText.primary, fontSize: '24px', fontWeight: 700, marginBottom: '8px' }">Share Profile</h3>
+          <p :style="{ color: modalText.muted, fontSize: '14px' }">Share on your favorite platform</p>
         </div>
 
         <!-- Social Buttons Grid -->
@@ -3927,7 +3931,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:globe-alt" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Facebook</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">Facebook</span>
           </a>
           <!-- Twitter/X -->
           <a
@@ -3936,7 +3940,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:at-symbol" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">X</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">X</span>
           </a>
           <!-- LinkedIn -->
           <a
@@ -3945,7 +3949,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:briefcase" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">LinkedIn</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">LinkedIn</span>
           </a>
           <!-- WhatsApp -->
           <a
@@ -3954,7 +3958,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:chat-bubble-left-right" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">WhatsApp</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">WhatsApp</span>
           </a>
           <!-- Telegram -->
           <a
@@ -3963,7 +3967,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:paper-airplane" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Telegram</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">Telegram</span>
           </a>
           <!-- Email -->
           <a
@@ -3971,7 +3975,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:envelope" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Email</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">Email</span>
           </a>
           <!-- SMS -->
           <a
@@ -3979,7 +3983,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:device-phone-mobile" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">SMS</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">SMS</span>
           </a>
           <!-- Copy Link -->
           <button
@@ -3987,7 +3991,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
           >
             <div :style="{ width: '56px', height: '56px', background: '#c2a068', color: '#1b1407', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:clipboard" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">Copy</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">Copy</span>
           </button>
           <!-- Native device share (falls back to copy when unsupported) -->
           <button
@@ -3995,7 +3999,7 @@
             :style="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer' }"
           >
             <div :style="{ width: '56px', height: '56px', background: 'rgba(194, 160, 104, 0.18)', border: '1px solid rgba(194, 160, 104, 0.4)', color: '#c2a068', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }"><Icon name="heroicons:share" :style="{ width: '24px', height: '24px' }" aria-hidden="true" /></div>
-            <span :style="{ color: responsive.textMuted, fontSize: '12px' }">More</span>
+            <span :style="{ color: modalText.muted, fontSize: '12px' }">More</span>
           </button>
         </div>
       </div>
@@ -4046,7 +4050,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '20px',
             transition: 'all 0.3s',
           }"
@@ -4069,7 +4073,7 @@
           }">
             <Icon :name="resolveServiceIcon(selectedService.icon)" :style="{ width: '40px', height: '40px' }" aria-hidden="true" />
           </div>
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '8px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+          <h3 :style="{ color: modalText.primary, fontSize: '28px', fontWeight: 700, marginBottom: '8px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedService.name }}
           </h3>
           <div v-if="selectedService.category" :style="{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }">
@@ -4123,12 +4127,12 @@
 
         <!-- Description -->
         <div v-if="selectedService.description" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:document-text" class="w-4 h-4" aria-hidden="true" />
             Description
           </h4>
           <p :style="{ 
-            color: responsive.textMuted, 
+            color: modalText.muted, 
             fontSize: '15px', 
             lineHeight: '1.7',
             padding: '16px',
@@ -4141,7 +4145,7 @@
 
         <!-- Features -->
         <div v-if="selectedService.features && selectedService.features.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:sparkles" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             Key Features
           </h4>
@@ -4159,7 +4163,7 @@
               }"
             >
               <span :style="{ color: '#c2a068', fontSize: '16px' }"><Icon name="heroicons:check" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /></span>
-              <span :style="{ color: responsive.textPrimary, fontSize: '14px', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">
+              <span :style="{ color: modalText.primary, fontSize: '14px', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }">
                 {{ typeof feature === 'object' ? (feature.feature || feature.name || feature) : feature }}
               </span>
             </div>
@@ -4168,7 +4172,7 @@
 
         <!-- Tags -->
         <div v-if="selectedService.tags && selectedService.tags.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             Keywords
           </h4>
@@ -4195,7 +4199,7 @@
 
         <!-- Gallery -->
         <div v-if="selectedService.gallery && selectedService.gallery.length > 0" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:photo" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             Gallery
           </h4>
@@ -4226,7 +4230,7 @@
 
         <!-- Video -->
         <div v-if="selectedService.video" :style="{ marginBottom: '24px' }">
-          <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+          <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
             <Icon name="heroicons:film" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             Promo Video
           </h4>
@@ -4246,7 +4250,7 @@
             }"
           >
             <Icon name="heroicons:play-circle" :style="{ width: '24px', height: '24px' }" aria-hidden="true" />
-            <span :style="{ color: responsive.textPrimary, fontSize: '14px', fontWeight: 500 }">Watch Video</span>
+            <span :style="{ color: modalText.primary, fontSize: '14px', fontWeight: 500 }">Watch Video</span>
           </a>
         </div>
 
@@ -4268,7 +4272,7 @@
               background: 'transparent',
               border: `1px solid ${hexToRgba(designSettings.accentColor, 0.32)}`,
               borderRadius: '14px',
-              color: responsive.textPrimary,
+              color: modalText.primary,
               fontSize: '15px',
               fontWeight: 600,
               textDecoration: 'none',
@@ -4355,7 +4359,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '20px',
             zIndex: 10,
             transition: 'all 0.3s',
@@ -4389,7 +4393,7 @@
         <!-- Content -->
         <div :style="{ padding: isMobile ? '24px' : '32px', marginTop: selectedProject.cover_image ? '-60px' : 0, position: 'relative', zIndex: 2 }">
           <!-- Title -->
-          <h3 :style="{ color: responsive.textPrimary, fontSize: '28px', fontWeight: 700, marginBottom: '16px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+          <h3 :style="{ color: modalText.primary, fontSize: '28px', fontWeight: 700, marginBottom: '16px', overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedProject.title }}
           </h3>
 
@@ -4398,25 +4402,25 @@
             <span v-if="selectedProject.category" :style="{ padding: '6px 16px', background: 'rgba(194, 160, 104, 0.2)', border: '1px solid rgba(194, 160, 104, 0.4)', borderRadius: '20px', color: '#e8d9b8', fontSize: '13px' }">
               {{ selectedProject.category }}
             </span>
-            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+            <span v-if="selectedProject.client_name" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: modalText.muted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
               <Icon name="heroicons:user" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.client_name }}
             </span>
-            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+            <span v-if="selectedProject.date_completed" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: modalText.muted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
               <Icon name="heroicons:calendar" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.date_completed }}
             </span>
-            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: responsive.textMuted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
+            <span v-if="selectedProject.location" :style="{ padding: '6px 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', color: modalText.muted, fontSize: '13px', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }">
               <Icon name="heroicons:map-pin" class="w-3.5 h-3.5 inline-block align-[-0.2em] mr-1" aria-hidden="true" />{{ selectedProject.location }}
             </span>
           </div>
 
           <!-- Description -->
           <div v-if="selectedProject.description" :style="{ marginBottom: '24px' }">
-            <p :style="{ color: responsive.textMuted, fontSize: '15px', lineHeight: '1.8', overflowWrap: 'break-word', wordBreak: 'break-word' }" v-html="selectedProject.description"></p>
+            <p :style="{ color: modalText.muted, fontSize: '15px', lineHeight: '1.8', overflowWrap: 'break-word', wordBreak: 'break-word' }" v-html="selectedProject.description"></p>
           </div>
 
           <!-- Gallery -->
           <div v-if="selectedProject.gallery && selectedProject.gallery.length > 0" :style="{ marginBottom: '24px' }">
-            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
               <Icon name="heroicons:photo" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               Project Gallery
             </h4>
@@ -4451,7 +4455,7 @@
 
           <!-- Skills/Tags -->
           <div v-if="(selectedProject.skills_used && selectedProject.skills_used.length > 0) || (selectedProject.tags && selectedProject.tags.length > 0)" :style="{ marginBottom: '24px' }">
-            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
               <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               Skills & Tags
             </h4>
@@ -4510,7 +4514,7 @@
                 background: 'transparent',
                 border: `1px solid ${hexToRgba(designSettings.accentColor, 0.32)}`,
                 borderRadius: '14px',
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: '15px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -4566,7 +4570,7 @@
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: responsive.textPrimary,
+            color: modalText.primary,
             fontSize: '20px',
             zIndex: 10,
             transition: 'all 0.3s',
@@ -4632,16 +4636,16 @@
              <span v-if="selectedBlog.category" :style="{ padding: '6px 14px', background: 'rgba(232, 217, 184, 0.15)', border: '1px solid rgba(232, 217, 184, 0.3)', borderRadius: '20px', color: '#e8d9b8', fontSize: '13px', fontWeight: 600 }">
               {{ selectedBlog.category }}
              </span>
-             <span v-if="selectedBlog.published_date" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+             <span v-if="selectedBlog.published_date" :style="{ color: modalText.muted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
                <Icon name="heroicons:calendar" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ selectedBlog.published_date }}
              </span>
-             <span v-if="selectedBlog.reading_time" :style="{ color: responsive.textMuted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
+             <span v-if="selectedBlog.reading_time" :style="{ color: modalText.muted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }">
                <Icon name="heroicons:clock" class="w-4 h-4 flex-shrink-0" aria-hidden="true" /> {{ selectedBlog.reading_time }}
              </span>
            </div>
 
           <!-- Title -->
-          <h3 :style="{ color: responsive.textPrimary, fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">
+          <h3 :style="{ color: modalText.primary, fontSize: isMobile ? '24px' : '32px', fontWeight: 700, marginBottom: '20px', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }">
             {{ selectedBlog.title }}
           </h3>
 
@@ -4651,8 +4655,8 @@
                   <Icon name="heroicons:pencil" :style="{ width: '20px', height: '20px', color: designSettings.accentColor }" aria-hidden="true" />
               </div>
               <div :style="{ minWidth: 0 }">
-                  <div :style="{ color: responsive.textPrimary, fontWeight: 600, fontSize: '15px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ selectedBlog.author_name }}</div>
-                  <div :style="{ color: responsive.textSubtle, fontSize: '13px' }">Author</div>
+                  <div :style="{ color: modalText.primary, fontWeight: 600, fontSize: '15px', overflowWrap: 'break-word', wordBreak: 'break-word' }">{{ selectedBlog.author_name }}</div>
+                  <div :style="{ color: modalText.muted, fontSize: '13px' }">Author</div>
               </div>
           </div>
 
@@ -4660,7 +4664,7 @@
           <div
             v-if="selectedBlog.content || selectedBlog.description"
             :style="{
-                color: responsive.textPrimary,
+                color: modalText.primary,
                 fontSize: responsive.bodySize,
                 lineHeight: '1.8',
                 marginBottom: '32px',
@@ -4674,7 +4678,7 @@
 
           <!-- Tags -->
           <div v-if="selectedBlog.tags && selectedBlog.tags.length > 0" :style="{ marginBottom: '32px' }">
-            <h4 :style="{ color: responsive.textPrimary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
+            <h4 :style="{ color: modalText.primary, fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }">
               <Icon name="heroicons:tag" class="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               Tags
             </h4>
@@ -4682,7 +4686,7 @@
               <span
                 v-for="(tag, idx) in selectedBlog.tags"
                 :key="'tag-' + idx"
-                :style="{ padding: '6px 14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', color: responsive.textMuted, fontSize: '13px' }"
+                :style="{ padding: '6px 14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', color: modalText.muted, fontSize: '13px' }"
               >#{{ typeof tag === 'object' ? (tag.tag || tag.name) : tag }}</span>
             </div>
           </div>
@@ -5142,6 +5146,40 @@ const applyInkBrassPalette = () => {
   designSettings.cardEffectColor = '#c2a068';
   designSettings.cardEffectOpacity = 0.55;
   designSettings.bgGradient = INK_BRASS_BACKDROP;
+};
+
+// Light vs dark theme, from the page background. Parts of this page were
+// drawn for the dark "Ink & Brass" palette only (cream text, pale-brass chips);
+// now that the owner's theme is honoured they need to follow it.
+const isLightTheme = computed(() => {
+  let h = String(designSettings.backgroundColor || '').replace('#', '');
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return false;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.6;
+});
+
+// Pale-brass chip text works on dark themes only; light themes use their text colour.
+const chipTextColor = computed(() => (isLightTheme.value ? (designSettings.textColor || '#1f2937') : '#e8d9b8'));
+
+// Modals always use a dark panel, whatever the theme, so their text is light.
+const modalText = { primary: 'rgba(247, 245, 240, 0.92)', muted: 'rgba(247, 245, 240, 0.7)' };
+
+// Colours the API resolved for this profile (NfcCardController::resolvedDesign):
+// the owner's theme/colours, or the system palette when the plan does not
+// include the chosen theme. Authoritative over the raw saved fields.
+const applyResolvedDesign = (design) => {
+  if (!design || typeof design !== 'object') return;
+  if (design.locked) {
+    applyInkBrassPalette();
+    return;
+  }
+  if (design.background_color) designSettings.backgroundColor = design.background_color;
+  if (design.text_color) designSettings.textColor = design.text_color;
+  if (design.accent_color) designSettings.accentColor = design.accent_color;
+  // null = solid background colour (a custom colour replaced the theme gradient)
+  designSettings.bgGradient = design.bg_gradient || null;
+  if (design.theme) designSettings.theme = design.theme;
 };
 
 // Loading skeleton bar colour - translucent so it never flashes a fixed colour
@@ -5980,7 +6018,11 @@ const loadPreviewData = (data) => {
   if (data.accentColor || data.accent_color) {
     designSettings.accentColor = data.accentColor || data.accent_color;
   }
-  if (data.bgGradient || data.bg_gradient) {
+  // Builder preview: a solid background (no gradient) must replace the page
+  // default instead of keeping it, so the preview matches the live profile.
+  if (data.backgroundColor) {
+    designSettings.bgGradient = data.bgGradient || data.bg_gradient || null;
+  } else if (data.bgGradient || data.bg_gradient) {
     designSettings.bgGradient = data.bgGradient || data.bg_gradient;
   }
   if (data.cardEffectColor || data.card_effect_color) {
@@ -6601,6 +6643,9 @@ const loadProfileData = async () => {
       // === Apply direct design fields (backward compatibility) ===
       applyDirectDesignFields(data);
 
+      // === Final colours resolved by the server (theme + plan) ===
+      applyResolvedDesign(response.design);
+
       // === Use visible_fields to control display ===
       if (data.visible_fields) {
         console.log('Visible fields config:', data.visible_fields);
@@ -6629,8 +6674,8 @@ const loadProfileData = async () => {
       profileNotFound.value = true;
     }
   } finally {
-    // Lock the public profile to the system "Ink & Brass" palette.
-    applyInkBrassPalette();
+    // The owner's theme is honoured (see applyResolvedDesign); the page no
+    // longer forces "Ink & Brass" on every profile.
     loading.value = false;
   }
 };

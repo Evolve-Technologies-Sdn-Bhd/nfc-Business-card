@@ -73,9 +73,7 @@
                   class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                   :class="getIconBgClass(notification.type)"
                 >
-                  <span class="text-body leading-none">
-                    {{ getIcon(notification.type) }}
-                  </span>
+                  <Icon :name="getIcon(notification.type)" class="h-[18px] w-[18px]" aria-hidden="true" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-2 mb-0.5">
@@ -233,14 +231,14 @@ const hasRead = computed(() =>
 const getIconBgClass = (type) => {
   const cat = props.getCategory(type);
   const map = {
-    system: "bg-info-100",
-    security: "bg-error-100",
-    activity: "bg-success-100",
-    payment: "bg-primary-100",
-    nfc: "bg-warning-100",
-    other: "bg-secondary-100",
+    system: "bg-info-100 text-info-700",
+    security: "bg-error-100 text-error-700",
+    activity: "bg-success-100 text-success-700",
+    payment: "bg-primary-100 text-primary-700",
+    nfc: "bg-accent-100 text-accent-700",
+    other: "bg-secondary-100 text-secondary-600",
   };
-  return map[cat] || "bg-secondary-100";
+  return map[cat] || "bg-secondary-100 text-secondary-600";
 };
 
 // Helper: buttonRef may be either:

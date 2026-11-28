@@ -168,13 +168,14 @@
           class="admin-panel group flex flex-col overflow-hidden"
         >
           <div class="relative aspect-[5/3] bg-secondary-100">
-            <img
-              v-if="template.front_image_url"
-              :src="getImageUrl(template.front_image_url)"
-              :alt="template.name"
-              class="h-full w-full object-cover"
-              loading="lazy"
-            />
+            <!-- Artwork + designer placeholders filled with sample data -->
+              <CardTemplateFace
+                v-if="template.front_image_url"
+                :template="template"
+                :image-url="getImageUrl(template.front_image_url)"
+                :alt="template.name"
+                class="absolute inset-0 h-full w-full"
+              />
             <div v-else class="flex h-full w-full flex-col items-center justify-center gap-2 text-secondary-400">
               <Icon name="heroicons:photo" class="h-12 w-12" />
               <span class="text-caption">No preview</span>

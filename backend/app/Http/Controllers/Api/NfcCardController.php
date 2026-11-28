@@ -229,6 +229,20 @@ class NfcCardController extends Controller
             }
         }
 
+        // Company card template locked by the Business owner (Team Members →
+        // Company profile & locks): every team card uses it, whatever design
+        // the order form sent. This was only applied to the bulk CSV upload,
+        // which no screen uses, so the lock had no effect on real orders.
+        $companyTemplateId = null;
+        if ($businessAccountId) {
+            $owner = $user->id === $businessAccountId ? $user : \App\Models\User::find($businessAccountId);
+            $settings = $owner ? app(\App\Services\BusinessTenantService::class)->settingsFor($owner) : null;
+            if ($settings && $settings->card_template_id
+                && in_array(\App\Services\BusinessTenantService::CARD_TEMPLATE_LOCK, $settings->locked_fields ?? [], true)) {
+                $companyTemplateId = (int) $settings->card_template_id;
+            }
+        }
+
         // Generate unique NFC card ID (this would typically be done by admin)
         $nfcCardId = 'NFC-' . strtoupper(Str::random(12));
 
@@ -243,7 +257,8 @@ class NfcCardController extends Controller
         // Handle custom design file uploads
         $customFrontUrl = null;
         $customBackUrl = null;
-        $isCustomDesign = (bool) $request->input('is_custom_design', false);
+        // A locked company template rules out a custom design upload.
+        $isCustomDesign = $companyTemplateId ? false : (bool) $request->input('is_custom_design', false);
 
         if ($isCustomDesign) {
             if ($request->hasFile('custom_design_front')) {
@@ -263,6 +278,9 @@ class NfcCardController extends Controller
         $cardTemplateId = $request->input('card_template_id');
         if ($isCustomDesign) {
             $cardTemplateId = null;
+        }
+        if ($companyTemplateId) {
+            $cardTemplateId = $companyTemplateId;
         }
 
         $nfcCard = NfcCard::create([
@@ -362,6 +380,8 @@ class NfcCardController extends Controller
             'message' => $plan === 'free'
                 ? 'NFC card created successfully'
                 : 'NFC card order created successfully. Please complete payment and upload proof.',
+            // true when the company's locked card template replaced the chosen design
+            'company_template_applied' => (bool) $companyTemplateId,
         ], 201);
     }
 
@@ -993,6 +1013,8 @@ class NfcCardController extends Controller
                 'name' => $nfcCard->user->name ?? '',
                 'email' => $nfcCard->user->email ?? '',
             ]);
+            // A Business member's new profile starts with the company's values.
+            app(\App\Services\BusinessTenantService::class)->applyCompanyValues($landingPage);
         }
 
         // Respect the owner's publication state: an unpublished profile
@@ -1014,6 +1036,7 @@ class NfcCardController extends Controller
             'show_nfcgo_branding' => $this->shouldShowNfcgoBranding($nfcCard, $landingPage),
             'effective_features' => $this->effectiveFeatures($nfcCard, $landingPage),
             'videos' => $this->profileVideos($nfcCard, $landingPage),
+            'design' => $this->resolvedDesign($nfcCard, $landingPage),
         ]);
     }
 
@@ -1178,6 +1201,84 @@ class NfcCardController extends Controller
         return [
             'intro' => ($allowed['introVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->intro_video) : null,
             'company' => ($allowed['companyVideo'] ?? false) ? \App\Support\VideoEmbed::embedUrl($landingPage->company_video) : null,
+        ];
+    }
+
+    /** System default palette ("Ink & Brass"), also the fallback for locked themes. */
+    public const DEFAULT_DESIGN = [
+        'theme' => 'ink-brass',
+        'background_color' => '#06090d',
+        'text_color' => '#f7f5f0',
+        'accent_color' => '#c2a068',
+        'bg_gradient' => 'radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), #06090d',
+    ];
+
+    /**
+     * The colours the public profile renders with: the owner's theme and
+     * colours from the Profile Builder.
+     *
+     * - A theme the card's plan does not include (admin theme options,
+     *   type=theme, available_plans) falls back to the system palette; Free
+     *   cards get the themes offered to Free or Basic, like the builder.
+     * - The theme gradient is used only while the background is still that
+     *   theme's colour; a custom background colour replaces it.
+     *
+     * The public page used to force "Ink & Brass" for everyone, so a theme
+     * chosen in the builder never showed on the live profile.
+     */
+    private function resolvedDesign(NfcCard $nfcCard, LandingPage $landingPage): array
+    {
+        $plan = strtolower($nfcCard->subscription_plan ?: ($nfcCard->user->subscription_plan ?? 'free'));
+        $config = is_array($landingPage->design_config) ? $landingPage->design_config : [];
+        $themeId = $landingPage->theme ?: ($config['theme']['id'] ?? null);
+
+        // Still exactly the landing_pages column defaults (theme "minimal",
+        // #FFFFFF on #000000): the owner never picked a theme. Choosing
+        // "Minimal" in the builder writes the theme's own text colour instead.
+        $untouched = strtolower((string) $landingPage->theme) === 'minimal'
+            && strtoupper((string) $landingPage->background_color) === '#FFFFFF'
+            && strtoupper((string) $landingPage->text_color) === '#000000'
+            && empty($config['theme']);
+        if (!$themeId || $untouched) {
+            return self::DEFAULT_DESIGN + ['locked' => false];
+        }
+
+        $option = ProfileDesignOption::query()->where('type', 'theme')->where('option_id', $themeId)->first();
+
+        // Not one of the admin themes: never chosen. The landing_pages columns
+        // default to theme "minimal" / white / black, so most untouched
+        // profiles carry that value without the owner ever picking it.
+        if (!$option) {
+            return self::DEFAULT_DESIGN + ['locked' => false];
+        }
+
+        $allowed = $option->is_active && ($plan === 'free'
+            ? ($option->isAvailableForPlan('free') || $option->isAvailableForPlan('basic'))
+            : $option->isAvailableForPlan($plan));
+        if (!$allowed) {
+            return self::DEFAULT_DESIGN + ['locked' => true];
+        }
+
+        $theme = array_merge(
+            is_array($config['theme'] ?? null) ? $config['theme'] : [],
+            is_array($option?->config) ? $option->config : []
+        );
+
+        $background = $landingPage->background_color ?: ($theme['backgroundColor'] ?? self::DEFAULT_DESIGN['background_color']);
+
+        $gradient = $landingPage->bg_gradient ?: null;
+        if (!$gradient && !empty($theme['bgGradient'])
+            && strcasecmp((string) $background, (string) ($theme['backgroundColor'] ?? '')) === 0) {
+            $gradient = $theme['bgGradient'];
+        }
+
+        return [
+            'theme' => $themeId,
+            'background_color' => $background,
+            'text_color' => $landingPage->text_color ?: ($theme['textColor'] ?? self::DEFAULT_DESIGN['text_color']),
+            'accent_color' => $landingPage->accent_color ?: ($theme['accentColor'] ?? self::DEFAULT_DESIGN['accent_color']),
+            'bg_gradient' => $gradient,
+            'locked' => false,
         ];
     }
 
@@ -1444,6 +1545,12 @@ class NfcCardController extends Controller
             ['nfc_card_id' => $nfcCard->id],
             $landingPageData
         );
+
+        // First save of a Business member's profile: fill what they left empty
+        // with the company's shared values (locked ones were applied above).
+        if ($landingPage->wasRecentlyCreated && $editor->isBusinessEmployee()) {
+            $tenant->applyCompanyValues($landingPage);
+        }
 
         // Handle links sync if provided
         if ($request->has('links')) {

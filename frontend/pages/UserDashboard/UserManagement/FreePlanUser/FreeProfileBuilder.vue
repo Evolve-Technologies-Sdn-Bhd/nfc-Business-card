@@ -1183,11 +1183,13 @@
                       <input
                         type="color"
                         v-model="profileData.backgroundColor"
+                        @input="profileData.bgGradient = null"
                         class="w-12 h-12 rounded-lg border-2 border-secondary-300 cursor-pointer"
                       />
                       <input
                         type="text"
                         v-model="profileData.backgroundColor"
+                        @input="profileData.bgGradient = null"
                         placeholder="#FFFFFF"
                         class="flex-1 input font-mono text-input"
                       />
@@ -2738,13 +2740,14 @@ const colorPresets = [
 const applyColorPreset = (preset) => {
   profileData.backgroundColor = preset.bg;
   profileData.textColor = preset.text;
+  profileData.bgGradient = null; // a solid preset replaces the theme gradient
 };
 
 // Apply color scheme from API
 const applyColorScheme = (scheme) => {
   profileData.colorScheme = scheme.id;
   if (scheme.colors) {
-    if (scheme.colors.background) profileData.backgroundColor = scheme.colors.background;
+    if (scheme.colors.background) { profileData.backgroundColor = scheme.colors.background; profileData.bgGradient = null; }
     if (scheme.colors.text) profileData.textColor = scheme.colors.text;
     if (scheme.colors.primary) profileData.primaryColor = scheme.colors.primary;
     if (scheme.colors.secondary) profileData.secondaryColor = scheme.colors.secondary;
@@ -3100,10 +3103,10 @@ const switchToCategory = (category) => {
   // Design Sections for the first time).
   if (category === 'general') {
     const firstTab = availableGeneralTabs.value[0];
-    if (firstTab) visitTab(firstTab.id);
+    if (firstTab) activeTab.value = firstTab.id; // (visitTab exists only in the Premium builder)
   } else if (category === 'design') {
     const firstTab = availableDesignTabs.value[0];
-    if (firstTab) visitTab(firstTab.id);
+    if (firstTab) activeTab.value = firstTab.id; // (visitTab exists only in the Premium builder)
   }
 };
 
@@ -3283,12 +3286,19 @@ const loadDesignOptions = async () => {
         bgGradient: opt.config?.bgGradient,
         _previewClass: opt.config?.preview,
       }));
-      themes.value = DESIGN_LIBRARY.themes.map(lib => {
-        const hit = dbThemes.find(d => d.id === lib.id);
-        return hit ? { ...lib, ...hit, previewCss: hit.previewCss || lib.previewCss } : lib;
+      // Only the themes the admin offers this plan (the API filters by plan);
+
+      // the library just supplies preview styling. Showing the whole library let
+
+      // any plan pick and save every theme.
+
+      themes.value = dbThemes.map(d => {
+
+        const lib = DESIGN_LIBRARY.themes.find(l => l.id === d.id);
+
+        return lib ? { ...lib, ...d, previewCss: d.previewCss || lib.previewCss } : d;
+
       });
-      // Append extra DB themes not in library
-      dbThemes.filter(d => !DESIGN_LIBRARY.themes.some(l => l.id === d.id)).forEach(extra => themes.value.push(extra));
       console.log('✅ Themes loaded (merged):', themes.value.length);
     } else {
       themes.value = [...DESIGN_LIBRARY.themes];
@@ -3561,7 +3571,9 @@ const applyTheme = (theme) => {
   profileData.backgroundColor = theme.backgroundColor;
   if (theme.textColor) profileData.textColor = theme.textColor;
   if (theme.accentColor) profileData.accentColor = theme.accentColor;
-  if (theme.bgGradient) profileData.bgGradient = theme.bgGradient;
+  // Always replace the gradient: a theme without one (solid colour) used to
+  // keep the previous theme's gradient, which the page draws first.
+  profileData.bgGradient = theme.bgGradient || null;
 };
 
 // Get icon for feature toggle based on feature_key

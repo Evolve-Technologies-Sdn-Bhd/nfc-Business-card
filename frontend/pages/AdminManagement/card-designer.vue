@@ -900,6 +900,7 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, toRaw } from 'vue';
+import { SAMPLE_CARD_DATA } from '~/utils/cardSampleData';
 
 definePageMeta({
   layout: 'admin-management',
@@ -921,13 +922,13 @@ const QR_ENDPOINT = 'https://api.qrserver.com/v1/create-qr-code/';
 // template image and drawn live from the customer's details (see CardExamples.vue).
 const TEXT_FIELDS = [
   { value: '', label: 'None (fixed text)' },
-  { value: 'name', label: 'Full name', sample: 'John Doe' },
-  { value: 'position', label: 'Job title', sample: 'Marketing Director' },
-  { value: 'company', label: 'Company name', sample: 'Company Sdn Bhd' },
-  { value: 'phone', label: 'Phone number', sample: '012-345 6789' },
-  { value: 'email', label: 'Email', sample: 'john@company.com' },
-  { value: 'website', label: 'Website', sample: 'company.com' },
-  { value: 'address', label: 'Address', sample: 'Kuala Lumpur, Malaysia' },
+  { value: 'name', label: 'Full name', sample: SAMPLE_CARD_DATA.name },
+  { value: 'position', label: 'Job title', sample: SAMPLE_CARD_DATA.position },
+  { value: 'company', label: 'Company name', sample: SAMPLE_CARD_DATA.company },
+  { value: 'phone', label: 'Phone number', sample: SAMPLE_CARD_DATA.phone },
+  { value: 'email', label: 'Email', sample: SAMPLE_CARD_DATA.email },
+  { value: 'website', label: 'Website', sample: SAMPLE_CARD_DATA.website },
+  { value: 'address', label: 'Address', sample: SAMPLE_CARD_DATA.address },
 ];
 const IMAGE_FIELDS = [
   { value: '', label: 'None (fixed image)' },

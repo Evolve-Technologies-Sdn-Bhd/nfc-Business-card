@@ -57,9 +57,59 @@ class CompanySettingsController extends Controller
                 'my_locked_fields' => $this->tenant->lockedFieldsFor($user),
                 'card_template_id' => $settings->card_template_id,
                 'lockable_fields' => BusinessTenantService::LOCKABLE_FIELDS,
+                // Valid choices for the branding fields (active design options).
+                'design_choices' => $this->designChoices(),
                 'quota' => $owner->getQuotaInfo(false),
             ],
         ]);
+    }
+
+    /** Branding fields whose value must be an active design option of that type. */
+    private const OPTION_FIELDS = ['theme', 'font', 'button_style', 'profile_style', 'card_style', 'color_scheme', 'layout'];
+
+    /** Fields that must be an http(s) URL when shared. */
+    private const URL_FIELDS = ['company_logo', 'cover_banner', 'website_url', 'address_map_url'];
+
+    /** @return array<string, array<int, array{id: string, name: string}>> */
+    private function designChoices(): array
+    {
+        return \App\Models\ProfileDesignOption::query()
+            ->whereIn('type', self::OPTION_FIELDS)
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get(['type', 'option_id', 'name'])
+            ->groupBy('type')
+            ->map(fn ($g) => $g->map(fn ($o) => ['id' => $o->option_id, 'name' => $o->name])->values())
+            ->all();
+    }
+
+    /** @return array<string, string> field => reason */
+    private function invalidSharedValues(array $shared): array
+    {
+        $choices = null;
+        $invalid = [];
+
+        foreach ($shared as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+            $value = (string) $value;
+
+            if (str_ends_with($key, '_color') && !preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value)) {
+                $invalid[$key] = 'Use a hex colour such as #1F2937.';
+            } elseif (in_array($key, self::OPTION_FIELDS, true)) {
+                $choices ??= $this->designChoices();
+                if (!collect($choices[$key] ?? [])->contains('id', $value)) {
+                    $invalid[$key] = 'Choose one of the available options.';
+                }
+            } elseif (in_array($key, self::URL_FIELDS, true) && !preg_match('#^https?://\S+$#i', $value)) {
+                $invalid[$key] = 'Use a full link starting with https://';
+            } elseif ($key === 'bg_gradient' && (str_contains($value, ';') || stripos($value, 'url(') !== false)) {
+                $invalid[$key] = 'Use a CSS gradient such as linear-gradient(135deg, #111 0%, #333 100%).';
+            }
+        }
+
+        return $invalid;
     }
 
     /**
@@ -97,6 +147,18 @@ class CompanySettingsController extends Controller
                 'success' => false,
                 'message' => 'These fields cannot be shared: ' . implode(', ', $unknown),
                 'errors' => ['shared_fields' => ['Unknown field(s): ' . implode(', ', $unknown)]],
+            ], 422);
+        }
+
+        // Shared values are copied onto member profiles, so they must be real
+        // values: an unknown theme/font id or a malformed colour would silently
+        // do nothing (or break) on every member's page.
+        $invalid = $this->invalidSharedValues($validated['shared_fields'] ?? []);
+        if ($invalid !== []) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Some company values are not valid: ' . implode(', ', array_keys($invalid)),
+                'errors' => array_map(fn ($m) => [$m], $invalid),
             ], 422);
         }
 
@@ -138,8 +200,7 @@ class CompanySettingsController extends Controller
             'success' => true,
             'message' => $synced > 0
                 ? "Company settings saved and applied to {$synced} member profile(s)."
-                : 'Company settings saved.',
-            'data' => [
+                : 'Company settings saved.',            'data' => [
                 'shared_fields' => (object) ($settings->shared_fields ?? []),
                 'locked_fields' => $settings->locked_fields ?? [],
                 'card_template_id' => $settings->card_template_id,
