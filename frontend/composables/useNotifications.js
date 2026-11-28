@@ -134,64 +134,65 @@ export const useNotifications = () => {
     return notifDate.toLocaleDateString();
   };
 
-  // Get notification icon
-  const getNotificationIcon = (type) => {
-    const icons = {
-      registration_success: "🎉",
-      email_verification: "✉️",
-      login_new_device: "🔒",
-      profile_updated: "✅",
-      link_milestone: "🎯",
-      landing_page_viewed: "👀",
-      contact_request: "📧",
-      subscription_upgrade: "⭐",
-      payment_successful: "💳",
-      payment_failed: "❌",
-      account_warning: "⚠️",
-      password_changed: "🔐",
-      nfc_card_purchased: "🛒",
-      nfc_card_delivered: "📦",
-      nfc_card_linked: "🔗",
-      nfc_card_activated: "✨",
-      nfc_card_expired: "⏰",
-      app_update: "🚀",
-      system_message: "ℹ️",
-      admin_announcement: "📢",
-    };
-    return icons[type] || "🔔";
+  // Notification category (filters, colours). Explicit types first, then a
+  // prefix rule so new types (e.g. every nfc_card_* order step) still land in
+  // the right group instead of "Other".
+  const NOTIFICATION_CATEGORIES = {
+    registration_success: "system",
+    email_verification: "system",
+    account_created: "system",
+    guest_checkout_welcome: "system",
+    free_plan_deactivated: "system",
+    app_update: "system",
+    system_message: "system",
+    admin_announcement: "system",
+    login_new_device: "security",
+    password_changed: "security",
+    account_warning: "security",
+    profile_updated: "activity",
+    link_milestone: "activity",
+    landing_page_viewed: "activity",
+    contact_request: "activity",
+    subscription_upgrade: "payment",
+    payment_successful: "payment",
+    payment_failed: "payment",
+    order_rejected: "nfc",
   };
 
-  // Get notification category
   const getNotificationCategory = (type) => {
-    const categories = {
-      // System notifications
-      registration_success: "system",
-      email_verification: "system",
-      app_update: "system",
-      system_message: "system",
-      admin_announcement: "system",
-      // Security notifications
-      login_new_device: "security",
-      password_changed: "security",
-      account_warning: "security",
-      // Profile & Activity
-      profile_updated: "activity",
-      link_milestone: "activity",
-      landing_page_viewed: "activity",
-      contact_request: "activity",
-      // Payment & Subscription
-      subscription_upgrade: "payment",
-      payment_successful: "payment",
-      payment_failed: "payment",
-      // NFC Card
-      nfc_card_purchased: "nfc",
-      nfc_card_delivered: "nfc",
-      nfc_card_linked: "nfc",
-      nfc_card_activated: "nfc",
-      nfc_card_expired: "nfc",
-    };
-    return categories[type] || "other";
+    const t = String(type || "");
+    if (NOTIFICATION_CATEGORIES[t]) return NOTIFICATION_CATEGORIES[t];
+    if (t.startsWith("nfc_card_") || t.startsWith("order_")) return "nfc";
+    if (t.startsWith("payment_") || t.startsWith("subscription_") || t.startsWith("invoice_") || t.startsWith("refund_")) return "payment";
+    if (t.startsWith("login_") || t.startsWith("password_") || t.includes("two_factor")) return "security";
+    return "other";
   };
+
+  // Icon (heroicons name) for a notification: a few specific ones, otherwise
+  // the category icon. Rendered with <Icon>, never as emoji text.
+  const NOTIFICATION_ICONS = {
+    registration_success: "heroicons:sparkles",
+    email_verification: "heroicons:envelope",
+    login_new_device: "heroicons:device-phone-mobile",
+    password_changed: "heroicons:key",
+    account_warning: "heroicons:exclamation-triangle",
+    profile_updated: "heroicons:user-circle",
+    link_milestone: "heroicons:trophy",
+    landing_page_viewed: "heroicons:eye",
+    contact_request: "heroicons:chat-bubble-left-right",
+    payment_successful: "heroicons:check-badge",
+    payment_failed: "heroicons:x-circle",
+    order_rejected: "heroicons:x-circle",
+    nfc_card_shipped: "heroicons:truck",
+    nfc_card_delivered: "heroicons:archive-box",
+    nfc_card_cancelled: "heroicons:x-circle",
+    nfc_card_payment_rejected: "heroicons:x-circle",
+    admin_announcement: "heroicons:megaphone",
+    free_plan_deactivated: "heroicons:pause-circle",
+  };
+
+  const getNotificationIcon = (type) =>
+    NOTIFICATION_ICONS[type] || getCategoryInfo(getNotificationCategory(type)).icon;
 
   // Get category info
   const getCategoryInfo = (category) => {
@@ -199,7 +200,7 @@ export const useNotifications = () => {
       all: { label: "All", icon: "heroicons:bell", color: "text-gray-600" },
       system: {
         label: "System",
-        icon: "heroicons:cog-6-tooth",
+        icon: "heroicons:information-circle",
         color: "text-blue-600",
       },
       security: {
@@ -209,17 +210,17 @@ export const useNotifications = () => {
       },
       activity: {
         label: "Activity",
-        icon: "heroicons:chart-bar",
+        icon: "heroicons:chart-bar-square",
         color: "text-green-600",
       },
       payment: {
         label: "Payment",
-        icon: "heroicons:credit-card",
+        icon: "heroicons:banknotes",
         color: "text-purple-600",
       },
       nfc: {
         label: "NFC Cards",
-        icon: "heroicons:qr-code",
+        icon: "heroicons:credit-card",
         color: "text-orange-600",
       },
       other: {

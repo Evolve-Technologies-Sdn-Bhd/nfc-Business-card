@@ -5409,7 +5409,11 @@ const loadPreviewData = (data) => {
   if (data.accentColor || data.accent_color) {
     designSettings.accentColor = data.accentColor || data.accent_color;
   }
-  if (data.bgGradient || data.bg_gradient) {
+  // Builder preview: a solid background (no gradient) must replace the page
+  // default instead of keeping it, so the preview matches the live profile.
+  if (data.backgroundColor) {
+    designSettings.bgGradient = data.bgGradient || data.bg_gradient || null;
+  } else if (data.bgGradient || data.bg_gradient) {
     designSettings.bgGradient = data.bgGradient || data.bg_gradient;
   }
   if (data.cardEffectColor || data.card_effect_color) {
@@ -5986,6 +5990,9 @@ const loadProfileData = async () => {
       // === Apply direct design fields (backward compatibility) ===
       applyDirectDesignFields(data);
 
+      // Final colours resolved by the server (theme + plan)
+      applyResolvedDesign(response.design);
+
       // === Use visible_fields to control display ===
       if (data.visible_fields) {
         console.log('Visible fields config:', data.visible_fields);
@@ -6083,6 +6090,19 @@ const applyDesignConfig = (designConfig) => {
 };
 
 // Apply direct design fields (from landing_page table)
+// Colours the API resolved for this profile (NfcCardController::resolvedDesign).
+// `locked` = the plan does not include the saved theme: use the system palette.
+const applyResolvedDesign = (design) => {
+  if (!design || typeof design !== 'object') return;
+  const d = design.locked
+    ? { background_color: '#06090d', text_color: '#f7f5f0', accent_color: '#c2a068', bg_gradient: 'radial-gradient(120% 90% at 12% 0%, rgba(194, 160, 104, 0.10) 0%, transparent 46%), radial-gradient(90% 80% at 92% 12%, rgba(194, 160, 104, 0.08) 0%, transparent 52%), #06090d' }
+    : design;
+  if (d.background_color) designSettings.backgroundColor = d.background_color;
+  if (d.text_color) designSettings.textColor = d.text_color;
+  if (d.accent_color) designSettings.accentColor = d.accent_color;
+  designSettings.bgGradient = d.bg_gradient || null;
+};
+
 const applyDirectDesignFields = (data) => {
   if (data.background_color) {
     designSettings.backgroundColor = data.background_color;

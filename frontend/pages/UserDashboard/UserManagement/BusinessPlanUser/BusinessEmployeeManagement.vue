@@ -1,680 +1,405 @@
-<!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement.vue -->
+<!-- pages/UserDashboard/UserManagement/BusinessPlanUser/BusinessEmployeeManagement.vue
+     Team Members (Business). Owner + company admins manage members; card
+     managers can view the team and jump to its cards. Every action button is
+     shown only to roles the API accepts it from (business.manager routes). -->
 <template>
   <div>
     <AdminPageHeader
       eyebrow="Team"
       eyebrow-icon="heroicons:users"
       title="Team Members"
-      description="People on your Business account: add or remove members, set their role and status, and choose the company details they share."
+      description="Everyone on your Business account: add or remove members, set their role and status, and choose the company details they share."
     >
       <template #actions>
+        <NuxtLink to="/UserDashboard/NFCCardDesign/BusinessPlanNFCCard" class="admin-btn admin-btn--outline">
+          <Icon name="heroicons:paint-brush" class="h-4 w-4" />
+          Design team cards
+        </NuxtLink>
         <button
           v-if="canManageCompany"
           type="button"
-          @click="openAddMember"
-          class="admin-btn admin-btn--ink"
-          :disabled="availableAccountSlots <= 0"
+          class="admin-btn admin-btn--primary"
+          :disabled="loading || availableAccountSlots <= 0"
           :title="availableAccountSlots <= 0 ? 'All seats are in use' : 'Add a team member'"
+          @click="openAddMember"
         >
           <Icon name="heroicons:user-plus" class="h-4 w-4" />
           Add member
         </button>
-        <button type="button" @click="showCardDesignModal = true" class="admin-btn admin-btn--primary">
-          <Icon name="heroicons:paint-brush" class="h-4 w-4" />
-          Design team cards
-        </button>
       </template>
     </AdminPageHeader>
 
-    <!-- Account & Card Usage Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-12 w-12 rounded-lg bg-primary-100 flex items-center justify-center"
-              >
-                <Icon
-                  name="heroicons:user-group"
-                  class="h-6 w-6 text-primary-600"
-                />
-              </div>
-              <div class="ml-4">
-                <p class="stat-label">
-                  Total Accounts
-                </p>
-                <p class="stat-value">
-                  {{ totalAccounts }}
-                </p>
-                <p class="text-caption text-secondary-500">
-                  1 owner + {{ employees.length }} employees
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- Seats -->
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <AdminStatTile
+        label="Seats used"
+        :value="totalQuota > 0 ? `${totalAccounts} / ${totalQuota}` : totalAccounts"
+        icon="heroicons:user-group"
+        :hint="`You + ${employees.length} member${employees.length === 1 ? '' : 's'}`"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Free seats"
+        :value="availableAccountSlots"
+        icon="heroicons:user-plus"
+        :hint="availableAccountSlots > 0 ? 'Ready for new members' : 'No free seats'"
+        :loading="loading"
+      />
+      <AdminStatTile
+        label="Cards ordered"
+        :value="totalQuota > 0 ? `${orderedCardsCount} / ${totalQuota}` : orderedCardsCount"
+        icon="heroicons:credit-card"
+        hint="Company NFC cards"
+        :loading="loading"
+      />
+    </div>
 
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-12 w-12 rounded-lg bg-info-100 flex items-center justify-center"
-              >
-                <Icon
-                  name="heroicons:credit-card"
-                  class="h-6 w-6 text-info-600"
-                />
-              </div>
-              <div class="ml-4">
-                <p class="stat-label">
-                  NFC Cards Ordered
-                </p>
-                <p class="stat-value">
-                  {{ orderedCardsCount }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- One clear notice only when seats block adding people -->
+    <div
+      v-if="!loading && availableAccountSlots <= 0"
+      class="mb-6 flex items-start gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3"
+      role="status"
+    >
+      <Icon name="heroicons:exclamation-triangle" class="mt-0.5 h-5 w-5 shrink-0 text-warning-600" />
+      <div class="text-body text-warning-800">
+        <p class="font-semibold">{{ totalQuota > 0 ? "All seats are in use" : "No seats assigned yet" }}</p>
+        <p class="text-warning-700">
+          {{
+            totalQuota > 0
+              ? `Your plan includes ${totalQuota} seats (you count as one). Remove a member or contact NFCGo support to add seats.`
+              : "NFCGo hasn't set a seat quota for this account yet. Contact support to add team members."
+          }}
+        </p>
+      </div>
+    </div>
 
-        <div class="card">
-          <div class="card-body">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-12 w-12 rounded-lg bg-warning-100 flex items-center justify-center"
-              >
-                <Icon
-                  name="heroicons:square-3-stack-3d"
-                  class="h-6 w-6 text-warning-600"
-                />
-              </div>
-              <div class="ml-4">
-                <p class="stat-label">
-                  Available Quota
-                </p>
-                <p class="stat-value">
-                  {{ availableQuota }} / {{ totalQuota }}
-                </p>
-                <p class="text-caption text-secondary-500">For accounts & cards</p>
-              </div>
-            </div>
+    <!-- Members -->
+    <AdminSectionCard flush>
+      <template #title>Members</template>
+      <template #header-actions>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="relative">
+            <Icon
+              name="heroicons:magnifying-glass"
+              class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-400"
+            />
+            <input
+              v-model="searchQuery"
+              type="search"
+              placeholder="Search name, e-mail, title…"
+              class="admin-field !py-1.5 !pl-9 w-56"
+              aria-label="Search members"
+            />
           </div>
+          <select v-model="filterStatus" class="admin-field !py-1.5 w-36" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Deactivated</option>
+          </select>
+        </div>
+      </template>
+
+      <div v-if="loading" class="divide-y divide-secondary-100" role="status" aria-busy="true">
+        <div v-for="i in 4" :key="i" class="flex items-center gap-4 px-5 py-4">
+          <span class="admin-skeleton h-10 w-10 shrink-0 rounded-full"></span>
+          <span class="admin-skeleton h-4 w-1/4"></span>
+          <span class="admin-skeleton h-4 w-20"></span>
+          <span class="admin-skeleton ml-auto h-4 w-24"></span>
         </div>
       </div>
 
-      <!-- Warning Messages -->
-      <div class="space-y-4 mb-6">
-        <!-- Quota Limit Warning -->
-        <div
-          v-if="availableQuota <= 0"
-          class="bg-warning-50 border border-warning-200 rounded-lg p-4"
-        >
-          <div class="flex">
-            <Icon
-              name="heroicons:exclamation-triangle"
-              class="h-5 w-5 text-warning-600 mt-0.5"
-            />
-            <div class="ml-3">
-              <h3 class="text-label text-warning-800">
-                {{ totalQuota > 0 ? "Quota limit reached" : "No quota assigned yet" }}
-              </h3>
-              <p class="text-body text-warning-700 mt-1">
-                <template v-if="totalQuota > 0">
-                  All {{ totalQuota }} seats are in use. Contact NFCGo support to add more
-                  accounts or cards.
-                </template>
-                <template v-else>
-                  NFCGo has not set a seat quota for this Business account yet. Contact
-                  support to add team accounts or order cards.
-                </template>
-              </p>
-            </div>
-          </div>
-        </div>
+      <AdminEmptyState
+        v-else-if="employees.length === 0"
+        icon="heroicons:user-group"
+        title="No team members yet"
+        :description="canManageCompany ? 'Add a member to give them their own profile and card. They get an e-mail to set their password.' : 'Your team has no members yet.'"
+      >
+        <template v-if="canManageCompany && availableAccountSlots > 0" #actions>
+          <button type="button" class="admin-btn admin-btn--primary admin-btn--sm" @click="openAddMember">
+            <Icon name="heroicons:user-plus" class="h-4 w-4" />
+            Add member
+          </button>
+        </template>
+      </AdminEmptyState>
 
-        <!-- Info: Unified Quota Explanation -->
-        <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-          <div class="flex">
-            <Icon
-              name="heroicons:information-circle"
-              class="h-5 w-5 text-info-600 mt-0.5 flex-shrink-0"
-            />
-            <div class="ml-3">
-              <h3 class="text-label text-info-800">
-                Business Quota Information
-              </h3>
-              <p class="text-body text-info-700 mt-1">
-                Your business has a total quota of
-                <strong>{{ totalQuota }}</strong> for both accounts and NFC
-                cards.
-              </p>
-              <div class="text-body text-info-700 mt-2 space-y-1">
-                <p>📊 <strong>Current Usage:</strong></p>
-                <p class="ml-4">
-                  • Accounts: {{ totalAccounts }} / {{ totalQuota }} (1 owner +
-                  {{ employees.length }} employees)
-                </p>
-                <p class="ml-4">
-                  • Cards Ordered: {{ orderedCardsCount }} / {{ totalQuota }}
-                </p>
-                <p class="ml-4">• Available: {{ availableQuota }}</p>
-              </div>
-              <p class="text-body text-info-600 mt-2">
-                💡 Use <strong>Add member</strong> to give someone a seat. They get an e-mail to set their password. Removing a member frees the seat and returns their company cards to you.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AdminEmptyState
+        v-else-if="filteredEmployees.length === 0"
+        icon="heroicons:magnifying-glass"
+        title="No members match"
+        description="Try another name or clear the status filter."
+      >
+        <template #actions>
+          <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" @click="searchQuery = ''; filterStatus = 'all'">
+            Clear search
+          </button>
+        </template>
+      </AdminEmptyState>
 
-      <!-- Employees List -->
-      <div class="card">
-        <div class="card-header">
-          <div class="flex items-center justify-between">
-            <h3 class="card-title">
-              Employee Accounts
-            </h3>
-            <div class="flex items-center space-x-3">
-              <!-- Search -->
-              <div class="relative">
-                <Icon
-                  name="heroicons:magnifying-glass"
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400"
-                />
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search employees..."
-                  class="pl-10 pr-4 py-2 border border-secondary-300 rounded-lg text-input focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <!-- Filter -->
-              <select
-                v-model="filterStatus"
-                class="px-4 py-2 border border-secondary-300 rounded-lg text-input focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="card-body p-0">
-          <!-- Loading State -->
-          <div v-if="loading" class="text-center py-12">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-secondary-600">Loading employees...</p>
-          </div>
-
-          <!-- Empty State -->
-          <div
-            v-else-if="filteredEmployees.length === 0"
-            class="text-center py-12"
-          >
-            <Icon
-              name="heroicons:user-group"
-              class="h-16 w-16 text-secondary-400 mx-auto mb-4"
-            />
-            <h3 class="card-title mb-2">
-              No Employees Found
-            </h3>
-            <p class="text-secondary-500">
-              {{
-                searchQuery
-                  ? "No employees match your search criteria."
-                  : "No team members yet. Use Add member to give someone a seat."
-              }}
-            </p>
-          </div>
-
-          <!-- Employees Table -->
-          <div v-else class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-secondary-200">
-              <thead class="bg-secondary-50">
-                <tr>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Employee
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Email
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Plan
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Role
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Status
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left table-head"
-                  >
-                    Created
-                  </th>
-                  <th
-                    class="px-6 py-3 text-right table-head"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-secondary-200">
-                <tr
-                  v-for="employee in filteredEmployees"
-                  :key="employee.id"
-                  class="hover:bg-secondary-50 transition-colors"
+      <div v-else class="admin-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th class="text-right"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="employee in filteredEmployees" :key="employee.id">
+              <td>
+                <button type="button" class="flex items-center gap-3 text-left min-w-0" @click="viewEmployeeDetails(employee)">
+                  <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-100 text-caption font-semibold text-accent-800">
+                    {{ getInitials(employee.name) }}
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block truncate font-medium text-secondary-900">{{ employee.name }}</span>
+                    <span class="block truncate text-caption text-secondary-500">
+                      {{ employee.email }}<template v-if="employee.position"> · {{ employee.position }}</template>
+                    </span>
+                  </span>
+                </button>
+              </td>
+              <td class="whitespace-nowrap">
+                <!-- Only the owner reassigns roles -->
+                <select
+                  v-if="isOwnerViewer"
+                  :value="employee.business_role || 'member'"
+                  :disabled="updatingRoleId === employee.id"
+                  class="admin-field !py-1 !text-sm w-40"
+                  :aria-label="`Role for ${employee.name}`"
+                  @change="updateEmployeeRole(employee, $event.target.value)"
                 >
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div
-                        class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center"
-                      >
-                        <span class="text-body font-medium text-primary-600">{{
-                          getInitials(employee.name)
-                        }}</span>
-                      </div>
-                      <div class="ml-4">
-                        <div class="table-cell font-medium text-secondary-900">
-                          {{ employee.name }}
-                        </div>
-                        <div class="table-cell text-secondary-500">
-                          {{ employee.position || "Employee" }}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="table-cell text-secondary-900">
-                      {{ employee.email }}
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      class="px-2 py-1 inline-flex text-badge rounded-full bg-accent-100 text-accent-800 capitalize"
-                    >
-                      {{ employee.subscription_plan || "Business" }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <!-- Owner can reassign roles; other managers see a read-only badge -->
-                    <select
-                      v-if="isOwnerViewer"
-                      :value="employee.business_role || 'member'"
-                      @change="updateEmployeeRole(employee, $event.target.value)"
-                      class="input py-1 text-body"
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="card_manager">Card Manager</option>
-                      <option value="member">Member</option>
-                    </select>
-                    <span
-                      v-else
-                      class="px-2 py-1 inline-flex text-badge rounded-full bg-secondary-100 text-secondary-700"
-                    >
-                      {{ roleLabels[employee.business_role] || "Member" }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      :class="[
-                        'px-2 py-1 inline-flex text-badge rounded-full',
-                        employee.subscription_active
-                          ? 'bg-success-100 text-success-800'
-                          : 'bg-secondary-100 text-secondary-800',
-                      ]"
-                    >
-                      {{ employee.subscription_active ? "Active" : "Inactive" }}
-                    </span>
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap table-cell text-secondary-500"
+                  <option value="admin">Admin</option>
+                  <option value="card_manager">Card manager</option>
+                  <option value="member">Member</option>
+                </select>
+                <span v-else class="admin-badge" :class="employee.business_role === 'admin' ? 'admin-badge--brass' : 'admin-badge--neutral'">
+                  {{ roleLabels[employee.business_role] || "Member" }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap">
+                <span class="admin-badge" :class="employee.subscription_active ? 'admin-badge--success' : 'admin-badge--neutral'">
+                  {{ employee.subscription_active ? "Active" : "Deactivated" }}
+                </span>
+              </td>
+              <td class="whitespace-nowrap text-secondary-600">{{ formatDate(employee.created_at) }}</td>
+              <td>
+                <div class="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    class="admin-icon-btn"
+                    :title="`View ${employee.name}'s cards`"
+                    :aria-label="`View ${employee.name}'s cards`"
+                    @click="viewEmployeeCard(employee)"
                   >
-                    {{ formatDate(employee.created_at) }}
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-right table-cell font-medium"
-                  >
-                    <div class="flex items-center justify-end space-x-2">
-                      <!-- Toggle Status Button -->
-                      <button
-                        @click="toggleEmployeeStatus(employee)"
-                        :class="[
-                          'px-2 py-1 rounded text-badge',
-                          employee.subscription_active
-                            ? 'bg-warning-100 text-warning-700 hover:bg-warning-200'
-                            : 'bg-success-100 text-success-700 hover:bg-success-200',
-                        ]"
-                        :title="
-                          employee.subscription_active
-                            ? 'Deactivate employee'
-                            : 'Activate employee'
-                        "
-                      >
-                        {{ employee.subscription_active ? 'Deactivate' : 'Activate' }}
-                      </button>
-                      <!-- View Details Button -->
-                      <button
-                        @click="viewEmployeeDetails(employee)"
-                        class="text-primary-600 hover:text-primary-900"
-                        title="View Details"
-                      >
-                        <Icon name="heroicons:eye" class="h-5 w-5" />
-                      </button>
-                      <!-- Reset Password Button -->
-                      <button
-                        @click="resetEmployeePassword(employee)"
-                        class="text-warning-600 hover:text-warning-900"
-                        title="Reset Password"
-                      >
-                        <Icon name="heroicons:key" class="h-5 w-5" />
-                      </button>
-                      <!-- View NFC Card Button -->
-                      <button
-                        @click="viewEmployeeCard(employee)"
-                        class="text-info-600 hover:text-info-900"
-                        title="View NFC Card"
-                      >
-                        <Icon name="heroicons:credit-card" class="h-5 w-5" />
-                      </button>
-                      <!-- Remove member (owner: anyone; company admin: not other admins) -->
-                      <button
-                        v-if="canActOn(employee)"
-                        @click="removeEmployee(employee)"
-                        class="text-error-600 hover:text-error-900"
-                        title="Remove member"
-                      >
-                        <Icon name="heroicons:user-minus" class="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    <Icon name="heroicons:credit-card" class="h-[18px] w-[18px]" />
+                  </button>
+                  <template v-if="canManageCompany && canActOn(employee)">
+                    <button
+                      type="button"
+                      class="admin-icon-btn"
+                      title="Send password reset link"
+                      :aria-label="`Send ${employee.name} a password reset link`"
+                      @click="resetEmployeePassword(employee)"
+                    >
+                      <Icon name="heroicons:key" class="h-[18px] w-[18px]" />
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-icon-btn"
+                      :title="employee.subscription_active ? 'Deactivate' : 'Reactivate'"
+                      :aria-label="`${employee.subscription_active ? 'Deactivate' : 'Reactivate'} ${employee.name}`"
+                      @click="toggleEmployeeStatus(employee)"
+                    >
+                      <Icon :name="employee.subscription_active ? 'heroicons:pause-circle' : 'heroicons:play-circle'" class="h-[18px] w-[18px]" />
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-icon-btn hover:!text-error-600"
+                      title="Remove member"
+                      :aria-label="`Remove ${employee.name}`"
+                      @click="removeEmployee(employee)"
+                    >
+                      <Icon name="heroicons:user-minus" class="h-[18px] w-[18px]" />
+                    </button>
+                  </template>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <template v-if="!loading && employees.length" #footer>
+        <p class="text-caption text-secondary-500">
+          Removing a member frees their seat and returns their company cards to you.
+        </p>
+      </template>
+    </AdminSectionCard>
 
     <!-- Company data shared with members + which fields they cannot change -->
     <div class="mt-8">
       <BusinessCompanySettings v-if="!loading" :can-manage="canManageCompany" />
     </div>
 
-    <!-- Add Member Modal -->
-    <Transition name="modal">
-      <div v-if="showAddMemberModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showAddMemberModal = false"></div>
+    <!-- Add member -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showAddMemberModal" class="admin-dialog-backdrop" @click.self="showAddMemberModal = false">
           <form
-            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl space-y-4"
+            class="admin-dialog flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add team member"
+            style="width: min(32rem, 100%); margin-top: 8vh"
             @submit.prevent="submitAddMember"
           >
-            <div class="flex items-center justify-between">
-              <h3 class="modal-title">Add team member</h3>
-              <button type="button" @click="showAddMemberModal = false" class="text-secondary-400 hover:text-secondary-600">
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
+                  <Icon name="heroicons:user-plus" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Add team member</p>
+                  <p class="admin-panel-subtitle">Uses 1 of {{ availableAccountSlots }} free seat{{ availableAccountSlots === 1 ? "" : "s" }}</p>
+                </div>
+              </div>
+              <button type="button" class="admin-icon-btn" aria-label="Close" @click="showAddMemberModal = false">
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
-            <p class="text-body text-secondary-600">
-              Uses 1 of {{ availableAccountSlots }} free seat(s). We e-mail them a link to set their password.
-            </p>
-            <div class="grid grid-cols-2 gap-3">
-              <input v-model.trim="newMember.first_name" required placeholder="First name" class="px-3 py-2 border border-secondary-300 rounded-lg text-input" />
-              <input v-model.trim="newMember.last_name" required placeholder="Last name" class="px-3 py-2 border border-secondary-300 rounded-lg text-input" />
+            <div class="admin-panel-body space-y-4">
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="admin-label" for="nm-first">First name</label>
+                  <input id="nm-first" v-model.trim="newMember.first_name" required class="admin-field" autocomplete="off" />
+                </div>
+                <div>
+                  <label class="admin-label" for="nm-last">Last name</label>
+                  <input id="nm-last" v-model.trim="newMember.last_name" required class="admin-field" autocomplete="off" />
+                </div>
+              </div>
+              <div>
+                <label class="admin-label" for="nm-email">Work e-mail</label>
+                <input id="nm-email" v-model.trim="newMember.email" type="email" required class="admin-field" autocomplete="off" />
+                <p class="admin-hint">We e-mail them a link to set their password.</p>
+              </div>
+              <div>
+                <label class="admin-label" for="nm-title">Job title <span class="font-normal text-secondary-400">(optional)</span></label>
+                <input id="nm-title" v-model.trim="newMember.job_title" class="admin-field" autocomplete="off" />
+              </div>
+              <div>
+                <label class="admin-label" for="nm-role">Role</label>
+                <select id="nm-role" v-model="newMember.role" class="admin-field">
+                  <option value="member">Member — edits their own profile</option>
+                  <option value="card_manager">Card manager — also assigns company cards</option>
+                  <option v-if="isOwnerViewer" value="admin">Admin — manages the team and company settings</option>
+                </select>
+              </div>
             </div>
-            <input v-model.trim="newMember.email" type="email" required placeholder="Work e-mail" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input" />
-            <input v-model.trim="newMember.job_title" placeholder="Job title (optional)" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input" />
-            <select v-model="newMember.role" class="w-full px-3 py-2 border border-secondary-300 rounded-lg text-input">
-              <option value="member">Member — edits own profile</option>
-              <option value="card_manager">Card Manager — also assigns company cards</option>
-              <option v-if="isOwnerViewer" value="admin">Admin — manages the team and company settings</option>
-            </select>
-            <div class="flex items-center justify-end gap-3 pt-2">
-              <button type="button" class="btn btn-outline" @click="showAddMemberModal = false">Cancel</button>
-              <button type="submit" class="btn btn-primary" :disabled="addMemberLoading">
-                {{ addMemberLoading ? "Adding..." : "Add member" }}
+            <div class="admin-dialog-foot">
+              <button type="button" class="admin-btn admin-btn--outline" @click="showAddMemberModal = false">Cancel</button>
+              <button type="submit" class="admin-btn admin-btn--primary" :disabled="addMemberLoading">
+                <Icon v-if="addMemberLoading" name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+                {{ addMemberLoading ? "Adding…" : "Add member" }}
               </button>
             </div>
           </form>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
-    <!-- View Employee Details Modal -->
-    <Transition name="modal">
-      <div
-        v-if="showViewDetailsModal"
-        class="fixed inset-0 z-50 overflow-y-auto"
-      >
-        <div class="flex items-center justify-center min-h-screen px-4">
-          <div
-            class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            @click="closeViewDetailsModal"
-          ></div>
-          <div
-            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="modal-title">
-                Employee Details
-              </h3>
-              <button
-                @click="closeViewDetailsModal"
-                class="text-secondary-400 hover:text-secondary-600"
-              >
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
-              </button>
-            </div>
-
-            <div v-if="selectedEmployee" class="space-y-4">
-              <div class="flex items-center space-x-4 mb-4">
-                <div
-                  class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold"
-                >
+    <!-- Member details -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showViewDetailsModal && selectedEmployee" class="admin-dialog-backdrop" @click.self="closeViewDetailsModal">
+          <div class="admin-dialog flex flex-col" role="dialog" aria-modal="true" aria-label="Member details" style="width: min(30rem, 100%); margin-top: 8vh">
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-100 font-semibold text-accent-800">
                   {{ getInitials(selectedEmployee.name) }}
-                </div>
-                <div>
-                  <h4 class="card-title">
-                    {{ selectedEmployee.name }}
-                  </h4>
-                  <span
-                    :class="[
-                      'inline-flex px-2 py-1 text-badge rounded-full',
-                      selectedEmployee.subscription_active
-                        ? 'bg-success-100 text-success-800'
-                        : 'bg-error-100 text-error-800',
-                    ]"
-                  >
-                    {{
-                      selectedEmployee.subscription_active
-                        ? "Active"
-                        : "Inactive"
-                    }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="space-y-3">
-                <div>
-                  <label
-                    class="text-label text-secondary-500 uppercase"
-                    >Email</label
-                  >
-                  <p class="text-body text-secondary-900 mt-1">
-                    {{ selectedEmployee.email }}
-                  </p>
-                </div>
-                <div>
-                  <label
-                    class="text-label text-secondary-500 uppercase"
-                    >Position</label
-                  >
-                  <p class="text-body text-secondary-900 mt-1">
-                    {{ selectedEmployee.position || "N/A" }}
-                  </p>
-                </div>
-                <div>
-                  <label
-                    class="text-label text-secondary-500 uppercase"
-                    >Phone</label
-                  >
-                  <p class="text-body text-secondary-900 mt-1">
-                    {{ selectedEmployee.phone || "N/A" }}
-                  </p>
-                </div>
-                <div>
-                  <label
-                    class="text-label text-secondary-500 uppercase"
-                    >Account Created</label
-                  >
-                  <p class="text-body text-secondary-900 mt-1">
-                    {{ formatDate(selectedEmployee.created_at) }}
+                </span>
+                <div class="min-w-0">
+                  <p class="admin-panel-title truncate">{{ selectedEmployee.name }}</p>
+                  <p class="admin-panel-subtitle">
+                    {{ roleLabels[selectedEmployee.business_role] || "Member" }} ·
+                    {{ selectedEmployee.subscription_active ? "Active" : "Deactivated" }}
                   </p>
                 </div>
               </div>
-
-              <div class="flex items-center justify-end pt-4">
-                <button @click="closeViewDetailsModal" class="btn btn-primary">
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- Reset Password Modal -->
-    <Transition name="modal">
-      <div
-        v-if="showResetPasswordModal"
-        class="fixed inset-0 z-50 overflow-y-auto"
-      >
-        <div class="flex items-center justify-center min-h-screen px-4">
-          <div
-            class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            @click="closeResetPasswordModal"
-          ></div>
-          <div
-            class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="modal-title">
-                Reset Employee Password
-              </h3>
-              <button
-                @click="closeResetPasswordModal"
-                class="text-secondary-400 hover:text-secondary-600"
-              >
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+              <button type="button" class="admin-icon-btn" aria-label="Close" @click="closeViewDetailsModal">
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
-
-            <div v-if="selectedEmployee" class="space-y-4">
-              <div class="bg-warning-50 border border-warning-200 rounded-lg p-4">
-                <div class="flex">
-                  <Icon
-                    name="heroicons:exclamation-triangle"
-                    class="h-5 w-5 text-warning-600 flex-shrink-0"
-                  />
-                  <div class="ml-3">
-                    <p class="text-body text-warning-700">
-                      A link to set a new password (valid for 1 hour) will be sent to
-                      <strong>{{ selectedEmployee.email }}</strong>
-                    </p>
-                  </div>
-                </div>
+            <dl class="admin-panel-body grid grid-cols-1 gap-4">
+              <div>
+                <dt class="admin-label">E-mail</dt>
+                <dd class="text-body text-secondary-900 break-all">{{ selectedEmployee.email }}</dd>
               </div>
-
-              <div class="flex items-center justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  @click="closeResetPasswordModal"
-                  class="btn btn-outline"
-                >
-                  Cancel
-                </button>
-                <button
-                  @click="confirmResetPassword"
-                  class="btn btn-warning"
-                  :disabled="resetPasswordLoading"
-                >
-                  <div v-if="resetPasswordLoading" class="spinner mr-2"></div>
-                  {{ resetPasswordLoading ? "Resetting..." : "Reset Password" }}
-                </button>
+              <div>
+                <dt class="admin-label">Job title</dt>
+                <dd class="text-body text-secondary-900">{{ selectedEmployee.position || "—" }}</dd>
               </div>
+              <div>
+                <dt class="admin-label">Phone</dt>
+                <dd class="text-body text-secondary-900">{{ selectedEmployee.phone || "—" }}</dd>
+              </div>
+              <div>
+                <dt class="admin-label">Joined</dt>
+                <dd class="text-body text-secondary-900">{{ formatDate(selectedEmployee.created_at) }}</dd>
+              </div>
+            </dl>
+            <div class="admin-dialog-foot">
+              <button type="button" class="admin-btn admin-btn--outline" @click="viewEmployeeCard(selectedEmployee)">
+                <Icon name="heroicons:credit-card" class="h-4 w-4" />
+                View cards
+              </button>
+              <button type="button" class="admin-btn admin-btn--primary" @click="closeViewDetailsModal">Close</button>
             </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
-    <!-- Card Design Modal -->
-    <Transition name="modal">
-      <div
-        v-if="showCardDesignModal"
-        class="fixed inset-0 z-50 overflow-y-auto"
-      >
-        <div class="flex items-center justify-center min-h-screen px-4">
-          <div
-            class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-            @click="closeCardDesignModal"
-          ></div>
-          <div
-            class="bg-white rounded-lg max-w-2xl w-full p-6 relative z-10 shadow-xl"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="modal-title">
-                Design Employee NFC Cards
-              </h3>
-              <button
-                @click="closeCardDesignModal"
-                class="text-secondary-400 hover:text-secondary-600"
-              >
-                <Icon name="heroicons:x-mark" class="h-6 w-6" />
+    <!-- Password reset -->
+    <Teleport to="body">
+      <Transition name="admin-fade">
+        <div v-if="showResetPasswordModal && selectedEmployee" class="admin-dialog-backdrop" @click.self="closeResetPasswordModal">
+          <div class="admin-dialog flex flex-col" role="dialog" aria-modal="true" aria-label="Send password reset link" style="width: min(28rem, 100%); margin-top: 10vh">
+            <div class="admin-dialog-head">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-warning-100 text-warning-700">
+                  <Icon name="heroicons:key" class="h-5 w-5" />
+                </span>
+                <div>
+                  <p class="admin-panel-title">Send password reset link</p>
+                  <p class="admin-panel-subtitle">{{ selectedEmployee.name }}</p>
+                </div>
+              </div>
+              <button type="button" class="admin-icon-btn" aria-label="Close" @click="closeResetPasswordModal">
+                <Icon name="heroicons:x-mark" class="h-5 w-5" />
               </button>
             </div>
-
-            <div class="space-y-4">
-              <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-                <div class="flex">
-                  <Icon
-                    name="heroicons:information-circle"
-                    class="h-5 w-5 text-info-600 flex-shrink-0"
-                  />
-                  <div class="ml-3">
-                    <p class="text-body text-info-700">
-                      Navigate to <strong>Card Design</strong> page to create
-                      and manage NFC card templates for your employees.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-end space-x-3 pt-4">
-                <button @click="closeCardDesignModal" class="btn btn-outline">
-                  Cancel
-                </button>
-                <button @click="navigateToCardDesign" class="btn btn-primary">
-                  Go to Card Design
-                </button>
-              </div>
+            <div class="admin-panel-body">
+              <p class="text-body text-secondary-700">
+                We'll e-mail <strong class="text-secondary-900">{{ selectedEmployee.email }}</strong> a link to set a new
+                password. The link is valid for 1 hour, and their current password keeps working until they use it.
+              </p>
+            </div>
+            <div class="admin-dialog-foot">
+              <button type="button" class="admin-btn admin-btn--outline" @click="closeResetPasswordModal">Cancel</button>
+              <button type="button" class="admin-btn admin-btn--primary" :disabled="resetPasswordLoading" @click="confirmResetPassword">
+                <Icon v-if="resetPasswordLoading" name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+                {{ resetPasswordLoading ? "Sending…" : "Send link" }}
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
+
     <AdminConfirmDialog
       v-model="confirmState.open"
       :title="confirmState.title"
@@ -712,7 +437,6 @@ const filterStatus = ref("all");
 // Modals
 const showViewDetailsModal = ref(false);
 const showResetPasswordModal = ref(false);
-const showCardDesignModal = ref(false);
 const resetPasswordLoading = ref(false);
 
 // Role management — only the account owner may reassign delegated roles
@@ -806,11 +530,6 @@ const removeEmployee = async (employee) => {
   }
 };
 
-// Computed
-const activeEmployeesCount = computed(() => {
-  return employees.value.filter((emp) => emp.subscription_active).length;
-});
-
 const filteredEmployees = computed(() => {
   let filtered = employees.value;
 
@@ -819,8 +538,8 @@ const filteredEmployees = computed(() => {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
       (emp) =>
-        emp.name.toLowerCase().includes(query) ||
-        emp.email.toLowerCase().includes(query) ||
+        String(emp.name || "").toLowerCase().includes(query) ||
+        String(emp.email || "").toLowerCase().includes(query) ||
         (emp.position && emp.position.toLowerCase().includes(query))
     );
   }
@@ -942,15 +661,6 @@ const closeResetPasswordModal = () => {
   selectedEmployee.value = null;
 };
 
-// Card Design
-const closeCardDesignModal = () => {
-  showCardDesignModal.value = false;
-};
-
-const navigateToCardDesign = () => {
-  navigateTo("/UserDashboard/NFCCardDesign/BusinessPlanNFCCard");
-};
-
 const viewEmployeeCard = async (employee) => {
   // Navigate to Business Card Management page with employee filter
   await navigateTo({
@@ -1025,31 +735,3 @@ onMounted(() => {
   loadEmployees();
 });
 </script>
-
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #e5e7eb;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>

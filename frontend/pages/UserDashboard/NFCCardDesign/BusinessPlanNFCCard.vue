@@ -532,6 +532,19 @@
               <h3 class="card-title text-secondary-800 mb-4">
                 Choose Design Method
               </h3>
+              <!-- Company template locked by the Business owner/admin -->
+              <div
+                v-if="companyTemplateLock"
+                class="mb-4 flex items-start gap-3 rounded-lg border border-accent-200 bg-accent-50 px-4 py-3"
+                role="status"
+              >
+                <Icon name="heroicons:lock-closed" class="mt-0.5 h-5 w-5 shrink-0 text-accent-700" />
+                <p class="text-body text-secondary-800">
+                  Your company uses
+                  <strong>{{ lockedTemplateName }}</strong>
+                  for every team card. Other designs and custom uploads are turned off by your company admin.
+                </p>
+              </div>
               <div class="grid grid-cols-3 gap-4">
                 <button
                   @click="designMethod = 'previous'"
@@ -540,8 +553,9 @@
                     designMethod === 'previous'
                       ? 'border-primary-500 bg-primary-50'
                       : 'border-secondary-200 hover:border-secondary-300',
+                    companyTemplateLock ? 'opacity-50 cursor-not-allowed' : '',
                   ]"
-                  :disabled="!hasPreviousDesigns"
+                  :disabled="!hasPreviousDesigns || !!companyTemplateLock"
                 >
                   <Icon
                     name="heroicons:clock"
@@ -567,11 +581,13 @@
                 </button>
                 <button
                   @click="designMethod = 'custom'"
+                  :disabled="!!companyTemplateLock"
                   :class="[
                     'p-4 rounded-lg border-2 transition-colors',
                     designMethod === 'custom'
                       ? 'border-primary-500 bg-primary-50'
                       : 'border-secondary-200 hover:border-secondary-300',
+                    companyTemplateLock ? 'opacity-50 cursor-not-allowed' : '',
                   ]"
                 >
                   <Icon
@@ -604,7 +620,7 @@
                   <div class="w-full bg-secondary-100 rounded mb-1 overflow-hidden" style="aspect-ratio: 5/3">
                     <img
                       v-if="design.front_design"
-                      :src="design.front_design"
+                      :src="getTemplateImageUrl(design.front_design)"
                       alt="Front Design"
                       class="w-full h-full object-cover"
                     />
@@ -647,7 +663,7 @@
               <!-- Template Options - Compact Cards (90mm x 54mm ratio) -->
               <div v-else class="grid grid-cols-3 gap-2">
                 <div
-                  v-for="template in availableTemplates"
+                  v-for="template in visibleTemplates"
                   :key="template.id"
                   @click="selectedTemplate = template.id"
                   :class="[
@@ -663,12 +679,14 @@
                     style="aspect-ratio: 5/3"
                   >
                     <!-- Template Image from API -->
-                    <img
-                      v-if="template.front_image_url"
-                      :src="getTemplateImageUrl(template.front_image_url)"
-                      :alt="template.name"
-                      class="w-full h-full object-cover"
-                    />
+                    <!-- Artwork + designer placeholders filled with sample data -->
+                      <CardTemplateFace
+                        v-if="template.front_image_url"
+                        :template="template"
+                        :image-url="getTemplateImageUrl(template.front_image_url)"
+                        :alt="template.name"
+                        class="absolute inset-0 h-full w-full"
+                      />
                     <!-- Fallback Preview if no image -->
                     <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 text-white flex flex-col justify-between text-caption">
                       <div>
@@ -782,101 +800,19 @@
             </div>
           </div>
 
-          <!-- Card Design Preview -->
-          <div v-if="hasSelectedDesign" class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="section-title text-secondary-900 mb-6">
-              Card Design Preview
-            </h2>
-
-            <!-- Use same grid system as template selection for consistent sizing -->
-            <div class="grid grid-cols-3 gap-2">
-              <div class="col-start-2">
-                <div class="relative">
-                  <!-- Card Container with same size as selection cards -->
-                  <div class="w-full bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-primary-500" style="aspect-ratio: 5/3">
-                    
-                    <!-- Previous Design Preview -->
-                    <div v-if="designMethod === 'previous' && selectedPreviousDesign" class="w-full h-full">
-                      <img
-                        v-if="selectedPreviousDesign.front_design"
-                        :src="selectedPreviousDesign.front_design"
-                        alt="Previous Design"
-                        class="w-full h-full object-cover"
-                      />
-                      <div v-else class="w-full h-full bg-gradient-to-br from-secondary-200 to-secondary-300 flex items-center justify-center">
-                        <div class="text-center text-secondary-600">
-                          <Icon name="heroicons:photo" class="h-5 w-5 mx-auto mb-1" />
-                          <p class="text-caption">Previous</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Template Preview -->
-                    <div v-else-if="designMethod === 'template' && selectedTemplate" class="w-full h-full">
-                      <!-- Show template image from API -->
-                      <img
-                        v-if="selectedTemplateData?.front_image_url"
-                        :src="getTemplateImageUrl(selectedTemplateData.front_image_url)"
-                        :alt="selectedTemplateData?.name || 'Template'"
-                        class="w-full h-full object-cover"
-                      />
-                      <!-- Fallback gradient if no image -->
-                      <div v-else class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 p-1.5">
-                        <div class="text-white h-full flex flex-col justify-between text-caption">
-                          <div class="flex items-start gap-1.5">
-                            <div v-if="companyInfo.logo" class="w-6 h-6 rounded bg-white/20 flex-shrink-0 overflow-hidden">
-                              <img :src="companyInfo.logo" alt="Logo" class="w-full h-full object-contain" />
-                            </div>
-                            <div class="flex-1 min-w-0">
-                              <div class="font-bold text-micro truncate">{{ companyInfo.name || 'Company Name' }}</div>
-                              <div class="font-semibold truncate">{{ adminInfo.name || 'Your Name' }}</div>
-                              <div class="opacity-90 text-micro">{{ adminInfo.position || 'Position' }}</div>
-                            </div>
-                          </div>
-                          <div class="text-micro space-y-0.5">
-                            <div>{{ adminInfo.contactNumber || '+60 12-345 6789' }}</div>
-                            <div class="truncate">{{ adminInfo.email || 'email@company.com' }}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Custom Upload Preview -->
-                    <div v-else-if="designMethod === 'custom' && cardDesign.front" class="w-full h-full">
-                      <img
-                        :src="cardDesign.front"
-                        alt="Custom Design"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <!-- No Design Selected -->
-                    <div v-else class="w-full h-full bg-secondary-100 flex items-center justify-center">
-                      <div class="text-center text-secondary-500">
-                        <Icon name="heroicons:photo" class="h-5 w-5 mx-auto mb-1" />
-                        <p class="text-caption">Select design</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Design Info Badge -->
-                  <div class="mt-2 text-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-badge bg-primary-100 text-primary-800">
-                      <Icon name="heroicons:sparkles" class="h-3 w-3 mr-1" />
-                      {{ 
-                        designMethod === 'previous' ? 'Previous' : 
-                        designMethod === 'template' ? (selectedTemplateData?.name || 'Template') : 
-                        'Custom'
-                      }}
-                    </span>
-                    <p class="text-helper text-secondary-500 mt-1">
-                      90mm × 54mm
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Card Design Preview: the real template layout (positions from the
+               admin card designer), filled with the first recipient's details,
+               flippable front/back. Replaces a hard-coded mock-up that ignored
+               the template and showed a "default design". -->
+          <CardExamples
+            v-if="hasSelectedDesign"
+            :card-info="previewCardInfo"
+            :selected-template="previewTemplate"
+            :design-method="previewDesignMethod"
+            :custom-design="previewCustomDesign"
+            title="Card design preview"
+            :subtitle="previewSubtitle"
+          />
 
           <!-- Order Summary -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -989,22 +925,12 @@
           </div>
 
           <!-- Validation Message -->
-          <div v-if="!isFormValid && totalCardsCount === 0" class="mt-3 text-center">
+          <!-- Says exactly what is still missing (it used to say "select a
+               design method" for any gap, e.g. a missing delivery address). -->
+          <div v-if="orderBlocker" class="mt-3 text-center">
             <p class="text-error text-red-600 flex items-center justify-center gap-1">
               <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
-              Please add at least one card recipient and select a design method
-            </p>
-          </div>
-          <div v-else-if="!isFormValid && includeAdminCard && !adminInfo.position" class="mt-3 text-center">
-            <p class="text-error text-red-600 flex items-center justify-center gap-1">
-              <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
-              Please fill in all required Admin fields
-            </p>
-          </div>
-          <div v-else-if="!isFormValid" class="mt-3 text-center">
-            <p class="text-error text-red-600 flex items-center justify-center gap-1">
-              <Icon name="heroicons:exclamation-circle" class="h-4 w-4" />
-              Please select a design method to continue
+              {{ orderBlocker }}
             </p>
           </div>
         </div>
@@ -1049,17 +975,17 @@
                     <div class="text-body text-blue-800 space-y-1">
                       <p>
                         <strong>Total Cards:</strong> {{ totalCardsCount }}
-                        <span v-if="includeAdminCard">(1 Admin + {{ uploadedEmployees.length }} Employees)</span>
-                        <span v-else>({{ uploadedEmployees.length }} Employees only)</span>
+                        <span v-if="includeAdminCard">(1 Admin + {{ uploadedEmployees.length }} Employee{{ uploadedEmployees.length === 1 ? '' : 's' }})</span>
+                        <span v-else>({{ uploadedEmployees.length }} Employee{{ uploadedEmployees.length === 1 ? '' : 's' }} only)</span>
                       </p>
                       <p>
-                        <strong>Design Method:</strong>
+                        <strong>Design:</strong>
                         {{
                           designMethod === "previous"
-                            ? "Previous Design"
+                            ? "Previous design" + (selectedPreviousDesign?.card_name ? " – " + selectedPreviousDesign.card_name : "")
                             : designMethod === "template"
-                            ? "Template (" + selectedTemplate + ")"
-                            : "Custom Upload"
+                            ? "Template – " + (selectedTemplateData?.name || "selected template")
+                            : "Custom upload"
                         }}
                       </p>
                       <p><strong>Plan:</strong> Business Plan</p>
@@ -1211,7 +1137,7 @@ const employeeFile = ref(null);
 const uploadedEmployees = ref([]);
 const showConfirmModal = ref(false);
 const designMethod = ref("template"); // 'previous', 'template', or 'custom'
-const selectedTemplate = ref("basic");
+const selectedTemplate = ref(null); // was "basic": never a real id, so no template was ever auto-selected
 const selectedPreviousDesign = ref(null);
 const previousDesigns = ref([]);
 const isPlacingOrder = ref(false);
@@ -1281,6 +1207,39 @@ const loadTemplates = async () => {
   }
 };
 
+// Company card template locked by the Business owner/admin (Team Members →
+// Company profile & locks). When set, it is the only design allowed; the API
+// (POST /nfc-cards) enforces the same rule on every team card order.
+const companyTemplateLock = ref(null);
+const loadCompanyTemplateLock = async () => {
+  try {
+    const { $api } = useNuxtApp();
+    const res = await $api.get("/business/context");
+    const d = res?.data;
+    if (d?.is_business && (d.locked_fields || []).includes("card_template") && d.card_template_id) {
+      companyTemplateLock.value = Number(d.card_template_id);
+      designMethod.value = "template";
+      selectedTemplate.value = companyTemplateLock.value;
+    }
+  } catch {
+    companyTemplateLock.value = null;
+  }
+};
+const visibleTemplates = computed(() =>
+  companyTemplateLock.value
+    ? availableTemplates.value.filter((t) => Number(t.id) === companyTemplateLock.value)
+    : availableTemplates.value
+);
+const lockedTemplateName = computed(
+  () => availableTemplates.value.find((t) => Number(t.id) === companyTemplateLock.value)?.name || "the company card template"
+);
+// Keep the locked choice even if something else tries to change it.
+watch([designMethod, selectedTemplate], () => {
+  if (!companyTemplateLock.value) return;
+  if (designMethod.value !== "template") designMethod.value = "template";
+  if (Number(selectedTemplate.value) !== companyTemplateLock.value) selectedTemplate.value = companyTemplateLock.value;
+});
+
 // Check if user has premium plan
 const isPremiumPlan = computed(() => {
   const selectedPlan = sessionStorage.getItem("selectedPlan");
@@ -1312,50 +1271,31 @@ const hasSelectedDesign = computed(() => {
   return false;
 });
 
-// Form validation
-const isFormValid = computed(() => {
-  // Company name is always required
-  if (!companyInfo.name) {
-    return false;
-  }
+// Form validation: the first thing still missing, or null when the order can go.
+const orderBlocker = computed(() => {
+  if (totalCardsCount.value === 0) return "Add at least one card recipient (yourself or an employee).";
+  if (!companyInfo.name?.trim()) return "Enter the company name shown on the cards.";
 
-  // Must have at least one card (admin or employees)
-  if (totalCardsCount.value === 0) {
-    return false;
-  }
-
-  // If admin card is included, all admin fields are required
   if (includeAdminCard.value) {
-    if (
-      !adminInfo.name ||
-      !adminInfo.email ||
-      !adminInfo.position ||
-      !adminInfo.contactNumber ||
-      !adminInfo.address ||
-      !adminInfo.deliveryAddress
-    ) {
-      return false;
-    }
+    const missing = [
+      ["name", adminInfo.name], ["email", adminInfo.email], ["position", adminInfo.position],
+      ["contact number", adminInfo.contactNumber], ["business address", adminInfo.address],
+      ["delivery address", adminInfo.deliveryAddress],
+    ].filter(([, v]) => !String(v || "").trim()).map(([label]) => label);
+    if (missing.length) return `Complete your card details: ${missing.join(", ")}.`;
+  } else if (!String(adminInfo.deliveryAddress || "").trim()) {
+    return "Enter the delivery address the cards should be shipped to.";
   }
 
-  // If only employees (no admin card), still need delivery address
-  if (!includeAdminCard.value && uploadedEmployees.value.length > 0) {
-    if (!adminInfo.deliveryAddress) {
-      return false;
-    }
+  if (designMethod.value === "previous" && !selectedPreviousDesign.value) {
+    return previousDesigns.value.length ? "Pick one of your previous designs." : "You have no previous designs yet: use a template or upload a design.";
   }
-
-  // Design validation
-  if (designMethod.value === "previous") {
-    return selectedPreviousDesign.value !== null;
-  } else if (designMethod.value === "template") {
-    return selectedTemplate.value !== null;
-  } else if (designMethod.value === "custom") {
-    return cardDesign.front && cardDesign.back;
-  }
-
-  return false;
+  if (designMethod.value === "template" && !selectedTemplate.value) return "Choose a card template.";
+  if (designMethod.value === "custom" && !(cardDesign.front && cardDesign.back)) return "Upload both the front and back design.";
+  return null;
 });
+
+const isFormValid = computed(() => orderBlocker.value === null);
 
 // Check if user is authenticated and load data
 onMounted(async () => {
@@ -1376,12 +1316,15 @@ onMounted(async () => {
     adminInfo.website = authStore.user.website || "";
     adminInfo.address = authStore.user.address || authStore.user.business_address || "";
     adminInfo.deliveryAddress = authStore.user.delivery_address || authStore.user.address || "";
+    // The company is already on the account: start from it instead of blank.
+    if (!companyInfo.name) companyInfo.name = authStore.user.company || "";
   }
 
   // Load previous designs and templates
   await Promise.all([
     loadPreviousDesigns(),
     loadTemplates(),
+    loadCompanyTemplateLock(),
   ]);
 });
 
@@ -1390,13 +1333,30 @@ const loadPreviousDesigns = async () => {
   try {
     const { $api } = useNuxtApp();
     const response = await $api.get("/nfc-cards");
-    
-    if (response.success && response.data) {
-      // Filter cards that have design data
-      previousDesigns.value = response.data.filter(card => 
-        card.front_design || card.back_design || card.design_template
-      );
-    }
+
+    // /nfc-cards answers `nfc_cards` (this read `data`, so the list was always
+    // empty) and cards carry card_template_id / custom_design_*_url, not
+    // front_design / design_template. One entry per distinct design.
+    const cards = Array.isArray(response?.nfc_cards) ? response.nfc_cards : [];
+    const seen = new Set();
+    previousDesigns.value = cards
+      .filter((card) => card.card_template_id || card.custom_design_front_url)
+      .map((card) => ({
+        id: card.id,
+        card_name: card.card_template?.name || (card.custom_design_front_url ? "Custom design" : `Card ${card.id}`),
+        card_template_id: card.card_template_id || null,
+        template: card.card_template || null,
+        front_design: card.custom_design_front_url || card.card_template?.front_image_url || null,
+        back_design: card.custom_design_back_url || card.card_template?.back_image_url || null,
+        is_custom: !card.card_template_id && !!card.custom_design_front_url,
+        created_at: card.created_at,
+      }))
+      .filter((d) => {
+        const key = d.card_template_id ? `t${d.card_template_id}` : `c${d.front_design}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   } catch (error) {
     console.error("Failed to load previous designs:", error);
     // Non-critical error, just log it
@@ -1446,7 +1406,53 @@ const getTemplateImageUrl = (url) => {
 // Get selected template object
 const selectedTemplateData = computed(() => {
   if (!selectedTemplate.value) return null;
-  return availableTemplates.value.find(t => t.id === selectedTemplate.value);
+  return availableTemplates.value.find(t => String(t.id) === String(selectedTemplate.value)) || null;
+});
+
+// ── Live preview (CardExamples) ─────────────────────────────────────────
+// Whose card the preview shows: the admin's own card when included,
+// otherwise the first employee in the list.
+const previewPerson = computed(() =>
+  includeAdminCard.value || uploadedEmployees.value.length === 0
+    ? adminInfo
+    : uploadedEmployees.value[0]
+);
+
+const previewCardInfo = computed(() => {
+  const p = previewPerson.value || {};
+  return {
+    name: p.name,
+    position: p.position,
+    contactNumber: p.contactNumber || p.contact_number,
+    email: p.email,
+    website: p.website,
+    address: adminInfo.address,
+    companyName: companyInfo.name,
+    companyLogo: companyInfo.logo,
+  };
+});
+
+// A previous design that came from a template previews as that template.
+const previewDesignMethod = computed(() => {
+  if (designMethod.value === "previous") return selectedPreviousDesign.value?.template ? "template" : "custom";
+  return designMethod.value;
+});
+const previewTemplate = computed(() => {
+  if (designMethod.value === "previous") return selectedPreviousDesign.value?.template || null;
+  return designMethod.value === "template" ? selectedTemplateData.value : null;
+});
+const previewCustomDesign = computed(() => {
+  if (designMethod.value === "previous") {
+    return {
+      front: getTemplateImageUrl(selectedPreviousDesign.value?.front_design || ""),
+      back: getTemplateImageUrl(selectedPreviousDesign.value?.back_design || ""),
+    };
+  }
+  return { front: cardDesign.front, back: cardDesign.back };
+});
+const previewSubtitle = computed(() => {
+  const p = previewPerson.value;
+  return p?.name ? `Shown with ${p.name}'s details. Click the card to flip it.` : "Fill in a recipient to see their details on the card.";
 });
 
 // Handle company logo upload
@@ -1701,51 +1707,6 @@ const handleBackUpload = async (event) => {
   }
 };
 
-// Upload card designs to backend
-const uploadCardDesigns = async () => {
-  if (
-    designMethod.value === "custom" &&
-    cardDesign.frontFile &&
-    cardDesign.backFile
-  ) {
-    try {
-      const formData = new FormData();
-      formData.append("front_design", cardDesign.frontFile);
-      formData.append("back_design", cardDesign.backFile);
-      formData.append("design_method", designMethod.value);
-      formData.append("selected_template", selectedTemplate.value);
-
-      const { $api } = useNuxtApp();
-      const response = await $api.post(
-        "/business/upload-card-design",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.success) {
-        // Update design URLs with backend response
-        if (response.data.front_design_url) {
-          cardDesign.front = response.data.front_design_url;
-        }
-        if (response.data.back_design_url) {
-          cardDesign.back = response.data.back_design_url;
-        }
-        $toast.success("Card designs uploaded successfully!");
-        return true;
-      }
-    } catch (error) {
-      console.error("Card design upload error:", error);
-      $toast.error("Failed to upload card designs. Please try again.");
-      return false;
-    }
-  }
-  return true; // For template method, no upload needed
-};
-
 // Go back to plan selection
 const goBack = () => {
   router.push(
@@ -1759,139 +1720,89 @@ const placeOrder = async () => {
   showConfirmModal.value = true;
 };
 
-// Confirm and submit order - send notification to super admin for each card
+// Confirm and submit the order.
+// POST /business/employees/upload (EmployeeController::uploadEmployees): checks
+// the seat/card quota, applies the company's locked card template, creates one
+// card per recipient (already payment-verified: Business cards are covered by
+// the plan) and notifies the NFCGo super admin.
+// This used to post to /notifications and /admin/super-admin, neither of which
+// a Business user can use, so no order ever reached NFCGo.
 const confirmOrder = async () => {
   isPlacingOrder.value = true;
 
   try {
     const { $api } = useNuxtApp();
 
-    // Upload designs if custom method
-    if (designMethod.value === "custom") {
-      const uploadSuccess = await uploadCardDesigns();
-      if (!uploadSuccess) {
-        isPlacingOrder.value = false;
-        return;
-      }
-    }
-
-    // Get current user for tracking who placed the order
-    const currentUserId = authStore.user?.id;
-
-    // Get super admin user
-    let superAdminId = 1; // Default fallback
-    try {
-      const adminResponse = await $api.get("/admin/super-admin");
-      if (adminResponse.success && adminResponse.data?.id) {
-        superAdminId = adminResponse.data.id;
-      }
-    } catch (error) {
-      console.warn("Could not fetch super admin, using default ID 1", error);
-    }
-
-    // Prepare design data based on method
-    let designData = {};
-    if (designMethod.value === "previous" && selectedPreviousDesign.value) {
-      designData = {
-        design_method: "previous",
-        previous_design_id: selectedPreviousDesign.value.id,
-        front_design: selectedPreviousDesign.value.front_design,
-        back_design: selectedPreviousDesign.value.back_design,
-        selected_template: selectedPreviousDesign.value.design_template,
-      };
-    } else if (designMethod.value === "template") {
-      designData = {
-        design_method: "template",
-        selected_template: selectedTemplate.value,
-      };
-    } else if (designMethod.value === "custom") {
-      designData = {
-        design_method: "custom",
-        front_design: cardDesign.front,
-        back_design: cardDesign.back,
-      };
-    }
-
-    // Prepare all cards data in one batch order
-    const cards = [];
-
-    // Add admin card if included
+    const recipients = [];
     if (includeAdminCard.value) {
-      cards.push({
+      recipients.push({
         name: adminInfo.name,
         email: adminInfo.email,
         position: adminInfo.position,
         contact_number: adminInfo.contactNumber,
         website: adminInfo.website || "",
-        business_address: adminInfo.address,
-        is_admin_card: true,
+        address: adminInfo.address,
+        delivery_address: adminInfo.deliveryAddress || adminInfo.address,
       });
     }
-
-    // Add all employee cards
     for (const employee of uploadedEmployees.value) {
-      cards.push({
+      recipients.push({
         name: employee.name,
         email: employee.email,
         position: employee.position,
-        contact_number: employee.contactNumber || employee.contact_number,
+        contact_number: employee.contactNumber || employee.contact_number || "",
         website: employee.website || "",
-        business_address: adminInfo.address,
-        is_employee_card: true,
+        // Note on the form: employee cards use the admin's addresses.
+        address: adminInfo.address,
+        delivery_address: adminInfo.deliveryAddress || adminInfo.address,
       });
     }
 
-    // Create one batch notification with all cards
-    const batchOrderData = {
-      requesting_user_id: currentUserId,
-      requesting_user_name: adminInfo.name,
-      requesting_user_email: adminInfo.email,
-      subscription_plan: "business",
-      delivery_address: adminInfo.deliveryAddress, // Master delivery address for all cards
-      // Company information (shared across all cards)
-      company_name: companyInfo.name,
-      company_logo: companyInfo.logo, // Base64 encoded image
-      total_cards: cards.length,
-      include_admin: includeAdminCard.value,
-      employee_count: uploadedEmployees.value.length,
-      cards: cards, // Array of all card data
-      ...designData,
-    };
-
-    const notification = {
-      user_id: superAdminId,
-      type: "business_card_order_request",
-      title: `Batch NFC Card Order from ${adminInfo.name}`,
-      message: `${adminInfo.name} has requested ${cards.length} NFC card${cards.length > 1 ? 's' : ''} (${includeAdminCard.value ? '1 Admin + ' : ''}${uploadedEmployees.value.length} Employee${uploadedEmployees.value.length !== 1 ? 's' : ''}). Please review and approve or reject the order.`,
-      priority: "urgent",
-      sticky: true,
-      data: batchOrderData,
-    };
-
-    // Send single batch notification
-    const result = await $api.post("/notifications", notification);
-
-    const allSuccess = result.success;
-
-    if (allSuccess) {
-      showConfirmModal.value = false;
-      $toast.success(
-        `✅ Batch order submitted successfully! ${totalCardsCount.value} card${totalCardsCount.value > 1 ? 's' : ''} have been sent to the Super Admin for approval.`
-      );
-
-      // Redirect to card management page after a short delay
-      setTimeout(() => {
-        router.push(
-          "/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement"
-        );
-      }, 2000);
-    } else {
-      throw new Error("Some notifications failed to send");
+    const form = new FormData();
+    form.append("employees", JSON.stringify(recipients));
+    if (companyInfo.name) form.append("company_name", companyInfo.name);
+    if (companyInfo.logo && String(companyInfo.logo).startsWith("data:image/")) {
+      form.append("company_logo", companyInfo.logo);
     }
+
+    // Design: a previous design re-uses its template or its uploaded artwork.
+    const prev = designMethod.value === "previous" ? selectedPreviousDesign.value : null;
+    if (designMethod.value === "template" || (prev && prev.card_template_id)) {
+      form.append("design_method", "template");
+      form.append("selected_template", String(prev ? prev.card_template_id : selectedTemplate.value));
+    } else {
+      form.append("design_method", "custom");
+      if (prev) {
+        if (prev.front_design) form.append("front_design_url", prev.front_design);
+        if (prev.back_design) form.append("back_design_url", prev.back_design);
+      } else {
+        if (cardDesign.frontFile) form.append("front_design", cardDesign.frontFile);
+        if (cardDesign.backFile) form.append("back_design", cardDesign.backFile);
+      }
+    }
+
+    const result = await $api.post("/business/employees/upload", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (!result?.success) throw new Error(result?.message || "The order could not be placed.");
+
+    showConfirmModal.value = false;
+    const created = result.data?.created_count ?? recipients.length;
+    const failed = result.data?.error_count || 0;
+    $toast.success(
+      `Order placed: ${created} card${created === 1 ? "" : "s"} sent to NFCGo for production.` +
+        (failed ? ` ${failed} could not be added.` : "")
+    );
+
+    setTimeout(() => {
+      router.push("/UserDashboard/UserManagement/BusinessPlanUser/BusinessCardManagement");
+    }, 1500);
   } catch (error) {
     console.error("Place order error:", error);
-    const errorMessage = error.response?.data?.message || error.message || "Failed to place order. Please try again.";
-    $toast.error(errorMessage);
+    const data = error?.data || error?.response?.data || {};
+    const firstFieldError = data.errors ? Object.values(data.errors).flat()[0] : null;
+    $toast.error(firstFieldError || data.message || error.message || "Failed to place order. Please try again.");
   } finally {
     isPlacingOrder.value = false;
   }

@@ -73,10 +73,10 @@ class ActivityLogController extends Controller
             return [
                 'id' => $log->id,
                 'user' => [
-                    'id' => $log->user->id,
-                    'name' => $log->user->full_name,
-                    'email' => $log->user->email,
-                    'job_title' => $log->user->job_title,
+                    'id' => $log->user?->id,
+                    'name' => $log->user?->full_name ?? 'Removed member',
+                    'email' => $log->user?->email,
+                    'job_title' => $log->user?->job_title,
                 ],
                 'action_type' => $log->action_type,
                 'action_description' => $log->action_description,
@@ -147,7 +147,7 @@ class ActivityLogController extends Controller
                 ->where('created_at', '>=', $startDate)
                 ->count(),
             'most_active_employee' => $mostActiveEmployee ? [
-                'name' => $mostActiveEmployee->user->full_name,
+                'name' => $mostActiveEmployee->user?->full_name ?? 'Removed member',
                 'count' => $mostActiveEmployee->count,
             ] : null,
             'most_common_action' => $mostCommonAction ? [
@@ -272,11 +272,11 @@ class ActivityLogController extends Controller
             'data' => [
                 'id' => $log->id,
                 'user' => [
-                    'id' => $log->user->id,
-                    'name' => $log->user->full_name,
-                    'email' => $log->user->email,
-                    'job_title' => $log->user->job_title,
-                    'phone' => $log->user->phone,
+                    'id' => $log->user?->id,
+                    'name' => $log->user?->full_name ?? 'Removed member',
+                    'email' => $log->user?->email,
+                    'job_title' => $log->user?->job_title,
+                    'phone' => $log->user?->phone,
                 ],
                 'action_type' => $log->action_type,
                 'action_description' => $log->action_description,
@@ -348,8 +348,8 @@ class ActivityLogController extends Controller
                 fputcsv($file, [
                     $log->created_at->toDateString(),
                     $log->created_at->toTimeString(),
-                    $log->user->full_name,
-                    $log->user->email,
+                    $log->user?->full_name ?? 'Removed member',
+                    $log->user?->email ?? '',
                     $log->action_type,
                     $log->action_description,
                     $log->ip_address,

@@ -197,9 +197,8 @@ class BusinessTenantService
     {
         $settings = $this->settingsFor($owner);
         $shared = $settings->shared_fields ?? [];
-        $values = array_intersect_key($shared, array_flip($settings->locked_fields ?? []));
 
-        if ($values === []) {
+        if ($shared === []) {
             return 0;
         }
 
@@ -207,12 +206,56 @@ class BusinessTenantService
         $cardIds = NfcCard::whereIn('user_id', $memberIds)->pluck('id');
 
         $updated = 0;
-        LandingPage::whereIn('nfc_card_id', $cardIds)->each(function (LandingPage $page) use ($values, &$updated) {
-            $page->fill($values)->save();
-            $updated++;
+        LandingPage::whereIn('nfc_card_id', $cardIds)->each(function (LandingPage $page) use ($settings, &$updated) {
+            if ($this->applyCompanyValues($page, $settings)) {
+                $updated++;
+            }
         });
 
         return $updated;
+    }
+
+    /**
+     * Put the company's values on one member profile:
+     *  - locked + shared fields are forced to the company value;
+     *  - shared but unlocked fields fill only what the member left empty, so a
+     *    member's own entry is never overwritten.
+     * Saves the page and returns whether anything changed.
+     *
+     * Unlocked shared values used to be stored but never reach any member, even
+     * though the settings panel said they were "copied onto every member's profile".
+     */
+    public function applyCompanyValues(LandingPage $page, ?BusinessSetting $settings = null): bool
+    {
+        if (!$settings) {
+            $member = $page->nfcCard?->user;
+            $owner = $member && $member->isBusinessEmployee() ? $this->ownerOf($member) : null;
+            if (!$owner) {
+                return false;
+            }
+            $settings = $this->settingsFor($owner);
+        }
+
+        $shared = $settings->shared_fields ?? [];
+        $locked = $settings->locked_fields ?? [];
+
+        foreach ($shared as $key => $value) {
+            if (!in_array($key, self::lockableKeys(), true)) {
+                continue;
+            }
+            if (in_array($key, $locked, true)) {
+                $page->{$key} = $value;
+            } elseif ($page->{$key} === null || $page->{$key} === '') {
+                $page->{$key} = $value;
+            }
+        }
+
+        if (!$page->isDirty()) {
+            return false;
+        }
+
+        $page->save();
+        return true;
     }
 
     /**

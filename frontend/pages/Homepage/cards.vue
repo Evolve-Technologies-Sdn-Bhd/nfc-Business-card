@@ -122,31 +122,36 @@
                 class="lp-design lp-design-shot lp-design-flip"
               >
                 <div class="lp-design-flip__inner">
+                  <!-- Artwork + designer placeholders filled with sample data,
+                       so a template never shows as a blank card -->
                   <div class="lp-design-flip__face">
-                    <img
-                      :src="getImageUrl(t.thumbnail_url || t.front_image_url)"
+                    <CardTemplateFace
+                      :template="t"
+                      side="front"
+                      :image-url="getImageUrl(t.thumbnail_url || t.front_image_url)"
                       :alt="t.name"
                       class="lp-design-shot__img"
-                      loading="lazy"
                     />
                   </div>
                   <div class="lp-design-flip__face lp-design-flip__back">
-                    <img
-                      :src="getImageUrl(t.back_image_url)"
+                    <CardTemplateFace
+                      :template="t"
+                      side="back"
+                      :image-url="getImageUrl(t.back_image_url)"
                       :alt="`${t.name} — back`"
                       class="lp-design-shot__img"
-                      loading="lazy"
                     />
                   </div>
                 </div>
               </div>
               <!-- Single face: plain shot, no flip -->
               <div v-else class="lp-design lp-design-shot">
-                <img
-                  :src="getImageUrl(t.thumbnail_url || t.front_image_url)"
+                <CardTemplateFace
+                  :template="t"
+                  side="front"
+                  :image-url="getImageUrl(t.thumbnail_url || t.front_image_url)"
                   :alt="t.name"
                   class="lp-design-shot__img"
-                  loading="lazy"
                 />
               </div>
               <p class="mt-3 text-center text-sm font-medium text-white/65">
